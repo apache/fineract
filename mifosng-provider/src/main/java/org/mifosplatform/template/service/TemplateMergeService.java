@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.template.domain.Template;
 import org.mifosplatform.template.domain.TemplateFunctions;
 import org.slf4j.Logger;
@@ -38,6 +39,7 @@ import com.github.mustachejava.MustacheFactory;
 @Service
 public class TemplateMergeService {
 	private final static Logger logger = LoggerFactory.getLogger(TemplateMergeService.class);
+	
 
     // private final FromJsonHelper fromApiJsonHelper;
     private Map<String, Object> scopes;
@@ -46,16 +48,19 @@ public class TemplateMergeService {
     // @Autowired
     // public TemplateMergeService(final FromJsonHelper fromApiJsonHelper) {
     // this.fromApiJsonHelper = fromApiJsonHelper;
-    // }
+    //
 
     public void setAuthToken(final String authToken) {
-        this.authToken = authToken;
+        //final String auth = ThreadLocalContextUtil.getAuthToken();
+    	this.authToken =  authToken;
     }
+    
 
     public String compile(final Template template, final Map<String, Object> scopes) throws MalformedURLException, IOException {
         this.scopes = scopes;
         this.scopes.put("static", new TemplateFunctions());
-
+        final String auth = ThreadLocalContextUtil.getAuthToken();
+        setAuthToken(auth);
         final MustacheFactory mf = new DefaultMustacheFactory();
         final Mustache mustache = mf.compile(new StringReader(template.getText()), template.getName());
 
@@ -124,7 +129,7 @@ public class TemplateMergeService {
         try {
             connection = (HttpURLConnection) new URL(url).openConnection();
             if (this.authToken != null) {
-                connection.setRequestProperty("Authorization", "Basic " + this.authToken);
+                connection.setRequestProperty("Authorization", "Bearer " + this.authToken);
             }
             TrustModifier.relaxHostChecking(connection);
 
@@ -168,22 +173,37 @@ public class TemplateMergeService {
 	@SuppressWarnings("unchecked")
 	private void expandMapArrays(Object value) {
 		if (value instanceof Map) {
+			System.out.println(value);
 			Map<String, Object> valueAsMap = (Map<String, Object>) value;
+			//Map<String, Object> newValue = null;
+			Map<String,Object> myNewMap = new HashMap<>();
 			for (Entry<String, Object> valueAsMapEntry : valueAsMap.entrySet()) {
+				System.out.println(valueAsMapEntry);
 				Object valueAsMapEntryValue = valueAsMapEntry.getValue();
+				System.out.println(valueAsMapEntryValue);
 				if (valueAsMapEntryValue instanceof Map) { // JSON Object
 					expandMapArrays(valueAsMapEntryValue);
+					System.out.println(valueAsMapEntryValue);
 				} else if (valueAsMapEntryValue instanceof Iterable) { // JSON Array
 					Iterable<Object> valueAsMapEntryValueIterable = (Iterable<Object>) valueAsMapEntryValue;
+					System.out.println(valueAsMapEntryValue);
 					String valueAsMapEntryKey = valueAsMapEntry.getKey();
 					int i = 0;
 					for (Object object : valueAsMapEntryValueIterable) {
-						valueAsMap.put(valueAsMapEntryKey + "#" + i, object);
+						System.out.println(valueAsMapEntryValueIterable);
+						myNewMap.put(valueAsMapEntryKey + "#" + i, object);
+						//valueAsMap.putAll(myNewMap);
+						
 						++i;
 						expandMapArrays(object);
+						System.out.println(object);
+						
 					}
 				}
+
 			}
+			valueAsMap.putAll(myNewMap);
+
 		}		
 	}
 
