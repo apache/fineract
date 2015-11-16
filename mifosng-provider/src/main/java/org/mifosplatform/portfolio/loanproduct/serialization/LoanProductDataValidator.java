@@ -326,31 +326,22 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter("interestRateDifferential").value(interestRateDifferential).notNull().zeroOrPositiveAmount();
 
             final String minDifferentialLendingRateParameterName = "minDifferentialLendingRate";
-            BigDecimal minDifferentialLendingRate = null;
-            if (this.fromApiJsonHelper.parameterExists(minDifferentialLendingRateParameterName, element)) {
-            	minDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minDifferentialLendingRateParameterName,
-                        element);
-                baseDataValidator.reset().parameter(minDifferentialLendingRateParameterName).value(minDifferentialLendingRate).ignoreIfNull()
+            BigDecimal minDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minDifferentialLendingRateParameterName,
+                    element);
+            baseDataValidator.reset().parameter(minDifferentialLendingRateParameterName).value(minDifferentialLendingRate).notNull()
                         .zeroOrPositiveAmount();
-            }
 
             final String defaultDifferentialLendingRateParameterName = "defaultDifferentialLendingRate";
-            BigDecimal defaultDifferentialLendingRate = null;
-            if (this.fromApiJsonHelper.parameterExists(defaultDifferentialLendingRateParameterName, element)) {
-            	defaultDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(defaultDifferentialLendingRateParameterName,
-                        element);
-                baseDataValidator.reset().parameter(defaultDifferentialLendingRateParameterName).value(defaultDifferentialLendingRate).ignoreIfNull()
+            BigDecimal defaultDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(defaultDifferentialLendingRateParameterName,
+                    element);
+            baseDataValidator.reset().parameter(defaultDifferentialLendingRateParameterName).value(defaultDifferentialLendingRate).notNull()
                         .zeroOrPositiveAmount();
-            }
 
             final String maxDifferentialLendingRateParameterName = "maxDifferentialLendingRate";
-            BigDecimal maxDifferentialLendingRate = null;
-            if (this.fromApiJsonHelper.parameterExists(maxDifferentialLendingRateParameterName, element)) {
-            	maxDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(maxDifferentialLendingRateParameterName,
-                        element);
-                baseDataValidator.reset().parameter(maxDifferentialLendingRateParameterName).value(maxDifferentialLendingRate).ignoreIfNull()
+            BigDecimal maxDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(maxDifferentialLendingRateParameterName,
+                    element);
+            baseDataValidator.reset().parameter(maxDifferentialLendingRateParameterName).value(maxDifferentialLendingRate).notNull()
                         .zeroOrPositiveAmount();
-            }
 
             if (defaultDifferentialLendingRate != null && defaultDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
                 if (minDifferentialLendingRate != null && minDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
@@ -1052,7 +1043,7 @@ public final class LoanProductDataValidator {
             	minDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minDifferentialLendingRateParameterName,
                         element);
             }
-            baseDataValidator.reset().parameter(minDifferentialLendingRateParameterName).value(minDifferentialLendingRate).ignoreIfNull()
+            baseDataValidator.reset().parameter(minDifferentialLendingRateParameterName).value(minDifferentialLendingRate).notNull()
             	.zeroOrPositiveAmount();
 
             final String defaultDifferentialLendingRateParameterName = "defaultDifferentialLendingRate";
@@ -1062,7 +1053,7 @@ public final class LoanProductDataValidator {
             	defaultDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(defaultDifferentialLendingRateParameterName,
                         element);
             }
-            baseDataValidator.reset().parameter(defaultDifferentialLendingRateParameterName).value(defaultDifferentialLendingRate).ignoreIfNull()
+            baseDataValidator.reset().parameter(defaultDifferentialLendingRateParameterName).value(defaultDifferentialLendingRate).notNull()
             	.zeroOrPositiveAmount();
 
             final String maxDifferentialLendingRateParameterName = "maxDifferentialLendingRate";
@@ -1072,7 +1063,7 @@ public final class LoanProductDataValidator {
             	maxDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(maxDifferentialLendingRateParameterName,
                         element);
             }
-            baseDataValidator.reset().parameter(maxDifferentialLendingRateParameterName).value(maxDifferentialLendingRate).ignoreIfNull()
+            baseDataValidator.reset().parameter(maxDifferentialLendingRateParameterName).value(maxDifferentialLendingRate).notNull()
             	.zeroOrPositiveAmount();
 
             if (defaultDifferentialLendingRate != null && defaultDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {

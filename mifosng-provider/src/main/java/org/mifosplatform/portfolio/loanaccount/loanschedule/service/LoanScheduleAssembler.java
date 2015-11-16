@@ -49,6 +49,7 @@ import org.mifosplatform.portfolio.common.domain.DaysInYearType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.floatingrates.data.FloatingRateDTO;
 import org.mifosplatform.portfolio.floatingrates.data.FloatingRatePeriodData;
+import org.mifosplatform.portfolio.floatingrates.exception.FloatingRateNotFoundException;
 import org.mifosplatform.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepositoryWrapper;
@@ -312,8 +313,13 @@ public class LoanScheduleAssembler {
                     LoanApiConstants.interestRateDifferentialParameterName, element);
             final Boolean isFloatingInterestRate = this.fromApiJsonHelper.extractBooleanNamed(
                     LoanApiConstants.isFloatingInterestRateParameterName, element);
-            List<FloatingRatePeriodData> baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate()
-                    .getRatePeriods();
+            List<FloatingRatePeriodData> baseLendingRatePeriods = null;
+            try{
+            	baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate()
+            								.getRatePeriods();
+            }catch(final FloatingRateNotFoundException ex){
+            	// Do not do anything
+            }
             FloatingRateDTO floatingRateDTO = new FloatingRateDTO(isFloatingInterestRate, expectedDisbursementDate, interestRateDiff,
                     baseLendingRatePeriods);
             Collection<FloatingRatePeriodData> applicableRates = loanProduct.fetchInterestRates(floatingRateDTO);

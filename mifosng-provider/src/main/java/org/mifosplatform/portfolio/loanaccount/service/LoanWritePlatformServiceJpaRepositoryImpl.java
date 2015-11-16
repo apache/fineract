@@ -99,6 +99,7 @@ import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.common.service.BusinessEventNotifierService;
 import org.mifosplatform.portfolio.floatingrates.data.FloatingRateDTO;
 import org.mifosplatform.portfolio.floatingrates.data.FloatingRatePeriodData;
+import org.mifosplatform.portfolio.floatingrates.exception.FloatingRateNotFoundException;
 import org.mifosplatform.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
@@ -3053,8 +3054,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (loan.loanProduct().isLinkedToFloatingInterestRate()) {
             boolean isFloatingInterestRate = loan.getIsFloatingInterestRate();
             BigDecimal interestRateDiff = loan.getInterestRateDifferential();
-            List<FloatingRatePeriodData> baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate()
-                    .getRatePeriods();
+            List<FloatingRatePeriodData> baseLendingRatePeriods = null;
+            try{
+            	baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate()
+            								.getRatePeriods();
+            }catch(final FloatingRateNotFoundException ex){
+            	// Do not do anything
+            }
             floatingRateDTO = new FloatingRateDTO(isFloatingInterestRate, loan.getDisbursementDate(), interestRateDiff,
                     baseLendingRatePeriods);
         }

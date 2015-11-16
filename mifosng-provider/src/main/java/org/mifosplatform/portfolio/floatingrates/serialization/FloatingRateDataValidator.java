@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -66,9 +67,10 @@ public class FloatingRateDataValidator {
 		baseDataValidator.reset().parameter("name").value(name).notBlank()
 				.notExceedingLengthOf(200);
 
+		Boolean isBaseLendingRate = null;
 		if (this.fromApiJsonHelper
 				.parameterExists("isBaseLendingRate", element)) {
-			final Boolean isBaseLendingRate = this.fromApiJsonHelper
+			isBaseLendingRate = this.fromApiJsonHelper
 					.extractBooleanNamed("isBaseLendingRate", element);
 
 			baseDataValidator.reset().parameter("isBaseLendingRate")
@@ -99,13 +101,16 @@ public class FloatingRateDataValidator {
 			}
 		}
 
-		validateRatePeriods(baseDataValidator, element);
+		if(isBaseLendingRate == null){
+			isBaseLendingRate = false;
+		}
+		validateRatePeriods(baseDataValidator, element, isBaseLendingRate, false);
 
 		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 	}
 
 	private void validateRatePeriods(DataValidatorBuilder baseDataValidator,
-			JsonElement element) {
+			JsonElement element, boolean isBaseLendingRate, boolean isBLRModifiedAsNonBLR) {
 		if (this.fromApiJsonHelper.parameterExists("ratePeriods", element)) {
 			final JsonArray ratePeriods = this.fromApiJsonHelper
 					.extractJsonArrayNamed("ratePeriods", element);
@@ -161,7 +166,7 @@ public class FloatingRateDataValidator {
 						} else if (isDifferentialToBaseLendingRate) {
 							FloatingRate baseLendingRate = this.floatingRateRepository
 									.retrieveBaseLendingRate();
-							if (baseLendingRate == null) {
+							if (baseLendingRate == null || isBLRModifiedAsNonBLR) {
 								baseDataValidator
 										.reset()
 										.parameter(
@@ -173,6 +178,20 @@ public class FloatingRateDataValidator {
 										.failWithCode(
 												"no.baselending.rate.defined",
 												"Base Lending Rate doesn't exists");
+							}
+							
+							if(isBaseLendingRate){
+								baseDataValidator
+								.reset()
+								.parameter(
+										"isDifferentialToBaseLendingRate")
+								.parameterAtIndexArray(
+										"isDifferentialToBaseLendingRate",
+										i + 1)
+								.value(isDifferentialToBaseLendingRate)
+								.failWithCode(
+										"cannot.be.true.for.baselendingrate",
+										"isDifferentialToBaseLendingRate cannot be true for floating rate marked as Base Lending Rate.");
 							}
 
 						}
@@ -211,9 +230,13 @@ public class FloatingRateDataValidator {
 					.notExceedingLengthOf(200);
 		}
 
+		Boolean isBaseLendingRate = null;
+		Boolean isBLRModifiedAsNonBLR = false;
+		FloatingRate baseLendingRate = this.floatingRateRepository
+				.retrieveBaseLendingRate();
 		if (this.fromApiJsonHelper
 				.parameterExists("isBaseLendingRate", element)) {
-			final Boolean isBaseLendingRate = this.fromApiJsonHelper
+			isBaseLendingRate = this.fromApiJsonHelper
 					.extractBooleanNamed("isBaseLendingRate", element);
 
 			baseDataValidator.reset().parameter("isBaseLendingRate")
@@ -222,8 +245,6 @@ public class FloatingRateDataValidator {
 				baseDataValidator.reset().parameter("isBaseLendingRate")
 						.trueOrFalseRequired(false);
 			} else if (isBaseLendingRate) {
-				FloatingRate baseLendingRate = this.floatingRateRepository
-						.retrieveBaseLendingRate();
 				if (baseLendingRate != null
 						&& baseLendingRate.getId() != floatingRateForUpdate
 								.getId()) {
@@ -237,8 +258,9 @@ public class FloatingRateDataValidator {
 			}
 		}
 
+		Boolean isActive = null;
 		if (this.fromApiJsonHelper.parameterExists("isActive", element)) {
-			final Boolean isActive = this.fromApiJsonHelper
+			isActive = this.fromApiJsonHelper
 					.extractBooleanNamed("isActive", element);
 			if (isActive == null) {
 				baseDataValidator.reset().parameter("isActive")
@@ -246,7 +268,36 @@ public class FloatingRateDataValidator {
 			}
 		}
 
-		validateRatePeriods(baseDataValidator, element);
+		if(isBaseLendingRate == null){
+			isBaseLendingRate = floatingRateForUpdate.isBaseLendingRate();
+		}
+		
+		if(isActive == null){
+			isActive = floatingRateForUpdate.isActive();
+		}
+		
+		if(baseLendingRate != null
+				&& baseLendingRate.getId() == floatingRateForUpdate
+						.getId()){
+			if(!isBaseLendingRate || !isActive){
+				isBLRModifiedAsNonBLR = true;
+			}
+		}
+		
+		if(isBLRModifiedAsNonBLR){
+			Collection<FloatingRate> floatingRates = this.floatingRateRepository.retrieveFloatingRatesLinkedToBLR();
+			if(floatingRates != null && floatingRates.size() > 0){
+				baseDataValidator
+				.reset()
+				.parameter("isBaseLendingRate")
+				.value(isBaseLendingRate)
+				.failWithCode("cannot.be.marked.non.baselendingrate",
+						"There are floating rates linked to this Base Lending Rate, cannot be marked as non-Base Lending Rate.");
+			}
+		}
+
+
+		validateRatePeriods(baseDataValidator, element, isBaseLendingRate, isBLRModifiedAsNonBLR);
 
 		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 	}

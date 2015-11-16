@@ -38,6 +38,7 @@ import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.mifosplatform.portfolio.floatingrates.data.FloatingRateDTO;
 import org.mifosplatform.portfolio.floatingrates.data.FloatingRatePeriodData;
+import org.mifosplatform.portfolio.floatingrates.exception.FloatingRateNotFoundException;
 import org.mifosplatform.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargePaidByData;
@@ -581,8 +582,13 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
         if (loan.loanProduct().isLinkedToFloatingInterestRate()) {
             boolean isFloatingInterestRate = loan.getIsFloatingInterestRate();
             BigDecimal interestRateDiff = loan.getInterestRateDifferential();
-            List<FloatingRatePeriodData> baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate()
-                    .getRatePeriods();
+            List<FloatingRatePeriodData> baseLendingRatePeriods = null;
+            try{
+            	baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate()
+            								.getRatePeriods();
+            }catch(final FloatingRateNotFoundException ex){
+            	// Do not do anything
+            }
             floatingRateDTO = new FloatingRateDTO(isFloatingInterestRate, loan.getDisbursementDate(), interestRateDiff,
                     baseLendingRatePeriods);
         }
