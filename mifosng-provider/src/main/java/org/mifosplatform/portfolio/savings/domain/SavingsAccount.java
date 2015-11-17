@@ -5,52 +5,7 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.enforceMinRequiredBalanceParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.localeParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredBalanceParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
-
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorType;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
-
+import com.google.gson.JsonArray;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
@@ -96,7 +51,50 @@ import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 import org.springframework.util.CollectionUtils;
 
-import com.google.gson.JsonArray;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.enforceMinRequiredBalanceParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.localeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredBalanceParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
 @Entity
 @Table(name = "m_savings_account", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "sa_account_no_UNIQUE"),
@@ -859,10 +857,11 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return transactionBeforeLastInterestPosting;
     }
 
-    public void validateAccountBalanceDoesNotBecomeNegative(final BigDecimal transactionAmount, final boolean isException) {
+    public void validateAccountBalanceDoesNotBecomeNegative(final BigDecimal transactionAmount, final boolean isException,final List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions) {
         final List<SavingsAccountTransaction> transactionsSortedByDate = retreiveListOfTransactions();
         Money runningBalance = Money.zero(this.currency);
         Money minRequiredBalance = minRequiredBalanceDerived(getCurrency());
+        LocalDate lastSavingsDate = null;
         for (final SavingsAccountTransaction transaction : transactionsSortedByDate) {
             if (transaction.isNotReversed() && transaction.isCredit()) {
                 runningBalance = runningBalance.plus(transaction.getAmount(this.currency));
@@ -872,27 +871,65 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 continue;
             }
 
+
+
             final BigDecimal withdrawalFee = null;
+
+            /* Loop through the onHold funds and see if we need to deduct or add to minimum required balance
+               and the point in time the transaction was made: */
+            if(depositAccountOnHoldTransactions !=null){
+                for(final DepositAccountOnHoldTransaction onHoldTransaction: depositAccountOnHoldTransactions) {
+                    // Compare the balance of the on hold:
+                    if((onHoldTransaction.getTransactionDate().isBefore(transaction.transactionLocalDate()) || onHoldTransaction.getTransactionDate().isEqual(transaction.transactionLocalDate()))
+                            && (lastSavingsDate == null || onHoldTransaction.getTransactionDate().isAfter(lastSavingsDate))) {
+                        if(onHoldTransaction.getTransactionType().isHold()) {
+                            minRequiredBalance = minRequiredBalance.plus(onHoldTransaction.getAmountMoney(this.currency));
+                        }else{
+                            minRequiredBalance = minRequiredBalance.minus(onHoldTransaction.getAmountMoney(this.currency));
+                        }
+                    }
+                }
+            }
+
+
             // deal with potential minRequiredBalance and
             // enforceMinRequiredBalance
             if (!isException && transaction.canProcessBalanceCheck()) {
                 if (runningBalance.minus(minRequiredBalance).isLessThanZero()) { throw new InsufficientAccountBalanceException(
                         "transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount); }
             }
+            lastSavingsDate = transaction.transactionLocalDate();
 
         }
     }
 
-    public void validateAccountBalanceDoesNotBecomeNegative(final String transactionAction) {
+    public void validateAccountBalanceDoesNotBecomeNegative(final String transactionAction,final List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions) {
 
         final List<SavingsAccountTransaction> transactionsSortedByDate = retreiveListOfTransactions();
         Money runningBalance = Money.zero(this.currency);
         Money minRequiredBalance = minRequiredBalanceDerived(getCurrency());
+        LocalDate lastSavingsDate = null;
         for (final SavingsAccountTransaction transaction : transactionsSortedByDate) {
             if (transaction.isNotReversed() && transaction.isCredit()) {
                 runningBalance = runningBalance.plus(transaction.getAmount(this.currency));
             } else if (transaction.isNotReversed() && transaction.isDebit()) {
                 runningBalance = runningBalance.minus(transaction.getAmount(this.currency));
+            }
+
+             /* Loop through the onHold funds and see if we need to deduct or add to minimum required balance
+               and the point in time the transaction was made: */
+            if(depositAccountOnHoldTransactions !=null){
+                for(final DepositAccountOnHoldTransaction onHoldTransaction: depositAccountOnHoldTransactions) {
+                    // Compare the balance of the on hold:
+                    if((onHoldTransaction.getTransactionDate().isBefore(transaction.transactionLocalDate()) || onHoldTransaction.getTransactionDate().isEqual(transaction.transactionLocalDate()))
+                            && (lastSavingsDate == null || onHoldTransaction.getTransactionDate().isAfter(lastSavingsDate))) {
+                        if(onHoldTransaction.getTransactionType().isHold()) {
+                            minRequiredBalance = minRequiredBalance.plus(onHoldTransaction.getAmountMoney(this.currency));
+                        }else{
+                            minRequiredBalance = minRequiredBalance.minus(onHoldTransaction.getAmountMoney(this.currency));
+                        }
+                    }
+                }
             }
 
             // enforceMinRequiredBalance
@@ -910,6 +947,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 }
 
             }
+            lastSavingsDate = transaction.transactionLocalDate();
+
         }
     }
 
@@ -2454,7 +2493,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     private Money minRequiredBalanceDerived(final MonetaryCurrency currency) {
-        Money minReqBalance = Money.of(currency, this.onHoldFunds);
+        Money minReqBalance = Money.zero(currency);
         if (this.enforceMinRequiredBalance) {
             minReqBalance = minReqBalance.plus(this.minRequiredBalance);
         }
@@ -2477,6 +2516,6 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public BigDecimal getWithdrawableBalance() {
-        return getAccountBalance().subtract(minRequiredBalanceDerived(getCurrency()).getAmount());
+        return getAccountBalance().subtract(minRequiredBalanceDerived(getCurrency()).getAmount()).subtract(this.getOnHoldFunds());
     }
 }
