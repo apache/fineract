@@ -90,7 +90,7 @@
 <body>
 	<div id="page-wrapper">
 		<div id="flybar">
-			<div id="nav-logo">15.11.1.RELEASE</div>
+			<div id="nav-logo">15.11.2.RELEASE</div>
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Overview</h2>
 				<div class="flybar-menu-overview">
@@ -2120,9 +2120,26 @@
 							<tr>
 								<td></td>
 								<td>provisioningcriteria/{criteriaId}</td>
+								<td></td>
 								<td><a href="#retrieve_provisioningcriteria">Retrieve Provisioning Criteria</a></td>
 								<td><a href="#update_provisioningcriteria">Update Provisioning Criteria</a></td>
 								<td><a href="#delete_provisioningcriteria">Delete Provisioning Criteria</a></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#floatingrates">Floating Rates</a></td>
+								<td>floatingrates</td>
+								<td><a href="#create_floatingrates">Create Floating Rate</a></td>
+								<td><a href="#floatingrates_list">List Floating Rates</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>floatingrates/{floatingRateId}</td>
+								<td></td>
+								<td><a href="#retrieve_floatingrate">Retrieve Floating Rate</a></td>
+								<td><a href="#update_floatingrate">Update Floating Rate</a></td>
 								<td></td>
 								<td></td>
 							</tr>
@@ -36267,8 +36284,304 @@ No Request Body:
 				</div>
 			</div>			
 		<!--End of Payment Type API docs-->
-
-
+			<!-- floatingrates -->
+			<a id="floatingrates" name="floatingrates" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Floating Rates</h3>
+					<p>This defines the Floating Rates</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>name</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Name of the Floating Rate, must be unique
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>isBaseLendingRate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								Identifies the Floating Rate scheme to be Base Lending Rate. Only one scheme can be Base Lending Rate at any given point of time. default is false.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>isActive</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								Identify if Floating Rate scheme is active or not. default is true.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>ratePeriods</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								Array of ratePeriod JSON objects as defined in below section.
+							</td>
+						</tr>					
+					</table>
+					<p>This defines the Floating Rates Periods</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions for ratePeriods</div></td>
+						</tr>
+						<tr class=alt>
+							<td>fromDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Start date from which this rate has to be considered. Should be a future date.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>interestRate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								Interest Rate applicable.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>isDifferentialToBaseLendingRate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								If false, interestRate field is considered absolute.
+								If true, interestRate field is considered differential to Base Lending Rate as of the startDate.
+								Cannot be used if there is no scheme defined as Base Lending Rate.
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			
+			<a id="create_floatingrates" name="create_floatingrates"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create a new Floating Rate</h4>
+					<p>Creates a new Floating Rate</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>name</td>
+						</tr>
+					</table>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>isBaseLendingRate</td>
+						</tr>
+						<tr class=alt>
+							<td>isActive</td>
+						</tr>
+						<tr class=alt>
+							<td>ratePeriods</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					POST https://DomainName/api/v1/floatingrates
+					</code>
+					<code class="method-request">
+					POST floatingrates
+					Content-Type: application/json
+					Request Body:
+					{
+						"name":"Floating Rate 1",
+						"isBaseLendingRate":true,
+						"isActive":true,
+						"ratePeriods":[
+							{
+								"fromDate":"19 November 2015",
+								"interestRate":10,
+								"locale":"en",
+								"dateFormat":"dd MMMM yyyy"
+							},
+							{
+								"fromDate":"15 December 2015",
+								"interestRate":11,
+								"locale":"en",
+								"dateFormat":"dd MMMM yyyy"
+							}
+						]
+					}	
+					</code>
+					<code class="method-response">
+					{
+						"resourceId": 1
+					}
+					</code>
+				</div>
+			</div>
+			<a id="floatingrates_list" name="floatingrates_list"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Floating Rates</h4>
+					<p>List Floating Rates</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					GET https://DomainName/api/v1/floatingrates
+					</code>
+					<code class="method-request">
+					GET floatingrates
+					Content-Type: application/json
+					</code>
+					<code class="method-response">
+					{
+						[
+							{
+								"id": 1,
+								"name": "Floating Rate 1",
+								"isBaseLendingRate": true,
+								"isActive": true,
+								"createdBy": "mifos",
+								"createdOn": "Nov 18, 2015",
+								"modifiedBy": "mifos",
+								"modifiedOn": "Nov 18, 2015"
+							},
+							{
+								"id": 2,
+								"name": "Floating Rate 2",
+								"isBaseLendingRate": false,
+								"isActive": true,
+								"createdBy": "mifos",
+								"createdOn": "Nov 18, 2015",
+								"modifiedBy": "mifos",
+								"modifiedOn": "Nov 18, 2015"
+							}
+						]
+					}
+					</code>
+				</div>
+			</div>
+			<a id="retrieve_floatingrate" name="retrieve_floatingrate"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Floating Rate</h4>
+					<p>Retrieve Floating Rate</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					GET https://DomainName/api/v1/floatingrates/1
+					</code>
+					<code class="method-request">
+					GET floatingrates
+					Content-Type: application/json
+					</code>
+					<code class="method-response">
+					{
+						"id": 1,
+						"name": "Floating Rate 1",
+						"isBaseLendingRate": true,
+						"isActive": true,
+						"createdBy": "mifos",
+						"createdOn": "Nov 18, 2015",
+						"modifiedBy": "mifos",
+						"modifiedOn": "Nov 18, 2015",
+						"ratePeriods":
+						[
+							{
+								"id": 1,
+								"fromDate": "Dec 15, 2015",
+								"interestRate": 11,
+								"isDifferentialToBaseLendingRate": false,
+								"isActive": true,
+								"createdBy": "mifos",
+								"createdOn": "Nov 18, 2015",
+								"modifiedBy": "mifos",
+								"modifiedOn": "Nov 18, 2015"
+							},
+							{
+								"id": 2,
+								"fromDate": "Nov 19, 2015",
+								"interestRate": 10,
+								"isDifferentialToBaseLendingRate": false,
+								"isActive": true,
+								"createdBy": "mifos",
+								"createdOn": "Nov 18, 2015",
+								"modifiedBy": "mifos",
+								"modifiedOn": "Nov 18, 2015"
+							}
+						]
+					}
+					</code>
+				</div>
+			</div>
+						<a id="update_floatingrate" name="update_floatingrate"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update Floating Rate</h4>
+					<p>Updates new Floating Rate. Rate Periods in the past cannot be modified. 
+					All the future rateperiods would be replaced with the new ratePeriods data sent.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					PUT https://DomainName/api/v1/floatingrates/1
+					</code>
+					<code class="method-request">
+					PUT floatingrates
+					Content-Type: application/json
+					Request Body:
+					{
+						"name":"Floating Rate 1",
+						"isBaseLendingRate":true,
+						"isActive":true,
+						"ratePeriods":[
+							{
+								"fromDate":"19 November 2015",
+								"interestRate":10,
+								"locale":"en",
+								"dateFormat":"dd MMMM yyyy"
+							},
+							{
+								"fromDate":"15 December 2015",
+								"interestRate":11,
+								"locale":"en",
+								"dateFormat":"dd MMMM yyyy"
+							}
+						]
+					}	
+					</code>
+					<code class="method-response">
+					{
+						"resourceId": 1,
+						"changes":
+						{
+							"ratePeriods": "[
+								{
+									"fromDate":"19 November 2015",
+									"interestRate":10,
+									"locale":"en",
+									"dateFormat":"dd MMMM yyyy"
+								},
+								{
+									"fromDate":"15 December 2015",
+									"interestRate":11,
+									"locale":"en",
+									"dateFormat":"dd MMMM yyyy"
+								}
+							]"
+						}
+					}
+					</code>
+				</div>
+			</div>
+			<!-- End of floatingrates -->
 
 		<!-- start of clients api docs -->
 		<a id="templates" name="clients" class="old-syle-anchor">&nbsp;</a>

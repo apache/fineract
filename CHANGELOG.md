@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 18 Nov 2015 - 15.11.2.RELEASE
 1. 04 Nov 2015 - 15.11.1.RELEASE
 1. 21 Oct 2015 - 15.10.2.RELEASE
 1. 20 Oct 2015 - 15.10.1.RELEASE
@@ -78,6 +79,29 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+15.11.2.RELEASE
+=============
+This release introduces floating rates feature.
+This release also includes few bug fixes as mentioned below.
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-1761] - Add support for floating interest rates for loan
+
+Bugs
+ - All issues found during testing of floating interest rates feature
+ - [MIFOSX-2328] - In Loan rescheduling if repayment date is changed the in Account details page Maturity date is not getting updated
+ 
+Community-App
+
+New Features & Improvements
+ - [MIFOSX-1761] - Add support for floating interest rates for loan
+
+Bugs
+ - [MIFOSX-2072] - 'validation.msg.invalid.decimal.format' Error in number fields in case the decimal symbol of current locale is comma
+ - [MIFOSX-2113] - Required some fields mandatory at the time of client creation
 
 15.11.1.RELEASE
 =============
