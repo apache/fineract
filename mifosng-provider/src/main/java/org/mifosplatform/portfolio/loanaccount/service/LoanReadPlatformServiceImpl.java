@@ -1995,10 +1995,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Collection<InterestRatePeriodData> intRates = this.floatingRatesReadPlatformService.retrieveInterestRatePeriods(loan
                     .loanProduct().getFloatingRates().getFloatingRate().getId());
             for (final InterestRatePeriodData rate : intRates) {
-                if (rate.getFromDate().compareTo(loan.getSubmittedOnDate().toDate()) > 0 && loan.getIsFloatingInterestRate()) {
+                if (rate.getFromDate().compareTo(loan.getDisbursementDate().toDate()) > 0 && loan.getIsFloatingInterestRate()) {
                     updateInterestRatePeriodData(rate, loan);
                     intRatePeriodData.add(rate);
-                } else if (rate.getFromDate().compareTo(loan.getSubmittedOnDate().toDate()) <= 0) {
+                } else if (rate.getFromDate().compareTo(loan.getDisbursementDate().toDate()) <= 0) {
                     updateInterestRatePeriodData(rate, loan);
                     intRatePeriodData.add(rate);
                     break;
@@ -2023,8 +2023,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
         rate.setEffectiveInterestRate(effectiveInterestRate);
 
-        if (rate.getFromDate().compareTo(loan.getSubmittedOnDate().toDate()) < 0) {
-            rate.setFromDate(loan.getSubmittedOnDate().toDate());
+        if (rate.getFromDate().compareTo(loan.getDisbursementDate().toDate()) < 0) {
+            rate.setFromDate(loan.getDisbursementDate().toDate());
         }
     }
 
