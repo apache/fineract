@@ -221,6 +221,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     loanApplicationTerms.updateAnnualNominalInterestRate(variation.getTermValue());
                 }
             }
+            isFirstRepayment = false;
         }
 
         while (!outstandingBalance.isZero() || !disburseDetailMap.isEmpty()) {
