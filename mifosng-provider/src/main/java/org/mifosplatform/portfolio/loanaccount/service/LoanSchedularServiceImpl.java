@@ -49,8 +49,9 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
     public void applyChargeForOverdueLoans() throws JobExecutionException {
 
         final Long penaltyWaitPeriodValue = this.configurationDomainService.retrievePenaltyWaitPeriod();
+        final Boolean backdatePenalties = this.configurationDomainService.isBackdatePenaltiesEnabled();
         final Collection<OverdueLoanScheduleData> overdueLoanScheduledInstallments = this.loanReadPlatformService
-                .retrieveAllLoansWithOverdueInstallments(penaltyWaitPeriodValue);
+                .retrieveAllLoansWithOverdueInstallments(penaltyWaitPeriodValue,backdatePenalties);
 
         if (!overdueLoanScheduledInstallments.isEmpty()) {
             final StringBuilder sb = new StringBuilder();

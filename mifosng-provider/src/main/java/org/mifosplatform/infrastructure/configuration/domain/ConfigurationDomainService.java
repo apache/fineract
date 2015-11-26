@@ -49,4 +49,5 @@ public interface ConfigurationDomainService {
 
     int getRoundingMode();
 
+    boolean isBackdatePenaltiesEnabled();
 }
