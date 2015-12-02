@@ -45,6 +45,7 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.exception.MultiDisbu
 import org.mifosplatform.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleModel;
 import org.mifosplatform.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleModelRepaymentPeriod;
 import org.mifosplatform.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
+import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
 
 /**
@@ -124,6 +125,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         // actual outstanding balance for interest calculation
         Money outstandingBalance = principalToBeScheduled;
 
+      //Set Fixed Principal Amount
+        if(loanApplicationTerms.getAmortizationMethod().equals(AmortizationMethod.EQUAL_PRINCIPAL)) {
+            loanApplicationTerms.updateFixedPrincipalAmount(mc, periodNumber, outstandingBalance) ;
+        }
+        
         // Set fixed EMI Amount
         if (loanApplicationTerms.getFixedEmiAmount() == null) {
             updateFixedInstallmentAmount(mc, loanApplicationTerms, actualRepaymentDate, periodNumber, outstandingBalance, holidayDetailDTO);
@@ -221,6 +227,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     loanApplicationTerms.updateAnnualNominalInterestRate(variation.getTermValue());
                 }
             }
+            isFirstRepayment = false;
         }
 
         while (!outstandingBalance.isZero() || !disburseDetailMap.isEmpty()) {

@@ -90,7 +90,7 @@
 <body>
 	<div id="page-wrapper">
 		<div id="flybar">
-			<div id="nav-logo">15.11.2.RELEASE</div>
+			<div id="nav-logo">15.12.1.RELEASE</div>
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Overview</h2>
 				<div class="flybar-menu-overview">
@@ -404,7 +404,7 @@
 								<td></td>
 							</tr>
 							<tr>
-								<td></td>							
+								<td></td>
 								<td>clients/{clientId}/charges/{clientChargeId}?command=pay</td>
 								<td><a href="#pay_clientCharge">Pay a Client Charge</a></td>
 								<td></td>
@@ -415,7 +415,7 @@
 							<tr>
 								<td></td>
 								<td>clients/{clientId}/charges/{clientChargeId}?command=waive</td>
-								<td><a href="#waive_clientCharge">Waive a Client Charge</a></td>							
+								<td><a href="#waive_clientCharge">Waive a Client Charge</a></td>
 								<td></td>
 								<td></td>
 								<td></td>
@@ -424,7 +424,7 @@
 							<tr>
 								<td><a href="#client_transactions">Client Transactions</td>
 								<td>clients/{clientId}/transactions</td>
-								<td><a href="#list_clientTransactions">List Client Transactions</a></td>			
+								<td><a href="#list_clientTransactions">List Client Transactions</a></td>
 								<td></td>
 								<td></td>
 								<td></td>
@@ -439,7 +439,7 @@
 								<td></td>
 								<td></td>
 							</tr>
-							
+
 						</table>
 					</div>
 				</div>
@@ -1504,8 +1504,8 @@
                                 <td></td>
                                 <td></td>
                             </tr>
-							
-							
+
+
 							<tr>
                                 <td><a href="#centers">Collection Sheet</a></td>
                                 <td>collectionsheet?command=generateCollectionSheet</td>
@@ -1679,7 +1679,7 @@
 								<td></td>
 								<td></td>
 							</tr>
-							
+
 							<tr>
 								<td><a href="#provisioningentries">Provisioning Entries</a></td>
 								<td>provisioningentries</td>
@@ -1697,7 +1697,7 @@
 								<td><a href="#provisioningentry_addjournals">Add Provisioning Journal Entries</a></td>
 								</tr>
 
-							
+
 						</table>
 					</div>
 				</div>
@@ -2912,6 +2912,99 @@
 				</div>
 			</div>
 
+			<!-- API documentation for SPM Framework -->
+			<div class="flybar-nav">
+				<h2 class="flybar-button">SPM</h2>
+				<div id="toc-menu-report" class="flybar-menu">
+					<div class="tocMatrix">
+						<table class=matrixHeading>
+							<tr class="matrixHeadingBG">
+								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
+										<table>
+											<tr>
+												<td>RESOURCES</td>
+											</tr>
+										</table>
+									</div></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">POST</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>create/complex
+													update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">GET</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>read</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">PUT</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">DELETE</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>delete</div></td>
+										</tr>
+									</table></td>
+							</tr>
+							<tr>
+								<td><a href="#surveys">Survey</a></td>
+								<td>surveys</td>
+								<td><a href="#surveys_create">Create a Survey</a></td>
+								<td><a href="#surveys_list">List Surveys</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>surveys/{id}</td>
+								<td></td>
+								<td><a href="#surveys_retrieve">Retrieve a Survey</a></td>
+								<td></td>
+								<td><a href="#surveys_delete">Deactivate a Survey</a></td>
+							</tr>
+							<tr>
+								<td><a href="#lookuptables">Lookup Table</a></td>
+								<td>surveys/{id}/lookuptables</td>
+								<td><a href="#lookuptables_create">Create a Lookup Table entry</a></td>
+								<td><a href="#lookoptables_list">List Lookup Table entries</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>surveys/{id}/lookuptables/{id}</td>
+								<td></td>
+								<td><a href="#lookuptables_retrieve">Retrieve an Entry</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#scorecards">Scorecard</a></td>
+								<td>surveys/{id}/scorecards</td>
+								<td><a href="#scorecards_create">Create a Scorecard entry</a></td>
+								<td><a href="#scorecards_list">List Scorecard entries</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+
 		</div>
 
 		<div id="main-content-wrapper">
@@ -3124,7 +3217,7 @@
 
 					<p>
 						Default authentication is using HTTP Basic Auth. Oauth2 can be enabled by using <i>-Psecurity=oauth</i> option on gradle build command , refer
-						the platform setup <a href="https://github.com/openMF/mifosx/wiki/Launching-platform-server-locally-from-the-command-line#choosing-authentication-mechanism"> wiki</a> for additional details. 
+						the platform setup <a href="https://github.com/openMF/mifosx/wiki/Launching-platform-server-locally-from-the-command-line#choosing-authentication-mechanism"> wiki</a> for additional details.
 					</p>
 					<p>
 						The platform has been configured to reject plain HTTP requests and
@@ -3253,7 +3346,7 @@ function executeAjaxRequest(url, verbType, jsonData, authKey, successFunction, e
 </code>
 					</div>
 			</div>
-			
+
 			<a id="batch_api" name="batch_api" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -5731,7 +5824,7 @@ Request Body:
             <code class="method-request">POST collectionsheet?command=generateCollectionSheet
 Content-Type: application/json
 Request Body:
-{  
+{
    "dateFormat":"dd MMMM yyyy",
    "locale":"en",
    "transactionDate":"15 January 2015",
@@ -5812,7 +5905,7 @@ Request Body:
                 </div>
             </div>
 
-			
+
             <a id="centers_save_collectionsheet" name="centers_save_collectionsheet" class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
                 <div class="method-description">
@@ -5849,13 +5942,13 @@ Request Body:
 }
                     </code>
                 </div>
-            </div>      
+            </div>
 
 			           <a id="save_individual_collection_sheet" name="save_individual_collection_sheet" class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
                 <div class="method-description">
                     <h4>Save Collection Sheet</h4>
-                    <p>This Api allows the loan officer to perform bulk repayments of individual loans and deposit of mandatory savings on a given meeting date.</p>      
+                    <p>This Api allows the loan officer to perform bulk repayments of individual loans and deposit of mandatory savings on a given meeting date.</p>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">POST https://Domain Name/api/v1/collectionsheet?command=saveCollectionSheet</code>
@@ -5891,7 +5984,7 @@ Request Body:
                 </div>
             </div>
 
-			
+
 			<a id="centers_update" name="centers_update" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -8940,7 +9033,7 @@ Request Body:
 						</tr>
 						<tr class=alt>
 							<td>expectedDisbursementDate</td>
-						</tr>	
+						</tr>
 					</table>
 				</div>
 				<div class="method-example">
@@ -9813,8 +9906,8 @@ Request Body:
                     </code>
                 </div>
             </div>
-			
-			
+
+
 			<a id="loans_transaction_pre_close_loan" name="loans_transaction_pre_close_loan" class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
                 <div class="method-description">
@@ -9824,7 +9917,7 @@ Request Body:
                 <div class="method-example">
                     <code class="method-declaration">
                         POST https://DomainName/api/v1/loans/{loanId}/transactions?command=prepayLoan   <b>or</b><br/>
-						
+
 						https://DomainName/api/v1/loans/{loanId}/transactions?command=prepayLoan&dateFormat=dd+MMMM+yyyy&locale=en&transactionDate=02+April+2015
                     </code>
                     <code class="method-request">
@@ -9845,7 +9938,7 @@ Request Body:
                     </code>
                 </div>
             </div>
-			
+
             <a id="loans_transaction_retrieve" name="loans_transaction_retrieve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -11844,7 +11937,7 @@ Request Body:
 							<td>canDefineInstallmentAmount</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>if provided as true, then fixed instalment amount can be provided from loan account. 
+							<td class=fielddesc>if provided as true, then fixed instalment amount can be provided from loan account.
 							</td>
 						</tr>
 
@@ -11977,7 +12070,7 @@ An enumeration that indicates the type of transaction processing strategy to be 
 						<tr>
 							<td class=fielddesc>Specifies compounding frequency start date for interest recalculation.<br>
 						</tr>
-						
+
 						<tr class=alt>
 							<td>recalculationRestFrequencyType</td>
 						</tr>
@@ -13328,7 +13421,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td>isArrearsBasedOnOriginalSchedule, preClosureInterestCalculationStrategy</td>
 						</tr>
 					</table>
-					<table class=matrixHeading>						
+					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Additional Optional Fields if interest recalculation is enabled(true) and recalculationRestFrequencyType is not same as repayment period</div></td>
 						</tr>
@@ -13336,7 +13429,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td>recalculationRestFrequencyInterval, recalculationRestFrequencyDate</td>
 						</tr>
 					</table>
-					<table class=matrixHeading>						
+					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Additional Optional Fields if interest recalculation is enabled(true) and interestRecalculationCompoundingMethod is enabled</div></td>
 						</tr>
@@ -13344,9 +13437,9 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td>recalculationCompoundingFrequencyType</td>
 						</tr>
 					</table>
-					<table class=matrixHeading>						
+					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Additional Optional Fields if interest recalculation is enabled(true) and interestRecalculationCompoundingMethod is enabled and 
+							<td><div class="mifosXHeading2">Additional Optional Fields if interest recalculation is enabled(true) and interestRecalculationCompoundingMethod is enabled and
 							recalculationCompoundingFrequencyType is not same as repayment period</div></td>
 						</tr>
 						<tr class=alt>
@@ -13408,7 +13501,7 @@ Request Body:
 	}
 ],
 "allowAttributeOverrides":
-	{amortizationType : true,	
+	{amortizationType : true,
 	 interestType : true,
 	 transactionProcessingStrategyId : false,
 	 interestCalculationPeriodType : true,
@@ -13416,7 +13509,7 @@ Request Body:
 	 repaymentEvery : true,
 	 graceOnPrincipalAndInterestPayment : true,
 	 graceOnArrearsAgeing : true},
-	 
+
 "accountingRule":"2",
 "name":"product 5",
 "shortName":"prd5",
@@ -14278,7 +14371,7 @@ Request Body:
 						<tr>
 							<td class=fielddesc>locale must be provided.</td>
 						</tr>
-		
+
 					</table>
 				<table id="nw_repayment_schedule_rule" class=matrixHeading>
 					<tr class="matrixHeadingBG">
@@ -16779,7 +16872,7 @@ POST scheduler?command=stop
 					</code>
 				</div>
 			</div>
-			
+
 			<a id="external_services" name="external_services" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -16797,11 +16890,11 @@ POST scheduler?command=stop
 						<li><b>host</b> - </li>
 						<li><b>port</b> - </li>
 						<li><b>useTLS</b> - </li>
-						
+
 					</ol>
 				</div>
 			</div>
-			
+
 			<a id="configs_externalService_retrieve" name="configs_externalService_retrieve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -16816,7 +16909,7 @@ POST scheduler?command=stop
 GET https://DomainName/api/v1/externalservice/{serviceName}
 					</code>
 					<code class="method-response">
-    
+
 
     [
         {
@@ -16845,7 +16938,7 @@ GET https://DomainName/api/v1/externalservice/{serviceName}
 					</code>
 				</div>
 			</div>
-			
+
 			<a id="config_externalService_update" name="config_externalService_update"
 				class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -16863,7 +16956,7 @@ Content-Type: application/json
 {
 	"username" : "test@mifos.org"
 	"password" : "XXXX"
-}				
+}
 				</code>
 				</div>
 			</div>
@@ -17204,8 +17297,8 @@ Request Body:
 					</code>
 				</div>
 			</div>
-			
-			
+
+
 <!--Charges section starts here-->
 <a id="charges" name="charges" class="old-syle-anchor">&nbsp;</a>
 <div class="method-section">
@@ -17347,7 +17440,7 @@ Request Body:
 				<td>incomeAccount</td>
 			</tr>
             <tr>
-            	<td class=fielddesc>This field is Optional and can be used only when a charge is applied to a Client. It indicates the Income or Liability account which gets 
+            	<td class=fielddesc>This field is Optional and can be used only when a charge is applied to a Client. It indicates the Income or Liability account which gets
             	credited when a payment is made on this charge<br/></td>
             </tr>
 		</table>
@@ -29448,7 +29541,7 @@ Request Body:
                 class="old-syle-anchor">&nbsp;</a>
              <div class="method-section">
                  <div class="method-description">
-                     <h4>Retreive surveys</h4>
+                     <h4>Retrieve surveys</h4>
                      <p>Retrieve surveys. This allows to retrieve the list of survey tables registered .
                      </p>
                  </div>
@@ -29585,7 +29678,7 @@ Request Body:
                 class="old-syle-anchor">&nbsp;</a>
              <div class="method-section">
                  <div class="method-description">
-                     <h4>Retreive survey</h4>
+                     <h4>Retrieve survey</h4>
                      <p>Lists a registered survey table details and the Mifos X Core application table they are registered to.
                      </p>
                  </div>
@@ -30897,7 +30990,7 @@ No Request Body
 						</tr>
 						<tr>
 							<td class=fielddesc>Mandatory field.
-							Indicates the client application identity. 
+							Indicates the client application identity.
 							</td>
 						</tr>
 						<tr class=alt>
@@ -30905,7 +30998,7 @@ No Request Body
 						</tr>
 						<tr>
 							<td class=fielddesc>Optional field.
-							Indicates the client application password. 
+							Indicates the client application password.
 							</td>
 						</tr>
 						<tr class=alt>
@@ -30913,7 +31006,7 @@ No Request Body
 						</tr>
 						<tr>
 							<td class=fielddesc>Mandatory field.
-							Application User(resource) login name. 
+							Application User(resource) login name.
 							</td>
 						</tr>
 						<tr class=alt>
@@ -30921,7 +31014,7 @@ No Request Body
 						</tr>
 						<tr>
 							<td class=fielddesc>Mandatory field.
-							Application User(resource) password. 
+							Application User(resource) password.
 							</td>
 						</tr>
 					</table>
@@ -30953,8 +31046,8 @@ No Request Body
 					</code>
 				</div>
 			</div>
-			
-			
+
+
 			<a id="oauth_access_token_req" name="oauth_access_token_req" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -30978,7 +31071,7 @@ No Request Body
 						</tr>
 						<tr>
 							<td class=fielddesc>Mandatory field.
-							Indicates the client application identity. 
+							Indicates the client application identity.
 							</td>
 						</tr>
 						<tr class=alt>
@@ -30986,7 +31079,7 @@ No Request Body
 						</tr>
 						<tr>
 							<td class=fielddesc>Optional field.
-							Indicates the client application password. 
+							Indicates the client application password.
 							</td>
 						</tr>
 						<tr class=alt>
@@ -30994,7 +31087,7 @@ No Request Body
 						</tr>
 						<tr>
 							<td class=fielddesc>Mandatory field.
-							Application refresh token to generate access token. 
+							Application refresh token to generate access token.
 							</td>
 						</tr>
 					</table>
@@ -31113,7 +31206,7 @@ No Request Body
 					</code>
 				</div>
 			</div>
-			
+
 			<!-- start of users api docs -->
 			<a id="users" name="users" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -31440,8 +31533,8 @@ GET https://DomainName/api/v1/roles
 					</code>
 				</div>
 			</div>
-			
-			
+
+
 			<a id="roles_delete" name="roles_delete" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -31460,7 +31553,7 @@ No Request Body
 					<code class="method-response">
 {
 	"resourceId":1
-}	
+}
 					</code>
 				</div>
 			</div>
@@ -31585,7 +31678,7 @@ GET https://DomainName/api/v1/roles/{roleId}/permissions
 					</code>
 				</div>
 			</div>
-			
+
 			<a id="roles_enable" name="roles_enable" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -31598,17 +31691,17 @@ POST https://DomainName/api/v1/roles/{roleId}?command=enable
 					</code>
 					<code class="method-request">
 POST roles/1?command=enable
-Content-Type: application/json 
+Content-Type: application/json
 No Request Body
 </code>
 					<code class="method-response">
 {
 	"resourceId":1
-} 
+}
 					</code>
 				</div>
 			</div>
-			
+
 			<a id="roles_disable" name="roles_disable" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -31621,7 +31714,7 @@ POST https://DomainName/api/v1/roles/{roleId}?command=disable
 					</code>
 					<code class="method-request">
 POST roles/1?command=disable
-Content-Type: application/json 
+Content-Type: application/json
 No Request Body
 </code>
 					<code class="method-response">
@@ -31797,7 +31890,7 @@ GET https://DomainName/api/v1/passwordpreferences/template
 ]
 					</code>
 				</div>
-			
+
 							<div class="method-example">
 					<code class="method-declaration">
 GET https://DomainName/api/v1/passwordpreferences/
@@ -33703,11 +33796,11 @@ Request Body:
 								Boolean variable whether to add journal entries for generated provisioning entries
 							</td>
 						</tr>
-						
+
 					</table>
 				</div>
 			</div>
-			
+
 			<a id="provisioningentries_create" name="provisioningentries_create"
 			   class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -33750,7 +33843,7 @@ Request Body:
 					"locale":"en",
 					"dateFormat":"dd MMMM yyyy",
 					"createjournalentries":true
-					}	
+					}
 					</code>
 					<code class="method-response">
 					{
@@ -33759,14 +33852,14 @@ Request Body:
 					</code>
 				</div>
 			</div>
-			
+
 			<a id="provisioningentries_list" name="provisioningentries_list"
 			   class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>List all Provisioning Entries</h4>
 					<p>List all Provisioning Entries</p>
-					
+
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -33777,8 +33870,8 @@ Request Body:
 					Content-Type: application/json
 					Request Body:
 					{
-					
-					}	
+
+					}
 					</code>
 					<code class="method-response">
 					{[
@@ -33789,14 +33882,14 @@ Request Body:
 					</code>
 				</div>
 			</div>
-			
+
 			<a id="provisioningentry_retrieve" name="provisioningentry_retrieve"
 			   class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Retrieves a Provisioning Entry</h4>
 					<p>Returns the details of a generated Provisioning Entry.</p>
-					
+
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -33807,14 +33900,14 @@ Request Body:
 					Content-Type: application/json
 					Request Body:
 					{
-					
-					}	
+
+					}
 					</code>
 					<code class="method-response">
 					{
-					"id":1, 
-					"journalEntry":true, 
-					"createdUser":"mifos", 
+					"id":1,
+					"journalEntry":true,
+					"createdUser":"mifos",
 					"createdDate":"16 October 2014",
 					"provisioningEntries":[
 					{"historyId":1,
@@ -33831,9 +33924,9 @@ Request Body:
 					"expenseAccount":6,
 					"expenseCode":"Expense Account Name"
 					},
-					{"id":2, 
-					"journalEntry":true, 
-					"createdUser":"mifos", 
+					{"id":2,
+					"journalEntry":true,
+					"createdUser":"mifos",
 					"createdDate":"16 October 2014",
 					"provisioningEntries":[
 					{"historyId":1,
@@ -33851,20 +33944,20 @@ Request Body:
 					"expenseCode":"Expense Account Name"
 					}
 					]
-					
+
 					}
 					</code>
 				</div>
 			</div>
-				
-								
+
+
 			<a id="provisioningentry_recreate" name="provisioningentry_recreate"
 			   class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Recreates Provisioning Entry</h4>
 					<p>Recreates Provisioning Entry.</p>
-					
+
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -33876,7 +33969,7 @@ Request Body:
 					Request Body:
 					{
 					"command":"recreateprovisioningentry"
-					}	
+					}
 					</code>
 					<code class="method-response">
 					{
@@ -33885,14 +33978,14 @@ Request Body:
 					</code>
 				</div>
 			</div>
-			
+
 			<a id="provisioningentry_addjournals" name="provisioningentry_addjournals"
 			   class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Retrieves a Provisioning Entry</h4>
 					<p>Returns the details of a generated Provisioning Entry.</p>
-					
+
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -33904,9 +33997,9 @@ Request Body:
 					Request Body:
 					{
 						"command":"createjournalentry"
-					}	
+					}
 					</code>
-					
+
 					<code class="method-response">
 					{
 					"resourceId": 1
@@ -33914,8 +34007,8 @@ Request Body:
 					</code>
 				</div>
 			</div>
-			
-			
+
+
 			<!-- end Periodic accrual API doc-->
 
 			<!-- start of Search API doc -->
@@ -34053,7 +34146,7 @@ GET https://DomainName/api/v1/search?query=000000111
   }
 ]
 					</code>
-					
+
 					<code class="method-declaration">
 GET https://DomainName/api/v1/search?query=000000001&exactMatch=true
 					</code>
@@ -36002,11 +36095,11 @@ No Request Body:
 								Define minimum, maximum, percentage, liability account, expense account for all provisioning categories
 							</td>
 						</tr>
-						
+
 					</table>
 				</div>
 			</div>
-			
+
 			<a id="create_provisioningcriteria" name="create_provisioningcriteria"
 			   class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -36045,21 +36138,21 @@ No Request Body:
 					"criteriaName":"High Risk Products Criteria",
 					"loanProducts": [
 						{"id": 1,
-						"name": "LOAN_PRODUCT_3ODPK1", 
+						"name": "LOAN_PRODUCT_3ODPK1",
 						"includeInBorrowerCycle": false},
 						{"id": 2,
-						"name": "LOAN_PRODUCT_BXW8NC", 
+						"name": "LOAN_PRODUCT_BXW8NC",
 						includeInBorrowerCycle": false}
 						],
 					"provisioningcriteria": [
-						{"categoryId": 1, 
-						"categoryName": "STANDARD", 
-						"minAge": 0, 
-						"maxAge": 3, 
+						{"categoryId": 1,
+						"categoryName": "STANDARD",
+						"minAge": 0,
+						"maxAge": 3,
 						"provisioningPercentage": 1,
-						"liabilityAccount": 8, 
+						"liabilityAccount": 8,
 						"expenseAccount": 14},
-						{"categoryId": 2, 
+						{"categoryId": 2,
 						"categoryName": "SUB-STANDARD",
 						"minAge": 1,
 						"maxAge": 5,
@@ -36078,9 +36171,9 @@ No Request Body:
 						"minAge": 3,
 						"maxAge": 7,
 						"provisioningPercentage": 4,
-						"liabilityAccount": 10, 
+						"liabilityAccount": 10,
 						"expenseAccount": 9}]
-					}	
+					}
 					</code>
 					<code class="method-response">
 					{
@@ -36104,8 +36197,8 @@ No Request Body:
 					GET provisioningcriteria
 					Content-Type: application/json
 					Request Body:
-					{				
-					}	
+					{
+					}
 					</code>
 					<code class="method-response">
 					{
@@ -36116,7 +36209,7 @@ No Request Body:
 					 {"criteriaId":2,
 					 "criteriaName":"Low Risk Products Criteria",
 					 "createdBy":"mifos"}
-					] 
+					]
 					}
 					</code>
 				</div>
@@ -36136,8 +36229,8 @@ No Request Body:
 					GET provisioningcriteria/{criteriaId}
 					Content-Type: application/json
 					Request Body:
-					{				
-					}	
+					{
+					}
 					</code>
 					<code class="method-response">
 					{
@@ -36145,21 +36238,21 @@ No Request Body:
 					"criteriaName":"High Risk Products Criteria",
 					"loanProducts": [
 						{"id": 1,
-						"name": "LOAN_PRODUCT_3ODPK1", 
+						"name": "LOAN_PRODUCT_3ODPK1",
 						"includeInBorrowerCycle": false},
 						{"id": 2,
-						"name": "LOAN_PRODUCT_BXW8NC", 
+						"name": "LOAN_PRODUCT_BXW8NC",
 						includeInBorrowerCycle": false}
 						],
 					"provisioningcriteria": [
-						{"categoryId": 1, 
-						"categoryName": "STANDARD", 
-						"minAge": 0, 
-						"maxAge": 3, 
+						{"categoryId": 1,
+						"categoryName": "STANDARD",
+						"minAge": 0,
+						"maxAge": 3,
 						"provisioningPercentage": 1,
-						"liabilityAccount": 8, 
+						"liabilityAccount": 8,
 						"expenseAccount": 14},
-						{"categoryId": 2, 
+						{"categoryId": 2,
 						"categoryName": "SUB-STANDARD",
 						"minAge": 1,
 						"maxAge": 5,
@@ -36178,7 +36271,7 @@ No Request Body:
 						"minAge": 3,
 						"maxAge": 7,
 						"provisioningPercentage": 4,
-						"liabilityAccount": 10, 
+						"liabilityAccount": 10,
 						"expenseAccount": 9}]
 					}
 					</code>
@@ -36211,21 +36304,21 @@ No Request Body:
 					"criteriaName":"High Risk Products Criteria1",
 					"loanProducts": [
 						{"id": 1,
-						"name": "LOAN_PRODUCT_3ODPK1", 
+						"name": "LOAN_PRODUCT_3ODPK1",
 						"includeInBorrowerCycle": false},
 						{"id": 2,
-						"name": "LOAN_PRODUCT_BXW8NC", 
+						"name": "LOAN_PRODUCT_BXW8NC",
 						includeInBorrowerCycle": false}
 						],
 					"provisioningcriteria": [
-						{"categoryId": 1, 
-						"categoryName": "STANDARD", 
-						"minAge": 0, 
-						"maxAge": 3, 
+						{"categoryId": 1,
+						"categoryName": "STANDARD",
+						"minAge": 0,
+						"maxAge": 3,
 						"provisioningPercentage": 1,
-						"liabilityAccount": 8, 
+						"liabilityAccount": 8,
 						"expenseAccount": 14},
-						{"categoryId": 2, 
+						{"categoryId": 2,
 						"categoryName": "SUB-STANDARD",
 						"minAge": 1,
 						"maxAge": 5,
@@ -36244,9 +36337,9 @@ No Request Body:
 						"minAge": 3,
 						"maxAge": 7,
 						"provisioningPercentage": 4,
-						"liabilityAccount": 10, 
+						"liabilityAccount": 10,
 						"expenseAccount": 9}]
-					}	
+					}
 					</code>
 					<code class="method-response">
 					{
@@ -36274,7 +36367,7 @@ No Request Body:
 					Content-Type: application/json
 					Request Body:
 					{
-					}	
+					}
 					</code>
 					<code class="method-response">
 					{
@@ -36282,7 +36375,7 @@ No Request Body:
 					}
 					</code>
 				</div>
-			</div>			
+			</div>
 		<!--End of Payment Type API docs-->
 			<!-- floatingrates -->
 			<a id="floatingrates" name="floatingrates" class="old-syle-anchor">&nbsp;</a>
@@ -36324,7 +36417,7 @@ No Request Body:
 							<td class=fielddesc>
 								Array of ratePeriod JSON objects as defined in below section.
 							</td>
-						</tr>					
+						</tr>
 					</table>
 					<p>This defines the Floating Rates Periods</p>
 					<table class=matrixHeading>
@@ -36359,7 +36452,7 @@ No Request Body:
 					</table>
 				</div>
 			</div>
-			
+
 			<a id="create_floatingrates" name="create_floatingrates"
 			   class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -36415,7 +36508,7 @@ No Request Body:
 								"dateFormat":"dd MMMM yyyy"
 							}
 						]
-					}	
+					}
 					</code>
 					<code class="method-response">
 					{
@@ -36526,7 +36619,7 @@ No Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Update Floating Rate</h4>
-					<p>Updates new Floating Rate. Rate Periods in the past cannot be modified. 
+					<p>Updates new Floating Rate. Rate Periods in the past cannot be modified.
 					All the future rateperiods would be replaced with the new ratePeriods data sent.</p>
 				</div>
 				<div class="method-example">
@@ -36555,7 +36648,7 @@ No Request Body:
 								"dateFormat":"dd MMMM yyyy"
 							}
 						]
-					}	
+					}
 					</code>
 					<code class="method-response">
 					{
@@ -36890,8 +36983,8 @@ Request Body:
 					</code>
 				</div>
 			</div>
-			
-			
+
+
 <!----------------Client charge API starts ------------>
 
           <a id="client_charge" name="client_charge" class="old-syle-anchor">&nbsp;</a>
@@ -36937,11 +37030,11 @@ Request Body:
 						<tr>
 							<td class=fielddesc>it specifies the due date</td>
 						</tr>
-						
+
 					</table>
 				</div>
 			</div>
-			
+
 			<a id="client_transaction" name="client_transaction" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -36992,7 +37085,7 @@ Request Body:
 						<tr>
 							<td class=fielddesc>Effective date of the transaction</td>
 						</tr>
-					
+
 					</table>
 				</div>
 			</div>
@@ -37015,9 +37108,9 @@ Request Body:
 						</dd>
 						<dd>Restricts the size of results returned. To override the default and return all entries you must explicitly pass a non-positive integer value for limit e.g. limit=0, or limit=-1</dd>
             		</dl>
-					<p>Example Requests:</p>				
+					<p>Example Requests:</p>
 					<div class=apiClick>clients/189/transactions</div>
-					<div class=apiClick>clients/189/transactions?offset=10&limit=50</div>				
+					<div class=apiClick>clients/189/transactions?offset=10&limit=50</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -37171,7 +37264,7 @@ Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>List Client Charges</h4>
-						
+
 					<p>The <i>list</i> capability of client charges supports <b>pagination</b>.</p>
 					<h5>Optional Arguments</h5>
 					<dl class="argument-list">
@@ -37193,9 +37286,9 @@ Request Body:
 						</dd>
 						<dd> Filters charges that are pending payment (neither paid or waived).</dd>
           			</dl>
-					<p>Example Requests:</p>				
-					<div class=apiClick>clients/1/charges</div>	
-					<div class=apiClick>clients/1/charges?offset=0&limit=5</div>				
+					<p>Example Requests:</p>
+					<div class=apiClick>clients/1/charges</div>
+					<div class=apiClick>clients/1/charges?offset=0&limit=5</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -37206,7 +37299,7 @@ GET clients/1/charges?limit=5&offset=0
 Content-Type: application/json
 No Request Body
             		</code>
-					<code class="method-response">	
+					<code class="method-response">
 {
   "totalFilteredRecords": 4,
   "pageItems": [
@@ -37363,8 +37456,8 @@ No Request Body
       "isWaived": true
     }
   ]
-}		
- 
+}
+
 					</code>
 				</div>
 			</div>
@@ -37442,8 +37535,8 @@ GET https://DomainName/api/v1/clients/{clientId}/charges/{clientChargeId}
 }
 					</code>
 				</div>
-			</div>	
-			
+			</div>
+
         <a id="delete_clientCharge" name="delete_clientCharge" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -37452,7 +37545,7 @@ GET https://DomainName/api/v1/clients/{clientId}/charges/{clientChargeId}
 					Deletes a Client Charge on which no transactions have taken place (either payments or waivers).				</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">				
+					<code class="method-declaration">
 DELETE  https://DomainName/api/v1/clients/{clientId}/charges/{clientChargeId}
 					</code>
 					<code class="method-request">
@@ -37474,7 +37567,7 @@ No Request Body
 				<div class="method-description">
 					<h4>Pay a Client Charge</h4>
 					<p>
-						<br>Pay either a part of or the entire due amount for a charge.						
+						<br>Pay either a part of or the entire due amount for a charge.
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
@@ -37486,10 +37579,10 @@ No Request Body
 							</td>
 						</tr>
 					</table>
-						<br />					
+						<br />
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">					
+					<code class="method-declaration">
 POST https://DomainName/api/v1/clients/{clientId}/charges/{clientChargeId}?command=paycharge
 					</code>
 					<code class="method-request">
@@ -37505,7 +37598,7 @@ Request Body:
 }
 			</code>
 			<code class="method-response">
-			
+
 {
   "officeId":1,
   "clientId":189,
@@ -37520,21 +37613,21 @@ Request Body:
 				<div class="method-description">
 					<h4>Waive a Client Charge</h4>
 					<p>
-						<br>This API provides the facility of waiving off the remaining amount on a client charge						
+						<br>This API provides the facility of waiving off the remaining amount on a client charge
 					</p>
-								
+
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">					
+					<code class="method-declaration">
 POST https://DomainName/api/v1/clients/{clientId}/charges/{clientChargeId}?command=waive
 					</code>
 					<code class="method-request">
-POST clients/189/charges/157?command=waive						
+POST clients/189/charges/157?command=waive
 Content-Type: application/json
 No Request Body
 			</code>
 			<code class="method-response">
-			
+
 {
  	"clientId":"189",
 	"resourceId":157
@@ -37542,23 +37635,23 @@ No Request Body
 					</code>
 				</div>
 			</div>
-			
+
            <a id="revert_clientCharge" name="revert_clientCharge" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Undo a Client Transaction</h4>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">					
+					<code class="method-declaration">
 POST https://DomainName/api/v1/clients/{clientId}/transactions/{transactionId}?command=undo
 					</code>
 					<code class="method-request">
-POST clients/189/transactions/222?command=undo					
+POST clients/189/transactions/222?command=undo
 Content-Type: application/json
 No Request Body
 					</code>
 					<code class="method-response">
-			
+
 {
 "officeId":1,
 "clientId":189,
@@ -37566,8 +37659,8 @@ No Request Body
 }
 					</code>
 				</div>
-			</div>			
-<!-- End of Client Transactions -->			
+			</div>
+<!-- End of Client Transactions -->
 			<a id="resources_deletetemplate" name="resources_deletetemplate"
 				class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -37592,14 +37685,394 @@ No Request Body:
 			</div>
 
 			<!-- end of UGD api docs -->
+					<!-- start of SPM API docs -->
+					<a id="surveys" name="surveys" class="old-syle-anchor">&nbsp;</a>
+					<div class="method-section">
+						<div class="method-description">
+							<h3>SPM API</h3>
+							<p>
+								The Mifos X SPM API provides the ability to create custom surveys to collect social performance measurentment data or any additional questionnaire a financial institute want to collect.
+							</p>
+						</div>
+					</div>
+					<a id="surveys_create" name="surveys_create" class="old-syle-anchor">&nbsp;</a>
+					<div class="method-section">
+						<div class="method-description">
+							<h3>Create a Survey</h3>
+							<p>Adds a new survey to collect client related data.</p>
+							<table class=matrixHeading>
+								<tr class="matrixHeadingBG">
+									<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+								</tr>
+								<tr class=alt>
+									<td>countryCode, key, name, questions, responses, sequenceNo, text, value</td>
+								</tr>
+							</table>
+						</div>
+						<div class="method-example">
+							<code class="method-declaration">
+POST https://DomainName/api/v1/surveys
+							</code>
+							<code class="method-request">
+POST surveys
+Content-Type: application/json
+Request Body:
+{
+  "key":"ppi-kenya-2010",
+  "name":"PPI Survey for Kenya, version 2010",
+  "description":null,
+  "countryCode":"KE",
+  "validFrom":null,
+  "validTo":null,
+  "components":
+  [
+    {
+      "key":"Household",
+      "text":"Information about the household."
+      "description":null,
+      "sequenceNo":1
+    }
+  ]
+  "questions":
+  [
+    {
+      "componentKey":"Household",
+      "key":"Familiy members",
+      "text":"How many persons live in the household?"
+      "description":null,
+      "sequenceNo":1,
+      "responses":
+      [
+        {
+          "text":"1 to 3",
+          "value":1,
+          "sequenceNo":1
+        },
+        {
+          "text":"3 to 7",
+          "value":5,
+          "sequenceNo":2
+        },
+        {
+          "text":"more than 7",
+          "value":13,
+          "sequenceNo":3
+        }
+      ]
+    }
+  ]
+}							</code>
+							<code class="method-response">
+200 OK
+							</code>
+						</div>
+					</div>
+					<a id="surveys_list" name="surveys_list" class="old-syle-anchor">&nbsp;</a>
+					<div class="method-section">
+						<div class="method-description">
+							<h3>List all Surveys</h3>
+						</div>
+						<div class="method-example">
+							<code class="method-declaration">
+GET https://DomainName/api/v1/surveys
+							</code>
+							<code class="method-request">
+GET surveys
+Content-Type: application/json
+No Request Body
+							</code>
+							<code class="method-response">
+[
+  {
+    "id":1
+    "key":"ppi-kenya-2010",
+    "name":"PPI Survey for Kenya, version 2010",
+    "description":null,
+    "countryCode":"KE",
+    "validFrom":"2015-11-25T00:00:00.000Z",
+    "validTo":"2115-12-31T23:59:59.999Z",
+    "components":
+    [
+      {
+        "key":"Household",
+        "text":"Information about the household."
+        "description":null,
+        "sequenceNo":1
+      }
+    ]
+    "questions":
+    [
+      {
+        "componentKey":"Household",
+        "key":"Familiy members",
+        "text":"How many persons live in the household?"
+        "description":null,
+        "sequenceNo":1,
+        "responses":
+        [
+          {
+            "text":"1 to 3",
+            "value":1,
+            "sequenceNo":1
+          },
+          {
+            "text":"3 to 7",
+            "value":5,
+            "sequenceNo":2
+          },
+          {
+            "text":"more than 7",
+            "value":13,
+            "sequenceNo":3
+          }
+        ]
+      }
+    ]
+  }
+]
+							</code>
+						</div>
+					</div>
+					<a id="surveys_retrieve" name="surveys_retrieve" class="old-syle-anchor">&nbsp;</a>
+					<div class="method-section">
+						<div class="method-description">
+							<h3>Retrieve a Survey</h3>
+						</div>
+						<div class="method-example">
+							<code class="method-declaration">
+GET https://DomainName/api/v1/surveys/1
+							</code>
+							<code class="method-request">
+GET surveys/1
+Content-Type: application/json
+No Request Body
+							</code>
+							<code class="method-response">
+{
+  "id":1
+  "key":"ppi-kenya-2010",
+  "name":"PPI Survey for Kenya, version 2010",
+  "description":null,
+  "countryCode":"KE",
+  "validFrom":"2015-11-25T00:00:00.000Z",
+  "validTo":"2115-12-31T23:59:59.999Z",
+  "components":
+  [
+    {
+      "key":"Household",
+      "text":"Information about the household."
+      "description":null,
+      "sequenceNo":1
+    }
+  ]
+  "questions":
+  [
+    {
+      "componentKey":"Household",
+      "key":"Familiy members",
+      "text":"How many persons live in the household?"
+      "description":null,
+      "sequenceNo":1,
+      "responses":
+      [
+        {
+          "text":"1 to 3",
+          "value":1,
+          "sequenceNo":1
+        },
+        {
+          "text":"3 to 7",
+          "value":5,
+          "sequenceNo":2
+        },
+        {
+          "text":"more than 7",
+          "value":13,
+          "sequenceNo":3
+        }
+      ]
+    }
+  ]
+}
 
+							</code>
+						</div>
+					</div>
+					<a id="surveys_delete" name="surveys_delete" class="old-syle-anchor">&nbsp;</a>
+					<div class="method-section">
+						<div class="method-description">
+							<h3>Deactivate Survey</h3>
+						</div>
+						<div class="method-example">
+							<code class="method-declaration">
+DELETE https://DomainName/api/v1/surveys/1
+							</code>
+							<code class="method-request">
+DELETE surveys/1
+Content-Type: application/json
+No Request Body
+							</code>
+							<code class="method-response">
+200 OK
+							</code>
+						</div>
+					</div>
+					<a id="lookuptables_create" name="lookuptables_create" class="old-syle-anchor">&nbsp;</a>
+					<div class="method-section">
+						<div class="method-description">
+							<h3>Create a Lookup Table entry</h3>
+							<p>Add a new netry to a survey.</p>
+							<table class=matrixHeading>
+								<tr class="matrixHeadingBG">
+									<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+								</tr>
+								<tr class=alt>
+									<td>key, score, validFrom, validTo</td>
+								</tr>
+							</table>
+						</div>
+						<div class="method-example">
+							<code class="method-declaration">
+POST https://DomainName/api/v1/surveys/1/lookuptables
+							</code>
+							<code class="method-request">
+POST surveys/1/lookuptables
+Content-Type: application/json
+Request Body:
+{
+  "key":"lookup-table-1",
+  "description":null,
+  "valueFrom":0,
+  "valueTo":5,
+  "score":100.00
+}
+              </code>
+							<code class="method-response">
+200 OK
+							</code>
+						</div>
+					</div>
+					<a id="lookuptables_list" name="lookuptables_list" class="old-syle-anchor">&nbsp;</a>
+					<div class="method-section">
+						<div class="method-description">
+							<h3>List all Lookup Table entries</h3>
+							<p>List all Lookup Table entries for a survey.</p>
+						</div>
+						<div class="method-example">
+							<code class="method-declaration">
+GET https://DomainName/api/v1/surveys/1/lookuptables
+							</code>
+							<code class="method-request">
+GET surveys/1/lookuptables
+Content-Type: application/json
+No Request Body
+              </code>
+							<code class="method-response">
+[
+  {
+    "id":1
+    "key":"lookup-table-1",
+    "description":null,
+    "valueFrom":0,
+    "valueTo":5,
+    "score":100.00
+  }
+]
+							</code>
+						</div>
+					</div>
+					<a id="lookuptables_retrieve" name="lookuptables_retrieve" class="old-syle-anchor">&nbsp;</a>
+					<div class="method-section">
+						<div class="method-description">
+							<h3>Retrieve a Lookup Table entry</h3>
+							<p>Retrieve a Lookup Table entry for a survey.</p>
+						</div>
+						<div class="method-example">
+							<code class="method-declaration">
+GET https://DomainName/api/v1/surveys/1/lookuptables/1
+							</code>
+							<code class="method-request">
+GET surveys/1/lookuptables/1
+Content-Type: application/json
+No Request Body
+              </code>
+							<code class="method-response">
+{
+  "id":1,
+  "key":"lookup-table-1",
+  "description":null,
+  "valueFrom":0,
+  "valueTo":5,
+  "score":100.00
+}
+							</code>
+						</div>
+					</div>
 
-
-
-
-
-
-
+					<a id="scorecards_create" name="scorecards_create" class="old-syle-anchor">&nbsp;</a>
+					<div class="method-section">
+						<div class="method-description">
+							<h3>Create a Scorecard entry</h3>
+							<p>Add a new netry to a survey.</p>
+							<table class=matrixHeading>
+								<tr class="matrixHeadingBG">
+									<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+								</tr>
+								<tr class=alt>
+									<td>clientId, createdOn, questionId, responseId, staffId</td>
+								</tr>
+							</table>
+						</div>
+						<div class="method-example">
+							<code class="method-declaration">
+POST https://DomainName/api/v1/surveys/1/scorecards
+							</code>
+							<code class="method-request">
+POST surveys/1/scorecards
+Content-Type: application/json
+Request Body:
+{
+  "questionId":1,
+  "responseId":1,
+  "staffId":1,
+  "clientId":1,
+  "createdOn":"2015-11-26T09:50:34.647Z"
+}
+              </code>
+							<code class="method-response">
+200 OK
+							</code>
+						</div>
+					</div>
+					<a id="scorecards_list" name="scorecards_list" class="old-syle-anchor">&nbsp;</a>
+					<div class="method-section">
+						<div class="method-description">
+							<h3>List all Scorecard entries</h3>
+							<p>List all Scorecard entries for a survey.</p>
+						</div>
+						<div class="method-example">
+							<code class="method-declaration">
+GET https://DomainName/api/v1/surveys/1/scorecards
+							</code>
+							<code class="method-request">
+GET surveys/1/scorecards
+Content-Type: application/json
+No Request Body
+              </code>
+							<code class="method-response">
+[
+  {
+    "questionId":1,
+    "responseId":1,
+    "staffId":1,
+    "clientId":1,
+    "createdOn":"2015-11-26T09:50:34.647Z"
+  }
+]
+							</code>
+						</div>
+					</div>
+					<!-- end of SPM API docs -->
         </div>
 		<!-- main-content-wrapper -->
 

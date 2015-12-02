@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 02 Dec 2015 - 15.12.1.RELEASE
 1. 18 Nov 2015 - 15.11.2.RELEASE
 1. 04 Nov 2015 - 15.11.1.RELEASE
 1. 21 Oct 2015 - 15.10.2.RELEASE
@@ -79,6 +80,36 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+15.12.1.RELEASE
+=============
+This release includes first part of Social Performance Management Framework.
+This release also includes few bug fixes as mentioned below.
+
+Platform & API
+
+New Features & Improvements
+Following stories of Social Performance Management Framework Epic
+ - [MIFOSX-1961] - Create new survey
+ - [MIFOSX-1962] - Add general information
+ - [MIFOSX-1963] - Add questions to a survey
+ - [MIFOSX-1964] - Add look-up tables
+ - [MIFOSX-1965] - Assign default look-up table
+
+Bugs
+ - [MIFOSX-2184] - As a user I want my penalties only to apply to new loans that go overdue
+ - [MIFOSX-2313] - Loan provisioning entries not getting created for multi tranche loans if first tranche disbursement date is back dated
+ - [MIFOSX-2322] - Template-User defined report is not working as expected
+ - [MIFOSX-2348] - incorrect error Insufficient account balance due to guarantors funds onhold
+ - [MIFOSX-2363] - Repayment schedule generated after early repayment with interest recalculation is not proper
+ - [MIFOSX-2368] - For the Multi tranche Loans with Equal Principal payments, last installment is not calculating properly
+ 
+Community-App
+
+Bugs
+ - [MIFOSX-2058] - Opening Screen for Non-Admin Users
+ - [MIFOSX-2327] - Does not come back to group, when cancel transfer clients
+ - [MIFOSX-2362] - Not able to save modify loan aplication after undo disburse and undo approval
 
 15.11.2.RELEASE
 =============
