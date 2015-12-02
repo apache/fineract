@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.template.domain.Template;
 import org.mifosplatform.template.domain.TemplateFunctions;
 import org.slf4j.Logger;
@@ -38,6 +39,7 @@ import com.github.mustachejava.MustacheFactory;
 @Service
 public class TemplateMergeService {
 	private final static Logger logger = LoggerFactory.getLogger(TemplateMergeService.class);
+	
 
     // private final FromJsonHelper fromApiJsonHelper;
     private Map<String, Object> scopes;
@@ -46,16 +48,18 @@ public class TemplateMergeService {
     // @Autowired
     // public TemplateMergeService(final FromJsonHelper fromApiJsonHelper) {
     // this.fromApiJsonHelper = fromApiJsonHelper;
-    // }
+    //
 
     public void setAuthToken(final String authToken) {
-        this.authToken = authToken;
+        //final String auth = ThreadLocalContextUtil.getAuthToken();
+    	this.authToken =  authToken;
     }
+    
 
     public String compile(final Template template, final Map<String, Object> scopes) throws MalformedURLException, IOException {
         this.scopes = scopes;
         this.scopes.put("static", new TemplateFunctions());
-
+        
         final MustacheFactory mf = new DefaultMustacheFactory();
         final Mustache mustache = mf.compile(new StringReader(template.getText()), template.getName());
 
@@ -169,6 +173,8 @@ public class TemplateMergeService {
 	private void expandMapArrays(Object value) {
 		if (value instanceof Map) {
 			Map<String, Object> valueAsMap = (Map<String, Object>) value;
+			//Map<String, Object> newValue = null;
+			Map<String,Object> valueAsMap_second = new HashMap<>();
 			for (Entry<String, Object> valueAsMapEntry : valueAsMap.entrySet()) {
 				Object valueAsMapEntryValue = valueAsMapEntry.getValue();
 				if (valueAsMapEntryValue instanceof Map) { // JSON Object
@@ -178,12 +184,16 @@ public class TemplateMergeService {
 					String valueAsMapEntryKey = valueAsMapEntry.getKey();
 					int i = 0;
 					for (Object object : valueAsMapEntryValueIterable) {
-						valueAsMap.put(valueAsMapEntryKey + "#" + i, object);
+						valueAsMap_second.put(valueAsMapEntryKey + "#" + i, object);
 						++i;
 						expandMapArrays(object);
+						
 					}
 				}
+
 			}
+			valueAsMap.putAll(valueAsMap_second);
+
 		}		
 	}
 
