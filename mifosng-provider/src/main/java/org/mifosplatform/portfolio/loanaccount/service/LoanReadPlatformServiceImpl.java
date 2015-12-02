@@ -17,8 +17,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -1465,12 +1468,31 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-    public Collection<OverdueLoanScheduleData> retrieveAllLoansWithOverdueInstallments(final Long penaltyWaitPeriod) {
+    public Collection<OverdueLoanScheduleData> retrieveAllLoansWithOverdueInstallments(final Long penaltyWaitPeriod, final Boolean backdatePenalties) {
         final MusoniOverdueLoanScheduleMapper rm = new MusoniOverdueLoanScheduleMapper();
-        final String sql = "select " + rm.schema() + " where DATE_SUB(CURDATE(),INTERVAL ? DAY) > ls.duedate "
-                + " and ls.completed_derived <> 1 and mc.charge_applies_to_enum =1 "
-                + " and mc.charge_time_enum = 9 and ml.loan_status_id = 300 ";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { penaltyWaitPeriod });
+
+        final StringBuilder sqlBuilder = new StringBuilder(400);
+        sqlBuilder
+                .append("select ")
+                .append(rm.schema())
+                .append(" where DATE_SUB(CURDATE(),INTERVAL ? DAY) > ls.duedate ")
+                .append( " and ls.completed_derived <> 1 and mc.charge_applies_to_enum =1 ")
+                .append(" and mc.charge_time_enum = 9 and ml.loan_status_id = 300 ");
+
+
+        if(backdatePenalties)
+        {
+            return this.jdbcTemplate.query(sqlBuilder.toString(), rm, new Object[] { penaltyWaitPeriod });
+        }
+        else
+        {
+            // Only apply for duedate = yesterday (so that we don't apply penalties on the duedate itself)
+            sqlBuilder.append(" and ls.duedate >= DATE_SUB(CURDATE(),INTERVAL (? + 1) DAY)");
+
+            return this.jdbcTemplate.query(sqlBuilder.toString(), rm, new Object[] { penaltyWaitPeriod, penaltyWaitPeriod });
+        }
+
+
     }
 
     @SuppressWarnings("deprecation")

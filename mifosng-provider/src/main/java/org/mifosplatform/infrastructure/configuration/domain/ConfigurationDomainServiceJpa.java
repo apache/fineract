@@ -187,10 +187,18 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
         if (property.isEnabled()) {
             int value = property.getValue().intValue();
-            if (value < 0 || value > 6) { return defaultValue; }
+            if (value < 0 || value > 6) {
+                return defaultValue;
+            }
             return value;
         }
         return defaultValue;
+    }
+
+    public boolean isBackdatePenaltiesEnabled() {
+        final String propertyName = "backdate-penalties-enabled";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
+        return property.isEnabled();
     }
 
 }
