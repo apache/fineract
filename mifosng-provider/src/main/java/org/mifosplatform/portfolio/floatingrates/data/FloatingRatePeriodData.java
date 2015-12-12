@@ -6,7 +6,6 @@
 package org.mifosplatform.portfolio.floatingrates.data;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -17,19 +16,19 @@ public class FloatingRatePeriodData implements
 		Comparable<FloatingRatePeriodData> {
 
 	private Long id;
-	private Date fromDate;
+	private LocalDate fromDate;
 	private BigDecimal interestRate;
 	private boolean isDifferentialToBaseLendingRate;
 	private boolean isActive;
 	private String createdBy;
-	private Date createdOn;
+	private LocalDate createdOn;
 	private String modifiedBy;
-	private Date modifiedOn;
+	private LocalDate modifiedOn;
 
-	public FloatingRatePeriodData(Long id, Date fromDate,
+	public FloatingRatePeriodData(Long id, LocalDate fromDate,
 			BigDecimal interestRate, boolean isDifferentialToBaseLendingRate,
-			boolean isActive, String createdBy, Date createdOn,
-			String modifiedBy, Date modifiedOn) {
+			boolean isActive, String createdBy, LocalDate createdOn,
+			String modifiedBy, LocalDate modifiedOn) {
 		this.id = id;
 		this.fromDate = fromDate;
 		this.interestRate = interestRate;
@@ -45,7 +44,7 @@ public class FloatingRatePeriodData implements
 		return this.id;
 	}
 
-	public Date getFromDate() {
+	public LocalDate getFromDate() {
 		return this.fromDate;
 	}
 
@@ -69,7 +68,7 @@ public class FloatingRatePeriodData implements
 		return this.createdBy;
 	}
 
-	public Date getCreatedOn() {
+	public LocalDate getCreatedOn() {
 		return this.createdOn;
 	}
 
@@ -77,7 +76,7 @@ public class FloatingRatePeriodData implements
 		return this.modifiedBy;
 	}
 
-	public Date getModifiedOn() {
+	public LocalDate getModifiedOn() {
 		return this.modifiedOn;
 	}
 

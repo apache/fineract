@@ -5,12 +5,12 @@
  */
 package org.mifosplatform.portfolio.floatingrates.data;
 
-import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 public class FloatingRateData implements Comparable<FloatingRateData> {
@@ -20,16 +20,16 @@ public class FloatingRateData implements Comparable<FloatingRateData> {
 	private final boolean isBaseLendingRate;
 	private final boolean isActive;
 	private final String createdBy;
-	private final Date createdOn;
+	private final LocalDate createdOn;
 	private final String modifiedBy;
-	private final Date modifiedOn;
+	private final LocalDate modifiedOn;
 	private final List<FloatingRatePeriodData> ratePeriods;
 	@SuppressWarnings("unused")
 	private final List<EnumOptionData> interestRateFrequencyTypeOptions;
 
 	public FloatingRateData(Long id, String name, boolean isBaseLendingRate,
-			boolean isActive, String createdBy, Date createdOn,
-			String modifiedBy, Date modifiedOn,
+			boolean isActive, String createdBy, LocalDate createdOn,
+			String modifiedBy, LocalDate modifiedOn,
 			List<FloatingRatePeriodData> ratePeriods,
 			List<EnumOptionData> interestRateFrequencyTypeOptions) {
 		this.id = id;
@@ -64,7 +64,7 @@ public class FloatingRateData implements Comparable<FloatingRateData> {
 		return this.createdBy;
 	}
 
-	public Date getCreatedOn() {
+	public LocalDate getCreatedOn() {
 		return this.createdOn;
 	}
 
@@ -72,7 +72,7 @@ public class FloatingRateData implements Comparable<FloatingRateData> {
 		return this.modifiedBy;
 	}
 
-	public Date getModifiedOn() {
+	public LocalDate getModifiedOn() {
 		return this.modifiedOn;
 	}
 
