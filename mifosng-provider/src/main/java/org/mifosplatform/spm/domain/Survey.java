@@ -15,11 +15,11 @@ import java.util.List;
 @Table(name = "m_surveys")
 public class Survey extends AbstractPersistable<Long> {
 
-    @OneToMany(mappedBy = "survey", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "survey", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @OrderBy("sequenceNo")
     private List<Component> components;
 
-    @OneToMany(mappedBy = "survey", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "survey", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @OrderBy("sequenceNo")
     private List<Question> questions;
 

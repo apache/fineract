@@ -18,7 +18,7 @@ public class Question extends AbstractPersistable<Long> {
     @JoinColumn(name = "survey_id")
     private Survey survey;
 
-    @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "question", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @OrderBy("sequenceNo")
     private List<Response> responses;
 

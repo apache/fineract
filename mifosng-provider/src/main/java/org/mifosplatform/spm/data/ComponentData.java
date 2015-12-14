@@ -7,6 +7,7 @@ package org.mifosplatform.spm.data;
 
 public class ComponentData {
 
+    private Long id;
     private String key;
     private String text;
     private String description;
@@ -16,13 +17,18 @@ public class ComponentData {
         super();
     }
 
-    public ComponentData(final String key, final String text,
+    public ComponentData(final Long id, final String key, final String text,
                          final String description, final Integer sequenceNo) {
         super();
+        this.id = id;
         this.key = key;
         this.text = text;
         this.description = description;
         this.sequenceNo = sequenceNo;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getKey() {
