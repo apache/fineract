@@ -15,6 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.mifosplatform.portfolio.floatingrates.data.FloatingRateDTO;
 import org.mifosplatform.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -136,11 +137,15 @@ public class FloatingRatePeriod extends AbstractPersistable<Long> {
 			interest = interest.add(floatingRateDTO
 					.fetchBaseRate(fetchFromDate()));
 		}
-
-		return new FloatingRatePeriodData(getId(), getFromDate(), interest,
+		
+		final LocalDate fromDate = new LocalDateTime(getFromDate()).toLocalDate();
+		final LocalDate createdOn = new LocalDateTime(getCreatedOn()).toLocalDate();
+		final LocalDate modidiedOn = new LocalDateTime(getModifiedOn()).toLocalDate();
+		
+		return new FloatingRatePeriodData(getId(), fromDate, interest,
 				isDifferentialToBaseLendingRate(), isActive(), getCreatedBy()
-						.getUsername(), getCreatedOn(), getModifiedBy()
-						.getUsername(), getModifiedOn());
+						.getUsername(), createdOn, getModifiedBy()
+						.getUsername(), modidiedOn);
 	}
 
 }

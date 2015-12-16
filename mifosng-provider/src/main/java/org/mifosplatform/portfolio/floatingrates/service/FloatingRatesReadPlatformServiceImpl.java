@@ -11,6 +11,8 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
+import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.portfolio.floatingrates.data.FloatingRateData;
 import org.mifosplatform.portfolio.floatingrates.data.FloatingRatePeriodData;
@@ -128,9 +130,9 @@ public class FloatingRatesReadPlatformServiceImpl implements
 					.getBoolean("isBaseLendingRate");
 			final boolean isActive = rs.getBoolean("isActive");
 			final String createdBy = rs.getString("createdBy");
-			final Date createdOn = rs.getDate("createdOn");
+			final LocalDate createdOn = JdbcSupport.getLocalDate(rs, "createdOn");
 			final String modifiedBy = rs.getString("modifiedBy");
-			final Date modifiedOn = rs.getDate("modifiedOn");
+			final LocalDate modifiedOn = JdbcSupport.getLocalDate(rs, "modifiedOn");
 			List<FloatingRatePeriodData> ratePeriods = null;
 			if (addRatePeriods) {
 				FloatingRatePeriodRowMapper ratePeriodMapper = new FloatingRatePeriodRowMapper();
@@ -173,15 +175,15 @@ public class FloatingRatesReadPlatformServiceImpl implements
 				@SuppressWarnings("unused") final int rowNum)
 				throws SQLException {
 			final Long id = rs.getLong("id");
-			final Date fromDate = rs.getDate("fromDate");
+			final LocalDate fromDate = JdbcSupport.getLocalDate(rs, "fromDate");
 			final BigDecimal interestRate = rs.getBigDecimal("interestRate");
 			final boolean isDifferentialToBaseLendingRate = rs
 					.getBoolean("isDifferentialToBaseLendingRate");
 			final boolean isActive = rs.getBoolean("isActive");
 			final String createdBy = rs.getString("createdBy");
-			final Date createdOn = rs.getDate("createdOn");
+			final LocalDate createdOn = JdbcSupport.getLocalDate(rs, "createdOn");
 			final String modifiedBy = rs.getString("modifiedBy");
-			final Date modifiedOn = rs.getDate("modifiedOn");
+			final LocalDate modifiedOn = JdbcSupport.getLocalDate(rs, "modifiedOn");
 			return new FloatingRatePeriodData(id, fromDate, interestRate,
 					isDifferentialToBaseLendingRate, isActive, createdBy,
 					createdOn, modifiedBy, modifiedOn);
