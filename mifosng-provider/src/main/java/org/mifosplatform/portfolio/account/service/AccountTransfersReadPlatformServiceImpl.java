@@ -75,7 +75,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         final Integer mostRelevantFromAccountType = fromAccountType;
         final Collection<EnumOptionData> fromAccountTypeOptions = Arrays.asList(savingsAccountType, loanAccountType);
         final Collection<EnumOptionData> toAccountTypeOptions;
-        if (mostRelevantFromAccountType == 1) {
+        if (mostRelevantFromAccountType != null && mostRelevantFromAccountType == 1) {
             // overpaid loan amt transfer to savings account
             toAccountTypeOptions = Arrays.asList(savingsAccountType);
         } else {

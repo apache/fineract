@@ -24,11 +24,15 @@ import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.security.data.PlatformRequestLog;
 import org.mifosplatform.infrastructure.security.exception.InvalidTenantIdentiferException;
 import org.mifosplatform.infrastructure.security.service.BasicAuthTenantDetailsService;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -142,5 +146,23 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
             final PlatformRequestLog log = PlatformRequestLog.from(task, request);
             logger.info(this.toApiJsonSerializer.serialize(log));
         }
+    }
+    
+    @Override
+    protected void onSuccessfulAuthentication(HttpServletRequest request,
+    		HttpServletResponse response, Authentication authResult)
+    		throws IOException {
+    	super.onSuccessfulAuthentication(request, response, authResult);
+		AppUser user = (AppUser) authResult.getPrincipal();
+		
+		String pathURL = request.getRequestURI();
+		boolean isSelfServiceRequest = (pathURL != null && pathURL.contains("/self/"));
+
+		boolean notAllowed = ((isSelfServiceRequest && !user.isSelfServiceUser())
+				||(!isSelfServiceRequest && user.isSelfServiceUser()));
+		
+		if(notAllowed){
+			throw new BadCredentialsException("User not authorised to use the requested resource.");
+		}
     }
 }

@@ -117,10 +117,22 @@ public class ClientsApiResource {
             @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder,
             @QueryParam("orphansOnly") final Boolean orphansOnly) {
 
+        return this.retrieveAll(uriInfo, sqlSearch, officeId, externalId, displayName, firstname, 
+        		lastname, hierarchy, offset, limit, orderBy, sortOrder, orphansOnly, false);
+    }
+    
+    public String retrieveAll(final UriInfo uriInfo, final String sqlSearch,
+            final Long officeId, final String externalId,
+            final String displayName, final String firstname,
+            final String lastname, final String hierarchy,
+            final Integer offset, final Integer limit,
+            final String orderBy, final String sortOrder,
+            final Boolean orphansOnly, final boolean isSelfUser) {
+
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
         final SearchParameters searchParameters = SearchParameters.forClients(sqlSearch, officeId, externalId, displayName, firstname,
-                lastname, hierarchy, offset, limit, orderBy, sortOrder, orphansOnly);
+                lastname, hierarchy, offset, limit, orderBy, sortOrder, orphansOnly, isSelfUser);
 
         final Page<ClientData> clientData = this.clientReadPlatformService.retrieveAll(searchParameters);
 

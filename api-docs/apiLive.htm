@@ -111,6 +111,7 @@
 	<li><a href="#fullapi_matrix">Full API Matrix</a></li>
 	<li><a href="#betaapi_matrix">Beta API Matrix</a></li>
 	<li><a href="#paymentapplicationlogic">Payment Application Logic / Transaction Processing Strategies</a></li>
+	<li><a href="#selfservice_overview">Self Service API</a></li>
 </ul>
 						</div>
 					</div>
@@ -3005,6 +3006,219 @@
 				</div>
 			</div>
 
+			<!-- API documentation for Customer Self Service APIs -->
+			<div class="flybar-nav">
+				<h2 class="flybar-button">Self Service</h2>
+				<div id="toc-menu-report" class="flybar-menu">
+					<div class="tocMatrix">
+						<table class=matrixHeading>
+							<tr class="matrixHeadingBG">
+								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
+										<table>
+											<tr>
+												<td>RESOURCES</td>
+											</tr>
+										</table>
+									</div></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">POST</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>create/complex
+													update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">GET</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>read</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">PUT</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">DELETE</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>delete</div></td>
+										</tr>
+									</table></td>
+							</tr>
+							<tr>
+								<td><a href="#selfbasicauth">Authentication HTTP Basic</a></td>
+								<td>self/authentication</td>
+								<td></td>
+								<td><a href="#selfbasicauth">Verify Authentication</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#selfoauth">Authentication Oauth2</a></td>
+								<td>self/userdetails</td>
+								<td></td>
+								<td><a href="#selfoauth">Fetch Authenticated User Details</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#selflistclients">Clients</a></td>
+								<td>self/clients</td>
+								<td></td>
+								<td><a href="#selflistclients">List Clients</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/clients/{clientId}</td>
+								<td></td>
+								<td><a href="#selfclient">Retrieve Client</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/clients/{clientId}/accounts</td>
+								<td></td>
+								<td><a href="#selfclientsaccounts">Retrieve Client Accounts Overview</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/clients/{clientId}/images</td>
+								<td></td>
+								<td><a href="#selfclientsimages">Retrieve Client Image</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/clients/{clientId}/charges</td>
+								<td></td>
+								<td><a href="#selfclientscharges">List Client Charges</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/clients/{clientId}/charges/{chargeId}</td>
+								<td></td>
+								<td><a href="#selfclientscharge">Retrieve a Client Charge</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/clients/{clientId}/transactions</td>
+								<td></td>
+								<td><a href="#selfclienttransactions">List Client Transactions</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/clients/{clientId}/transactions/{transactionId}</td>
+								<td></td>
+								<td><a href="#selfclienttransaction">Retrieve a Client Transaction</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#selfloan">Loans</a></td>
+								<td>self/loans/{loanId}</td>
+								<td></td>
+								<td><a href="#selfloan">Retrieve a Loan</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/loans/{loanId}/transactions/{transactionId}</td>
+								<td></td>
+								<td><a href="#selfloantransaction">Retrieve a Loan Transaction Details</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/loans/{loanId}/charges</td>
+								<td></td>
+								<td><a href="#selfloancharges">Retrieve Loan Charges</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/loans/{loanId}/charges/{chargeId}</td>
+								<td></td>
+								<td><a href="#selfloancharge">Retrieve a Loan Charge Details</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#selfsavings">Savings</a></td>
+								<td>self/savingsaccounts/{accountId}</td>
+								<td></td>
+								<td><a href="#selfsavings">Retrieve a Savings Account</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/savingsaccounts/{accountId}/transactions/{transactionId}</td>
+								<td></td>
+								<td><a href="#selfsavingstransaction">Retrieve a Savings Transaction Details</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/savingsaccounts/{accountId}/charges</td>
+								<td></td>
+								<td><a href="#selfsavingscharges">Retrieve Savings Charges</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/savingsaccounts/{accountId}/charges/{savingsAccountChargeId}</td>
+								<td></td>
+								<td><a href="#selfsavingscharge">Retrieve a Savings Charge Details</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#selftransfertemplate">Own Account Transfers</a></td>
+								<td>self/accounttransfers/template</td>
+								<td></td>
+								<td><a href="#selftransfertemplate">Account Transfer Template</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/accounttransfers</td>
+								<td><a href="#selftransfer">Account Transfer</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+
 		</div>
 
 		<div id="main-content-wrapper">
@@ -3763,7 +3977,28 @@ Successful transaction response:
 </code>
 				</div>
 			</div>
+			<a id="selfservice_overview" name="selfservice_overview"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Self Service API Overview</h3>
+					<p>
+					Self Service APIs are a set of APIs with restricted data scope. Functional specifications and design can be viewed 
+					<a href="https://mifosforge.jira.com/wiki/display/MIFOSX/Customer+Self+Service">here</a>. 
+					</p>
 
+					<p>
+					While creating an <a href="#users_create">user</a>, user can be tagged as self service user. Also you can associate 
+					clients that this user has access to. Data scope is restricted to these linked clients.
+					</p>
+					<p>
+					A self service user shall have access to only self service APIs. Self service APIs cannot be accessed by non-self service user. Vice-versa is also true.
+					</p>
+				</div>
+				<div class="method-example">
+
+					</div>
+			</div>
 			<!-- start of clients api docs -->
 			<a id="clients" name="clients" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -31382,7 +31617,7 @@ GET https://DomainName/api/v1/users/{userId}
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr>
-							<td>staffId,passwordNeverExpires</td>
+							<td>staffId,passwordNeverExpires,isSelfServiceUser,clients</td>
 						</tr>
 					</table>
 				</div>
@@ -31432,6 +31667,32 @@ Request body:
 {
     "officeId": 1,
     "resourceId": 12
+}
+					</code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/users
+					</code>
+					<code class="method-request">
+POST users
+Content-Type: application/json
+Request body:
+{
+    "username": "newuser",
+    "firstname": "Test",
+    "lastname": "User",
+    "email": "whatever@mifos.org",
+    "officeId": 1,
+    "staffId": 1,
+    "roles": [2,3],
+    "sendPasswordToEmail": true,
+    "isSelfServiceUser": true,
+    "clients": [1,2,3]
+}
+					</code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "resourceId": 11
 }
 					</code>
 				</div>
@@ -38077,6 +38338,1778 @@ No Request Body
 						</div>
 					</div>
 					<!-- end of SPM API docs -->
+					
+					<!-- Customer Self Service APIs-->
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Self Service APIs</h3>
+				</div>
+			</div>
+			<a id="selfbasicauth" name="selfbasicauth" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Verify authentication</h4>
+					<p>Authenticates the credentials provided and returns the set roles and permissions allowed.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/self/authentication?username={username}&password={password}
+					</code>
+					<code class="method-request">
+POST self/authentication?username=mifos&password=password
+Content-Type: application/json
+No Request Body
+					</code>
+					<p>Example response of autentication for user</p>
+<code class="method-response">
+{
+    "username": "mifos",
+    "userId": 1,
+    "base64EncodedAuthenticationKey": "bWlmb3M6cGFzc3dvcmQ=",
+    "authenticated": true,
+    "officeId": 1,
+    "officeName": "Head Office",
+    "staffId": 1,
+    "staffDisplayName": "Director, Program",
+    "organisationalRole": {
+        "id": 100,
+        "code": "staffOrganisationalRoleType.programDirector",
+        "value": "Program Director"
+    },
+    "roles": [
+        {
+            "id": 1,
+            "name": "Super user",
+            "description": "This role provides all application permissions."
+        }
+    ],
+    "permissions": [
+        "ALL_FUNCTIONS"
+    ],
+    "isSelfServiceUser": true,
+    "clients": [1,2,3]
+}
+</code>
+
+					<code class="method-request">
+POST self/authentication?username=mifos&password=fail
+Content-Type: application/json
+No Request Body
+					</code>
+					<code class="method-response">
+{
+    "developerMessage": "Invalid authentication details were passed in api request.",
+    "developerDocLink": "https://github.com/openMF/mifosx/wiki/HTTP-API-Error-codes",
+    "httpStatusCode": "401",
+    "defaultUserMessage": "Unauthenticated. Please login.",
+    "userMessageGlobalisationCode": "error.msg.not.authenticated",
+    "errors": []
+}
+					</code>
+				</div>
+			</div>
+			
+			<a id="selfoauth" name="selfoauth" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Fetch authenticated user details </h4>
+					<p>checks the Authentication and returns the set roles and permissions allowed.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/userdetails?access_token={access_token}
+					</code>
+					<code class="method-request">
+POST userdetails?access_token=bWlmb3M6cGFzc3dvcmQ=
+Content-Type: application/json
+No Request Body
+					</code>
+					<p>Example response of authenticated user.</p>
+<code class="method-response">
+{
+    "username": "mifos",
+    "userId": 1,
+    "base64EncodedAuthenticationKey": "bWlmb3M6cGFzc3dvcmQ=",
+    "authenticated": true,
+    "officeId": 1,
+    "officeName": "Head Office",
+    "staffId": 1,
+    "staffDisplayName": "Director, Program",
+    "organisationalRole": {
+        "id": 100,
+        "code": "staffOrganisationalRoleType.programDirector",
+        "value": "Program Director"
+    },
+    "roles": [
+        {
+            "id": 1,
+            "name": "Super user",
+            "description": "This role provides all application permissions."
+        }
+    ],
+    "permissions": [
+        "ALL_FUNCTIONS"
+    ],
+    "isSelfServiceUser": true,
+    "clients": [1,2,3]
+}
+</code>
+
+					<code class="method-request">
+POST api/oauth/token?username=mifos&password=password&client_id=community-app&grant_type=password&client_secret=123
+Content-Type: application/json
+No Request Body
+					</code>
+					<code class="method-response">
+{
+    "developerMessage": "Invalid authentication details were passed in api request.",
+    "developerDocLink": "https://github.com/openMF/mifosx/wiki/HTTP-API-Error-codes",
+    "httpStatusCode": "401",
+    "defaultUserMessage": "Unauthenticated. Please login.",
+    "userMessageGlobalisationCode": "error.msg.not.authenticated",
+    "errors": []
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="selflistclients" name="selflistclients" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Clients associated to the user</h4>
+					<p>The <i>list</i> capability of clients can support <b>pagination</b> and <b>sorting</b>.</p>
+					<h5>Optional Arguments</h5>
+					<dl class="argument-list">
+						<dt>offset</dt>
+						<dd>
+							Integer <span>optional</span>, defaults to 0
+						</dd>
+						<dd>Indicates the result from which pagination starts</dd>
+
+						<dt>limit</dt>
+						<dd>
+							Integer <span>optional</span>, defaults to 200
+						</dd>
+						<dd>Restricts the size of results returned. To override the default and return all entries you must explicitly pass a non-positive integer value for limit e.g. limit=0, or limit=-1</dd>
+
+						<dt>orderBy</dt>
+						<dd>
+							String <span>optional</span>, one of <span>displayName, accountNo, officeId, officeName</span>
+						</dd>
+						<dd>Orders results by the indicated field.</dd>
+
+						<dt>sortBy</dt>
+						<dd>
+							String <span>optional</span>, one of <span>ASC, DESC</span>
+						</dd>
+						<dd>Indicates what way to order results if <i>orderBy</i> is used.</dd>
+
+						<dt>displayName</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use displayName of clients to restrict results.</dd>
+
+						<dt>firstName</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use firstName of clients to restrict results.</dd>
+
+						<dt>lastName</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use lastName of clients to restrict results.</dd>
+
+					</dl>
+					<p>Example Requests:</p>
+					<div class=apiClick>self/clients</div>
+					<br>
+					<div class=apiClick>self/clients?fields=displayName,officeName</div>
+					<br>
+					<div class=apiClick>self/clients?offset=10&limit=50</div>
+					<br>
+					<div class=apiClick>self/clients?orderBy=displayName&sortOrder=DESC</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/clients
+					</code>
+					<code class="method-response">
+{
+  "totalFilteredRecords": 2,
+  "pageItems": [
+    {
+      "id": 1,
+      "accountNo": "000000001",
+      "status": {
+        "id": 300,
+        "code": "clientStatusType.active",
+        "value": "Active"
+      },
+      "active": true,
+      "activationDate": [
+        2013,
+        3,
+        1
+      ],
+      "fullname": "Small shop",
+      "displayName": "Small shop",
+      "officeId": 1,
+      "officeName": "Head Office"
+    },
+    {
+      "id": 2,
+      "accountNo": "000000002",
+      "status": {
+        "id": 100,
+        "code": "clientStatusType.pending",
+        "value": "Pending"
+      },
+      "active": false,
+      "fullname": "Home Farm Produce",
+      "displayName": "Home Farm Produce",
+      "officeId": 1,
+      "officeName": "Head Office"
+    }
+  ]
+}
+					</code>
+				</div>
+			</div>
+			
+			<a id="selfclient" name="selfclient" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Client</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>self/clients/1</div>
+					<br>
+					<div class=apiClick>self/clients/1?fields=id,displayName,officeName</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/clients/{clientId}
+					</code>
+					<code class="method-response">
+{
+  "id": 27,
+  "accountNo": "000000027",
+  "status": {
+    "id": 300,
+    "code": "clientStatusType.active",
+    "value": "Active"
+  },
+  "active": true,
+  "activationDate": [
+    2013,
+    1,
+    1
+  ],
+  "firstname": "savings",
+  "lastname": "test",
+  "displayName": "savings test",
+  "officeId": 1,
+  "officeName": "Head Office",
+  "timeline": {
+    "submittedOnDate": [
+      2013,
+      1,
+      1
+    ],
+    "submittedByUsername": "mifos",
+    "submittedByFirstname": "App",
+    "submittedByLastname": "Administrator",
+    "activatedOnDate": [
+      2013,
+      1,
+      1
+    ],
+    "activatedByUsername": "mifos",
+    "activatedByFirstname": "App",
+    "activatedByLastname": "Administrator"
+  },
+  "savingsProductId": 4,
+  "savingsProductName": "account overdraft",
+  "groups": []
+}
+					</code>
+				</div>
+			</div>
+			<a id="selfclientsaccounts" name="selfclientsaccounts" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve client accounts overview</h4>
+					<p>
+						An example of how a loan portfolio summary can be provided. This
+						is requested in a specific use case of the community application.<br> It is quite reasonable to add resources like this to simplify User Interface development.
+					</p>
+					<p>Example Requests:</p>
+					<div class=apiClick>self/clients/1/accounts</div>
+					<br>
+					<br>
+					<div class=apiClick>self/clients/1/accounts?fields=loanAccounts,savingsAccounts</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/clients/{clientId}/accounts
+					</code>
+					<code class="method-response">
+{
+    "loanAccounts": [
+        {
+            "id": 1,
+            "accountNo": "000000001",
+            "externalId": "456",
+            "productId": 1,
+            "productName": "TestOne",
+            "status": {
+                "id": 300,
+                "code": "loanStatusType.active",
+                "value": "Active",
+                "pendingApproval": false,
+                "waitingForDisbursal": false,
+                "active": true,
+                "closedObligationsMet": false,
+                "closedWrittenOff": false,
+                "closedRescheduled": false,
+                "closed": false,
+                "overpaid": false
+            },
+            "loanType": {
+                "id": 1,
+                "code": "loanType.individual",
+                "value": "Individual"
+            },
+            "loanCycle": 1
+        }
+    ],
+    "savingsAccounts": [
+        {
+            "id": 7,
+            "accountNo": "000000007",
+            "productId": 2,
+            "productName": "Other product",
+            "status": {
+                "id": 100,
+                "code": "savingsAccountStatusType.submitted.and.pending.approval",
+                "value": "Submitted and pending approval",
+                "submittedAndPendingApproval": true,
+                "approved": false,
+                "rejected": false,
+                "withdrawnByApplicant": false,
+                "active": false,
+                "closed": false
+            },
+            "currency": {
+                "code": "USD",
+                "name": "US Dollar",
+                "decimalPlaces": 2,
+                "displaySymbol": "$",
+                "nameCode": "currency.USD",
+                "displayLabel": "US Dollar ($)"
+            }
+        },
+        {
+            "id": 6,
+            "accountNo": "000000006",
+            "productId": 1,
+            "productName": "Passbook Savings",
+            "status": {
+                "id": 300,
+                "code": "savingsAccountStatusType.active",
+                "value": "Active",
+                "submittedAndPendingApproval": false,
+                "approved": false,
+                "rejected": false,
+                "withdrawnByApplicant": false,
+                "active": true,
+                "closed": false
+            },
+            "currency": {
+                "code": "USD",
+                "name": "US Dollar",
+                "decimalPlaces": 2,
+                "displaySymbol": "$",
+                "nameCode": "currency.USD",
+                "displayLabel": "US Dollar ($)"
+            },
+            "accountBalance": 1828.03
+        },
+        {
+            "id": 5,
+            "accountNo": "000000005",
+            "productId": 1,
+            "productName": "Passbook Savings",
+            "status": {
+                "id": 400,
+                "code": "savingsAccountStatusType.withdrawn.by.applicant",
+                "value": "Withdrawn by applicant",
+                "submittedAndPendingApproval": false,
+                "approved": false,
+                "rejected": false,
+                "withdrawnByApplicant": true,
+                "active": false,
+                "closed": true
+            },
+            "currency": {
+                "code": "USD",
+                "name": "US Dollar",
+                "decimalPlaces": 2,
+                "displaySymbol": "$",
+                "nameCode": "currency.USD",
+                "displayLabel": "US Dollar ($)"
+            }
+        }
+    ]
+}
+					</code>
+				</div>
+			</div>					
+			
+			<a id="selfclientsimages" name="selfclientsimages"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Client Image</h4>
+					<p>Optional arguments are identical to those of <a href="#client_images_retrieve_binary">Get Image associated with an Entity (Binary file)</a></p>
+					<p>Example Requests:</p>
+					<div class=apiClick>self/clients/1/images</div>
+					<br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/clients/{clientId}/images
+Accept: text/plain
+
+					</code>
+					<code class="method-response">
+data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJ
+bWFnZVJlYWR5ccllPAAAAJ1JREFUeNpi+P//PwMIA4E9EG8E4idQDGLbw+WhiiqA+D8OXAFVAzbp
+DxBvB2JLIGaGYkuoGEjOhhFIHAbij0BdPgxYACMj42ogJQpifwBiXSDeC8JIbt4LxSC5DyxQjTeB
++BeaYb+Q5EBOAVutCzMJHUNNPADzzDokiYdAfAmJvwLkGeTgWQfyKZICS6hYBTwc0QL8ORSjBDhA
+gAEAOg13B6R/SAgAAAAASUVORK5CYII=
+					</code>
+				</div>
+			</div>
+
+			<a id="selfclientscharges" name="selfclientscharges" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Client Charges</h4>
+
+					<p>The <i>list</i> capability of client charges supports <b>pagination</b>.</p>
+					<h5>Optional Arguments</h5>
+					<dl class="argument-list">
+						<dt>offset</dt>
+						<dd>
+							Integer <span>Mandatory</span>, defaults to 0
+						</dd>
+						<dd>Indicates the result from which pagination starts</dd>
+
+						<dt>limit</dt>
+						<dd>
+							Integer <span>Mandatory</span>, defaults to 200
+						</dd>
+						<dd>Restricts the size of results returned. To override the default and return all entries you must explicitly pass a non-positive integer value for limit e.g. limit=0, or limit=-1</dd>
+
+						<dt>pendingPayment</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd> Filters charges that are pending payment (neither paid or waived).</dd>
+
+						<dt>chargeStatus</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd> Filters charges according to the status.</dd>
+          			</dl>
+					<p>Example Requests:</p>
+					<div class=apiClick>self/clients/1/charges</div>
+					<div class=apiClick>self/clients/1/charges?offset=0&limit=5</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/clients/{clientId}/charges?limit=5&offset=0
+					</code>
+					<code class="method-request">
+GET self/clients/1/charges?limit=5&offset=0
+Content-Type: application/json
+No Request Body
+            		</code>
+					<code class="method-response">
+{
+  "totalFilteredRecords": 4,
+  "pageItems": [
+    {
+      "id": 5,
+      "clientId": 1,
+      "chargeId": 6,
+      "name": "Client Fees 2",
+      "chargeTimeType": {
+        "id": 2,
+        "code": "chargeTimeType.specifiedDueDate",
+        "value": "Specified due date"
+      },
+      "dueDate": [
+        2015,
+        9,
+        1
+      ],
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 550.000000,
+      "amountPaid": 0.000000,
+      "amountWaived": 0.000000,
+      "amountWrittenOff": 0,
+      "amountOutstanding": 550.000000,
+      "penalty": false,
+      "isActive": true,
+      "isPaid": false,
+      "isWaived": false
+    },
+    {
+      "id": 4,
+      "clientId": 1,
+      "chargeId": 5,
+      "name": "Client Fee 1",
+      "chargeTimeType": {
+        "id": 2,
+        "code": "chargeTimeType.specifiedDueDate",
+        "value": "Specified due date"
+      },
+      "dueDate": [
+        2015,
+        8,
+        31
+      ],
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 120.000000,
+      "amountPaid": 0.000000,
+      "amountWaived": 120.000000,
+      "amountWrittenOff": 0,
+      "amountOutstanding": 120.000000,
+      "penalty": true,
+      "isActive": true,
+      "isPaid": false,
+      "isWaived": true
+    },
+    {
+      "id": 3,
+      "clientId": 1,
+      "chargeId": 5,
+      "name": "Client Fee 1",
+      "chargeTimeType": {
+        "id": 2,
+        "code": "chargeTimeType.specifiedDueDate",
+        "value": "Specified due date"
+      },
+      "dueDate": [
+        2015,
+        8,
+        17
+      ],
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 100.000000,
+      "amountPaid": 0.000000,
+      "amountWaived": 100.000000,
+      "amountWrittenOff": 0,
+      "amountOutstanding": 0.000000,
+      "penalty": true,
+      "isActive": true,
+      "isPaid": false,
+      "isWaived": true
+    },
+    {
+      "id": 2,
+      "clientId": 1,
+      "chargeId": 2,
+      "name": "Recurring savings Charge",
+      "chargeTimeType": {
+        "id": 7,
+        "code": "chargeTimeType.monthlyFee",
+        "value": "Monthly Fee"
+      },
+      "dueDate": [
+        2015,
+        8,
+        17
+      ],
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 100.000000,
+      "amountPaid": 0,
+      "amountWaived": 100.000000,
+      "amountWrittenOff": 0,
+      "amountOutstanding": 0.000000,
+      "penalty": false,
+      "isActive": true,
+      "isPaid": false,
+      "isWaived": true
+    }
+  ]
+}
+
+					</code>
+				</div>
+			</div>
+					<a id="selfclientscharge" name="selfclientscharge" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Client Charge</h4>
+					<h5>Arguments</h5>
+					<dl class="argument-list">
+						<dt>associations</dt>
+						<dd>
+							optional, <span>a comma separated list of
+								'associations' (itemised below).</span>
+						</dd>
+						<dd>
+							<br>Associations are just extra pieces of data that you
+							might or might not want to retrieve.<br>
+							<br>
+						</dd>
+						<dd>
+							<b>'transactions':</b> Retrieves all transactions made on this client charge.
+						</dd>
+					</dl>
+					<p>Example Requests:</p>
+					<div class=apiClick>self/clients/1/charges/1</div>
+					<br>
+					<br>
+					<div class=apiClick>self/clients/1/charges/1?fields=name,id</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/clients/{clientId}/charges/{clientChargeId}
+					</code>
+					<code class="method-response">
+{
+  "id": 3,
+  "clientId": 1,
+  "chargeId": 5,
+  "name": "Client Fee 1",
+  "chargeTimeType": {
+    "id": 2,
+    "code": "chargeTimeType.specifiedDueDate",
+    "value": "Specified due date"
+  },
+  "dueDate": [
+    2015,
+    8,
+    17
+  ],
+  "chargeCalculationType": {
+    "id": 1,
+    "code": "chargeCalculationType.flat",
+    "value": "Flat"
+  },
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "amount": 100.000000,
+  "amountPaid": 0.000000,
+  "amountWaived": 100.000000,
+  "amountWrittenOff": 0,
+  "amountOutstanding": 0.000000,
+  "penalty": true,
+  "isActive": true,
+  "isPaid": false,
+  "isWaived": true
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="selfclienttransactions" name="selfclienttransactions" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Client Transactions</h4>
+					<p>The <i>list</i> capability of client transaction can support <b>pagination</b>.</p>
+					<h5>Mandatory Arguments</h5>
+					<dl class="argument-list">
+						<dt>offset</dt>
+						<dd>
+							Integer <span>Mandatory</span>, defaults to 0
+						</dd>
+						<dd>Indicates the result from which pagination starts</dd>
+
+						<dt>limit</dt>
+						<dd>
+							Integer <span>Mandatory</span>, defaults to 200
+						</dd>
+						<dd>Restricts the size of results returned. To override the default and return all entries you must explicitly pass a non-positive integer value for limit e.g. limit=0, or limit=-1</dd>
+            		</dl>
+					<p>Example Requests:</p>
+					<div class=apiClick>self/clients/189/transactions</div>
+					<div class=apiClick>self/clients/189/transactions?offset=10&limit=50</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/clients/{clientId}/transactions?limit=5&offset=0
+					</code>
+					<code class="method-request">
+GET self/clients/226/transactions?limit=5&offset=0
+Content-Type: application/json
+No Request Body:
+
+			</code>
+			<code class="method-response">
+{
+  "totalFilteredRecords": 20,
+  "pageItems": [
+    {
+      "id": 226,
+      "officeId": 1,
+      "officeName": "Head Office",
+      "type": {
+        "id": 1,
+        "code": "clientTransactionType.payCharge",
+        "value": "PAY_CHARGE"
+      },
+      "date": [
+        2015,
+        9,
+        2
+      ],
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 22,
+      "submittedOnDate": [
+        2015,
+        9,
+        2
+      ],
+      "reversed": false
+    }
+  ]
+}
+</code>
+				</div>
+			</div>
+
+			<a id="selfclienttransaction" name="selfclienttransaction" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Client Transaction</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>self/clients/1/transactions/1</div>
+					<br>
+					<br>
+					<div class=apiClick>self/clients/1/transactions/1?fields=id,officeName</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/clients/{clientId}/transaction/{transactionId}
+					</code>
+					<code class="method-response">
+{
+  "id": 1,
+  "officeId": 1,
+  "officeName": "Head Office",
+  "type": {
+    "id": 1,
+    "code": "clientTransactionType.payCharge",
+    "value": "PAY_CHARGE"
+  },
+  "date": [
+    2015,
+    8,
+    17
+  ],
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "amount": 60.000000,
+  "submittedOnDate": [
+    2015,
+    8,
+    19
+  ],
+  "reversed": true
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="selfloan" name="selfloan" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Loan</h4>
+					<h5>Arguments</h5>
+					<dl class="argument-list">
+						<dt>associations</dt>
+						<dd>
+							optional, <span>a comma separated list of
+								loan 'associations' (itemised below).</span>
+						</dd>
+						<dd>
+							<br>Associations are just extra pieces of data that you
+							might or might not want to retrieve.<br>
+							<br>
+						</dd>
+						<dd>
+							<b>'repaymentSchedule':</b> Loan schedule data.
+						</dd>
+						<dd>
+							<b>'originalSchedule':</b> Loan schedule data without interest recalculations.
+						</dd>
+						<dd>
+							<b>'futureSchedule':</b> Loan schedule data from today date(will be displayed only for interest first repayment strategy processors)
+						</dd>
+						<dd>
+							<b>'transactions':</b> Loan transactions data.
+						</dd>
+						<dd>
+							<b>'charges':</b> Loan charges data.
+						</dd>
+						<dd>
+							<b>'guarantors':</b> Loan guarantors data.
+						</dd>
+						<dd>
+							<b>'collateral':</b> Loan collateral data.
+						</dd>
+						<dd>
+							<b>'linkedAccount':</b> Account linked to loan.
+						</dd>
+						<dd>
+							<b>'multiDisburseDetails':</b> Loan multi-disbursement details.
+						</dd>
+					</dl>
+					<p>Example Requests:</p>
+					<div class=apiClick>self/loans/1</div>
+					<br>
+					<br>
+					<div class=apiClick>self/loans/1?fields=id,principal,annualInterestRate</div>
+					<br>
+					<br>
+					<div class=apiClick>self/loans/1?fields=id,principal,annualInterestRate&associations=repaymentSchedule,transactions</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/loans/{loanId}
+					</code>
+					<code class="method-response">
+{
+  "id": 1,
+  "accountNo": "000000001",
+  "status": {
+    "id": 300,
+    "code": "loanStatusType.active",
+    "value": "Active",
+    "pendingApproval": false,
+    "waitingForDisbursal": false,
+    "active": true,
+    "closedObligationsMet": false,
+    "closedWrittenOff": false,
+    "closedRescheduled": false,
+    "closed": false,
+    "overpaid": false
+  },
+  "clientId": 1,
+  "clientName": "Kampala first Client",
+  "clientOfficeId": 2,
+  "loanProductId": 1,
+  "loanProductName": "Kampala Product (with cash accounting)",
+  "loanProductDescription": "Typical Kampala loan product with cash accounting enabled for testing.",
+  "loanPurposeId": 22,
+  "loanPurposeName": "option.HousingImprovement",
+  "loanOfficerId": 2,
+  "loanOfficerName": "LoanOfficer, Kampala",
+  "loanType": {
+    "id": 1,
+    "code": "loanType.individual",
+    "value": "Individual"
+  },
+  "currency": {
+    "code": "UGX",
+    "name": "Uganda Shilling",
+    "decimalPlaces": 2,
+    "displaySymbol": "USh",
+    "nameCode": "currency.UGX",
+    "displayLabel": "Uganda Shilling (USh)"
+  },
+  "principal": 1000000,
+  "termFrequency": 12,
+  "termPeriodFrequencyType": {
+    "id": 2,
+    "code": "termFrequency.periodFrequencyType.months",
+    "value": "Months"
+  },
+  "numberOfRepayments": 12,
+  "repaymentEvery": 1,
+  "repaymentFrequencyType": {
+    "id": 2,
+    "code": "repaymentFrequency.periodFrequencyType.months",
+    "value": "Months"
+  },
+  "interestRatePerPeriod": 24,
+  "interestRateFrequencyType": {
+    "id": 3,
+    "code": "interestRateFrequency.periodFrequencyType.years",
+    "value": "Per year"
+  },
+  "annualInterestRate": 24,
+  "amortizationType": {
+    "id": 1,
+    "code": "amortizationType.equal.installments",
+    "value": "Equal installments"
+  },
+  "interestType": {
+    "id": 1,
+    "code": "interestType.flat",
+    "value": "Flat"
+  },
+  "interestCalculationPeriodType": {
+    "id": 1,
+    "code": "interestCalculationPeriodType.same.as.repayment.period",
+    "value": "Same as repayment period"
+  },
+  "transactionProcessingStrategyId": 2,
+  "timeline": {
+    "submittedOnDate": [
+      2012,
+      4,
+      3
+    ],
+    "submittedByUsername": "admin",
+    "submittedByFirstname": "App",
+    "submittedByLastname": "Administrator",
+    "approvedOnDate": [
+      2012,
+      4,
+      3
+    ],
+    "approvedByUsername": "admin",
+    "approvedByFirstname": "App",
+    "approvedByLastname": "Administrator",
+    "expectedDisbursementDate": [
+      2012,
+      4,
+      10
+    ],
+    "actualDisbursementDate": [
+      2012,
+      4,
+      10
+    ],
+    "disbursedByUsername": "admin",
+    "disbursedByFirstname": "App",
+    "disbursedByLastname": "Administrator",
+    "expectedMaturityDate": [
+      2013,
+      4,
+      10
+    ]
+  },
+  "summary": {
+    "currency": {
+      "code": "UGX",
+      "name": "Uganda Shilling",
+      "decimalPlaces": 2,
+      "displaySymbol": "USh",
+      "nameCode": "currency.UGX",
+      "displayLabel": "Uganda Shilling (USh)"
+    },
+    "principalDisbursed": 1000000,
+    "principalPaid": 0,
+    "principalWrittenOff": 0,
+    "principalOutstanding": 1000000,
+    "principalOverdue": 833333.3,
+    "interestCharged": 240000,
+    "interestPaid": 0,
+    "interestWaived": 0,
+    "interestWrittenOff": 0,
+    "interestOutstanding": 240000,
+    "interestOverdue": 200000,
+    "feeChargesCharged": 18000,
+    "feeChargesDueAtDisbursementCharged": 0,
+    "feeChargesPaid": 0,
+    "feeChargesWaived": 0,
+    "feeChargesWrittenOff": 0,
+    "feeChargesOutstanding": 18000,
+    "feeChargesOverdue": 15000,
+    "penaltyChargesCharged": 0,
+    "penaltyChargesPaid": 0,
+    "penaltyChargesWaived": 0,
+    "penaltyChargesWrittenOff": 0,
+    "penaltyChargesOutstanding": 0,
+    "penaltyChargesOverdue": 0,
+    "totalExpectedRepayment": 1258000,
+    "totalRepayment": 0,
+    "totalExpectedCostOfLoan": 258000,
+    "totalCostOfLoan": 0,
+    "totalWaived": 0,
+    "totalWrittenOff": 0,
+    "totalOutstanding": 1258000,
+    "totalOverdue": 1048333.3,
+    "overdueSinceDate": [
+      2012,
+      5,
+      10
+    ],
+    "linkedAccount":{
+    	"id":1,
+    	"accountNo":"000000001"
+    },
+    "disbursementDetails":[{"id":71,"expectedDisbursementDate":[2013,11,1],"principal":22000.000000,"approvedPrincipal":22000.000000}],
+    "fixedEmiAmount":1100.000000,
+    "maxOutstandingLoanBalance":35000,
+    "canDisburse":false,
+    "emiAmountVariations": [],
+  "inArrears": true,
+  "isNPA":false,
+  "overdueCharges": [
+    {
+      "id": 20,
+      "name": "overdraft penality",
+      "active": true,
+      "penalty": true,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 3.000000,
+      "chargeTimeType": {
+        "id": 9,
+        "code": "chargeTimeType.overdueInstallment",
+        "value": "overdue fees"
+      },
+      "chargeAppliesTo": {
+        "id": 1,
+        "code": "chargeAppliesTo.loan",
+        "value": "Loan"
+      },
+      "chargeCalculationType": {
+        "id": 2,
+        "code": "chargeCalculationType.percent.of.amount",
+        "value": "% Amount"
+      },
+      "chargePaymentMode": {
+        "id": 0,
+        "code": "chargepaymentmode.regular",
+        "value": "Regular"
+      },
+      "feeInterval": 2,
+      "feeFrequency": {
+        "id": 1,
+        "code": "feeFrequencyperiodFrequencyType.weeks",
+        "value": "Weeks"
+      }
+    }
+  ]
+  }
+}
+					</code>
+				</div>
+			</div>
+
+            <a id="selfloantransaction" name="selfloantransaction" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Loan Transaction Details</h4>
+					<p>Example Request:</p>
+					<div class=apiClick>self/loans/5/transactions/3</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/loans/{loanId}/transactions/{transactionId}
+					</code>
+					<code class="method-response">
+{
+  "id": 3,
+  "type": {
+    "id": 2,
+    "code": "loanTransactionType.repayment",
+    "value": "Repayment",
+    "disbursement": false,
+    "repaymentAtDisbursement": false,
+    "repayment": true,
+    "contra": false,
+    "waiveInterest": false,
+    "waiveCharges": false,
+    "writeOff": false,
+    "recoveryRepayment": false
+  },
+  "date": [
+    2012,
+    5,
+    14
+  ],
+  "manuallyReversed": false,
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "amount": 559.88,
+  "interestPortion": 559.88
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="selfloancharges" name="selfloancharges"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Loan Charges</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>self/loans/1/charges</div>
+					<br>
+					<br>
+					<div class=apiClick>self/loans/1/charges?fields=name,amountOrPercentage</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/loans/{loanId}/charges
+					</code>
+					<code class="method-response">
+[
+  {
+    "id": 1,
+    "chargeId": 1,
+    "name": "Loan Processing fee",
+    "chargeTimeType": {
+      "id": 1,
+      "code": "chargeTimeType.disbursement",
+      "value": "Disbursement"
+    },
+    "chargeCalculationType": {
+      "id": 1,
+      "code": "chargeCalculationType.flat",
+      "value": "Flat"
+    },
+    "percentage": 0,
+    "amountPercentageAppliedTo": 0,
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "amount": 100,
+    "amountPaid": 0,
+    "amountWaived": 0,
+    "amountWrittenOff": 0,
+    "amountOutstanding": 100,
+    "amountOrPercentage": 100,
+    "penalty": false
+  },
+  {
+    "id": 7,
+    "chargeId": 2,
+    "name": "Collection Fee",
+    "chargeTimeType": {
+      "id": 2,
+      "code": "chargeTimeType.specifiedDueDate",
+      "value": "Specified due date"
+    },
+    "dueDate": [
+      2013,
+      3,
+      29
+    ],
+    "chargeCalculationType": {
+      "id": 1,
+      "code": "chargeCalculationType.flat",
+      "value": "Flat"
+    },
+    "percentage": 0,
+    "amountPercentageAppliedTo": 0,
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "amount": 100,
+    "amountPaid": 0,
+    "amountWaived": 0,
+    "amountWrittenOff": 0,
+    "amountOutstanding": 100,
+    "amountOrPercentage": 100,
+    "penalty": false
+  }
+]
+					</code>
+				</div>
+			</div>
+
+			<a id="selfloancharge" name="selfloancharge"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Loan Charge</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>self/loans/1/charges/1</div>
+					<br>
+					<br>
+					<div class=apiClick>self/loans/1/charges/1?fields=name,amountOrPercentage</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/loans/{loanId}/charges/{chargeId}
+					</code>
+					<code class="method-response">
+{
+  "id": 1,
+  "chargeId": 1,
+  "name": "Loan Processing fee",
+  "chargeTimeType": {
+    "id": 1,
+    "code": "chargeTimeType.disbursement",
+    "value": "Disbursement"
+  },
+  "chargeCalculationType": {
+    "id": 1,
+    "code": "chargeCalculationType.flat",
+    "value": "Flat"
+  },
+  "percentage": 0,
+  "amountPercentageAppliedTo": 0,
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "amount": 100,
+  "amountPaid": 0,
+  "amountWaived": 0,
+  "amountWrittenOff": 0,
+  "amountOutstanding": 100,
+  "amountOrPercentage": 100,
+  "penalty": false
+}			</code>
+				</div>
+			</div>
+
+	<a id="selfsavings" name="selfsavings" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve a savings account:</h4>
+	        <h4>Arguments</h4>
+	        <dl class="argument-list">
+	            <dt>associations</dt>
+	            <dd>optional, <span>a comma separated list of savings 'associations' (itemized below).</span></dd>
+	            <dd><br>Associations are just extra pieces of data that you might or might not want to retrieve.<br><br></dd>
+				<dd><b>'transactions':</b> Gets data related to transactions on the account e.g. ?associations=transactions</dd>
+				<dd><b>'charges':</b>Savings Account charges data.</dd>
+	        </dl>
+	        <p>Example Requests : </p>
+	        <div class=apiClick>self/savingsaccounts/1</div>
+	        <br><br>
+	        <div class=apiClick>self/savingsaccounts/1?associations=transactions</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://DomainName/api/v1/self/savingsaccounts/{accountId}</code>
+	        <code class="method-response">
+{
+  "id": 1,
+  "accountNo": "000000001",
+  "clientId": 1,
+  "clientName": "small business",
+  "savingsProductId": 1,
+  "savingsProductName": "Passbook Savings",
+  "fieldOfficerId": 0,
+  "status": {
+    "id": 100,
+    "code": "savingsAccountStatusType.submitted.and.pending.approval",
+    "value": "Submitted and pending approval",
+    "submittedAndPendingApproval": true,
+    "approved": false,
+    "rejected": false,
+    "withdrawnByApplicant": false,
+    "active": false,
+    "closed": false
+  },
+  "timeline": {
+    "submittedOnDate": [
+      2013,
+      3,
+      1
+    ]
+  },
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "nominalAnnualInterestRate": 5,
+  "interestCompoundingPeriodType": {
+    "id": 1,
+    "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+    "value": "Daily"
+  },
+  "interestPostingPeriodType": {
+    "id": 4,
+    "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+    "value": "Monthly"
+  },
+  "interestCalculationType": {
+    "id": 1,
+    "code": "savingsInterestCalculationType.dailybalance",
+    "value": "Daily Balance"
+  },
+  "interestCalculationDaysInYearType": {
+    "id": 365,
+    "code": "savingsInterestCalculationDaysInYearType.days365",
+    "value": "365 Days"
+  },
+  "summary": {
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "accountBalance": 0
+  }
+}
+	        </code>
+	    </div>
+	</div>
+
+<a id="selfsavingstransaction" name="selfsavingstransaction" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Retrieve Savings Account Transaction:</h4>
+	        <p>Example Requests: </p>
+	        <div class=apiClick>self/savingsaccounts/1/transactions/1</div>
+	        <br/>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://DomainName/api/v1/self/savingsaccounts/{accountId}/transactions/{transactionId}
+	        </code>
+			<code class="method-response">
+{
+  "id": 1,
+  "transactionType": {
+    "id": 2,
+    "code": "savingsAccountTransactionType.withdrawal",
+    "value": "Withdrawal",
+    "deposit": false,
+    "withdrawal": true,
+    "interestPosting": false,
+    "feeDeduction": false
+  },
+  "accountId": 1,
+  "accountNo": "000000001",
+  "date": [
+    2013,
+    8,
+    7
+  ],
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "inMultiplesOf": 0,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "paymentDetailData": {
+    "id": 62,
+    "paymentType": {
+      "id": 11,
+      "name": "cash"
+    },
+    "accountNumber": "",
+    "checkNumber": "",
+    "routingCode": "",
+    "receiptNumber": "",
+    "bankNumber": ""
+  },
+  "amount": 5000,
+  "runningBalance": 0,
+  "reversed": true
+}
+</code>
+	    </div>
+	</div>
+
+			<a id="selfsavingscharges" name="selfsavingscharges"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Savings Charges</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>self/savingsaccounts/1/charges</div>
+					<br>
+					<div class=apiClick>self/savingsaccounts/1/charges?chargeStatus=inactive</div>
+					<br>
+					<div class=apiClick>self/savingsaccounts/1/charges?fields=name,amountOrPercentage</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/savingsaccounts/{accountId}/charges
+					</code>
+					<code class="method-response">
+[
+  {
+    "id": 1,
+    "chargeId": 3,
+    "accountId": 57,
+    "name": "Savings account maintenance fee",
+    "chargeTimeType": {
+      "id": 1,
+      "code": "chargeTimeType.specifiedDueDate",
+      "value": "Specified due date"
+    },
+    "chargeCalculationType": {
+      "id": 1,
+      "code": "chargeCalculationType.flat",
+      "value": "Flat"
+    },
+    "percentage": 0,
+    "amountPercentageAppliedTo": 0,
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "amount": 100,
+    "amountPaid": 0,
+    "amountWaived": 0,
+    "amountWrittenOff": 0,
+    "amountOutstanding": 100,
+    "amountOrPercentage": 100,
+    "penalty": false
+  },
+  {
+    "id": 2,
+    "chargeId": 4,
+    "accountId": 57,
+    "name": "Pass book Fee",
+    "chargeTimeType": {
+      "id": 2,
+      "code": "chargeTimeType.specifiedDueDate",
+      "value": "Specified due date"
+    },
+    "dueDate": [
+      2013,
+      3,
+      29
+    ],
+    "chargeCalculationType": {
+      "id": 1,
+      "code": "chargeCalculationType.flat",
+      "value": "Flat"
+    },
+    "percentage": 0,
+    "amountPercentageAppliedTo": 0,
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "amount": 100,
+    "amountPaid": 0,
+    "amountWaived": 0,
+    "amountWrittenOff": 0,
+    "amountOutstanding": 100,
+    "amountOrPercentage": 100,
+    "penalty": false
+  },
+  {
+    "id": 9,
+    "chargeId": 4,
+    "accountId": 57,
+    "name": "Withdrawal fee percentage",
+    "chargeTimeType": {
+      "id": 5,
+      "code": "chargeTimeType.withdrawalFee",
+      "value": "Withdrawal Fee"
+    },
+    "chargeCalculationType": {
+      "id": 2,
+      "code": "chargeCalculationType.percent.of.amount",
+      "value": "% Amount"
+    },
+    "percentage": 0.25,
+    "amountPercentageAppliedTo": 0,
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "amount": 0,
+    "amountPaid": 0,
+    "amountWaived": 0,
+    "amountWrittenOff": 0,
+    "amountOutstanding": 0,
+    "amountOrPercentage": 0.25,
+    "penalty": false
+  },
+  {
+    "id": 10,
+    "chargeId": 6,
+    "accountId": 57,
+    "name": "Annual fee - INR",
+    "chargeTimeType": {
+      "id": 6,
+      "code": "chargeTimeType.annualFee",
+      "value": "Annual Fee"
+    },
+    "feeOnMonthDay": [
+      10,
+      9
+    ],
+    "chargeCalculationType": {
+      "id": 1,
+      "code": "chargeCalculationType.flat",
+      "value": "Flat"
+    },
+    "percentage": 0,
+    "amountPercentageAppliedTo": 0,
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "amount": 50,
+    "amountPaid": 0,
+    "amountWaived": 0,
+    "amountWrittenOff": 0,
+    "amountOutstanding": 50,
+    "amountOrPercentage": 50,
+    "penalty": false
+  }
+]
+					</code>
+				</div>
+			</div>
+
+			<a id="selfsavingscharge" name="selfsavingscharge"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Savings account Charge</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>self/savingsaccounts/1/charges/5</div>
+					<br>
+					<br>
+					<div class=apiClick>self/savingsaccounts/1/charges/5?fields=name,amountOrPercentage</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/savingsaccounts/{accountId}/charges/{savingsAccountChargeId}
+					</code>
+					<code class="method-response">
+{
+  "id": 1,
+  "chargeId": 1,
+  "name": "Passbook fee",
+  "chargeTimeType": {
+    "id": 1,
+    "code": "chargeTimeType.specifiedDueDate",
+    "value": "Specified due date"
+  },
+  "chargeCalculationType": {
+    "id": 1,
+    "code": "chargeCalculationType.flat",
+    "value": "Flat"
+  },
+  "percentage": 0,
+  "amountPercentageAppliedTo": 0,
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "amount": 100,
+  "amountPaid": 0,
+  "amountWaived": 0,
+  "amountWrittenOff": 0,
+  "amountOutstanding": 100,
+  "amountOrPercentage": 100,
+  "penalty": false
+}			</code>
+				</div>
+			</div>
+
+	<a id="selftransfertemplate" name="selftransfertemplate" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve Account Transfer Template</h2>
+	        <p>Returns list of loan/savings accounts that can be used for account transfer</p>
+	        <p>Example Requests:</p>
+	        <div class=apiClick>self/accounttransfers/template</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://DomainName/api/v1/self/accounttransfers/template
+	        </code>
+			<code class="method-response">
+{
+  "accountOptions": [
+	{
+		"accountId": 1,
+		"accountNo": "00000001",
+		"accountType": {
+			"id": 2,
+			"code": "accountType.savings",
+			"value": "Savings Account"
+		},
+		"clientId": 1,
+		"clientName": "ABC",
+		"officeId": 1,
+		"officeName": "HEAD OFFICE"
+	},
+	{
+		"accountId": 5,
+		"accountNo": "00000005",
+		"accountType": {
+			"id": 1,
+			"code": "accountType.loan",
+			"value": "Loan Account"
+		},
+		"clientId": 2,
+		"clientName": "XYZ",
+		"officeId": 3,
+		"officeName": "REGIONAL OFFICE"
+	}
+  ]
+}
+			</code>
+	    </div>
+	</div>
+
+	<a id="selftransfer" name="selftransfer" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Create new Transfer</h2>
+	        <p>Ability to create new transfer of monetary funds from one account to another.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://DomainName/api/v1/self/accounttransfers</code>
+	        <code class="method-request">POST self/accounttransfers/
+Content-Type: application/json
+No Request Body:
+{
+"fromOfficeId": 1,
+"fromClientId": 1,
+"fromAccountType": 2,
+"fromAccountId": 1,
+"toOfficeId": 1,
+"toClientId": 1,
+"toAccountType": 2,
+"toAccountId": 2,
+"dateFormat": "dd MMMM yyyy",
+"locale": "en",
+"transferDate": "01 August 2011",
+"transferAmount": "112.45",
+"transferDescription": "A description of the transfer"
+}
+	        </code>
+	        <code class="method-response">
+{
+  "savingsId": 1,
+  "resourceId": 1
+}
+	        </code>
+	    </div>
+	</div>
+		
+			<!-- end of Customer Self Service APIs-->
         </div>
 		<!-- main-content-wrapper -->
 

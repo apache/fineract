@@ -113,6 +113,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         final String userOfficeHierarchy = this.context.officeHierarchy();
         final String underHierarchySearchString = userOfficeHierarchy + "%";
+        final String appUserID = String.valueOf(context.authenticatedUser().getId());
 
         // if (searchParameters.isScopedByOfficeHierarchy()) {
         // this.context.validateAccessRights(searchParameters.getHierarchy());
@@ -123,6 +124,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(this.clientMapper.schema());
         sqlBuilder.append(" where (o.hierarchy like ? or transferToOffice.hierarchy like ?) ");
+        
+        if(searchParameters.isSelfUser()){
+        	sqlBuilder.append(" and c.id in (select umap.client_id from m_selfservice_user_client_mapping as umap where umap.appuser_id = ? ) ");
+        }
 
         final String extraCriteria = buildSqlStringFromClientCriteria(searchParameters);
 
@@ -146,8 +151,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), new Object[] {
-                underHierarchySearchString, underHierarchySearchString }, this.clientMapper);
+        Object[] params = new Object[] {underHierarchySearchString, underHierarchySearchString };
+        if(searchParameters.isSelfUser()){
+            params = new Object[] {underHierarchySearchString, underHierarchySearchString, appUserID };
+        }
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), params, this.clientMapper);
     }
 
     private String buildSqlStringFromClientCriteria(final SearchParameters searchParameters) {

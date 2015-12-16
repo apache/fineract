@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
@@ -18,9 +19,12 @@ import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
+import org.mifosplatform.portfolio.client.data.ClientData;
+import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.useradministration.data.AppUserData;
 import org.mifosplatform.useradministration.data.RoleData;
 import org.mifosplatform.useradministration.domain.AppUser;
+import org.mifosplatform.useradministration.domain.AppUserClientMapping;
 import org.mifosplatform.useradministration.domain.AppUserRepository;
 import org.mifosplatform.useradministration.domain.Role;
 import org.mifosplatform.useradministration.exception.UserNotFoundException;
@@ -119,9 +123,21 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
             linkedStaff = null;
         }
 
-        return AppUserData.instance(user.getId(), user.getUsername(), user.getEmail(), user.getOffice().getId(),
+        AppUserData retUser = AppUserData.instance(user.getId(), user.getUsername(), user.getEmail(), user.getOffice().getId(),
                 user.getOffice().getName(), user.getFirstname(), user.getLastname(), availableRoles, selectedUserRoles, linkedStaff,
-                user.getPasswordNeverExpires());
+                user.getPasswordNeverExpires(), user.isSelfServiceUser());
+        
+        if(retUser.isSelfServiceUser()){
+        	Set<ClientData> clients = new HashSet<>();
+        	for(AppUserClientMapping clientMap : user.getAppUserClientMappings()){
+        		Client client = clientMap.getClient();
+        		clients.add(ClientData.lookup(client.getId(), client.getDisplayName(), 
+        				client.getOffice().getId(), client.getOffice().getName()));
+        	}
+        	retUser.setClients(clients);
+        }
+        
+        return retUser; 
     }
 
     private static final class AppUserMapper implements RowMapper<AppUserData> {
@@ -146,6 +162,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
             final String officeName = rs.getString("officeName");
             final Long staffId = JdbcSupport.getLong(rs, "staffId");
             final Boolean passwordNeverExpire = rs.getBoolean("passwordNeverExpires");
+            final Boolean isSelfServiceUser = rs.getBoolean("isSelfServiceUser");
             final Collection<RoleData> selectedRoles = this.roleReadPlatformService.retrieveAppUserRoles(id);
 
             final StaffData linkedStaff;
@@ -155,12 +172,12 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
                 linkedStaff = null;
             }
             return AppUserData.instance(id, username, email, officeId, officeName, firstname, lastname, null, selectedRoles, linkedStaff,
-                    passwordNeverExpire);
+                    passwordNeverExpire, isSelfServiceUser);
         }
 
         public String schema() {
             return " u.id as id, u.username as username, u.firstname as firstname, u.lastname as lastname, u.email as email, u.password_never_expires as passwordNeverExpires, "
-                    + " u.office_id as officeId, o.name as officeName, u.staff_id as staffId from m_appuser u "
+                    + " u.office_id as officeId, o.name as officeName, u.staff_id as staffId, u.is_self_service_user as isSelfServiceUser from m_appuser u "
                     + " join m_office o on o.id = u.office_id where o.hierarchy like ? and u.is_deleted=0 order by u.username";
         }
 
