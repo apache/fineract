@@ -786,10 +786,17 @@ public final class LoanApplicationTerms {
 
     private long calculatePeriodsInOneYear(final PaymentPeriodsInOneYearCalculator calculator) {
 
-        long periodsInOneYear = calculator.calculate(this.repaymentPeriodFrequencyType).longValue();
+        //check if daysInYears is set if so change periodsInOneYear to days set in db
+        long periodsInOneYear;
+        boolean daysInYearToUse = (this.repaymentPeriodFrequencyType.getCode().equalsIgnoreCase("periodFrequencyType.days") && !this.daysInYearType.getCode().equalsIgnoreCase("DaysInYearType.actual"));
+        if(daysInYearToUse){
+            periodsInOneYear = this.daysInYearType.getValue().longValue();
+        }else{
+            periodsInOneYear =   calculator.calculate(this.repaymentPeriodFrequencyType).longValue();
+        }
         switch (this.interestCalculationPeriodMethod) {
             case DAILY:
-                periodsInOneYear = calculator.calculate(PeriodFrequencyType.DAYS).longValue();
+                periodsInOneYear = (!this.daysInYearType.getCode().equalsIgnoreCase("DaysInYearType.actual")) ? this.daysInYearType.getValue().longValue() : calculator.calculate(PeriodFrequencyType.DAYS).longValue();
             break;
             case INVALID:
             break;
