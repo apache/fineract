@@ -37724,24 +37724,24 @@ Request Body:
   "countryCode":"KE",
   "validFrom":null,
   "validTo":null,
-  "components":
+  "componentDatas":
   [
     {
       "key":"Household",
-      "text":"Information about the household."
+      "text":"Information about the household.",
       "description":null,
       "sequenceNo":1
     }
-  ]
-  "questions":
+  ],
+  "questionDatas":
   [
     {
       "componentKey":"Household",
       "key":"Familiy members",
-      "text":"How many persons live in the household?"
+      "text":"How many persons live in the household?",
       "description":null,
       "sequenceNo":1,
-      "responses":
+      "responseDatas":
       [
         {
           "text":"1 to 3",
@@ -37761,7 +37761,8 @@ Request Body:
       ]
     }
   ]
-}							</code>
+}
+							</code>
 							<code class="method-response">
 200 OK
 							</code>
@@ -37784,50 +37785,52 @@ No Request Body
 							<code class="method-response">
 [
   {
-    "id":1
-    "key":"ppi-kenya-2010",
-    "name":"PPI Survey for Kenya, version 2010",
-    "description":null,
-    "countryCode":"KE",
-    "validFrom":"2015-11-25T00:00:00.000Z",
-    "validTo":"2115-12-31T23:59:59.999Z",
-    "components":
-    [
+    "id": 1,
+    "componentDatas": [
       {
-        "key":"Household",
-        "text":"Information about the household."
-        "description":null,
-        "sequenceNo":1
+        "id": 1,
+        "key": "Household",
+        "text": "Information about the household.",
+        "description": null,
+        "sequenceNo": 1
       }
-    ]
-    "questions":
-    [
+    ],
+    "questionDatas": [
       {
-        "componentKey":"Household",
-        "key":"Familiy members",
-        "text":"How many persons live in the household?"
-        "description":null,
-        "sequenceNo":1,
-        "responses":
-        [
+        "id": 1,
+        "responseDatas": [
           {
-            "text":"1 to 3",
-            "value":1,
-            "sequenceNo":1
+            "id": 1,
+            "text": "1 to 3",
+            "value": 1,
+            "sequenceNo": 1
           },
           {
-            "text":"3 to 7",
-            "value":5,
-            "sequenceNo":2
+            "id": 2,
+            "text": "3 to 7",
+            "value": 5,
+            "sequenceNo": 2
           },
           {
-            "text":"more than 7",
-            "value":13,
-            "sequenceNo":3
+            "id": 3,
+            "text": "more than 7",
+            "value": 13,
+            "sequenceNo": 3
           }
-        ]
+        ],
+        "componentKey": "Household",
+        "key": "Familiy members",
+        "text": "How many persons live in the household?",
+        "description": null,
+        "sequenceNo": 1
       }
-    ]
+    ],
+    "key": "ppi-kenya-2010",
+    "name": "PPI Survey for Kenya, version 2010",
+    "description": null,
+    "countryCode": "KE",
+    "validFrom": 1450047600000,
+    "validTo": 4607276399000
   }
 ]
 							</code>
@@ -37849,52 +37852,53 @@ No Request Body
 							</code>
 							<code class="method-response">
 {
-  "id":1
-  "key":"ppi-kenya-2010",
-  "name":"PPI Survey for Kenya, version 2010",
-  "description":null,
-  "countryCode":"KE",
-  "validFrom":"2015-11-25T00:00:00.000Z",
-  "validTo":"2115-12-31T23:59:59.999Z",
-  "components":
-  [
+  "id": 1,
+  "componentDatas": [
     {
-      "key":"Household",
-      "text":"Information about the household."
-      "description":null,
-      "sequenceNo":1
+      "id": 1,
+      "key": "Household",
+      "text": "Information about the household.",
+      "description": null,
+      "sequenceNo": 1
     }
-  ]
-  "questions":
-  [
+  ],
+  "questionDatas": [
     {
-      "componentKey":"Household",
-      "key":"Familiy members",
-      "text":"How many persons live in the household?"
-      "description":null,
-      "sequenceNo":1,
-      "responses":
-      [
+      "id": 1,
+      "responseDatas": [
         {
-          "text":"1 to 3",
-          "value":1,
-          "sequenceNo":1
+          "id": 1,
+          "text": "1 to 3",
+          "value": 1,
+          "sequenceNo": 1
         },
         {
-          "text":"3 to 7",
-          "value":5,
-          "sequenceNo":2
+          "id": 2,
+          "text": "3 to 7",
+          "value": 5,
+          "sequenceNo": 2
         },
         {
-          "text":"more than 7",
-          "value":13,
-          "sequenceNo":3
+          "id": 3,
+          "text": "more than 7",
+          "value": 13,
+          "sequenceNo": 3
         }
-      ]
+      ],
+      "componentKey": "Household",
+      "key": "Familiy members",
+      "text": "How many persons live in the household?",
+      "description": null,
+      "sequenceNo": 1
     }
-  ]
+  ],
+  "key": "ppi-kenya-2010",
+  "name": "PPI Survey for Kenya, version 2010",
+  "description": null,
+  "countryCode": "KE",
+  "validFrom": 1450047600000,
+  "validTo": 4607276399000
 }
-
 							</code>
 						</div>
 					</div>

@@ -34,7 +34,7 @@ public class SurveyMapper {
 
     public static Survey map(final SurveyData surveyData) {
         final Survey survey = new Survey();
-        survey.setComponents(SurveyMapper.mapComponentDatas(surveyData.getComponentDatas()));
+        survey.setComponents(SurveyMapper.mapComponentDatas(surveyData.getComponentDatas(), survey));
         survey.setQuestions(SurveyMapper.mapQuestionDatas(surveyData.getQuestionDatas(), survey));
         survey.setKey(surveyData.getKey());
         survey.setName(surveyData.getName());
@@ -48,18 +48,20 @@ public class SurveyMapper {
         if (components != null) {
             for (final Component component : components) {
                 componentDatas.add(new ComponentData(
-                        component.getKey(), component.getText(), component.getDescription(), component.getSequenceNo()
+                        component.getId(), component.getKey(), component.getText(), component.getDescription(),
+                        component.getSequenceNo()
                 ));
             }
         }
         return componentDatas;
     }
 
-    private static List<Component> mapComponentDatas(final List<ComponentData> componentDatas) {
+    private static List<Component> mapComponentDatas(final List<ComponentData> componentDatas, final Survey survey) {
         final List<Component> components = new ArrayList<>();
         if (componentDatas != null) {
             for (final ComponentData componentData : componentDatas) {
                 final Component component = new Component();
+                component.setSurvey(survey);
                 component.setKey(componentData.getKey());
                 component.setText(componentData.getText());
                 component.setDescription(componentData.getDescription());
@@ -74,8 +76,8 @@ public class SurveyMapper {
         final List<QuestionData> questionDatas = new ArrayList<>();
         if (questions != null) {
             for (final Question question : questions) {
-                questionDatas.add(new QuestionData(
-                    SurveyMapper.mapResponses(question.getResponses()), question.getComponentKey(), question.getKey(),
+                questionDatas.add(new QuestionData(question.getId(),
+                        SurveyMapper.mapResponses(question.getResponses()), question.getComponentKey(), question.getKey(),
                         question.getText(), question.getDescription(), question.getSequenceNo()
                 ));
             }
@@ -106,7 +108,7 @@ public class SurveyMapper {
         if (responses != null) {
             for (final Response response : responses) {
                 responseDatas.add(new ResponseData(
-                    response.getText(), response.getValue(), response.getSequenceNo()
+                    response.getId(), response.getText(), response.getValue(), response.getSequenceNo()
                 ));
             }
         }

@@ -42,28 +42,27 @@ public class SpmService {
         return this.surveyRepository.findOne(id);
     }
 
-    @Transactional
     public Survey createSurvey(final Survey survey) {
         this.securityContext.authenticatedUser();
 
-        final Survey previousSurvey = this.surveyRepository.findByKey(survey.getKey());
+        final Survey previousSurvey = this.surveyRepository.findByKey(survey.getKey(), new Date());
 
         if (previousSurvey != null) {
             this.deactivateSurvey(previousSurvey.getId());
         }
 
         // set valid from to start of today
-        final DateTime dateTime = DateTime
+        final DateTime validFrom = DateTime
                 .now()
                 .withHourOfDay(0)
                 .withMinuteOfHour(0)
                 .withSecondOfMinute(0)
                 .withMillisOfSecond(0);
 
-        survey.setValidFrom(dateTime.toDate());
+        survey.setValidFrom(validFrom.toDate());
 
         // set valid from to end in 100 years
-        dateTime
+        final DateTime validTo = validFrom
                 .withDayOfMonth(31)
                 .withMonthOfYear(12)
                 .withHourOfDay(23)
@@ -72,12 +71,11 @@ public class SpmService {
                 .withMillisOfSecond(999)
                 .plusYears(100);
 
-        survey.setValidTo(dateTime.toDate());
+        survey.setValidTo(validTo.toDate());
 
         return this.surveyRepository.save(survey);
     }
 
-    @Transactional
     public void deactivateSurvey(final Long id) {
         this.securityContext.authenticatedUser();
 

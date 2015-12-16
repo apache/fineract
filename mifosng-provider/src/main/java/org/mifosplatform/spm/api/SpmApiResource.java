@@ -14,6 +14,7 @@ import org.mifosplatform.spm.util.SurveyMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -38,6 +39,7 @@ public class SpmApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Transactional
     public List<SurveyData> fetchActiveSurveys() {
         this.securityContext.authenticatedUser();
 
@@ -58,6 +60,7 @@ public class SpmApiResource {
     @Path("/{id}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Transactional
     public SurveyData findSurvey(@PathParam("id") final Long id) {
         this.securityContext.authenticatedUser();
 
@@ -73,6 +76,7 @@ public class SpmApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Transactional
     public void createSurvey(final SurveyData surveyData) {
         this.securityContext.authenticatedUser();
 
@@ -85,6 +89,7 @@ public class SpmApiResource {
     @Path("/{id}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Transactional
     public void deactivateSurvey(@PathParam("id") final Long id) {
         this.securityContext.authenticatedUser();
 

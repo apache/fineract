@@ -7,6 +7,7 @@ package org.mifosplatform.spm.data;
 
 public class ResponseData {
 
+    private Long id;
     private String text;
     private Integer value;
     private Integer sequenceNo;
@@ -15,12 +16,17 @@ public class ResponseData {
         super();
     }
 
-    public ResponseData(final String text, final Integer value,
+    public ResponseData(final Long id, final String text, final Integer value,
                         final Integer sequenceNo) {
         super();
+        this.id = id;
         this.text = text;
         this.value = value;
         this.sequenceNo = sequenceNo;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getText() {

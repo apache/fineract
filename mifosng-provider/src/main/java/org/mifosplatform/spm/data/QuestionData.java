@@ -9,6 +9,7 @@ import java.util.List;
 
 public class QuestionData {
 
+    private Long id;
     private List<ResponseData> responseDatas;
     private String componentKey;
     private String key;
@@ -20,15 +21,20 @@ public class QuestionData {
         super();
     }
 
-    public QuestionData(final List<ResponseData> responseDatas, final String componentKey, final String key,
+    public QuestionData(final Long id, final List<ResponseData> responseDatas, final String componentKey, final String key,
                         final String text, final String description, final Integer sequenceNo) {
         super();
+        this.id = id;
         this.responseDatas = responseDatas;
         this.componentKey = componentKey;
         this.key = key;
         this.text = text;
         this.description = description;
         this.sequenceNo = sequenceNo;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public List<ResponseData> getResponseDatas() {
