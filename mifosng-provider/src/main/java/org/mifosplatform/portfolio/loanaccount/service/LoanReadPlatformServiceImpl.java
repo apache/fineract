@@ -1040,7 +1040,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             // update totals with details of fees charged during disbursement
             totalFeeChargesCharged = totalFeeChargesCharged.plus(disbursementPeriod.feeChargesDue());
             totalRepaymentExpected = totalRepaymentExpected.plus(disbursementPeriod.feeChargesDue());
-            totalRepayment = totalRepayment.plus(totalPaidFeeCharges);
+            totalRepayment = totalRepayment.plus(disbursementPeriod.feeChargesPaid());
             totalOutstanding = totalOutstanding.plus(disbursementPeriod.feeChargesDue()).minus(disbursementPeriod.feeChargesPaid());
 
             Integer loanTermInDays = Integer.valueOf(0);
