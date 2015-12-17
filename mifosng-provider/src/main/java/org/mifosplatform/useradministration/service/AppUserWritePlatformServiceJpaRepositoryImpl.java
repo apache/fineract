@@ -6,6 +6,7 @@
 package org.mifosplatform.useradministration.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,8 @@ import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
+import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.useradministration.api.AppUserApiConstant;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.useradministration.domain.AppUserPreviousPassword;
@@ -49,6 +52,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+
 @Service
 public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWritePlatformService {
 
@@ -63,12 +69,14 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     private final UserDataValidator fromApiJsonDeserializer;
     private final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository;
     private final StaffRepositoryWrapper staffRepositoryWrapper;
+    private final ClientRepository clientRepository;
 
     @Autowired
     public AppUserWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AppUserRepository appUserRepository,
             final UserDomainService userDomainService, final OfficeRepository officeRepository, final RoleRepository roleRepository,
             final PlatformPasswordEncoder platformPasswordEncoder, final UserDataValidator fromApiJsonDeserializer,
-            final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository, final StaffRepositoryWrapper staffRepositoryWrapper) {
+            final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository, final StaffRepositoryWrapper staffRepositoryWrapper,
+            final ClientRepository clientRepository) {
         this.context = context;
         this.appUserRepository = appUserRepository;
         this.userDomainService = userDomainService;
@@ -78,6 +86,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.appUserPreviewPasswordRepository = appUserPreviewPasswordRepository;
         this.staffRepositoryWrapper = staffRepositoryWrapper;
+        this.clientRepository = clientRepository;
     }
 
     @Transactional
@@ -108,8 +117,20 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             if (staffId != null) {
                 linkedStaff = this.staffRepositoryWrapper.findByOfficeWithNotFoundDetection(staffId, userOffice.getId());
             }
+            
+            Collection<Client> clients = null;
+            if(command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)
+            		&& command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER)
+            		&& command.hasParameter(AppUserConstants.CLIENTS)){
+            	JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
+            	Collection<Long> clientIds = new HashSet<>();
+            	for(JsonElement clientElement : clientsArray){
+            		clientIds.add(clientElement.getAsLong());
+            	}
+            	clients = this.clientRepository.findAll(clientIds);
+            }
 
-            appUser = AppUser.fromJson(userOffice, linkedStaff, allRoles, command);
+            appUser = AppUser.fromJson(userOffice, linkedStaff, allRoles, clients, command);
 
             final Boolean sendPasswordToEmail = command.booleanObjectValueOfParameterNamed("sendPasswordToEmail");
             this.userDomainService.create(appUser, sendPasswordToEmail);
@@ -151,8 +172,24 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             if (userToUpdate == null) { throw new UserNotFoundException(userId); }
 
             final AppUserPreviousPassword currentPasswordToSaveAsPreview = getCurrentPasswordToSaveAsPreview(userToUpdate, command);
+            
+            Collection<Client> clients = null;
+            boolean isSelfServiceUser = userToUpdate.isSelfServiceUser();
+            if(command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)){
+            	isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER); 
+            }
+            
+            if(isSelfServiceUser
+            		&& command.hasParameter(AppUserConstants.CLIENTS)){
+            	JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
+            	Collection<Long> clientIds = new HashSet<>();
+            	for(JsonElement clientElement : clientsArray){
+            		clientIds.add(clientElement.getAsLong());
+            	}
+            	clients = this.clientRepository.findAll(clientIds);
+            }
 
-            final Map<String, Object> changes = userToUpdate.update(command, this.platformPasswordEncoder);
+            final Map<String, Object> changes = userToUpdate.update(command, this.platformPasswordEncoder, clients);
 
             if (changes.containsKey("officeId")) {
                 final Long officeId = (Long) changes.get("officeId");
