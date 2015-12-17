@@ -323,9 +323,9 @@ CREATE TABLE IF NOT EXISTS `c_configuration` (
   `description` varchar(300) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.c_configuration: ~19 rows (approximately)
+-- Dumping data for table mifostenant-reference.c_configuration: ~20 rows (approximately)
 /*!40000 ALTER TABLE `c_configuration` DISABLE KEYS */;
 INSERT INTO `c_configuration` (`id`, `name`, `value`, `enabled`, `is_trap_door`, `description`) VALUES
 	(1, 'maker-checker', NULL, 0, 0, NULL),
@@ -417,25 +417,25 @@ CREATE TABLE IF NOT EXISTS `job` (
 -- Dumping data for table mifostenant-reference.job: ~19 rows (approximately)
 /*!40000 ALTER TABLE `job` DISABLE KEYS */;
 INSERT INTO `job` (`id`, `name`, `display_name`, `cron_expression`, `create_time`, `task_priority`, `group_name`, `previous_run_start_time`, `next_run_time`, `job_key`, `initializing_errorlog`, `is_active`, `currently_running`, `updates_allowed`, `scheduler_group`, `is_misfired`) VALUES
-	(1, 'Update loan Summary', 'Update loan Summary', '0 0 22 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, '2014-06-11 09:30:00', '2015-12-02 22:00:00', 'Update loan SummaryJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(2, 'Update Loan Arrears Ageing', 'Update Loan Arrears Ageing', '0 1 0 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, NULL, '2015-12-03 00:01:00', 'Update Loan Arrears AgeingJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(3, 'Update Loan Paid In Advance', 'Update Loan Paid In Advance', '0 5 0 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, NULL, '2015-12-03 00:05:00', 'Update Loan Paid In AdvanceJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(4, 'Apply Annual Fee For Savings', 'Apply Annual Fee For Savings', '0 20 22 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, '2014-06-11 09:50:00', '2015-12-02 22:20:00', 'Apply Annual Fee For SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(5, 'Apply Holidays To Loans', 'Apply Holidays To Loans', '0 0 12 * * ?', '2014-03-07 18:29:14', 5, NULL, '2014-03-24 12:00:04', '2015-12-03 12:00:00', 'Apply Holidays To LoansJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(6, 'Post Interest For Savings', 'Post Interest For Savings', '0 0 0 1/1 * ? *', '2014-03-07 18:29:21', 5, NULL, NULL, '2015-12-03 00:00:00', 'Post Interest For SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
-	(7, 'Transfer Fee For Loans From Savings', 'Transfer Fee For Loans From Savings', '0 1 0 1/1 * ? *', '2014-03-07 18:29:32', 5, NULL, NULL, '2015-12-03 00:01:00', 'Transfer Fee For Loans From SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(8, 'Pay Due Savings Charges', 'Pay Due Savings Charges', '0 0 12 * * ?', '2013-09-23 00:00:00', 5, NULL, '2014-03-24 12:00:04', '2015-12-03 12:00:00', 'Pay Due Savings ChargesJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(9, 'Update Accounting Running Balances', 'Update Accounting Running Balances', '0 1 0 1/1 * ? *', '2014-03-07 18:29:37', 5, NULL, NULL, '2015-12-03 00:01:00', 'Update Accounting Running BalancesJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(10, 'Execute Standing Instruction', 'Execute Standing Instruction', '0 0 0 1/1 * ? *', '2014-05-01 16:10:35', 5, NULL, NULL, '2015-12-03 00:00:00', 'Execute Standing InstructionJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(11, 'Add Accrual Transactions', 'Add Accrual Transactions', '0 1 0 1/1 * ? *', '2014-05-01 16:10:36', 3, NULL, NULL, '2015-12-03 00:01:00', 'Add Accrual TransactionsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(12, 'Apply penalty to overdue loans', 'Apply penalty to overdue loans', '0 0 0 1/1 * ? *', '2014-05-01 16:10:36', 5, NULL, NULL, '2015-12-03 00:00:00', 'Apply penalty to overdue loansJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(13, 'Update Non Performing Assets', 'Update Non Performing Assets', '0 0 0 1/1 * ? *', '2014-05-01 16:10:41', 5, NULL, NULL, '2015-12-03 00:00:00', 'Update Non Performing AssetsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(14, 'Transfer Interest To Savings', 'Transfer Interest To Savings', '0 2 0 1/1 * ? *', '2014-06-11 09:09:15', 4, NULL, NULL, '2015-12-03 00:02:00', 'Transfer Interest To SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
-	(15, 'Update Deposit Accounts Maturity details', 'Update Deposit Accounts Maturity details', '0 0 0 1/1 * ? *', '2014-06-11 09:09:15', 5, NULL, NULL, '2015-12-03 00:00:00', 'Update Deposit Accounts Maturity detailsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(16, 'Add Periodic Accrual Transactions', 'Add Periodic Accrual Transactions', '0 2 0 1/1 * ? *', '2014-10-14 16:19:45', 2, NULL, NULL, '2015-12-03 00:02:00', 'Add Periodic Accrual TransactionsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(17, 'Recalculate Interest For Loans', 'Recalculate Interest For Loans', '0 1 0 1/1 * ? *', '2014-10-14 16:19:55', 4, NULL, NULL, '2015-12-03 00:01:00', 'Recalculate Interest For LoansJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(18, 'Generate Mandatory Savings Schedule', 'Generate Mandatory Savings Schedule', '0 5 0 1/1 * ? *', '2015-04-16 02:28:43', 5, NULL, NULL, '2015-12-03 00:05:00', 'Generate Mandatory Savings ScheduleJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(19, 'Generate Loan Loss Provisioning', 'Generate Loan Loss Provisioning', '0 0 0 1/1 * ? *', '2015-10-20 19:57:58', 5, NULL, NULL, '2015-12-03 00:00:00', 'Generate Loan Loss ProvisioningJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0);
+	(1, 'Update loan Summary', 'Update loan Summary', '0 0 22 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, '2014-06-11 09:30:00', '2015-12-17 22:00:00', 'Update loan SummaryJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(2, 'Update Loan Arrears Ageing', 'Update Loan Arrears Ageing', '0 1 0 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, NULL, '2015-12-18 00:01:00', 'Update Loan Arrears AgeingJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(3, 'Update Loan Paid In Advance', 'Update Loan Paid In Advance', '0 5 0 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, NULL, '2015-12-18 00:05:00', 'Update Loan Paid In AdvanceJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(4, 'Apply Annual Fee For Savings', 'Apply Annual Fee For Savings', '0 20 22 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, '2014-06-11 09:50:00', '2015-12-17 22:20:00', 'Apply Annual Fee For SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(5, 'Apply Holidays To Loans', 'Apply Holidays To Loans', '0 0 12 * * ?', '2014-03-07 18:29:14', 5, NULL, '2014-03-24 12:00:04', '2015-12-17 12:00:00', 'Apply Holidays To LoansJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(6, 'Post Interest For Savings', 'Post Interest For Savings', '0 0 0 1/1 * ? *', '2014-03-07 18:29:21', 5, NULL, NULL, '2015-12-18 00:00:00', 'Post Interest For SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
+	(7, 'Transfer Fee For Loans From Savings', 'Transfer Fee For Loans From Savings', '0 1 0 1/1 * ? *', '2014-03-07 18:29:32', 5, NULL, NULL, '2015-12-18 00:01:00', 'Transfer Fee For Loans From SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(8, 'Pay Due Savings Charges', 'Pay Due Savings Charges', '0 0 12 * * ?', '2013-09-23 00:00:00', 5, NULL, '2014-03-24 12:00:04', '2015-12-17 12:00:00', 'Pay Due Savings ChargesJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(9, 'Update Accounting Running Balances', 'Update Accounting Running Balances', '0 1 0 1/1 * ? *', '2014-03-07 18:29:37', 5, NULL, NULL, '2015-12-18 00:01:00', 'Update Accounting Running BalancesJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(10, 'Execute Standing Instruction', 'Execute Standing Instruction', '0 0 0 1/1 * ? *', '2014-05-01 16:10:35', 5, NULL, NULL, '2015-12-18 00:00:00', 'Execute Standing InstructionJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(11, 'Add Accrual Transactions', 'Add Accrual Transactions', '0 1 0 1/1 * ? *', '2014-05-01 16:10:36', 3, NULL, NULL, '2015-12-18 00:01:00', 'Add Accrual TransactionsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(12, 'Apply penalty to overdue loans', 'Apply penalty to overdue loans', '0 0 0 1/1 * ? *', '2014-05-01 16:10:36', 5, NULL, NULL, '2015-12-18 00:00:00', 'Apply penalty to overdue loansJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(13, 'Update Non Performing Assets', 'Update Non Performing Assets', '0 0 0 1/1 * ? *', '2014-05-01 16:10:41', 5, NULL, NULL, '2015-12-18 00:00:00', 'Update Non Performing AssetsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(14, 'Transfer Interest To Savings', 'Transfer Interest To Savings', '0 2 0 1/1 * ? *', '2014-06-11 09:09:15', 4, NULL, NULL, '2015-12-18 00:02:00', 'Transfer Interest To SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
+	(15, 'Update Deposit Accounts Maturity details', 'Update Deposit Accounts Maturity details', '0 0 0 1/1 * ? *', '2014-06-11 09:09:15', 5, NULL, NULL, '2015-12-18 00:00:00', 'Update Deposit Accounts Maturity detailsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(16, 'Add Periodic Accrual Transactions', 'Add Periodic Accrual Transactions', '0 2 0 1/1 * ? *', '2014-10-14 16:19:45', 2, NULL, NULL, '2015-12-18 00:02:00', 'Add Periodic Accrual TransactionsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(17, 'Recalculate Interest For Loans', 'Recalculate Interest For Loans', '0 1 0 1/1 * ? *', '2014-10-14 16:19:55', 4, NULL, NULL, '2015-12-18 00:01:00', 'Recalculate Interest For LoansJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(18, 'Generate Mandatory Savings Schedule', 'Generate Mandatory Savings Schedule', '0 5 0 1/1 * ? *', '2015-04-16 02:28:43', 5, NULL, NULL, '2015-12-18 00:05:00', 'Generate Mandatory Savings ScheduleJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(19, 'Generate Loan Loss Provisioning', 'Generate Loan Loss Provisioning', '0 0 0 1/1 * ? *', '2015-10-20 19:57:58', 5, NULL, NULL, '2015-12-18 00:00:00', 'Generate Loan Loss ProvisioningJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0);
 /*!40000 ALTER TABLE `job` ENABLE KEYS */;
 
 
@@ -726,6 +726,7 @@ CREATE TABLE IF NOT EXISTS `m_appuser` (
   `enabled` bit(1) NOT NULL,
   `last_time_password_updated` date NOT NULL,
   `password_never_expires` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'define if the password, should be check for validity period or not',
+  `is_self_service_user` bit(1) NOT NULL DEFAULT b'0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `username_org` (`username`),
   KEY `FKB3D587CE0DD567A` (`office_id`),
@@ -737,12 +738,12 @@ CREATE TABLE IF NOT EXISTS `m_appuser` (
 
 -- Dumping data for table mifostenant-reference.m_appuser: ~5 rows (approximately)
 /*!40000 ALTER TABLE `m_appuser` DISABLE KEYS */;
-INSERT INTO `m_appuser` (`id`, `is_deleted`, `office_id`, `staff_id`, `username`, `firstname`, `lastname`, `password`, `email`, `firsttime_login_remaining`, `nonexpired`, `nonlocked`, `nonexpired_credentials`, `enabled`, `last_time_password_updated`, `password_never_expires`) VALUES
-	(1, 0, 1, NULL, 'mifos', 'App', 'Administrator', '5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a', 'demomfi@mifos.org', b'0', b'1', b'1', b'1', b'1', '2014-03-07', 0),
-	(2, 0, 1, NULL, 'adama', 'Adam', 'A', '08a5c6ee6e7361aa153b4c8620d31bcedef514238a69c0f30f05fe460663cbc6', 'adama@123.com', b'0', b'1', b'1', b'1', b'1', '2014-03-07', 0),
-	(4, 0, 2, NULL, 'benb', 'Ben', 'B', '19d327dc34e2f7b889b571ad9651355e8cce87493611847c70fabf1fcfa914c8', 'benb@123.com', b'0', b'1', b'1', b'1', b'1', '2014-03-07', 0),
-	(5, 0, 3, NULL, 'janej', 'Jane', 'J', 'f37ddcab2b9cfb015d94becdda719361ce13df943058cbf3130db468c288acb9', 'janej@123.com', b'0', b'1', b'1', b'1', b'1', '2014-03-07', 0),
-	(6, 0, 1, NULL, 'system', 'system', 'system', '5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a', 'demomfi@mifos.org', b'0', b'1', b'1', b'1', b'1', '2014-03-07', 0);
+INSERT INTO `m_appuser` (`id`, `is_deleted`, `office_id`, `staff_id`, `username`, `firstname`, `lastname`, `password`, `email`, `firsttime_login_remaining`, `nonexpired`, `nonlocked`, `nonexpired_credentials`, `enabled`, `last_time_password_updated`, `password_never_expires`, `is_self_service_user`) VALUES
+	(1, 0, 1, NULL, 'mifos', 'App', 'Administrator', '5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a', 'demomfi@mifos.org', b'0', b'1', b'1', b'1', b'1', '2014-03-07', 0, b'0'),
+	(2, 0, 1, NULL, 'adama', 'Adam', 'A', '08a5c6ee6e7361aa153b4c8620d31bcedef514238a69c0f30f05fe460663cbc6', 'adama@123.com', b'0', b'1', b'1', b'1', b'1', '2014-03-07', 0, b'0'),
+	(4, 0, 2, NULL, 'benb', 'Ben', 'B', '19d327dc34e2f7b889b571ad9651355e8cce87493611847c70fabf1fcfa914c8', 'benb@123.com', b'0', b'1', b'1', b'1', b'1', '2014-03-07', 0, b'0'),
+	(5, 0, 3, NULL, 'janej', 'Jane', 'J', 'f37ddcab2b9cfb015d94becdda719361ce13df943058cbf3130db468c288acb9', 'janej@123.com', b'0', b'1', b'1', b'1', b'1', '2014-03-07', 0, b'0'),
+	(6, 0, 1, NULL, 'system', 'system', 'system', '5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a', 'demomfi@mifos.org', b'0', b'1', b'1', b'1', b'1', '2014-03-07', 0, b'0');
 /*!40000 ALTER TABLE `m_appuser` ENABLE KEYS */;
 
 
@@ -2998,7 +2999,7 @@ CREATE TABLE IF NOT EXISTS `m_permission` (
   UNIQUE KEY `code` (`code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=695 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.m_permission: ~741 rows (approximately)
+-- Dumping data for table mifostenant-reference.m_permission: ~773 rows (approximately)
 /*!40000 ALTER TABLE `m_permission` DISABLE KEYS */;
 INSERT INTO `m_permission` (`id`, `grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES
 	(1, 'special', 'ALL_FUNCTIONS', NULL, NULL, 0),
@@ -4464,6 +4465,24 @@ CREATE TABLE IF NOT EXISTS `m_savings_product_charge` (
 /*!40000 ALTER TABLE `m_savings_product_charge` ENABLE KEYS */;
 
 
+-- Dumping structure for table mifostenant-reference.m_selfservice_user_client_mapping
+DROP TABLE IF EXISTS `m_selfservice_user_client_mapping`;
+CREATE TABLE IF NOT EXISTS `m_selfservice_user_client_mapping` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `appuser_id` bigint(20) NOT NULL,
+  `client_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `appuser_id_client_id` (`appuser_id`,`client_id`),
+  KEY `m_selfservice_client_id` (`client_id`),
+  CONSTRAINT `m_selfservice_appuser_id` FOREIGN KEY (`appuser_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `m_selfservice_client_id` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_selfservice_user_client_mapping: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_selfservice_user_client_mapping` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_selfservice_user_client_mapping` ENABLE KEYS */;
+
+
 -- Dumping structure for table mifostenant-reference.m_staff
 DROP TABLE IF EXISTS `m_staff`;
 CREATE TABLE IF NOT EXISTS `m_staff` (
@@ -4521,6 +4540,130 @@ CREATE TABLE IF NOT EXISTS `m_staff_assignment_history` (
 -- Dumping data for table mifostenant-reference.m_staff_assignment_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_staff_assignment_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_staff_assignment_history` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-reference.m_surveys
+DROP TABLE IF EXISTS `m_surveys`;
+CREATE TABLE IF NOT EXISTS `m_surveys` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `a_key` varchar(32) NOT NULL,
+  `a_name` varchar(255) NOT NULL,
+  `description` varchar(4000) DEFAULT NULL,
+  `country_code` varchar(2) NOT NULL,
+  `valid_from` datetime DEFAULT NULL,
+  `valid_to` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_surveys: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_surveys` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_surveys` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-reference.m_survey_components
+DROP TABLE IF EXISTS `m_survey_components`;
+CREATE TABLE IF NOT EXISTS `m_survey_components` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `survey_id` bigint(20) NOT NULL,
+  `a_key` varchar(32) NOT NULL,
+  `a_text` varchar(255) NOT NULL,
+  `description` varchar(4000) DEFAULT NULL,
+  `sequence_no` int(4) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `survey_id` (`survey_id`),
+  CONSTRAINT `m_survey_components_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `m_surveys` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_survey_components: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_survey_components` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_survey_components` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-reference.m_survey_lookup_tables
+DROP TABLE IF EXISTS `m_survey_lookup_tables`;
+CREATE TABLE IF NOT EXISTS `m_survey_lookup_tables` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `survey_id` bigint(20) NOT NULL,
+  `a_key` varchar(255) NOT NULL,
+  `description` int(4) DEFAULT NULL,
+  `value_from` int(4) NOT NULL,
+  `value_to` int(4) NOT NULL,
+  `score` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `survey_id` (`survey_id`),
+  CONSTRAINT `m_survey_lookup_tables_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `m_surveys` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_survey_lookup_tables: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_survey_lookup_tables` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_survey_lookup_tables` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-reference.m_survey_questions
+DROP TABLE IF EXISTS `m_survey_questions`;
+CREATE TABLE IF NOT EXISTS `m_survey_questions` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `survey_id` bigint(20) NOT NULL,
+  `component_key` varchar(32) DEFAULT NULL,
+  `a_key` varchar(32) NOT NULL,
+  `a_text` varchar(255) NOT NULL,
+  `description` varchar(4000) DEFAULT NULL,
+  `sequence_no` int(4) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `survey_id` (`survey_id`),
+  CONSTRAINT `m_survey_questions_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `m_surveys` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_survey_questions: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_survey_questions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_survey_questions` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-reference.m_survey_responses
+DROP TABLE IF EXISTS `m_survey_responses`;
+CREATE TABLE IF NOT EXISTS `m_survey_responses` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `question_id` bigint(20) NOT NULL,
+  `a_text` varchar(255) NOT NULL,
+  `a_value` int(4) NOT NULL,
+  `sequence_no` int(4) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `question_id` (`question_id`),
+  CONSTRAINT `m_survey_responses_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `m_survey_questions` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_survey_responses: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_survey_responses` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_survey_responses` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-reference.m_survey_scorecards
+DROP TABLE IF EXISTS `m_survey_scorecards`;
+CREATE TABLE IF NOT EXISTS `m_survey_scorecards` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `survey_id` bigint(20) NOT NULL,
+  `question_id` bigint(20) NOT NULL,
+  `response_id` bigint(20) NOT NULL,
+  `staff_id` bigint(20) NOT NULL,
+  `client_id` bigint(20) NOT NULL,
+  `created_on` datetime DEFAULT NULL,
+  `a_value` int(4) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `survey_id` (`survey_id`),
+  KEY `question_id` (`question_id`),
+  KEY `response_id` (`response_id`),
+  KEY `staff_id` (`staff_id`),
+  KEY `client_id` (`client_id`),
+  CONSTRAINT `m_survey_scorecards_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `m_surveys` (`id`),
+  CONSTRAINT `m_survey_scorecards_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `m_survey_questions` (`id`),
+  CONSTRAINT `m_survey_scorecards_ibfk_3` FOREIGN KEY (`response_id`) REFERENCES `m_survey_responses` (`id`),
+  CONSTRAINT `m_survey_scorecards_ibfk_4` FOREIGN KEY (`staff_id`) REFERENCES `m_staff` (`id`),
+  CONSTRAINT `m_survey_scorecards_ibfk_5` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_survey_scorecards: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_survey_scorecards` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_survey_scorecards` ENABLE KEYS */;
 
 
 -- Dumping structure for table mifostenant-reference.m_tellers
@@ -4888,7 +5031,7 @@ CREATE TABLE IF NOT EXISTS `schema_version` (
   KEY `schema_version_s_idx` (`success`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Dumping data for table mifostenant-reference.schema_version: ~322 rows (approximately)
+-- Dumping data for table mifostenant-reference.schema_version: ~373 rows (approximately)
 /*!40000 ALTER TABLE `schema_version` DISABLE KEYS */;
 INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `description`, `type`, `script`, `checksum`, `installed_by`, `installed_on`, `execution_time`, `success`) VALUES
 	(1, 1, '1', 'mifosplatform-core-ddl-latest', 'SQL', 'V1__mifosplatform-core-ddl-latest.sql', -1957145051, 'root', '2014-03-08 02:28:38', 10710, 1),
@@ -5107,6 +5250,7 @@ INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `desc
 	(28, 28, '28', 'accounting-abstractions-and-autoposting', 'SQL', 'V28__accounting-abstractions-and-autoposting.sql', -966431980, 'root', '2014-03-08 02:28:53', 556, 1),
 	(293, 293, '280', 'spm framework initial tables', 'SQL', 'V280__spm_framework_initial_tables.sql', -1638980235, 'root', '2015-12-02 16:07:45', 630, 1),
 	(294, 294, '281', 'add configuration param backdate-penalties', 'SQL', 'V281__add_configuration_param_backdate-penalties.sql', -45520299, 'root', '2015-12-02 16:07:45', 45, 1),
+	(295, 295, '282', 'CustomerSelfService', 'SQL', 'V282__CustomerSelfService.sql', -51763400, 'root', '2015-12-17 10:17:34', 255, 1),
 	(29, 29, '29', 'add-support-for-annual-fees-on-savings', 'SQL', 'V29__add-support-for-annual-fees-on-savings.sql', 992227725, 'root', '2014-03-08 02:28:55', 1556, 1),
 	(3, 3, '3', 'mifosx-permissions-and-authorisation-utf8', 'SQL', 'V3__mifosx-permissions-and-authorisation-utf8.sql', 1922951887, 'root', '2014-03-08 02:28:38', 110, 1),
 	(30, 30, '30', 'add-referenceNumber-to-acc gl journal entry', 'SQL', 'V30__add-referenceNumber-to-acc_gl_journal_entry.sql', 2079970797, 'root', '2014-03-08 02:28:55', 327, 1),

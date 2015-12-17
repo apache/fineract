@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 17 Dec 2015 - 15.12.2.RELEASE
 1. 02 Dec 2015 - 15.12.1.RELEASE
 1. 18 Nov 2015 - 15.11.2.RELEASE
 1. 04 Nov 2015 - 15.11.1.RELEASE
@@ -81,7 +82,33 @@ Releases
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
 
-15.12.1.RELEASE
+15.12.2.RELEASE
+=============
+This release introduces Customer Self Service APIs.
+This release also includes few bug fixes as mentioned below.
+
+Platform & API
+
+New Features & Improvements
+Customer Self Service APIs
+ - [MIFOSX-1666] - Users as Clients
+ - [MIFOSX-2247] - Read List of Savings Accounts  
+ - [MIFOSX-2246] - Read List of Loan Accounts  
+ - [MIFOSX-2245] - User login and account management  
+ - [MIFOSX-2243] - Manage User login accounts  
+ - [MIFOSX-2248] - Read Loan details  
+ - [MIFOSX-2249] - Read Savings details  
+ - [MIFOSX-2370] - API for account transfer  
+
+Bugs
+ - Changes to SPM framework fetch type
+ - [MIFOSX-2371] - Wrong Installment Calculation for equal installment declining balance - Hard coded number of days on year.
+ - [MIFOSX-2372] - Charge incorrectly applied in 'Update loan Summary' scheduled job
+ - [MIFOSX-2384] - After making loan repayment the the Total paid is not displaying properly if charge is attached to that loan.
+ - [MIFOSX-2385] - When request data of floating rate, server side send JSON data with locale specific format of date
+ - [MIFOSX-2388] - Frequency type isn't loaded during modifying loan application
+
+ 15.12.1.RELEASE
 =============
 This release includes first part of Social Performance Management Framework.
 This release also includes few bug fixes as mentioned below.
