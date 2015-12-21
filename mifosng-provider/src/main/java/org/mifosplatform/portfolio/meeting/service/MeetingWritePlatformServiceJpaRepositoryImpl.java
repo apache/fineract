@@ -11,6 +11,7 @@ import static org.mifosplatform.portfolio.meeting.MeetingApiConstants.calendarId
 import static org.mifosplatform.portfolio.meeting.MeetingApiConstants.clientIdParamName;
 import static org.mifosplatform.portfolio.meeting.MeetingApiConstants.clientsAttendanceParamName;
 import static org.mifosplatform.portfolio.meeting.MeetingApiConstants.meetingDateParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.isTransactionDateOnNonMeetingDateParamName;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -81,11 +82,12 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
         this.meetingDataValidator.validateForCreate(command);
 
         final Date meetingDate = command.DateValueOfParameterNamed(meetingDateParamName);
+        final Boolean isTransactionDateOnNonMeetingDate = false;
 
         try {
             final CalendarInstance calendarInstance = getCalendarInstance(command);
             // create new meeting
-            final Meeting newMeeting = Meeting.createNew(calendarInstance, meetingDate);
+            final Meeting newMeeting = Meeting.createNew(calendarInstance, meetingDate, isTransactionDateOnNonMeetingDate);
 
             final Collection<ClientAttendance> clientsAttendance = getClientsAttendance(newMeeting, command);
             if (clientsAttendance != null && !clientsAttendance.isEmpty()) {
@@ -261,13 +263,14 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
     @Override
     public void updateCollectionSheetAttendance(final JsonCommand command) {
         final Date meetingDate = command.DateValueOfParameterNamed(transactionDateParamName);
+        final Boolean isTransactionDateOnNonMeetingDate = command.booleanPrimitiveValueOfParameterNamed(isTransactionDateOnNonMeetingDateParamName);
 
         try {
             final CalendarInstance calendarInstance = getCalendarInstance(command);
             final Meeting meeting = this.meetingRepository.findByCalendarInstanceIdAndMeetingDate(calendarInstance.getId(), meetingDate);
 
             // create new meeting
-            final Meeting newMeeting = (meeting != null) ? meeting : Meeting.createNew(calendarInstance, meetingDate);
+            final Meeting newMeeting = (meeting != null) ? meeting : Meeting.createNew(calendarInstance, meetingDate, isTransactionDateOnNonMeetingDate);
 
             final Collection<ClientAttendance> clientsAttendance = getClientsAttendance(newMeeting, command);
             if (clientsAttendance != null && !clientsAttendance.isEmpty()) {
