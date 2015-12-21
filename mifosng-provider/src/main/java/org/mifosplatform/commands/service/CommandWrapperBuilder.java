@@ -30,8 +30,8 @@ public class CommandWrapperBuilder {
     private Long templateId;
 
     public CommandWrapper build() {
-        return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName, this.entityName,
-                this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId);
+        return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
+                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId);
     }
 
     public CommandWrapperBuilder withLoanId(final Long withLoanId) {
@@ -1337,7 +1337,7 @@ public class CommandWrapperBuilder {
         this.actionName = "UPDATE";
         this.entityName = "CALENDAR";
         this.entityId = calendarId;
-       	this.groupId = supportedEntityId;
+        this.groupId = supportedEntityId;
         this.href = "/" + supportedEntityType + "/" + supportedEntityId + "/calendars/" + calendarId;
         return this;
     }
@@ -1815,8 +1815,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder saveOrUpdateAttendance(final Long entityId, final String supportedEntityType,
-            final Long supportedEntityId) {
+    public CommandWrapperBuilder saveOrUpdateAttendance(final Long entityId, final String supportedEntityType, final Long supportedEntityId) {
         this.actionName = "SAVEORUPDATEATTENDANCE";
         this.entityName = "MEETING";
         this.entityId = entityId;
@@ -2457,7 +2456,7 @@ public class CommandWrapperBuilder {
         this.href = "/clients/" + clientId + "/transactions/" + transactionId + "?command=undo";
         return this;
     }
-    
+
     public CommandWrapperBuilder createProvisioningCategory() {
         this.actionName = "CREATE";
         this.entityName = "PROVISIONCATEGORY";
@@ -2465,7 +2464,7 @@ public class CommandWrapperBuilder {
         this.href = "/provisioningcategory";
         return this;
     }
-    
+
     public CommandWrapperBuilder updateProvisioningCategory(final Long cateoryId) {
         this.actionName = "UPDATE";
         this.entityName = "PROVISIONCATEGORY";
@@ -2473,7 +2472,7 @@ public class CommandWrapperBuilder {
         this.href = "/provisioningcategory/" + cateoryId;
         return this;
     }
-    
+
     public CommandWrapperBuilder deleteProvisioningCategory(final Long categoryId) {
         this.actionName = "DELETE";
         this.entityName = "PROVISIONCATEGORY";
@@ -2481,7 +2480,7 @@ public class CommandWrapperBuilder {
         this.href = "/provisioningcategory/" + categoryId;
         return this;
     }
-    
+
     public CommandWrapperBuilder createProvisioningCriteria() {
         this.actionName = "CREATE";
         this.entityName = "PROVISIONCRITERIA";
@@ -2489,7 +2488,7 @@ public class CommandWrapperBuilder {
         this.href = "/provisioningcriteria";
         return this;
     }
-    
+
     public CommandWrapperBuilder updateProvisioningCriteria(final Long criteriaId) {
         this.actionName = "UPDATE";
         this.entityName = "PROVISIONCRITERIA";
@@ -2497,7 +2496,7 @@ public class CommandWrapperBuilder {
         this.href = "/provisioningcriteria/" + criteriaId;
         return this;
     }
-    
+
     public CommandWrapperBuilder deleteProvisioningCriteria(final Long criteriaId) {
         this.actionName = "DELETE";
         this.entityName = "PROVISIONCRITERIA";
@@ -2505,7 +2504,7 @@ public class CommandWrapperBuilder {
         this.href = "/provisioningcriteria/" + criteriaId;
         return this;
     }
-    
+
     public CommandWrapperBuilder createProvisioningEntries() {
         this.actionName = "CREATE";
         this.entityName = "PROVISIONENTRIES";
@@ -2513,20 +2512,20 @@ public class CommandWrapperBuilder {
         this.href = "/provisioningentries";
         return this;
     }
-    
+
     public CommandWrapperBuilder createProvisioningJournalEntries(final Long entryId) {
         this.actionName = "CREATE";
         this.entityName = "PROVISIONJOURNALENTRIES";
         this.entityId = entryId;
-        this.href = "/provisioningentries/"+entryId;
+        this.href = "/provisioningentries/" + entryId;
         return this;
     }
-    
+
     public CommandWrapperBuilder reCreateProvisioningEntries(final Long entryId) {
         this.actionName = "RECREATE";
         this.entityName = "PROVISIONENTRIES";
         this.entityId = entryId;
-        this.href = "/provisioningentries/"+entryId;
+        this.href = "/provisioningentries/" + entryId;
         return this;
     }
 
@@ -2542,7 +2541,25 @@ public class CommandWrapperBuilder {
         this.actionName = "UPDATE";
         this.entityName = "FLOATINGRATE";
         this.entityId = floatingRateId;
-        this.href = "/floatingrates/"+floatingRateId;
+        this.href = "/floatingrates/" + floatingRateId;
+        return this;
+    }
+
+    public CommandWrapperBuilder createScheduleExceptions(final Long loanId) {
+        this.actionName = "CREATESCHEDULEEXCEPTIONS";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/schedule";
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteScheduleExceptions(final Long loanId) {
+        this.actionName = "DELETESCHEDULEEXCEPTIONS";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/schedule";
         return this;
     }
 }

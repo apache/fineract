@@ -200,7 +200,10 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lfr.min_differential_lending_rate as minDifferentialLendingRate, "
                     + "lfr.default_differential_lending_rate as defaultDifferentialLendingRate, "
                     + "lfr.max_differential_lending_rate as maxDifferentialLendingRate, "
-                    + "lfr.is_floating_interest_rate_calculation_allowed as isFloatingInterestRateCalculationAllowed "
+                    + "lfr.is_floating_interest_rate_calculation_allowed as isFloatingInterestRateCalculationAllowed, "
+                    + "lp.allow_variabe_installments as isVariableIntallmentsAllowed, "
+                    + "lvi.minimum_gap as minimumGap, "
+                    + "lvi.maximum_gap as maximumGap "
                     + " from m_product_loan lp "
                     + " left join m_fund f on f.id = lp.fund_id "
                     + " left join m_product_loan_recalculation_details lpr on lpr.product_id=lp.id "
@@ -209,7 +212,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + " left join m_product_loan_configurable_attributes lca on lca.loan_product_id = lp.id "
                     + " left join m_product_loan_floating_rates as lfr on lfr.loan_product_id = lp.id "
                     + " left join m_floating_rates as fr on lfr.floating_rates_id = fr.id "
+                    + " left join m_product_loan_variable_installment_config as lvi on lvi.loan_product_id = lp.id "
                     + " join m_currency curr on curr.code = lp.currency_code";
+
         }
 
         @Override
@@ -268,7 +273,11 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final BigDecimal defaultDifferentialLendingRate = rs.getBigDecimal("defaultDifferentialLendingRate");
             final BigDecimal maxDifferentialLendingRate = rs.getBigDecimal("maxDifferentialLendingRate");
             final boolean isFloatingInterestRateCalculationAllowed = rs.getBoolean("isFloatingInterestRateCalculationAllowed");
-            
+
+            final boolean isVariableIntallmentsAllowed = rs.getBoolean("isVariableIntallmentsAllowed");
+            final Integer minimumGap = rs.getInt("minimumGap");
+            final Integer maximumGap = rs.getInt("maximumGap");
+
             final int repaymentFrequencyTypeId = JdbcSupport.getInteger(rs, "repaymentPeriodFrequency");
             final EnumOptionData repaymentFrequencyType = LoanEnumerations.repaymentFrequencyType(repaymentFrequencyTypeId);
 
@@ -341,8 +350,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                 final Integer compoundingFrequencyEnumValue = JdbcSupport.getInteger(rs, "compoundingFrequencyTypeEnum");
                 EnumOptionData compoundingFrequencyType = null;
                 if (compoundingFrequencyEnumValue != null) {
-                    compoundingFrequencyType = LoanEnumerations
-                            .interestRecalculationFrequencyType(compoundingFrequencyEnumValue);
+                    compoundingFrequencyType = LoanEnumerations.interestRecalculationFrequencyType(compoundingFrequencyEnumValue);
                 }
                 final Integer compoundingInterval = JdbcSupport.getInteger(rs, "compoundingInterval");
                 final LocalDate compoundingFrequencyDate = JdbcSupport.getLocalDate(rs, "compoundingFrequencyDate");
@@ -397,8 +405,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     interestRecalculationData, minimumDaysBetweenDisbursalAndFirstRepayment, holdGuaranteeFunds, loanProductGuaranteeData,
                     principalThresholdForLastInstallment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount,
                     installmentAmountInMultiplesOf, allowAttributeOverrides, isLinkedToFloatingInterestRates, floatingRateId,
-                    floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate, 
-                    maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed);
+                    floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
+                    maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableIntallmentsAllowed, minimumGap,
+                    maximumGap);
         }
     }
 

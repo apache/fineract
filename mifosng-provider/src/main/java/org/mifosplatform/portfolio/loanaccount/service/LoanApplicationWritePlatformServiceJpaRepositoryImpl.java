@@ -476,15 +476,15 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     loanId); }
 
             final String productIdParamName = "productId";
-            LoanProduct newLoanProduct = null; 
+            LoanProduct newLoanProduct = null;
             if (command.isChangeInLongParameterNamed(productIdParamName, existingLoanApplication.loanProduct().getId())) {
                 final Long productId = command.longValueOfParameterNamed(productIdParamName);
                 newLoanProduct = this.loanProductRepository.findOne(productId);
                 if (newLoanProduct == null) { throw new LoanProductNotFoundException(productId); }
             }
-            
-            LoanProduct loanProductForValidations = newLoanProduct == null? existingLoanApplication.loanProduct(): newLoanProduct;
-            
+
+            LoanProduct loanProductForValidations = newLoanProduct == null ? existingLoanApplication.loanProduct() : newLoanProduct;
+
             this.fromApiJsonDeserializer.validateForModify(command.json(), loanProductForValidations, existingLoanApplication);
 
             checkClientOrGroupActive(existingLoanApplication);
@@ -495,21 +495,23 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 LoanChargeData chargeData = new LoanChargeData(charge.getId(), charge.getDueLocalDate(), charge.amountOrPercentage());
                 chargesMap.put(charge.getId(), chargeData);
             }
-            Set<LoanDisbursementDetails> disbursementDetails = this.loanAssembler.fetchDisbursementData(command.parsedJson().getAsJsonObject());
+            Set<LoanDisbursementDetails> disbursementDetails = this.loanAssembler.fetchDisbursementData(command.parsedJson()
+                    .getAsJsonObject());
 
             /**
              * Stores all charges which are passed in during modify loan
              * application
              **/
-            final Set<LoanCharge> possiblyModifedLoanCharges = this.loanChargeAssembler.fromParsedJson(command.parsedJson(),disbursementDetails);
+            final Set<LoanCharge> possiblyModifedLoanCharges = this.loanChargeAssembler.fromParsedJson(command.parsedJson(),
+                    disbursementDetails);
             /** Boolean determines if any charge has been modified **/
             boolean isChargeModified = false;
 
-            Set<Charge> newTrancheChages = this.loanChargeAssembler.getNewLoanTrancheCharges(command.parsedJson()) ;
+            Set<Charge> newTrancheChages = this.loanChargeAssembler.getNewLoanTrancheCharges(command.parsedJson());
             for (Charge charge : newTrancheChages) {
-                    existingLoanApplication.addTrancheLoanCharge(charge) ;
+                existingLoanApplication.addTrancheLoanCharge(charge);
             }
-            
+
             /**
              * If there are any charges already present, which are now not
              * passed in as a part of the request, deem the charges as modified
@@ -579,19 +581,19 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                         cycleNumber = this.loanReadPlatformService.retriveLoanCounter(clientId, newLoanProduct.getId());
                     } else if (groupId != null) {
                         cycleNumber = this.loanReadPlatformService.retriveLoanCounter(groupId, AccountType.GROUP.getValue(),
-                        		newLoanProduct.getId());
+                                newLoanProduct.getId());
                     }
                     this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(command.parsedJson(), baseDataValidator,
-                    		newLoanProduct, cycleNumber);
+                            newLoanProduct, cycleNumber);
                 } else {
                     this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(command.parsedJson(), baseDataValidator,
-                    		newLoanProduct);
+                            newLoanProduct);
                 }
-                if(newLoanProduct.isLinkedToFloatingInterestRate()){
-                	existingLoanApplication.getLoanProductRelatedDetail().updateForFloatingInterestRates();
-                }else{
-                	existingLoanApplication.setInterestRateDifferential(null);
-                	existingLoanApplication.setIsFloatingInterestRate(null);
+                if (newLoanProduct.isLinkedToFloatingInterestRate()) {
+                    existingLoanApplication.getLoanProductRelatedDetail().updateForFloatingInterestRates();
+                } else {
+                    existingLoanApplication.setInterestRateDifferential(null);
+                    existingLoanApplication.setIsFloatingInterestRate(null);
                 }
                 if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
             }
@@ -644,7 +646,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             if (changes.containsKey(chargesParamName)) {
                 existingLoanApplication.updateLoanCharges(possiblyModifedLoanCharges);
             }
-            
+
             if (changes.containsKey("recalculateLoanSchedule")) {
                 changes.remove("recalculateLoanSchedule");
 
@@ -655,7 +657,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 existingLoanApplication.updateLoanSchedule(loanSchedule, currentUser);
                 existingLoanApplication.recalculateAllCharges();
             }
-
 
             this.fromApiJsonDeserializer.validateLoanTermAndRepaidEveryValues(existingLoanApplication.getTermFrequency(),
                     existingLoanApplication.getTermPeriodFrequencyType(), productRelatedDetail.getNumberOfRepayments(),
@@ -723,7 +724,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     isModified = true;
                 } else {
                     final SavingsAccount savingsAccount = accountAssociations.linkedSavingsAccount();
-                    if (savingsAccount == null || savingsAccount.getId() != savingsAccountId) {
+                    if (savingsAccount == null || !savingsAccount.getId().equals(savingsAccountId)) {
                         isModified = true;
                     }
                 }
@@ -891,7 +892,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             // If loan approved amount less than loan demanded amount, then need
             // to recompute the schedule
-            if (changes.containsKey(LoanApiConstants.approvedLoanAmountParameterName) || changes.containsKey("recalculateLoanSchedule")) {
+            if (changes.containsKey(LoanApiConstants.approvedLoanAmountParameterName) || changes.containsKey("recalculateLoanSchedule")
+                    || changes.containsKey("expectedDisbursementDate")) {
                 ScheduleGeneratorDTO scheduleGeneratorDTO = loanAccountDomainService.buildScheduleGeneratorDTO(loan);
                 loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
             }
@@ -1082,7 +1084,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             for (LoanRepaymentScheduleInstallment installment : installments) {
                 if (installment.getId() == null) {
                     this.repaymentScheduleInstallmentRepository.save(installment);
-                } 
+                }
             }
             this.loanRepository.saveAndFlush(loan);
         } catch (final DataIntegrityViolationException e) {

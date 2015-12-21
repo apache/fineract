@@ -14,4 +14,6 @@ public interface LoanScheduleCalculationPlatformService {
     LoanScheduleModel calculateLoanSchedule(JsonQuery query, Boolean validateParams);
 
     void updateFutureSchedule(LoanScheduleData loanScheduleData, Long loanId);
+
+    LoanScheduleData generateLoanScheduleForVariableInstallmentRequest(Long loanId, String json);
 }

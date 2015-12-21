@@ -124,11 +124,11 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             Guarantor guarantor = null;
             for (final Guarantor avilableGuarantor : existGuarantorList) {
                 if (entityId != null && avilableGuarantor.getEntityId() != null && avilableGuarantor.getEntityId().equals(entityId)
-                        && avilableGuarantor.getGurantorType() == guarantorTypeId && avilableGuarantor.isActive()) {
+                        && avilableGuarantor.getGurantorType().equals(guarantorTypeId) && avilableGuarantor.isActive()) {
                     if (guarantorCommand.getSavingsId() == null || avilableGuarantor.hasGuarantor(guarantorCommand.getSavingsId())) {
                         /** Get the right guarantor based on guarantorType **/
                         String defaultUserMessage = null;
-                        if (guarantorTypeId == GuarantorType.STAFF.getValue()) {
+                        if (guarantorTypeId.equals(GuarantorType.STAFF.getValue())) {
                             defaultUserMessage = this.staffRepositoryWrapper.findOneWithNotFoundDetection(entityId).displayName();
                         } else {
                             defaultUserMessage = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
@@ -196,7 +196,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             if (guarantorType.isCustomer() || guarantorType.isStaff()) {
                 final Long entityId = guarantorCommand.getEntityId();
                 for (final Guarantor guarantor : existGuarantorList) {
-                    if (guarantor.getEntityId() == entityId && guarantor.getGurantorType() == guarantorTypeId
+                    if (guarantor.getEntityId().equals(entityId) && guarantor.getGurantorType().equals(guarantorTypeId)
                             && !guarantorForUpdate.getId().equals(guarantor.getId())) {
                         String defaultUserMessage = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
                         defaultUserMessage = defaultUserMessage + " is already exist as a guarantor for this loan";

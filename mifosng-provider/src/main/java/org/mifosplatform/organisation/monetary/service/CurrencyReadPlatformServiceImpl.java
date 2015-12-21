@@ -50,6 +50,14 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
         return this.jdbcTemplate.query(sql, this.currencyRowMapper, new Object[] {});
     }
 
+    @Override
+    public CurrencyData retrieveCurrency(final String code) {
+
+        final String sql = "select " + this.currencyRowMapper.schema() + " from m_currency c  where c.code = ? order by c.name";
+
+        return this.jdbcTemplate.queryForObject(sql, this.currencyRowMapper, new Object[] { code });
+    }
+
     private static final class CurrencyMapper implements RowMapper<CurrencyData> {
 
         @Override

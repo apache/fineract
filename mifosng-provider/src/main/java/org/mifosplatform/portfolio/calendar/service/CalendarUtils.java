@@ -45,7 +45,42 @@ public class CalendarUtils {
     public static LocalDate getNextRecurringDate(final String recurringRule, final LocalDate seedDate, final LocalDate startDate) {
         final Recur recur = CalendarUtils.getICalRecur(recurringRule);
         if (recur == null) { return null; }
-        return getNextRecurringDate(recur, seedDate, startDate);
+        LocalDate nextDate = getNextRecurringDate(recur, seedDate, startDate);
+        nextDate = adjustDate(nextDate, seedDate, getMeetingPeriodFrequencyType(recurringRule));
+        return nextDate;
+    }
+
+    public static LocalDate adjustDate(final LocalDate date, final LocalDate seedDate, final PeriodFrequencyType frequencyType) {
+        LocalDate adjustedVal = date;
+        if (frequencyType.isMonthly() && seedDate.getDayOfMonth() > 28) {
+            switch (date.getMonthOfYear()) {
+                case 2:
+                    if (date.year().isLeap()) {
+                        adjustedVal = date.dayOfMonth().setCopy(29);
+                    }
+                break;
+                case 4:
+                case 6:
+                case 9:
+                case 11:
+                    if (seedDate.getDayOfMonth() > 30) {
+                        adjustedVal = date.dayOfMonth().setCopy(30);
+                    } else {
+                        adjustedVal = date.dayOfMonth().setCopy(seedDate.getDayOfMonth());
+                    }
+                break;
+                case 1:
+                case 3:
+                case 5:
+                case 7:
+                case 8:
+                case 10:
+                case 12:
+                    adjustedVal = date.dayOfMonth().setCopy(seedDate.getDayOfMonth());
+                break;
+            }
+        }
+        return adjustedVal;
     }
 
     private static LocalDate getNextRecurringDate(final Recur recur, final LocalDate seedDate, final LocalDate startDate) {
@@ -105,17 +140,18 @@ public class CalendarUtils {
 
         final Value value = new Value(Value.DATE.getValue());
         final DateList recurringDates = recur.getDates(seed, periodStart, periodEnd, value, maxCount);
-        return convertToLocalDateList(recurringDates);
+        return convertToLocalDateList(recurringDates, seedDate, getMeetingPeriodFrequencyType(recur));
     }
 
-    private static Collection<LocalDate> convertToLocalDateList(final DateList dates) {
+    private static Collection<LocalDate> convertToLocalDateList(final DateList dates, final LocalDate seedDate,
+            final PeriodFrequencyType frequencyType) {
 
         final Collection<LocalDate> recurringDates = new ArrayList<>();
 
         for (@SuppressWarnings("rawtypes")
         final Iterator iterator = dates.iterator(); iterator.hasNext();) {
             final Date date = (Date) iterator.next();
-            recurringDates.add(new LocalDate(date));
+            recurringDates.add(adjustDate(new LocalDate(date), seedDate, frequencyType));
         }
 
         return recurringDates;
@@ -259,6 +295,10 @@ public class CalendarUtils {
 
     public static PeriodFrequencyType getMeetingPeriodFrequencyType(final String recurringRule) {
         final Recur recur = CalendarUtils.getICalRecur(recurringRule);
+        return getMeetingPeriodFrequencyType(recur);
+    }
+
+    private static PeriodFrequencyType getMeetingPeriodFrequencyType(final Recur recur) {
         PeriodFrequencyType meetingFrequencyType = PeriodFrequencyType.INVALID;
         if (recur.getFrequency().equals(Recur.DAILY)) {
             meetingFrequencyType = PeriodFrequencyType.DAYS;
