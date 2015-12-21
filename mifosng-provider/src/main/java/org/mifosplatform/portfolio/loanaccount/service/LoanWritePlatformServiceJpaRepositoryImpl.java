@@ -779,11 +779,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
-
+        final Boolean isHolidayValidationDone = false;
+        final HolidayDetailDTO holidayDetailDto = null;
         boolean isAccountTransfer = false;
         final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
         this.loanAccountDomainService.makeRepayment(loan, commandProcessingResultBuilder, transactionDate, transactionAmount,
-                paymentDetail, noteText, txnExternalId, isRecoveryRepayment, isAccountTransfer);
+                paymentDetail, noteText, txnExternalId, isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
 
         return commandProcessingResultBuilder.withCommandId(command.commandId()) //
                 .withLoanId(loanId) //
@@ -802,6 +803,29 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (repaymentCommand == null) { return changes; }
         List<Long> transactionIds = new ArrayList<>();
         boolean isAccountTransfer = false;
+        HolidayDetailDTO holidayDetailDTO = null;
+        Boolean isHolidayValidationDone = false;
+        final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
+        for(final SingleRepaymentCommand singleLoanRepaymentCommand : repaymentCommand){
+        	if(singleLoanRepaymentCommand != null){
+        		Loan loans = this.loanRepository.findOne(singleLoanRepaymentCommand.getLoanId());
+                final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loans.getOfficeId(),
+                		singleLoanRepaymentCommand.getTransactionDate().toDate());
+                final WorkingDays workingDays = this.workingDaysRepository.findOne();
+                final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
+                boolean isHolidayEnabled = false;
+                isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+                holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays, allowTransactionsOnHoliday,
+                        allowTransactionsOnNonWorkingDay);
+                loans.validateRepaymentDateIsOnHoliday(singleLoanRepaymentCommand.getTransactionDate(), holidayDetailDTO.isAllowTransactionsOnHoliday(),
+                        holidayDetailDTO.getHolidays());
+                loans.validateRepaymentDateIsOnNonWorkingDay(singleLoanRepaymentCommand.getTransactionDate(), holidayDetailDTO.getWorkingDays(),
+                        holidayDetailDTO.isAllowTransactionsOnNonWorkingDay());
+                isHolidayValidationDone = true;
+                break;
+        	}
+        	
+        }
         for (final SingleRepaymentCommand singleLoanRepaymentCommand : repaymentCommand) {
             if (singleLoanRepaymentCommand != null) {
                 final Loan loan = this.loanAssembler.assembleFrom(singleLoanRepaymentCommand.getLoanId());
@@ -812,7 +836,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
                 LoanTransaction loanTransaction = this.loanAccountDomainService.makeRepayment(loan, commandProcessingResultBuilder,
                         bulkRepaymentCommand.getTransactionDate(), singleLoanRepaymentCommand.getTransactionAmount(), paymentDetail,
-                        bulkRepaymentCommand.getNote(), null, isRecoveryRepayment, isAccountTransfer);
+                        bulkRepaymentCommand.getNote(), null, isRecoveryRepayment, isAccountTransfer, holidayDetailDTO, isHolidayValidationDone);
                 transactionIds.add(loanTransaction.getId());
             }
         }
