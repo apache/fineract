@@ -87,7 +87,9 @@ public final class LoanProductDataValidator {
             LoanProductConstants.minimumGuaranteeFromOwnFundsParamName, LoanProductConstants.principalThresholdForLastInstallmentParamName,
             LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName, LoanProductConstants.canDefineEmiAmountParamName,
             LoanProductConstants.installmentAmountInMultiplesOfParamName,
-            LoanProductConstants.preClosureInterestCalculationStrategyParamName, LoanProductConstants.allowAttributeOverridesParamName));
+            LoanProductConstants.preClosureInterestCalculationStrategyParamName, LoanProductConstants.allowAttributeOverridesParamName,
+            LoanProductConstants.allowVariableInstallmentsParamName, LoanProductConstants.minimumGapBetweenInstallments,
+            LoanProductConstants.maximumGapBetweenInstallments));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -290,58 +292,74 @@ public final class LoanProductDataValidator {
             }
         }
 
-        //interest rates
-        if(this.fromApiJsonHelper.parameterExists("isLinkedToFloatingInterestRates", element)
-        		&& this.fromApiJsonHelper.extractBooleanNamed("isLinkedToFloatingInterestRates", element) == true){
-            if(this.fromApiJsonHelper.parameterExists("interestRatePerPeriod", element)){
-                baseDataValidator.reset().parameter("interestRatePerPeriod").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.true", 
-                		"interestRatePerPeriod param is not supported when isLinkedToFloatingInterestRates is true");
+        // interest rates
+        if (this.fromApiJsonHelper.parameterExists("isLinkedToFloatingInterestRates", element)
+                && this.fromApiJsonHelper.extractBooleanNamed("isLinkedToFloatingInterestRates", element) == true) {
+            if (this.fromApiJsonHelper.parameterExists("interestRatePerPeriod", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("interestRatePerPeriod")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.true",
+                                "interestRatePerPeriod param is not supported when isLinkedToFloatingInterestRates is true");
             }
-        	
-            if(this.fromApiJsonHelper.parameterExists("minInterestRatePerPeriod", element)){
-                baseDataValidator.reset().parameter("minInterestRatePerPeriod").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.true", 
-                		"minInterestRatePerPeriod param is not supported when isLinkedToFloatingInterestRates is true");
+
+            if (this.fromApiJsonHelper.parameterExists("minInterestRatePerPeriod", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("minInterestRatePerPeriod")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.true",
+                                "minInterestRatePerPeriod param is not supported when isLinkedToFloatingInterestRates is true");
             }
-        	
-            if(this.fromApiJsonHelper.parameterExists("maxInterestRatePerPeriod", element)){
-                baseDataValidator.reset().parameter("maxInterestRatePerPeriod").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.true", 
-                		"maxInterestRatePerPeriod param is not supported when isLinkedToFloatingInterestRates is true");
+
+            if (this.fromApiJsonHelper.parameterExists("maxInterestRatePerPeriod", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("maxInterestRatePerPeriod")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.true",
+                                "maxInterestRatePerPeriod param is not supported when isLinkedToFloatingInterestRates is true");
             }
-        	
-            if(this.fromApiJsonHelper.parameterExists("interestRateFrequencyType", element)){
-                baseDataValidator.reset().parameter("interestRateFrequencyType").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.true", 
-                		"interestRateFrequencyType param is not supported when isLinkedToFloatingInterestRates is true");
+
+            if (this.fromApiJsonHelper.parameterExists("interestRateFrequencyType", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("interestRateFrequencyType")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.true",
+                                "interestRateFrequencyType param is not supported when isLinkedToFloatingInterestRates is true");
             }
-        	if((interestType == null || interestType != InterestMethod.DECLINING_BALANCE.getValue()) 
-        			|| (isInterestRecalculationEnabled == null || isInterestRecalculationEnabled == false)){
-                baseDataValidator.reset().parameter("isLinkedToFloatingInterestRates").failWithCode("supported.only.for.declining.balance.interest.recalculation.enabled", 
-                		"Floating interest rates are supported only for declining balance and interest recalculation enabled loan products");
-        	}
-        	
-            final Integer floatingRatesId = this.fromApiJsonHelper.extractIntegerNamed("floatingRatesId", element,
-                    Locale.getDefault());
+            if ((interestType == null || interestType != InterestMethod.DECLINING_BALANCE.getValue())
+                    || (isInterestRecalculationEnabled == null || isInterestRecalculationEnabled == false)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("isLinkedToFloatingInterestRates")
+                        .failWithCode("supported.only.for.declining.balance.interest.recalculation.enabled",
+                                "Floating interest rates are supported only for declining balance and interest recalculation enabled loan products");
+            }
+
+            final Integer floatingRatesId = this.fromApiJsonHelper.extractIntegerNamed("floatingRatesId", element, Locale.getDefault());
             baseDataValidator.reset().parameter("floatingRatesId").value(floatingRatesId).notNull();
-            
-            final BigDecimal interestRateDifferential = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRateDifferential", element);
-            baseDataValidator.reset().parameter("interestRateDifferential").value(interestRateDifferential).notNull().zeroOrPositiveAmount();
+
+            final BigDecimal interestRateDifferential = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRateDifferential",
+                    element);
+            baseDataValidator.reset().parameter("interestRateDifferential").value(interestRateDifferential).notNull()
+                    .zeroOrPositiveAmount();
 
             final String minDifferentialLendingRateParameterName = "minDifferentialLendingRate";
-            BigDecimal minDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minDifferentialLendingRateParameterName,
-                    element);
+            BigDecimal minDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                    minDifferentialLendingRateParameterName, element);
             baseDataValidator.reset().parameter(minDifferentialLendingRateParameterName).value(minDifferentialLendingRate).notNull()
-                        .zeroOrPositiveAmount();
+                    .zeroOrPositiveAmount();
 
             final String defaultDifferentialLendingRateParameterName = "defaultDifferentialLendingRate";
-            BigDecimal defaultDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(defaultDifferentialLendingRateParameterName,
-                    element);
-            baseDataValidator.reset().parameter(defaultDifferentialLendingRateParameterName).value(defaultDifferentialLendingRate).notNull()
-                        .zeroOrPositiveAmount();
+            BigDecimal defaultDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                    defaultDifferentialLendingRateParameterName, element);
+            baseDataValidator.reset().parameter(defaultDifferentialLendingRateParameterName).value(defaultDifferentialLendingRate)
+                    .notNull().zeroOrPositiveAmount();
 
             final String maxDifferentialLendingRateParameterName = "maxDifferentialLendingRate";
-            BigDecimal maxDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(maxDifferentialLendingRateParameterName,
-                    element);
+            BigDecimal maxDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                    maxDifferentialLendingRateParameterName, element);
             baseDataValidator.reset().parameter(maxDifferentialLendingRateParameterName).value(maxDifferentialLendingRate).notNull()
-                        .zeroOrPositiveAmount();
+                    .zeroOrPositiveAmount();
 
             if (defaultDifferentialLendingRate != null && defaultDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
                 if (minDifferentialLendingRate != null && minDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
@@ -349,57 +367,76 @@ public final class LoanProductDataValidator {
                             .notLessThanMin(minDifferentialLendingRate);
                 }
             }
-            
+
             if (maxDifferentialLendingRate != null && maxDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
                 if (minDifferentialLendingRate != null && minDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
                     baseDataValidator.reset().parameter("maxDifferentialLendingRate").value(maxDifferentialLendingRate)
                             .notLessThanMin(minDifferentialLendingRate);
                 }
             }
-            
+
             if (maxDifferentialLendingRate != null && maxDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
                 if (defaultDifferentialLendingRate != null && defaultDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
                     baseDataValidator.reset().parameter("maxDifferentialLendingRate").value(maxDifferentialLendingRate)
                             .notLessThanMin(defaultDifferentialLendingRate);
                 }
             }
-            
+
             final Boolean isFloatingInterestRateCalculationAllowed = this.fromApiJsonHelper.extractBooleanNamed(
-            		"isFloatingInterestRateCalculationAllowed", element);
-            baseDataValidator.reset().parameter("isFloatingInterestRateCalculationAllowed")
-                    .value(isFloatingInterestRateCalculationAllowed).notNull().isOneOfTheseValues(true, false);
+                    "isFloatingInterestRateCalculationAllowed", element);
+            baseDataValidator.reset().parameter("isFloatingInterestRateCalculationAllowed").value(isFloatingInterestRateCalculationAllowed)
+                    .notNull().isOneOfTheseValues(true, false);
         } else {
-            if(this.fromApiJsonHelper.parameterExists("floatingRatesId", element)){
-                baseDataValidator.reset().parameter("floatingRatesId").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false", 
-                		"floatingRatesId param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
+            if (this.fromApiJsonHelper.parameterExists("floatingRatesId", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("floatingRatesId")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false",
+                                "floatingRatesId param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
             }
-        	
-            if(this.fromApiJsonHelper.parameterExists("interestRateDifferential", element)){
-                baseDataValidator.reset().parameter("interestRateDifferential").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false", 
-                		"interestRateDifferential param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
+
+            if (this.fromApiJsonHelper.parameterExists("interestRateDifferential", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("interestRateDifferential")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false",
+                                "interestRateDifferential param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
             }
-        	
-            if(this.fromApiJsonHelper.parameterExists("minDifferentialLendingRate", element)){
-                baseDataValidator.reset().parameter("minDifferentialLendingRate").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false", 
-                		"minDifferentialLendingRate param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
+
+            if (this.fromApiJsonHelper.parameterExists("minDifferentialLendingRate", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("minDifferentialLendingRate")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false",
+                                "minDifferentialLendingRate param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
             }
-        	
-            if(this.fromApiJsonHelper.parameterExists("defaultDifferentialLendingRate", element)){
-                baseDataValidator.reset().parameter("defaultDifferentialLendingRate").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false", 
-                		"defaultDifferentialLendingRate param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
+
+            if (this.fromApiJsonHelper.parameterExists("defaultDifferentialLendingRate", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("defaultDifferentialLendingRate")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false",
+                                "defaultDifferentialLendingRate param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
             }
-        	
-            if(this.fromApiJsonHelper.parameterExists("maxDifferentialLendingRate", element)){
-                baseDataValidator.reset().parameter("maxDifferentialLendingRate").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false", 
-                		"maxDifferentialLendingRate param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
+
+            if (this.fromApiJsonHelper.parameterExists("maxDifferentialLendingRate", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("maxDifferentialLendingRate")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false",
+                                "maxDifferentialLendingRate param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
             }
-        	
-            if(this.fromApiJsonHelper.parameterExists("isFloatingInterestRateCalculationAllowed", element)){
-                baseDataValidator.reset().parameter("isFloatingInterestRateCalculationAllowed").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false", 
-                		"isFloatingInterestRateCalculationAllowed param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
+
+            if (this.fromApiJsonHelper.parameterExists("isFloatingInterestRateCalculationAllowed", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("isFloatingInterestRateCalculationAllowed")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false",
+                                "isFloatingInterestRateCalculationAllowed param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
             }
-        	
-            final BigDecimal interestRatePerPeriod = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element);
+
+            final BigDecimal interestRatePerPeriod = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod",
+                    element);
             baseDataValidator.reset().parameter("interestRatePerPeriod").value(interestRatePerPeriod).notNull().zeroOrPositiveAmount();
 
             final String minInterestRatePerPeriodParameterName = "minInterestRatePerPeriod";
@@ -441,7 +478,6 @@ public final class LoanProductDataValidator {
                     Locale.getDefault());
             baseDataValidator.reset().parameter("interestRateFrequencyType").value(interestRateFrequencyType).notNull().inMinMaxRange(0, 3);
         }
-
 
         // Guarantee Funds
         Boolean holdGuaranteeFunds = false;
@@ -563,7 +599,56 @@ public final class LoanProductDataValidator {
 
         validateLoanConfigurableAttributes(baseDataValidator, element);
 
+        validateVariableInstallmentSettings(baseDataValidator, element);
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void validateVariableInstallmentSettings(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.allowVariableInstallmentsParamName, element)
+                && this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.allowVariableInstallmentsParamName, element)) {
+
+            Long minimumGapBetweenInstallments = null;
+            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.minimumGapBetweenInstallments, element)) {
+                minimumGapBetweenInstallments = this.fromApiJsonHelper.extractLongNamed(LoanProductConstants.minimumGapBetweenInstallments,
+                        element);
+                baseDataValidator.reset().parameter(LoanProductConstants.minimumGapBetweenInstallments)
+                        .value(minimumGapBetweenInstallments).notNull();
+            } else {
+                baseDataValidator
+                        .reset()
+                        .parameter(LoanProductConstants.minimumGapBetweenInstallments)
+                        .failWithCode("is.mandatory.when.allowVariableInstallments.is.true",
+                                "minimumGap param is mandatory when allowVariableInstallments is true");
+            }
+
+            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.maximumGapBetweenInstallments, element)) {
+                final Long maximumGapBetweenInstallments = this.fromApiJsonHelper.extractLongNamed(
+                        LoanProductConstants.maximumGapBetweenInstallments, element);
+                baseDataValidator.reset().parameter(LoanProductConstants.minimumGapBetweenInstallments)
+                        .value(maximumGapBetweenInstallments).notNull();
+                baseDataValidator.reset().parameter(LoanProductConstants.maximumGapBetweenInstallments)
+                        .value(maximumGapBetweenInstallments).notNull().longGreaterThanNumber(minimumGapBetweenInstallments);
+            }
+
+        } else {
+            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.minimumGapBetweenInstallments, element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter(LoanProductConstants.minimumGapBetweenInstallments)
+                        .failWithCode("not.supported.when.allowVariableInstallments.is.false",
+                                "minimumGap param is not supported when allowVariableInstallments is not supplied or false");
+            }
+
+            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.maximumGapBetweenInstallments, element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter(LoanProductConstants.maximumGapBetweenInstallments)
+                        .failWithCode("not.supported.when.allowVariableInstallments.is.false",
+                                "maximumGap param is not supported when allowVariableInstallments is not supplied or false");
+            }
+
+        }
     }
 
     private void validateLoanConfigurableAttributes(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
@@ -752,13 +837,13 @@ public final class LoanProductDataValidator {
                                 LoanProductConstants.recalculationCompoundingFrequencyIntervalParameterName, element)) {
                     final Integer recurrenceInterval = this.fromApiJsonHelper.extractIntegerNamed(
                             LoanProductConstants.recalculationCompoundingFrequencyIntervalParameterName, element, Locale.getDefault());
-                    Integer repaymentEvery =  null;
+                    Integer repaymentEvery = null;
                     if (loanProduct == null) {
                         repaymentEvery = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentEvery", element);
                     } else {
                         repaymentEvery = loanProduct.getLoanProductRelatedDetail().getRepayEvery();
                     }
-                    
+
                     baseDataValidator.reset().parameter(LoanProductConstants.recalculationCompoundingFrequencyIntervalParameterName)
                             .value(recurrenceInterval).notNull().integerInMultiplesOfNumber(repaymentEvery);
                 }
@@ -989,82 +1074,99 @@ public final class LoanProductDataValidator {
             }
         }
 
-        //interest rates
+        // interest rates
         boolean isLinkedToFloatingInterestRates = loanProduct.isLinkedToFloatingInterestRate();
-        if(this.fromApiJsonHelper.parameterExists("isLinkedToFloatingInterestRates", element)){
-        	isLinkedToFloatingInterestRates = this.fromApiJsonHelper.extractBooleanNamed("isLinkedToFloatingInterestRates", element);
+        if (this.fromApiJsonHelper.parameterExists("isLinkedToFloatingInterestRates", element)) {
+            isLinkedToFloatingInterestRates = this.fromApiJsonHelper.extractBooleanNamed("isLinkedToFloatingInterestRates", element);
         }
-        if(isLinkedToFloatingInterestRates){
-            if(this.fromApiJsonHelper.parameterExists("interestRatePerPeriod", element)){
-                baseDataValidator.reset().parameter("interestRatePerPeriod").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.true", 
-                		"interestRatePerPeriod param is not supported when isLinkedToFloatingInterestRates is true");
+        if (isLinkedToFloatingInterestRates) {
+            if (this.fromApiJsonHelper.parameterExists("interestRatePerPeriod", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("interestRatePerPeriod")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.true",
+                                "interestRatePerPeriod param is not supported when isLinkedToFloatingInterestRates is true");
             }
-        	
-            if(this.fromApiJsonHelper.parameterExists("minInterestRatePerPeriod", element)){
-                baseDataValidator.reset().parameter("minInterestRatePerPeriod").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.true", 
-                		"minInterestRatePerPeriod param is not supported when isLinkedToFloatingInterestRates is true");
+
+            if (this.fromApiJsonHelper.parameterExists("minInterestRatePerPeriod", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("minInterestRatePerPeriod")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.true",
+                                "minInterestRatePerPeriod param is not supported when isLinkedToFloatingInterestRates is true");
             }
-        	
-            if(this.fromApiJsonHelper.parameterExists("maxInterestRatePerPeriod", element)){
-                baseDataValidator.reset().parameter("maxInterestRatePerPeriod").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.true", 
-                		"maxInterestRatePerPeriod param is not supported when isLinkedToFloatingInterestRates is true");
+
+            if (this.fromApiJsonHelper.parameterExists("maxInterestRatePerPeriod", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("maxInterestRatePerPeriod")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.true",
+                                "maxInterestRatePerPeriod param is not supported when isLinkedToFloatingInterestRates is true");
             }
-        	
-            if(this.fromApiJsonHelper.parameterExists("interestRateFrequencyType", element)){
-                baseDataValidator.reset().parameter("interestRateFrequencyType").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.true", 
-                		"interestRateFrequencyType param is not supported when isLinkedToFloatingInterestRates is true");
+
+            if (this.fromApiJsonHelper.parameterExists("interestRateFrequencyType", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("interestRateFrequencyType")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.true",
+                                "interestRateFrequencyType param is not supported when isLinkedToFloatingInterestRates is true");
             }
-            
-            Integer interestType = this.fromApiJsonHelper.parameterExists("interestType", element)
-            		? this.fromApiJsonHelper.extractIntegerNamed("interestType", element, Locale.getDefault())
-            		: loanProduct.getLoanProductRelatedDetail().getInterestMethod().getValue();
-        	if((interestType == null || interestType != InterestMethod.DECLINING_BALANCE.getValue()) 
-        			|| (isInterestRecalculationEnabled == null || isInterestRecalculationEnabled == false)){
-                baseDataValidator.reset().parameter("isLinkedToFloatingInterestRates").failWithCode("supported.only.for.declining.balance.interest.recalculation.enabled", 
-                		"Floating interest rates are supported only for declining balance and interest recalculation enabled loan products");
-        	}
-        	
-        	Long floatingRatesId = loanProduct.getFloatingRates() == null? null: loanProduct.getFloatingRates().getFloatingRate().getId(); 
-        	if(this.fromApiJsonHelper.parameterExists("floatingRatesId", element)){
+
+            Integer interestType = this.fromApiJsonHelper.parameterExists("interestType", element) ? this.fromApiJsonHelper
+                    .extractIntegerNamed("interestType", element, Locale.getDefault()) : loanProduct.getLoanProductRelatedDetail()
+                    .getInterestMethod().getValue();
+            if ((interestType == null || interestType != InterestMethod.DECLINING_BALANCE.getValue())
+                    || (isInterestRecalculationEnabled == null || isInterestRecalculationEnabled == false)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("isLinkedToFloatingInterestRates")
+                        .failWithCode("supported.only.for.declining.balance.interest.recalculation.enabled",
+                                "Floating interest rates are supported only for declining balance and interest recalculation enabled loan products");
+            }
+
+            Long floatingRatesId = loanProduct.getFloatingRates() == null ? null : loanProduct.getFloatingRates().getFloatingRate().getId();
+            if (this.fromApiJsonHelper.parameterExists("floatingRatesId", element)) {
                 floatingRatesId = this.fromApiJsonHelper.extractLongNamed("floatingRatesId", element);
-        	}
+            }
             baseDataValidator.reset().parameter("floatingRatesId").value(floatingRatesId).notNull();
 
-            BigDecimal interestRateDifferential = loanProduct.getFloatingRates() == null? null: loanProduct.getFloatingRates().getInterestRateDifferential(); 
-            if(this.fromApiJsonHelper.parameterExists("interestRateDifferential", element)){
+            BigDecimal interestRateDifferential = loanProduct.getFloatingRates() == null ? null : loanProduct.getFloatingRates()
+                    .getInterestRateDifferential();
+            if (this.fromApiJsonHelper.parameterExists("interestRateDifferential", element)) {
                 interestRateDifferential = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRateDifferential", element);
-        	}
-            baseDataValidator.reset().parameter("interestRateDifferential").value(interestRateDifferential).notNull().zeroOrPositiveAmount();
+            }
+            baseDataValidator.reset().parameter("interestRateDifferential").value(interestRateDifferential).notNull()
+                    .zeroOrPositiveAmount();
 
             final String minDifferentialLendingRateParameterName = "minDifferentialLendingRate";
-            BigDecimal minDifferentialLendingRate = loanProduct.getFloatingRates() == null
-            		? null:loanProduct.getFloatingRates().getMinDifferentialLendingRate();
+            BigDecimal minDifferentialLendingRate = loanProduct.getFloatingRates() == null ? null : loanProduct.getFloatingRates()
+                    .getMinDifferentialLendingRate();
             if (this.fromApiJsonHelper.parameterExists(minDifferentialLendingRateParameterName, element)) {
-            	minDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minDifferentialLendingRateParameterName,
-                        element);
+                minDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                        minDifferentialLendingRateParameterName, element);
             }
             baseDataValidator.reset().parameter(minDifferentialLendingRateParameterName).value(minDifferentialLendingRate).notNull()
-            	.zeroOrPositiveAmount();
+                    .zeroOrPositiveAmount();
 
             final String defaultDifferentialLendingRateParameterName = "defaultDifferentialLendingRate";
-            BigDecimal defaultDifferentialLendingRate = loanProduct.getFloatingRates() == null
-            		? null:loanProduct.getFloatingRates().getDefaultDifferentialLendingRate();
+            BigDecimal defaultDifferentialLendingRate = loanProduct.getFloatingRates() == null ? null : loanProduct.getFloatingRates()
+                    .getDefaultDifferentialLendingRate();
             if (this.fromApiJsonHelper.parameterExists(defaultDifferentialLendingRateParameterName, element)) {
-            	defaultDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(defaultDifferentialLendingRateParameterName,
-                        element);
+                defaultDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                        defaultDifferentialLendingRateParameterName, element);
             }
-            baseDataValidator.reset().parameter(defaultDifferentialLendingRateParameterName).value(defaultDifferentialLendingRate).notNull()
-            	.zeroOrPositiveAmount();
+            baseDataValidator.reset().parameter(defaultDifferentialLendingRateParameterName).value(defaultDifferentialLendingRate)
+                    .notNull().zeroOrPositiveAmount();
 
             final String maxDifferentialLendingRateParameterName = "maxDifferentialLendingRate";
-            BigDecimal maxDifferentialLendingRate = loanProduct.getFloatingRates() == null
-            		? null:loanProduct.getFloatingRates().getMaxDifferentialLendingRate();
+            BigDecimal maxDifferentialLendingRate = loanProduct.getFloatingRates() == null ? null : loanProduct.getFloatingRates()
+                    .getMaxDifferentialLendingRate();
             if (this.fromApiJsonHelper.parameterExists(maxDifferentialLendingRateParameterName, element)) {
-            	maxDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(maxDifferentialLendingRateParameterName,
-                        element);
+                maxDifferentialLendingRate = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
+                        maxDifferentialLendingRateParameterName, element);
             }
             baseDataValidator.reset().parameter(maxDifferentialLendingRateParameterName).value(maxDifferentialLendingRate).notNull()
-            	.zeroOrPositiveAmount();
+                    .zeroOrPositiveAmount();
 
             if (defaultDifferentialLendingRate != null && defaultDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
                 if (minDifferentialLendingRate != null && minDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
@@ -1072,60 +1174,78 @@ public final class LoanProductDataValidator {
                             .notLessThanMin(minDifferentialLendingRate);
                 }
             }
-            
+
             if (maxDifferentialLendingRate != null && maxDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
                 if (minDifferentialLendingRate != null && minDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
                     baseDataValidator.reset().parameter("maxDifferentialLendingRate").value(maxDifferentialLendingRate)
                             .notLessThanMin(minDifferentialLendingRate);
                 }
             }
-            
+
             if (maxDifferentialLendingRate != null && maxDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
                 if (defaultDifferentialLendingRate != null && defaultDifferentialLendingRate.compareTo(BigDecimal.ZERO) != -1) {
                     baseDataValidator.reset().parameter("maxDifferentialLendingRate").value(maxDifferentialLendingRate)
                             .notLessThanMin(defaultDifferentialLendingRate);
                 }
             }
-            
-            Boolean isFloatingInterestRateCalculationAllowed = loanProduct.getFloatingRates() == null ? null
-            		: loanProduct.getFloatingRates().isFloatingInterestRateCalculationAllowed();
-            if(this.fromApiJsonHelper.parameterExists("isFloatingInterestRateCalculationAllowed", element)){
+
+            Boolean isFloatingInterestRateCalculationAllowed = loanProduct.getFloatingRates() == null ? null : loanProduct
+                    .getFloatingRates().isFloatingInterestRateCalculationAllowed();
+            if (this.fromApiJsonHelper.parameterExists("isFloatingInterestRateCalculationAllowed", element)) {
                 isFloatingInterestRateCalculationAllowed = this.fromApiJsonHelper.extractBooleanNamed(
-                		"isFloatingInterestRateCalculationAllowed", element);
+                        "isFloatingInterestRateCalculationAllowed", element);
             }
-            baseDataValidator.reset().parameter("isFloatingInterestRateCalculationAllowed")
-            	.value(isFloatingInterestRateCalculationAllowed).notNull().isOneOfTheseValues(true, false);
+            baseDataValidator.reset().parameter("isFloatingInterestRateCalculationAllowed").value(isFloatingInterestRateCalculationAllowed)
+                    .notNull().isOneOfTheseValues(true, false);
         } else {
-            if(this.fromApiJsonHelper.parameterExists("floatingRatesId", element)){
-                baseDataValidator.reset().parameter("floatingRatesId").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false", 
-                		"floatingRatesId param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
+            if (this.fromApiJsonHelper.parameterExists("floatingRatesId", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("floatingRatesId")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false",
+                                "floatingRatesId param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
             }
-        	
-            if(this.fromApiJsonHelper.parameterExists("interestRateDifferential", element)){
-                baseDataValidator.reset().parameter("interestRateDifferential").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false", 
-                		"interestRateDifferential param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
+
+            if (this.fromApiJsonHelper.parameterExists("interestRateDifferential", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("interestRateDifferential")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false",
+                                "interestRateDifferential param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
             }
-        	
-            if(this.fromApiJsonHelper.parameterExists("minDifferentialLendingRate", element)){
-                baseDataValidator.reset().parameter("minDifferentialLendingRate").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false", 
-                		"minDifferentialLendingRate param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
+
+            if (this.fromApiJsonHelper.parameterExists("minDifferentialLendingRate", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("minDifferentialLendingRate")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false",
+                                "minDifferentialLendingRate param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
             }
-        	
-            if(this.fromApiJsonHelper.parameterExists("defaultDifferentialLendingRate", element)){
-                baseDataValidator.reset().parameter("defaultDifferentialLendingRate").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false", 
-                		"defaultDifferentialLendingRate param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
+
+            if (this.fromApiJsonHelper.parameterExists("defaultDifferentialLendingRate", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("defaultDifferentialLendingRate")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false",
+                                "defaultDifferentialLendingRate param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
             }
-        	
-            if(this.fromApiJsonHelper.parameterExists("maxDifferentialLendingRate", element)){
-                baseDataValidator.reset().parameter("maxDifferentialLendingRate").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false", 
-                		"maxDifferentialLendingRate param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
+
+            if (this.fromApiJsonHelper.parameterExists("maxDifferentialLendingRate", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("maxDifferentialLendingRate")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false",
+                                "maxDifferentialLendingRate param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
             }
-        	
-            if(this.fromApiJsonHelper.parameterExists("isFloatingInterestRateCalculationAllowed", element)){
-                baseDataValidator.reset().parameter("isFloatingInterestRateCalculationAllowed").failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false", 
-                		"isFloatingInterestRateCalculationAllowed param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
+
+            if (this.fromApiJsonHelper.parameterExists("isFloatingInterestRateCalculationAllowed", element)) {
+                baseDataValidator
+                        .reset()
+                        .parameter("isFloatingInterestRateCalculationAllowed")
+                        .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.false",
+                                "isFloatingInterestRateCalculationAllowed param is not supported when isLinkedToFloatingInterestRates is not supplied or false");
             }
-        	
+
             final String minInterestRatePerPeriodParameterName = "minInterestRatePerPeriod";
             BigDecimal minInterestRatePerPeriod = loanProduct.getMinNominalInterestRatePerPeriod();
             if (this.fromApiJsonHelper.parameterExists(minInterestRatePerPeriodParameterName, element)) {
@@ -1133,7 +1253,7 @@ public final class LoanProductDataValidator {
                         element);
             }
             baseDataValidator.reset().parameter(minInterestRatePerPeriodParameterName).value(minInterestRatePerPeriod).ignoreIfNull()
-            	.zeroOrPositiveAmount();
+                    .zeroOrPositiveAmount();
 
             final String maxInterestRatePerPeriodParameterName = "maxInterestRatePerPeriod";
             BigDecimal maxInterestRatePerPeriod = loanProduct.getMaxNominalInterestRatePerPeriod();
@@ -1142,12 +1262,11 @@ public final class LoanProductDataValidator {
                         element);
             }
             baseDataValidator.reset().parameter(maxInterestRatePerPeriodParameterName).value(maxInterestRatePerPeriod).ignoreIfNull()
-            	.zeroOrPositiveAmount();
+                    .zeroOrPositiveAmount();
 
             BigDecimal interestRatePerPeriod = loanProduct.getLoanProductRelatedDetail().getNominalInterestRatePerPeriod();
             if (this.fromApiJsonHelper.parameterExists("interestRatePerPeriod", element)) {
-                interestRatePerPeriod = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod",
-                        element);
+                interestRatePerPeriod = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element);
             }
             baseDataValidator.reset().parameter("interestRatePerPeriod").value(interestRatePerPeriod).notNull().zeroOrPositiveAmount();
 
@@ -1275,6 +1394,7 @@ public final class LoanProductDataValidator {
 
         // validateLoanConfigurableAttributes(baseDataValidator,element);
 
+        validateVariableInstallmentSettings(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -1556,11 +1676,8 @@ public final class LoanProductDataValidator {
     private void validateNominalInterestRatePerPeriodMinMaxConstraint(final JsonElement element, final LoanProduct loanProduct,
             final DataValidatorBuilder baseDataValidator) {
 
-        if((this.fromApiJsonHelper.parameterExists("isLinkedToFloatingInterestRates", element)
-        		&& this.fromApiJsonHelper.extractBooleanNamed("isLinkedToFloatingInterestRates", element) == true) 
-        		|| loanProduct.isLinkedToFloatingInterestRate()){
-        	return;
-        }
+        if ((this.fromApiJsonHelper.parameterExists("isLinkedToFloatingInterestRates", element) && this.fromApiJsonHelper
+                .extractBooleanNamed("isLinkedToFloatingInterestRates", element) == true) || loanProduct.isLinkedToFloatingInterestRate()) { return; }
         boolean iRPUpdated = false;
         boolean minIRPUpdated = false;
         boolean maxIRPUpdated = false;

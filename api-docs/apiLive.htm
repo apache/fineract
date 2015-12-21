@@ -1245,6 +1245,30 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr>
+								<td><a href="#loan_term_variations">Loan Term Variations</a></td>
+								<td>/loans/{loanId}/schedule?command=calculateLoanSchedule</td>
+								<td><a href="#loans_calculate_with_exceptions">Calculate Schedule with Loan Term Variations</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>/loans/{loanId}/schedule?command=addVariations</td>
+								<td><a href="#loans_update_variations">Create Loan Term Variations</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>/loans/{loanId}/schedule?command=deleteVariations</td>
+								<td><a href="#loans_delete_variations">Remove All Loan Term Variations</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -11765,6 +11789,603 @@ Request Body:
 				</div>
 			</div>
 
+
+<!-- start Loan term variations -->
+<a id="loan_term_variations" name="loan_term_variations" class="old-syle-anchor">&nbsp;</a>
+<div class="method-section">
+				<div class="method-description">
+					<h3>Loan Rescheduling</h3>
+					<p>Loan Term Variations provides the ability to change due dates, amounts and number of instalments before loan approval.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>loanId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The ID of the loan to be modified.</td>
+						</tr>
+						<tr class=alt>
+							<td>exceptions</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>contains exception data for variations(modifiedinstallments,newinstallments and deletedinstallments described below) </td>
+						</tr>
+						
+					</table>
+					<p>Exception object fields</p>
+					<p>Modifiedinstallments Array fields</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>dueDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Schedule dueDate for which this exception should be applied.</td>
+						</tr>
+						<tr class=alt>
+							<td>modifiedDueDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc> this is the exception data to move the due date to specified  date for a instalment</td>
+						</tr>
+						<tr class=alt>
+							<td>installmentAmount</td>
+						</tr>
+						<tr>
+							<td class=fielddesc> new instalment amount(principal+interest) for the specified instalment. supported only for interest method  declining  with equal instalments Amortization</td>
+						</tr>
+						<tr class=alt>
+							<td>principal</td>
+						</tr>
+						<tr>
+							<td class=fielddesc> new Principal amount for the specified instalment. supported only for interest method  declining  with equal instalments Amortization and for Flat loans.</td>
+						</tr>
+					</table>
+					<p>newinstallments Array fields</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>dueDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Schedule dueDate for inserting new instalment.</td>
+						</tr>
+						<tr class=alt>
+							<td>installmentAmount</td>
+						</tr>
+						<tr>
+							<td class=fielddesc> new instalment amount(principal+interest) for the new instalment. supported only for interest method  declining  with equal instalments Amortization</td>
+						</tr>
+						<tr class=alt>
+							<td>principal</td>
+						</tr>
+						<tr>
+							<td class=fielddesc> new Principal amount for the new instalment. supported only for interest method  declining  with equal instalments Amortization and for Flat loans.</td>
+						</tr>
+					</table>
+					<p>deletedinstallments Array fields</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>dueDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Schedule dueDate for removing specific instalment.</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+
+
+
+			<a id="loans_calculate_with_exceptions" name="loans_calculate_with_exceptions" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Calculate loan repayment schedule based on Loan term variations</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>exceptions,locale,dateFormat</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans/1/schedule?command=calculateLoanSchedule
+					</code>
+					<code class="method-request">
+POST loans/{loanIdd}/schedule?command=calculateLoanSchedule
+Content-Type: application/json
+Request Body:
+{
+	"locale": "en",
+	"dateFormat": "dd MMMM yyyy",
+	"exceptions": {
+		"modifiedinstallments": [{
+			"dueDate": '01 April 2016',
+			"modifiedDueDate": '05 April 2016'
+		},
+		{
+			"dueDate": '05 January 2016',
+			"modifiedDueDate": '01 January 2016'
+		}],
+		"deletedinstallments": [{
+			"dueDate": "01 October 2016"
+		}],
+		newinstallments: [{
+			dueDate: '10 October 2016',
+			installmentAmount: '1000'
+}]
+	}
+}
+					</code>
+					<code class="method-response">
+{
+	"currency": {
+		"code": "USD",
+		"name": "US Dollar",
+		"decimalPlaces": 2,
+		"displaySymbol": "$",
+		"nameCode": "currency.USD",
+		"displayLabel": "US Dollar ($)"
+	},
+	"loanTermInDays": 12,
+	"totalPrincipalDisbursed": 10000,
+	"totalPrincipalExpected": 10000,
+	"totalInterestCharged": 1340.98,
+	"totalFeeChargesCharged": 0,
+	"totalPenaltyChargesCharged": 0,
+	"totalRepaymentExpected": 11340.98,
+	"periods": [{
+		"period": 1,
+		"fromDate": [2015,
+		11,
+		1],
+		"dueDate": [2015,
+		12,
+		1],
+		"daysInPeriod": 30,
+		"principalOriginalDue": 745.6,
+		"principalDue": 745.6,
+		"principalOutstanding": 745.6,
+		"principalLoanBalanceOutstanding": 9254.4,
+		"interestOriginalDue": 200,
+		"interestDue": 200,
+		"interestOutstanding": 200,
+		"feeChargesDue": 0,
+		"penaltyChargesDue": 0,
+		"totalOriginalDueForPeriod": 945.6,
+		"totalDueForPeriod": 945.6,
+		"totalPaidForPeriod": 0,
+		"totalOutstandingForPeriod": 945.6,
+		"totalOverdue": 945.6,
+		"totalActualCostOfLoanForPeriod": 200
+	},
+	{
+		"period": 2,
+		"fromDate": [2015,
+		12,
+		1],
+		"dueDate": [2016,
+		1,
+		1],
+		"daysInPeriod": 31,
+		"principalOriginalDue": 814.91,
+		"principalDue": 814.91,
+		"principalOutstanding": 814.91,
+		"principalLoanBalanceOutstanding": 8439.49,
+		"interestOriginalDue": 185.09,
+		"interestDue": 185.09,
+		"interestOutstanding": 185.09,
+		"feeChargesDue": 0,
+		"penaltyChargesDue": 0,
+		"totalOriginalDueForPeriod": 1000,
+		"totalDueForPeriod": 1000,
+		"totalPaidForPeriod": 0,
+		"totalOutstandingForPeriod": 1000,
+		"totalActualCostOfLoanForPeriod": 185.09
+	},
+	{
+		"period": 3,
+		"fromDate": [2016,
+		1,
+		1],
+		"dueDate": [2016,
+		2,
+		1],
+		"daysInPeriod": 31,
+		"principalOriginalDue": 770.75,
+		"principalDue": 770.75,
+		"principalOutstanding": 770.75,
+		"principalLoanBalanceOutstanding": 7668.74,
+		"interestOriginalDue": 168.79,
+		"interestDue": 168.79,
+		"interestOutstanding": 168.79,
+		"feeChargesDue": 0,
+		"penaltyChargesDue": 0,
+		"totalOriginalDueForPeriod": 939.54,
+		"totalDueForPeriod": 939.54,
+		"totalPaidForPeriod": 0,
+		"totalOutstandingForPeriod": 939.54,
+		"totalActualCostOfLoanForPeriod": 168.79
+	},
+	{
+		"period": 4,
+		"fromDate": [2016,
+		2,
+		1],
+		"dueDate": [2016,
+		3,
+		5],
+		"daysInPeriod": 33,
+		"principalOriginalDue": 786.17,
+		"principalDue": 786.17,
+		"principalOutstanding": 786.17,
+		"principalLoanBalanceOutstanding": 6882.57,
+		"interestOriginalDue": 153.37,
+		"interestDue": 153.37,
+		"interestOutstanding": 153.37,
+		"feeChargesDue": 0,
+		"penaltyChargesDue": 0,
+		"totalOriginalDueForPeriod": 939.54,
+		"totalDueForPeriod": 939.54,
+		"totalPaidForPeriod": 0,
+		"totalOutstandingForPeriod": 939.54,
+		"totalActualCostOfLoanForPeriod": 153.37
+	},
+	{
+		"period": 5,
+		"fromDate": [2016,
+		3,
+		5],
+		"dueDate": [2016,
+		4,
+		5],
+		"daysInPeriod": 31,
+		"principalOriginalDue": 801.89,
+		"principalDue": 801.89,
+		"principalOutstanding": 801.89,
+		"principalLoanBalanceOutstanding": 6080.68,
+		"interestOriginalDue": 137.65,
+		"interestDue": 137.65,
+		"interestOutstanding": 137.65,
+		"feeChargesDue": 0,
+		"penaltyChargesDue": 0,
+		"totalOriginalDueForPeriod": 939.54,
+		"totalDueForPeriod": 939.54,
+		"totalPaidForPeriod": 0,
+		"totalOutstandingForPeriod": 939.54,
+		"totalActualCostOfLoanForPeriod": 137.65
+	},
+	{
+		"period": 6,
+		"fromDate": [2016,
+		4,
+		5],
+		"dueDate": [2016,
+		5,
+		1],
+		"daysInPeriod": 26,
+		"principalOriginalDue": 817.93,
+		"principalDue": 817.93,
+		"principalOutstanding": 817.93,
+		"principalLoanBalanceOutstanding": 5262.75,
+		"interestOriginalDue": 121.61,
+		"interestDue": 121.61,
+		"interestOutstanding": 121.61,
+		"feeChargesDue": 0,
+		"penaltyChargesDue": 0,
+		"totalOriginalDueForPeriod": 939.54,
+		"totalDueForPeriod": 939.54,
+		"totalPaidForPeriod": 0,
+		"totalOutstandingForPeriod": 939.54,
+		"totalActualCostOfLoanForPeriod": 121.61
+	},
+	{
+		"period": 7,
+		"fromDate": [2016,
+		5,
+		1],
+		"dueDate": [2016,
+		6,
+		1],
+		"daysInPeriod": 31,
+		"principalOriginalDue": 834.28,
+		"principalDue": 834.28,
+		"principalOutstanding": 834.28,
+		"principalLoanBalanceOutstanding": 4428.47,
+		"interestOriginalDue": 105.26,
+		"interestDue": 105.26,
+		"interestOutstanding": 105.26,
+		"feeChargesDue": 0,
+		"penaltyChargesDue": 0,
+		"totalOriginalDueForPeriod": 939.54,
+		"totalDueForPeriod": 939.54,
+		"totalPaidForPeriod": 0,
+		"totalOutstandingForPeriod": 939.54,
+		"totalActualCostOfLoanForPeriod": 105.26
+	},
+	{
+		"period": 8,
+		"fromDate": [2016,
+		6,
+		1],
+		"dueDate": [2016,
+		7,
+		1],
+		"daysInPeriod": 30,
+		"principalOriginalDue": 850.97,
+		"principalDue": 850.97,
+		"principalOutstanding": 850.97,
+		"principalLoanBalanceOutstanding": 3577.5,
+		"interestOriginalDue": 88.57,
+		"interestDue": 88.57,
+		"interestOutstanding": 88.57,
+		"feeChargesDue": 0,
+		"penaltyChargesDue": 0,
+		"totalOriginalDueForPeriod": 939.54,
+		"totalDueForPeriod": 939.54,
+		"totalPaidForPeriod": 0,
+		"totalOutstandingForPeriod": 939.54,
+		"totalActualCostOfLoanForPeriod": 88.57
+	},
+	{
+		"period": 9,
+		"fromDate": [2016,
+		7,
+		1],
+		"dueDate": [2016,
+		8,
+		1],
+		"daysInPeriod": 31,
+		"principalOriginalDue": 867.99,
+		"principalDue": 867.99,
+		"principalOutstanding": 867.99,
+		"principalLoanBalanceOutstanding": 2709.51,
+		"interestOriginalDue": 71.55,
+		"interestDue": 71.55,
+		"interestOutstanding": 71.55,
+		"feeChargesDue": 0,
+		"penaltyChargesDue": 0,
+		"totalOriginalDueForPeriod": 939.54,
+		"totalDueForPeriod": 939.54,
+		"totalPaidForPeriod": 0,
+		"totalOutstandingForPeriod": 939.54,
+		"totalActualCostOfLoanForPeriod": 71.55
+	},
+	{
+		"period": 10,
+		"fromDate": [2016,
+		8,
+		1],
+		"dueDate": [2016,
+		9,
+		1],
+		"daysInPeriod": 31,
+		"principalOriginalDue": 885.35,
+		"principalDue": 885.35,
+		"principalOutstanding": 885.35,
+		"principalLoanBalanceOutstanding": 1824.16,
+		"interestOriginalDue": 54.19,
+		"interestDue": 54.19,
+		"interestOutstanding": 54.19,
+		"feeChargesDue": 0,
+		"penaltyChargesDue": 0,
+		"totalOriginalDueForPeriod": 939.54,
+		"totalDueForPeriod": 939.54,
+		"totalPaidForPeriod": 0,
+		"totalOutstandingForPeriod": 939.54,
+		"totalActualCostOfLoanForPeriod": 54.19
+	},
+	{
+		"period": 11,
+		"fromDate": [2016,
+		9,
+		1],
+		"dueDate": [2016,
+		10,
+		10],
+		"daysInPeriod": 39,
+		"principalOriginalDue": 903.05,
+		"principalDue": 903.05,
+		"principalOutstanding": 903.05,
+		"principalLoanBalanceOutstanding": 921.11,
+		"interestOriginalDue": 36.48,
+		"interestDue": 36.48,
+		"interestOutstanding": 36.48,
+		"feeChargesDue": 0,
+		"penaltyChargesDue": 0,
+		"totalOriginalDueForPeriod": 939.53,
+		"totalDueForPeriod": 939.53,
+		"totalPaidForPeriod": 0,
+		"totalOutstandingForPeriod": 939.53,
+		"totalActualCostOfLoanForPeriod": 36.48
+	},
+	{
+		"period": 12,
+		"fromDate": [2016,
+		10,
+		10],
+		"dueDate": [2016,
+		11,
+		1],
+		"daysInPeriod": 22,
+		"principalOriginalDue": 921.11,
+		"principalDue": 921.11,
+		"principalOutstanding": 921.11,
+		"principalLoanBalanceOutstanding": 0,
+		"interestOriginalDue": 18.42,
+		"interestDue": 18.42,
+		"interestOutstanding": 18.42,
+		"feeChargesDue": 0,
+		"penaltyChargesDue": 0,
+		"totalOriginalDueForPeriod": 939.53,
+		"totalDueForPeriod": 939.53,
+		"totalPaidForPeriod": 0,
+		"totalOutstandingForPeriod": 939.53,
+		"totalActualCostOfLoanForPeriod": 18.42
+	}]
+}
+					</code>
+				</div>
+			</div>	
+
+		<a id="loans_update_variations" name="loans_update_variations" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Updates loan repayment schedule based on Loan term variations</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>exceptions,locale,dateFormat</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans/1/schedule?command=addVariations
+					</code>
+					<code class="method-request">
+POST loans/{loanIdd}/schedule?command=addVariations
+Content-Type: application/json
+Request Body:
+{
+	"locale": "en",
+	"dateFormat": "dd MMMM yyyy",
+	"exceptions": {
+		"modifiedinstallments": [{
+			"dueDate": '01 April 2016',
+			"modifiedDueDate": '05 April 2016'
+		},
+		{
+			"dueDate": '05 January 2016',
+			"modifiedDueDate": '01 January 2016'
+		}],
+		"deletedinstallments": [{
+			"dueDate": "01 October 2016"
+		}],
+		newinstallments: [{
+			dueDate: '10 October 2016',
+			installmentAmount: '1000'
+}]
+	}
+}
+					</code>
+					<code class="method-response">
+{
+	"loanId": 1,
+	"changes": {
+		"loanTermVariations": [{
+			"id": 21,
+			"termType": {
+				"id": 4,
+				"code": "loanTermType.dueDate",
+				"value": "dueDate"
+			},
+			"termVariationApplicableFrom": [2016,
+			1,
+			1],
+			"dateValue": [2016,
+			1,
+			10],
+			"isSpecificToInstallment": true
+		},
+		{
+			"id": 22,
+			"termType": {
+				"id": 3,
+				"code": "loanTermType.principalAmount",
+				"value": "principalAmount"
+			},
+			"termVariationApplicableFrom": [2016,
+			1,
+			10],
+			"decimalValue": 1100,
+			"isSpecificToInstallment": true
+		},
+		{
+			"id": 23,
+			"termType": {
+				"id": 3,
+				"code": "loanTermType.principalAmount",
+				"value": "principalAmount"
+			},
+			"termVariationApplicableFrom": [2016,
+			8,
+			1],
+			"decimalValue": 1000,
+			"isSpecificToInstallment": true
+		},
+		{
+			"id": 24,
+			"termType": {
+				"id": 5,
+				"code": "loanTermType.dueDate",
+				"value": "insertInstallment"
+			},
+			"termVariationApplicableFrom": [2016,
+			8,
+			15],
+			"decimalValue": 900,
+			"isSpecificToInstallment": true
+		}]
+	}
+}
+					</code>
+				</div>
+			</div>			
+			
+
+		<a id="loans_delete_variations" name="loans_delete_variations" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Updates loan repayment schedule by removing Loan term variations</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td></td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans/1/schedule?command=deleteVariations
+					</code>
+					<code class="method-request">
+POST loans/{loanIdd}/schedule?command=deleteVariations
+Content-Type: application/json
+Request Body:
+{}
+					</code>
+					<code class="method-response">
+{
+	"loanId": 1,
+	"changes": {
+		"removedEntityIds": [{
+			 21,22}]
+	}
+}
+					</code>
+				</div>
+			</div>			
+						
+			
+<!-- End Loan Term variations-->	
 <!-- start of offices content -->
 			<a id="offices" name="offices" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -40858,6 +41479,30 @@ No Request Body:
 					<td></td>
 					<td>rescheduleloans/{requestId}?command=approve</td>
 					<td><a href="#loan_reschedule_request_approve">Approve Loan Reschedule Request</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td><a href="#loan_term_variations">Loan Term Variations</a></td>
+					<td>/loans/{loanId}/schedule?command=calculateLoanSchedule</td>
+					<td><a href="#loans_calculate_with_exceptions">Calculate Schedule with Loan Term Variations</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>/loans/{loanId}/schedule?command=addVariations</td>
+					<td><a href="#loans_update_variations">Create Loan Term Variations</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>/loans/{loanId}/schedule?command=deleteVariations</td>
+					<td><a href="#loans_delete_variations">Remove All Loan Term Variations</a></td>
 					<td></td>
 					<td></td>
 					<td></td>

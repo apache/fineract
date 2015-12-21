@@ -141,7 +141,7 @@ public class LoanChargeAssembler {
                                 }
                             }
                             
-                            if (chargeDefinition.getChargeTimeType() == ChargeTimeType.DISBURSEMENT.getValue()) {
+                            if ( ChargeTimeType.DISBURSEMENT.getValue().equals(chargeDefinition.getChargeTimeType())) {
                                 for (LoanDisbursementDetails disbursementDetail : disbursementDetails) {
                                     LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = null;
                                     if (chargeDefinition.isPercentageOfApprovedAmount()
@@ -164,10 +164,10 @@ public class LoanChargeAssembler {
                                         }
                                     }
                                 }
-                            } else if (chargeDefinition.getChargeTimeType() == ChargeTimeType.TRANCHE_DISBURSEMENT.getValue()) {
+                            } else if (ChargeTimeType.TRANCHE_DISBURSEMENT.getValue().equals(chargeDefinition.getChargeTimeType())) {
                                 LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = null;
                                 for (LoanDisbursementDetails disbursementDetail : disbursementDetails) {
-                                    if (chargeDefinition.getChargeTimeType() == ChargeTimeType.TRANCHE_DISBURSEMENT.getValue()) {
+                                    if (ChargeTimeType.TRANCHE_DISBURSEMENT.getValue().equals(chargeDefinition.getChargeTimeType())) {
                                         final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition,
                                                 disbursementDetail.principal(), amount, chargeTime, chargeCalculation,
                                                 disbursementDetail.expectedDisbursementDateAsLocalDate(), chargePaymentModeEnum,

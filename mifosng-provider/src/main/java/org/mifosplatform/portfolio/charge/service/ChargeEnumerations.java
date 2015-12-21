@@ -113,7 +113,7 @@ public class ChargeEnumerations {
             break;
             case PERCENT_OF_AMOUNT:
                 optionData = new EnumOptionData(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue().longValue(),
-                        ChargeCalculationType.PERCENT_OF_AMOUNT.getCode(), "% Approved Amount");
+                        ChargeCalculationType.PERCENT_OF_AMOUNT.getCode(), "% Amount");
             break;
             case PERCENT_OF_AMOUNT_AND_INTEREST:
                 optionData = new EnumOptionData(ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue().longValue(),

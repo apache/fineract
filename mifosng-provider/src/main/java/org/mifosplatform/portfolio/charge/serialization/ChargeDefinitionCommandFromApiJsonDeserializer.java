@@ -40,10 +40,10 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(
-            Arrays.asList("name", "amount", "locale", "currencyCode", "currencyOptions", "chargeAppliesTo", "chargeTimeType",
-                    "chargeCalculationType", "chargeCalculationTypeOptions", "penalty", "active", "chargePaymentMode", "feeOnMonthDay",
-                    "feeInterval", "monthDayFormat", "minCap", "maxCap", "feeFrequency", ChargesApiConstants.glAccountIdParamName));
+    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("name", "amount", "locale", "currencyCode",
+            "currencyOptions", "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions", "penalty",
+            "active", "chargePaymentMode", "feeOnMonthDay", "feeInterval", "monthDayFormat", "minCap", "maxCap", "feeFrequency",
+            ChargesApiConstants.glAccountIdParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -104,9 +104,9 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
                 baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
                         .isOneOfTheseValues(ChargeCalculationType.validValuesForLoan());
             }
-            
-            if(chargeTimeType != null && chargeCalculationType != null){
-            	performChargeTimeNCalculationTypeValidation(baseDataValidator, chargeTimeType, chargeCalculationType);
+
+            if (chargeTimeType != null && chargeCalculationType != null) {
+                performChargeTimeNCalculationTypeValidation(baseDataValidator, chargeTimeType, chargeCalculationType);
             }
 
         } else if (appliesTo.isSavingsCharge()) {
@@ -122,8 +122,8 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
 
             if (ctt.isWeeklyFee()) {
                 final String monthDay = this.fromApiJsonHelper.extractStringNamed("feeOnMonthDay", element);
-                baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay).mustBeBlankWhenParameterProvidedIs("chargeTimeType",
-                        chargeTimeType);
+                baseDataValidator.reset().parameter("feeOnMonthDay").value(monthDay)
+                        .mustBeBlankWhenParameterProvidedIs("chargeTimeType", chargeTimeType);
             }
 
             if (ctt.isMonthlyFee()) {
@@ -305,26 +305,26 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
-    
-	public void validateChargeTimeNCalculationType(Integer chargeTimeType, Integer ChargeCalculationType) {
+
+    public void validateChargeTimeNCalculationType(Integer chargeTimeType, Integer ChargeCalculationType) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charge");
         performChargeTimeNCalculationTypeValidation(baseDataValidator, chargeTimeType, ChargeCalculationType);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
-	}
-	
-	private void performChargeTimeNCalculationTypeValidation(DataValidatorBuilder baseDataValidator, 
-			final Integer chargeTimeType, final Integer chargeCalculationType){
-        if (chargeTimeType == ChargeTimeType.TRANCHE_DISBURSEMENT.getValue()){
-        	baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
-        			.isOneOfTheseValues(ChargeCalculationType.validValuesForTrancheDisbursement());
-        } else {
-        	baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
-        			.isNotOneOfTheseValues(ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue());
-        }	
     }
 
-	private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
+    private void performChargeTimeNCalculationTypeValidation(DataValidatorBuilder baseDataValidator, final Integer chargeTimeType,
+            final Integer chargeCalculationType) {
+        if (chargeTimeType.equals(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue())) {
+            baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
+                    .isOneOfTheseValues(ChargeCalculationType.validValuesForTrancheDisbursement());
+        } else {
+            baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
+                    .isNotOneOfTheseValues(ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue());
+        }
+    }
+
+    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 }

@@ -9,7 +9,11 @@ public enum LoanTermVariationType {
 
     INVALID(0, "loanTermType.invalid"), //
     EMI_AMOUNT(1, "loanTermType.emiAmount"), //
-    INTEREST_RATE(2, "loanTermType.interestRate");
+    INTEREST_RATE(2, "loanTermType.interestRate"), //
+    PRINCIPAL_AMOUNT(3, "loanTermType.principalAmount"), //
+    DUE_DATE(4, "loanTermType.dueDate"), //
+    INSERT_INSTALLMENT(5, "loanTermType.insertInstallment"), //
+    DELETE_INSTALLMENT(6, "loanTermType.deleteInstallment");
 
     private final Integer value;
     private final String code;
@@ -37,6 +41,18 @@ public enum LoanTermVariationType {
             case 2:
                 enumeration = LoanTermVariationType.INTEREST_RATE;
             break;
+            case 3:
+                enumeration = LoanTermVariationType.PRINCIPAL_AMOUNT;
+            break;
+            case 4:
+                enumeration = LoanTermVariationType.DUE_DATE;
+            break;
+            case 5:
+                enumeration = LoanTermVariationType.INSERT_INSTALLMENT;
+            break;
+            case 6:
+                enumeration = LoanTermVariationType.DELETE_INSTALLMENT;
+            break;
         }
         return enumeration;
     }
@@ -44,8 +60,24 @@ public enum LoanTermVariationType {
     public boolean isEMIAmountVariation() {
         return this.value.equals(LoanTermVariationType.EMI_AMOUNT.getValue());
     }
-    
+
     public boolean isInterestRateVariation() {
         return this.value.equals(LoanTermVariationType.INTEREST_RATE.getValue());
+    }
+
+    public boolean isPrincipalAmountVariation() {
+        return this.value.equals(LoanTermVariationType.PRINCIPAL_AMOUNT.getValue());
+    }
+
+    public boolean isDueDateVariation() {
+        return this.value.equals(LoanTermVariationType.DUE_DATE.getValue());
+    }
+
+    public boolean isInsertInstallment() {
+        return this.value.equals(LoanTermVariationType.INSERT_INSTALLMENT.getValue());
+    }
+
+    public boolean isDeleteInstallment() {
+        return this.value.equals(LoanTermVariationType.DELETE_INSTALLMENT.getValue());
     }
 }

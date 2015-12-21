@@ -322,4 +322,9 @@ public final class LoanSummary {
     public BigDecimal getTotalPenaltyChargesWaived() {
         return this.totalPenaltyChargesWaived;
     }
+
+    
+    public BigDecimal getTotalExpectedRepayment() {
+        return this.totalExpectedRepayment;
+    }
 }

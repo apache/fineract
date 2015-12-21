@@ -51,7 +51,6 @@ import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
 import org.springframework.data.jpa.domain.AbstractPersistable;
-import org.mifosplatform.portfolio.loanproduct.domain.LoanProductConfigurableAttributes;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -164,6 +163,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
     private LoanProductFloatingRates floatingRates;
 
+    @Column(name = "allow_variabe_installments", nullable = false)
+    private boolean allowVariabeInstallments;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
+    private LoanProductVariableInstallmentConfig variableInstallmentConfig;
+
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate) {
 
@@ -195,6 +201,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
         BigDecimal maxDifferentialLendingRate = null;
         BigDecimal defaultDifferentialLendingRate = null;
         Boolean isFloatingInterestRateCalculationAllowed = null;
+
+        Integer minimumGapBetweenInstallments = null;
+        Integer maximumGapBetweenInstallments = null;
+
         final Boolean isLinkedToFloatingInterestRates = command.booleanObjectValueOfParameterNamed("isLinkedToFloatingInterestRates");
         if (isLinkedToFloatingInterestRates != null && isLinkedToFloatingInterestRates) {
             interestRateDifferential = command.bigDecimalValueOfParameterNamed("interestRateDifferential");
@@ -209,6 +219,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
             minInterestRatePerPeriod = command.bigDecimalValueOfParameterNamed("minInterestRatePerPeriod");
             maxInterestRatePerPeriod = command.bigDecimalValueOfParameterNamed("maxInterestRatePerPeriod");
             annualInterestRate = aprCalculator.calculateFrom(interestFrequencyType, interestRatePerPeriod);
+        }
+
+        final Boolean isVariableInstallmentsAllowed = command
+                .booleanObjectValueOfParameterNamed(LoanProductConstants.allowVariableInstallmentsParamName);
+        if (isVariableInstallmentsAllowed != null && isVariableInstallmentsAllowed) {
+            minimumGapBetweenInstallments = command.integerValueOfParameterNamed(LoanProductConstants.minimumGapBetweenInstallments);
+            maximumGapBetweenInstallments = command.integerValueOfParameterNamed(LoanProductConstants.maximumGapBetweenInstallments);
         }
 
         final Integer repaymentEvery = command.integerValueOfParameterNamed("repaymentEvery");
@@ -304,7 +321,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
                 accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineEmiAmount, installmentAmountInMultiplesOf,
                 loanConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRate, interestRateDifferential,
                 minDifferentialLendingRate, maxDifferentialLendingRate, defaultDifferentialLendingRate,
-                isFloatingInterestRateCalculationAllowed);
+                isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGapBetweenInstallments,
+                maximumGapBetweenInstallments);
 
     }
 
@@ -534,7 +552,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final Integer installmentAmountInMultiplesOf, final LoanProductConfigurableAttributes loanProductConfigurableAttributes,
             Boolean isLinkedToFloatingInterestRates, FloatingRate floatingRate, BigDecimal interestRateDifferential,
             BigDecimal minDifferentialLendingRate, BigDecimal maxDifferentialLendingRate, BigDecimal defaultDifferentialLendingRate,
-            Boolean isFloatingInterestRateCalculationAllowed) {
+            Boolean isFloatingInterestRateCalculationAllowed, final Boolean isVariableInstallmentsAllowed,
+            final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -553,6 +572,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
         if (isLinkedToFloatingInterestRate) {
             this.floatingRates = new LoanProductFloatingRates(floatingRate, this, interestRateDifferential, minDifferentialLendingRate,
                     maxDifferentialLendingRate, defaultDifferentialLendingRate, isFloatingInterestRateCalculationAllowed);
+        }
+
+        this.allowVariabeInstallments = isVariableInstallmentsAllowed == null ? false : isVariableInstallmentsAllowed;
+
+        if (allowVariabeInstallments) {
+            this.variableInstallmentConfig = new LoanProductVariableInstallmentConfig(this, minimumGapBetweenInstallments,
+                    maximumGapBetweenInstallments);
         }
 
         this.loanProductRelatedDetail = new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod,
@@ -674,8 +700,20 @@ public class LoanProduct extends AbstractPersistable<Long> {
             actualChanges.putAll(loanProductFloatingRates().update(command, floatingRate));
             this.loanProductRelatedDetail.updateForFloatingInterestRates();
             this.loanProductMinMaxConstraints.updateForFloatingInterestRates();
-        }else{
-        	this.floatingRates = null;
+        } else {
+            this.floatingRates = null;
+        }
+
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.allowVariableInstallmentsParamName, this.allowVariabeInstallments)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.allowVariableInstallmentsParamName);
+            actualChanges.put(LoanProductConstants.allowVariableInstallmentsParamName, newValue);
+            this.allowVariabeInstallments = newValue;
+        }
+
+        if (this.allowVariabeInstallments) {
+            actualChanges.putAll(loanProductVariableInstallmentConfig().update(command));
+        } else {
+            this.variableInstallmentConfig = null;
         }
 
         final String accountingTypeParamName = "accountingRule";
@@ -964,11 +1002,16 @@ public class LoanProduct extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
-	private LoanProductFloatingRates loanProductFloatingRates() {
-        this.floatingRates = this.floatingRates == null 
-        		? new LoanProductFloatingRates(null, this, null, null, null, null, false) 
-        		: this.floatingRates;
+    private LoanProductFloatingRates loanProductFloatingRates() {
+        this.floatingRates = this.floatingRates == null ? new LoanProductFloatingRates(null, this, null, null, null, null, false)
+                : this.floatingRates;
         return this.floatingRates;
+    }
+
+    public LoanProductVariableInstallmentConfig loanProductVariableInstallmentConfig() {
+        this.variableInstallmentConfig = this.variableInstallmentConfig == null ? new LoanProductVariableInstallmentConfig(this, null, null)
+                : this.variableInstallmentConfig;
+        return this.variableInstallmentConfig;
     }
 
     public boolean isAccountingDisabled() {
@@ -1266,6 +1309,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
             applicableRates = getFloatingRates().fetchInterestRates(floatingRateDTO);
         }
         return applicableRates;
+    }
+
+    public boolean allowVariabeInstallments() {
+        return this.allowVariabeInstallments;
     }
 
 }

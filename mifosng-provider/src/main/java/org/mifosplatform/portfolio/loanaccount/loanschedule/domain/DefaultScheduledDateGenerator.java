@@ -14,14 +14,10 @@ import org.mifosplatform.organisation.holiday.service.HolidayUtil;
 import org.mifosplatform.organisation.workingdays.domain.RepaymentRescheduleType;
 import org.mifosplatform.organisation.workingdays.service.WorkingDaysUtil;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
-import org.mifosplatform.portfolio.calendar.domain.CalendarHistory;
-import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.mifosplatform.portfolio.common.domain.DayOfWeekType;
 import org.mifosplatform.portfolio.common.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
-
-import java.util.Set;
 
 public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
 
@@ -52,6 +48,8 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             dueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
                     loanApplicationTerms.getRepaymentEvery(), lastRepaymentDate, loanApplicationTerms.getNthDay(),
                     loanApplicationTerms.getWeekDayType());
+            dueRepaymentPeriodDate = CalendarUtils.adjustDate(dueRepaymentPeriodDate, loanApplicationTerms.getSeedDate(),
+                    loanApplicationTerms.getRepaymentPeriodFrequencyType());
             if (currentCalendar != null) {
                 // If we have currentCalendar object, this means there is a
                 // calendar associated with
@@ -78,8 +76,8 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                 loanApplicationTerms.getRepaymentEvery(), adjustedDate, loanApplicationTerms.getNthDay(),
                 loanApplicationTerms.getWeekDayType());
 
-        final RepaymentRescheduleType rescheduleType = RepaymentRescheduleType
-                .fromInt(holidayDetailDTO.getWorkingDays().getRepaymentReschedulingType());
+        final RepaymentRescheduleType rescheduleType = RepaymentRescheduleType.fromInt(holidayDetailDTO.getWorkingDays()
+                .getRepaymentReschedulingType());
 
         /**
          * Fix for https://mifosforge.jira.com/browse/MIFOSX-1357
@@ -91,6 +89,8 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
             nextDueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
                     loanApplicationTerms.getRepaymentEvery(), nextDueRepaymentPeriodDate, loanApplicationTerms.getNthDay(),
                     loanApplicationTerms.getWeekDayType());
+            nextDueRepaymentPeriodDate = CalendarUtils.adjustDate(nextDueRepaymentPeriodDate, loanApplicationTerms.getSeedDate(),
+                    loanApplicationTerms.getRepaymentPeriodFrequencyType());
 
         }
         adjustedDate = WorkingDaysUtil.getOffSetDateIfNonWorkingDay(adjustedDate, nextDueRepaymentPeriodDate,

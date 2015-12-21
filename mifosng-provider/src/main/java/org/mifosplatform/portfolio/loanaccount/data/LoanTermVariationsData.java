@@ -11,38 +11,42 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTermVariationType;
 
-public class LoanTermVariationsData {
+public class LoanTermVariationsData implements Comparable<LoanTermVariationsData> {
 
     @SuppressWarnings("unused")
     private final Long id;
     private final EnumOptionData termType;
     private final LocalDate termVariationApplicableFrom;
-    private final Integer termVariationApplicableFromInstallment;
-    private final BigDecimal termValue;
+    private final BigDecimal decimalValue;
+    private final LocalDate dateValue;
+    private final boolean isSpecificToInstallment;
+    private Boolean isProcessed;
 
     public LoanTermVariationsData(final Long id, final EnumOptionData termType, final LocalDate termVariationApplicableFrom,
-            final BigDecimal termValue) {
+            final BigDecimal decimalValue, final LocalDate dateValue, final boolean isSpecificToInstallment) {
         this.id = id;
         this.termType = termType;
         this.termVariationApplicableFrom = termVariationApplicableFrom;
-        this.termValue = termValue;
-        this.termVariationApplicableFromInstallment = null;
+        this.decimalValue = decimalValue;
+        this.dateValue = dateValue;
+        this.isSpecificToInstallment = isSpecificToInstallment;
     }
-    
+
     public LoanTermVariationsData(final EnumOptionData termType, final LocalDate termVariationApplicableFrom,
-            final BigDecimal termValue) {
+            final BigDecimal decimalValue, LocalDate dateValue, final boolean isSpecificToInstallment) {
         this.id = null;
         this.termType = termType;
         this.termVariationApplicableFrom = termVariationApplicableFrom;
-        this.termValue = termValue;
-        this.termVariationApplicableFromInstallment = null;
+        this.decimalValue = decimalValue;
+        this.dateValue = dateValue;
+        this.isSpecificToInstallment = isSpecificToInstallment;
     }
 
     public EnumOptionData getTermType() {
         return this.termType;
     }
-    
-    public LoanTermVariationType getTermVariationType(){
+
+    public LoanTermVariationType getTermVariationType() {
         return LoanTermVariationType.fromInt(this.termType.getId().intValue());
     }
 
@@ -50,33 +54,51 @@ public class LoanTermVariationsData {
         return this.termVariationApplicableFrom;
     }
 
-    public BigDecimal getTermValue() {
-        return this.termValue;
+    public BigDecimal getDecimalValue() {
+        return this.decimalValue;
     }
 
-    public boolean isApplicable(final LocalDate fromDate, final LocalDate dueDate, int installmentNumber) {
-        return occursOnDayFromAndUpTo(fromDate, dueDate, this.termVariationApplicableFrom)
-                || isIntegerEquals(installmentNumber, this.termVariationApplicableFromInstallment);
+    public boolean isApplicable(final LocalDate fromDate, final LocalDate dueDate) {
+        return occursOnDayFromAndUpTo(fromDate, dueDate, this.termVariationApplicableFrom);
     }
 
     private boolean occursOnDayFromAndUpTo(final LocalDate fromInclusive, final LocalDate upToNotInclusive, final LocalDate target) {
         return target != null && !target.isBefore(fromInclusive) && target.isBefore(upToNotInclusive);
     }
 
-    private boolean isIntegerEquals(final Integer installmentNumber, final Integer target) {
-        return target != null && target.equals(installmentNumber);
-    }
-
-    public boolean isApplicable(final LocalDate fromDate, int installmentNumber) {
-        return occursBefore(fromDate, this.termVariationApplicableFrom)
-                || isIntegerGreterThan(installmentNumber, this.termVariationApplicableFromInstallment);
+    public boolean isApplicable(final LocalDate fromDate) {
+        return occursBefore(fromDate, this.termVariationApplicableFrom);
     }
 
     private boolean occursBefore(final LocalDate date, final LocalDate target) {
         return target != null && target.isBefore(date);
     }
 
-    private boolean isIntegerGreterThan(final Integer installmentNumber, final Integer target) {
-        return target != null && target < installmentNumber;
+    public LocalDate getDateValue() {
+        return this.dateValue;
     }
+
+    public boolean isSpecificToInstallment() {
+        return this.isSpecificToInstallment;
+    }
+
+    public Boolean isProcessed() {
+        return this.isProcessed == null ? false : this.isProcessed;
+    }
+
+    public void setProcessed(Boolean isProcessed) {
+        this.isProcessed = isProcessed;
+    }
+
+    @Override
+    public int compareTo(LoanTermVariationsData o) {
+        int comparsion = getTermApplicableFrom().compareTo(o.getTermApplicableFrom());
+        if (comparsion == 0) {
+            if (o.getTermVariationType().isDueDateVariation() || o.getTermVariationType().isInsertInstallment()) {
+                comparsion = 1;
+            }
+        }
+        return comparsion;
+    }
+
 }
