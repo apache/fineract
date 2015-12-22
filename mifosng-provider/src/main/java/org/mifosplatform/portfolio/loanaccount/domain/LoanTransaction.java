@@ -617,6 +617,16 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     public boolean isAccrual() {
         return LoanTransactionType.ACCRUAL.equals(getTypeOf()) && isNotReversed();
     }
+    
+    public boolean isNonMonetaryTransaction(){
+    	return isNotReversed() 
+    			&& (LoanTransactionType.CONTRA.equals(getTypeOf())
+    					|| LoanTransactionType.MARKED_FOR_RESCHEDULING.equals(getTypeOf())
+    					|| LoanTransactionType.APPROVE_TRANSFER.equals(getTypeOf())
+    					|| LoanTransactionType.INITIATE_TRANSFER.equals(getTypeOf())
+    					|| LoanTransactionType.REJECT_TRANSFER.equals(getTypeOf())
+    					|| LoanTransactionType.WITHDRAW_TRANSFER.equals(getTypeOf()));
+    }
 
     public void updateOutstandingLoanBalance(BigDecimal outstandingLoanBalance) {
         this.outstandingLoanBalance = outstandingLoanBalance;
