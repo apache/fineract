@@ -3080,7 +3080,9 @@ public class Loan extends AbstractPersistable<Long> {
     private List<LoanTransaction> retreiveListOfTransactionsPostDisbursement() {
         final List<LoanTransaction> repaymentsOrWaivers = new ArrayList<>();
         for (final LoanTransaction transaction : this.loanTransactions) {
-            if (!transaction.isDisbursement() && transaction.isNotReversed()) {
+            if (transaction.isNotReversed() 
+            		&& !(transaction.isDisbursement()
+            				|| transaction.isNonMonetaryTransaction())) {
                 repaymentsOrWaivers.add(transaction);
             }
         }
@@ -3092,8 +3094,11 @@ public class Loan extends AbstractPersistable<Long> {
     public List<LoanTransaction> retreiveListOfTransactionsPostDisbursementExcludeAccruals() {
         final List<LoanTransaction> repaymentsOrWaivers = new ArrayList<>();
         for (final LoanTransaction transaction : this.loanTransactions) {
-            if (!transaction.isDisbursement() && transaction.isNotReversed() && !transaction.isAccrual()
-                    && !transaction.isRepaymentAtDisbursement()) {
+            if (transaction.isNotReversed() 
+            		&& !(transaction.isDisbursement() 
+            				|| transaction.isAccrual()
+            				|| transaction.isRepaymentAtDisbursement()
+            				|| transaction.isNonMonetaryTransaction())) {
                 repaymentsOrWaivers.add(transaction);
             }
         }
@@ -3105,7 +3110,9 @@ public class Loan extends AbstractPersistable<Long> {
     private List<LoanTransaction> retreiveListOfTransactionsExcludeAccruals() {
         final List<LoanTransaction> repaymentsOrWaivers = new ArrayList<>();
         for (final LoanTransaction transaction : this.loanTransactions) {
-            if (transaction.isNotReversed() && !transaction.isAccrual()) {
+            if (transaction.isNotReversed() 
+            		&& !(transaction.isAccrual() 
+            				|| transaction.isNonMonetaryTransaction())) {
                 repaymentsOrWaivers.add(transaction);
             }
         }
