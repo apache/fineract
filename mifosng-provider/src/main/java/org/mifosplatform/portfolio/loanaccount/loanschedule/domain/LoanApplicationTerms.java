@@ -704,15 +704,21 @@ public final class LoanApplicationTerms {
             break;
             case MONTHS:
                 int numberOfMonths = Months.monthsBetween(startDate, endDate).getMonths();
-                int daysLeftAfterMonths = Days.daysBetween(startDate.plusMonths(numberOfMonths), endDate).getDays();
+                LocalDate startDateAfterConsideringMonths = startDate.plusMonths(numberOfMonths);
+                LocalDate endDateAfterConsideringMonths = startDate.plusMonths(numberOfMonths + 1);
+                int daysLeftAfterMonths = Days.daysBetween(startDateAfterConsideringMonths, endDate).getDays();
+                int daysInPeriodAfterMonths = Days.daysBetween(startDateAfterConsideringMonths, endDateAfterConsideringMonths).getDays();
                 numberOfPeriods = numberOfPeriods.add(BigDecimal.valueOf(numberOfMonths)).add(
-                        BigDecimal.valueOf((double) daysLeftAfterMonths / 30));
+                        BigDecimal.valueOf((double) daysLeftAfterMonths / daysInPeriodAfterMonths));
             break;
             case YEARS:
                 int numberOfYears = Years.yearsBetween(startDate, endDate).getYears();
-                int daysLeftAfterYears = Days.daysBetween(startDate.plusYears(numberOfYears), endDate).getDays();
+                LocalDate startDateAfterConsideringYears = startDate.plusYears(numberOfYears);
+                LocalDate endDateAfterConsideringYears = startDate.plusYears(numberOfYears + 1);
+                int daysLeftAfterYears = Days.daysBetween(startDateAfterConsideringYears, endDate).getDays();
+                int daysInPeriodAfterYears = Days.daysBetween(startDateAfterConsideringYears, endDateAfterConsideringYears).getDays();
                 numberOfPeriods = numberOfPeriods.add(BigDecimal.valueOf(numberOfYears)).add(
-                        BigDecimal.valueOf((double) daysLeftAfterYears / 365));
+                        BigDecimal.valueOf((double) daysLeftAfterYears / daysInPeriodAfterYears));
             break;
             default:
             break;
@@ -881,17 +887,20 @@ public final class LoanApplicationTerms {
 
     private long calculatePeriodsInOneYear(final PaymentPeriodsInOneYearCalculator calculator) {
 
-        //check if daysInYears is set if so change periodsInOneYear to days set in db
+        // check if daysInYears is set if so change periodsInOneYear to days set
+        // in db
         long periodsInOneYear;
-        boolean daysInYearToUse = (this.repaymentPeriodFrequencyType.getCode().equalsIgnoreCase("periodFrequencyType.days") && !this.daysInYearType.getCode().equalsIgnoreCase("DaysInYearType.actual"));
-        if(daysInYearToUse){
+        boolean daysInYearToUse = (this.repaymentPeriodFrequencyType.getCode().equalsIgnoreCase("periodFrequencyType.days") && !this.daysInYearType
+                .getCode().equalsIgnoreCase("DaysInYearType.actual"));
+        if (daysInYearToUse) {
             periodsInOneYear = this.daysInYearType.getValue().longValue();
-        }else{
-            periodsInOneYear =   calculator.calculate(this.repaymentPeriodFrequencyType).longValue();
+        } else {
+            periodsInOneYear = calculator.calculate(this.repaymentPeriodFrequencyType).longValue();
         }
         switch (this.interestCalculationPeriodMethod) {
             case DAILY:
-                periodsInOneYear = (!this.daysInYearType.getCode().equalsIgnoreCase("DaysInYearType.actual")) ? this.daysInYearType.getValue().longValue() : calculator.calculate(PeriodFrequencyType.DAYS).longValue();
+                periodsInOneYear = (!this.daysInYearType.getCode().equalsIgnoreCase("DaysInYearType.actual")) ? this.daysInYearType
+                        .getValue().longValue() : calculator.calculate(PeriodFrequencyType.DAYS).longValue();
             break;
             case INVALID:
             break;
