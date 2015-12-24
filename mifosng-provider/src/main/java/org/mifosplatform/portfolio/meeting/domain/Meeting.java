@@ -65,9 +65,9 @@ public class Meeting extends AbstractPersistable<Long> {
         this.meetingDate = meetingDate;
     }
 
-    public static Meeting createNew(final CalendarInstance calendarInstance, final Date meetingDate) {
-
-        if (!isValidMeetingDate(calendarInstance, meetingDate)) { throw new NotValidRecurringDateException("meeting", "The date '"
+    public static Meeting createNew(final CalendarInstance calendarInstance, final Date meetingDate, Boolean isTransactionDateOnNonMeetingDate) {
+    	
+    	if (!isTransactionDateOnNonMeetingDate && !isValidMeetingDate(calendarInstance, meetingDate)) { throw new NotValidRecurringDateException("meeting", "The date '"
                 + meetingDate + "' is not a valid meeting date.", meetingDate); }
         return new Meeting(calendarInstance, meetingDate);
     }
