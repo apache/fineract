@@ -132,9 +132,17 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Override
     public LoanTransaction makeRepayment(final Loan loan, final CommandProcessingResultBuilder builderResult,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText,
-            final String txnExternalId, final boolean isRecoveryRepayment, boolean isAccountTransfer) {
+            final String txnExternalId, final boolean isRecoveryRepayment, boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto, Boolean isHolidayValidationDone) {
         AppUser currentUser = getAppUserIfPresent();
         checkClientOrGroupActive(loan);
+        List<Holiday> holidays = null;
+        WorkingDays workingDays = null;
+        boolean allowTransactionsOnHoliday = false;
+        boolean allowTransactionsOnNonWorkingDay = false;
+        HolidayDetailDTO holidayDetailDTO = null;
+        if(holidayDetailDto != null){
+            holidayDetailDTO = holidayDetailDto;
+        }
         this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.LOAN_MAKE_REPAYMENT,
                 constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
 
@@ -165,12 +173,13 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                     txnExternalId, currentDateTime, currentUser);
         }
 
-        final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
-        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
-                transactionDate.toDate(), HolidayStatusType.ACTIVE.getValue());
-        final WorkingDays workingDays = this.workingDaysRepository.findOne();
-        final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
-
+        if(!isHolidayValidationDone){
+	        allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
+	        holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
+	                transactionDate.toDate(), HolidayStatusType.ACTIVE.getValue());
+	        workingDays = this.workingDaysRepository.findOne();
+	        allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
+		}
         CalendarInstance restCalendarInstance = null;
         CalendarInstance compoundingCalendarInstance = null;
         ApplicationCurrency applicationCurrency = null;
@@ -191,12 +200,16 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             calculatedRepaymentsStartingFromDate = getCalculatedRepaymentsStartingFromDate(loan.getDisbursementDate(), loan,
                     calendarInstance);
 
-            isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+			if(!isHolidayValidationDone){
+            	isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+			}
             overdurPenaltyWaitPeriod = this.configurationDomainService.retrievePenaltyWaitPeriod();
             recalculateFrom = transactionDate;
         }
-        HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays, allowTransactionsOnHoliday,
+        if(!isHolidayValidationDone){
+        	holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays, allowTransactionsOnHoliday,
                 allowTransactionsOnNonWorkingDay);
+        }	
         FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
 
         final ScheduleGeneratorDTO scheduleGeneratorDTO = new ScheduleGeneratorDTO(loanScheduleFactory, applicationCurrency,
@@ -205,7 +218,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         final ChangedTransactionDetail changedTransactionDetail = loan.makeRepayment(newRepaymentTransaction,
                 defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds, isRecoveryRepayment,
-                scheduleGeneratorDTO, currentUser);
+                scheduleGeneratorDTO, currentUser, isHolidayValidationDone);
 
         saveLoanTransactionWithDataIntegrityViolationChecks(newRepaymentTransaction);
 
