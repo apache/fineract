@@ -21,32 +21,35 @@ public class CodeValueData implements Serializable {
 
     @SuppressWarnings("unused")
     private final String description;
+    private final boolean isActive;
 
-    public static CodeValueData instance(final Long id, final String name, final Integer position) {
+    public static CodeValueData instance(final Long id, final String name, final Integer position, final boolean isActive) {
         String description = null;
-        return new CodeValueData(id, name, position, description);
+        return new CodeValueData(id, name, position, description,isActive);
     }
 
-    public static CodeValueData instance(final Long id, final String name, final String description) {
+    public static CodeValueData instance(final Long id, final String name, final String description, final boolean isActive) {
         Integer position = null;
-        return new CodeValueData(id, name, position, description);
+        return new CodeValueData(id, name, position, description,isActive);
     }
 
     public static CodeValueData instance(final Long id, final String name) {
         String description = null;
         Integer position = null;
-        return new CodeValueData(id, name, position, description);
+        boolean isActive = false;
+        return new CodeValueData(id, name, position, description, isActive);
     }
 
-    public static CodeValueData instance(final Long id, final String name, final Integer position, final String description) {
-        return new CodeValueData(id, name, position, description);
+    public static CodeValueData instance(final Long id, final String name, final Integer position, final String description, final boolean isActive) {
+        return new CodeValueData(id, name, position, description,isActive);
     }
 
-    private CodeValueData(final Long id, final String name, final Integer position, final String description) {
+    private CodeValueData(final Long id, final String name, final Integer position, final String description, final boolean isActive) {
         this.id = id;
         this.name = name;
         this.position = position;
         this.description = description;
+        this.isActive = isActive;
     }
 
     public Long getId() {

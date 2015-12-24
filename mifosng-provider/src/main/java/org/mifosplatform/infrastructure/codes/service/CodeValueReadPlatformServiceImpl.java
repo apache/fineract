@@ -35,8 +35,8 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
     private static final class CodeValueDataMapper implements RowMapper<CodeValueData> {
 
         public String schema() {
-            return " cv.id as id, cv.code_value as value, cv.code_id as codeId, cv.code_description as description, cv.order_position as position"
-                    + " from m_code_value as cv join m_code c on cv.code_id = c.id ";
+            return " cv.id as id, cv.code_value as value, cv.code_id as codeId, cv.code_description as description, cv.order_position as position,"
+                    + " cv.is_active isActive from m_code_value as cv join m_code c on cv.code_id = c.id ";
         }
 
         @Override
@@ -46,7 +46,8 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
             final String value = rs.getString("value");
             final Integer position = rs.getInt("position");
             final String description = rs.getString("description");
-            return CodeValueData.instance(id, value, position, description);
+            final boolean isActive = rs.getBoolean("isActive");
+            return CodeValueData.instance(id, value, position, description, isActive);
         }
     }
 
@@ -56,7 +57,7 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
         this.context.authenticatedUser();
 
         final CodeValueDataMapper rm = new CodeValueDataMapper();
-        final String sql = "select " + rm.schema() + "where c.code_name like ? order by position";
+        final String sql = "select " + rm.schema() + "where c.code_name like ? and cv.is_active = 1 order by position";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { code });
     }
