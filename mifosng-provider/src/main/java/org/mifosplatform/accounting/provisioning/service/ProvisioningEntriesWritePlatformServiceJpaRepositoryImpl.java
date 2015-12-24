@@ -29,6 +29,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -142,9 +143,14 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     @Override
     @CronTarget(jobName = JobName.GENERATE_LOANLOSS_PROVISIONING)
     public void generateLoanLossProvisioningAmount() {
-        Date currentDate = new Date();
+        Date currentDate  = DateUtils.getLocalDateOfTenant().toDate() ;
         boolean addJournalEntries = true;
         try {
+            Collection<ProvisioningCriteriaData> criteriaCollection = this.provisioningCriteriaReadPlatformService.retrieveAllProvisioningCriterias() ; 
+            if(criteriaCollection == null || criteriaCollection.size() == 0){
+                return ;
+                //FIXME: Do we need to throw NoProvisioningCriteriaDefinitionFound()?
+            }
             createProvsioningEntry(currentDate, addJournalEntries);
         } catch (ProvisioningEntryAlreadyCreatedException peace) {} catch (DataIntegrityViolationException dive) {}
     }
