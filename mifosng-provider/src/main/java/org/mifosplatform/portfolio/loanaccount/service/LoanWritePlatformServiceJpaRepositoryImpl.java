@@ -2474,6 +2474,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
         boolean runInterestRecalculation = false;
         LocalDate recalculateFrom = DateUtils.getLocalDateOfTenant();
+        LocalDate lastChargeDate = null;
         for (final OverdueLoanScheduleData overdueInstallment : overdueLoanScheduleDatas) {
 
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(overdueInstallment.toString());
@@ -2485,6 +2486,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             runInterestRecalculation = runInterestRecalculation || overdueDTO.isRunInterestRecalculation();
             if (recalculateFrom.isAfter(overdueDTO.getRecalculateFrom())) {
                 recalculateFrom = overdueDTO.getRecalculateFrom();
+            }
+            if (lastChargeDate == null || overdueDTO.getLastChargeAppliedDate().isAfter(lastChargeDate)) {
+                lastChargeDate = overdueDTO.getLastChargeAppliedDate();
             }
         }
         if (loan != null) {
@@ -2503,6 +2507,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
 
             if (reprocessRequired) {
+                addInstallmentIfPenaltyAppliedAfterLastDueDate(loan, lastChargeDate);
                 ChangedTransactionDetail changedTransactionDetail = loan.reprocessTransactions();
                 if (changedTransactionDetail != null) {
                     for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
@@ -2525,6 +2530,28 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_APPLY_OVERDUE_CHARGE,
                     constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
 
+        }
+    }
+
+    private void addInstallmentIfPenaltyAppliedAfterLastDueDate(Loan loan, LocalDate lastChargeDate) {
+        if (lastChargeDate != null) {
+            List<LoanRepaymentScheduleInstallment> installments = loan.fetchRepaymentScheduleInstallments();
+            LoanRepaymentScheduleInstallment lastInstallment = loan.fetchRepaymentScheduleInstallment(installments.size());
+            if (lastChargeDate.isAfter(lastInstallment.getDueDate())) {
+                if (lastInstallment.isRecalculatedInterestComponent()) {
+                    installments.remove(lastInstallment);
+                    lastInstallment = loan.fetchRepaymentScheduleInstallment(installments.size());
+                }
+                boolean recalculatedInterestComponent = true;
+                BigDecimal principal = BigDecimal.ZERO;
+                BigDecimal interest = BigDecimal.ZERO;
+                BigDecimal feeCharges = BigDecimal.ZERO;
+                BigDecimal penaltyCharges = BigDecimal.ONE;
+                LoanRepaymentScheduleInstallment newEntry = new LoanRepaymentScheduleInstallment(loan, installments.size() + 1,
+                        lastInstallment.getDueDate(), lastChargeDate, principal, interest, feeCharges, penaltyCharges,
+                        recalculatedInterestComponent);
+                installments.add(newEntry);
+            }
         }
     }
 
@@ -2565,6 +2592,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         LoanRepaymentScheduleInstallment installment = null;
+        LocalDate lastChargeAppliedDate = dueDate;
         if (!scheduleDates.isEmpty()) {
             if (loan == null) {
                 loan = this.loanAssembler.assembleFrom(loanId);
@@ -2573,8 +2601,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
             }
             installment = loan.fetchRepaymentScheduleInstallment(periodNumber);
+            lastChargeAppliedDate = installment.getDueDate();
         }
         LocalDate recalculateFrom = DateUtils.getLocalDateOfTenant();
+
         if (loan != null) {
             this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.LOAN_APPLY_OVERDUE_CHARGE,
                     constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
@@ -2591,10 +2621,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 if (entry.getValue().isBefore(recalculateFrom)) {
                     recalculateFrom = entry.getValue();
                 }
+                if (entry.getValue().isAfter(lastChargeAppliedDate)) {
+                    lastChargeAppliedDate = entry.getValue();
+                }
             }
         }
 
-        return new LoanOverdueDTO(loan, runInterestRecalculation, recalculateFrom);
+        return new LoanOverdueDTO(loan, runInterestRecalculation, recalculateFrom, lastChargeAppliedDate);
     }
 
     @Override
@@ -3079,11 +3112,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             boolean isFloatingInterestRate = loan.getIsFloatingInterestRate();
             BigDecimal interestRateDiff = loan.getInterestRateDifferential();
             List<FloatingRatePeriodData> baseLendingRatePeriods = null;
-            try{
-            	baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate()
-            								.getRatePeriods();
-            }catch(final FloatingRateNotFoundException ex){
-            	// Do not do anything
+            try {
+                baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate().getRatePeriods();
+            } catch (final FloatingRateNotFoundException ex) {
+                // Do not do anything
             }
             floatingRateDTO = new FloatingRateDTO(isFloatingInterestRate, loan.getDisbursementDate(), interestRateDiff,
                     baseLendingRatePeriods);
