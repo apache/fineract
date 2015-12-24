@@ -59,6 +59,7 @@ public class LoanAccountData {
 
     // related to
     private final Long clientId;
+    private final String clientAccountNo;
     private final String clientName;
     private final Long clientOfficeId;
     private final GroupGeneralData group;
@@ -205,6 +206,7 @@ public class LoanAccountData {
         final String externalId = null;
         final Long clientId = null;
         final String clientName = null;
+        final String clientAccountNo = null;
         final Long clientOfficeId = null;
         final GroupGeneralData group = null;
         final EnumOptionData loanType = null;
@@ -301,14 +303,14 @@ public class LoanAccountData {
         final Boolean isVariableInstallmentsAllowed = Boolean.FALSE;
         final Integer minimumGap = null;
         final Integer maximumGap = null;
-        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group, loanType, loanProductId,
-                loanProductName, loanProductDescription, isLoanProductLinkedToFloatingRate, fundId, fundName, loanPurposeId,
-                loanPurposeName, loanOfficerId, loanOfficerName, currencyData, proposedPrincipal, principal, principal, totalOverpaid,
-                inArrearsTolerance, termFrequency, termPeriodFrequencyType, numberOfRepayments, repaymentEvery, repaymentFrequencyType,
-                repaymentFrequencyNthDayType, repaymentFrequencyDayOfWeekType, transactionProcessingStrategyId,
-                transactionProcessingStrategyName, amortizationType, interestRatePerPeriod, interestRateFrequencyType, annualInterestRate,
-                interestType, isFloatingInterestRate, interestRateDifferential, interestCalculationPeriodType,
-                expectedFirstRepaymentOnDate, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
+
+        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientAccountNo, clientName, clientOfficeId, group, loanType, loanProductId,
+                loanProductName, loanProductDescription, isLoanProductLinkedToFloatingRate, fundId, fundName, loanPurposeId, loanPurposeName, loanOfficerId, loanOfficerName,
+                currencyData, proposedPrincipal, principal, principal, totalOverpaid, inArrearsTolerance, termFrequency,
+                termPeriodFrequencyType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, repaymentFrequencyNthDayType,
+                repaymentFrequencyDayOfWeekType, transactionProcessingStrategyId, transactionProcessingStrategyName, amortizationType,
+                interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType, isFloatingInterestRate, 
+                interestRateDifferential, interestCalculationPeriodType, expectedFirstRepaymentOnDate, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                 interestChargedFromDate, timeline, summary, feeChargesDueAtDisbursementCharged, repaymentSchedule, transactions, charges,
                 collateral, guarantors, calendarData, productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 repaymentFrequencyNthDayTypeOptions, repaymentFrequencyDayOfWeekTypeOptions, transactionProcessingStrategyOptions,
@@ -327,7 +329,7 @@ public class LoanAccountData {
      * Used to produce a {@link LoanAccountData} with only client information
      * defaulted.
      */
-    public static LoanAccountData clientDefaults(final Long clientId, final String clientName, final Long clientOfficeId,
+    public static LoanAccountData clientDefaults(final Long clientId, final String clientAccountNo, final String clientName, final Long clientOfficeId,
             final LocalDate expectedDisbursementDate) {
         final Long id = null;
         final String accountNo = null;
@@ -432,13 +434,13 @@ public class LoanAccountData {
         final Integer minimumGap = null;
         final Integer maximumGap = null;
 
-        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group, loanType, loanProductId,
-                loanProductName, loanProductDescription, isLoanProductLinkedToFloatingRate, fundId, fundName, loanPurposeId,
-                loanPurposeName, loanOfficerId, loanOfficerName, currencyData, proposedPrincipal, principal, principal, totalOverpaid,
-                inArrearsTolerance, termFrequency, termPeriodFrequencyType, numberOfRepayments, repaymentEvery, repaymentFrequencyType,
-                repaymentFrequencyNthDayType, repaymentFrequencyDayOfWeekType, transactionProcessingStrategyId,
-                transactionProcessingStrategyName, amortizationType, interestRatePerPeriod, interestRateFrequencyType, annualInterestRate,
-                interestType, isFloatingInterestRate, interestRateDifferential, interestCalculationPeriodType,
+        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientAccountNo, clientName, clientOfficeId, group, loanType, loanProductId,
+                loanProductName, loanProductDescription, isLoanProductLinkedToFloatingRate, fundId, fundName, loanPurposeId, loanPurposeName, loanOfficerId, loanOfficerName,
+                currencyData, proposedPrincipal, principal, principal, totalOverpaid, inArrearsTolerance, termFrequency,
+                termPeriodFrequencyType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, repaymentFrequencyNthDayType,
+                repaymentFrequencyDayOfWeekType, transactionProcessingStrategyId, transactionProcessingStrategyName, amortizationType,
+                interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType, 
+                isFloatingInterestRate, interestRateDifferential, interestCalculationPeriodType,
                 expectedFirstRepaymentOnDate, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                 interestChargedFromDate, timeline, summary, feeChargesDueAtDisbursementCharged, repaymentSchedule, transactions, charges,
                 collateral, guarantors, calendarData, productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions,
@@ -456,28 +458,28 @@ public class LoanAccountData {
 
     public static LoanAccountData populateClientDefaults(final LoanAccountData acc, final LoanAccountData clientAcc) {
 
-        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, clientAcc.clientId, clientAcc.clientName,
-                clientAcc.clientOfficeId, acc.group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription,
-                acc.isLoanProductLinkedToFloatingRate, acc.fundId, acc.fundName, acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId,
-                acc.loanOfficerName, acc.currency, acc.proposedPrincipal, acc.principal, acc.approvedPrincipal, acc.totalOverpaid,
-                acc.inArrearsTolerance, acc.termFrequency, acc.termPeriodFrequencyType, acc.numberOfRepayments, acc.repaymentEvery,
-                acc.repaymentFrequencyType, acc.repaymentFrequencyNthDayType, acc.repaymentFrequencyDayOfWeekType,
-                acc.transactionProcessingStrategyId, acc.transactionProcessingStrategyName, acc.amortizationType,
-                acc.interestRatePerPeriod, acc.interestRateFrequencyType, acc.annualInterestRate, acc.interestType,
-                acc.isFloatingInterestRate, acc.interestRateDifferential, acc.interestCalculationPeriodType,
-                acc.expectedFirstRepaymentOnDate, acc.graceOnPrincipalPayment, acc.graceOnInterestPayment, acc.graceOnInterestCharged,
-                acc.interestChargedFromDate, clientAcc.timeline, acc.summary, acc.feeChargesAtDisbursementCharged, acc.repaymentSchedule,
-                acc.transactions, acc.charges, acc.collateral, acc.guarantors, acc.meeting, acc.productOptions,
-                acc.termFrequencyTypeOptions, acc.repaymentFrequencyTypeOptions, acc.repaymentFrequencyNthDayTypeOptions,
-                acc.repaymentFrequencyDaysOfWeekTypeOptions, acc.transactionProcessingStrategyOptions,
-                acc.interestRateFrequencyTypeOptions, acc.amortizationTypeOptions, acc.interestTypeOptions,
-                acc.interestCalculationPeriodTypeOptions, acc.fundOptions, acc.chargeOptions, null, acc.loanOfficerOptions,
-                acc.loanPurposeOptions, acc.loanCollateralOptions, acc.calendarOptions, acc.syncDisbursementWithMeeting, acc.loanCounter,
-                acc.loanProductCounter, acc.notes, acc.accountLinkingOptions, acc.linkedAccount, acc.disbursementDetails,
-                acc.multiDisburseLoan, acc.canDefineInstallmentAmount, acc.fixedEmiAmount, acc.maxOutstandingLoanBalance,
-                acc.emiAmountVariations, acc.memberVariations, acc.product, acc.inArrears, acc.graceOnArrearsAgeing, acc.overdueCharges,
-                acc.isNPA, acc.daysInMonthType, acc.daysInYearType, acc.isInterestRecalculationEnabled, acc.interestRecalculationData,
-                acc.originalSchedule, acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods,
+        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, clientAcc.clientId, clientAcc.clientAccountNo, clientAcc.clientName,
+                clientAcc.clientOfficeId, acc.group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription, acc.isLoanProductLinkedToFloatingRate,
+                acc.fundId, acc.fundName, acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName, acc.currency,
+                acc.proposedPrincipal, acc.principal, acc.approvedPrincipal, acc.totalOverpaid, acc.inArrearsTolerance, acc.termFrequency,
+                acc.termPeriodFrequencyType, acc.numberOfRepayments, acc.repaymentEvery, acc.repaymentFrequencyType,
+                acc.repaymentFrequencyNthDayType, acc.repaymentFrequencyDayOfWeekType, acc.transactionProcessingStrategyId,
+                acc.transactionProcessingStrategyName, acc.amortizationType, acc.interestRatePerPeriod, acc.interestRateFrequencyType,
+                acc.annualInterestRate, acc.interestType, acc.isFloatingInterestRate, acc.interestRateDifferential, 
+                acc.interestCalculationPeriodType, acc.expectedFirstRepaymentOnDate,
+                acc.graceOnPrincipalPayment, acc.graceOnInterestPayment, acc.graceOnInterestCharged, acc.interestChargedFromDate,
+                clientAcc.timeline, acc.summary, acc.feeChargesAtDisbursementCharged, acc.repaymentSchedule, acc.transactions, acc.charges,
+                acc.collateral, acc.guarantors, acc.meeting, acc.productOptions, acc.termFrequencyTypeOptions,
+                acc.repaymentFrequencyTypeOptions, acc.repaymentFrequencyNthDayTypeOptions, acc.repaymentFrequencyDaysOfWeekTypeOptions,
+                acc.transactionProcessingStrategyOptions, acc.interestRateFrequencyTypeOptions, acc.amortizationTypeOptions,
+                acc.interestTypeOptions, acc.interestCalculationPeriodTypeOptions, acc.fundOptions, acc.chargeOptions, null,
+                acc.loanOfficerOptions, acc.loanPurposeOptions, acc.loanCollateralOptions, acc.calendarOptions,
+                acc.syncDisbursementWithMeeting, acc.loanCounter, acc.loanProductCounter, acc.notes, acc.accountLinkingOptions,
+                acc.linkedAccount, acc.disbursementDetails, acc.multiDisburseLoan, acc.canDefineInstallmentAmount, acc.fixedEmiAmount,
+                acc.maxOutstandingLoanBalance, acc.emiAmountVariations, acc.memberVariations, acc.product, acc.inArrears,
+                acc.graceOnArrearsAgeing, acc.overdueCharges, acc.isNPA, acc.daysInMonthType, acc.daysInYearType,
+                acc.isInterestRecalculationEnabled, acc.interestRecalculationData, acc.originalSchedule,
+                acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods,
                 acc.isVariableInstallmentsAllowed, acc.minimumGap, acc.maximumGap);
     }
 
@@ -492,6 +494,7 @@ public class LoanAccountData {
         final LoanStatusEnumData status = null;
         final String externalId = null;
         final Long clientId = null;
+        final String clientAccountNo = null;
         final String clientName = null;
         final Long clientOfficeId = null;
         final EnumOptionData loanType = null;
@@ -591,13 +594,14 @@ public class LoanAccountData {
         final Integer minimumGap = null;
         final Integer maximumGap = null;
 
-        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group, loanType, loanProductId,
-                loanProductName, loanProductDescription, isLoanProductLinkedToFloatingRate, fundId, fundName, loanPurposeId,
-                loanPurposeName, loanOfficerId, loanOfficerName, currencyData, proposedPrincipal, principal, principal, totalOverpaid,
-                inArrearsTolerance, termFrequency, termPeriodFrequencyType, numberOfRepayments, repaymentEvery, repaymentFrequencyType,
-                repaymentFrequencyNthDayType, repaymentFrequencyDayOfWeekType, transactionProcessingStrategyId,
-                transactionProcessingStrategyName, amortizationType, interestRatePerPeriod, interestRateFrequencyType, annualInterestRate,
-                interestType, isFloatingInterestRate, interestRateDifferential, interestCalculationPeriodType,
+
+        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientAccountNo, clientName, clientOfficeId, group, loanType, loanProductId,
+                loanProductName, loanProductDescription, isLoanProductLinkedToFloatingRate, fundId, fundName, loanPurposeId, loanPurposeName, loanOfficerId, loanOfficerName,
+                currencyData, proposedPrincipal, principal, principal, totalOverpaid, inArrearsTolerance, termFrequency,
+                termPeriodFrequencyType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, repaymentFrequencyNthDayType,
+                repaymentFrequencyDayOfWeekType, transactionProcessingStrategyId, transactionProcessingStrategyName, amortizationType,
+                interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType, 
+                isFloatingInterestRate, interestRateDifferential, interestCalculationPeriodType,
                 expectedFirstRepaymentOnDate, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                 interestChargedFromDate, timeline, summary, feeChargesDueAtDisbursementCharged, repaymentSchedule, transactions, charges,
                 collateral, guarantors, calendarData, productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions,
@@ -615,28 +619,28 @@ public class LoanAccountData {
 
     public static LoanAccountData populateGroupDefaults(final LoanAccountData acc, final LoanAccountData groupAcc) {
 
-        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientName, acc.clientOfficeId,
-                groupAcc.group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription,
-                acc.isLoanProductLinkedToFloatingRate, acc.fundId, acc.fundName, acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId,
-                acc.loanOfficerName, acc.currency, acc.proposedPrincipal, acc.principal, acc.approvedPrincipal, acc.totalOverpaid,
-                acc.inArrearsTolerance, acc.termFrequency, acc.termPeriodFrequencyType, acc.numberOfRepayments, acc.repaymentEvery,
-                acc.repaymentFrequencyType, acc.repaymentFrequencyNthDayType, acc.repaymentFrequencyDayOfWeekType,
-                acc.transactionProcessingStrategyId, acc.transactionProcessingStrategyName, acc.amortizationType,
-                acc.interestRatePerPeriod, acc.interestRateFrequencyType, acc.annualInterestRate, acc.interestType,
-                acc.isFloatingInterestRate, acc.interestRateDifferential, acc.interestCalculationPeriodType,
-                acc.expectedFirstRepaymentOnDate, acc.graceOnPrincipalPayment, acc.graceOnInterestPayment, acc.graceOnInterestCharged,
-                acc.interestChargedFromDate, groupAcc.timeline, acc.summary, acc.feeChargesAtDisbursementCharged, acc.repaymentSchedule,
-                acc.transactions, acc.charges, acc.collateral, acc.guarantors, acc.meeting, acc.productOptions,
-                acc.termFrequencyTypeOptions, acc.repaymentFrequencyTypeOptions, acc.repaymentFrequencyNthDayTypeOptions,
-                acc.repaymentFrequencyDaysOfWeekTypeOptions, acc.transactionProcessingStrategyOptions,
-                acc.interestRateFrequencyTypeOptions, acc.amortizationTypeOptions, acc.interestTypeOptions,
-                acc.interestCalculationPeriodTypeOptions, acc.fundOptions, acc.chargeOptions, null, acc.loanOfficerOptions,
-                acc.loanPurposeOptions, acc.loanCollateralOptions, acc.calendarOptions, acc.syncDisbursementWithMeeting, acc.loanCounter,
-                acc.loanProductCounter, acc.notes, acc.accountLinkingOptions, acc.linkedAccount, acc.disbursementDetails,
-                acc.multiDisburseLoan, acc.canDefineInstallmentAmount, acc.fixedEmiAmount, acc.maxOutstandingLoanBalance,
-                acc.emiAmountVariations, acc.memberVariations, acc.product, acc.inArrears, acc.graceOnArrearsAgeing, acc.overdueCharges,
-                acc.isNPA, acc.daysInMonthType, acc.daysInYearType, acc.isInterestRecalculationEnabled, acc.interestRecalculationData,
-                acc.originalSchedule, acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods,
+        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientAccountNo, acc.clientName, acc.clientOfficeId,
+                groupAcc.group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription, acc.isLoanProductLinkedToFloatingRate, acc.fundId, acc.fundName,
+                acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName, acc.currency, acc.proposedPrincipal,
+                acc.principal, acc.approvedPrincipal, acc.totalOverpaid, acc.inArrearsTolerance, acc.termFrequency,
+                acc.termPeriodFrequencyType, acc.numberOfRepayments, acc.repaymentEvery, acc.repaymentFrequencyType,
+                acc.repaymentFrequencyNthDayType, acc.repaymentFrequencyDayOfWeekType, acc.transactionProcessingStrategyId,
+                acc.transactionProcessingStrategyName, acc.amortizationType, acc.interestRatePerPeriod, acc.interestRateFrequencyType,
+                acc.annualInterestRate, acc.interestType, acc.isFloatingInterestRate, acc.interestRateDifferential, 
+                acc.interestCalculationPeriodType, acc.expectedFirstRepaymentOnDate,
+                acc.graceOnPrincipalPayment, acc.graceOnInterestPayment, acc.graceOnInterestCharged, acc.interestChargedFromDate,
+                groupAcc.timeline, acc.summary, acc.feeChargesAtDisbursementCharged, acc.repaymentSchedule, acc.transactions, acc.charges,
+                acc.collateral, acc.guarantors, acc.meeting, acc.productOptions, acc.termFrequencyTypeOptions,
+                acc.repaymentFrequencyTypeOptions, acc.repaymentFrequencyNthDayTypeOptions, acc.repaymentFrequencyDaysOfWeekTypeOptions,
+                acc.transactionProcessingStrategyOptions, acc.interestRateFrequencyTypeOptions, acc.amortizationTypeOptions,
+                acc.interestTypeOptions, acc.interestCalculationPeriodTypeOptions, acc.fundOptions, acc.chargeOptions, null,
+                acc.loanOfficerOptions, acc.loanPurposeOptions, acc.loanCollateralOptions, acc.calendarOptions,
+                acc.syncDisbursementWithMeeting, acc.loanCounter, acc.loanProductCounter, acc.notes, acc.accountLinkingOptions,
+                acc.linkedAccount, acc.disbursementDetails, acc.multiDisburseLoan, acc.canDefineInstallmentAmount, acc.fixedEmiAmount,
+                acc.maxOutstandingLoanBalance, acc.emiAmountVariations, acc.memberVariations, acc.product, acc.inArrears,
+                acc.graceOnArrearsAgeing, acc.overdueCharges, acc.isNPA, acc.daysInMonthType, acc.daysInYearType,
+                acc.isInterestRecalculationEnabled, acc.interestRecalculationData, acc.originalSchedule,
+                acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods,
                 acc.isVariableInstallmentsAllowed, acc.minimumGap, acc.maximumGap);
 
     }
@@ -657,6 +661,7 @@ public class LoanAccountData {
         final LoanStatusEnumData status = null;
         final String externalId = null;
         final Long clientId = null;
+        final String clientAccountNo = null;
         final String clientName = null;
         final Long clientOfficeId = null;
         final GroupGeneralData group = null;
@@ -761,12 +766,11 @@ public class LoanAccountData {
         final Integer minimumGap = null;
         final Integer maximumGap = null;
 
-        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group, loanType,
-                product.getId(), product.getName(), product.getDescription(), product.isLinkedToFloatingInterestRates(),
-                product.getFundId(), product.getFundName(), loanPurposeId, loanPurposeName, loanOfficerId, loanOfficerName,
-                product.getCurrency(), proposedPrincipal, principal, principal, totalOverpaid, product.getInArrearsTolerance(),
-                termFrequency, termPeriodFrequencyType, numberOfRepayments, product.getRepaymentEvery(),
-                product.getRepaymentFrequencyType(), null, null, product.getTransactionProcessingStrategyId(),
+        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientAccountNo, clientName, clientOfficeId, group, loanType,
+                product.getId(), product.getName(), product.getDescription(), product.isLinkedToFloatingInterestRates(), product.getFundId(), product.getFundName(), loanPurposeId,
+                loanPurposeName, loanOfficerId, loanOfficerName, product.getCurrency(), proposedPrincipal, principal, principal,
+                totalOverpaid, product.getInArrearsTolerance(), termFrequency, termPeriodFrequencyType, numberOfRepayments,
+                product.getRepaymentEvery(), product.getRepaymentFrequencyType(), null, null, product.getTransactionProcessingStrategyId(),
                 transactionProcessingStrategyName, product.getAmortizationType(), interestRatePerPeriod,
                 product.getInterestRateFrequencyType(), product.getAnnualInterestRate(), product.getInterestType(),
                 product.isFloatingInterestRateCalculationAllowed(), product.getDefaultDifferentialLendingRate(),
@@ -820,29 +824,28 @@ public class LoanAccountData {
             charges.add(charge.toLoanChargeData());
         }
 
-        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientName, acc.clientOfficeId,
-                acc.group, acc.loanType, product.getId(), product.getName(), product.getDescription(),
-                product.isLinkedToFloatingInterestRates(), product.getFundId(), product.getFundName(), acc.loanPurposeId,
-                acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName, product.getCurrency(), product.getPrincipal(),
-                product.getPrincipal(), product.getPrincipal(), acc.totalOverpaid, product.getInArrearsTolerance(), termFrequency,
-                termPeriodFrequencyType, product.getNumberOfRepayments(), product.getRepaymentEvery(), product.getRepaymentFrequencyType(),
-                null, null, product.getTransactionProcessingStrategyId(), product.getTransactionProcessingStrategyName(),
-                product.getAmortizationType(), product.getInterestRatePerPeriod(), product.getInterestRateFrequencyType(),
-                product.getAnnualInterestRate(), product.getInterestType(), product.isFloatingInterestRateCalculationAllowed(),
-                product.getDefaultDifferentialLendingRate(), product.getInterestCalculationPeriodType(), acc.expectedFirstRepaymentOnDate,
-                product.getGraceOnPrincipalPayment(), product.getGraceOnInterestPayment(), product.getGraceOnInterestCharged(),
-                acc.interestChargedFromDate, acc.timeline, acc.summary, acc.feeChargesAtDisbursementCharged, repaymentSchedule,
-                transactions, charges, collateral, guarantors, calendarData, productOptions, termFrequencyTypeOptions,
-                repaymentFrequencyTypeOptions, null, null, repaymentStrategyOptions, interestRateFrequencyTypeOptions,
-                amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions,
-                chargeTemplate, loanOfficerOptions, loanPurposeOptions, loanCollateralOptions, calendarOptions,
-                acc.syncDisbursementWithMeeting, acc.loanCounter, acc.loanProductCounter, notes, acc.accountLinkingOptions,
-                acc.linkedAccount, acc.disbursementDetails, product.getMultiDisburseLoan(), product.canDefineInstallmentAmount(),
-                acc.fixedEmiAmount, product.getOutstandingLoanBalance(), acc.emiAmountVariations, acc.memberVariations, product,
-                acc.inArrears, product.getGraceOnArrearsAgeing(), product.overdueFeeCharges(), acc.isNPA, product.getDaysInMonthType(),
-                product.getDaysInYearType(), product.isInterestRecalculationEnabled(), product.toLoanInterestRecalculationData(),
-                acc.originalSchedule, acc.createStandingInstructionAtDisbursement, paidInAdvance, acc.interestRatesPeriods,
-                product.isVariableInstallmentsAllowed(), product.getMinimumGapBetweenInstallments(),
+        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientAccountNo, acc.clientName, acc.clientOfficeId,
+                acc.group, acc.loanType, product.getId(), product.getName(), product.getDescription(), product.isLinkedToFloatingInterestRates(), product.getFundId(),
+                product.getFundName(), acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName,
+                product.getCurrency(), product.getPrincipal(), product.getPrincipal(), product.getPrincipal(), acc.totalOverpaid,
+                product.getInArrearsTolerance(), termFrequency, termPeriodFrequencyType, product.getNumberOfRepayments(),
+                product.getRepaymentEvery(), product.getRepaymentFrequencyType(), null, null, product.getTransactionProcessingStrategyId(),
+                product.getTransactionProcessingStrategyName(), product.getAmortizationType(), product.getInterestRatePerPeriod(),
+                product.getInterestRateFrequencyType(), product.getAnnualInterestRate(), product.getInterestType(),
+                product.isFloatingInterestRateCalculationAllowed(), product.getDefaultDifferentialLendingRate(),
+                product.getInterestCalculationPeriodType(), acc.expectedFirstRepaymentOnDate, product.getGraceOnPrincipalPayment(),
+                product.getGraceOnInterestPayment(), product.getGraceOnInterestCharged(), acc.interestChargedFromDate, acc.timeline,
+                acc.summary, acc.feeChargesAtDisbursementCharged, repaymentSchedule, transactions, charges, collateral, guarantors,
+                calendarData, productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions, null, null,
+                repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
+                interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions,
+                loanCollateralOptions, calendarOptions, acc.syncDisbursementWithMeeting, acc.loanCounter, acc.loanProductCounter, notes,
+                acc.accountLinkingOptions, acc.linkedAccount, acc.disbursementDetails, product.getMultiDisburseLoan(),
+                product.canDefineInstallmentAmount(), acc.fixedEmiAmount, product.getOutstandingLoanBalance(), acc.emiAmountVariations,
+                acc.memberVariations, product, acc.inArrears, product.getGraceOnArrearsAgeing(), product.overdueFeeCharges(), acc.isNPA,
+                product.getDaysInMonthType(), product.getDaysInYearType(), product.isInterestRecalculationEnabled(),
+                product.toLoanInterestRecalculationData(), acc.originalSchedule, acc.createStandingInstructionAtDisbursement, 
+                paidInAdvance, acc.interestRatesPeriods, product.isVariableInstallmentsAllowed(), product.getMinimumGapBetweenInstallments(),
                 product.getMaximumGapBetweenInstallments());
 
     }
@@ -852,7 +855,7 @@ public class LoanAccountData {
      * query.
      */
     public static LoanAccountData basicLoanDetails(final Long id, final String accountNo, final LoanStatusEnumData status,
-            final String externalId, final Long clientId, final String clientName, final Long clientOfficeId, final GroupGeneralData group,
+    		final String externalId, final Long clientId, final String clientAccountNo, final String clientName, final Long clientOfficeId, final GroupGeneralData group,
             final EnumOptionData loanType, final Long loanProductId, final String loanProductName, final String loanProductDescription,
             final boolean isLoanProductLinkedToFloatingRate, final Long fundId, final String fundName, final Long loanPurposeId,
             final String loanPurposeName, final Long loanOfficerId, final String loanOfficerName, final CurrencyData currencyData,
@@ -909,19 +912,20 @@ public class LoanAccountData {
         final PaidInAdvanceData paidInAdvance = null;
         final Collection<InterestRatePeriodData> interestRatesPeriods = null;
 
-        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group, loanType, loanProductId,
-                loanProductName, loanProductDescription, isLoanProductLinkedToFloatingRate, fundId, fundName, loanPurposeId,
-                loanPurposeName, loanOfficerId, loanOfficerName, currencyData, proposedPrincipal, principal, approvedPrincipal,
-                totalOverpaid, inArrearsTolerance, termFrequency, termPeriodFrequencyType, numberOfRepayments, repaymentEvery,
-                repaymentFrequencyType, repaymentFrequencyNthDayType, repaymentFrequencyDayOfWeekType, transactionStrategyId,
-                transactionStrategyName, amortizationType, interestRatePerPeriod, interestRateFrequencyType, annualInterestRate,
-                interestType, isFloatingInterestRate, interestRateDifferential, interestCalculationPeriodType,
-                expectedFirstRepaymentOnDate, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
-                interestChargedFromDate, timeline, loanSummary, feeChargesDueAtDisbursementCharged, repaymentSchedule, transactions,
-                charges, collateral, guarantors, calendarData, productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions,
-                repaymentFrequencyNthDayTypeOptions, repaymentFrequencyDayOfWeekTypeOptions, repaymentStrategyOptions,
-                interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions,
-                fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions, loanCollateralOptions, calendarOptions,
+
+        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientAccountNo, clientName, clientOfficeId, group, loanType, loanProductId,
+                loanProductName, loanProductDescription, isLoanProductLinkedToFloatingRate, fundId, fundName, loanPurposeId, loanPurposeName, loanOfficerId, loanOfficerName,
+                currencyData, proposedPrincipal, principal, approvedPrincipal, totalOverpaid, inArrearsTolerance, termFrequency,
+                termPeriodFrequencyType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, repaymentFrequencyNthDayType,
+                repaymentFrequencyDayOfWeekType, transactionStrategyId, transactionStrategyName, amortizationType, interestRatePerPeriod,
+                interestRateFrequencyType, annualInterestRate, interestType, isFloatingInterestRate, interestRateDifferential, 
+                interestCalculationPeriodType, expectedFirstRepaymentOnDate,
+                graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, timeline, loanSummary,
+                feeChargesDueAtDisbursementCharged, repaymentSchedule, transactions, charges, collateral, guarantors, calendarData,
+                productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions, repaymentFrequencyNthDayTypeOptions,
+                repaymentFrequencyDayOfWeekTypeOptions, repaymentStrategyOptions, interestRateFrequencyTypeOptions,
+                amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions,
+                chargeTemplate, loanOfficerOptions, loanPurposeOptions, loanCollateralOptions, calendarOptions,
                 syncDisbursementWithMeeting, loancounter, loanProductCounter, notes, accountLinkingOptions, linkedAccount,
                 disbursementData, multiDisburseLoan, canDefineInstallmentAmount, fixedEmiAmont, outstandingLoanBalance,
                 emiAmountVariations, memberVariations, product, inArrears, graceOnArrearsAgeing, overdueCharges, isNPA, daysInMonthType,
@@ -955,24 +959,26 @@ public class LoanAccountData {
         if (acc.product != null) {
             loanProductConfigurableAttributes = acc.product.getloanProductConfigurableAttributes();
         }
-        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientName, acc.clientOfficeId,
-                acc.group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription,
-                acc.isLoanProductLinkedToFloatingRate, acc.fundId, acc.fundName, acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId,
-                acc.loanOfficerName, acc.currency, acc.proposedPrincipal, acc.principal, acc.approvedPrincipal, acc.totalOverpaid,
-                acc.inArrearsTolerance, acc.termFrequency, acc.termPeriodFrequencyType, acc.numberOfRepayments, acc.repaymentEvery,
-                acc.repaymentFrequencyType, acc.repaymentFrequencyNthDayType, acc.repaymentFrequencyDayOfWeekType,
-                acc.transactionProcessingStrategyId, acc.transactionProcessingStrategyName, acc.amortizationType,
-                acc.interestRatePerPeriod, acc.interestRateFrequencyType, acc.annualInterestRate, acc.interestType,
-                acc.isFloatingInterestRate, acc.interestRateDifferential, acc.interestCalculationPeriodType,
-                acc.expectedFirstRepaymentOnDate, acc.graceOnPrincipalPayment, acc.graceOnInterestPayment, acc.graceOnInterestCharged,
-                acc.interestChargedFromDate, acc.timeline, acc.summary, acc.feeChargesAtDisbursementCharged, repaymentSchedule,
-                transactions, charges, collateral, guarantors, calendarData, productOptions, termFrequencyTypeOptions,
-                repaymentFrequencyTypeOptions, repaymentFrequencyNthDayTypeOptions, repaymentFrequencyDayOfWeekTypeOptions,
-                transactionProcessingStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
-                interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions,
-                loanCollateralOptions, calendarOptions, acc.syncDisbursementWithMeeting, acc.loanCounter, acc.loanProductCounter, notes,
-                accountLinkingOptions, linkedAccount, disbursementDetails, acc.multiDisburseLoan, acc.canDefineInstallmentAmount,
-                acc.fixedEmiAmount, acc.maxOutstandingLoanBalance, emiAmountVariations, acc.memberVariations, acc.product, acc.inArrears,
+
+
+        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientAccountNo, acc.clientName, acc.clientOfficeId,
+                acc.group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription, acc.isLoanProductLinkedToFloatingRate, acc.fundId, acc.fundName,
+                acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName, acc.currency, acc.proposedPrincipal,
+                acc.principal, acc.approvedPrincipal, acc.totalOverpaid, acc.inArrearsTolerance, acc.termFrequency,
+                acc.termPeriodFrequencyType, acc.numberOfRepayments, acc.repaymentEvery, acc.repaymentFrequencyType,
+                acc.repaymentFrequencyNthDayType, acc.repaymentFrequencyDayOfWeekType, acc.transactionProcessingStrategyId,
+                acc.transactionProcessingStrategyName, acc.amortizationType, acc.interestRatePerPeriod, acc.interestRateFrequencyType,
+                acc.annualInterestRate, acc.interestType, acc.isFloatingInterestRate, acc.interestRateDifferential,
+                acc.interestCalculationPeriodType, acc.expectedFirstRepaymentOnDate,
+                acc.graceOnPrincipalPayment, acc.graceOnInterestPayment, acc.graceOnInterestCharged, acc.interestChargedFromDate,
+                acc.timeline, acc.summary, acc.feeChargesAtDisbursementCharged, repaymentSchedule, transactions, charges, collateral,
+                guarantors, calendarData, productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions,
+                repaymentFrequencyNthDayTypeOptions, repaymentFrequencyDayOfWeekTypeOptions, transactionProcessingStrategyOptions,
+                interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions,
+                fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions, loanCollateralOptions, calendarOptions,
+                acc.syncDisbursementWithMeeting, acc.loanCounter, acc.loanProductCounter, notes, accountLinkingOptions, linkedAccount,
+                disbursementDetails, acc.multiDisburseLoan, acc.canDefineInstallmentAmount, acc.fixedEmiAmount,
+                acc.maxOutstandingLoanBalance, emiAmountVariations, acc.memberVariations, acc.product, acc.inArrears,
                 acc.graceOnArrearsAgeing, overdueCharges, acc.isNPA, acc.daysInMonthType, acc.daysInYearType,
                 acc.isInterestRecalculationEnabled, acc.interestRecalculationData, acc.originalSchedule,
                 acc.createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods, acc.isVariableInstallmentsAllowed,
@@ -993,28 +999,29 @@ public class LoanAccountData {
     }
 
     public static LoanAccountData associateGroup(final LoanAccountData acc, final GroupGeneralData group) {
-        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientName, acc.clientOfficeId,
-                group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription,
-                acc.isLoanProductLinkedToFloatingRate, acc.fundId, acc.fundName, acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId,
-                acc.loanOfficerName, acc.currency, acc.proposedPrincipal, acc.principal, acc.approvedPrincipal, acc.totalOverpaid,
-                acc.inArrearsTolerance, acc.termFrequency, acc.termPeriodFrequencyType, acc.numberOfRepayments, acc.repaymentEvery,
-                acc.repaymentFrequencyType, acc.repaymentFrequencyNthDayType, acc.repaymentFrequencyDayOfWeekType,
-                acc.transactionProcessingStrategyId, acc.transactionProcessingStrategyName, acc.amortizationType,
-                acc.interestRatePerPeriod, acc.interestRateFrequencyType, acc.annualInterestRate, acc.interestType,
-                acc.isFloatingInterestRate, acc.interestRateDifferential, acc.interestCalculationPeriodType,
-                acc.expectedFirstRepaymentOnDate, acc.graceOnPrincipalPayment, acc.graceOnInterestPayment, acc.graceOnInterestCharged,
-                acc.interestChargedFromDate, acc.timeline, acc.summary, acc.feeChargesAtDisbursementCharged, acc.repaymentSchedule,
-                acc.transactions, acc.charges, acc.collateral, acc.guarantors, acc.meeting, acc.productOptions,
-                acc.termFrequencyTypeOptions, acc.repaymentFrequencyTypeOptions, acc.repaymentFrequencyNthDayTypeOptions,
-                acc.repaymentFrequencyDaysOfWeekTypeOptions, acc.transactionProcessingStrategyOptions,
-                acc.interestRateFrequencyTypeOptions, acc.amortizationTypeOptions, acc.interestTypeOptions,
-                acc.interestCalculationPeriodTypeOptions, acc.fundOptions, acc.chargeOptions, null, acc.loanOfficerOptions,
-                acc.loanPurposeOptions, acc.loanCollateralOptions, acc.calendarOptions, acc.syncDisbursementWithMeeting, acc.loanCounter,
-                acc.loanProductCounter, acc.notes, acc.accountLinkingOptions, acc.linkedAccount, acc.disbursementDetails,
-                acc.multiDisburseLoan, acc.canDefineInstallmentAmount, acc.fixedEmiAmount, acc.maxOutstandingLoanBalance,
-                acc.emiAmountVariations, acc.memberVariations, acc.product, acc.inArrears, acc.graceOnArrearsAgeing, acc.overdueCharges,
-                acc.isNPA, acc.daysInMonthType, acc.daysInYearType, acc.isInterestRecalculationEnabled, acc.interestRecalculationData,
-                acc.originalSchedule, acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods,
+
+        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientAccountNo, acc.clientName, acc.clientOfficeId,
+                group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription, acc.isLoanProductLinkedToFloatingRate, acc.fundId, acc.fundName,
+                acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName, acc.currency, acc.proposedPrincipal,
+                acc.principal, acc.approvedPrincipal, acc.totalOverpaid, acc.inArrearsTolerance, acc.termFrequency,
+                acc.termPeriodFrequencyType, acc.numberOfRepayments, acc.repaymentEvery, acc.repaymentFrequencyType,
+                acc.repaymentFrequencyNthDayType, acc.repaymentFrequencyDayOfWeekType, acc.transactionProcessingStrategyId,
+                acc.transactionProcessingStrategyName, acc.amortizationType, acc.interestRatePerPeriod, acc.interestRateFrequencyType,
+                acc.annualInterestRate, acc.interestType, acc.isFloatingInterestRate, acc.interestRateDifferential,
+                acc.interestCalculationPeriodType, acc.expectedFirstRepaymentOnDate,
+                acc.graceOnPrincipalPayment, acc.graceOnInterestPayment, acc.graceOnInterestCharged, acc.interestChargedFromDate,
+                acc.timeline, acc.summary, acc.feeChargesAtDisbursementCharged, acc.repaymentSchedule, acc.transactions, acc.charges,
+                acc.collateral, acc.guarantors, acc.meeting, acc.productOptions, acc.termFrequencyTypeOptions,
+                acc.repaymentFrequencyTypeOptions, acc.repaymentFrequencyNthDayTypeOptions, acc.repaymentFrequencyDaysOfWeekTypeOptions,
+                acc.transactionProcessingStrategyOptions, acc.interestRateFrequencyTypeOptions, acc.amortizationTypeOptions,
+                acc.interestTypeOptions, acc.interestCalculationPeriodTypeOptions, acc.fundOptions, acc.chargeOptions, null,
+                acc.loanOfficerOptions, acc.loanPurposeOptions, acc.loanCollateralOptions, acc.calendarOptions,
+                acc.syncDisbursementWithMeeting, acc.loanCounter, acc.loanProductCounter, acc.notes, acc.accountLinkingOptions,
+                acc.linkedAccount, acc.disbursementDetails, acc.multiDisburseLoan, acc.canDefineInstallmentAmount, acc.fixedEmiAmount,
+                acc.maxOutstandingLoanBalance, acc.emiAmountVariations, acc.memberVariations, acc.product, acc.inArrears,
+                acc.graceOnArrearsAgeing, acc.overdueCharges, acc.isNPA, acc.daysInMonthType, acc.daysInYearType,
+                acc.isInterestRecalculationEnabled, acc.interestRecalculationData, acc.originalSchedule,
+                acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods,
                 acc.isVariableInstallmentsAllowed, acc.minimumGap, acc.maximumGap);
     }
 
@@ -1056,28 +1063,28 @@ public class LoanAccountData {
             memberVariations.put(clientId, borrowerCycleData);
         }
 
-        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientName, acc.clientOfficeId,
-                acc.group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription,
-                acc.isLoanProductLinkedToFloatingRate, acc.fundId, acc.fundName, acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId,
-                acc.loanOfficerName, acc.currency, acc.proposedPrincipal, acc.principal, acc.approvedPrincipal, acc.totalOverpaid,
-                acc.inArrearsTolerance, acc.termFrequency, acc.termPeriodFrequencyType, acc.numberOfRepayments, acc.repaymentEvery,
-                acc.repaymentFrequencyType, acc.repaymentFrequencyNthDayType, acc.repaymentFrequencyDayOfWeekType,
-                acc.transactionProcessingStrategyId, acc.transactionProcessingStrategyName, acc.amortizationType,
-                acc.interestRatePerPeriod, acc.interestRateFrequencyType, acc.annualInterestRate, acc.interestType,
-                acc.isFloatingInterestRate, acc.interestRateDifferential, acc.interestCalculationPeriodType,
-                acc.expectedFirstRepaymentOnDate, acc.graceOnPrincipalPayment, acc.graceOnInterestPayment, acc.graceOnInterestCharged,
-                acc.interestChargedFromDate, acc.timeline, acc.summary, acc.feeChargesAtDisbursementCharged, acc.repaymentSchedule,
-                acc.transactions, acc.charges, acc.collateral, acc.guarantors, acc.meeting, acc.productOptions,
-                acc.termFrequencyTypeOptions, acc.repaymentFrequencyTypeOptions, acc.repaymentFrequencyNthDayTypeOptions,
-                acc.repaymentFrequencyDaysOfWeekTypeOptions, acc.transactionProcessingStrategyOptions,
-                acc.interestRateFrequencyTypeOptions, acc.amortizationTypeOptions, acc.interestTypeOptions,
-                acc.interestCalculationPeriodTypeOptions, acc.fundOptions, acc.chargeOptions, null, acc.loanOfficerOptions,
-                acc.loanPurposeOptions, acc.loanCollateralOptions, acc.calendarOptions, acc.syncDisbursementWithMeeting, acc.loanCounter,
-                acc.loanProductCounter, acc.notes, acc.accountLinkingOptions, acc.linkedAccount, acc.disbursementDetails,
-                acc.multiDisburseLoan, acc.canDefineInstallmentAmount, acc.fixedEmiAmount, acc.maxOutstandingLoanBalance,
-                acc.emiAmountVariations, memberVariations, acc.product, acc.inArrears, acc.graceOnArrearsAgeing, acc.overdueCharges,
-                acc.isNPA, acc.daysInMonthType, acc.daysInYearType, acc.isInterestRecalculationEnabled, acc.interestRecalculationData,
-                acc.originalSchedule, acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods,
+        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientAccountNo, acc.clientName, acc.clientOfficeId,
+                acc.group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription, acc.isLoanProductLinkedToFloatingRate, acc.fundId, acc.fundName,
+                acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName, acc.currency, acc.proposedPrincipal,
+                acc.principal, acc.approvedPrincipal, acc.totalOverpaid, acc.inArrearsTolerance, acc.termFrequency,
+                acc.termPeriodFrequencyType, acc.numberOfRepayments, acc.repaymentEvery, acc.repaymentFrequencyType,
+                acc.repaymentFrequencyNthDayType, acc.repaymentFrequencyDayOfWeekType, acc.transactionProcessingStrategyId,
+                acc.transactionProcessingStrategyName, acc.amortizationType, acc.interestRatePerPeriod, acc.interestRateFrequencyType,
+                acc.annualInterestRate, acc.interestType, acc.isFloatingInterestRate, acc.interestRateDifferential,
+                acc.interestCalculationPeriodType, acc.expectedFirstRepaymentOnDate,
+                acc.graceOnPrincipalPayment, acc.graceOnInterestPayment, acc.graceOnInterestCharged, acc.interestChargedFromDate,
+                acc.timeline, acc.summary, acc.feeChargesAtDisbursementCharged, acc.repaymentSchedule, acc.transactions, acc.charges,
+                acc.collateral, acc.guarantors, acc.meeting, acc.productOptions, acc.termFrequencyTypeOptions,
+                acc.repaymentFrequencyTypeOptions, acc.repaymentFrequencyNthDayTypeOptions, acc.repaymentFrequencyDaysOfWeekTypeOptions,
+                acc.transactionProcessingStrategyOptions, acc.interestRateFrequencyTypeOptions, acc.amortizationTypeOptions,
+                acc.interestTypeOptions, acc.interestCalculationPeriodTypeOptions, acc.fundOptions, acc.chargeOptions, null,
+                acc.loanOfficerOptions, acc.loanPurposeOptions, acc.loanCollateralOptions, acc.calendarOptions,
+                acc.syncDisbursementWithMeeting, acc.loanCounter, acc.loanProductCounter, acc.notes, acc.accountLinkingOptions,
+                acc.linkedAccount, acc.disbursementDetails, acc.multiDisburseLoan, acc.canDefineInstallmentAmount, acc.fixedEmiAmount,
+                acc.maxOutstandingLoanBalance, acc.emiAmountVariations, memberVariations, acc.product, acc.inArrears,
+                acc.graceOnArrearsAgeing, acc.overdueCharges, acc.isNPA, acc.daysInMonthType, acc.daysInYearType,
+                acc.isInterestRecalculationEnabled, acc.interestRecalculationData, acc.originalSchedule,
+                acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods,
                 acc.isVariableInstallmentsAllowed, acc.minimumGap, acc.maximumGap);
 
     }
@@ -1087,55 +1094,57 @@ public class LoanAccountData {
 
         final LoanInterestRecalculationData interestRecalculationData = LoanInterestRecalculationData.withCalendarData(
                 acc.interestRecalculationData, calendarData, compoundingCalendarData);
-        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientName, acc.clientOfficeId,
-                acc.group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription,
-                acc.isLoanProductLinkedToFloatingRate, acc.fundId, acc.fundName, acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId,
-                acc.loanOfficerName, acc.currency, acc.proposedPrincipal, acc.principal, acc.approvedPrincipal, acc.totalOverpaid,
-                acc.inArrearsTolerance, acc.termFrequency, acc.termPeriodFrequencyType, acc.numberOfRepayments, acc.repaymentEvery,
-                acc.repaymentFrequencyType, acc.repaymentFrequencyNthDayType, acc.repaymentFrequencyDayOfWeekType,
-                acc.transactionProcessingStrategyId, acc.transactionProcessingStrategyName, acc.amortizationType,
-                acc.interestRatePerPeriod, acc.interestRateFrequencyType, acc.annualInterestRate, acc.interestType,
-                acc.isFloatingInterestRate, acc.interestRateDifferential, acc.interestCalculationPeriodType,
-                acc.expectedFirstRepaymentOnDate, acc.graceOnPrincipalPayment, acc.graceOnInterestPayment, acc.graceOnInterestCharged,
-                acc.interestChargedFromDate, acc.timeline, acc.summary, acc.feeChargesAtDisbursementCharged, acc.repaymentSchedule,
-                acc.transactions, acc.charges, acc.collateral, acc.guarantors, acc.meeting, acc.productOptions,
-                acc.termFrequencyTypeOptions, acc.repaymentFrequencyTypeOptions, acc.repaymentFrequencyNthDayTypeOptions,
-                acc.repaymentFrequencyDaysOfWeekTypeOptions, acc.transactionProcessingStrategyOptions,
-                acc.interestRateFrequencyTypeOptions, acc.amortizationTypeOptions, acc.interestTypeOptions,
-                acc.interestCalculationPeriodTypeOptions, acc.fundOptions, acc.chargeOptions, null, acc.loanOfficerOptions,
-                acc.loanPurposeOptions, acc.loanCollateralOptions, acc.calendarOptions, acc.syncDisbursementWithMeeting, acc.loanCounter,
-                acc.loanProductCounter, acc.notes, acc.accountLinkingOptions, acc.linkedAccount, acc.disbursementDetails,
-                acc.multiDisburseLoan, acc.canDefineInstallmentAmount, acc.fixedEmiAmount, acc.maxOutstandingLoanBalance,
-                acc.emiAmountVariations, acc.memberVariations, acc.product, acc.inArrears, acc.graceOnArrearsAgeing, acc.overdueCharges,
-                acc.isNPA, acc.daysInMonthType, acc.daysInYearType, acc.isInterestRecalculationEnabled, interestRecalculationData,
-                acc.originalSchedule, acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods,
+
+        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientAccountNo, acc.clientName, acc.clientOfficeId,
+                acc.group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription, acc.isLoanProductLinkedToFloatingRate, acc.fundId, acc.fundName,
+                acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName, acc.currency, acc.proposedPrincipal,
+                acc.principal, acc.approvedPrincipal, acc.totalOverpaid, acc.inArrearsTolerance, acc.termFrequency,
+                acc.termPeriodFrequencyType, acc.numberOfRepayments, acc.repaymentEvery, acc.repaymentFrequencyType,
+                acc.repaymentFrequencyNthDayType, acc.repaymentFrequencyDayOfWeekType, acc.transactionProcessingStrategyId,
+                acc.transactionProcessingStrategyName, acc.amortizationType, acc.interestRatePerPeriod, acc.interestRateFrequencyType,
+                acc.annualInterestRate, acc.interestType, acc.isFloatingInterestRate, acc.interestRateDifferential,
+                acc.interestCalculationPeriodType, acc.expectedFirstRepaymentOnDate,
+                acc.graceOnPrincipalPayment, acc.graceOnInterestPayment, acc.graceOnInterestCharged, acc.interestChargedFromDate,
+                acc.timeline, acc.summary, acc.feeChargesAtDisbursementCharged, acc.repaymentSchedule, acc.transactions, acc.charges,
+                acc.collateral, acc.guarantors, acc.meeting, acc.productOptions, acc.termFrequencyTypeOptions,
+                acc.repaymentFrequencyTypeOptions, acc.repaymentFrequencyNthDayTypeOptions, acc.repaymentFrequencyDaysOfWeekTypeOptions,
+                acc.transactionProcessingStrategyOptions, acc.interestRateFrequencyTypeOptions, acc.amortizationTypeOptions,
+                acc.interestTypeOptions, acc.interestCalculationPeriodTypeOptions, acc.fundOptions, acc.chargeOptions, null,
+                acc.loanOfficerOptions, acc.loanPurposeOptions, acc.loanCollateralOptions, acc.calendarOptions,
+                acc.syncDisbursementWithMeeting, acc.loanCounter, acc.loanProductCounter, acc.notes, acc.accountLinkingOptions,
+                acc.linkedAccount, acc.disbursementDetails, acc.multiDisburseLoan, acc.canDefineInstallmentAmount, acc.fixedEmiAmount,
+                acc.maxOutstandingLoanBalance, acc.emiAmountVariations, acc.memberVariations, acc.product, acc.inArrears,
+                acc.graceOnArrearsAgeing, acc.overdueCharges, acc.isNPA, acc.daysInMonthType, acc.daysInYearType,
+                acc.isInterestRecalculationEnabled, interestRecalculationData, acc.originalSchedule,
+                acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods,
                 acc.isVariableInstallmentsAllowed, acc.minimumGap, acc.maximumGap);
     }
 
     public static LoanAccountData withOriginalSchedule(final LoanAccountData acc, final LoanScheduleData originalSchedule) {
 
-        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientName, acc.clientOfficeId,
-                acc.group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription,
-                acc.isLoanProductLinkedToFloatingRate, acc.fundId, acc.fundName, acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId,
-                acc.loanOfficerName, acc.currency, acc.proposedPrincipal, acc.principal, acc.approvedPrincipal, acc.totalOverpaid,
-                acc.inArrearsTolerance, acc.termFrequency, acc.termPeriodFrequencyType, acc.numberOfRepayments, acc.repaymentEvery,
-                acc.repaymentFrequencyType, acc.repaymentFrequencyNthDayType, acc.repaymentFrequencyDayOfWeekType,
-                acc.transactionProcessingStrategyId, acc.transactionProcessingStrategyName, acc.amortizationType,
-                acc.interestRatePerPeriod, acc.interestRateFrequencyType, acc.annualInterestRate, acc.interestType,
-                acc.isFloatingInterestRate, acc.interestRateDifferential, acc.interestCalculationPeriodType,
-                acc.expectedFirstRepaymentOnDate, acc.graceOnPrincipalPayment, acc.graceOnInterestPayment, acc.graceOnInterestCharged,
-                acc.interestChargedFromDate, acc.timeline, acc.summary, acc.feeChargesAtDisbursementCharged, acc.repaymentSchedule,
-                acc.transactions, acc.charges, acc.collateral, acc.guarantors, acc.meeting, acc.productOptions,
-                acc.termFrequencyTypeOptions, acc.repaymentFrequencyTypeOptions, acc.repaymentFrequencyNthDayTypeOptions,
-                acc.repaymentFrequencyDaysOfWeekTypeOptions, acc.transactionProcessingStrategyOptions,
-                acc.interestRateFrequencyTypeOptions, acc.amortizationTypeOptions, acc.interestTypeOptions,
-                acc.interestCalculationPeriodTypeOptions, acc.fundOptions, acc.chargeOptions, null, acc.loanOfficerOptions,
-                acc.loanPurposeOptions, acc.loanCollateralOptions, acc.calendarOptions, acc.syncDisbursementWithMeeting, acc.loanCounter,
-                acc.loanProductCounter, acc.notes, acc.accountLinkingOptions, acc.linkedAccount, acc.disbursementDetails,
-                acc.multiDisburseLoan, acc.canDefineInstallmentAmount, acc.fixedEmiAmount, acc.maxOutstandingLoanBalance,
-                acc.emiAmountVariations, acc.memberVariations, acc.product, acc.inArrears, acc.graceOnArrearsAgeing, acc.overdueCharges,
-                acc.isNPA, acc.daysInMonthType, acc.daysInYearType, acc.isInterestRecalculationEnabled, acc.interestRecalculationData,
-                originalSchedule, acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods,
+
+        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientAccountNo, acc.clientName, acc.clientOfficeId,
+                acc.group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription, acc.isLoanProductLinkedToFloatingRate, acc.fundId, acc.fundName,
+                acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName, acc.currency, acc.proposedPrincipal,
+                acc.principal, acc.approvedPrincipal, acc.totalOverpaid, acc.inArrearsTolerance, acc.termFrequency,
+                acc.termPeriodFrequencyType, acc.numberOfRepayments, acc.repaymentEvery, acc.repaymentFrequencyType,
+                acc.repaymentFrequencyNthDayType, acc.repaymentFrequencyDayOfWeekType, acc.transactionProcessingStrategyId,
+                acc.transactionProcessingStrategyName, acc.amortizationType, acc.interestRatePerPeriod, acc.interestRateFrequencyType,
+                acc.annualInterestRate, acc.interestType, acc.isFloatingInterestRate, acc.interestRateDifferential,
+                acc.interestCalculationPeriodType, acc.expectedFirstRepaymentOnDate,
+                acc.graceOnPrincipalPayment, acc.graceOnInterestPayment, acc.graceOnInterestCharged, acc.interestChargedFromDate,
+                acc.timeline, acc.summary, acc.feeChargesAtDisbursementCharged, acc.repaymentSchedule, acc.transactions, acc.charges,
+                acc.collateral, acc.guarantors, acc.meeting, acc.productOptions, acc.termFrequencyTypeOptions,
+                acc.repaymentFrequencyTypeOptions, acc.repaymentFrequencyNthDayTypeOptions, acc.repaymentFrequencyDaysOfWeekTypeOptions,
+                acc.transactionProcessingStrategyOptions, acc.interestRateFrequencyTypeOptions, acc.amortizationTypeOptions,
+                acc.interestTypeOptions, acc.interestCalculationPeriodTypeOptions, acc.fundOptions, acc.chargeOptions, null,
+                acc.loanOfficerOptions, acc.loanPurposeOptions, acc.loanCollateralOptions, acc.calendarOptions,
+                acc.syncDisbursementWithMeeting, acc.loanCounter, acc.loanProductCounter, acc.notes, acc.accountLinkingOptions,
+                acc.linkedAccount, acc.disbursementDetails, acc.multiDisburseLoan, acc.canDefineInstallmentAmount, acc.fixedEmiAmount,
+                acc.maxOutstandingLoanBalance, acc.emiAmountVariations, acc.memberVariations, acc.product, acc.inArrears,
+                acc.graceOnArrearsAgeing, acc.overdueCharges, acc.isNPA, acc.daysInMonthType, acc.daysInYearType,
+                acc.isInterestRecalculationEnabled, acc.interestRecalculationData, originalSchedule,
+                acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods,
                 acc.isVariableInstallmentsAllowed, acc.minimumGap, acc.maximumGap);
     }
 
@@ -1145,6 +1154,7 @@ public class LoanAccountData {
             final LoanStatusEnumData status, //
             final String externalId, //
             final Long clientId,
+            final String clientAccountNo,
             final String clientName,
             final Long clientOfficeId, //
             final GroupGeneralData group,
@@ -1208,6 +1218,7 @@ public class LoanAccountData {
         this.status = status;
         this.externalId = externalId;
         this.clientId = clientId;
+        this.clientAccountNo = clientAccountNo;
         this.clientName = clientName;
         this.clientOfficeId = clientOfficeId;
         this.group = group;
