@@ -18,9 +18,11 @@ import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.organisation.provisioning.data.ProvisioningCategoryData;
 import org.mifosplatform.organisation.provisioning.data.ProvisioningCriteriaData;
 import org.mifosplatform.organisation.provisioning.data.ProvisioningCriteriaDefinitionData;
+import org.mifosplatform.organisation.provisioning.exception.ProvisioningCriteriaNotFoundException;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -99,12 +101,17 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
 
     @Override
     public ProvisioningCriteriaData retrieveProvisioningCriteria(Long criteriaId) {
-        String criteriaName = retrieveCriteriaName(criteriaId);
-        Collection<LoanProductData> loanProducts = loanProductReaPlatformService
-                .retrieveAllLoanProductsForLookup("select product_id from m_loanproduct_provisioning_mapping where m_loanproduct_provisioning_mapping.criteria_id="
-                        + criteriaId);
-        List<ProvisioningCriteriaDefinitionData> definitions = retrieveProvisioningDefinitions(criteriaId);
-        return ProvisioningCriteriaData.toLookup(criteriaId, criteriaName, loanProducts, definitions);
+        try {
+            String criteriaName = retrieveCriteriaName(criteriaId);
+            Collection<LoanProductData> loanProducts = loanProductReaPlatformService
+                    .retrieveAllLoanProductsForLookup("select product_id from m_loanproduct_provisioning_mapping where m_loanproduct_provisioning_mapping.criteria_id="
+                            + criteriaId);
+            List<ProvisioningCriteriaDefinitionData> definitions = retrieveProvisioningDefinitions(criteriaId);
+            return ProvisioningCriteriaData.toLookup(criteriaId, criteriaName, loanProducts, definitions);
+        }catch(EmptyResultDataAccessException e) {
+            throw new ProvisioningCriteriaNotFoundException(criteriaId) ;
+        }
+       
     }
 
     private List<ProvisioningCriteriaDefinitionData> retrieveProvisioningDefinitions(Long criteriaId) {

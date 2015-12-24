@@ -25,7 +25,7 @@ public interface ProvisioningCriteriaConstants {
     
     public final static String JSON_LOAN_PRODUCT_BORROWERCYCLE_PARAM = "includeInBorrowerCycle" ;
     
-    public final static String JSON_PROVISIONING_DEFINITIONS_PARAM = "provisioningcriteria";
+    public final static String JSON_PROVISIONING_DEFINITIONS_PARAM = "definitions";
     
     public final static String JSON_CATEOGRYID_PARAM = "categoryId";
 
@@ -54,7 +54,7 @@ public interface ProvisioningCriteriaConstants {
             JSON_CATEOGRYNAME_PARAM, JSON_MINIMUM_AGE_PARAM, JSON_MAXIMUM_AGE_PARAM, JSON_MINIMUM_AGE_PARAM, JSON_PROVISIONING_PERCENTAGE_PARAM, JSON_EXPENSE_ACCOUNT_PARAM, JSON_LIABILITY_ACCOUNT_PARAM)) ;
     
     
-    Set<String> PROVISIONING_CRITERIA_TEMPLATE_PARAMETER = new HashSet<>(Arrays.asList("provisioninCriteria", "loanProducts",
+    Set<String> PROVISIONING_CRITERIA_TEMPLATE_PARAMETER = new HashSet<>(Arrays.asList("definitions", "loanProducts",
             "glAccounts"));
 
     Set<String> PROVISIONING_CRITERIA_PARAMETERS = new HashSet<>(Arrays.asList("criteriaName", "loanProducts",
