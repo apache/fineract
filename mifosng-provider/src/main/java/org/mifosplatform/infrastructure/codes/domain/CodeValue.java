@@ -38,19 +38,23 @@ public class CodeValue extends AbstractPersistable<Long> {
     @JoinColumn(name = "code_id", nullable = false)
     private Code code;
 
-    public static CodeValue createNew(final Code code, final String label, final int position, final String description) {
-        return new CodeValue(code, label, position, description);
+    @Column(name = "is_active")
+    private boolean isActive;
+    
+    public static CodeValue createNew(final Code code, final String label, final int position, final String description, final boolean isActive) {
+        return new CodeValue(code, label, position, description, isActive);
     }
 
     protected CodeValue() {
         //
     }
 
-    private CodeValue(final Code code, final String label, final int position, final String description) {
+    private CodeValue(final Code code, final String label, final int position, final String description, final boolean isActive) {
         this.code = code;
         this.label = StringUtils.defaultIfEmpty(label, null);
         this.position = position;
         this.description = description;
+        this.isActive = isActive;
     }
 
     public String label() {
@@ -66,10 +70,11 @@ public class CodeValue extends AbstractPersistable<Long> {
         final String label = command.stringValueOfParameterNamed(CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue());
         Integer position = command.integerValueSansLocaleOfParameterNamed(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue());
         String description = command.stringValueOfParameterNamed(CODEVALUE_JSON_INPUT_PARAMS.DESCRIPTION.getValue());
+        boolean isActive = command.booleanPrimitiveValueOfParameterNamed(CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue());
         if (position == null) {
             position = new Integer(0);
         }
-        return new CodeValue(code, label, position.intValue(),description);
+        return new CodeValue(code, label, position.intValue(), description, isActive);
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -96,11 +101,18 @@ public class CodeValue extends AbstractPersistable<Long> {
             actualChanges.put(positionParamName, newValue);
             this.position = newValue.intValue();
         }
+        
+        final String isActiveParamName = CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue();
+        if (command.isChangeInBooleanParameterNamed(isActiveParamName, this.isActive)) {
+            final Boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isActiveParamName);
+            actualChanges.put(isActiveParamName, newValue);
+            this.isActive = newValue.booleanValue();
+        }
 
         return actualChanges;
     }
 
     public CodeValueData toData() {
-        return CodeValueData.instance(getId(), this.label, this.position);
+        return CodeValueData.instance(getId(), this.label, this.position, this.isActive);
     }
 }
