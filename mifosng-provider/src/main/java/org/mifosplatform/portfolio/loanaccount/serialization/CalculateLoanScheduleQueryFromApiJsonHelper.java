@@ -146,13 +146,13 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             dataValidationErrors.add(error);
         } else if (repaymentsStartingFromDate == null && interestChargedFromDate != null) {
 
-            if (expectedDisbursementDate != null && expectedDisbursementDate.isAfter(interestChargedFromDate)) {
+           /* if (expectedDisbursementDate != null && expectedDisbursementDate.isAfter(interestChargedFromDate)) {
                 final ApiParameterError error = ApiParameterError.parameterError(
                         "validation.msg.loan.interestChargedFromDate.cannot.be.before.disbursement.date",
                         "The parameter interestChargedFromDate cannot be before the date given for expectedDisbursementDate.",
                         "interestChargedFromDate", interestChargedFromDate, expectedDisbursementDate);
                 dataValidationErrors.add(error);
-            }
+            }*/
         }
     }
 
