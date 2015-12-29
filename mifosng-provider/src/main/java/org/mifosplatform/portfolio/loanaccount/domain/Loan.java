@@ -836,6 +836,9 @@ public class Loan extends AbstractPersistable<Long> {
      */
     private BigDecimal calculateAmountPercentageAppliedTo(final LoanCharge loanCharge) {
         BigDecimal amount = BigDecimal.ZERO;
+        if(loanCharge.isOverdueInstallmentCharge()){
+            return loanCharge.getAmountPercentageAppliedTo();
+        }
         switch (loanCharge.getChargeCalculation()) {
             case PERCENT_OF_AMOUNT:
                 amount = getPrincpal().getAmount();

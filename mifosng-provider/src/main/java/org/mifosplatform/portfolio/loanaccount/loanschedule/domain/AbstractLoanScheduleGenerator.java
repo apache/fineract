@@ -172,7 +172,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             // calculated interest start date for the period
             LocalDate periodStartDateApplicableForInterest = calculateInterestStartDateForPeriod(loanApplicationTerms,
-                    scheduleParams.getPeriodStartDate(), idealDisbursementDate);
+                    scheduleParams.getPeriodStartDate(), idealDisbursementDate, firstRepaymentdate);
 
             // Loan Schedule Exceptions that need to be applied for Loan Account
             LoanTermVariationParams termVariationParams = applyLoanTermVariations(loanApplicationTerms, scheduleParams,
@@ -229,14 +229,14 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             // for a loan repayment which falls between the
             // two periods for interest first repayment strategies
             handleRecalculationForNonDueDateTransactions(mc, loanApplicationTerms, loanCharges, holidayDetailDTO, scheduleParams, periods,
-                    totalInterestChargedForFullLoanTerm, idealDisbursementDate, lastRestDate, scheduledDueDate,
+                    totalInterestChargedForFullLoanTerm, idealDisbursementDate, firstRepaymentdate, lastRestDate, scheduledDueDate,
                     periodStartDateApplicableForInterest, applicableTransactions, currentPeriodParams);
 
             if (currentPeriodParams.isSkipCurrentLoop()) {
                 continue;
             }
             periodStartDateApplicableForInterest = calculateInterestStartDateForPeriod(loanApplicationTerms,
-                    scheduleParams.getPeriodStartDate(), idealDisbursementDate);
+                    scheduleParams.getPeriodStartDate(), idealDisbursementDate, firstRepaymentdate);
 
             // backup for pre-close transaction
             updateCompoundingDetails(scheduleParams, periodStartDateApplicableForInterest);
@@ -581,9 +581,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     private void handleRecalculationForNonDueDateTransactions(final MathContext mc, final LoanApplicationTerms loanApplicationTerms,
             final Set<LoanCharge> loanCharges, final HolidayDetailDTO holidayDetailDTO, LoanScheduleParams scheduleParams,
             final Collection<LoanScheduleModelPeriod> periods, final Money totalInterestChargedForFullLoanTerm,
-            final LocalDate idealDisbursementDate, final LocalDate lastRestDate, final LocalDate scheduledDueDate,
-            final LocalDate periodStartDateForInterest, final Collection<RecalculationDetail> applicableTransactions,
-            final ScheduleCurrentPeriodParams currentPeriodParams) {
+            final LocalDate idealDisbursementDate, LocalDate firstRepaymentdate, final LocalDate lastRestDate,
+            final LocalDate scheduledDueDate, final LocalDate periodStartDateForInterest,
+            final Collection<RecalculationDetail> applicableTransactions, final ScheduleCurrentPeriodParams currentPeriodParams) {
         if (scheduleParams.applyInterestRecalculation()) {
             final MonetaryCurrency currency = scheduleParams.getCurrency();
             final Collection<LoanTermVariationsData> interestRates = loanApplicationTerms.getLoanTermVariations().getInterestRateChanges();
@@ -608,7 +608,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                             // calculates period start date for interest
                             // calculation as per the configuration
                             periodStartDateApplicableForInterest = calculateInterestStartDateForPeriod(loanApplicationTerms,
-                                    scheduleParams.getPeriodStartDate(), idealDisbursementDate);
+                                    scheduleParams.getPeriodStartDate(), idealDisbursementDate, firstRepaymentdate);
 
                             int daysInPeriodApplicable = Days.daysBetween(periodStartDateApplicableForInterest, transactionDate).getDays();
                             Money interestForThisinstallment = Money.zero(currency);
@@ -1507,15 +1507,17 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
     /**
      * calculates Interest stating date as per the settings
+     * 
+     * @param firstRepaymentdate
+     *            TODO
      */
     private LocalDate calculateInterestStartDateForPeriod(final LoanApplicationTerms loanApplicationTerms, LocalDate periodStartDate,
-            final LocalDate idealDisbursementDate) {
+            final LocalDate idealDisbursementDate, final LocalDate firstRepaymentdate) {
         LocalDate periodStartDateApplicableForInterest = periodStartDate;
-        if (periodStartDate.isBefore(idealDisbursementDate)) {
+        if (periodStartDate.isBefore(idealDisbursementDate) || firstRepaymentdate.isAfter(periodStartDate)) {
             if (loanApplicationTerms.getInterestChargedFromLocalDate() != null) {
                 if (periodStartDate.isEqual(loanApplicationTerms.getExpectedDisbursementDate())
-                        || loanApplicationTerms.getCalculatedRepaymentsStartingFromLocalDate().isBefore(
-                                loanApplicationTerms.getInterestChargedFromLocalDate())) {
+                        || loanApplicationTerms.getInterestChargedFromLocalDate().isAfter(periodStartDate)) {
                     periodStartDateApplicableForInterest = loanApplicationTerms.getInterestChargedFromLocalDate();
                 }
             } else {
