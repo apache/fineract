@@ -17,10 +17,12 @@ import org.mifosplatform.spm.util.LookupTableMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Path("/surveys/{surveyId}/lookuptables")
@@ -45,46 +47,45 @@ public class LookupTableApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Transactional
     public List<LookupTableData> fetchLookupTables(@PathParam("surveyId") final Long surveyId) {
         this.securityContext.authenticatedUser();
 
         final Survey survey = findSurvey(surveyId);
 
-        final List<LookupTableData> result = new ArrayList<>();
-
         final List<LookupTable> lookupTables = this.lookupTableService.findBySurvey(survey);
 
         if (lookupTables != null) {
-            for (final LookupTable lookupTable : lookupTables) {
-                result.add(LookupTableMapper.map(lookupTable));
-            }
+            return LookupTableMapper.map(lookupTables);
         }
 
-        return result;
+        return Collections.EMPTY_LIST;
     }
 
     @GET
-    @Path("/{id}")
+    @Path("/{key}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Transactional
     public LookupTableData findLookupTable(@PathParam("surveyId") final Long surveyId,
-                                           @PathParam("id") final Long id) {
+                                           @PathParam("key") final String key) {
         this.securityContext.authenticatedUser();
 
         findSurvey(surveyId);
 
-        final LookupTable lookupTable = this.lookupTableService.findById(id);
+        final List<LookupTable> lookupTables = this.lookupTableService.findByKey(key);
 
-        if (lookupTable == null) {
-            throw new LookupTableNotFoundException(id);
+        if (lookupTables == null || lookupTables.isEmpty()) {
+            throw new LookupTableNotFoundException(key);
         }
 
-        return LookupTableMapper.map(lookupTable);
+        return LookupTableMapper.map(lookupTables).get(0);
     }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Transactional
     public void createLookupTable(@PathParam("surveyId") final Long surveyId,
                                   final LookupTableData lookupTableData) {
         this.securityContext.authenticatedUser();

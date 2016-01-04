@@ -4007,12 +4007,12 @@ Successful transaction response:
 				<div class="method-description">
 					<h3>Self Service API Overview</h3>
 					<p>
-					Self Service APIs are a set of APIs with restricted data scope. Functional specifications and design can be viewed 
-					<a href="https://mifosforge.jira.com/wiki/display/MIFOSX/Customer+Self+Service">here</a>. 
+					Self Service APIs are a set of APIs with restricted data scope. Functional specifications and design can be viewed
+					<a href="https://mifosforge.jira.com/wiki/display/MIFOSX/Customer+Self+Service">here</a>.
 					</p>
 
 					<p>
-					While creating an <a href="#users_create">user</a>, user can be tagged as self service user. Also you can associate 
+					While creating an <a href="#users_create">user</a>, user can be tagged as self service user. Also you can associate
 					clients that this user has access to. Data scope is restricted to these linked clients.
 					</p>
 					<p>
@@ -11812,7 +11812,7 @@ Request Body:
 						<tr>
 							<td class=fielddesc>contains exception data for variations(modifiedinstallments,newinstallments and deletedinstallments described below) </td>
 						</tr>
-						
+
 					</table>
 					<p>Exception object fields</p>
 					<p>Modifiedinstallments Array fields</p>
@@ -12239,7 +12239,7 @@ Request Body:
 }
 					</code>
 				</div>
-			</div>	
+			</div>
 
 		<a id="loans_update_variations" name="loans_update_variations" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -12346,8 +12346,8 @@ Request Body:
 }
 					</code>
 				</div>
-			</div>			
-			
+			</div>
+
 
 		<a id="loans_delete_variations" name="loans_delete_variations" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -12382,10 +12382,10 @@ Request Body:
 }
 					</code>
 				</div>
-			</div>			
-						
-			
-<!-- End Loan Term variations-->	
+			</div>
+
+
+<!-- End Loan Term variations-->
 <!-- start of offices content -->
 			<a id="offices" name="offices" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -38826,11 +38826,30 @@ POST surveys/1/lookuptables
 Content-Type: application/json
 Request Body:
 {
-  "key":"lookup-table-1",
-  "description":null,
-  "valueFrom":0,
-  "valueTo":5,
-  "score":100.00
+  "key": "test-table",
+  "description": null,
+  "entries": [
+    {
+      "valueFrom": 0,
+      "valueTo": 25,
+      "score": 100
+    },
+    {
+      "valueFrom": 26,
+      "valueTo": 50,
+      "score": 50
+    },
+    {
+      "valueFrom": 51,
+      "valueTo": 75,
+      "score": 25
+    },
+    {
+      "valueFrom": 76,
+      "valueTo": 100,
+      "score": 0
+    }
+  ]
 }
               </code>
 							<code class="method-response">
@@ -38856,12 +38875,30 @@ No Request Body
 							<code class="method-response">
 [
   {
-    "id":1
-    "key":"lookup-table-1",
-    "description":null,
-    "valueFrom":0,
-    "valueTo":5,
-    "score":100.00
+    "key": "test-table",
+    "description": null,
+    "entries": [
+      {
+        "valueFrom": 0,
+        "valueTo": 25,
+        "score": 100
+      },
+      {
+        "valueFrom": 26,
+        "valueTo": 50,
+        "score": 50
+      },
+      {
+        "valueFrom": 51,
+        "valueTo": 75,
+        "score": 25
+      },
+      {
+        "valueFrom": 76,
+        "valueTo": 100,
+        "score": 0
+      }
+    ]
   }
 ]
 							</code>
@@ -38878,18 +38915,36 @@ No Request Body
 GET https://DomainName/api/v1/surveys/1/lookuptables/1
 							</code>
 							<code class="method-request">
-GET surveys/1/lookuptables/1
+GET surveys/1/lookuptables/test-table
 Content-Type: application/json
 No Request Body
               </code>
 							<code class="method-response">
 {
-  "id":1,
-  "key":"lookup-table-1",
-  "description":null,
-  "valueFrom":0,
-  "valueTo":5,
-  "score":100.00
+  "key": "test-table",
+  "description": null,
+  "entries": [
+    {
+      "valueFrom": 0,
+      "valueTo": 25,
+      "score": 100
+    },
+    {
+      "valueFrom": 26,
+      "valueTo": 50,
+      "score": 50
+    },
+    {
+      "valueFrom": 51,
+      "valueTo": 75,
+      "score": 25
+    },
+    {
+      "valueFrom": 76,
+      "valueTo": 100,
+      "score": 0
+    }
+  ]
 }
 							</code>
 						</div>
@@ -38918,13 +38973,63 @@ POST surveys/1/scorecards
 Content-Type: application/json
 Request Body:
 {
-  "questionId":1,
-  "responseId":1,
-  "staffId":1,
-  "clientId":1,
-  "createdOn":"2015-11-26T09:50:34.647Z"
-}
-              </code>
+  "staffId": 1,
+  "clientId": 1,
+  "createdOn": 1451905784553,
+  "scorecardValues":
+  [
+    {
+      "questionId": 1,
+      "responseId": 1,
+      "value": 0
+    },
+    {
+      "questionId": 2,
+      "responseId": 8,
+      "value": 0
+    },
+    {
+      "questionId": 3,
+      "responseId": 12,
+      "value": 7
+    },
+    {
+      "questionId": 4,
+      "responseId": 16,
+      "value": 4
+    },
+    {
+      "questionId": 5,
+      "responseId": 21,
+      "value": 2
+    },
+    {
+      "questionId": 6,
+      "responseId": 25,
+      "value": 2
+    },
+    {
+      "questionId": 7,
+      "responseId": 28,
+      "value": 3
+    },
+    {
+      "questionId": 8,
+      "responseId": 30,
+      "value": 6
+    },
+    {
+      "questionId": 9,
+      "responseId": 33,
+      "value": 4
+    },
+    {
+      "questionId": 10,
+      "responseId": 37,
+      "value": 7
+    }
+  ]
+}              </code>
 							<code class="method-response">
 200 OK
 							</code>
@@ -38947,19 +39052,70 @@ No Request Body
               </code>
 							<code class="method-response">
 [
-  {
-    "questionId":1,
-    "responseId":1,
-    "staffId":1,
-    "clientId":1,
-    "createdOn":"2015-11-26T09:50:34.647Z"
-  }
+	{
+	  "staffId": 1,
+	  "clientId": 1,
+	  "createdOn": 1451905784553,
+	  "scorecardValues":
+	  [
+	    {
+	      "questionId": 1,
+	      "responseId": 1,
+	      "value": 0
+	    },
+	    {
+	      "questionId": 2,
+	      "responseId": 8,
+	      "value": 0
+	    },
+	    {
+	      "questionId": 3,
+	      "responseId": 12,
+	      "value": 7
+	    },
+	    {
+	      "questionId": 4,
+	      "responseId": 16,
+	      "value": 4
+	    },
+	    {
+	      "questionId": 5,
+	      "responseId": 21,
+	      "value": 2
+	    },
+	    {
+	      "questionId": 6,
+	      "responseId": 25,
+	      "value": 2
+	    },
+	    {
+	      "questionId": 7,
+	      "responseId": 28,
+	      "value": 3
+	    },
+	    {
+	      "questionId": 8,
+	      "responseId": 30,
+	      "value": 6
+	    },
+	    {
+	      "questionId": 9,
+	      "responseId": 33,
+	      "value": 4
+	    },
+	    {
+	      "questionId": 10,
+	      "responseId": 37,
+	      "value": 7
+	    }
+	  ]
+	}
 ]
 							</code>
 						</div>
 					</div>
 					<!-- end of SPM API docs -->
-					
+
 					<!-- Customer Self Service APIs-->
 			<div class="method-section">
 				<div class="method-description">
@@ -39029,7 +39185,7 @@ No Request Body
 					</code>
 				</div>
 			</div>
-			
+
 			<a id="selfoauth" name="selfoauth" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -39199,7 +39355,7 @@ GET https://DomainName/api/v1/self/clients
 					</code>
 				</div>
 			</div>
-			
+
 			<a id="selfclient" name="selfclient" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -39387,8 +39543,8 @@ GET https://DomainName/api/v1/self/clients/{clientId}/accounts
 }
 					</code>
 				</div>
-			</div>					
-			
+			</div>
+
 			<a id="selfclientsimages" name="selfclientsimages"
 				class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -40729,7 +40885,7 @@ No Request Body:
 	        </code>
 	    </div>
 	</div>
-		
+
 			<!-- end of Customer Self Service APIs-->
         </div>
 		<!-- main-content-wrapper -->

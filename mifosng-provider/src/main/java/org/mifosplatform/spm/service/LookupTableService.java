@@ -28,10 +28,10 @@ public class LookupTableService {
         this.lookupTableRepository = lookupTableRepository;
     }
 
-    public LookupTable findById(final Long id) {
+    public List<LookupTable> findByKey(final String key) {
         this.securityContext.authenticatedUser();
 
-        return this.lookupTableRepository.findOne(id);
+        return this.lookupTableRepository.findByKey(key);
     }
 
     public List<LookupTable> findBySurvey(final Survey survey) {
@@ -40,7 +40,7 @@ public class LookupTableService {
         return this.lookupTableRepository.findBySurvey(survey);
     }
 
-    public LookupTable createLookupTable(final LookupTable lookupTable) {
+    public List<LookupTable> createLookupTable(final List<LookupTable> lookupTable) {
         this.securityContext.authenticatedUser();
 
         return this.lookupTableRepository.save(lookupTable);
