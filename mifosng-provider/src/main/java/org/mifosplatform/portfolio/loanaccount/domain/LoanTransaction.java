@@ -713,5 +713,9 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     public Set<LoanTransactionToRepaymentScheduleMapping> getLoanTransactionToRepaymentScheduleMappings() {
         return this.loanTransactionToRepaymentScheduleMappings;
     }
+        
+    public Boolean isAllowTypeTransactionAtTheTimeOfLastUndo(){
+    	return isDisbursement() || isAccrual() || isRepaymentAtDisbursement();
+    }
 
 }

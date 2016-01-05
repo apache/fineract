@@ -817,6 +817,15 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId;
         return this;
     }
+    
+    public CommandWrapperBuilder undoLastDisbursalLoanApplication(final Long loanId) {
+        this.actionName = "DISBURSALLASTUNDO";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
 
     public CommandWrapperBuilder assignLoanOfficer(final Long loanId) {
         this.actionName = "UPDATELOANOFFICER";

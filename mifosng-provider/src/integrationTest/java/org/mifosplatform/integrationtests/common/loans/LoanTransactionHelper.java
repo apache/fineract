@@ -32,6 +32,7 @@ public class LoanTransactionHelper {
     private static final String DISBURSE_LOAN_COMMAND = "disburse";
     private static final String DISBURSE_LOAN_TO_SAVINGS_COMMAND = "disburseToSavings";
     private static final String UNDO_DISBURSE_LOAN_COMMAND = "undoDisbursal";
+    private static final String UNDO_LAST_DISBURSE_LOAN_COMMAND = "undolastdisbursal";
     private static final String WRITE_OFF_LOAN_COMMAND = "writeoff";
     private static final String WAIVE_INTEREST_COMMAND = "waiveinterest";
     private static final String MAKE_REPAYMENT_COMMAND = "repayment";
@@ -166,6 +167,13 @@ public class LoanTransactionHelper {
         final String url = createLoanOperationURL(UNDO_DISBURSE_LOAN_COMMAND, loanID);
         System.out.println("IN DISBURSE LOAN URL " + url);
         return performLoanTransaction(createLoanOperationURL(UNDO_DISBURSE_LOAN_COMMAND, loanID), undoDisburseJson);
+    }
+    
+    public Float undoLastDisbursal(final Integer loanID) {
+        final String undoLastDisburseJson = "{'note' : 'UNDO LAST DISBURSAL'}";
+        final String url = createLoanOperationURL(UNDO_LAST_DISBURSE_LOAN_COMMAND, loanID);
+        System.out.println("IN UNDO LAST DISBURSE LOAN URL " + url);
+        return performUndoLastLoanDisbursementTransaction(createLoanOperationURL(UNDO_LAST_DISBURSE_LOAN_COMMAND, loanID), undoLastDisburseJson);
     }
 
     public void recoverFromGuarantor(final Integer loanID) {
@@ -423,6 +431,13 @@ public class LoanTransactionHelper {
         final HashMap response = Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForLoanTransaction, jsonToBeSent,
                 "changes");
         return (HashMap) response.get("status");
+    }
+    
+    private Float performUndoLastLoanDisbursementTransaction(final String postURLForLoanTransaction, final String jsonToBeSent) {
+
+        final HashMap response = Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForLoanTransaction, jsonToBeSent,
+                "changes");
+        return (Float) response.get("disbursedAmount");
     }
 
     private Object performLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent, final String responseAttribute) {
