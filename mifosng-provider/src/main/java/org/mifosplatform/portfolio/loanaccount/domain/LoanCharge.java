@@ -961,4 +961,8 @@ public class LoanCharge extends AbstractPersistable<Long> {
     public Loan getLoan() {
         return this.loan;
     }
+    
+    public boolean isTrancheDisbursementCharge() {
+        return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.TRANCHE_DISBURSEMENT);
+    }
 }
