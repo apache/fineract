@@ -30,11 +30,10 @@ public class ScorecardService {
         this.scorecardRepository = scorecardRepository;
     }
 
-    @Transactional
-    public Scorecard createScorecard(final Scorecard scorecard) {
+    public List<Scorecard> createScorecard(final List<Scorecard> scorecards) {
         this.securityContext.authenticatedUser();
 
-        return this.scorecardRepository.save(scorecard);
+        return this.scorecardRepository.save(scorecards);
     }
 
     public List<Scorecard> findBySurvey(final Survey survey) {

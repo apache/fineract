@@ -13,6 +13,7 @@ import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.spm.data.ScorecardData;
+import org.mifosplatform.spm.data.ScorecardValue;
 import org.mifosplatform.spm.domain.Scorecard;
 import org.mifosplatform.spm.domain.Survey;
 import org.mifosplatform.spm.exception.SurveyNotFoundException;
@@ -22,10 +23,12 @@ import org.mifosplatform.spm.util.ScorecardMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Path("/surveys/{surveyId}/scorecards")
@@ -54,27 +57,25 @@ public class ScorecardApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Transactional
     public List<ScorecardData> findBySurvey(@PathParam("surveyId") final Long surveyId) {
         this.securityContext.authenticatedUser();
 
         final Survey survey = findSurvey(surveyId);
 
-        final List<ScorecardData> result = new ArrayList<>();
-
         final List<Scorecard> scorecards = this.scorecardService.findBySurvey(survey);
 
         if (scorecards == null) {
-            for (final Scorecard scorecard : scorecards) {
-                result.add(ScorecardMapper.map(scorecard));
-            }
+            return ScorecardMapper.map(scorecards);
         }
 
-        return result;
+        return Collections.EMPTY_LIST;
     }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @Transactional
     public void createScorecard(@PathParam("surveyId") final Long surveyId, final ScorecardData scorecardData) {
         this.securityContext.authenticatedUser();
 
@@ -93,6 +94,32 @@ public class ScorecardApiResource {
         }
 
         this.scorecardService.createScorecard(ScorecardMapper.map(scorecardData, survey, staff, client));
+    }
+
+    @Path("/clients/{clientId}")
+    @GET
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Transactional
+    public List<ScorecardData> findBySurveyClient(@PathParam("surveyId") final Long surveyId,
+                                                  @PathParam("clientId") final Long clientId) {
+        this.securityContext.authenticatedUser();
+
+        final Survey survey = findSurvey(surveyId);
+
+        final Client client = this.clientRepository.findOne(clientId);
+
+        if (client == null) {
+            throw new ClientNotFoundException(clientId);
+        }
+
+        final List<Scorecard> scorecards = this.scorecardService.findBySurveyAndClient(survey, client);
+
+        if (scorecards == null) {
+            return ScorecardMapper.map(scorecards);
+        }
+
+        return Collections.EMPTY_LIST;
     }
 
     private Survey findSurvey(final Long surveyId) {

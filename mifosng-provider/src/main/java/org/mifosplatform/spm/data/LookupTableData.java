@@ -5,36 +5,24 @@
  */
 package org.mifosplatform.spm.data;
 
+import java.util.List;
+
 public class LookupTableData {
 
-    private Long id;
     private String key;
     private String description;
-    private Integer valueFrom;
-    private Integer valueTo;
-    private Double score;
+    private List<LookupTableEntry> entries;
 
     public LookupTableData() {
         super();
     }
 
-    public LookupTableData(final Long id, final String key, final String description, final Integer valueFrom,
-                           final Integer valueTo, final Double score) {
+    public LookupTableData(final String key, final String description,
+                           final List<LookupTableEntry> entries) {
         super();
-        this.id = id;
         this.key = key;
         this.description = description;
-        this.valueFrom = valueFrom;
-        this.valueTo = valueTo;
-        this.score = score;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+        this.entries = entries;
     }
 
     public String getKey() {
@@ -53,27 +41,11 @@ public class LookupTableData {
         this.description = description;
     }
 
-    public Integer getValueFrom() {
-        return valueFrom;
+    public List<LookupTableEntry> getEntries() {
+        return entries;
     }
 
-    public void setValueFrom(Integer valueFrom) {
-        this.valueFrom = valueFrom;
-    }
-
-    public Integer getValueTo() {
-        return valueTo;
-    }
-
-    public void setValueTo(Integer valueTo) {
-        this.valueTo = valueTo;
-    }
-
-    public Double getScore() {
-        return score;
-    }
-
-    public void setScore(Double score) {
-        this.score = score;
+    public void setEntries(List<LookupTableEntry> entries) {
+        this.entries = entries;
     }
 }

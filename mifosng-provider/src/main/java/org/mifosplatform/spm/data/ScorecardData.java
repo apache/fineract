@@ -6,45 +6,26 @@
 package org.mifosplatform.spm.data;
 
 import java.util.Date;
+import java.util.List;
 
 public class ScorecardData {
 
-    private Long questionId;
-    private Long responseId;
     private Long staffId;
     private Long clientId;
     private Date createdOn;
-    private Integer value;
+    private List<ScorecardValue> scorecardValues;
 
     public ScorecardData() {
         super();
     }
 
-    public ScorecardData(final Long questionId, final Long responseId, final Long staffId, final Long clientId,
-                         final Date createdOn, final Integer value) {
+    public ScorecardData(final Long staffId, final Long clientId, final Date createdOn,
+                         final List<ScorecardValue> scorecardValues) {
         super();
-        this.questionId = questionId;
-        this.responseId = responseId;
         this.staffId = staffId;
         this.clientId = clientId;
         this.createdOn = createdOn;
-        this.value = value;
-    }
-
-    public Long getQuestionId() {
-        return questionId;
-    }
-
-    public void setQuestionId(Long questionId) {
-        this.questionId = questionId;
-    }
-
-    public Long getResponseId() {
-        return responseId;
-    }
-
-    public void setResponseId(Long responseId) {
-        this.responseId = responseId;
+        this.scorecardValues = scorecardValues;
     }
 
     public Long getStaffId() {
@@ -71,11 +52,11 @@ public class ScorecardData {
         this.createdOn = createdOn;
     }
 
-    public Integer getValue() {
-        return value;
+    public List<ScorecardValue> getScorecardValues() {
+        return scorecardValues;
     }
 
-    public void setValue(Integer value) {
-        this.value = value;
+    public void setScorecardValues(List<ScorecardValue> scorecardValues) {
+        this.scorecardValues = scorecardValues;
     }
 }

@@ -9,7 +9,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
 
 public class LookupTableNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public LookupTableNotFoundException(final Long id) {
-        super("error.msg.survey.lookuptable.id.notfound", "Lookup table with id " + id + " not found!", id);
+    public LookupTableNotFoundException(final String key) {
+        super("error.msg.survey.lookuptable.notfound", "Lookup table with id " + key + " not found!", key);
     }
 }
