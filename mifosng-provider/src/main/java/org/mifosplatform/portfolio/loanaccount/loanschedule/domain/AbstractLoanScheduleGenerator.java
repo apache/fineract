@@ -108,8 +108,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 this.paymentPeriodsInOneYearCalculator, mc);
 
         boolean isFirstRepayment = true;
-        LocalDate firstRepaymentdate = this.scheduledDateGenerator.generateNextRepaymentDate(scheduleParams.getPeriodStartDate(),
-                loanApplicationTerms, isFirstRepayment, holidayDetailDTO);
+        LocalDate firstRepaymentdate = this.scheduledDateGenerator.generateNextRepaymentDate(
+                loanApplicationTerms.getExpectedDisbursementDate(), loanApplicationTerms, isFirstRepayment, holidayDetailDTO);
         final LocalDate idealDisbursementDate = this.scheduledDateGenerator.idealDisbursementDateBasedOnFirstRepaymentDate(
                 loanApplicationTerms.getLoanTermPeriodFrequencyType(), loanApplicationTerms.getRepaymentEvery(), firstRepaymentdate);
 
@@ -1520,7 +1520,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         || loanApplicationTerms.getInterestChargedFromLocalDate().isAfter(periodStartDate)) {
                     periodStartDateApplicableForInterest = loanApplicationTerms.getInterestChargedFromLocalDate();
                 }
-            } else {
+            } else if(periodStartDate.isEqual(loanApplicationTerms.getExpectedDisbursementDate())){
                 periodStartDateApplicableForInterest = idealDisbursementDate;
             }
         }

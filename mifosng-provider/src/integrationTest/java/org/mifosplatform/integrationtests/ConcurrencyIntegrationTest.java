@@ -80,7 +80,7 @@ public class ConcurrencyIntegrationTest {
 
     private Integer createLoanProduct(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
         System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        final String loanProductJSON = new LoanProductTestBuilder() //
+        LoanProductTestBuilder builder = new LoanProductTestBuilder() //
                 .withPrincipal("12,000.00") //
                 .withNumberOfRepayments("4") //
                 .withRepaymentAfterEvery("1") //
@@ -90,7 +90,12 @@ public class ConcurrencyIntegrationTest {
                 .withAmortizationTypeAsEqualInstallments() //
                 .withInterestTypeAsDecliningBalance() //
                 .withTranches(multiDisburseLoan) //
-                .withAccounting(accountingRule, accounts).build(null);
+                .withAccounting(accountingRule, accounts);
+
+        if (multiDisburseLoan) {
+            builder = builder.withInterestCalculationPeriodTypeAsRepaymentPeriod(true);
+        }
+        final String loanProductJSON = builder.build(null);
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 

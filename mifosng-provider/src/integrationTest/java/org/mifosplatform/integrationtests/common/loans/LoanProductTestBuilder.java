@@ -104,6 +104,7 @@ public class LoanProductTestBuilder {
     private String graceOnPrincipalPayment = "1";
     private String graceOnInterestPayment = "1";
     private JsonObject allowAttributeOverrides = null;
+    private Boolean allowPartialPeriodInterestCalcualtion = false;
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -183,6 +184,7 @@ public class LoanProductTestBuilder {
         if (allowAttributeOverrides != null) {
             map.put("allowAttributeOverrides", this.allowAttributeOverrides);
         }
+        map.put("allowPartialPeriodInterestCalcualtion", this.allowPartialPeriodInterestCalcualtion);
         return new Gson().toJson(map);
     }
 
@@ -276,8 +278,9 @@ public class LoanProductTestBuilder {
         return this;
     }
 
-    public LoanProductTestBuilder withInterestCalculationPeriodTypeAsRepaymentPeriod() {
+    public LoanProductTestBuilder withInterestCalculationPeriodTypeAsRepaymentPeriod(final Boolean allowPartialPeriodInterestCalcualtion) {
         this.interestCalculationPeriodType = CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD;
+        this.allowPartialPeriodInterestCalcualtion = allowPartialPeriodInterestCalcualtion;
         return this;
     }
 
@@ -419,7 +422,7 @@ public class LoanProductTestBuilder {
         this.recalculationRestFrequencyDate = recalculationRestFrequencyDate;
         return this;
     }
-    
+
     public LoanProductTestBuilder withInterestRecalculationCompoundingFrequencyDetails(final String recalculationCompoundingFrequencyType,
             final String recalculationCompoundingFrequencyInterval, final String recalculationCompoundingFrequencyDate) {
         this.isInterestRecalculationEnabled = true;

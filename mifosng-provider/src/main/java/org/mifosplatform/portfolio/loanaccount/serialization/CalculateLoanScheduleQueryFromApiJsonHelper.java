@@ -37,13 +37,14 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             "accountNo", "externalId", "fundId", "loanOfficerId", "loanPurposeId", "transactionProcessingStrategyId", "principal",
             "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", "loanTermFrequency",
             "loanTermFrequencyType", "repaymentFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
-            "interestRateFrequencyType", "expectedDisbursementDate", "repaymentsStartingFromDate", "graceOnPrincipalPayment",
-            "graceOnInterestPayment", "graceOnInterestCharged", "interestChargedFromDate", "submittedOnDate", "submittedOnNote", "locale",
-            "dateFormat", "charges", "collateral", "syncDisbursementWithMeeting", "linkAccountId",
-            LoanApiConstants.disbursementDataParameterName, LoanApiConstants.emiAmountParameterName,
-            LoanApiConstants.maxOutstandingBalanceParameterName, LoanProductConstants.graceOnArrearsAgeingParameterName,
-            LoanProductConstants.recalculationRestFrequencyDateParamName, "createStandingInstructionAtDisbursement",
-            LoanApiConstants.isFloatingInterestRateParameterName, LoanApiConstants.interestRateDifferentialParameterName));
+            LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName, "interestRateFrequencyType", "expectedDisbursementDate",
+            "repaymentsStartingFromDate", "graceOnPrincipalPayment", "graceOnInterestPayment", "graceOnInterestCharged",
+            "interestChargedFromDate", "submittedOnDate", "submittedOnNote", "locale", "dateFormat", "charges", "collateral",
+            "syncDisbursementWithMeeting", "linkAccountId", LoanApiConstants.disbursementDataParameterName,
+            LoanApiConstants.emiAmountParameterName, LoanApiConstants.maxOutstandingBalanceParameterName,
+            LoanProductConstants.graceOnArrearsAgeingParameterName, LoanProductConstants.recalculationRestFrequencyDateParamName,
+            "createStandingInstructionAtDisbursement", LoanApiConstants.isFloatingInterestRateParameterName,
+            LoanApiConstants.interestRateDifferentialParameterName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -95,17 +96,9 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             repaymentsStartingFromDate = this.fromApiJsonHelper.extractLocalDateNamed(repaymentsStartingFromDateParameterName, element);
         }
 
-        LocalDate interestChargedFromDate = null;
-        final String interestChargedFromDateParameterName = "interestChargedFromDate";
-        if (this.fromApiJsonHelper.parameterExists(interestChargedFromDateParameterName, element)) {
-            interestChargedFromDate = this.fromApiJsonHelper.extractLocalDateNamed(interestChargedFromDateParameterName, element);
-        }
-
         validateRepaymentsStartingFromDateIsAfterDisbursementDate(dataValidationErrors, expectedDisbursementDate,
                 repaymentsStartingFromDate);
 
-        validateRepaymentsStartingFromDateAndInterestChargedFromDate(dataValidationErrors, expectedDisbursementDate,
-                repaymentsStartingFromDate, interestChargedFromDate);
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
@@ -132,27 +125,6 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
                     dataValidationErrors.add(error);
                 }
             }
-        }
-    }
-
-    private void validateRepaymentsStartingFromDateAndInterestChargedFromDate(final List<ApiParameterError> dataValidationErrors,
-            final LocalDate expectedDisbursementDate, final LocalDate repaymentsStartingFromDate, final LocalDate interestChargedFromDate) {
-        if (repaymentsStartingFromDate != null && interestChargedFromDate == null) {
-
-            final ApiParameterError error = ApiParameterError.parameterError(
-                    "validation.msg.loan.interestChargedFromDate.must.be.entered.when.using.repayments.startfrom.field",
-                    "The parameter interestChargedFromDate cannot be empty when repaymentsStartingFromDate is provided.",
-                    "interestChargedFromDate", repaymentsStartingFromDate);
-            dataValidationErrors.add(error);
-        } else if (repaymentsStartingFromDate == null && interestChargedFromDate != null) {
-
-           /* if (expectedDisbursementDate != null && expectedDisbursementDate.isAfter(interestChargedFromDate)) {
-                final ApiParameterError error = ApiParameterError.parameterError(
-                        "validation.msg.loan.interestChargedFromDate.cannot.be.before.disbursement.date",
-                        "The parameter interestChargedFromDate cannot be before the date given for expectedDisbursementDate.",
-                        "interestChargedFromDate", interestChargedFromDate, expectedDisbursementDate);
-                dataValidationErrors.add(error);
-            }*/
         }
     }
 

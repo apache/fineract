@@ -109,5 +109,7 @@ public interface LoanProductConstants {
     public static final String maximumGapBetweenInstallments = "maximumGap" ;
     
     
+    public static final String allowPartialPeriodInterestCalcualtionParamName = "allowPartialPeriodInterestCalcualtion";
+    
 
 }

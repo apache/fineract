@@ -29,6 +29,7 @@ import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanInterestRecalculationDetails;
 import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
+import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
@@ -49,19 +50,15 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     final Set<String> supportedParameters = new HashSet<>(Arrays.asList("dateFormat", "locale", "id", "clientId", "groupId", "loanType",
             "productId", "principal", "loanTermFrequency", "loanTermFrequencyType", "numberOfRepayments", "repaymentEvery",
             "repaymentFrequencyType", "repaymentFrequencyNthDayType", "repaymentFrequencyDayOfWeekType", "interestRatePerPeriod",
-            "amortizationType", "interestType",
-            LoanApiConstants.isFloatingInterestRate,
-            LoanApiConstants.interestRateDifferential,
-            "interestCalculationPeriodType",
-            "interestRateFrequencyType",
-            "expectedDisbursementDate",
-            "repaymentsStartingFromDate",
+            "amortizationType", "interestType", LoanApiConstants.isFloatingInterestRate, LoanApiConstants.interestRateDifferential,
+            "interestCalculationPeriodType", LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName,
+            "interestRateFrequencyType", "expectedDisbursementDate", "repaymentsStartingFromDate",
             "graceOnPrincipalPayment",
             "graceOnInterestPayment",
             "graceOnInterestCharged",
-            "interestChargedFromDate", //
+            "interestChargedFromDate",
             "submittedOnDate",
-            "submittedOnNote", //
+            "submittedOnNote",
             "accountNo",
             "externalId",
             "fundId",
@@ -451,7 +448,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     .ignoreIfNull().positiveAmount();
         }
         validateLoanMultiDisbursementdate(element, baseDataValidator, expectedDisbursementDate, principal);
-
+        validatePartialPeriodSupport(interestCalculationPeriodType, baseDataValidator, element, loanProduct);
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
@@ -670,10 +667,11 @@ public final class LoanApplicationCommandFromApiJsonHelper {
 
         }
 
+        Integer interestCalculationPeriodType = loanProduct.getLoanProductRelatedDetail().getInterestCalculationPeriodMethod().getValue();
         final String interestCalculationPeriodTypeParameterName = "interestCalculationPeriodType";
         if (this.fromApiJsonHelper.parameterExists(interestCalculationPeriodTypeParameterName, element)) {
             atLeastOneParameterPassedForUpdate = true;
-            final Integer interestCalculationPeriodType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
+            interestCalculationPeriodType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
                     interestCalculationPeriodTypeParameterName, element);
             baseDataValidator.reset().parameter(interestCalculationPeriodTypeParameterName).value(interestCalculationPeriodType).notNull()
                     .inMinMaxRange(0, 1);
@@ -877,6 +875,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     .ignoreIfNull().positiveAmount();
         }
         validateLoanMultiDisbursementdate(element, baseDataValidator, expectedDisbursementDate, principal);
+        validatePartialPeriodSupport(interestCalculationPeriodType, baseDataValidator, element, loanProduct);
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
@@ -1150,6 +1149,54 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
         baseDataValidator.reset().parameter(paramName).value(recalculationFrequencyDate).notNull()
                 .validateDateForEqual(expectedDisbursementDate);
+    }
+
+    private void validatePartialPeriodSupport(final Integer interestCalculationPeriodType, final DataValidatorBuilder baseDataValidator,
+            final JsonElement element, final LoanProduct loanProduct) {
+        if (interestCalculationPeriodType != null) {
+            final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod
+                    .fromInt(interestCalculationPeriodType);
+            boolean considerPartialPeriodUpdates = interestCalculationPeriodMethod.isDaily() ? interestCalculationPeriodMethod.isDaily()
+                    : loanProduct.getLoanProductRelatedDetail().isAllowPartialPeriodInterestCalcualtion();
+            if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName, element)) {
+                final Boolean considerPartialInterestEnabled = this.fromApiJsonHelper.extractBooleanNamed(
+                        LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName, element);
+                baseDataValidator.reset().parameter(LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName)
+                        .value(considerPartialInterestEnabled).notNull().isOneOfTheseValues(true, false);
+                boolean considerPartialPeriods = considerPartialInterestEnabled == null ? false : considerPartialInterestEnabled;
+                if (interestCalculationPeriodMethod.isDaily()) {
+                    if (considerPartialPeriods) {
+                        baseDataValidator.reset().parameter(LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName)
+                                .failWithCode("not.supported.for.daily.calcualtions");
+                    }
+                } else {
+                    considerPartialPeriodUpdates = considerPartialPeriods;
+                }
+            }
+
+            if (!considerPartialPeriodUpdates) {
+                if (loanProduct.isInterestRecalculationEnabled()) {
+                    baseDataValidator.reset().parameter(LoanProductConstants.isInterestRecalculationEnabledParameterName)
+                            .failWithCode("not.supported.for.selected.interest.calcualtion.type");
+                }
+
+                if (loanProduct.isMultiDisburseLoan()) {
+                    baseDataValidator.reset().parameter(LoanProductConstants.multiDisburseLoanParameterName)
+                            .failWithCode("not.supported.for.selected.interest.calcualtion.type");
+                }
+
+                if (loanProduct.allowVariabeInstallments()) {
+                    baseDataValidator.reset().parameter(LoanProductConstants.allowVariableInstallmentsParamName)
+                            .failWithCode("not.supported.for.selected.interest.calcualtion.type");
+                }
+
+                if (loanProduct.isLinkedToFloatingInterestRate()) {
+                    baseDataValidator.reset().parameter("isLinkedToFloatingInterestRates")
+                            .failWithCode("not.supported.for.selected.interest.calcualtion.type");
+                }
+            }
+
+        }
     }
 
 }

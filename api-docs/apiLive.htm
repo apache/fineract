@@ -8004,6 +8004,14 @@ GET https://DomainName/mifosng-provider/api/v1/groups?paged=true
 							<td class=fielddesc><span>Example Values:</span> 0=Daily, 1=Same as repayment period</td>
 						</tr>
 						<tr class=alt>
+							<td>allowPartialPeriodInterestCalcualtion</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>This value will be supported along with interestCalculationPeriodType as Same as repayment period to calculate interest for partial periods.
+							<span>Example:</span> Interest charged from is 5th of April , Principal is 10000 and interest is 1% per month then the interest will be (10000 * 1%)* (25/30) , it calculates for the month first then calculates exact periods between start date and end date(can be a decimal)
+							</td>
+						</tr>
+						<tr class=alt>
 							<td>inArrearsTolerance</td>
 						</tr>
 						<tr>
@@ -9219,7 +9227,7 @@ Request Body:
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId,
+							<td>graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId, allowPartialPeriodInterestCalcualtion,
 								 fixedEmiAmount, maxOutstandingLoanBalance, disbursementData, graceOnArrearsAgeing, createStandingInstructionAtDisbursement (requires linkedAccountId if set to true)
 							</td>
 						</tr>
@@ -12760,6 +12768,14 @@ Request Body:
 							<td class=fielddesc><span>Example Values:</span> 0=Daily, 1=Same as repayment period</td>
 						</tr>
 						<tr class=alt>
+							<td>allowPartialPeriodInterestCalcualtion</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>This value will be supported along with interestCalculationPeriodType as Same as repayment period to calculate interest for partial periods.
+							<span>Example:</span> Interest charged from is 5th of April , Principal is 10000 and interest is 1% per month then the interest will be (10000 * 1%)* (25/30) , it calculates for the month first then calculates exact periods between start date and end date(can be a decimal)
+							</td>
+						</tr>
+						<tr class=alt>
 							<td>inArrearsTolerance</td>
 						</tr>
 						<tr>
@@ -14236,7 +14252,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							numberOfRepaymentVariationsForBorrowerCycle,
 							interestRateVariationsForBorrowerCycle,
 							multiDisburseLoan,maxTrancheCount,
-							outstandingLoanBalance,overdueDaysForNPA,holdGuaranteeFunds, principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount, installmentAmountInMultiplesOf, allowAttributeOverrides
+							outstandingLoanBalance,overdueDaysForNPA,holdGuaranteeFunds, principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount, installmentAmountInMultiplesOf, allowAttributeOverrides, allowPartialPeriodInterestCalcualtion
 							</td>
 						</tr>
 					</table>

@@ -199,6 +199,11 @@ public class LoanScheduleAssembler {
                 element);
         final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod
                 .fromInt(interestCalculationPeriodType);
+        Boolean allowPartialPeriodInterestCalcualtion = this.fromApiJsonHelper.extractBooleanNamed(
+                LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName, element);
+        if (allowPartialPeriodInterestCalcualtion == null) {
+            allowPartialPeriodInterestCalcualtion = loanProduct.getLoanProductRelatedDetail().isAllowPartialPeriodInterestCalcualtion();
+        }
 
         final BigDecimal interestRatePerPeriod = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element);
         final PeriodFrequencyType interestRatePeriodFrequencyType = loanProduct.getInterestPeriodFrequencyType();
@@ -366,12 +371,13 @@ public class LoanScheduleAssembler {
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, nthDay, weekDayType, amortizationMethod, interestMethod,
                 interestRatePerPeriod, interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod,
-                principalMoney, expectedDisbursementDate, repaymentsStartingFromDate, calculatedRepaymentsStartingFromDate,
-                graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, inArrearsToleranceMoney,
-                loanProduct.isMultiDisburseLoan(), emiAmount, disbursementDatas, maxOutstandingBalance, graceOnArrearsAgeing,
-                daysInMonthType, daysInYearType, isInterestRecalculationEnabled, recalculationFrequencyType, restCalendarInstance,
-                compoundingCalendarInstance, compoundingFrequencyType, principalThresholdForLastInstalment, installmentAmountInMultiplesOf,
-                loanProduct.preCloseInterestCalculationStrategy(), calendar, BigDecimal.ZERO, loanTermVariations);
+                allowPartialPeriodInterestCalcualtion, principalMoney, expectedDisbursementDate, repaymentsStartingFromDate,
+                calculatedRepaymentsStartingFromDate, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
+                interestChargedFromDate, inArrearsToleranceMoney, loanProduct.isMultiDisburseLoan(), emiAmount, disbursementDatas,
+                maxOutstandingBalance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
+                recalculationFrequencyType, restCalendarInstance, compoundingCalendarInstance, compoundingFrequencyType,
+                principalThresholdForLastInstalment, installmentAmountInMultiplesOf, loanProduct.preCloseInterestCalculationStrategy(),
+                calendar, BigDecimal.ZERO, loanTermVariations);
     }
 
     private CalendarInstance createInterestRecalculationCalendarInstance(final LocalDate calendarStartDate,
@@ -630,7 +636,7 @@ public class LoanScheduleAssembler {
                     if (termVariations.fetchTermApplicaDate().isAfter(lastDate)) {
                         baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
                                 "variable.schedule.insert.not.allowed.after.last.period.date", "Loan schedule insert request invalid");
-                    } else if(termVariations.fetchTermApplicaDate().isBefore(loan.getExpectedDisbursedOnLocalDate())){
+                    } else if (termVariations.fetchTermApplicaDate().isBefore(loan.getExpectedDisbursedOnLocalDate())) {
                         baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
                                 "variable.schedule.insert.not.allowed.before.disbursement.date", "Loan schedule insert request invalid");
                     }
@@ -664,7 +670,7 @@ public class LoanScheduleAssembler {
                     } else {
                         dueDates.add(termVariations.fetchDateValue());
                     }
-                    if(termVariations.fetchDateValue().isBefore(loan.getExpectedDisbursedOnLocalDate())){
+                    if (termVariations.fetchDateValue().isBefore(loan.getExpectedDisbursedOnLocalDate())) {
                         baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
                                 "variable.schedule.insert.not.allowed.before.disbursement.date", "Loan schedule insert request invalid");
                     }
@@ -713,8 +719,11 @@ public class LoanScheduleAssembler {
             int gap = Days.daysBetween(previousDate, duedate).getDays();
             previousDate = duedate;
             if (gap < minGap || (maxGap != null && gap > maxGap)) {
-                baseDataValidator.reset().value(duedate)
-                        .failWithCodeNoParameterAddedToErrorCode("variable.schedule.date.must.be.in.min.max.range", "Loan schedule date invalid");
+                baseDataValidator
+                        .reset()
+                        .value(duedate)
+                        .failWithCodeNoParameterAddedToErrorCode("variable.schedule.date.must.be.in.min.max.range",
+                                "Loan schedule date invalid");
             } else if (loanCalendar != null && !actualDueDates.contains(duedate) && !loanCalendar.isValidRecurringDate(duedate)) {
                 baseDataValidator
                         .reset()
