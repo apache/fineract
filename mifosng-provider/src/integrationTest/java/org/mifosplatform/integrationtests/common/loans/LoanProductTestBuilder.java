@@ -105,6 +105,10 @@ public class LoanProductTestBuilder {
     private String graceOnInterestPayment = "1";
     private JsonObject allowAttributeOverrides = null;
     private Boolean allowPartialPeriodInterestCalcualtion = false;
+    
+    private Boolean allowVariableInstallments = Boolean.FALSE;
+    private Integer minimumGap;
+    private Integer maximumGap;
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -185,6 +189,11 @@ public class LoanProductTestBuilder {
             map.put("allowAttributeOverrides", this.allowAttributeOverrides);
         }
         map.put("allowPartialPeriodInterestCalcualtion", this.allowPartialPeriodInterestCalcualtion);
+        map.put("allowVariableInstallments", allowVariableInstallments) ;
+        if(allowVariableInstallments) {
+            map.put("minimumGap", minimumGap) ;
+            map.put("maximumGap", maximumGap) ;
+        }
         return new Gson().toJson(map);
     }
 
@@ -460,5 +469,12 @@ public class LoanProductTestBuilder {
     public LoanProductTestBuilder withLoanProductConfiguration(JsonObject loanProductConfigurableAttributes) {
         this.allowAttributeOverrides = loanProductConfigurableAttributes;
         return this;
+    }
+    
+    public LoanProductTestBuilder withVariableInstallmentsConfig(Boolean allowVariableInstallments, Integer minimumGap, Integer maximumGap) {
+        this.allowVariableInstallments = allowVariableInstallments ;
+        this.minimumGap = minimumGap;
+        this.maximumGap = maximumGap;
+        return this ;
     }
 }
