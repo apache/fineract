@@ -121,7 +121,8 @@ public class LoanApplicationApprovalTest {
                 + clientID);
 
         final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder()
-                .withInterestTypeAsDecliningBalance().withTranches(true).build(null));
+                .withInterestTypeAsDecliningBalance().withTranches(true).withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
+                .build(null));
         System.out.println("----------------------------------LOAN PRODUCT CREATED WITH ID-------------------------------------------"
                 + loanProductID);
 

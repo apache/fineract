@@ -48,6 +48,7 @@ import org.mifosplatform.portfolio.floatingrates.data.FloatingRateData;
 import org.mifosplatform.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.fund.service.FundReadPlatformService;
+import org.mifosplatform.portfolio.loanproduct.LoanProductConstants;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.mifosplatform.portfolio.loanproduct.productmix.data.ProductMixData;
@@ -70,14 +71,14 @@ public class LoanProductsApiResource {
             "minNumberOfRepayments", "maxNumberOfRepayments", "repaymentEvery", "repaymentFrequencyType", "graceOnPrincipalPayment",
             "graceOnInterestPayment", "graceOnInterestCharged", "interestRatePerPeriod", "minInterestRatePerPeriod",
             "maxInterestRatePerPeriod", "interestRateFrequencyType", "annualInterestRate", "amortizationType", "interestType",
-            "interestCalculationPeriodType", "inArrearsTolerance", "transactionProcessingStrategyId", "transactionProcessingStrategyName",
-            "charges", "accountingRule", "externalId", "accountingMappings", "paymentChannelToFundSourceMappings", "fundOptions",
-            "paymentTypeOptions", "currencyOptions", "repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions",
-            "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions",
-            "transactionProcessingStrategyOptions", "chargeOptions", "accountingOptions", "accountingRuleOptions",
-            "accountingMappingOptions", "floatingRateOptions", "isLinkedToFloatingInterestRates", "floatingRatesId", "interestRateDifferential",
-            "minDifferentialLendingRate", "defaultDifferentialLendingRate", "maxDifferentialLendingRate",
-            "isFloatingInterestRateCalculationAllowed"));
+            "interestCalculationPeriodType", LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName, "inArrearsTolerance",
+            "transactionProcessingStrategyId", "transactionProcessingStrategyName", "charges", "accountingRule", "externalId",
+            "accountingMappings", "paymentChannelToFundSourceMappings", "fundOptions", "paymentTypeOptions", "currencyOptions",
+            "repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "amortizationTypeOptions", "interestTypeOptions",
+            "interestCalculationPeriodTypeOptions", "transactionProcessingStrategyOptions", "chargeOptions", "accountingOptions",
+            "accountingRuleOptions", "accountingMappingOptions", "floatingRateOptions", "isLinkedToFloatingInterestRates",
+            "floatingRatesId", "interestRateDifferential", "minDifferentialLendingRate", "defaultDifferentialLendingRate",
+            "maxDifferentialLendingRate", "isFloatingInterestRateCalculationAllowed"));
 
     private final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<>(Arrays.asList("productId", "productName", "restrictedProducts",
             "allowedProducts", "productOptions"));

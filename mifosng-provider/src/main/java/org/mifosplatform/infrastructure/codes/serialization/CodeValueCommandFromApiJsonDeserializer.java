@@ -66,9 +66,11 @@ public final class CodeValueCommandFromApiJsonDeserializer {
             // Validate input value is a valid Integer
             this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(), element);
         }
-        
-        final Boolean isActive = this.fromApiJsonHelper.extractBooleanNamed(CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue(), element);
-        baseDataValidator.reset().parameter(CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue()).value(isActive).validateForBooleanValue();
+
+        if (this.fromApiJsonHelper.parameterExists(CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue(), element)) {
+            final Boolean isActive = this.fromApiJsonHelper.extractBooleanNamed(CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue(), element);
+            baseDataValidator.reset().parameter(CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue()).value(isActive).validateForBooleanValue();
+        }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -100,7 +102,7 @@ public final class CodeValueCommandFromApiJsonDeserializer {
             // Validate input value is a valid Integer
             this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(), element);
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists(CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue(), element)) {
             final Boolean isActive = this.fromApiJsonHelper.extractBooleanNamed(CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue(), element);
             baseDataValidator.reset().parameter(CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue()).value(isActive).validateForBooleanValue();

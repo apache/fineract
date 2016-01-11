@@ -40,8 +40,9 @@ public class CodeValue extends AbstractPersistable<Long> {
 
     @Column(name = "is_active")
     private boolean isActive;
-    
-    public static CodeValue createNew(final Code code, final String label, final int position, final String description, final boolean isActive) {
+
+    public static CodeValue createNew(final Code code, final String label, final int position, final String description,
+            final boolean isActive) {
         return new CodeValue(code, label, position, description, isActive);
     }
 
@@ -70,7 +71,11 @@ public class CodeValue extends AbstractPersistable<Long> {
         final String label = command.stringValueOfParameterNamed(CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue());
         Integer position = command.integerValueSansLocaleOfParameterNamed(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue());
         String description = command.stringValueOfParameterNamed(CODEVALUE_JSON_INPUT_PARAMS.DESCRIPTION.getValue());
-        boolean isActive = command.booleanPrimitiveValueOfParameterNamed(CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue());
+        Boolean isActiveObj = command.booleanObjectValueOfParameterNamed(CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue());
+        boolean isActive = true;
+        if (isActiveObj != null) {
+            isActive = isActiveObj;
+        }
         if (position == null) {
             position = new Integer(0);
         }
@@ -87,7 +92,7 @@ public class CodeValue extends AbstractPersistable<Long> {
             actualChanges.put(labelParamName, newValue);
             this.label = StringUtils.defaultIfEmpty(newValue, null);
         }
-        
+
         final String decriptionParamName = CODEVALUE_JSON_INPUT_PARAMS.DESCRIPTION.getValue();
         if (command.isChangeInStringParameterNamed(decriptionParamName, this.description)) {
             final String newValue = command.stringValueOfParameterNamed(decriptionParamName);
@@ -101,7 +106,7 @@ public class CodeValue extends AbstractPersistable<Long> {
             actualChanges.put(positionParamName, newValue);
             this.position = newValue.intValue();
         }
-        
+
         final String isActiveParamName = CODEVALUE_JSON_INPUT_PARAMS.IS_ACTIVE.getValue();
         if (command.isChangeInBooleanParameterNamed(isActiveParamName, this.isActive)) {
             final Boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isActiveParamName);

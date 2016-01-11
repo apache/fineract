@@ -868,7 +868,7 @@ public class ClientLoanIntegrationTest {
 
     private Integer createLoanProduct(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
         System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        final String loanProductJSON = new LoanProductTestBuilder() //
+        LoanProductTestBuilder builder = new LoanProductTestBuilder() //
                 .withPrincipal("12,000.00") //
                 .withNumberOfRepayments("4") //
                 .withRepaymentAfterEvery("1") //
@@ -878,7 +878,11 @@ public class ClientLoanIntegrationTest {
                 .withAmortizationTypeAsEqualInstallments() //
                 .withInterestTypeAsDecliningBalance() //
                 .withTranches(multiDisburseLoan) //
-                .withAccounting(accountingRule, accounts).build(null);
+                .withAccounting(accountingRule, accounts);
+        if (multiDisburseLoan) {
+            builder = builder.withInterestCalculationPeriodTypeAsRepaymentPeriod(true);
+        }
+        final String loanProductJSON = builder.build(null);
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
@@ -4166,13 +4170,12 @@ public class ClientLoanIntegrationTest {
         testLoanScheduleWithInterestRecalculation_FOR_PRE_CLOSE_WITH_MORATORIUM(
                 LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, "10006.59");
     }
-    
+
     @Test
     public void testLoanScheduleWithInterestRecalculation_FOR_PRE_CLOSE_WITH_MORATORIUM_INTEREST_APPLICABLE_STRATEGY_REST_DATE() {
         testLoanScheduleWithInterestRecalculation_FOR_PRE_CLOSE_WITH_MORATORIUM(
                 LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_REST_DATE, "10046.15");
     }
-
 
     private void testLoanScheduleWithInterestRecalculation_FOR_PRE_CLOSE_WITH_MORATORIUM(final String preCloseStrategy,
             final String preCloseAmount) {
@@ -4307,6 +4310,7 @@ public class ClientLoanIntegrationTest {
                 .withInterestRateFrequencyTypeAsMonths()
                 .withRepaymentStrategy(repaymentStrategy)
                 .withAmortizationTypeAsEqualPrincipalPayment()
+                .withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
                 .withInterestTypeAsDecliningBalance()
                 .withInterestRecalculationDetails(interestRecalculationCompoundingMethod, rescheduleStrategyMethod,
                         preCloseInterestCalculationStrategy)
