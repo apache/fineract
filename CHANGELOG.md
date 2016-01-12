@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 12 Jan 2016 - 16.01.1.RELEASE
 1. 17 Dec 2015 - 15.12.2.RELEASE
 1. 02 Dec 2015 - 15.12.1.RELEASE
 1. 18 Nov 2015 - 15.11.2.RELEASE
@@ -82,6 +83,60 @@ Releases
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
 
+16.01.1.RELEASE
+=============
+
+This release includes Variable Installments Feature.
+This release also includes many bug fixes as mentioned below.
+
+Platform & API
+
+New Features & Improvements
+Following stories of Variable Installments Epic
+ - [MIFOSX-2254] - Capture data at product level
+ - [MIFOSX-2255] - Allow installment due dates to be modified
+ - [MIFOSX-2257] - Add additional installments
+ - [MIFOSX-2419] - Add "consider partial period interest" option to loan
+ - [MIFOSX-2256] - Allow installment amounts to be modified (either total installment or principal portion can be modified)
+ 
+Bugs
+ 
+ - [MIFOSX-2207] - After Client transfer if loan repayment is done loan balance is displaying as negative in Transactions page
+ - [MIFOSX-2139] - Overdue Charges Not getting updated in repayment schedule after second tranche disbursement
+ - [MIFOSX-2160] - Not able to waive Charge displays internal server error
+ - [MIFOSX-2181] - Add Savings Fee Not working
+ - [MIFOSX-2189] - If %Approved amount Charge defined for multi tranche loan is calculating for %Disbursed amount
+ - [MIFOSX-2283] - Installment fee - Flat is not working as expected for multi tranche loans
+ - [MIFOSX-2284] - Not able to make loan repayment with the installment fees attached
+ - [MIFOSX-2285] - Overdue Charge with % Approved amount is not working as expected
+ - [MIFOSX-2286] - Overdue charge - Flat is not getting applied properly
+ - [MIFOSX-2290] - Penalties receivable is not displaying in Loan Transactions page for overdue loans.
+ - [MIFOSX-2292] - In Modify loan application not able to add any charges displayed internal server error
+ - [MIFOSX-2296] - Overdue charge applied as % Approved amount is collcting as % of Principal due in Loans
+ - [MIFOSX-2304] - Overdue charge is not getting applied properly
+ - [MIFOSX-2355] - For Floating interest - If expected disbursement date is modified during Loan approval then after disbursement interest is getting calculated wrt submitted date
+ - [MIFOSX-2356] - If the Expected disbursement date is modified during loan approval and the Loan is disbursed on the same date as modifed during approval then installment date is not getting updated as per disbursed date
+ - [MIFOSX-2358] - fix for last installment overdue charge
+ - [MIFOSX-2367] - For Yearly repayment if the Days in year is defined as 365 the interest is not getting calculated properly for loan with interest recalculation
+ - Retrofitted SPM API to ease the usage
+ - [CC-38] - adding client account no in client data
+ - [CC-32] - undo last tranche disbursal feature
+ - [CC-42] - adding new transaction date in collection sheet
+ - [CC-61] - validate holiday only once while doing repayment through collection 
+ 
+Community-App
+
+New Features & Improvements
+Variable Installments Feature
+
+Bugs
+ 
+ - [CC-48] - enabling code values based on active or inactive status
+ - [MIFOSX-2412] - Floating Rate UI Enhancements
+ - [MIFOSX-2413] - Adding tooltip for floating interest rate screens
+ - [MIFOSX-2419] - UI Chages to add partial period interest calcualtion
+ - [MIFOSX-2282] - Some times after fetching the latest code interest type is missing out while creating the loan product
+ 
 15.12.2.RELEASE
 =============
 This release introduces Customer Self Service APIs.
