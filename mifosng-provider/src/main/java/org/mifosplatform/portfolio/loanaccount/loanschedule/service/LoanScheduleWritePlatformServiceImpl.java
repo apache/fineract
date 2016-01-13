@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -87,7 +88,8 @@ public class LoanScheduleWritePlatformServiceImpl implements LoanScheduleWritePl
         final Map<String, Object> changes = new HashMap<>();
         changes.put("removedEntityIds", deletedVariations);
         loan.getLoanTermVariations().clear();
-        ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan);
+        final LocalDate recalculateFrom = null;
+        ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
         AppUser currentUser = this.context.getAuthenticatedUserIfPresent();
         loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
         this.loanAccountDomainService.saveLoanWithDataIntegrityViolationChecks(loan);

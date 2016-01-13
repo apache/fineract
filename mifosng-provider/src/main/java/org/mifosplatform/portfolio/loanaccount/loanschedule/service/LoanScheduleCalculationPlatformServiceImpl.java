@@ -22,21 +22,12 @@ import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidation
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
-import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
-import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
 import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
-import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
-import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
-import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
-import org.mifosplatform.portfolio.floatingrates.data.FloatingRateDTO;
-import org.mifosplatform.portfolio.floatingrates.data.FloatingRatePeriodData;
-import org.mifosplatform.portfolio.floatingrates.exception.FloatingRateNotFoundException;
-import org.mifosplatform.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
+import org.mifosplatform.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
@@ -50,6 +41,7 @@ import org.mifosplatform.portfolio.loanaccount.serialization.CalculateLoanSchedu
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanApplicationCommandFromApiJsonHelper;
 import org.mifosplatform.portfolio.loanaccount.service.LoanAssembler;
 import org.mifosplatform.portfolio.loanaccount.service.LoanReadPlatformService;
+import org.mifosplatform.portfolio.loanaccount.service.LoanUtilService;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
@@ -68,25 +60,20 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
     private final LoanReadPlatformService loanReadPlatformService;
     private final LoanApplicationCommandFromApiJsonHelper loanApiJsonDeserializer;
     private final LoanAssembler loanAssembler;
-    private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
-    private final LoanAccountDomainService accountDomainService;
-    private final CalendarInstanceRepository calendarInstanceRepository;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final ConfigurationDomainService configurationDomainService;
-    private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
+    private final LoanUtilService loanUtilService;
 
     @Autowired
     public LoanScheduleCalculationPlatformServiceImpl(final CalculateLoanScheduleQueryFromApiJsonHelper fromApiJsonDeserializer,
             final LoanScheduleAssembler loanScheduleAssembler, final FromJsonHelper fromJsonHelper,
             final LoanProductRepository loanProductRepository, final LoanProductDataValidator loanProductCommandFromApiJsonDeserializer,
             final LoanReadPlatformService loanReadPlatformService, final LoanApplicationCommandFromApiJsonHelper loanApiJsonDeserializer,
-            final LoanAssembler loanAssembler, final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
-            final LoanAccountDomainService accountDomainService, final CalendarInstanceRepository calendarInstanceRepository,
+            final LoanAssembler loanAssembler,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
-            final ConfigurationDomainService configurationDomainService,
-            final FloatingRatesReadPlatformService floatingRatesReadPlatformService,
-            final CurrencyReadPlatformService currencyReadPlatformService) {
+            final ConfigurationDomainService configurationDomainService, final CurrencyReadPlatformService currencyReadPlatformService,
+            final LoanUtilService loanUtilService) {
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.loanScheduleAssembler = loanScheduleAssembler;
         this.fromJsonHelper = fromJsonHelper;
@@ -95,13 +82,10 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanApiJsonDeserializer = loanApiJsonDeserializer;
         this.loanAssembler = loanAssembler;
-        this.applicationCurrencyRepository = applicationCurrencyRepository;
-        this.accountDomainService = accountDomainService;
-        this.calendarInstanceRepository = calendarInstanceRepository;
         this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
         this.configurationDomainService = configurationDomainService;
-        this.floatingRatesReadPlatformService = floatingRatesReadPlatformService;
         this.currencyReadPlatformService = currencyReadPlatformService;
+        this.loanUtilService = loanUtilService;
     }
 
     @Override
@@ -174,7 +158,8 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         LoanApplicationTerms loanApplicationTerms = constructLoanApplicationTerms(loan);
         LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = this.loanScheduleAssembler.calculatePrepaymentAmount(currency,
                 today, loanApplicationTerms, loan.charges(), loan.getOfficeId(),
-                loan.retreiveListOfTransactionsPostDisbursementExcludeAccruals(), loanRepaymentScheduleTransactionProcessor);
+                loan.retreiveListOfTransactionsPostDisbursementExcludeAccruals(), loanRepaymentScheduleTransactionProcessor,
+                loan.fetchRepaymentScheduleInstallments());
         Money totalAmount = totalPrincipal.plus(loanRepaymentScheduleInstallment.getFeeChargesOutstanding(currency)).plus(
                 loanRepaymentScheduleInstallment.getPenaltyChargesOutstanding(currency));
         Money interestDue = Money.zero(currency);
@@ -278,37 +263,10 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
     }
 
     private LoanApplicationTerms constructLoanApplicationTerms(final Loan loan) {
-        MonetaryCurrency currency = loan.getCurrency();
-        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
-        final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
-                CalendarEntityType.LOANS.getValue());
-        final CalendarInstance restCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(
-                loan.loanInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_REST_DETAIL.getValue());
-        final CalendarInstance compoundingCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(
-                loan.loanInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_COMPOUNDING_DETAIL.getValue());
-        LocalDate calculatedRepaymentsStartingFromDate = accountDomainService.getCalculatedRepaymentsStartingFromDate(
-                loan.getDisbursementDate(), loan, calendarInstance);
-        FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
-        LoanApplicationTerms loanApplicationTerms = loan.constructLoanApplicationTerms(applicationCurrency,
-                calculatedRepaymentsStartingFromDate, restCalendarInstance, compoundingCalendarInstance, floatingRateDTO);
+        final LocalDate recalculateFrom = null;
+        ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
+        LoanApplicationTerms loanApplicationTerms = loan.constructLoanApplicationTerms(scheduleGeneratorDTO);
         return loanApplicationTerms;
-    }
-
-    private FloatingRateDTO constructFloatingRateDTO(final Loan loan) {
-        FloatingRateDTO floatingRateDTO = null;
-        if (loan.loanProduct().isLinkedToFloatingInterestRate()) {
-            boolean isFloatingInterestRate = loan.getIsFloatingInterestRate();
-            BigDecimal interestRateDiff = loan.getInterestRateDifferential();
-            List<FloatingRatePeriodData> baseLendingRatePeriods = null;
-            try {
-                baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate().getRatePeriods();
-            } catch (final FloatingRateNotFoundException ex) {
-                // Do not do anything
-            }
-            floatingRateDTO = new FloatingRateDTO(isFloatingInterestRate, loan.getDisbursementDate(), interestRateDiff,
-                    baseLendingRatePeriods);
-        }
-        return floatingRateDTO;
     }
 
 }

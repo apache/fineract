@@ -8,7 +8,13 @@ package org.mifosplatform.portfolio.loanaccount.rescheduleloan.service;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -43,17 +49,34 @@ import org.mifosplatform.portfolio.floatingrates.service.FloatingRatesReadPlatfo
 import org.mifosplatform.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargePaidByData;
 import org.mifosplatform.portfolio.loanaccount.data.ScheduleGeneratorDTO;
-import org.mifosplatform.portfolio.loanaccount.domain.*;
+import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
+import org.mifosplatform.portfolio.loanaccount.domain.Loan;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanInstallmentCharge;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanSummary;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanSummaryWrapper;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistory;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistoryRepository;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleHistoryWritePlatformService;
 import org.mifosplatform.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
 import org.mifosplatform.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidator;
-import org.mifosplatform.portfolio.loanaccount.rescheduleloan.domain.*;
+import org.mifosplatform.portfolio.loanaccount.rescheduleloan.domain.DefaultLoanReschedulerFactory;
+import org.mifosplatform.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleModel;
+import org.mifosplatform.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleModelRepaymentPeriod;
+import org.mifosplatform.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
+import org.mifosplatform.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
 import org.mifosplatform.portfolio.loanaccount.rescheduleloan.exception.LoanRescheduleRequestNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.service.LoanAssembler;
 import org.mifosplatform.portfolio.loanaccount.service.LoanChargeReadPlatformService;
+import org.mifosplatform.portfolio.loanaccount.service.LoanUtilService;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -81,14 +104,13 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     private final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository;
     private final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService;
     private final CalendarInstanceRepository calendarInstanceRepository;
-    private final LoanAccountDomainService loanAccountDomainService;
     private final LoanChargeReadPlatformService loanChargeReadPlatformService;
-    private final LoanScheduleGeneratorFactory loanScheduleFactory;
     private final LoanTransactionRepository loanTransactionRepository;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final LoanRepository loanRepository;
     private final LoanAssembler loanAssembler;
     private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
+    private final LoanUtilService loanUtilService;
 
     /**
      * LoanRescheduleRequestWritePlatformServiceImpl constructor
@@ -104,11 +126,11 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             HolidayRepositoryWrapper holidayRepository, WorkingDaysRepositoryWrapper workingDaysRepository,
             LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository,
             final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService,
-            final CalendarInstanceRepository calendarInstanceRepository, final LoanAccountDomainService loanAccountDomainService,
-            final LoanChargeReadPlatformService loanChargeReadPlatformService, final LoanScheduleGeneratorFactory loanScheduleFactory,
+            final CalendarInstanceRepository calendarInstanceRepository, final LoanChargeReadPlatformService loanChargeReadPlatformService,
             final LoanTransactionRepository loanTransactionRepository,
             final JournalEntryWritePlatformService journalEntryWritePlatformService, final LoanRepository loanRepository,
-            final LoanAssembler loanAssembler, final FloatingRatesReadPlatformService floatingRatesReadPlatformService) {
+            final LoanAssembler loanAssembler, final FloatingRatesReadPlatformService floatingRatesReadPlatformService,
+            final LoanUtilService loanUtilService) {
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
         this.platformSecurityContext = platformSecurityContext;
@@ -121,14 +143,13 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
         this.loanRepaymentScheduleHistoryRepository = loanRepaymentScheduleHistoryRepository;
         this.loanScheduleHistoryWritePlatformService = loanScheduleHistoryWritePlatformService;
         this.calendarInstanceRepository = calendarInstanceRepository;
-        this.loanAccountDomainService = loanAccountDomainService;
         this.loanChargeReadPlatformService = loanChargeReadPlatformService;
-        this.loanScheduleFactory = loanScheduleFactory;
         this.loanTransactionRepository = loanTransactionRepository;
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
         this.loanRepository = loanRepository;
         this.loanAssembler = loanAssembler;
         this.floatingRatesReadPlatformService = floatingRatesReadPlatformService;
+        this.loanUtilService = loanUtilService;
     }
 
     /**
@@ -398,8 +419,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 for (final LoanRepaymentScheduleInstallment repaymentScheduleInstallment : repaymentScheduleInstallments) {
                     repaymentScheduleInstallment.updateDerivedFields(currency, new LocalDate());
                 }
-                
-                //updates maturity date
+
+                // updates maturity date
                 loan.updateLoanScheduleDependentDerivedFields();
                 // update the loan object
                 this.loanRepository.save(loan);
@@ -448,40 +469,12 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
                 final List<Long> existingTransactionIds = new ArrayList<>();
                 final List<Long> existingReversedTransactionIds = new ArrayList<>();
-                CalendarInstance restCalendarInstance = null;
-                CalendarInstance compoundingCalendarInstance = null;
-                ApplicationCurrency applicationCurrency = null;
-                LocalDate calculatedRepaymentsStartingFromDate = null;
-                List<Holiday> holidays = null;
-                boolean isHolidayEnabled = false;
-                WorkingDays workingDays = null;
                 LocalDate recalculateFrom = null;
-                Long overdurPenaltyWaitPeriod = null;
                 if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
-                    restCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(
-                            loan.loanInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_REST_DETAIL.getValue());
-                    compoundingCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(
-                            loan.loanInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_COMPOUNDING_DETAIL.getValue());
-                    final MonetaryCurrency currency = loan.getCurrency();
-                    applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
-                    final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
-                            CalendarEntityType.LOANS.getValue());
-                    calculatedRepaymentsStartingFromDate = this.loanAccountDomainService.getCalculatedRepaymentsStartingFromDate(
-                            loan.getDisbursementDate(), loan, calendarInstance);
-
-                    isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
-                    holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan.getDisbursementDate()
-                            .toDate());
-                    workingDays = this.workingDaysRepository.findOne();
-                    overdurPenaltyWaitPeriod = this.configurationDomainService.retrievePenaltyWaitPeriod();
                     recalculateFrom = DateUtils.getLocalDateOfTenant();
                 }
 
-                HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
-                FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
-                ScheduleGeneratorDTO scheduleGeneratorDTO = new ScheduleGeneratorDTO(loanScheduleFactory, applicationCurrency,
-                        calculatedRepaymentsStartingFromDate, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance,
-                        recalculateFrom, overdurPenaltyWaitPeriod, floatingRateDTO);
+                ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
 
                 Money accruedCharge = Money.zero(loan.getCurrency());
                 if (loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
@@ -583,11 +576,10 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             boolean isFloatingInterestRate = loan.getIsFloatingInterestRate();
             BigDecimal interestRateDiff = loan.getInterestRateDifferential();
             List<FloatingRatePeriodData> baseLendingRatePeriods = null;
-            try{
-            	baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate()
-            								.getRatePeriods();
-            }catch(final FloatingRateNotFoundException ex){
-            	// Do not do anything
+            try {
+                baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate().getRatePeriods();
+            } catch (final FloatingRateNotFoundException ex) {
+                // Do not do anything
             }
             floatingRateDTO = new FloatingRateDTO(isFloatingInterestRate, loan.getDisbursementDate(), interestRateDiff,
                     baseLendingRatePeriods);

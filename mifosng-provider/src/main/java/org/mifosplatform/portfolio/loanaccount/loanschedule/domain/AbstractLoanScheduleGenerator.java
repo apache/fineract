@@ -1520,7 +1520,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         || loanApplicationTerms.getInterestChargedFromLocalDate().isAfter(periodStartDate)) {
                     periodStartDateApplicableForInterest = loanApplicationTerms.getInterestChargedFromLocalDate();
                 }
-            } else if(periodStartDate.isEqual(loanApplicationTerms.getExpectedDisbursementDate())){
+            } else if (periodStartDate.isEqual(loanApplicationTerms.getExpectedDisbursementDate())) {
                 periodStartDateApplicableForInterest = idealDisbursementDate;
             }
         }
@@ -2023,6 +2023,18 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
             final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, final LocalDate rescheduleFrom) {
 
+        // Fixed schedule End Date for generating schedule
+        final LocalDate scheduleTillDate = null;
+        return rescheduleNextInstallments(mc, loanApplicationTerms, loanCharges, holidayDetailDTO, transactions,
+                loanRepaymentScheduleTransactionProcessor, repaymentScheduleInstallments, rescheduleFrom, scheduleTillDate);
+
+    }
+
+    private LoanScheduleDTO rescheduleNextInstallments(final MathContext mc, final LoanApplicationTerms loanApplicationTerms,
+            final Set<LoanCharge> loanCharges, final HolidayDetailDTO holidayDetailDTO, final List<LoanTransaction> transactions,
+            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
+            final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, final LocalDate rescheduleFrom,
+            final LocalDate scheduleTillDate) {
         // Loan transactions to process and find the variation on payments
         Collection<RecalculationDetail> recalculationDetails = new ArrayList<>();
         for (LoanTransaction loanTransaction : transactions) {
@@ -2031,8 +2043,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         }
         final boolean applyInterestRecalculation = loanApplicationTerms.isInterestRecalculationEnabled();
 
-        // Fixed schedule End Date for generating schedule
-        final LocalDate scheduleTillDate = null;
         LoanScheduleParams loanScheduleParams = null;
         Collection<LoanScheduleModelPeriod> periods = new ArrayList<>();
         final List<LoanRepaymentScheduleInstallment> retainedInstallments = new ArrayList<>();
@@ -2259,7 +2269,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         periods.addAll(loanScheduleModel.getPeriods());
         LoanScheduleModel loanScheduleModelwithPeriodChanges = LoanScheduleModel.withLoanScheduleModelPeriods(periods, loanScheduleModel);
         return LoanScheduleDTO.from(retainedInstallments, loanScheduleModelwithPeriodChanges);
-
     }
 
     /**
@@ -2368,14 +2377,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         return principalPortionCalculated;
     }
 
-    private List<LoanRepaymentScheduleInstallment> fetchInstallmentsFromScheduleModel(final LoanScheduleModel loanScheduleModel) {
-        final List<LoanRepaymentScheduleInstallment> installments = new ArrayList<>();
-        for (LoanScheduleModelPeriod loanScheduleModelPeriod : loanScheduleModel.getPeriods()) {
-            addLoanRepaymentScheduleInstallment(installments, loanScheduleModelPeriod);
-        }
-        return installments;
-    }
-
     private LoanRepaymentScheduleInstallment addLoanRepaymentScheduleInstallment(final List<LoanRepaymentScheduleInstallment> installments,
             final LoanScheduleModelPeriod scheduledLoanInstallment) {
         LoanRepaymentScheduleInstallment installment = null;
@@ -2437,29 +2438,24 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
     public LoanRepaymentScheduleInstallment calculatePrepaymentAmount(final MonetaryCurrency currency, final LocalDate onDate,
             final LoanApplicationTerms loanApplicationTerms, final MathContext mc, final Set<LoanCharge> charges,
             final HolidayDetailDTO holidayDetailDTO, final List<LoanTransaction> loanTransactions,
-            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor) {
+            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
+            final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments) {
 
         LocalDate calculateTill = onDate;
         if (loanApplicationTerms.getPreClosureInterestCalculationStrategy().calculateTillRestFrequencyEnabled()) {
             calculateTill = getNextRestScheduleDate(onDate.minusDays(1), loanApplicationTerms, holidayDetailDTO);
         }
-        Collection<RecalculationDetail> recalculationDetails = new ArrayList<>();
-        for (LoanTransaction loanTransaction : loanTransactions) {
-            recalculationDetails.add(new RecalculationDetail(loanTransaction.getTransactionDate(), LoanTransaction
-                    .copyTransactionProperties(loanTransaction)));
-        }
-        final boolean applyInterestRecalculation = loanApplicationTerms.isInterestRecalculationEnabled();
-        LoanScheduleParams loanScheduleRecalculationDTO = LoanScheduleParams.createLoanScheduleParamsForCompleteUpdate(
-                recalculationDetails, loanRepaymentScheduleTransactionProcessor, calculateTill, applyInterestRecalculation);
-        LoanScheduleModel loanScheduleModel = generate(mc, loanApplicationTerms, charges, holidayDetailDTO, loanScheduleRecalculationDTO);
-        List<LoanRepaymentScheduleInstallment> installments = fetchInstallmentsFromScheduleModel(loanScheduleModel);
+
+        LoanScheduleDTO loanScheduleDTO = rescheduleNextInstallments(mc, loanApplicationTerms, charges, holidayDetailDTO, loanTransactions,
+                loanRepaymentScheduleTransactionProcessor, repaymentScheduleInstallments, onDate, calculateTill);
+
         loanRepaymentScheduleTransactionProcessor.handleTransaction(loanApplicationTerms.getExpectedDisbursementDate(), loanTransactions,
-                currency, installments, charges);
+                currency, loanScheduleDTO.getInstallments(), charges);
         Money feeCharges = Money.zero(currency);
         Money penaltyCharges = Money.zero(currency);
         Money totalPrincipal = Money.zero(currency);
         Money totalInterest = Money.zero(currency);
-        for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
+        for (final LoanRepaymentScheduleInstallment currentInstallment : loanScheduleDTO.getInstallments()) {
             if (currentInstallment.isNotFullyPaidOff()) {
                 totalPrincipal = totalPrincipal.plus(currentInstallment.getPrincipalOutstanding(currency));
                 totalInterest = totalInterest.plus(currentInstallment.getInterestOutstanding(currency));
