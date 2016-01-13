@@ -26,23 +26,6 @@ public class ScheduleGeneratorDTO {
     public ScheduleGeneratorDTO(final LoanScheduleGeneratorFactory loanScheduleFactory, final ApplicationCurrency applicationCurrency,
             final LocalDate calculatedRepaymentsStartingFromDate, final HolidayDetailDTO holidayDetailDTO,
             final CalendarInstance calendarInstanceForInterestRecalculation, final CalendarInstance compoundingCalendarInstance,
-            final FloatingRateDTO floatingRateDTO) {
-
-        this.loanScheduleFactory = loanScheduleFactory;
-        this.applicationCurrency = applicationCurrency;
-        this.calculatedRepaymentsStartingFromDate = calculatedRepaymentsStartingFromDate;
-        this.calendarInstanceForInterestRecalculation = calendarInstanceForInterestRecalculation;
-        this.compoundingCalendarInstance = compoundingCalendarInstance;
-        this.recalculateFrom = null;
-        this.overdurPenaltyWaitPeriod = null;
-        this.holidayDetailDTO = holidayDetailDTO;
-        this.floatingRateDTO = floatingRateDTO;
-
-    }
-
-    public ScheduleGeneratorDTO(final LoanScheduleGeneratorFactory loanScheduleFactory, final ApplicationCurrency applicationCurrency,
-            final LocalDate calculatedRepaymentsStartingFromDate, final HolidayDetailDTO holidayDetailDTO,
-            final CalendarInstance calendarInstanceForInterestRecalculation, final CalendarInstance compoundingCalendarInstance,
             final LocalDate recalculateFrom, final Long overdurPenaltyWaitPeriod, final FloatingRateDTO floatingRateDTO) {
 
         this.loanScheduleFactory = loanScheduleFactory;
@@ -100,7 +83,6 @@ public class ScheduleGeneratorDTO {
         return this.compoundingCalendarInstance;
     }
 
-    
     public FloatingRateDTO getFloatingRateDTO() {
         return this.floatingRateDTO;
     }

@@ -5,8 +5,14 @@
  */
 package org.mifosplatform.portfolio.loanaccount.service;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.accountnumberformat.domain.AccountNumberFormat;
@@ -56,7 +62,6 @@ import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
 import org.mifosplatform.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
@@ -97,13 +102,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 
 @Service
 public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements LoanApplicationWritePlatformService {
@@ -134,11 +134,11 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final AccountAssociationsRepository accountAssociationsRepository;
     private final LoanReadPlatformService loanReadPlatformService;
     private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
-    private final LoanAccountDomainService loanAccountDomainService;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final ConfigurationDomainService configurationDomainService;
     private final LoanScheduleAssembler loanScheduleAssembler;
+    private final LoanUtilService loanUtilService;
 
     @Autowired
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
@@ -154,10 +154,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final CalendarRepository calendarRepository, final CalendarInstanceRepository calendarInstanceRepository,
             final SavingsAccountAssembler savingsAccountAssembler, final AccountAssociationsRepository accountAssociationsRepository,
             final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository,
-            final LoanReadPlatformService loanReadPlatformService, final LoanAccountDomainService loanAccountDomainService,
+            final LoanReadPlatformService loanReadPlatformService,
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
             final BusinessEventNotifierService businessEventNotifierService, final ConfigurationDomainService configurationDomainService,
-            final LoanScheduleAssembler loanScheduleAssembler) {
+            final LoanScheduleAssembler loanScheduleAssembler, final LoanUtilService loanUtilService) {
         this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
@@ -182,11 +182,11 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.accountAssociationsRepository = accountAssociationsRepository;
         this.repaymentScheduleInstallmentRepository = repaymentScheduleInstallmentRepository;
         this.loanReadPlatformService = loanReadPlatformService;
-        this.loanAccountDomainService = loanAccountDomainService;
         this.accountNumberFormatRepository = accountNumberFormatRepository;
         this.businessEventNotifierService = businessEventNotifierService;
         this.configurationDomainService = configurationDomainService;
         this.loanScheduleAssembler = loanScheduleAssembler;
+        this.loanUtilService = loanUtilService;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -894,7 +894,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             // to recompute the schedule
             if (changes.containsKey(LoanApiConstants.approvedLoanAmountParameterName) || changes.containsKey("recalculateLoanSchedule")
                     || changes.containsKey("expectedDisbursementDate")) {
-                ScheduleGeneratorDTO scheduleGeneratorDTO = loanAccountDomainService.buildScheduleGeneratorDTO(loan);
+                LocalDate recalculateFrom = null;
+                ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
                 loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
             }
 
@@ -941,7 +942,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             if (changes.containsKey(LoanApiConstants.approvedLoanAmountParameterName)
                     || changes.containsKey(LoanApiConstants.disbursementPrincipalParameterName)) {
-                ScheduleGeneratorDTO scheduleGeneratorDTO = loanAccountDomainService.buildScheduleGeneratorDTO(loan);
+                LocalDate recalculateFrom = null;
+                ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
                 loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
             }
 

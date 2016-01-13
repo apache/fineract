@@ -307,7 +307,10 @@ public class LoanScheduleAssembler {
             LoanProductInterestRecalculationDetails loanProductInterestRecalculationDetails = loanProduct
                     .getProductInterestRecalculationDetails();
             recalculationFrequencyType = loanProductInterestRecalculationDetails.getRestFrequencyType();
-            if (!recalculationFrequencyType.isSameAsRepayment()) {
+            if (recalculationFrequencyType.isSameAsRepayment()) {
+                restCalendarInstance = createCalendarForSameAsRepayment(repaymentEvery, repaymentPeriodFrequencyType,
+                        expectedDisbursementDate);
+            } else {
                 LocalDate calendarStartDate = this.fromApiJsonHelper.extractLocalDateNamed(
                         LoanProductConstants.recalculationRestFrequencyDateParamName, element);
                 if (calendarStartDate == null) {
@@ -320,7 +323,10 @@ public class LoanScheduleAssembler {
                     .fromInt(loanProductInterestRecalculationDetails.getInterestRecalculationCompoundingMethod());
             if (compoundingMethod.isCompoundingEnabled()) {
                 compoundingFrequencyType = loanProductInterestRecalculationDetails.getCompoundingFrequencyType();
-                if (!compoundingFrequencyType.isSameAsRepayment()) {
+                if (compoundingFrequencyType.isSameAsRepayment()) {
+                    compoundingCalendarInstance = createCalendarForSameAsRepayment(repaymentEvery, repaymentPeriodFrequencyType,
+                            expectedDisbursementDate);
+                } else {
                     LocalDate calendarStartDate = this.fromApiJsonHelper.extractLocalDateNamed(
                             LoanProductConstants.recalculationCompoundingFrequencyDateParamName, element);
                     if (calendarStartDate == null) {
@@ -380,9 +386,16 @@ public class LoanScheduleAssembler {
                 calendar, BigDecimal.ZERO, loanTermVariations);
     }
 
+    private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,
+            final PeriodFrequencyType repaymentPeriodFrequencyType, final LocalDate expectedDisbursementDate) {
+
+        CalendarInstance restCalendarInstance = createInterestRecalculationCalendarInstance(expectedDisbursementDate, repaymentEvery,
+                CalendarFrequencyType.from(repaymentPeriodFrequencyType));
+        return restCalendarInstance;
+    }
+
     private CalendarInstance createInterestRecalculationCalendarInstance(final LocalDate calendarStartDate,
             final RecalculationFrequencyType recalculationFrequencyType, final Integer frequency) {
-        final Integer repeatsOnDay = calendarStartDate.getDayOfWeek();
 
         CalendarFrequencyType calendarFrequencyType = CalendarFrequencyType.INVALID;
         switch (recalculationFrequencyType) {
@@ -399,6 +412,12 @@ public class LoanScheduleAssembler {
             break;
         }
 
+        return createInterestRecalculationCalendarInstance(calendarStartDate, frequency, calendarFrequencyType);
+    }
+
+    private CalendarInstance createInterestRecalculationCalendarInstance(final LocalDate calendarStartDate, final Integer frequency,
+            CalendarFrequencyType calendarFrequencyType) {
+        final Integer repeatsOnDay = calendarStartDate.getDayOfWeek();
         final String title = "loan_recalculation_detail";
         final Calendar calendar = Calendar.createRepeatingCalendar(title, calendarStartDate, CalendarType.COLLECTION.getValue(),
                 calendarFrequencyType, frequency, repeatsOnDay);
@@ -549,7 +568,8 @@ public class LoanScheduleAssembler {
     public LoanRepaymentScheduleInstallment calculatePrepaymentAmount(MonetaryCurrency currency, LocalDate onDate,
             LoanApplicationTerms loanApplicationTerms, final Set<LoanCharge> loanCharges, final Long officeId,
             List<LoanTransaction> loanTransactions,
-            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor) {
+            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
+            final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments) {
         final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
         final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
         final MathContext mc = new MathContext(8, roundingMode);
@@ -561,7 +581,7 @@ public class LoanScheduleAssembler {
         HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
 
         return loanScheduleGenerator.calculatePrepaymentAmount(currency, onDate, loanApplicationTerms, mc, loanCharges, holidayDetailDTO,
-                loanTransactions, loanRepaymentScheduleTransactionProcessor);
+                loanTransactions, loanRepaymentScheduleTransactionProcessor, repaymentScheduleInstallments);
 
     }
 
@@ -736,7 +756,8 @@ public class LoanScheduleAssembler {
         if (loan.getExpectedFirstRepaymentOnDate() == null) {
             loan.setExpectedFirstRepaymentOnDate(loan.fetchRepaymentScheduleInstallment(1).getDueDate().toDate());
         }
-        ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan);
+        final LocalDate recalculateFrom = null;
+        ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
         AppUser currentUser = this.context.getAuthenticatedUserIfPresent();
         loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
     }

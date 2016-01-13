@@ -31,11 +31,13 @@ public interface LoanScheduleGenerator {
 
     LoanScheduleDTO rescheduleNextInstallments(MathContext mc, LoanApplicationTerms loanApplicationTerms, Set<LoanCharge> loanCharges,
             final HolidayDetailDTO holidayDetailDTO, List<LoanTransaction> transactions,
-            LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, LocalDate rescheduleFrom);
+            LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
+            List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, LocalDate rescheduleFrom);
 
-    LoanRepaymentScheduleInstallment calculatePrepaymentAmount(MonetaryCurrency currency,
-            LocalDate onDate, LoanApplicationTerms loanApplicationTerms, MathContext mc, Set<LoanCharge> charges,
-            HolidayDetailDTO holidayDetailDTO, List<LoanTransaction> loanTransactions, LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor);
+    LoanRepaymentScheduleInstallment calculatePrepaymentAmount(MonetaryCurrency currency, LocalDate onDate,
+            LoanApplicationTerms loanApplicationTerms, MathContext mc, Set<LoanCharge> charges, HolidayDetailDTO holidayDetailDTO,
+            List<LoanTransaction> loanTransactions, LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
+            List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments);
 
     LoanRescheduleModel reschedule(final MathContext mathContext, final LoanRescheduleRequest loanRescheduleRequest,
             final ApplicationCurrency applicationCurrency, final HolidayDetailDTO holidayDetailDTO, CalendarInstance restCalendarInstance,

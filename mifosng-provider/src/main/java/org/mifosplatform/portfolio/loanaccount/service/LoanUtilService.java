@@ -60,9 +60,92 @@ public class LoanUtilService {
         this.floatingRatesReadPlatformService = floatingRatesReadPlatformService;
     }
 
-    public LocalDate getCalculatedRepaymentsStartingFromDate(final LocalDate actualDisbursementDate, final Loan loan,
+    public ScheduleGeneratorDTO buildScheduleGeneratorDTO(final Loan loan, final LocalDate recalculateFrom) {
+        final HolidayDetailDTO holidayDetailDTO = null;
+        return buildScheduleGeneratorDTO(loan, recalculateFrom, holidayDetailDTO);
+    }
+
+    public ScheduleGeneratorDTO buildScheduleGeneratorDTO(final Loan loan, final LocalDate recalculateFrom,
+            final HolidayDetailDTO holidayDetailDTO) {
+        HolidayDetailDTO holidayDetails = holidayDetailDTO;
+        if (holidayDetailDTO == null) {
+            holidayDetails = constructHolidayDTO(loan);
+        }
+        final MonetaryCurrency currency = loan.getCurrency();
+        ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
+        final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
+                CalendarEntityType.LOANS.getValue());
+        LocalDate calculatedRepaymentsStartingFromDate = this.getCalculatedRepaymentsStartingFromDate(loan.getDisbursementDate(), loan,
+                calendarInstance);
+        CalendarInstance restCalendarInstance = null;
+        CalendarInstance compoundingCalendarInstance = null;
+        Long overdurPenaltyWaitPeriod = null;
+        if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+            restCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(loan.loanInterestRecalculationDetailId(),
+                    CalendarEntityType.LOAN_RECALCULATION_REST_DETAIL.getValue());
+            compoundingCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(
+                    loan.loanInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_COMPOUNDING_DETAIL.getValue());
+            overdurPenaltyWaitPeriod = this.configurationDomainService.retrievePenaltyWaitPeriod();
+        }
+        FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
+        ScheduleGeneratorDTO scheduleGeneratorDTO = new ScheduleGeneratorDTO(loanScheduleFactory, applicationCurrency,
+                calculatedRepaymentsStartingFromDate, holidayDetails, restCalendarInstance, compoundingCalendarInstance, recalculateFrom,
+                overdurPenaltyWaitPeriod, floatingRateDTO);
+
+        return scheduleGeneratorDTO;
+    }
+
+    public LocalDate getCalculatedRepaymentsStartingFromDate(final Loan loan) {
+        final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
+                CalendarEntityType.LOANS.getValue());
+        return this.getCalculatedRepaymentsStartingFromDate(loan.getDisbursementDate(), loan, calendarInstance);
+    }
+
+    private HolidayDetailDTO constructHolidayDTO(final Loan loan) {
+        final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan
+                .getDisbursementDate().toDate(), HolidayStatusType.ACTIVE.getValue());
+        final WorkingDays workingDays = this.workingDaysRepository.findOne();
+        final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
+        final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
+
+        HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays, allowTransactionsOnHoliday,
+                allowTransactionsOnNonWorkingDay);
+        return holidayDetailDTO;
+    }
+
+    private FloatingRateDTO constructFloatingRateDTO(final Loan loan) {
+        FloatingRateDTO floatingRateDTO = null;
+        if (loan.loanProduct().isLinkedToFloatingInterestRate()) {
+            boolean isFloatingInterestRate = loan.getIsFloatingInterestRate();
+            BigDecimal interestRateDiff = loan.getInterestRateDifferential();
+            List<FloatingRatePeriodData> baseLendingRatePeriods = null;
+            try {
+                baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate().getRatePeriods();
+            } catch (final FloatingRateNotFoundException ex) {
+                // Do not do anything
+            }
+
+            floatingRateDTO = new FloatingRateDTO(isFloatingInterestRate, loan.getDisbursementDate(), interestRateDiff,
+                    baseLendingRatePeriods);
+        }
+        return floatingRateDTO;
+    }
+
+    private LocalDate getCalculatedRepaymentsStartingFromDate(final LocalDate actualDisbursementDate, final Loan loan,
             final CalendarInstance calendarInstance) {
         final Calendar calendar = calendarInstance == null ? null : calendarInstance.getCalendar();
+        return calculateRepaymentStartingFromDate(actualDisbursementDate, loan, calendar);
+    }
+
+    public LocalDate getCalculatedRepaymentsStartingFromDate(final LocalDate actualDisbursementDate, final Loan loan,
+            final Calendar calendar) {
+        if (calendar == null) { return getCalculatedRepaymentsStartingFromDate(loan); }
+        return calculateRepaymentStartingFromDate(actualDisbursementDate, loan, calendar);
+
+    }
+
+    private LocalDate calculateRepaymentStartingFromDate(final LocalDate actualDisbursementDate, final Loan loan, final Calendar calendar) {
         LocalDate calculatedRepaymentsStartingFromDate = loan.getExpectedFirstRepaymentOnDate();
         if (calendar != null) {// sync repayments
 
@@ -85,56 +168,6 @@ public class LoanUtilService {
             }
         }
         return calculatedRepaymentsStartingFromDate;
-    }
-
-    public ScheduleGeneratorDTO buildScheduleGeneratorDTO(final Loan loan) {
-
-        final MonetaryCurrency currency = loan.getCurrency();
-        ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
-        final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
-                CalendarEntityType.LOANS.getValue());
-        LocalDate calculatedRepaymentsStartingFromDate = this.getCalculatedRepaymentsStartingFromDate(loan.getDisbursementDate(), loan,
-                calendarInstance);
-        final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
-        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan
-                .getExpectedDisbursedOnLocalDate().toDate(), HolidayStatusType.ACTIVE.getValue());
-        final WorkingDays workingDays = this.workingDaysRepository.findOne();
-        final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
-        final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
-
-        HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays, allowTransactionsOnHoliday,
-                allowTransactionsOnNonWorkingDay);
-        CalendarInstance restCalendarInstance = null;
-        CalendarInstance compoundingCalendarInstance = null;
-        if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
-            restCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(loan.loanInterestRecalculationDetailId(),
-                    CalendarEntityType.LOAN_RECALCULATION_REST_DETAIL.getValue());
-            compoundingCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(
-                    loan.loanInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_COMPOUNDING_DETAIL.getValue());
-        }
-        FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
-        ScheduleGeneratorDTO scheduleGeneratorDTO = new ScheduleGeneratorDTO(loanScheduleFactory, applicationCurrency,
-                calculatedRepaymentsStartingFromDate, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance, floatingRateDTO);
-
-        return scheduleGeneratorDTO;
-    }
-
-    private FloatingRateDTO constructFloatingRateDTO(final Loan loan) {
-        FloatingRateDTO floatingRateDTO = null;
-        if (loan.loanProduct().isLinkedToFloatingInterestRate()) {
-            boolean isFloatingInterestRate = loan.getIsFloatingInterestRate();
-            BigDecimal interestRateDiff = loan.getInterestRateDifferential();
-            List<FloatingRatePeriodData> baseLendingRatePeriods = null;
-            try {
-                baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate().getRatePeriods();
-            } catch (final FloatingRateNotFoundException ex) {
-                // Do not do anything
-            }
-
-            floatingRateDTO = new FloatingRateDTO(isFloatingInterestRate, loan.getDisbursementDate(), interestRateDiff,
-                    baseLendingRatePeriods);
-        }
-        return floatingRateDTO;
     }
 
 }
