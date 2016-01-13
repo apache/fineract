@@ -56,6 +56,7 @@ public class ScorecardMapper {
            for (ScorecardValue scorecardValue : scorecardValues) {
                final Scorecard scorecard = new Scorecard();
                scorecards.add(scorecard);
+               scorecard.setSurvey(survey);
                ScorecardMapper.setQuestionAndResponse(scorecardValue, scorecard, survey);
                scorecard.setStaff(staff);
                scorecard.setClient(client);
