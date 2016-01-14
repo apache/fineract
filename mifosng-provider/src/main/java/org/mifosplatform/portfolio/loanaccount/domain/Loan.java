@@ -2324,7 +2324,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public void regenerateScheduleOnDisbursement(final ScheduleGeneratorDTO scheduleGeneratorDTO, final boolean recalculateSchedule,
-            final LocalDate actualDisbursementDate, BigDecimal emiAmount, final AppUser currentUser) {
+            final LocalDate actualDisbursementDate, BigDecimal emiAmount, final AppUser currentUser, LocalDate nextPossibleRepaymentDate, Date rescheduledRepaymentDate) {
         boolean isEmiAmountChanged = false;
         if ((this.loanProduct.isMultiDisburseLoan() || this.loanProduct.canDefineInstallmentAmount()) && emiAmount != null
                 && emiAmount.compareTo(retriveLastEmiAmount()) != 0) {
@@ -2332,12 +2332,18 @@ public class Loan extends AbstractPersistable<Long> {
                 final Date dateValue = null;
                 final boolean isSpecificToInstallment = false;
                 LoanTermVariations loanVariationTerms = new LoanTermVariations(LoanTermVariationType.EMI_AMOUNT.getValue(),
-                        actualDisbursementDate.toDate(), emiAmount, dateValue, isSpecificToInstallment, this);
+                        actualDisbursementDate.toDate(), emiAmount, dateValue, isSpecificToInstallment, this, LoanStatus.ACTIVE.getValue());
                 this.loanTermVariations.add(loanVariationTerms);
             } else {
                 this.fixedEmiAmount = emiAmount;
             }
             isEmiAmountChanged = true;
+        }
+        if(rescheduledRepaymentDate != null && this.loanProduct.isMultiDisburseLoan()){
+        	 final boolean isSpecificToInstallment = false;
+        	 LoanTermVariations loanVariationTerms = new LoanTermVariations(LoanTermVariationType.DUE_DATE.getValue(),
+        			 nextPossibleRepaymentDate.toDate(), emiAmount, rescheduledRepaymentDate, isSpecificToInstallment, this, LoanStatus.ACTIVE.getValue());
+             this.loanTermVariations.add(loanVariationTerms);
         }
 
         if (isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate) || recalculateSchedule || isEmiAmountChanged) {
@@ -5533,6 +5539,12 @@ public class Loan extends AbstractPersistable<Long> {
         }
         actualDisbursementDate = lastTransactionDate;
         updateLoanToLastDisbursalState(actualDisbursementDate);
+        for (Iterator<LoanTermVariations> iterator = this.loanTermVariations.iterator(); iterator.hasNext();) {
+        	LoanTermVariations loanTermVariations = iterator.next();
+			if (loanTermVariations.fetchDateValue().isAfter(actualDisbursementDate)) {
+				iterator.remove();
+			}
+		}
         reverseExistingTransactionsTillLastDisbursal(actualDisbursementDate);
         loan.recalculateScheduleFromLastTransaction(scheduleGeneratorDTO, existingTransactionIds, existingReversedTransactionIds,
                 currentUser);
@@ -5621,5 +5633,27 @@ public class Loan extends AbstractPersistable<Long> {
     public void setExpectedFirstRepaymentOnDate(Date expectedFirstRepaymentOnDate) {
         this.expectedFirstRepaymentOnDate = expectedFirstRepaymentOnDate;
     }
+    
+    /*
+ 	* get the next repayment date for rescheduling at the time of disbursement
+ 	*/
+     public LocalDate getNextPossibleRepaymentDateForRescheduling(){
+     	Set<LoanDisbursementDetails> loanDisbursementDetails = this.disbursementDetails;
+     	LocalDate nextRepaymentDate = new LocalDate();
+     	for(LoanDisbursementDetails loanDisbursementDetail : loanDisbursementDetails){
+     		if(loanDisbursementDetail.actualDisbursementDate() == null){
+     			for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
+ 		            if (installment.getDueDate().isEqual(loanDisbursementDetail.expectedDisbursementDateAsLocalDate()) || 
+ 		            		installment.getDueDate().isAfter(loanDisbursementDetail.expectedDisbursementDateAsLocalDate()) 
+ 		            		&& installment.isNotFullyPaidOff()) {
+ 		            	nextRepaymentDate = installment.getDueDate();
+ 		                break;
+ 		            }   
+ 		        }
+ 			 break;
+     		}
+     	}
+ 		return nextRepaymentDate;
+     }
 
 }

@@ -60,6 +60,17 @@ public class LoanTermVariations extends AbstractPersistable<Long> {
         this.isSpecificToInstallment = isSpecificToInstallment;
         this.onLoanStatus = loan.status().getValue();
     }
+    
+    public LoanTermVariations(final Integer termType, final Date termApplicableFrom, final BigDecimal decimalValue, final Date dateValue,
+            final boolean isSpecificToInstallment, final Loan loan, final Integer loanStatus) {
+        this.loan = loan;
+        this.termApplicableFrom = termApplicableFrom;
+        this.termType = termType;
+        this.decimalValue = decimalValue;
+        this.dateValue = dateValue;
+        this.isSpecificToInstallment = isSpecificToInstallment;
+        this.onLoanStatus = loanStatus;
+    }
 
     protected LoanTermVariations() {
 
