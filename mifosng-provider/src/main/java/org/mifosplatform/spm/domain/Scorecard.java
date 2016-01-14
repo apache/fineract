@@ -5,8 +5,8 @@
  */
 package org.mifosplatform.spm.domain;
 
-import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 import javax.persistence.*;
@@ -29,8 +29,8 @@ public class Scorecard extends AbstractPersistable<Long> {
     private Response response;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "staff_id")
-    private Staff staff;
+    @JoinColumn(name = "user_id")
+    private AppUser appUser;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
@@ -72,12 +72,12 @@ public class Scorecard extends AbstractPersistable<Long> {
         this.response = response;
     }
 
-    public Staff getStaff() {
-        return staff;
+    public AppUser getAppUser() {
+        return appUser;
     }
 
-    public void setStaff(Staff staff) {
-        this.staff = staff;
+    public void setAppUser(AppUser appUser) {
+        this.appUser = appUser;
     }
 
     public Client getClient() {
