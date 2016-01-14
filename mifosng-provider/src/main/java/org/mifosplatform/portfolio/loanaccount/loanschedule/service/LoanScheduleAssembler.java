@@ -366,7 +366,7 @@ public class LoanScheduleAssembler {
                 LoanTermVariationsData loanTermVariation = new LoanTermVariationsData(
                         LoanEnumerations.loanvariationType(LoanTermVariationType.INTEREST_RATE), periodData.getFromDateAsLocalDate(),
                         periodData.getInterestRate(), dateValue, isSpecificToInstallment);
-                if (interestRateStartDate.isAfter(periodData.getFromDateAsLocalDate())) {
+                if (!interestRateStartDate.isBefore(periodData.getFromDateAsLocalDate())) {
                     interestRateStartDate = periodData.getFromDateAsLocalDate();
                     annualNominalInterestRate = periodData.getInterestRate();
                 }

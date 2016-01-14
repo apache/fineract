@@ -62,8 +62,8 @@ public class LoanTermVariationsData implements Comparable<LoanTermVariationsData
         return occursOnDayFromAndUpTo(fromDate, dueDate, this.termVariationApplicableFrom);
     }
 
-    private boolean occursOnDayFromAndUpTo(final LocalDate fromInclusive, final LocalDate upToNotInclusive, final LocalDate target) {
-        return target != null && !target.isBefore(fromInclusive) && target.isBefore(upToNotInclusive);
+    private boolean occursOnDayFromAndUpTo(final LocalDate fromNotInclusive, final LocalDate upToInclusive, final LocalDate target) {
+        return target != null && target.isAfter(fromNotInclusive) && !target.isAfter(upToInclusive);
     }
 
     public boolean isApplicable(final LocalDate fromDate) {
