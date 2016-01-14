@@ -10,11 +10,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.exception.JobExecutionException;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
@@ -22,6 +24,8 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.data.OverdueLoanSche
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -94,13 +98,76 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
         }
     }
 
-    @Override
-    @CronTarget(jobName = JobName.RECALCULATE_INTEREST_FOR_LOAN)
-    public void recalculateInterest() {
-        Collection<Long> loanIds = this.loanReadPlatformService.fetchLoansForInterestRecalculation();
-        for (Long loanId : loanIds) {
-            this.loanWritePlatformService.recalculateInterest(loanId);
-        }
-    }
+	@Override
+	@CronTarget(jobName = JobName.RECALCULATE_INTEREST_FOR_LOAN)
+	public void recalculateInterest() throws JobExecutionException {
+		Integer maxNumberOfRetries = ThreadLocalContextUtil.getTenant()
+				.getConnection().getMaxRetriesOnDeadlock();
+		Integer maxIntervalBetweenRetries = ThreadLocalContextUtil.getTenant()
+				.getConnection().getMaxIntervalBetweenRetries();
+		Collection<Long> loanIds = this.loanReadPlatformService
+				.fetchLoansForInterestRecalculation();
+		int i = 0;
+		if (!loanIds.isEmpty()) {
+			final StringBuilder sb = new StringBuilder();
+			for (Long loanId : loanIds) {
+				logger.info("Loan ID " + loanId);
+				Integer numberOfRetries = 0;
+				while (numberOfRetries <= maxNumberOfRetries) {
+					try {
+						this.loanWritePlatformService
+								.recalculateInterest(loanId);
+						numberOfRetries = maxNumberOfRetries + 1;
+					} catch (CannotAcquireLockException
+							| ObjectOptimisticLockingFailureException exception) {
+						logger.info("Recalulate interest job has been retried  "
+								+ numberOfRetries + " time(s)");
+						/***
+						 * Fail if the transaction has been retired for
+						 * maxNumberOfRetries
+						 **/
+						if (numberOfRetries >= maxNumberOfRetries) {
+							logger.warn("Recalulate interest job has been retried for the max allowed attempts of "
+									+ numberOfRetries
+									+ " and will be rolled back");
+							sb.append("Recalulate interest job has been retried for the max allowed attempts of "
+									+ numberOfRetries
+									+ " and will be rolled back");
+							break;
+						}
+						/***
+						 * Else sleep for a random time (between 1 to 10
+						 * seconds) and continue
+						 **/
+						try {
+							Random random = new Random();
+							int randomNum = random
+									.nextInt(maxIntervalBetweenRetries + 1);
+							Thread.sleep(1000 + (randomNum * 1000));
+							numberOfRetries = numberOfRetries + 1;
+						} catch (InterruptedException e) {
+							sb.append("Interest recalculation for loans failed " + exception.getMessage()) ;
+							break;
+						}
+					} catch (Exception e) {
+						Throwable realCause = e;
+						if (e.getCause() != null) {
+							realCause = e.getCause();
+						}
+						logger.error("Interest recalculation for loans failed for account:"	+ loanId + " with message "
+								+ realCause.getMessage());
+						sb.append("Interest recalculation for loans failed for account:").append(loanId).append(" with message ")
+                        .append(realCause.getMessage());
+					}
+					i++;
+				}
+				logger.info("Loans count " + i);
+			}
+			if (sb.length() > 0) {
+				throw new JobExecutionException(sb.toString());
+			}
+		}
+
+	}
 
 }
