@@ -434,6 +434,7 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
             final LocalDate dueDate = JdbcSupport.getLocalDate(rs, "dueDate");
             final BigDecimal principalDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalAmount");
             final BigDecimal interestDueOnPrincipalOutstanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestAmount");
+            final BigDecimal totalInstallmentAmount = principalDue.add(interestDueOnPrincipalOutstanding);
             final BigDecimal feeChargesDueForPeriod = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeAmount");
             final BigDecimal penaltyChargesDueForPeriod = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyAmount");
             final Integer periodNumber = null;
@@ -441,7 +442,8 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
             final BigDecimal principalOutstanding = null;
             final BigDecimal totalDueForPeriod = null;
             return LoanSchedulePeriodData.repaymentOnlyPeriod(periodNumber, fromDate, dueDate, principalDue, principalOutstanding,
-                    interestDueOnPrincipalOutstanding, feeChargesDueForPeriod, penaltyChargesDueForPeriod, totalDueForPeriod);
+                    interestDueOnPrincipalOutstanding, feeChargesDueForPeriod, penaltyChargesDueForPeriod, totalDueForPeriod,
+                    totalInstallmentAmount);
 
         }
     }

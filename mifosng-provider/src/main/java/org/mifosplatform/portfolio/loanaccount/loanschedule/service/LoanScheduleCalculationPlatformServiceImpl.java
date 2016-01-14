@@ -190,7 +190,8 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
                         periodData.periodFromDate(), periodData.periodDueDate(), totalPrincipal.getAmount(), periodData
                                 .principalLoanBalanceOutstanding(), interestDue.getAmount(), loanRepaymentScheduleInstallment
                                 .getFeeChargesCharged(currency).getAmount(),
-                        loanRepaymentScheduleInstallment.getPenaltyChargesCharged(currency).getAmount(), totalAmount.getAmount());
+                        loanRepaymentScheduleInstallment.getPenaltyChargesCharged(currency).getAmount(), totalAmount.getAmount(),
+                        totalPrincipal.plus(interestDue).getAmount());
                 futureInstallments.add(loanSchedulePeriodData);
                 isNewPaymentRequired = false;
             } else if (periodData.periodDueDate().isAfter(today)) {
@@ -246,7 +247,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
                     installment.getFromDate(), installment.getDueDate(), installment.getPrincipal(currency).getAmount(),
                     outstanding.getAmount(), installment.getInterestCharged(currency).getAmount(),
                     installment.getFeeChargesCharged(currency).getAmount(), installment.getPenaltyChargesCharged(currency).getAmount(),
-                    installment.getDue(currency).getAmount());
+                    installment.getDue(currency).getAmount(), installment.getTotalPrincipalAndInterest(currency).getAmount());
             installmentData.add(loanSchedulePeriodData);
             totalInterest = totalInterest.plus(installment.getInterestCharged(currency));
             totalCharge = totalCharge.plus(installment.getFeeChargesCharged(currency));
