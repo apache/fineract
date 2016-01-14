@@ -13,6 +13,7 @@ import org.mifosplatform.spm.domain.Question;
 import org.mifosplatform.spm.domain.Response;
 import org.mifosplatform.spm.domain.Scorecard;
 import org.mifosplatform.spm.domain.Survey;
+import org.mifosplatform.useradministration.domain.AppUser;
 
 import java.util.*;
 
@@ -30,7 +31,7 @@ public class ScorecardMapper {
                 if ((scorecardData = scorecardDataMap.get(scorecard.getCreatedOn())) == null) {
                     scorecardData = new ScorecardData();
                     scorecardDataMap.put(scorecard.getCreatedOn(), scorecardData);
-                    scorecardData.setStaffId(scorecard.getStaff().getId());
+                    scorecardData.setUserId(scorecard.getAppUser().getId());
                     scorecardData.setClientId(scorecard.getClient().getId());
                     scorecardData.setCreatedOn(scorecard.getCreatedOn());
                     scorecardData.setScorecardValues(new ArrayList<ScorecardValue>());
@@ -47,7 +48,7 @@ public class ScorecardMapper {
     }
 
     public static List<Scorecard> map(final ScorecardData scorecardData, final Survey survey,
-                                final Staff staff, final Client client) {
+                                      final AppUser appUser, final Client client) {
         final List<Scorecard> scorecards = new ArrayList<>();
 
         final List<ScorecardValue> scorecardValues = scorecardData.getScorecardValues();
@@ -58,7 +59,7 @@ public class ScorecardMapper {
                scorecards.add(scorecard);
                scorecard.setSurvey(survey);
                ScorecardMapper.setQuestionAndResponse(scorecardValue, scorecard, survey);
-               scorecard.setStaff(staff);
+               scorecard.setAppUser(appUser);
                scorecard.setClient(client);
                scorecard.setCreatedOn(scorecardData.getCreatedOn());
                scorecard.setValue(scorecardValue.getValue());

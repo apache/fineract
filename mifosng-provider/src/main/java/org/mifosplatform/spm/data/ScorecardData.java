@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ScorecardData {
 
-    private Long staffId;
+    private Long userId;
     private Long clientId;
     private Date createdOn;
     private List<ScorecardValue> scorecardValues;
@@ -19,21 +19,21 @@ public class ScorecardData {
         super();
     }
 
-    public ScorecardData(final Long staffId, final Long clientId, final Date createdOn,
+    public ScorecardData(final Long userId, final Long clientId, final Date createdOn,
                          final List<ScorecardValue> scorecardValues) {
         super();
-        this.staffId = staffId;
+        this.userId = userId;
         this.clientId = clientId;
         this.createdOn = createdOn;
         this.scorecardValues = scorecardValues;
     }
 
-    public Long getStaffId() {
-        return staffId;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setStaffId(Long staffId) {
-        this.staffId = staffId;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public Long getClientId() {
