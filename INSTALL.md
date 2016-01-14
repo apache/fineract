@@ -31,7 +31,7 @@ The three ways to get up and running with mifos platform is:
 
 1. Use Amazon AWS and mifosplatform public AMI to spin up a new instance in the cloud
 2. Manually install the prerequisite software on your own machine, follow setup instructions and use release artifacts to get platform running yourself.
-3. ~~The (and the easiest) method is to just fire up the launch script provided in the release artifact and Mifos takes care of all the database, server-side and client-side setup for you.~~ Currently Broken
+
 
 ## 1. Launch script automatic out-of-the box setup
 
