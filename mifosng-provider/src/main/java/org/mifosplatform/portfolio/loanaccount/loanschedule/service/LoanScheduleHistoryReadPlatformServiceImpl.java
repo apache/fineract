@@ -163,6 +163,9 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
                 final BigDecimal interestExpectedDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestDue");
                 totalInterestCharged = totalInterestCharged.plus(interestExpectedDue);
 
+                final BigDecimal totalInstallmentAmount = totalPrincipalExpected.zero().plus(principalDue).plus(interestExpectedDue)
+                        .getAmount();
+
                 final BigDecimal feeChargesExpectedDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesDue");
                 totalFeeChargesCharged = totalFeeChargesCharged.plus(feeChargesExpectedDue);
 
@@ -187,7 +190,7 @@ public class LoanScheduleHistoryReadPlatformServiceImpl implements LoanScheduleH
 
                 final LoanSchedulePeriodData periodData = LoanSchedulePeriodData.repaymentOnlyPeriod(period, fromDate, dueDate,
                         principalDue, outstandingPrincipalBalanceOfLoan, interestExpectedDue, feeChargesExpectedDue,
-                        penaltyChargesExpectedDue, totalDueForPeriod);
+                        penaltyChargesExpectedDue, totalDueForPeriod, totalInstallmentAmount);
 
                 periods.add(periodData);
             }

@@ -55,7 +55,7 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
     public LoanSchedulePeriodData toData() {
         return LoanSchedulePeriodData.repaymentOnlyPeriod(this.periodNumber, this.fromDate, this.dueDate, this.principalDue.getAmount(),
                 this.outstandingLoanBalance.getAmount(), this.interestDue.getAmount(), this.feeChargesDue.getAmount(),
-                this.penaltyChargesDue.getAmount(), this.totalDue.getAmount());
+                this.penaltyChargesDue.getAmount(), this.totalDue.getAmount(), this.principalDue.plus(this.interestDue).getAmount());
     }
 
     @Override
@@ -124,11 +124,11 @@ public final class LoanScheduleModelRepaymentPeriod implements LoanScheduleModel
         this.penaltyChargesDue = this.penaltyChargesDue.plus(penaltyCharge);
         this.totalDue = this.totalDue.plus(feeCharge).plus(penaltyCharge);
     }
-    
+
     @Override
-    public void addPrincipalAmount(final Money principalDue){
-         this.principalDue = this.principalDue.plus(principalDue);
-         this.totalDue = this.totalDue.plus(principalDue);
+    public void addPrincipalAmount(final Money principalDue) {
+        this.principalDue = this.principalDue.plus(principalDue);
+        this.totalDue = this.totalDue.plus(principalDue);
     }
 
     @Override
