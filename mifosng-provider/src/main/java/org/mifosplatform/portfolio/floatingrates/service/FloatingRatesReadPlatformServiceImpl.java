@@ -139,7 +139,7 @@ public class FloatingRatesReadPlatformServiceImpl implements
 				final String sql = "select "
 						+ ratePeriodMapper.schema()
 						+ " where period.is_active = 1 and period.floating_rates_id = ? "
-						+ " order by period.from_date ";
+						+ " order by period.from_date desc ";
 				ratePeriods = jdbcTemplate.query(sql, ratePeriodMapper,
 						new Object[] { id });
 			}

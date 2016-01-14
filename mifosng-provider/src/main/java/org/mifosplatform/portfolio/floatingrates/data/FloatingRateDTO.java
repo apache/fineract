@@ -29,10 +29,12 @@ public class FloatingRateDTO {
 	public BigDecimal fetchBaseRate(LocalDate date) {
 		BigDecimal rate = null;
 		for (FloatingRatePeriodData periodData : this.baseLendingRatePeriods) {
-			if (date.isBefore(new LocalDate(periodData.getFromDate()))) {
+			final LocalDate periodFromDate = new LocalDate(periodData.getFromDate());
+			if (periodFromDate.isBefore(date)
+					|| periodFromDate.isEqual(date)) {
+				rate = periodData.getInterestRate();
 				break;
 			}
-			rate = periodData.getInterestRate();
 		}
 		return rate;
 	}
