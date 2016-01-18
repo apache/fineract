@@ -480,11 +480,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         if (paymentDetailsRequired) {
             paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
         }
-        final BigDecimal outstandingLoanBalance = null;
-        final BigDecimal unrecognizedIncomePortion = null;
-        return new LoanTransactionData(null, null, null, transactionType, null, null, loan.getExpectedDisbursedOnLocalDateForTemplate(),
-                loan.getDisburseAmountForTemplate(), null, null, null, null, null, unrecognizedIncomePortion, paymentOptions, null, null,
-                loan.retriveLastEmiAmount(), outstandingLoanBalance, false);
+        return LoanTransactionData.LoanTransactionDataForDisbursalTemplate(transactionType, loan.getExpectedDisbursedOnLocalDateForTemplate(), loan.getDisburseAmountForTemplate(), 
+        		paymentOptions, loan.retriveLastEmiAmount(), loan.getNextPossibleRepaymentDateForRescheduling());
 
     }
 

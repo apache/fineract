@@ -152,6 +152,11 @@ public class LoanTransactionHelper {
     public HashMap disburseLoan(final String date, final Integer loanID) {
         return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID), getDisburseLoanAsJSON(date, null));
     }
+    
+    public HashMap disburseLoanWithRepaymentReschedule(final String date, final Integer loanID, String adjustRepaymentDate) {
+        return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID), getDisburseLoanWithRepaymentRescheduleAsJSON(date,
+        		null, adjustRepaymentDate));
+    }
 
     public HashMap disburseLoan(final String date, final Integer loanID, final String disburseAmt) {
         return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID), getDisburseLoanAsJSON(date, disburseAmt));
@@ -253,6 +258,20 @@ public class LoanTransactionHelper {
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("actualDisbursementDate", actualDisbursementDate);
+        map.put("note", "DISBURSE NOTE");
+        if (transactionAmount != null) {
+            map.put("transactionAmount", transactionAmount);
+        }
+        System.out.println("Loan Application disburse request : " + map);
+        return new Gson().toJson(map);
+    }
+    
+    private String getDisburseLoanWithRepaymentRescheduleAsJSON(final String actualDisbursementDate, final String transactionAmount, final String adjustRepaymentDate) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("locale", "en");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("actualDisbursementDate", actualDisbursementDate);
+        map.put("adjustRepaymentDate", adjustRepaymentDate);
         map.put("note", "DISBURSE NOTE");
         if (transactionAmount != null) {
             map.put("transactionAmount", transactionAmount);
