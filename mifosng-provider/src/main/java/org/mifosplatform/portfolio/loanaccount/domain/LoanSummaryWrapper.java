@@ -118,7 +118,7 @@ public final class LoanSummaryWrapper {
             final MonetaryCurrency currency) {
         Money total = Money.zero(currency);
         for (final LoanCharge charge : charges) {
-            if(charge.isActive()){
+            if(charge.isActive() && !charge.isPenaltyCharge()){
                 total = total.plus(charge.getAmountWaived(currency));
             }
         }
