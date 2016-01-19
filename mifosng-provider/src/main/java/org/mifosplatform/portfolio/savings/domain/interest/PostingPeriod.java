@@ -44,6 +44,25 @@ public class PostingPeriod {
 
     // minimum balance for interest calculation
     private final Money minBalanceForInterestCalculation;
+	private BigDecimal overdraftInterestRateAsFraction;
+	private Money minOverdraftForInterestCalculation;
+
+    public static PostingPeriod createFrom(final LocalDateInterval periodInterval, final Money periodStartingBalance,
+            final List<SavingsAccountTransaction> orderedListOfTransactions, final MonetaryCurrency currency,
+            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+            final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
+            final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
+            final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd) {
+
+    	final BigDecimal overdraftInterestRateAsFraction = BigDecimal.ZERO;
+    	final Money minOverdraftForInterestCalculation = Money.zero(currency);
+    	
+    	return createFrom(periodInterval, periodStartingBalance, orderedListOfTransactions, currency, 
+    			interestCompoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYear, 
+    			upToInterestCalculationDate, interestPostTransactions, isInterestTransfer, 
+    			minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd, 
+    			overdraftInterestRateAsFraction, minOverdraftForInterestCalculation);
+    }
 
     // isInterestTransfer boolean is to identify newly created transaction is
     // interest transfer
@@ -52,7 +71,8 @@ public class PostingPeriod {
             final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
             final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
-            final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd) {
+            final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
+            final BigDecimal overdraftInterestRateAsFraction, final Money minOverdraftForInterestCalculation) {
 
         final List<EndOfDayBalance> accountEndOfDayBalances = new ArrayList<>();
         boolean interestTransfered = false;
@@ -113,14 +133,16 @@ public class PostingPeriod {
 
         return new PostingPeriod(periodInterval, currency, periodStartingBalance, openingDayBalance, interestCompoundingPeriodType,
                 interestCalculationType, interestRateAsFraction, daysInYear, compoundingPeriods, interestTransfered,
-                minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd);
+                minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd,
+                overdraftInterestRateAsFraction, minOverdraftForInterestCalculation);
     }
 
     private PostingPeriod(final LocalDateInterval periodInterval, final MonetaryCurrency currency, final Money openingBalance,
             final Money closingBalance, final SavingsCompoundingInterestPeriodType interestCompoundingType,
             final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
             final List<CompoundingPeriod> compoundingPeriods, boolean interestTransfered, final Money minBalanceForInterestCalculation,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd) {
+            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final BigDecimal overdraftInterestRateAsFraction, 
+            final Money minOverdraftForInterestCalculation) {
         this.periodInterval = periodInterval;
         this.currency = currency;
         this.openingBalance = openingBalance;
@@ -137,6 +159,8 @@ public class PostingPeriod {
             this.dateOfPostingTransaction = periodInterval.endDate().plusDays(1);
         this.interestTransfered = interestTransfered;
         this.minBalanceForInterestCalculation = minBalanceForInterestCalculation;
+        this.overdraftInterestRateAsFraction = overdraftInterestRateAsFraction;
+        this.minOverdraftForInterestCalculation = minOverdraftForInterestCalculation;
     }
 
     public Money interest() {
@@ -165,7 +189,8 @@ public class PostingPeriod {
 
             final BigDecimal interestUnrounded = compoundingPeriod.calculateInterest(this.interestCompoundingType,
                     this.interestCalculationType, interestCompounded, this.interestRateAsFraction, this.daysInYear,
-                    this.minBalanceForInterestCalculation.getAmount());
+                    this.minBalanceForInterestCalculation.getAmount(), 	this.overdraftInterestRateAsFraction,
+                    this.minOverdraftForInterestCalculation.getAmount());
             interestCompounded = interestCompounded.add(interestUnrounded);
             interestEarned = interestEarned.add(interestUnrounded);
         }

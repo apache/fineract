@@ -82,10 +82,10 @@ public enum SavingsAccountTransactionType {
             case 15:
                 savingsAccountTransactionType = SavingsAccountTransactionType.REJECT_TRANSFER;
             break;
-            case 18:
+            case 16:
                 savingsAccountTransactionType = SavingsAccountTransactionType.WRITTEN_OFF;
             break;
-            case 19:
+            case 17:
                 savingsAccountTransactionType = SavingsAccountTransactionType.OVERDRAFT_INTEREST;
             break;
         }
@@ -149,7 +149,7 @@ public enum SavingsAccountTransactionType {
     }
 
     public boolean isDebit() {
-        return isWithdrawal() || isWithdrawalFee() || isAnnualFee() || isPayCharge();
+        return isWithdrawal() || isWithdrawalFee() || isAnnualFee() || isPayCharge() || isIncomeFromInterest();
     }
 
     public boolean isCredit() {
