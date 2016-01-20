@@ -25,6 +25,8 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequire
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nameParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateOverdraftParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minOverdraftForInterestCalculationParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.shortNameParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
@@ -535,6 +537,16 @@ public class SavingsProductDataValidator {
         if (this.fromApiJsonHelper.parameterExists(overdraftLimitParamName, element)) {
             final BigDecimal overdraftLimit = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(overdraftLimitParamName, element);
             baseDataValidator.reset().parameter(overdraftLimitParamName).value(overdraftLimit).ignoreIfNull().zeroOrPositiveAmount();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(nominalAnnualInterestRateOverdraftParamName, element)) {
+            final BigDecimal nominalAnnualInterestRateOverdraft = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(nominalAnnualInterestRateOverdraftParamName, element);
+            baseDataValidator.reset().parameter(nominalAnnualInterestRateOverdraftParamName).value(nominalAnnualInterestRateOverdraft).ignoreIfNull().zeroOrPositiveAmount();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(minOverdraftForInterestCalculationParamName, element)) {
+            final BigDecimal minOverdraftForInterestCalculation = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minOverdraftForInterestCalculationParamName, element);
+            baseDataValidator.reset().parameter(minOverdraftForInterestCalculationParamName).value(minOverdraftForInterestCalculation).ignoreIfNull().zeroOrPositiveAmount();
         }
 
     }

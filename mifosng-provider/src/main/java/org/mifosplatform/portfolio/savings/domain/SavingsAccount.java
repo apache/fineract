@@ -5,7 +5,54 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
-import com.google.gson.JsonArray;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.enforceMinRequiredBalanceParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.localeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredBalanceParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateOverdraftParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minOverdraftForInterestCalculationParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
+
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
@@ -51,50 +98,7 @@ import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 import org.springframework.util.CollectionUtils;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorType;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.enforceMinRequiredBalanceParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.localeParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredBalanceParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
+import com.google.gson.JsonArray;
 
 @Entity
 @Table(name = "m_savings_account", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "sa_account_no_UNIQUE"),
@@ -245,6 +249,12 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "overdraft_limit", scale = 6, precision = 19, nullable = true)
     private BigDecimal overdraftLimit;
 
+    @Column(name = "nominal_annual_interest_rate_overdraft", scale = 6, precision = 19, nullable = true)
+    protected BigDecimal nominalAnnualInterestRateOverdraft;
+
+    @Column(name = "min_overdraft_for_interest_calculation", scale = 6, precision = 19, nullable = true)
+    private BigDecimal minOverdraftForInterestCalculation;
+
     @Column(name = "enforce_min_required_balance")
     private boolean enforceMinRequiredBalance;
 
@@ -300,14 +310,15 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
             final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean enforceMinRequiredBalance,
-            final BigDecimal minRequiredBalance) {
+            final BigDecimal minRequiredBalance, final BigDecimal nominalAnnualInterestRateOverdraft, 
+            final BigDecimal minOverdraftForInterestCalculation) {
 
         final SavingsAccountStatusType status = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
         return new SavingsAccount(client, group, product, fieldOfficer, accountNo, externalId, status, accountType, submittedOnDate,
                 submittedBy, interestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
                 interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
                 withdrawalFeeApplicableForTransfer, savingsAccountCharges, allowOverdraft, overdraftLimit, enforceMinRequiredBalance,
-                minRequiredBalance);
+                minRequiredBalance, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation);
     }
 
     protected SavingsAccount(final Client client, final Group group, final SavingsProduct product, final Staff fieldOfficer,
@@ -322,7 +333,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this(client, group, product, fieldOfficer, accountNo, externalId, status, accountType, submittedOnDate, submittedBy,
                 nominalAnnualInterestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
                 interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
-                withdrawalFeeApplicableForTransfer, savingsAccountCharges, allowOverdraft, overdraftLimit, false, null);
+                withdrawalFeeApplicableForTransfer, savingsAccountCharges, allowOverdraft, overdraftLimit, false, null, null, null);
     }
 
     protected SavingsAccount(final Client client, final Group group, final SavingsProduct product, final Staff savingsOfficer,
@@ -334,7 +345,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
             final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean enforceMinRequiredBalance,
-            final BigDecimal minRequiredBalance) {
+            final BigDecimal minRequiredBalance, final BigDecimal nominalAnnualInterestRateOverdraft, 
+            final BigDecimal minOverdraftForInterestCalculation) {
         this.client = client;
         this.group = group;
         this.product = product;
@@ -371,6 +383,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.summary = new SavingsAccountSummary();
         this.allowOverdraft = allowOverdraft;
         this.overdraftLimit = overdraftLimit;
+        this.nominalAnnualInterestRateOverdraft = nominalAnnualInterestRateOverdraft;
+        this.minOverdraftForInterestCalculation = minOverdraftForInterestCalculation;
         esnureOverdraftLimitsSetForOverdraftAccounts();
 
         this.enforceMinRequiredBalance = enforceMinRequiredBalance;
@@ -443,16 +457,33 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
                 final SavingsAccountTransaction postingTransaction = findInterestPostingTransactionFor(interestPostingTransactionDate);
                 if (postingTransaction == null) {
-                    final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
-                            interestPostingTransactionDate, interestEarnedToBePostedForPeriod);
+                	SavingsAccountTransaction newPostingTransaction;
+                	if(interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(currency))){
+                        newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
+                                interestPostingTransactionDate, interestEarnedToBePostedForPeriod);
+                	}else{
+                        newPostingTransaction = SavingsAccountTransaction.overdraftInterest(this, office(),
+                                interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated());
+                	}
                     this.transactions.add(newPostingTransaction);
                     recalucateDailyBalanceDetails = true;
                 } else {
-                    final boolean correctionRequired = postingTransaction.hasNotAmount(interestEarnedToBePostedForPeriod);
+                    boolean correctionRequired = false;
+                    if(postingTransaction.isInterestPostingAndNotReversed()){
+                    	correctionRequired = postingTransaction.hasNotAmount(interestEarnedToBePostedForPeriod);
+                    }else{
+                    	correctionRequired = postingTransaction.hasNotAmount(interestEarnedToBePostedForPeriod.negated());
+                    }
                     if (correctionRequired) {
                         postingTransaction.reverse();
-                        final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
-                                interestPostingTransactionDate, interestEarnedToBePostedForPeriod);
+                    	SavingsAccountTransaction newPostingTransaction;
+                    	if(interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(currency))){
+                            newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
+                                    interestPostingTransactionDate, interestEarnedToBePostedForPeriod);
+                    	}else{
+                            newPostingTransaction = SavingsAccountTransaction.overdraftInterest(this, office(),
+                                    interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated());
+                    	}
                         this.transactions.add(newPostingTransaction);
                         recalucateDailyBalanceDetails = true;
                     }
@@ -479,7 +510,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         SavingsAccountTransaction postingTransation = null;
 
         for (final SavingsAccountTransaction transaction : this.transactions) {
-            if (transaction.isInterestPostingAndNotReversed() && transaction.occursOn(postingDate)) {
+            if ((transaction.isInterestPostingAndNotReversed() || transaction.isOverdraftInterestAndNotReversed()) && transaction.occursOn(postingDate)) {
                 postingTransation = transaction;
                 break;
             }
@@ -575,15 +606,18 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         final SavingsInterestCalculationType interestCalculationType = SavingsInterestCalculationType.fromInt(this.interestCalculationType);
         final BigDecimal interestRateAsFraction = getEffectiveInterestRateAsFraction(mc, upToInterestCalculationDate);
+        final BigDecimal overdraftInterestRateAsFraction = getEffectiveOverdraftInterestRateAsFraction(mc);
         final Collection<Long> interestPostTransactions = this.savingsHelper.fetchPostInterestTransactionIds(getId());
         final Money minBalanceForInterestCalculation = Money.of(getCurrency(), minBalanceForInterestCalculation());
+        final Money minOverdraftForInterestCalculation = Money.of(getCurrency(), this.minOverdraftForInterestCalculation);
 
         for (final LocalDateInterval periodInterval : postingPeriodIntervals) {
 
             final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance,
                     retreiveOrderedNonInterestPostingTransactions(), this.currency, compoundingPeriodType, interestCalculationType,
                     interestRateAsFraction, daysInYearType.getValue(), upToInterestCalculationDate, interestPostTransactions,
-                    isInterestTransfer, minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd);
+                    isInterestTransfer, minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd,
+                    overdraftInterestRateAsFraction, minOverdraftForInterestCalculation);
 
             periodStartingBalance = postingPeriod.closingBalance();
 
@@ -599,7 +633,11 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return allPostingPeriods;
     }
 
-    @SuppressWarnings("unused")
+    private BigDecimal getEffectiveOverdraftInterestRateAsFraction(MathContext mc) {
+    	return this.nominalAnnualInterestRateOverdraft.divide(BigDecimal.valueOf(100l), mc);
+    }
+
+	@SuppressWarnings("unused")
     protected BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate upToInterestCalculationDate) {
         return this.nominalAnnualInterestRate.divide(BigDecimal.valueOf(100l), mc);
     }
@@ -610,7 +648,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final List<SavingsAccountTransaction> orderedNonInterestPostingTransactions = new ArrayList<>();
 
         for (final SavingsAccountTransaction transaction : listOfTransactionsSorted) {
-            if (!transaction.isInterestPostingAndNotReversed() && transaction.isNotReversed()) {
+            if (!(transaction.isInterestPostingAndNotReversed() || transaction.isOverdraftInterestAndNotReversed()) && transaction.isNotReversed()) {
                 orderedNonInterestPostingTransactions.add(transaction);
             }
         }
@@ -689,7 +727,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         LocalDate endOfBalanceDate = interestPostingUpToDate;
         for (int i = accountTransactionsSorted.size() - 1; i >= 0; i--) {
             final SavingsAccountTransaction transaction = accountTransactionsSorted.get(i);
-            if (transaction.isNotReversed() && !transaction.isInterestPostingAndNotReversed()) {
+            if (transaction.isNotReversed() 
+            		&& !(transaction.isInterestPostingAndNotReversed() 
+            				|| transaction.isOverdraftInterestAndNotReversed())) {
                 transaction.updateCumulativeBalanceAndDates(this.currency, endOfBalanceDate);
                 // this transactions transaction date is end of balance date for
                 // previous transaction.
@@ -848,7 +888,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         boolean transactionBeforeLastInterestPosting = false;
 
         for (final SavingsAccountTransaction transaction : retreiveListOfTransactions()) {
-            if (transaction.isInterestPostingAndNotReversed() && transaction.isAfter(transactionDate)) {
+            if ((transaction.isInterestPostingAndNotReversed() || transaction.isOverdraftInterestAndNotReversed()) && transaction.isAfter(transactionDate)) {
                 transactionBeforeLastInterestPosting = true;
                 break;
             }
@@ -1132,8 +1172,24 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             this.overdraftLimit = newValue;
         }
 
+        if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(nominalAnnualInterestRateOverdraftParamName, this.nominalAnnualInterestRateOverdraft)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(nominalAnnualInterestRateOverdraftParamName);
+            actualChanges.put(nominalAnnualInterestRateOverdraftParamName, newValue);
+            actualChanges.put(localeParamName, localeAsInput);
+            this.nominalAnnualInterestRateOverdraft = newValue;
+        }
+
+        if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(minOverdraftForInterestCalculationParamName, this.minOverdraftForInterestCalculation)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(minOverdraftForInterestCalculationParamName);
+            actualChanges.put(minOverdraftForInterestCalculationParamName, newValue);
+            actualChanges.put(localeParamName, localeAsInput);
+            this.minOverdraftForInterestCalculation = newValue;
+        }
+
         if (!this.allowOverdraft) {
             this.overdraftLimit = null;
+            this.nominalAnnualInterestRateOverdraft = null;
+            this.minOverdraftForInterestCalculation = null;
         }
 
         if (command.isChangeInBooleanParameterNamed(enforceMinRequiredBalanceParamName, this.enforceMinRequiredBalance)) {
@@ -1159,8 +1215,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
      **/
     private void esnureOverdraftLimitsSetForOverdraftAccounts() {
 
-        if (this.allowOverdraft && this.overdraftLimit == null) {
-            this.overdraftLimit = BigDecimal.ZERO;
+        if (this.allowOverdraft) {
+            this.overdraftLimit = this.overdraftLimit == null? BigDecimal.ZERO : this.overdraftLimit;
+            this.nominalAnnualInterestRateOverdraft = this.nominalAnnualInterestRateOverdraft == null? BigDecimal.ZERO : this.nominalAnnualInterestRateOverdraft;
+            this.minOverdraftForInterestCalculation = this.minOverdraftForInterestCalculation == null? BigDecimal.ZERO : this.minOverdraftForInterestCalculation;
         }
     }
 
@@ -1529,6 +1587,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     public BigDecimal getNominalAnnualInterestRate() {
         return this.nominalAnnualInterestRate;
+    }
+
+    public BigDecimal getNominalAnnualInterestRateOverdraft() {
+        return this.nominalAnnualInterestRateOverdraft;
     }
 
     public Map<String, Object> approveApplication(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate) {

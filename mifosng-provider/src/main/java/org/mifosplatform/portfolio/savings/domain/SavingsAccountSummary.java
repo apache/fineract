@@ -57,6 +57,9 @@ public final class SavingsAccountSummary {
     @Transient
     private BigDecimal totalPenaltyChargesWaived = BigDecimal.ZERO;
 
+    @Column(name = "total_overdraft_interest_derived", scale = 6, precision = 19)
+	private BigDecimal totalOverdraftInterestDerived;
+
     protected SavingsAccountSummary() {
         //
     }
@@ -73,10 +76,11 @@ public final class SavingsAccountSummary {
         this.totalPenaltyCharge = wrapper.calculateTotalPenaltyCharge(currency, transactions);
         this.totalFeeChargesWaived = wrapper.calculateTotalFeesChargeWaived(currency, transactions);
         this.totalPenaltyChargesWaived = wrapper.calculateTotalPenaltyChargeWaived(currency, transactions);
+        this.totalOverdraftInterestDerived = wrapper.calculateTotalOverdraftInterest(currency, transactions);
 
         this.accountBalance = Money.of(currency, this.totalDeposits).plus(this.totalInterestPosted).minus(this.totalWithdrawals)
                 .minus(this.totalWithdrawalFees).minus(this.totalAnnualFees).minus(this.totalFeeCharge).minus(this.totalPenaltyCharge)
-                .getAmount();
+                .minus(totalOverdraftInterestDerived).getAmount();
     }
 
     public void updateFromInterestPeriodSummaries(final MonetaryCurrency currency, final List<PostingPeriod> allPostingPeriods) {

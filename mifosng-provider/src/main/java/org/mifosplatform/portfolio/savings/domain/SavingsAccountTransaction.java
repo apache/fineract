@@ -129,7 +129,14 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
                 amount, isReversed, null);
     }
 
-    public static SavingsAccountTransaction withdrawalFee(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
+	public static SavingsAccountTransaction overdraftInterest(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
+            final Money amount) {
+        final boolean isReversed = false;
+        return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue(), date,
+                amount, isReversed, null);
+	}
+
+	public static SavingsAccountTransaction withdrawalFee(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
             final Money amount, final AppUser appUser) {
         final boolean isReversed = false;
         return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.WITHDRAWAL_FEE.getValue(), date, amount,
@@ -505,10 +512,18 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     }
 
     public boolean isDebit() {
-        return isWithdrawal() || isWithdrawalFeeAndNotReversed() || isAnnualFeeAndNotReversed() || isPayCharge();
+        return isWithdrawal() 
+        		|| isWithdrawalFeeAndNotReversed() 
+        		|| isAnnualFeeAndNotReversed() 
+        		|| isPayCharge()
+        		|| isOverdraftInterestAndNotReversed();
     }
 
-    public boolean isPayCharge() {
+    public boolean isOverdraftInterestAndNotReversed() {
+    	return SavingsAccountTransactionType.fromInt(this.typeOf).isIncomeFromInterest() && isNotReversed();
+    }
+
+	public boolean isPayCharge() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isPayCharge();
     }
 
@@ -608,4 +623,5 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     public BigDecimal getAmount() {
         return this.amount;
     }
+
 }

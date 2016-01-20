@@ -109,4 +109,15 @@ public final class SavingsAccountTransactionSummaryWrapper {
         return total.getAmountDefaultedToNullIfZero();
     }
 
+	public BigDecimal calculateTotalOverdraftInterest(MonetaryCurrency currency,
+			List<SavingsAccountTransaction> transactions) {
+        Money total = Money.zero(currency);
+        for (final SavingsAccountTransaction transaction : transactions) {
+            if (transaction.isOverdraftInterestAndNotReversed()) {
+                total = total.plus(transaction.getAmount(currency));
+            }
+        }
+        return total.getAmountDefaultedToNullIfZero();
+	}
+
 }

@@ -25,11 +25,12 @@ public class SavingsAccountSummaryData {
     private final BigDecimal accountBalance;
     private final BigDecimal totalFeeCharge;
     private final BigDecimal totalPenaltyCharge;
+    private final BigDecimal totalOverdraftInterestDerived;
 
     public SavingsAccountSummaryData(final CurrencyData currency, final BigDecimal totalDeposits, final BigDecimal totalWithdrawals,
             final BigDecimal totalWithdrawalFees, final BigDecimal totalAnnualFees, final BigDecimal totalInterestEarned,
             final BigDecimal totalInterestPosted, final BigDecimal accountBalance, final BigDecimal totalFeeCharge,
-            final BigDecimal totalPenaltyCharge) {
+            final BigDecimal totalPenaltyCharge, final BigDecimal totalOverdraftInterestDerived) {
         this.currency = currency;
         this.totalDeposits = totalDeposits;
         this.totalWithdrawals = totalWithdrawals;
@@ -40,5 +41,6 @@ public class SavingsAccountSummaryData {
         this.accountBalance = accountBalance;
         this.totalFeeCharge = totalFeeCharge;
         this.totalPenaltyCharge = totalPenaltyCharge;
+        this.totalOverdraftInterestDerived = totalOverdraftInterestDerived;
     }
 }

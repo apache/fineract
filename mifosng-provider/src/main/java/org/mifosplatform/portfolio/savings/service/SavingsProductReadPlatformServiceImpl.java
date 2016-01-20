@@ -114,6 +114,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sqlBuilder.append("sp.withdrawal_fee_for_transfer as withdrawalFeeForTransfers, ");
             sqlBuilder.append("sp.allow_overdraft as allowOverdraft, ");
             sqlBuilder.append("sp.overdraft_limit as overdraftLimit, ");
+            sqlBuilder.append("sp.nominal_annual_interest_rate_overdraft as nominalAnnualInterestRateOverdraft, ");
+            sqlBuilder.append("sp.min_overdraft_for_interest_calculation as minOverdraftForInterestCalculation, ");
             sqlBuilder.append("sp.min_required_balance as minRequiredBalance, ");
             sqlBuilder.append("sp.enforce_min_required_balance as enforceMinRequiredBalance, ");
             sqlBuilder.append("sp.min_balance_for_interest_calculation as minBalanceForInterestCalculation,");
@@ -178,6 +180,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             final boolean withdrawalFeeForTransfers = rs.getBoolean("withdrawalFeeForTransfers");
             final boolean allowOverdraft = rs.getBoolean("allowOverdraft");
             final BigDecimal overdraftLimit = rs.getBigDecimal("overdraftLimit");
+            final BigDecimal nominalAnnualInterestRateOverdraft = rs.getBigDecimal("nominalAnnualInterestRateOverdraft");
+            final BigDecimal minOverdraftForInterestCalculation = rs.getBigDecimal("minOverdraftForInterestCalculation");
 
             final BigDecimal minRequiredBalance = rs.getBigDecimal("minRequiredBalance");
             final boolean enforceMinRequiredBalance = rs.getBoolean("enforceMinRequiredBalance");
@@ -187,7 +191,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
                     compoundingInterestPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers,
                     accountingRuleType, allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance,
-                    minBalanceForInterestCalculation);
+                    minBalanceForInterestCalculation, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation);
         }
     }
 
