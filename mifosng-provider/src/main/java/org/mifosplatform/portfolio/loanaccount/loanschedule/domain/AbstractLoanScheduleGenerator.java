@@ -488,7 +488,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             final ScheduleCurrentPeriodParams currentPeriodParams, final Money lastTotalOutstandingInterestPaymentDueToGrace,
             final LocalDate transactionDate, final LoanScheduleModelPeriod installment) {
         LoanScheduleModelPeriod modifiedInstallment = installment;
-        if (scheduleParams.getOutstandingBalance().isLessThan(currentPeriodParams.getInterestForThisPeriod())
+        if (!scheduleParams.getOutstandingBalance().isGreaterThan(currentPeriodParams.getInterestForThisPeriod())
                 && !scheduledDueDate.equals(transactionDate)) {
             final Collection<LoanTermVariationsData> interestRates = loanApplicationTerms.getLoanTermVariations().getInterestRateChanges();
             LocalDate calculateTill = transactionDate;
@@ -602,7 +602,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                             && scheduleParams.getLoanRepaymentScheduleTransactionProcessor()
                                     .isInterestFirstRepaymentScheduleTransactionProcessor()) {
                         List<LoanTransaction> currentTransactions = createCurrentTransactionList(detail);
-                        if (!transactionDate.isEqual(scheduleParams.getPeriodStartDate())) {
+                        if (!transactionDate.isEqual(scheduleParams.getPeriodStartDate()) ||  scheduleParams.getInstalmentNumber() == 1) {
 
                             int periodDays = Days.daysBetween(scheduleParams.getPeriodStartDate(), transactionDate).getDays();
                             // calculates period start date for interest

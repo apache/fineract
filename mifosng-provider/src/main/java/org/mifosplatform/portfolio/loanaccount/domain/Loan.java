@@ -4954,7 +4954,7 @@ public class Loan extends AbstractPersistable<Long> {
             for (LoanTransaction loanTransaction : allNonContraTransactionsPostDisbursement) {
                 copyTransactions.add(LoanTransaction.copyTransactionProperties(loanTransaction));
             }
-            loanRepaymentScheduleTransactionProcessor.populateDerivedFeildsWithoutReprocess(getDisbursementDate(), copyTransactions,
+            loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), copyTransactions,
                     getCurrency(), this.repaymentScheduleInstallments, charges());
 
             updateLoanSummaryDerivedFields();

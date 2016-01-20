@@ -48,17 +48,11 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
      * falls before existing transactions or and adjustment is made to an
      * existing in which case the entire loan schedule needs to be re-processed.
      */
+
     @Override
     public ChangedTransactionDetail handleTransaction(final LocalDate disbursementDate,
             final List<LoanTransaction> transactionsPostDisbursement, final MonetaryCurrency currency,
             final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges) {
-        final boolean reprocessCharges = true;
-        return handleTransaction(disbursementDate, transactionsPostDisbursement, currency, installments, charges, reprocessCharges);
-    }
-
-    private ChangedTransactionDetail handleTransaction(final LocalDate disbursementDate,
-            final List<LoanTransaction> transactionsPostDisbursement, final MonetaryCurrency currency,
-            final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges, boolean reprocessCharges) {
 
         if (charges != null) {
             for (final LoanCharge loanCharge : charges) {
@@ -75,10 +69,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
         // re-process loan charges over repayment periods (picking up on waived
         // loan charges)
-        if (reprocessCharges) {
-            final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
-            wrapper.reprocess(currency, disbursementDate, installments, charges);
-        }
+        final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
+        wrapper.reprocess(currency, disbursementDate, installments, charges);
 
         final ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
         final List<LoanTransaction> transactionstoBeProcessed = new ArrayList<>();
@@ -328,7 +320,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
         Money amountRemaining = feeCharges;
         while (amountRemaining.isGreaterThanZero()) {
-            final LoanCharge unpaidCharge = findEarliestUnpaidChargeFromUnOrderedSet(charges);
+            final LoanCharge unpaidCharge = findEarliestUnpaidChargeFromUnOrderedSet(charges, feeCharges.getCurrency());
             Money feeAmount = feeCharges.zero();
             if (loanTransaction.isChargePayment()) {
                 feeAmount = feeCharges;
@@ -355,12 +347,12 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
     }
 
-    private LoanCharge findEarliestUnpaidChargeFromUnOrderedSet(final Set<LoanCharge> charges) {
+    private LoanCharge findEarliestUnpaidChargeFromUnOrderedSet(final Set<LoanCharge> charges, final MonetaryCurrency currency) {
         LoanCharge earliestUnpaidCharge = null;
         LoanCharge installemntCharge = null;
         LoanInstallmentCharge chargePerInstallment = null;
         for (final LoanCharge loanCharge : charges) {
-            if (loanCharge.isNotFullyPaid() && !loanCharge.isDueAtDisbursement()) {
+            if (loanCharge.getAmountOutstanding(currency).isGreaterThanZero() && !loanCharge.isDueAtDisbursement()) {
                 if (loanCharge.isInstalmentFee()) {
                     LoanInstallmentCharge unpaidLoanChargePerInstallment = loanCharge.getUnpaidInstallmentLoanCharge();
                     if (chargePerInstallment == null
@@ -585,14 +577,6 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             }
         }
 
-    }
-
-    @Override
-    public ChangedTransactionDetail populateDerivedFeildsWithoutReprocess(final LocalDate disbursementDate,
-            final List<LoanTransaction> transactionsPostDisbursement, final MonetaryCurrency currency,
-            final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges) {
-        final boolean reprocessCharges = false;
-        return handleTransaction(disbursementDate, transactionsPostDisbursement, currency, installments, charges, reprocessCharges);
     }
 
     private LoanCharge findLatestPaidChargeFromUnOrderedSet(final Set<LoanCharge> charges, MonetaryCurrency currency) {
