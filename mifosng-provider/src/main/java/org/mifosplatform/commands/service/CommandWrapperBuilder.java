@@ -2571,4 +2571,36 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId + "/schedule";
         return this;
     }
+    
+    public CommandWrapperBuilder createProduct(String productType) {
+        this.entityName = productType.toUpperCase()+"PRODUCT" ; //To Support different type of products
+        this.actionName = "CREATE";
+        this.entityId = null;
+        this.href = "/products/"+productType;
+        return this;
+    }
+    
+    public CommandWrapperBuilder updateProduct(String productType, final Long productId) {
+        this.entityName = productType.toUpperCase()+"PRODUCT" ;
+        this.actionName = "UPDATE";
+        this.entityId = productId;
+        this.href = "/products/" + productType+"/"+productId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder createAccount(String accountType) {
+        this.entityName = accountType.toUpperCase()+"ACCOUNT" ; //To Support different type of Accounts
+        this.actionName = "CREATE";
+        this.entityId = null;
+        this.href = "/accounts/"+accountType;
+        return this;
+    }
+    
+    public CommandWrapperBuilder updateAccount(String accountType, final Long accountId) {
+        this.entityName = accountType.toUpperCase()+"ACCOUNT" ;
+        this.actionName = "UPDATE";
+        this.entityId = accountId;
+        this.href = "/accounts/" + accountType+"/"+accountId;
+        return this;
+    }
 }
