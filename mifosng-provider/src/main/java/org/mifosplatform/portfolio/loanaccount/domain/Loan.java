@@ -5627,6 +5627,15 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public int fetchNumberOfInstallmensAfterExceptions() {
+        if(this.repaymentScheduleInstallments.size() > 0){
+            int numberOfInstallments = 0;
+            for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
+                if(!installment.isRecalculatedInterestComponent()){
+                    numberOfInstallments++; 
+                }
+            }
+            return numberOfInstallments;
+        }
         return this.repaymentScheduleDetail().getNumberOfRepayments() + adjustNumberOfRepayments();
     }
 

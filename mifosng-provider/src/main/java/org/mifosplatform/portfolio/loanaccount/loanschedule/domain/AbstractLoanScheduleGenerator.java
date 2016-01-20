@@ -304,7 +304,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             installment = handleRecalculationForTransactions(mc, loanApplicationTerms, holidayDetailDTO, currency, scheduleParams,
                     loanRepaymentScheduleTransactionProcessor, totalInterestChargedForFullLoanTerm, lastRestDate, scheduledDueDate,
                     periodStartDateApplicableForInterest, applicableTransactions, currentPeriodParams,
-                    lastTotalOutstandingInterestPaymentDueToGrace, installment);
+                    lastTotalOutstandingInterestPaymentDueToGrace, installment, loanCharges);
             periods.add(installment);
 
             // Updates principal paid map with efective date for reducing
@@ -424,7 +424,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             final Money totalInterestChargedForFullLoanTerm, final LocalDate lastRestDate, final LocalDate scheduledDueDate,
             final LocalDate periodStartDateApplicableForInterest, final Collection<RecalculationDetail> applicableTransactions,
             final ScheduleCurrentPeriodParams currentPeriodParams, final Money lastTotalOutstandingInterestPaymentDueToGrace,
-            final LoanScheduleModelPeriod installment) {
+            final LoanScheduleModelPeriod installment, Set<LoanCharge> loanCharges) {
         LoanScheduleModelPeriod modifiedInstallment = installment;
         if (scheduleParams.applyInterestRecalculation() && loanRepaymentScheduleTransactionProcessor != null) {
             Money principalProcessed = Money.zero(currency);
@@ -446,7 +446,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         modifiedInstallment = handlePrepaymentOfLoan(mc, loanApplicationTerms, holidayDetailDTO, scheduleParams,
                                 totalInterestChargedForFullLoanTerm, scheduledDueDate, periodStartDateApplicableForInterest,
                                 currentPeriodParams.getInterestCalculationGraceOnRepaymentPeriodFraction(), currentPeriodParams,
-                                lastTotalOutstandingInterestPaymentDueToGrace, transactionDate, modifiedInstallment);
+                                lastTotalOutstandingInterestPaymentDueToGrace, transactionDate, modifiedInstallment, loanCharges);
 
                         Money addToPrinciapal = Money.zero(currency);
                         if (scheduleParams.getOutstandingBalance().isLessThanZero()) {
@@ -486,7 +486,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             final Money totalInterestChargedForFullLoanTerm, final LocalDate scheduledDueDate,
             LocalDate periodStartDateApplicableForInterest, final double interestCalculationGraceOnRepaymentPeriodFraction,
             final ScheduleCurrentPeriodParams currentPeriodParams, final Money lastTotalOutstandingInterestPaymentDueToGrace,
-            final LocalDate transactionDate, final LoanScheduleModelPeriod installment) {
+            final LocalDate transactionDate, final LoanScheduleModelPeriod installment, Set<LoanCharge> loanCharges) {
         LoanScheduleModelPeriod modifiedInstallment = installment;
         if (!scheduleParams.getOutstandingBalance().isGreaterThan(currentPeriodParams.getInterestForThisPeriod())
                 && !scheduledDueDate.equals(transactionDate)) {
@@ -510,20 +510,31 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     lastTotalOutstandingInterestPaymentDueToGrace, scheduleParams.getOutstandingBalanceAsPerRest(), loanApplicationTerms,
                     scheduleParams.getPeriodNumber(), mc, mergeVariationsToMap(scheduleParams), scheduleParams.getCompoundingMap(),
                     periodStartDateApplicableForInterest, calculateTill, interestRates);
-            Money diff = currentPeriodParams.getInterestForThisPeriod().minus(interestTillDate.interest());
+            // applies charges for the period
+            final ScheduleCurrentPeriodParams tempPeriod = new ScheduleCurrentPeriodParams(
+                    totalInterestChargedForFullLoanTerm.getCurrency(), interestCalculationGraceOnRepaymentPeriodFraction);
+            tempPeriod.setInterestForThisPeriod(interestTillDate.interest());
+            applyChargesForCurrentPeriod(loanCharges, totalInterestChargedForFullLoanTerm.getCurrency(), scheduleParams, calculateTill,
+                    tempPeriod);
+            Money interestDiff = currentPeriodParams.getInterestForThisPeriod().minus(tempPeriod.getInterestForThisPeriod());
+            Money chargeDiff = currentPeriodParams.getFeeChargesForInstallment().minus(tempPeriod.getFeeChargesForInstallment());
+            Money penaltyDiff = currentPeriodParams.getPenaltyChargesForInstallment().minus(tempPeriod.getPenaltyChargesForInstallment());
+
+            Money diff = interestDiff.plus(chargeDiff).plus(penaltyDiff);
             if (!scheduleParams.getOutstandingBalance().minus(diff).isGreaterThanZero()) {
                 scheduleParams.reduceOutstandingBalance(diff);
-                currentPeriodParams.minusInterestForThisPeriod(diff);
+                currentPeriodParams.minusInterestForThisPeriod(interestDiff);
+                currentPeriodParams.minusFeeChargesForInstallment(chargeDiff);
+                currentPeriodParams.minusPenaltyChargesForInstallment(penaltyDiff);
                 currentPeriodParams.plusPrincipalForThisPeriod(diff);
-                final Money totalDue = currentPeriodParams.getPrincipalForThisPeriod().plus(currentPeriodParams.getInterestForThisPeriod());
 
                 // create and replaces repayment period
                 // from parts
                 modifiedInstallment = LoanScheduleModelRepaymentPeriod.repayment(scheduleParams.getInstalmentNumber(),
                         scheduleParams.getPeriodStartDate(), transactionDate, currentPeriodParams.getPrincipalForThisPeriod(),
                         scheduleParams.getOutstandingBalance(), currentPeriodParams.getInterestForThisPeriod(),
-                        currentPeriodParams.getFeeChargesForInstallment(), currentPeriodParams.getPenaltyChargesForInstallment(), totalDue,
-                        false);
+                        currentPeriodParams.getFeeChargesForInstallment(), currentPeriodParams.getPenaltyChargesForInstallment(),
+                        currentPeriodParams.fetchTotalAmountForPeriod(), false);
                 scheduleParams.setTotalOutstandingInterestPaymentDueToGrace(interestTillDate.interestPaymentDueToGrace());
             }
 
@@ -602,7 +613,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                             && scheduleParams.getLoanRepaymentScheduleTransactionProcessor()
                                     .isInterestFirstRepaymentScheduleTransactionProcessor()) {
                         List<LoanTransaction> currentTransactions = createCurrentTransactionList(detail);
-                        if (!transactionDate.isEqual(scheduleParams.getPeriodStartDate()) ||  scheduleParams.getInstalmentNumber() == 1) {
+                        if (!transactionDate.isEqual(scheduleParams.getPeriodStartDate()) || scheduleParams.getInstalmentNumber() == 1) {
 
                             int periodDays = Days.daysBetween(scheduleParams.getPeriodStartDate(), transactionDate).getDays();
                             // calculates period start date for interest
@@ -2603,12 +2614,20 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             this.feeChargesForInstallment = feeChargesForInstallment;
         }
 
+        public void minusFeeChargesForInstallment(Money feeChargesForInstallment) {
+            this.feeChargesForInstallment = this.feeChargesForInstallment.minus(feeChargesForInstallment);
+        }
+
         public Money getPenaltyChargesForInstallment() {
             return this.penaltyChargesForInstallment;
         }
 
         public void setPenaltyChargesForInstallment(Money penaltyChargesForInstallment) {
             this.penaltyChargesForInstallment = penaltyChargesForInstallment;
+        }
+
+        public void minusPenaltyChargesForInstallment(Money penaltyChargesForInstallment) {
+            this.penaltyChargesForInstallment = this.penaltyChargesForInstallment.minus(penaltyChargesForInstallment);
         }
 
         public Money fetchTotalAmountForPeriod() {
