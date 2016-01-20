@@ -88,16 +88,16 @@ public final class Client extends AbstractPersistable<Long> {
     @Temporal(TemporalType.DATE)
     private Date officeJoiningDate;
 
-    @Column(name = "firstname", length = 50)
+    @Column(name = "firstname", length = 50, nullable = true)
     private String firstname;
 
-    @Column(name = "middlename", length = 50)
+    @Column(name = "middlename", length = 50, nullable = true)
     private String middlename;
 
-    @Column(name = "lastname", length = 50)
+    @Column(name = "lastname", length = 50, nullable = true)
     private String lastname;
 
-    @Column(name = "fullname", length = 100)
+    @Column(name = "fullname", length = 100, nullable = true)
     private String fullname;
 
     @Column(name = "display_name", length = 100, nullable = false)
@@ -208,10 +208,13 @@ public final class Client extends AbstractPersistable<Long> {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_classification_cv_id", nullable = true)
     private CodeValue clientClassification;
+    
+    @Column(name = "legal_form_enum", nullable = true)
+    private Integer legalForm;
 
     public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff,
             final SavingsProduct savingsProduct, final CodeValue gender, final CodeValue clientType, final CodeValue clientClassification,
-            final JsonCommand command) {
+            final Integer legalForm, final JsonCommand command) {
 
         final String accountNo = command.stringValueOfParameterNamed(ClientApiConstants.accountNoParamName);
         final String externalId = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
@@ -248,18 +251,18 @@ public final class Client extends AbstractPersistable<Long> {
         final SavingsAccount account = null;
         return new Client(currentUser, status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname,
                 activationDate, officeJoiningDate, externalId, mobileNo, staff, submittedOnDate, savingsProduct, account, dataOfBirth,
-                gender, clientType, clientClassification);
+                gender, clientType, clientClassification, legalForm);
     }
 
     protected Client() {
-        //
+    	this.setLegalForm(null);
     }
 
     private Client(final AppUser currentUser, final ClientStatus status, final Office office, final Group clientParentGroup,
             final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
             final LocalDate activationDate, final LocalDate officeJoiningDate, final String externalId, final String mobileNo,
             final Staff staff, final LocalDate submittedOnDate, final SavingsProduct savingsProduct, final SavingsAccount savingsAccount,
-            final LocalDate dateOfBirth, final CodeValue gender, final CodeValue clientType, final CodeValue clientClassification) {
+            final LocalDate dateOfBirth, final CodeValue gender, final CodeValue clientType, final CodeValue clientClassification, final Integer legalForm) {
 
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
@@ -333,6 +336,7 @@ public final class Client extends AbstractPersistable<Long> {
         }
         this.clientType = clientType;
         this.clientClassification = clientClassification;
+        this.setLegalForm(legalForm);
 
         deriveDisplayName();
         validate();
@@ -341,6 +345,16 @@ public final class Client extends AbstractPersistable<Long> {
     private void validate() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         validateNameParts(dataValidationErrors);
+        validateActivationDate(dataValidationErrors);
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+
+    }
+    
+    private void validateUpdate() {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        //Not validating name parts while update request as firstname/lastname can be along with fullname 
+        //when we change clientType from Individual to Organisation or vice-cersa
         validateActivationDate(dataValidationErrors);
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
@@ -506,6 +520,29 @@ public final class Client extends AbstractPersistable<Long> {
             final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.clientClassificationIdParamName);
             actualChanges.put(ClientApiConstants.clientClassificationIdParamName, newValue);
         }
+        
+        if (command.isChangeInIntegerParameterNamed(ClientApiConstants.legalFormIdParamName, this.getLegalForm())) {
+            final Integer newValue = command.integerValueOfParameterNamed(ClientApiConstants.legalFormIdParamName);
+            if(newValue != null)
+            {
+            	LegalForm legalForm = LegalForm.fromInt(newValue);
+            	if(legalForm != null)
+            	{
+            		actualChanges.put(ClientApiConstants.legalFormIdParamName, ClientEnumerations.legalForm(newValue));
+                    this.setLegalForm(legalForm.getValue());
+            	}
+            	else
+            	{
+            		actualChanges.put(ClientApiConstants.legalFormIdParamName, null);
+                    this.setLegalForm(null);
+            	}
+            }
+            else
+            {
+            	actualChanges.put(ClientApiConstants.legalFormIdParamName, null);
+                this.setLegalForm(null);
+            }
+        }
 
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
@@ -541,7 +578,7 @@ public final class Client extends AbstractPersistable<Long> {
             this.submittedOnDate = newValue.toDate();
         }
 
-        validate();
+        validateUpdate();
 
         deriveDisplayName();
 
@@ -615,22 +652,28 @@ public final class Client extends AbstractPersistable<Long> {
     private void deriveDisplayName() {
 
         StringBuilder nameBuilder = new StringBuilder();
-        if (StringUtils.isNotBlank(this.firstname)) {
-            nameBuilder.append(this.firstname).append(' ');
-        }
+        Integer legalForm = this.getLegalForm();
+        if(legalForm == null || LegalForm.fromInt(legalForm).isPerson())
+        {
+        	if (StringUtils.isNotBlank(this.firstname)) {
+                nameBuilder.append(this.firstname).append(' ');
+            }
 
-        if (StringUtils.isNotBlank(this.middlename)) {
-            nameBuilder.append(this.middlename).append(' ');
-        }
+            if (StringUtils.isNotBlank(this.middlename)) {
+                nameBuilder.append(this.middlename).append(' ');
+            }
 
-        if (StringUtils.isNotBlank(this.lastname)) {
-            nameBuilder.append(this.lastname);
+            if (StringUtils.isNotBlank(this.lastname)) {
+                nameBuilder.append(this.lastname);
+            }
         }
-
-        if (StringUtils.isNotBlank(this.fullname)) {
-            nameBuilder = new StringBuilder(this.fullname);
+        else if(LegalForm.fromInt(legalForm).isEntity())
+        {
+        	if (StringUtils.isNotBlank(this.fullname)) {
+                nameBuilder = new StringBuilder(this.fullname);
+            }
         }
-
+        
         this.displayName = nameBuilder.toString();
     }
 
@@ -896,4 +939,12 @@ public final class Client extends AbstractPersistable<Long> {
         this.status = ClientStatus.PENDING.getValue();
 
     }
+
+	public Integer getLegalForm() {
+		return legalForm;
+	}
+
+	public void setLegalForm(Integer legalForm) {
+		this.legalForm = legalForm;
+	}
 }
