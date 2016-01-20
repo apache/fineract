@@ -36,10 +36,6 @@ public interface LoanRepaymentScheduleTransactionProcessor {
      */
     boolean isInterestFirstRepaymentScheduleTransactionProcessor();
 
-    ChangedTransactionDetail populateDerivedFeildsWithoutReprocess(LocalDate disbursementDate,
-            List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
-            List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges);
-
     void handleRefund(LoanTransaction loanTransaction, MonetaryCurrency currency, List<LoanRepaymentScheduleInstallment> installments,
             final Set<LoanCharge> charges);
 

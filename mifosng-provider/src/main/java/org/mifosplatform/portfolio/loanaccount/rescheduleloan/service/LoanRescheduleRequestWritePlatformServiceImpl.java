@@ -454,7 +454,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
         for (LoanCharge loanCharge : loanCharges) {
 
-            if (loanCharge.isNotFullyPaid() && !loanCharge.isWaived()) {
+            if (loanCharge.isChargePending()) {
                 Integer loanInstallmentNumber = null;
 
                 if (loanCharge.isInstalmentFee()) {

@@ -372,7 +372,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Map<Long, BigDecimal> disBuLoanCharges = new HashMap<>();
         for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isDueAtDisbursement() && loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()
-                    && loanCharge.isNotFullyPaid() && !loanCharge.isWaived()) {
+                    && loanCharge.isChargePending()) {
                 disBuLoanCharges.put(loanCharge.getId(), loanCharge.amountOutstanding());
             }
         }
@@ -599,7 +599,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final Map<Long, BigDecimal> disBuLoanCharges = new HashMap<>();
             for (final LoanCharge loanCharge : loanCharges) {
                 if (loanCharge.isDueAtDisbursement() && loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()
-                        && loanCharge.isNotFullyPaid() && !loanCharge.isWaived()) {
+                        && loanCharge.isChargePending()) {
                     disBuLoanCharges.put(loanCharge.getId(), loanCharge.amountOutstanding());
                 }
             }
