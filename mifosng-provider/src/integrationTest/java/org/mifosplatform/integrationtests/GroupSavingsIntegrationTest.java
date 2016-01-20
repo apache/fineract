@@ -516,6 +516,10 @@ public class GroupSavingsIntegrationTest {
         LocalDate expectedNextDueDate = new LocalDate((Integer) dates.get(0), (Integer) dates.get(1), (Integer) dates.get(2))
                 .plusWeeks((Integer) paidCharge.get("feeInterval"));
         assertEquals(expectedNextDueDate, nextDueDate);
+        cal = Calendar.getInstance();
+        
+        this.savingsAccountHelper.closeSavingsAccountAndGetBackRequiredField(savingsId, "true", null, sdf.format(cal.getTime()));
+        
     }
 
     public static Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
