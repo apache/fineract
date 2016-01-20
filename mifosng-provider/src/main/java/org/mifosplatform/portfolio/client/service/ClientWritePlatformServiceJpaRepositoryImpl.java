@@ -11,6 +11,7 @@
  */
 package org.mifosplatform.portfolio.client.service;
 
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -32,6 +33,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
@@ -42,8 +44,11 @@ import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.mifosplatform.portfolio.client.data.ClientDataValidator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.domain.ClientNonPerson;
+import org.mifosplatform.portfolio.client.domain.ClientNonPersonRepositoryWrapper;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.domain.ClientStatus;
+import org.mifosplatform.portfolio.client.domain.LegalForm;
 import org.mifosplatform.portfolio.client.exception.ClientActiveForUpdateException;
 import org.mifosplatform.portfolio.client.exception.ClientHasNoStaffException;
 import org.mifosplatform.portfolio.client.exception.ClientMustBePendingToBeDeletedException;
@@ -73,6 +78,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.gson.JsonElement;
+
 @Service
 public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWritePlatformService {
 
@@ -80,6 +87,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     private final PlatformSecurityContext context;
     private final ClientRepositoryWrapper clientRepository;
+    private final ClientNonPersonRepositoryWrapper clientNonPersonRepository;
     private final OfficeRepository officeRepository;
     private final NoteRepository noteRepository;
     private final GroupRepository groupRepository;
@@ -94,19 +102,21 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final CommandProcessingService commandProcessingService;
     private final ConfigurationDomainService configurationDomainService;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
+	private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final ClientRepositoryWrapper clientRepository, final OfficeRepository officeRepository, final NoteRepository noteRepository,
+            final ClientRepositoryWrapper clientRepository, final ClientNonPersonRepositoryWrapper clientNonPersonRepository, final OfficeRepository officeRepository, final NoteRepository noteRepository,
             final ClientDataValidator fromApiJsonDeserializer, final AccountNumberGenerator accountNumberGenerator,
             final GroupRepository groupRepository, final StaffRepositoryWrapper staffRepository,
             final CodeValueRepositoryWrapper codeValueRepository, final LoanRepository loanRepository,
             final SavingsAccountRepository savingsRepository, final SavingsProductRepository savingsProductRepository,
             final SavingsApplicationProcessWritePlatformService savingsApplicationProcessWritePlatformService,
             final CommandProcessingService commandProcessingService, final ConfigurationDomainService configurationDomainService,
-            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository) {
+            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final FromJsonHelper fromApiJsonHelper) {
         this.context = context;
         this.clientRepository = clientRepository;
+        this.clientNonPersonRepository = clientNonPersonRepository;
         this.officeRepository = officeRepository;
         this.noteRepository = noteRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -121,6 +131,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.commandProcessingService = commandProcessingService;
         this.configurationDomainService = configurationDomainService;
         this.accountNumberFormatRepository = accountNumberFormatRepository;
+        this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
     @Transactional
@@ -134,6 +145,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         final List<Note> relatedNotes = this.noteRepository.findByClientId(clientId);
         this.noteRepository.deleteInBatch(relatedNotes);
 
+        final ClientNonPerson clientNonPerson = this.clientNonPersonRepository.findOneByClientId(clientId);
+        if(clientNonPerson != null)
+        	this.clientNonPersonRepository.delete(clientNonPerson);
+        
         this.clientRepository.delete(client);
 
         return new CommandProcessingResultBuilder() //
@@ -225,9 +240,22 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 if (savingsProduct == null) { throw new SavingsProductNotFoundException(savingsProductId); }
 
             }
-
+            
+            final Integer legalFormParamValue = command.integerValueOfParameterNamed(ClientApiConstants.legalFormIdParamName);
+            boolean isEntity = false;
+            Integer legalFormValue = null;
+            if(legalFormParamValue != null)
+            {
+            	LegalForm legalForm = LegalForm.fromInt(legalFormParamValue);
+            	if(legalForm != null)
+                {
+                	legalFormValue = legalForm.getValue();
+                	isEntity = legalForm.isEntity();
+                }
+            }
+            
             final Client newClient = Client.createNew(currentUser, clientOffice, clientParentGroup, staff, savingsProduct, gender,
-                    clientType, clientClassification, command);
+                    clientType, clientClassification, legalFormValue, command);
             boolean rollbackTransaction = false;
             if (newClient.isActive()) {
                 validateParentGroupRulesBeforeClientActivation(newClient);
@@ -242,13 +270,16 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 newClient.updateAccountNo(accountNumberGenerator.generate(newClient, accountNumberFormat));
                 this.clientRepository.save(newClient);
             }
-
+                        
             final Locale locale = command.extractLocale();
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
             CommandProcessingResult result = openSavingsAccount(newClient, fmt);
             if (result.getSavingsId() != null) {
                 this.clientRepository.save(newClient);
             }
+            
+            if(isEntity)            
+            	extractAndCreateClientNonPerson(newClient, command);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -264,6 +295,42 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
+    }
+    
+    /**
+     * This method extracts ClientNonPerson details from Client command and creates a new ClientNonPerson record
+     * @param client
+     * @param command
+     */
+    public void extractAndCreateClientNonPerson(Client client, JsonCommand command)
+    {    	
+    	final JsonElement clientNonPersonElement = this.fromApiJsonHelper.parse(command.jsonFragment(ClientApiConstants.clientNonPersonDetailsParamName));
+
+		if(clientNonPersonElement != null)
+		{
+			final String incorpNumber = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.incorpNumberParamName, clientNonPersonElement);
+	        final String remarks = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.remarksParamName, clientNonPersonElement);                
+	        final LocalDate incorpValidityTill = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.incorpValidityTillParamName, clientNonPersonElement);
+	        
+	    	//JsonCommand clientNonPersonCommand = JsonCommand.fromExistingCommand(command, command.arrayOfParameterNamed(ClientApiConstants.clientNonPersonDetailsParamName).getAsJsonObject());
+	    	CodeValue clientNonPersonConstitution = null;
+	        final Long clientNonPersonConstitutionId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.constitutionIdParamName, clientNonPersonElement);
+	        if (clientNonPersonConstitutionId != null) {
+	        	clientNonPersonConstitution = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.CLIENT_NON_PERSON_CONSTITUTION,
+	        			clientNonPersonConstitutionId);
+	        }
+	        
+	        CodeValue clientNonPersonMainBusinessLine = null;
+	        final Long clientNonPersonMainBusinessLineId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.mainBusinessLineIdParamName, clientNonPersonElement);
+	        if (clientNonPersonMainBusinessLineId != null) {
+	        	clientNonPersonMainBusinessLine = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.CLIENT_NON_PERSON_MAIN_BUSINESS_LINE,
+	        			clientNonPersonMainBusinessLineId);
+	        }
+	        
+	    	final ClientNonPerson newClientNonPerson = ClientNonPerson.createNew(client, clientNonPersonConstitution, clientNonPersonMainBusinessLine, incorpNumber, incorpValidityTill, remarks);
+	    	
+	    	this.clientNonPersonRepository.save(newClientNonPerson);
+		}
     }
 
     @Transactional
@@ -344,6 +411,61 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             if (!changes.isEmpty()) {
                 this.clientRepository.saveAndFlush(clientForUpdate);
+            }
+            
+            if (changes.containsKey(ClientApiConstants.legalFormIdParamName)) {
+            	Integer legalFormValue = clientForUpdate.getLegalForm();
+            	boolean isChangedToEntity = false;
+            	if(legalFormValue != null)
+            	{
+            		LegalForm legalForm = LegalForm.fromInt(legalFormValue);
+            		if(legalForm != null)
+            			isChangedToEntity = legalForm.isEntity();
+            	}
+                
+                if(isChangedToEntity)
+                {
+                	extractAndCreateClientNonPerson(clientForUpdate, command);
+                }
+                else
+                {
+                	final ClientNonPerson clientNonPerson = this.clientNonPersonRepository.findOneByClientId(clientForUpdate.getId());
+                	if(clientNonPerson != null)
+                		this.clientNonPersonRepository.delete(clientNonPerson);
+                }
+            }
+            
+            final ClientNonPerson clientNonPersonForUpdate = this.clientNonPersonRepository.findOneByClientId(clientId);
+            if(clientNonPersonForUpdate != null)
+            {
+            	final JsonElement clientNonPersonElement = this.fromApiJsonHelper.parse(command.jsonFragment(ClientApiConstants.clientNonPersonDetailsParamName));
+            	final Map<String, Object> clientNonPersonChanges = clientNonPersonForUpdate.update(JsonCommand.fromExistingCommand(command, clientNonPersonElement));
+                
+                if (clientNonPersonChanges.containsKey(ClientApiConstants.constitutionIdParamName)) {
+
+                    final Long newValue = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.constitutionIdParamName, clientNonPersonElement);
+                    CodeValue constitution = null;
+                    if (newValue != null) {
+                        constitution = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.CLIENT_NON_PERSON_CONSTITUTION, newValue);
+                    }
+                    clientNonPersonForUpdate.updateConstitution(constitution);
+                }
+                
+                if (clientNonPersonChanges.containsKey(ClientApiConstants.mainBusinessLineIdParamName)) {
+
+                    final Long newValue = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.mainBusinessLineIdParamName, clientNonPersonElement);
+                    CodeValue mainBusinessLine = null;
+                    if (newValue != null) {
+                        mainBusinessLine = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.CLIENT_NON_PERSON_MAIN_BUSINESS_LINE, newValue);
+                    }
+                    clientNonPersonForUpdate.updateMainBusinessLine(mainBusinessLine);
+                }
+                
+                if (!clientNonPersonChanges.isEmpty()) {
+                    this.clientNonPersonRepository.saveAndFlush(clientNonPersonForUpdate);
+                }
+                
+                changes.putAll(clientNonPersonChanges);
             }
 
             return new CommandProcessingResultBuilder() //

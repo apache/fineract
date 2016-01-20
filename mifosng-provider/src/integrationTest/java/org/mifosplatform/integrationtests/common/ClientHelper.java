@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 
+import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.integrationtests.common.system.CodeHelper;
 
 import com.google.gson.Gson;
@@ -55,6 +56,43 @@ public class ClientHelper {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestClientAsJSON(activationDate, officeId),
                 "clientId");
     }
+    
+    public static Integer createClientAsPerson(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+        return createClientAsPerson(requestSpec, responseSpec, "04 March 2011");
+    }
+
+    public static Integer createClientAsPerson(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String activationDate) {
+        return createClientAsPerson(requestSpec, responseSpec, activationDate, "1");
+    }
+
+    public static Integer createClientAsPerson(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String activationDate, final String officeId) {
+    	
+        System.out.println("---------------------------------CREATING A CLIENT NON PERSON(ORGANISATION)---------------------------------------------");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestPersonClientAsJSON(activationDate, officeId),
+                "clientId");
+    }
+    
+    public static Integer createClientAsEntity(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+        return createClientAsEntity(requestSpec, responseSpec, "04 March 2011");
+    }
+
+    public static Integer createClientAsEntity(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String activationDate) {
+        return createClientAsEntity(requestSpec, responseSpec, activationDate, "1");
+    }
+
+    public static Integer createClientAsEntity(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String activationDate, final String officeId) {
+    	
+    	Integer constitutionCodeId = (Integer) CodeHelper.getCodeByName(requestSpec, responseSpec, "Constitution").get("id");
+    	Integer soleProprietorCodeValueId = (Integer) CodeHelper.retrieveOrCreateCodeValue(constitutionCodeId, requestSpec, responseSpec).get("id");
+    	
+        System.out.println("---------------------------------CREATING A CLIENT NON PERSON(ORGANISATION)---------------------------------------------");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestEntityClientAsJSON(activationDate, officeId, soleProprietorCodeValueId),
+                "clientId");
+    }
 
     public static Integer createClientForAccountPreference(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer clientType, String jsonAttributeToGetBack) {
@@ -90,6 +128,40 @@ public class ClientHelper {
         map.put("locale", "en");
         map.put("active", "true");
         map.put("activationDate", dateOfJoining);
+        System.out.println("map : " + map);
+        return new Gson().toJson(map);
+    }
+    
+    public static String getTestPersonClientAsJSON(final String dateOfJoining, final String officeId) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("officeId", officeId);
+        map.put("fullname", Utils.randomNameGenerator("Client_FullName_", 5));
+        map.put("externalId", randomIDGenerator("ID_", 7));
+        map.put("dateFormat", DATE_FORMAT);
+        map.put("locale", "en");
+        map.put("active", "true");
+        map.put("activationDate", dateOfJoining);
+        map.put("legalFormId", 1);
+        
+        System.out.println("map : " + map);
+        return new Gson().toJson(map);
+    }
+    
+    public static String getTestEntityClientAsJSON(final String dateOfJoining, final String officeId, final Integer soleProprietorCodeValueId) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("officeId", officeId);
+        map.put("fullname", Utils.randomNameGenerator("Client_FullName_", 5));
+        map.put("externalId", randomIDGenerator("ID_", 7));
+        map.put("dateFormat", DATE_FORMAT);
+        map.put("locale", "en");
+        map.put("active", "true");
+        map.put("activationDate", dateOfJoining);
+        map.put("legalFormId", 2);
+        
+        final HashMap<String, Object> clientNonPersonMap = new HashMap<>();
+        clientNonPersonMap.put("constitutionId", soleProprietorCodeValueId);
+        map.put("clientNonPersonDetails", clientNonPersonMap);
+        
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }

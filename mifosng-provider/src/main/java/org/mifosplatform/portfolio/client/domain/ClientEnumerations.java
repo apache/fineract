@@ -53,6 +53,24 @@ public class ClientEnumerations {
 
         return optionData;
     }
+    
+    public static EnumOptionData legalForm(final Integer statusId) {
+        return legalForm(LegalForm.fromInt(statusId));
+    }
+    
+    public static EnumOptionData legalForm(final LegalForm legalForm) {
+    	final EnumOptionData optionData = new EnumOptionData(legalForm.getValue().longValue(), legalForm.getCode(),
+                legalForm.toString());
+        return optionData;
+    }
+    
+    public static List<EnumOptionData> legalForm(final LegalForm[] legalForms) {
+        final List<EnumOptionData> optionDatas = new ArrayList<>();
+        for (final LegalForm legalForm : legalForms) {
+            optionDatas.add(legalForm(legalForm));
+        }
+        return optionDatas;
+    }
 
     public static EnumOptionData clientTransactionType(final int id) {
         return clientTransactionType(ClientTransactionType.fromInt(id));
