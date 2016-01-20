@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 20 Jan 2016 - 16.01.2.RELEASE
 1. 12 Jan 2016 - 16.01.1.RELEASE
 1. 17 Dec 2015 - 15.12.2.RELEASE
 1. 02 Dec 2015 - 15.12.1.RELEASE
@@ -83,6 +84,45 @@ Releases
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
 
+16.01.2.RELEASE
+=============
+
+This release includes following features and Bug fixes as mentioned below:
+ 
+Platform & API
+
+New Features & Improvements
+
+ - Shares and Dividends - API Mockups
+ - Interest calculation on Overdraft 
+ - Entity as client
+ - Added installment amount for period in schedule data
+ - [MIFOSX-SPM-4] - Eased survey handling for scorecard
+ - [MIFSX-SPM-5] - MifosX SPM 5
+ - [CC-57] - Interest recalculation scheduler job enhancement
+ - [CC-36] - Loan Repayment Rescheduling while disbursement
+ 
+Bugs
+ 
+ - [MIFOSX-2437] - Prepay of loan not working when first repayment date provided
+ - [MIFOSX-2435] - After waive penalty summary page is not displaying as expected in loan account
+ - [MIFOSX-2441] - Not able to prepay loan on the date of disbursement gives internal server error
+ - [MIFOSX-2390] - Not able to prepay loan with the installment fee attached
+ - [MIFOSX-2481] - After creating Closing entries for a branch, not able to add new tranche for the active loans from Loan tranche details page
+ - Fixes to make sure all Integration Tests pass as of this release
+ 
+Community-App
+
+New Features & Improvements
+
+ - Added installment amount for period in schedule data
+ - Interest calculation on Overdraft 
+ - Entity as client
+
+Bugs
+ 
+ - [MIFOSX-2442] - After creating the floating rate it should not get activated by default
+ 
 16.01.1.RELEASE
 =============
 

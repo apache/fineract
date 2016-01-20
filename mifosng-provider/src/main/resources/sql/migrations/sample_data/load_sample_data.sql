@@ -1,6 +1,6 @@
 -- --------------------------------------------------------
 -- Host:                         127.0.0.1
--- Server version:               5.6.21-log - MySQL Community Server (GPL)
+-- Server version:               5.5.34 - MySQL Community Server (GPL)
 -- Server OS:                    Win64
 -- HeidiSQL Version:             9.3.0.4984
 -- --------------------------------------------------------
@@ -159,7 +159,7 @@ CREATE TABLE IF NOT EXISTS `acc_gl_financial_activity_account` (
   CONSTRAINT `FK_office_mapping_acc_gl_account` FOREIGN KEY (`gl_account_id`) REFERENCES `acc_gl_account` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.acc_gl_financial_activity_account: ~0 rows (approximately)
+-- Dumping data for table mifostenant-reference.acc_gl_financial_activity_account: ~1 rows (approximately)
 /*!40000 ALTER TABLE `acc_gl_financial_activity_account` DISABLE KEYS */;
 INSERT INTO `acc_gl_financial_activity_account` (`id`, `gl_account_id`, `financial_activity_type`) VALUES
 	(1, 55, 200);
@@ -305,7 +305,7 @@ CREATE TABLE IF NOT EXISTS `c_cache` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.c_cache: ~0 rows (approximately)
+-- Dumping data for table mifostenant-reference.c_cache: ~1 rows (approximately)
 /*!40000 ALTER TABLE `c_cache` DISABLE KEYS */;
 INSERT INTO `c_cache` (`id`, `cache_type_enum`) VALUES
 	(1, 1);
@@ -417,25 +417,25 @@ CREATE TABLE IF NOT EXISTS `job` (
 -- Dumping data for table mifostenant-reference.job: ~19 rows (approximately)
 /*!40000 ALTER TABLE `job` DISABLE KEYS */;
 INSERT INTO `job` (`id`, `name`, `display_name`, `cron_expression`, `create_time`, `task_priority`, `group_name`, `previous_run_start_time`, `next_run_time`, `job_key`, `initializing_errorlog`, `is_active`, `currently_running`, `updates_allowed`, `scheduler_group`, `is_misfired`) VALUES
-	(1, 'Update loan Summary', 'Update loan Summary', '0 0 22 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, '2014-06-11 09:30:00', '2016-01-12 22:00:00', 'Update loan SummaryJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(2, 'Update Loan Arrears Ageing', 'Update Loan Arrears Ageing', '0 1 0 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, NULL, '2016-01-13 00:01:00', 'Update Loan Arrears AgeingJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(3, 'Update Loan Paid In Advance', 'Update Loan Paid In Advance', '0 5 0 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, NULL, '2016-01-13 00:05:00', 'Update Loan Paid In AdvanceJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(4, 'Apply Annual Fee For Savings', 'Apply Annual Fee For Savings', '0 20 22 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, '2014-06-11 09:50:00', '2016-01-12 22:20:00', 'Apply Annual Fee For SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(5, 'Apply Holidays To Loans', 'Apply Holidays To Loans', '0 0 12 * * ?', '2014-03-07 18:29:14', 5, NULL, '2014-03-24 12:00:04', '2016-01-13 12:00:00', 'Apply Holidays To LoansJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(6, 'Post Interest For Savings', 'Post Interest For Savings', '0 0 0 1/1 * ? *', '2014-03-07 18:29:21', 5, NULL, NULL, '2016-01-13 00:00:00', 'Post Interest For SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
-	(7, 'Transfer Fee For Loans From Savings', 'Transfer Fee For Loans From Savings', '0 1 0 1/1 * ? *', '2014-03-07 18:29:32', 5, NULL, NULL, '2016-01-13 00:01:00', 'Transfer Fee For Loans From SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(8, 'Pay Due Savings Charges', 'Pay Due Savings Charges', '0 0 12 * * ?', '2013-09-23 00:00:00', 5, NULL, '2014-03-24 12:00:04', '2016-01-13 12:00:00', 'Pay Due Savings ChargesJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(9, 'Update Accounting Running Balances', 'Update Accounting Running Balances', '0 1 0 1/1 * ? *', '2014-03-07 18:29:37', 5, NULL, NULL, '2016-01-13 00:01:00', 'Update Accounting Running BalancesJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(10, 'Execute Standing Instruction', 'Execute Standing Instruction', '0 0 0 1/1 * ? *', '2014-05-01 16:10:35', 5, NULL, NULL, '2016-01-13 00:00:00', 'Execute Standing InstructionJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(11, 'Add Accrual Transactions', 'Add Accrual Transactions', '0 1 0 1/1 * ? *', '2014-05-01 16:10:36', 3, NULL, NULL, '2016-01-13 00:01:00', 'Add Accrual TransactionsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(12, 'Apply penalty to overdue loans', 'Apply penalty to overdue loans', '0 0 0 1/1 * ? *', '2014-05-01 16:10:36', 5, NULL, NULL, '2016-01-13 00:00:00', 'Apply penalty to overdue loansJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(13, 'Update Non Performing Assets', 'Update Non Performing Assets', '0 0 0 1/1 * ? *', '2014-05-01 16:10:41', 5, NULL, NULL, '2016-01-13 00:00:00', 'Update Non Performing AssetsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(14, 'Transfer Interest To Savings', 'Transfer Interest To Savings', '0 2 0 1/1 * ? *', '2014-06-11 09:09:15', 4, NULL, NULL, '2016-01-13 00:02:00', 'Transfer Interest To SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
-	(15, 'Update Deposit Accounts Maturity details', 'Update Deposit Accounts Maturity details', '0 0 0 1/1 * ? *', '2014-06-11 09:09:15', 5, NULL, NULL, '2016-01-13 00:00:00', 'Update Deposit Accounts Maturity detailsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(16, 'Add Periodic Accrual Transactions', 'Add Periodic Accrual Transactions', '0 2 0 1/1 * ? *', '2014-10-14 16:19:45', 2, NULL, NULL, '2016-01-13 00:02:00', 'Add Periodic Accrual TransactionsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(17, 'Recalculate Interest For Loans', 'Recalculate Interest For Loans', '0 1 0 1/1 * ? *', '2014-10-14 16:19:55', 4, NULL, NULL, '2016-01-13 00:01:00', 'Recalculate Interest For LoansJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(18, 'Generate Mandatory Savings Schedule', 'Generate Mandatory Savings Schedule', '0 5 0 1/1 * ? *', '2015-04-16 02:28:43', 5, NULL, NULL, '2016-01-13 00:05:00', 'Generate Mandatory Savings ScheduleJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(19, 'Generate Loan Loss Provisioning', 'Generate Loan Loss Provisioning', '0 0 0 1/1 * ? *', '2015-10-20 19:57:58', 5, NULL, NULL, '2016-01-13 00:00:00', 'Generate Loan Loss ProvisioningJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0);
+	(1, 'Update loan Summary', 'Update loan Summary', '0 0 22 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, '2014-06-11 09:30:00', '2016-01-20 22:00:00', 'Update loan SummaryJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(2, 'Update Loan Arrears Ageing', 'Update Loan Arrears Ageing', '0 1 0 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, NULL, '2016-01-21 00:01:00', 'Update Loan Arrears AgeingJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(3, 'Update Loan Paid In Advance', 'Update Loan Paid In Advance', '0 5 0 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, NULL, '2016-01-21 00:05:00', 'Update Loan Paid In AdvanceJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(4, 'Apply Annual Fee For Savings', 'Apply Annual Fee For Savings', '0 20 22 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, '2014-06-11 09:50:00', '2016-01-20 22:20:00', 'Apply Annual Fee For SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(5, 'Apply Holidays To Loans', 'Apply Holidays To Loans', '0 0 12 * * ?', '2014-03-07 18:29:14', 5, NULL, '2014-03-24 12:00:04', '2016-01-21 12:00:00', 'Apply Holidays To LoansJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(6, 'Post Interest For Savings', 'Post Interest For Savings', '0 0 0 1/1 * ? *', '2014-03-07 18:29:21', 5, NULL, NULL, '2016-01-21 00:00:00', 'Post Interest For SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
+	(7, 'Transfer Fee For Loans From Savings', 'Transfer Fee For Loans From Savings', '0 1 0 1/1 * ? *', '2014-03-07 18:29:32', 5, NULL, NULL, '2016-01-21 00:01:00', 'Transfer Fee For Loans From SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(8, 'Pay Due Savings Charges', 'Pay Due Savings Charges', '0 0 12 * * ?', '2013-09-23 00:00:00', 5, NULL, '2014-03-24 12:00:04', '2016-01-21 12:00:00', 'Pay Due Savings ChargesJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(9, 'Update Accounting Running Balances', 'Update Accounting Running Balances', '0 1 0 1/1 * ? *', '2014-03-07 18:29:37', 5, NULL, NULL, '2016-01-21 00:01:00', 'Update Accounting Running BalancesJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(10, 'Execute Standing Instruction', 'Execute Standing Instruction', '0 0 0 1/1 * ? *', '2014-05-01 16:10:35', 5, NULL, NULL, '2016-01-21 00:00:00', 'Execute Standing InstructionJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(11, 'Add Accrual Transactions', 'Add Accrual Transactions', '0 1 0 1/1 * ? *', '2014-05-01 16:10:36', 3, NULL, NULL, '2016-01-21 00:01:00', 'Add Accrual TransactionsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(12, 'Apply penalty to overdue loans', 'Apply penalty to overdue loans', '0 0 0 1/1 * ? *', '2014-05-01 16:10:36', 5, NULL, NULL, '2016-01-21 00:00:00', 'Apply penalty to overdue loansJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(13, 'Update Non Performing Assets', 'Update Non Performing Assets', '0 0 0 1/1 * ? *', '2014-05-01 16:10:41', 5, NULL, NULL, '2016-01-21 00:00:00', 'Update Non Performing AssetsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(14, 'Transfer Interest To Savings', 'Transfer Interest To Savings', '0 2 0 1/1 * ? *', '2014-06-11 09:09:15', 4, NULL, NULL, '2016-01-21 00:02:00', 'Transfer Interest To SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
+	(15, 'Update Deposit Accounts Maturity details', 'Update Deposit Accounts Maturity details', '0 0 0 1/1 * ? *', '2014-06-11 09:09:15', 5, NULL, NULL, '2016-01-21 00:00:00', 'Update Deposit Accounts Maturity detailsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(16, 'Add Periodic Accrual Transactions', 'Add Periodic Accrual Transactions', '0 2 0 1/1 * ? *', '2014-10-14 16:19:45', 2, NULL, NULL, '2016-01-21 00:02:00', 'Add Periodic Accrual TransactionsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(17, 'Recalculate Interest For Loans', 'Recalculate Interest For Loans', '0 1 0 1/1 * ? *', '2014-10-14 16:19:55', 4, NULL, NULL, '2016-01-21 00:01:00', 'Recalculate Interest For LoansJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(18, 'Generate Mandatory Savings Schedule', 'Generate Mandatory Savings Schedule', '0 5 0 1/1 * ? *', '2015-04-16 02:28:43', 5, NULL, NULL, '2016-01-21 00:05:00', 'Generate Mandatory Savings ScheduleJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(19, 'Generate Loan Loss Provisioning', 'Generate Loan Loss Provisioning', '0 0 0 1/1 * ? *', '2015-10-20 19:57:58', 5, NULL, NULL, '2016-01-21 00:00:00', 'Generate Loan Loss ProvisioningJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0);
 /*!40000 ALTER TABLE `job` ENABLE KEYS */;
 
 
@@ -558,7 +558,7 @@ CREATE TABLE IF NOT EXISTS `mix_taxonomy_mapping` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.mix_taxonomy_mapping: ~0 rows (approximately)
+-- Dumping data for table mifostenant-reference.mix_taxonomy_mapping: ~1 rows (approximately)
 /*!40000 ALTER TABLE `mix_taxonomy_mapping` DISABLE KEYS */;
 INSERT INTO `mix_taxonomy_mapping` (`id`, `identifier`, `config`, `last_update_date`, `currency`) VALUES
 	(1, 'default', NULL, NULL, '');
@@ -932,7 +932,7 @@ CREATE TABLE IF NOT EXISTS `m_charge` (
   CONSTRAINT `FK_m_charge_acc_gl_account` FOREIGN KEY (`income_or_liability_account_id`) REFERENCES `acc_gl_account` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.m_charge: ~0 rows (approximately)
+-- Dumping data for table mifostenant-reference.m_charge: ~1 rows (approximately)
 /*!40000 ALTER TABLE `m_charge` DISABLE KEYS */;
 INSERT INTO `m_charge` (`id`, `name`, `currency_code`, `charge_applies_to_enum`, `charge_time_enum`, `charge_calculation_enum`, `charge_payment_mode_enum`, `amount`, `fee_on_day`, `fee_interval`, `fee_on_month`, `is_penalty`, `is_active`, `is_deleted`, `min_cap`, `max_cap`, `fee_frequency`, `income_or_liability_account_id`) VALUES
 	(1, 'Processing Fee', 'USD', 1, 1, 1, 0, 500.000000, NULL, NULL, NULL, 0, 1, 0, NULL, NULL, NULL, NULL);
@@ -981,6 +981,7 @@ CREATE TABLE IF NOT EXISTS `m_client` (
   `withdraw_on_userid` bigint(20) DEFAULT NULL,
   `reactivated_on_date` date DEFAULT NULL,
   `reactivated_on_userid` bigint(20) DEFAULT NULL,
+  `legal_form_enum` int(5) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `account_no_UNIQUE` (`account_no`),
   UNIQUE KEY `external_id` (`external_id`),
@@ -1008,21 +1009,21 @@ CREATE TABLE IF NOT EXISTS `m_client` (
   CONSTRAINT `FK_m_client_m_savings_product` FOREIGN KEY (`default_savings_product`) REFERENCES `m_savings_product` (`id`),
   CONSTRAINT `FK_m_client_m_staff` FOREIGN KEY (`staff_id`) REFERENCES `m_staff` (`id`),
   CONSTRAINT `FK_m_client_substatus_m_code_value` FOREIGN KEY (`sub_status`) REFERENCES `m_code_value` (`id`),
+  CONSTRAINT `FK_m_client_type_mcode_value_reject` FOREIGN KEY (`reject_reason_cv_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `FK_m_client_type_m_code_value` FOREIGN KEY (`client_type_cv_id`) REFERENCES `m_code_value` (`id`),
-  CONSTRAINT `FK_m_client_type_m_code_value_withdraw` FOREIGN KEY (`withdraw_reason_cv_id`) REFERENCES `m_code_value` (`id`),
-  CONSTRAINT `FK_m_client_type_mcode_value_reject` FOREIGN KEY (`reject_reason_cv_id`) REFERENCES `m_code_value` (`id`)
+  CONSTRAINT `FK_m_client_type_m_code_value_withdraw` FOREIGN KEY (`withdraw_reason_cv_id`) REFERENCES `m_code_value` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 
 -- Dumping data for table mifostenant-reference.m_client: ~7 rows (approximately)
 /*!40000 ALTER TABLE `m_client` DISABLE KEYS */;
-INSERT INTO `m_client` (`id`, `account_no`, `external_id`, `status_enum`, `sub_status`, `activation_date`, `office_joining_date`, `office_id`, `transfer_to_office_id`, `staff_id`, `firstname`, `middlename`, `lastname`, `fullname`, `display_name`, `mobile_no`, `gender_cv_id`, `date_of_birth`, `image_id`, `closure_reason_cv_id`, `closedon_date`, `updated_by`, `updated_on`, `submittedon_date`, `submittedon_userid`, `activatedon_userid`, `closedon_userid`, `default_savings_product`, `default_savings_account`, `client_type_cv_id`, `client_classification_cv_id`, `reject_reason_cv_id`, `rejectedon_date`, `rejectedon_userid`, `withdraw_reason_cv_id`, `withdrawn_on_date`, `withdraw_on_userid`, `reactivated_on_date`, `reactivated_on_userid`) VALUES
-	(1, '000000001', NULL, 300, NULL, '2014-03-07', '2014-03-07', 1, NULL, 1, 'Smith', NULL, 'R', NULL, 'Smith R', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2010-01-01', 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-	(2, '000000002', NULL, 300, NULL, '2010-01-04', '2010-01-04', 2, NULL, 2, 'Johnson', NULL, 'D', NULL, 'Johnson D', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2010-01-04', 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-	(4, '000000004', NULL, 300, NULL, '2010-01-04', '2010-01-04', 2, NULL, 2, 'Williams', NULL, 'G', NULL, 'Williams G', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2010-01-04', 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-	(5, '000000005', NULL, 300, NULL, '2010-01-04', '2010-01-04', 2, NULL, 2, 'Harris', NULL, 'P', NULL, 'Harris P', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2010-01-04', 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-	(6, '000000006', NULL, 300, NULL, '2010-01-04', '2010-01-04', 2, NULL, 2, 'Allen', NULL, 'E', NULL, 'Allen E', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2010-01-04', 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-	(7, '000000007', NULL, 300, NULL, '2010-01-04', '2010-01-04', 2, NULL, 2, 'Scott', NULL, 'C', NULL, 'Scott C', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2010-01-04', 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-	(8, '000000008', NULL, 300, NULL, '2010-01-04', '2010-01-04', 2, NULL, 2, 'Robinson', NULL, 'R', NULL, 'Robinson R', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2010-01-04', 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `m_client` (`id`, `account_no`, `external_id`, `status_enum`, `sub_status`, `activation_date`, `office_joining_date`, `office_id`, `transfer_to_office_id`, `staff_id`, `firstname`, `middlename`, `lastname`, `fullname`, `display_name`, `mobile_no`, `gender_cv_id`, `date_of_birth`, `image_id`, `closure_reason_cv_id`, `closedon_date`, `updated_by`, `updated_on`, `submittedon_date`, `submittedon_userid`, `activatedon_userid`, `closedon_userid`, `default_savings_product`, `default_savings_account`, `client_type_cv_id`, `client_classification_cv_id`, `reject_reason_cv_id`, `rejectedon_date`, `rejectedon_userid`, `withdraw_reason_cv_id`, `withdrawn_on_date`, `withdraw_on_userid`, `reactivated_on_date`, `reactivated_on_userid`, `legal_form_enum`) VALUES
+	(1, '000000001', NULL, 300, NULL, '2014-03-07', '2014-03-07', 1, NULL, 1, 'Smith', NULL, 'R', NULL, 'Smith R', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2010-01-01', 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(2, '000000002', NULL, 300, NULL, '2010-01-04', '2010-01-04', 2, NULL, 2, 'Johnson', NULL, 'D', NULL, 'Johnson D', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2010-01-04', 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(4, '000000004', NULL, 300, NULL, '2010-01-04', '2010-01-04', 2, NULL, 2, 'Williams', NULL, 'G', NULL, 'Williams G', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2010-01-04', 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(5, '000000005', NULL, 300, NULL, '2010-01-04', '2010-01-04', 2, NULL, 2, 'Harris', NULL, 'P', NULL, 'Harris P', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2010-01-04', 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(6, '000000006', NULL, 300, NULL, '2010-01-04', '2010-01-04', 2, NULL, 2, 'Allen', NULL, 'E', NULL, 'Allen E', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2010-01-04', 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(7, '000000007', NULL, 300, NULL, '2010-01-04', '2010-01-04', 2, NULL, 2, 'Scott', NULL, 'C', NULL, 'Scott C', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2010-01-04', 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(8, '000000008', NULL, 300, NULL, '2010-01-04', '2010-01-04', 2, NULL, 2, 'Robinson', NULL, 'R', NULL, 'Robinson R', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2010-01-04', 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 /*!40000 ALTER TABLE `m_client` ENABLE KEYS */;
 
 
@@ -1121,6 +1122,27 @@ CREATE TABLE IF NOT EXISTS `m_client_identifier` (
 /*!40000 ALTER TABLE `m_client_identifier` ENABLE KEYS */;
 
 
+-- Dumping structure for table mifostenant-reference.m_client_non_person
+DROP TABLE IF EXISTS `m_client_non_person`;
+CREATE TABLE IF NOT EXISTS `m_client_non_person` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `client_id` bigint(20) NOT NULL,
+  `constitution_cv_id` int(11) NOT NULL,
+  `incorp_no` varchar(50) DEFAULT NULL,
+  `incorp_validity_till` datetime DEFAULT NULL,
+  `main_business_line_cv_id` int(11) DEFAULT NULL,
+  `remarks` varchar(150) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `client_id` (`client_id`),
+  KEY `FK_client_id` (`client_id`),
+  CONSTRAINT `FK_client_id` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_client_non_person: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_client_non_person` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_client_non_person` ENABLE KEYS */;
+
+
 -- Dumping structure for table mifostenant-reference.m_client_transaction
 DROP TABLE IF EXISTS `m_client_transaction`;
 CREATE TABLE IF NOT EXISTS `m_client_transaction` (
@@ -1157,9 +1179,9 @@ CREATE TABLE IF NOT EXISTS `m_code` (
   `is_system_defined` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code_name` (`code_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.m_code: ~22 rows (approximately)
+-- Dumping data for table mifostenant-reference.m_code: ~24 rows (approximately)
 /*!40000 ALTER TABLE `m_code` DISABLE KEYS */;
 INSERT INTO `m_code` (`id`, `code_name`, `is_system_defined`) VALUES
 	(1, 'Customer Identifier', 1),
@@ -1183,7 +1205,9 @@ INSERT INTO `m_code` (`id`, `code_name`, `is_system_defined`) VALUES
 	(20, 'ClientWithdrawReason', 1),
 	(21, 'Entity to Entity Access Types', 1),
 	(22, 'CenterClosureReason', 1),
-	(23, 'LoanRescheduleReason', 1);
+	(23, 'LoanRescheduleReason', 1),
+	(24, 'Constitution', 1),
+	(25, 'Main Business Line', 1);
 /*!40000 ALTER TABLE `m_code` ENABLE KEYS */;
 
 
@@ -1690,7 +1714,7 @@ CREATE TABLE IF NOT EXISTS `m_fund` (
   UNIQUE KEY `fund_externalid_org` (`external_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.m_fund: ~0 rows (approximately)
+-- Dumping data for table mifostenant-reference.m_fund: ~1 rows (approximately)
 /*!40000 ALTER TABLE `m_fund` DISABLE KEYS */;
 INSERT INTO `m_fund` (`id`, `name`, `external_id`) VALUES
 	(1, 'Loan from Central Bank', NULL);
@@ -2351,7 +2375,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_charge` (
   CONSTRAINT `m_loan_charge_ibfk_2` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.m_loan_charge: ~0 rows (approximately)
+-- Dumping data for table mifostenant-reference.m_loan_charge: ~1 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_charge` DISABLE KEYS */;
 INSERT INTO `m_loan_charge` (`id`, `loan_id`, `charge_id`, `is_penalty`, `charge_time_enum`, `due_for_collection_as_of_date`, `charge_calculation_enum`, `charge_payment_mode_enum`, `calculation_percentage`, `calculation_on_amount`, `charge_amount_or_percentage`, `amount`, `amount_paid_derived`, `amount_waived_derived`, `amount_writtenoff_derived`, `amount_outstanding_derived`, `is_paid_derived`, `waived`, `min_cap`, `max_cap`, `is_active`) VALUES
 	(1, 1, 1, 0, 1, NULL, 1, 0, NULL, NULL, 500.000000, 500.000000, NULL, NULL, NULL, 500.000000, 0, 0, NULL, NULL, 1);
@@ -2929,7 +2953,7 @@ CREATE TABLE IF NOT EXISTS `m_organisation_currency` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.m_organisation_currency: ~0 rows (approximately)
+-- Dumping data for table mifostenant-reference.m_organisation_currency: ~1 rows (approximately)
 /*!40000 ALTER TABLE `m_organisation_currency` DISABLE KEYS */;
 INSERT INTO `m_organisation_currency` (`id`, `code`, `decimal_places`, `currency_multiplesof`, `name`, `display_symbol`, `internationalized_name_code`) VALUES
 	(21, 'USD', 2, NULL, 'US Dollar', '$', 'currency.USD');
@@ -3002,9 +3026,9 @@ CREATE TABLE IF NOT EXISTS `m_permission` (
   `can_maker_checker` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=701 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=705 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.m_permission: ~678 rows (approximately)
+-- Dumping data for table mifostenant-reference.m_permission: ~781 rows (approximately)
 /*!40000 ALTER TABLE `m_permission` DISABLE KEYS */;
 INSERT INTO `m_permission` (`id`, `grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES
 	(1, 'special', 'ALL_FUNCTIONS', NULL, NULL, 0),
@@ -3684,7 +3708,11 @@ INSERT INTO `m_permission` (`id`, `grouping`, `code`, `entity_name`, `action_nam
 	(697, 'portfolio', 'DELETESCHEDULEEXCEPTIONS_LOAN', 'LOAN', 'DELETESCHEDULEEXCEPTIONS', 0),
 	(698, 'portfolio', 'DELETESCHEDULEEXCEPTIONS_LOAN_CHECKER', 'LOAN', 'DELETESCHEDULEEXCEPTIONS_CHECKER', 0),
 	(699, 'transaction_loan', 'DISBURSALLASTUNDO_LOAN', 'LOAN', 'DISBURSALLASTUNDO', 0),
-	(700, 'transaction_loan', 'DISBURSALLASTUNDO_LOAN_CHECKER', 'LOAN', 'DISBURSALLASTUNDO_CHECKER', 0);
+	(700, 'transaction_loan', 'DISBURSALLASTUNDO_LOAN_CHECKER', 'LOAN', 'DISBURSALLASTUNDO_CHECKER', 0),
+	(701, 'SHAREPRODUCT', 'CREATE_SHAREPRODUCT', 'SHAREPRODUCT', 'CREATE', 0),
+	(702, 'SHAREPRODUCT', 'UPDATE_SHAREPRODUCT', 'SHAREPRODUCT', 'CREATE', 0),
+	(703, 'SHAREACCOUNT', 'CREATE_SHAREACCOUNT', 'SHAREACCOUNT', 'CREATE', 0),
+	(704, 'SHAREACCOUNT', 'UPDATE_SHAREACCOUNT', 'SHAREACCOUNT', 'CREATE', 0);
 /*!40000 ALTER TABLE `m_permission` ENABLE KEYS */;
 
 
@@ -3752,7 +3780,7 @@ CREATE TABLE IF NOT EXISTS `m_portfolio_command_source` (
   CONSTRAINT `FK_m_maker_m_appuser` FOREIGN KEY (`maker_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.m_portfolio_command_source: ~72 rows (approximately)
+-- Dumping data for table mifostenant-reference.m_portfolio_command_source: ~71 rows (approximately)
 /*!40000 ALTER TABLE `m_portfolio_command_source` DISABLE KEYS */;
 INSERT INTO `m_portfolio_command_source` (`id`, `action_name`, `entity_name`, `office_id`, `group_id`, `client_id`, `loan_id`, `savings_account_id`, `api_get_url`, `resource_id`, `subresource_id`, `command_as_json`, `maker_id`, `made_on_date`, `checker_id`, `checked_on_date`, `processing_result_enum`, `product_id`, `transaction_id`) VALUES
 	(1, 'CREATE', 'STAFF', 1, NULL, NULL, NULL, NULL, '/staff/template', 1, NULL, '{"isLoanOfficer":true,"officeId":1,"firstname":"Aliya","lastname":"A"}', 1, '2014-03-07 19:10:05', NULL, NULL, 1, NULL, NULL),
@@ -3913,7 +3941,7 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_charge` (
   CONSTRAINT `m_product_loan_charge_ibfk_2` FOREIGN KEY (`product_loan_id`) REFERENCES `m_product_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.m_product_loan_charge: ~0 rows (approximately)
+-- Dumping data for table mifostenant-reference.m_product_loan_charge: ~1 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan_charge` DISABLE KEYS */;
 INSERT INTO `m_product_loan_charge` (`product_loan_id`, `charge_id`) VALUES
 	(1, 1);
@@ -3938,7 +3966,7 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_configurable_attributes` (
   CONSTRAINT `fk_m_product_loan_configurable_attributes_0001` FOREIGN KEY (`loan_product_id`) REFERENCES `m_product_loan` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.m_product_loan_configurable_attributes: ~0 rows (approximately)
+-- Dumping data for table mifostenant-reference.m_product_loan_configurable_attributes: ~1 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan_configurable_attributes` DISABLE KEYS */;
 INSERT INTO `m_product_loan_configurable_attributes` (`id`, `loan_product_id`, `amortization_method_enum`, `interest_method_enum`, `loan_transaction_strategy_id`, `interest_calculated_in_period_enum`, `arrearstolerance_amount`, `repay_every`, `moratorium`, `grace_on_arrears_ageing`) VALUES
 	(1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
@@ -4168,7 +4196,7 @@ CREATE TABLE IF NOT EXISTS `m_role` (
   UNIQUE KEY `unq_name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.m_role: ~0 rows (approximately)
+-- Dumping data for table mifostenant-reference.m_role: ~1 rows (approximately)
 /*!40000 ALTER TABLE `m_role` DISABLE KEYS */;
 INSERT INTO `m_role` (`id`, `name`, `description`, `is_disabled`) VALUES
 	(1, 'Super user', 'This role provides all application permissions.', 0);
@@ -4187,7 +4215,7 @@ CREATE TABLE IF NOT EXISTS `m_role_permission` (
   CONSTRAINT `FK8DEDB04815CEC7AB` FOREIGN KEY (`role_id`) REFERENCES `m_role` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.m_role_permission: ~0 rows (approximately)
+-- Dumping data for table mifostenant-reference.m_role_permission: ~1 rows (approximately)
 /*!40000 ALTER TABLE `m_role_permission` DISABLE KEYS */;
 INSERT INTO `m_role_permission` (`role_id`, `permission_id`) VALUES
 	(1, 1);
@@ -4233,6 +4261,8 @@ CREATE TABLE IF NOT EXISTS `m_savings_account` (
   `withdrawal_fee_for_transfer` tinyint(4) DEFAULT '1',
   `allow_overdraft` tinyint(1) NOT NULL DEFAULT '0',
   `overdraft_limit` decimal(19,6) DEFAULT NULL,
+  `nominal_annual_interest_rate_overdraft` decimal(19,6) DEFAULT '0.000000',
+  `min_overdraft_for_interest_calculation` decimal(19,6) DEFAULT '0.000000',
   `lockedin_until_date_derived` date DEFAULT NULL,
   `total_deposits_derived` decimal(19,6) DEFAULT NULL,
   `total_withdrawals_derived` decimal(19,6) DEFAULT NULL,
@@ -4242,6 +4272,7 @@ CREATE TABLE IF NOT EXISTS `m_savings_account` (
   `total_annual_fees_derived` decimal(19,6) DEFAULT NULL,
   `total_interest_earned_derived` decimal(19,6) DEFAULT NULL,
   `total_interest_posted_derived` decimal(19,6) DEFAULT NULL,
+  `total_overdraft_interest_derived` decimal(19,6) DEFAULT '0.000000',
   `account_balance_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `min_required_balance` decimal(19,6) DEFAULT NULL,
   `enforce_min_required_balance` tinyint(1) NOT NULL DEFAULT '0',
@@ -4464,6 +4495,8 @@ CREATE TABLE IF NOT EXISTS `m_savings_product` (
   `withdrawal_fee_for_transfer` tinyint(4) DEFAULT '1',
   `allow_overdraft` tinyint(1) NOT NULL DEFAULT '0',
   `overdraft_limit` decimal(19,6) DEFAULT NULL,
+  `nominal_annual_interest_rate_overdraft` decimal(19,6) DEFAULT '0.000000',
+  `min_overdraft_for_interest_calculation` decimal(19,6) DEFAULT '0.000000',
   `min_required_balance` decimal(19,6) DEFAULT NULL,
   `enforce_min_required_balance` tinyint(1) NOT NULL DEFAULT '0',
   `min_balance_for_interest_calculation` decimal(19,6) DEFAULT NULL,
@@ -4472,10 +4505,10 @@ CREATE TABLE IF NOT EXISTS `m_savings_product` (
   UNIQUE KEY `sp_unq_short_name` (`short_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.m_savings_product: ~0 rows (approximately)
+-- Dumping data for table mifostenant-reference.m_savings_product: ~1 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_product` DISABLE KEYS */;
-INSERT INTO `m_savings_product` (`id`, `name`, `short_name`, `description`, `deposit_type_enum`, `currency_code`, `currency_digits`, `currency_multiplesof`, `nominal_annual_interest_rate`, `interest_compounding_period_enum`, `interest_posting_period_enum`, `interest_calculation_type_enum`, `interest_calculation_days_in_year_type_enum`, `min_required_opening_balance`, `lockin_period_frequency`, `lockin_period_frequency_enum`, `accounting_type`, `withdrawal_fee_amount`, `withdrawal_fee_type_enum`, `withdrawal_fee_for_transfer`, `allow_overdraft`, `overdraft_limit`, `min_required_balance`, `enforce_min_required_balance`, `min_balance_for_interest_calculation`) VALUES
-	(1, 'Voluntary savings', 'VS', 'Save money', 100, 'USD', 2, 0, 9.500000, 1, 4, 1, 365, 1000.000000, 1.000000, 1, 2, NULL, NULL, 0, 0, NULL, NULL, 0, NULL);
+INSERT INTO `m_savings_product` (`id`, `name`, `short_name`, `description`, `deposit_type_enum`, `currency_code`, `currency_digits`, `currency_multiplesof`, `nominal_annual_interest_rate`, `interest_compounding_period_enum`, `interest_posting_period_enum`, `interest_calculation_type_enum`, `interest_calculation_days_in_year_type_enum`, `min_required_opening_balance`, `lockin_period_frequency`, `lockin_period_frequency_enum`, `accounting_type`, `withdrawal_fee_amount`, `withdrawal_fee_type_enum`, `withdrawal_fee_for_transfer`, `allow_overdraft`, `overdraft_limit`, `nominal_annual_interest_rate_overdraft`, `min_overdraft_for_interest_calculation`, `min_required_balance`, `enforce_min_required_balance`, `min_balance_for_interest_calculation`) VALUES
+	(1, 'Voluntary savings', 'VS', 'Save money', 100, 'USD', 2, 0, 9.500000, 1, 4, 1, 365, 1000.000000, 1.000000, 1, 2, NULL, NULL, 0, 0, NULL, 0.000000, 0.000000, NULL, 0, NULL);
 /*!40000 ALTER TABLE `m_savings_product` ENABLE KEYS */;
 
 
@@ -4674,7 +4707,7 @@ CREATE TABLE IF NOT EXISTS `m_survey_scorecards` (
   `survey_id` bigint(20) NOT NULL,
   `question_id` bigint(20) NOT NULL,
   `response_id` bigint(20) NOT NULL,
-  `staff_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
   `client_id` bigint(20) NOT NULL,
   `created_on` datetime DEFAULT NULL,
   `a_value` int(4) NOT NULL,
@@ -4682,12 +4715,12 @@ CREATE TABLE IF NOT EXISTS `m_survey_scorecards` (
   KEY `survey_id` (`survey_id`),
   KEY `question_id` (`question_id`),
   KEY `response_id` (`response_id`),
-  KEY `staff_id` (`staff_id`),
+  KEY `user_id` (`user_id`),
   KEY `client_id` (`client_id`),
   CONSTRAINT `m_survey_scorecards_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `m_surveys` (`id`),
   CONSTRAINT `m_survey_scorecards_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `m_survey_questions` (`id`),
   CONSTRAINT `m_survey_scorecards_ibfk_3` FOREIGN KEY (`response_id`) REFERENCES `m_survey_responses` (`id`),
-  CONSTRAINT `m_survey_scorecards_ibfk_4` FOREIGN KEY (`staff_id`) REFERENCES `m_staff` (`id`),
+  CONSTRAINT `m_survey_scorecards_ibfk_4` FOREIGN KEY (`user_id`) REFERENCES `m_appusers` (`id`),
   CONSTRAINT `m_survey_scorecards_ibfk_5` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -4780,7 +4813,7 @@ CREATE TABLE IF NOT EXISTS `m_working_days` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.m_working_days: ~0 rows (approximately)
+-- Dumping data for table mifostenant-reference.m_working_days: ~1 rows (approximately)
 /*!40000 ALTER TABLE `m_working_days` DISABLE KEYS */;
 INSERT INTO `m_working_days` (`id`, `recurrence`, `repayment_rescheduling_enum`, `extend_term_daily_repayments`) VALUES
 	(1, 'FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU', 2, 0);
@@ -4821,7 +4854,7 @@ CREATE TABLE IF NOT EXISTS `oauth_client_details` (
   PRIMARY KEY (`client_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.oauth_client_details: ~0 rows (approximately)
+-- Dumping data for table mifostenant-reference.oauth_client_details: ~1 rows (approximately)
 /*!40000 ALTER TABLE `oauth_client_details` DISABLE KEYS */;
 INSERT INTO `oauth_client_details` (`client_id`, `resource_ids`, `client_secret`, `scope`, `authorized_grant_types`, `web_server_redirect_uri`, `authorities`, `access_token_validity`, `refresh_token_validity`, `additional_information`, `autoapprove`) VALUES
 	('community-app', NULL, '123', 'all', 'password,refresh_token', NULL, NULL, NULL, NULL, NULL, NULL);
@@ -5034,7 +5067,7 @@ CREATE TABLE IF NOT EXISTS `scheduler_detail` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.scheduler_detail: ~0 rows (approximately)
+-- Dumping data for table mifostenant-reference.scheduler_detail: ~1 rows (approximately)
 /*!40000 ALTER TABLE `scheduler_detail` DISABLE KEYS */;
 INSERT INTO `scheduler_detail` (`id`, `is_suspended`, `execute_misfired_jobs`, `reset_scheduler_on_bootup`) VALUES
 	(1, 0, 1, 1);
@@ -5061,7 +5094,7 @@ CREATE TABLE IF NOT EXISTS `schema_version` (
   KEY `schema_version_s_idx` (`success`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Dumping data for table mifostenant-reference.schema_version: ~299 rows (approximately)
+-- Dumping data for table mifostenant-reference.schema_version: ~293 rows (approximately)
 /*!40000 ALTER TABLE `schema_version` DISABLE KEYS */;
 INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `description`, `type`, `script`, `checksum`, `installed_by`, `installed_on`, `execution_time`, `success`) VALUES
 	(1, 1, '1', 'mifosplatform-core-ddl-latest', 'SQL', 'V1__mifosplatform-core-ddl-latest.sql', -1957145051, 'root', '2014-03-08 02:28:38', 10710, 1),
@@ -5285,7 +5318,11 @@ INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `desc
 	(297, 297, '284', 'update codevalue', 'SQL', 'V284__update_codevalue.sql', 442711672, 'root', '2016-01-12 17:39:22', 457, 1),
 	(298, 298, '285', 'undo last tranche script', 'SQL', 'V285__undo_last_tranche_script.sql', 1551040289, 'root', '2016-01-12 17:39:22', 29, 1),
 	(299, 299, '286', 'partial period interest calcualtion', 'SQL', 'V286__partial_period_interest_calcualtion.sql', -1701869481, 'root', '2016-01-12 17:39:23', 1590, 1),
+	(300, 300, '287', 'alter spm scorecard', 'SQL', 'V287__alter_spm_scorecard.sql', 1834026952, 'root', '2016-01-20 18:23:20', 194, 1),
+	(301, 301, '288', 'overdraft interest', 'SQL', 'V288__overdraft_interest.sql', 2003058104, 'root', '2016-01-20 18:23:20', 307, 1),
+	(302, 302, '289', 'client non person', 'SQL', 'V289__client_non_person.sql', 1595576360, 'root', '2016-01-20 18:23:20', 277, 1),
 	(29, 29, '29', 'add-support-for-annual-fees-on-savings', 'SQL', 'V29__add-support-for-annual-fees-on-savings.sql', 992227725, 'root', '2014-03-08 02:28:55', 1556, 1),
+	(303, 303, '290', 'shares dividends permissions script', 'SQL', 'V290__shares_dividends_permissions_script.sql', -1504459497, 'root', '2016-01-20 18:23:21', 39, 1),
 	(3, 3, '3', 'mifosx-permissions-and-authorisation-utf8', 'SQL', 'V3__mifosx-permissions-and-authorisation-utf8.sql', 1922951887, 'root', '2014-03-08 02:28:38', 110, 1),
 	(30, 30, '30', 'add-referenceNumber-to-acc gl journal entry', 'SQL', 'V30__add-referenceNumber-to-acc_gl_journal_entry.sql', 2079970797, 'root', '2014-03-08 02:28:55', 327, 1),
 	(31, 31, '31', 'drop-autopostings', 'SQL', 'V31__drop-autopostings.sql', 630501407, 'root', '2014-03-08 02:28:55', 39, 1),
@@ -5452,7 +5489,7 @@ CREATE TABLE IF NOT EXISTS `stretchy_report` (
   UNIQUE KEY `report_name_UNIQUE` (`report_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=165 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.stretchy_report: ~92 rows (approximately)
+-- Dumping data for table mifostenant-reference.stretchy_report: ~125 rows (approximately)
 /*!40000 ALTER TABLE `stretchy_report` DISABLE KEYS */;
 INSERT INTO `stretchy_report` (`id`, `report_name`, `report_type`, `report_subtype`, `report_category`, `report_sql`, `description`, `core_report`, `use_report`) VALUES
 	(1, 'Client Listing', 'Table', NULL, 'Client', 'select \nconcat(repeat("..",   \n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\n c.account_no as "Client Account No.",  \nc.display_name as "Name",  \nr.enum_message_property as "Status",\nc.activation_date as "Activation", c.external_id as "External Id"\nfrom m_office o \njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\njoin m_client c on c.office_id = ounder.id\nleft join r_enum_value r on r.enum_name = \'status_enum\' and r.enum_id = c.status_enum\nwhere o.id = ${officeId}\norder by ounder.hierarchy, c.account_no', 'Individual Client Report\r\n\r\nLists the small number of defined fields on the client table.  Would expect to copy this \n\nreport and add any \'one to one\' additional data for specific tenant needs.\r\n\r\nCan be run for any size MFI but you\'d expect it only to be run within a branch for \n\nlarger ones.  Depending on how many columns are displayed, there is probably is a limit of about 20/50k clients returned for html display (export to excel doesn\'t \n\nhave that client browser/memory impact).', 1, 1),
