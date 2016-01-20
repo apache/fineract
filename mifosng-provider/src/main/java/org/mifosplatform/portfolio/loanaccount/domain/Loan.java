@@ -302,6 +302,7 @@ public class Loan extends AbstractPersistable<Long> {
     // see
     // http://stackoverflow.com/questions/4334970/hibernate-cannot-simultaneously-fetch-multiple-bags
     @LazyCollection(LazyCollectionOption.FALSE)
+    @OrderBy(value = "installmentNumber")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
     private final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = new ArrayList<>();
 
@@ -5627,6 +5628,15 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public int fetchNumberOfInstallmensAfterExceptions() {
+        if(this.repaymentScheduleInstallments.size() > 0){
+            int numberOfInstallments = 0;
+            for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
+                if(!installment.isRecalculatedInterestComponent()){
+                    numberOfInstallments++; 
+                }
+            }
+            return numberOfInstallments;
+        }
         return this.repaymentScheduleDetail().getNumberOfRepayments() + adjustNumberOfRepayments();
     }
 

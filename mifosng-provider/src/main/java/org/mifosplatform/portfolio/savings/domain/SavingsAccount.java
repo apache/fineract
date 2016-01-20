@@ -310,7 +310,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
             final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean enforceMinRequiredBalance,
-            final BigDecimal minRequiredBalance, final BigDecimal nominalAnnualInterestRateOverdraft, 
+            final BigDecimal minRequiredBalance, final BigDecimal nominalAnnualInterestRateOverdraft,
             final BigDecimal minOverdraftForInterestCalculation) {
 
         final SavingsAccountStatusType status = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
@@ -345,7 +345,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
             final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean enforceMinRequiredBalance,
-            final BigDecimal minRequiredBalance, final BigDecimal nominalAnnualInterestRateOverdraft, 
+            final BigDecimal minRequiredBalance, final BigDecimal nominalAnnualInterestRateOverdraft,
             final BigDecimal minOverdraftForInterestCalculation) {
         this.client = client;
         this.group = group;
@@ -457,33 +457,33 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
                 final SavingsAccountTransaction postingTransaction = findInterestPostingTransactionFor(interestPostingTransactionDate);
                 if (postingTransaction == null) {
-                	SavingsAccountTransaction newPostingTransaction;
-                	if(interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(currency))){
-                        newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
-                                interestPostingTransactionDate, interestEarnedToBePostedForPeriod);
-                	}else{
-                        newPostingTransaction = SavingsAccountTransaction.overdraftInterest(this, office(),
-                                interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated());
-                	}
+                    SavingsAccountTransaction newPostingTransaction;
+                    if (interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(currency))) {
+                        newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(), interestPostingTransactionDate,
+                                interestEarnedToBePostedForPeriod);
+                    } else {
+                        newPostingTransaction = SavingsAccountTransaction.overdraftInterest(this, office(), interestPostingTransactionDate,
+                                interestEarnedToBePostedForPeriod.negated());
+                    }
                     this.transactions.add(newPostingTransaction);
                     recalucateDailyBalanceDetails = true;
                 } else {
                     boolean correctionRequired = false;
-                    if(postingTransaction.isInterestPostingAndNotReversed()){
-                    	correctionRequired = postingTransaction.hasNotAmount(interestEarnedToBePostedForPeriod);
-                    }else{
-                    	correctionRequired = postingTransaction.hasNotAmount(interestEarnedToBePostedForPeriod.negated());
+                    if (postingTransaction.isInterestPostingAndNotReversed()) {
+                        correctionRequired = postingTransaction.hasNotAmount(interestEarnedToBePostedForPeriod);
+                    } else {
+                        correctionRequired = postingTransaction.hasNotAmount(interestEarnedToBePostedForPeriod.negated());
                     }
                     if (correctionRequired) {
                         postingTransaction.reverse();
-                    	SavingsAccountTransaction newPostingTransaction;
-                    	if(interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(currency))){
+                        SavingsAccountTransaction newPostingTransaction;
+                        if (interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(currency))) {
                             newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
                                     interestPostingTransactionDate, interestEarnedToBePostedForPeriod);
-                    	}else{
+                        } else {
                             newPostingTransaction = SavingsAccountTransaction.overdraftInterest(this, office(),
                                     interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated());
-                    	}
+                        }
                         this.transactions.add(newPostingTransaction);
                         recalucateDailyBalanceDetails = true;
                     }
@@ -510,7 +510,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         SavingsAccountTransaction postingTransation = null;
 
         for (final SavingsAccountTransaction transaction : this.transactions) {
-            if ((transaction.isInterestPostingAndNotReversed() || transaction.isOverdraftInterestAndNotReversed()) && transaction.occursOn(postingDate)) {
+            if ((transaction.isInterestPostingAndNotReversed() || transaction.isOverdraftInterestAndNotReversed())
+                    && transaction.occursOn(postingDate)) {
                 postingTransation = transaction;
                 break;
             }
@@ -634,10 +635,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     private BigDecimal getEffectiveOverdraftInterestRateAsFraction(MathContext mc) {
-    	return this.nominalAnnualInterestRateOverdraft.divide(BigDecimal.valueOf(100l), mc);
+        return this.nominalAnnualInterestRateOverdraft.divide(BigDecimal.valueOf(100l), mc);
     }
 
-	@SuppressWarnings("unused")
+    @SuppressWarnings("unused")
     protected BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate upToInterestCalculationDate) {
         return this.nominalAnnualInterestRate.divide(BigDecimal.valueOf(100l), mc);
     }
@@ -648,7 +649,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final List<SavingsAccountTransaction> orderedNonInterestPostingTransactions = new ArrayList<>();
 
         for (final SavingsAccountTransaction transaction : listOfTransactionsSorted) {
-            if (!(transaction.isInterestPostingAndNotReversed() || transaction.isOverdraftInterestAndNotReversed()) && transaction.isNotReversed()) {
+            if (!(transaction.isInterestPostingAndNotReversed() || transaction.isOverdraftInterestAndNotReversed())
+                    && transaction.isNotReversed()) {
                 orderedNonInterestPostingTransactions.add(transaction);
             }
         }
@@ -727,9 +729,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         LocalDate endOfBalanceDate = interestPostingUpToDate;
         for (int i = accountTransactionsSorted.size() - 1; i >= 0; i--) {
             final SavingsAccountTransaction transaction = accountTransactionsSorted.get(i);
-            if (transaction.isNotReversed() 
-            		&& !(transaction.isInterestPostingAndNotReversed() 
-            				|| transaction.isOverdraftInterestAndNotReversed())) {
+            if (transaction.isNotReversed()
+                    && !(transaction.isInterestPostingAndNotReversed() || transaction.isOverdraftInterestAndNotReversed())) {
                 transaction.updateCumulativeBalanceAndDates(this.currency, endOfBalanceDate);
                 // this transactions transaction date is end of balance date for
                 // previous transaction.
@@ -888,7 +889,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         boolean transactionBeforeLastInterestPosting = false;
 
         for (final SavingsAccountTransaction transaction : retreiveListOfTransactions()) {
-            if ((transaction.isInterestPostingAndNotReversed() || transaction.isOverdraftInterestAndNotReversed()) && transaction.isAfter(transactionDate)) {
+            if ((transaction.isInterestPostingAndNotReversed() || transaction.isOverdraftInterestAndNotReversed())
+                    && transaction.isAfter(transactionDate)) {
                 transactionBeforeLastInterestPosting = true;
                 break;
             }
@@ -897,7 +899,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return transactionBeforeLastInterestPosting;
     }
 
-    public void validateAccountBalanceDoesNotBecomeNegative(final BigDecimal transactionAmount, final boolean isException,final List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions) {
+    public void validateAccountBalanceDoesNotBecomeNegative(final BigDecimal transactionAmount, final boolean isException,
+            final List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions) {
         final List<SavingsAccountTransaction> transactionsSortedByDate = retreiveListOfTransactions();
         Money runningBalance = Money.zero(this.currency);
         Money minRequiredBalance = minRequiredBalanceDerived(getCurrency());
@@ -911,26 +914,27 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 continue;
             }
 
-
-
             final BigDecimal withdrawalFee = null;
 
-            /* Loop through the onHold funds and see if we need to deduct or add to minimum required balance
-               and the point in time the transaction was made: */
-            if(depositAccountOnHoldTransactions !=null){
-                for(final DepositAccountOnHoldTransaction onHoldTransaction: depositAccountOnHoldTransactions) {
+            /*
+             * Loop through the onHold funds and see if we need to deduct or add
+             * to minimum required balance and the point in time the transaction
+             * was made:
+             */
+            if (depositAccountOnHoldTransactions != null) {
+                for (final DepositAccountOnHoldTransaction onHoldTransaction : depositAccountOnHoldTransactions) {
                     // Compare the balance of the on hold:
-                    if((onHoldTransaction.getTransactionDate().isBefore(transaction.transactionLocalDate()) || onHoldTransaction.getTransactionDate().isEqual(transaction.transactionLocalDate()))
+                    if ((onHoldTransaction.getTransactionDate().isBefore(transaction.transactionLocalDate()) || onHoldTransaction
+                            .getTransactionDate().isEqual(transaction.transactionLocalDate()))
                             && (lastSavingsDate == null || onHoldTransaction.getTransactionDate().isAfter(lastSavingsDate))) {
-                        if(onHoldTransaction.getTransactionType().isHold()) {
+                        if (onHoldTransaction.getTransactionType().isHold()) {
                             minRequiredBalance = minRequiredBalance.plus(onHoldTransaction.getAmountMoney(this.currency));
-                        }else{
+                        } else {
                             minRequiredBalance = minRequiredBalance.minus(onHoldTransaction.getAmountMoney(this.currency));
                         }
                     }
                 }
             }
-
 
             // deal with potential minRequiredBalance and
             // enforceMinRequiredBalance
@@ -943,7 +947,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
     }
 
-    public void validateAccountBalanceDoesNotBecomeNegative(final String transactionAction,final List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions) {
+    public void validateAccountBalanceDoesNotBecomeNegative(final String transactionAction,
+            final List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions) {
 
         final List<SavingsAccountTransaction> transactionsSortedByDate = retreiveListOfTransactions();
         Money runningBalance = Money.zero(this.currency);
@@ -956,16 +961,20 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 runningBalance = runningBalance.minus(transaction.getAmount(this.currency));
             }
 
-             /* Loop through the onHold funds and see if we need to deduct or add to minimum required balance
-               and the point in time the transaction was made: */
-            if(depositAccountOnHoldTransactions !=null){
-                for(final DepositAccountOnHoldTransaction onHoldTransaction: depositAccountOnHoldTransactions) {
+            /*
+             * Loop through the onHold funds and see if we need to deduct or add
+             * to minimum required balance and the point in time the transaction
+             * was made:
+             */
+            if (depositAccountOnHoldTransactions != null) {
+                for (final DepositAccountOnHoldTransaction onHoldTransaction : depositAccountOnHoldTransactions) {
                     // Compare the balance of the on hold:
-                    if((onHoldTransaction.getTransactionDate().isBefore(transaction.transactionLocalDate()) || onHoldTransaction.getTransactionDate().isEqual(transaction.transactionLocalDate()))
+                    if ((onHoldTransaction.getTransactionDate().isBefore(transaction.transactionLocalDate()) || onHoldTransaction
+                            .getTransactionDate().isEqual(transaction.transactionLocalDate()))
                             && (lastSavingsDate == null || onHoldTransaction.getTransactionDate().isAfter(lastSavingsDate))) {
-                        if(onHoldTransaction.getTransactionType().isHold()) {
+                        if (onHoldTransaction.getTransactionType().isHold()) {
                             minRequiredBalance = minRequiredBalance.plus(onHoldTransaction.getAmountMoney(this.currency));
-                        }else{
+                        } else {
                             minRequiredBalance = minRequiredBalance.minus(onHoldTransaction.getAmountMoney(this.currency));
                         }
                     }
@@ -1172,15 +1181,19 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             this.overdraftLimit = newValue;
         }
 
-        if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(nominalAnnualInterestRateOverdraftParamName, this.nominalAnnualInterestRateOverdraft)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(nominalAnnualInterestRateOverdraftParamName);
+        if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(nominalAnnualInterestRateOverdraftParamName,
+                this.nominalAnnualInterestRateOverdraft)) {
+            final BigDecimal newValue = command
+                    .bigDecimalValueOfParameterNamedDefaultToNullIfZero(nominalAnnualInterestRateOverdraftParamName);
             actualChanges.put(nominalAnnualInterestRateOverdraftParamName, newValue);
             actualChanges.put(localeParamName, localeAsInput);
             this.nominalAnnualInterestRateOverdraft = newValue;
         }
 
-        if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(minOverdraftForInterestCalculationParamName, this.minOverdraftForInterestCalculation)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(minOverdraftForInterestCalculationParamName);
+        if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(minOverdraftForInterestCalculationParamName,
+                this.minOverdraftForInterestCalculation)) {
+            final BigDecimal newValue = command
+                    .bigDecimalValueOfParameterNamedDefaultToNullIfZero(minOverdraftForInterestCalculationParamName);
             actualChanges.put(minOverdraftForInterestCalculationParamName, newValue);
             actualChanges.put(localeParamName, localeAsInput);
             this.minOverdraftForInterestCalculation = newValue;
@@ -1208,20 +1221,19 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         validateLockinDetails(baseDataValidator);
         esnureOverdraftLimitsSetForOverdraftAccounts();
     }
-    
+
     /**
      * If overdrafts are allowed and the overdraft limit is not set, set the
      * same to Zero
      **/
     private void esnureOverdraftLimitsSetForOverdraftAccounts() {
 
-        if (this.allowOverdraft) {
-            this.overdraftLimit = this.overdraftLimit == null? BigDecimal.ZERO : this.overdraftLimit;
-            this.nominalAnnualInterestRateOverdraft = this.nominalAnnualInterestRateOverdraft == null? BigDecimal.ZERO : this.nominalAnnualInterestRateOverdraft;
-            this.minOverdraftForInterestCalculation = this.minOverdraftForInterestCalculation == null? BigDecimal.ZERO : this.minOverdraftForInterestCalculation;
-        }
+        this.overdraftLimit = this.overdraftLimit == null ? BigDecimal.ZERO : this.overdraftLimit;
+        this.nominalAnnualInterestRateOverdraft = this.nominalAnnualInterestRateOverdraft == null ? BigDecimal.ZERO
+                : this.nominalAnnualInterestRateOverdraft;
+        this.minOverdraftForInterestCalculation = this.minOverdraftForInterestCalculation == null ? BigDecimal.ZERO
+                : this.minOverdraftForInterestCalculation;
     }
-
 
     private void validateLockinDetails(final DataValidatorBuilder baseDataValidator) {
 

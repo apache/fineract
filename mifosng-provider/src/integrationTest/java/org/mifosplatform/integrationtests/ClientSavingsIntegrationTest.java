@@ -546,18 +546,24 @@ public class ClientSavingsIntegrationTest {
         cal.set(Calendar.YEAR, (Integer) dates.get(0));
         cal.set(Calendar.MONTH, (Integer) dates.get(1) - 1);
         cal.set(Calendar.DAY_OF_MONTH, (Integer) dates.get(2));
+        int n = 0;
+        Calendar current = Calendar.getInstance();
+        while (cal.compareTo(current) < 0) {
+            n++;
+            cal.set(Calendar.YEAR, (Integer) dates.get(0) + n);
+        }
+        cal.set(Calendar.YEAR, (Integer) dates.get(0));
+        cal.set(Calendar.MONTH, (Integer) dates.get(1) - 1);
+        cal.set(Calendar.DAY_OF_MONTH, (Integer) dates.get(2));
 
-        this.savingsAccountHelper.payCharge((Integer) savingsChargeForPay.get("id"), savingsId,
-                ((Float) savingsChargeForPay.get("amount")).toString(), sdf.format(cal.getTime()));
-        HashMap paidCharge = this.savingsAccountHelper.getSavingsCharge(savingsId, (Integer) savingsChargeForPay.get("id"));
-        assertEquals(savingsChargeForPay.get("amount"), paidCharge.get("amountPaid"));
-
-        // temporary fix, this test case needs to be re-factored (will fail
-        // again on Jan 15 2016)
-        cal.set(Calendar.YEAR, (Integer) dates.get(0) + 1);
-        this.savingsAccountHelper.payCharge((Integer) savingsChargeForPay.get("id"), savingsId,
-                ((Float) savingsChargeForPay.get("amount")).toString(), sdf.format(cal.getTime()));
-        paidCharge = this.savingsAccountHelper.getSavingsCharge(savingsId, (Integer) savingsChargeForPay.get("id"));
+        for (int i = 1; i <= n; i++) {
+            this.savingsAccountHelper.payCharge((Integer) savingsChargeForPay.get("id"), savingsId,
+                    ((Float) savingsChargeForPay.get("amount")).toString(), sdf.format(cal.getTime()));
+            HashMap paidCharge = this.savingsAccountHelper.getSavingsCharge(savingsId, (Integer) savingsChargeForPay.get("id"));
+            Float expectedValue = (Float) savingsChargeForPay.get("amount") * i;
+            assertEquals(expectedValue, paidCharge.get("amountPaid"));
+            cal.set(Calendar.YEAR, (Integer) dates.get(0) + i);
+        }
 
         Integer inactivatedChargeId = (Integer) this.savingsAccountHelper.inactivateCharge(annualSavingsChargeId, savingsId,
                 CommonConstants.RESPONSE_RESOURCE_ID);
@@ -618,7 +624,7 @@ public class ClientSavingsIntegrationTest {
 
         this.savingsAccountHelper.payCharge((Integer) savingsChargeForPay.get("id"), savingsId,
                 ((Float) savingsChargeForPay.get("amount")).toString(), sdf.format(cal.getTime()));
-        paidCharge = this.savingsAccountHelper.getSavingsCharge(savingsId, (Integer) savingsChargeForPay.get("id"));
+        HashMap paidCharge = this.savingsAccountHelper.getSavingsCharge(savingsId, (Integer) savingsChargeForPay.get("id"));
         assertEquals(savingsChargeForPay.get("amount"), paidCharge.get("amountPaid"));
         List nextDueDates = (List) paidCharge.get("dueDate");
         LocalDate nextDueDate = new LocalDate((Integer) nextDueDates.get(0), (Integer) nextDueDates.get(1), (Integer) nextDueDates.get(2));
