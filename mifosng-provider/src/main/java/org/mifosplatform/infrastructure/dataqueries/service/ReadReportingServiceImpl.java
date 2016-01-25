@@ -6,34 +6,24 @@
 package org.mifosplatform.infrastructure.dataqueries.service;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.Connection;
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 import javax.sql.DataSource;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
-import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
-import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenantConnection;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
-import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.data.ReportData;
 import org.mifosplatform.infrastructure.dataqueries.data.ReportParameterData;
@@ -44,20 +34,6 @@ import org.mifosplatform.infrastructure.dataqueries.exception.ReportNotFoundExce
 import org.mifosplatform.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.domain.AppUser;
-import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
-import org.pentaho.reporting.engine.classic.core.DefaultReportEnvironment;
-import org.pentaho.reporting.engine.classic.core.MasterReport;
-import org.pentaho.reporting.engine.classic.core.ReportProcessingException;
-import org.pentaho.reporting.engine.classic.core.modules.output.pageable.pdf.PdfReportUtil;
-import org.pentaho.reporting.engine.classic.core.modules.output.table.csv.CSVReportUtil;
-import org.pentaho.reporting.engine.classic.core.modules.output.table.html.HtmlReportUtil;
-import org.pentaho.reporting.engine.classic.core.modules.output.table.xls.ExcelReportUtil;
-import org.pentaho.reporting.engine.classic.core.parameters.ParameterDefinitionEntry;
-import org.pentaho.reporting.engine.classic.core.parameters.ReportParameterDefinition;
-import org.pentaho.reporting.engine.classic.core.util.ReportParameterValues;
-import org.pentaho.reporting.libraries.resourceloader.Resource;
-import org.pentaho.reporting.libraries.resourceloader.ResourceException;
-import org.pentaho.reporting.libraries.resourceloader.ResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,14 +56,10 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     private final DataSource dataSource;
     private final PlatformSecurityContext context;
     private final GenericDataService genericDataService;
-    private boolean noPentaho = false;
 
     @Autowired
     public ReadReportingServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final GenericDataService genericDataService) {
-        // kick off pentaho reports server
-        ClassicEngineBoot.getInstance().start();
-        this.noPentaho = false;
 
         this.context = context;
         this.dataSource = dataSource;
@@ -223,7 +195,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(inputSqlWrapped);
 
-        if (rs.next()) { return rs.getString("the_sql"); }
+        if (rs.next() && rs.getString("the_sql") != null) { return rs.getString("the_sql"); }
         throw new ReportNotFoundException(inputSql);
     }
 
@@ -238,151 +210,6 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         if (rs.next()) { return rs.getString("report_type"); }
         throw new ReportNotFoundException(sql);
-    }
-
-    @Override
-    public Response processPentahoRequest(final String reportName, final String outputTypeParam, final Map<String, String> queryParams,
-            final Locale locale) {
-
-        String outputType = "HTML";
-        if (StringUtils.isNotBlank(outputTypeParam)) {
-            outputType = outputTypeParam;
-        }
-
-        if (!(outputType.equalsIgnoreCase("HTML") || outputType.equalsIgnoreCase("PDF") || outputType.equalsIgnoreCase("XLS")
-                || outputType.equalsIgnoreCase("XLSX") || outputType.equalsIgnoreCase("CSV"))) { throw new PlatformDataIntegrityException(
-                "error.msg.invalid.outputType", "No matching Output Type: " + outputType); }
-
-        if (this.noPentaho) { throw new PlatformDataIntegrityException("error.msg.no.pentaho", "Pentaho is not enabled",
-                "Pentaho is not enabled"); }
-
-        final String reportPath = FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + "pentahoReports" + File.separator
-                + reportName + ".prpt";
-        logger.info("Report path: " + reportPath);
-
-        // load report definition
-        final ResourceManager manager = new ResourceManager();
-        manager.registerDefaults();
-        Resource res;
-
-        try {
-            res = manager.createDirectly(reportPath, MasterReport.class);
-            final MasterReport masterReport = (MasterReport) res.getResource();
-            final DefaultReportEnvironment reportEnvironment = (DefaultReportEnvironment) masterReport.getReportEnvironment();
-            if (locale != null) {
-                reportEnvironment.setLocale(locale);
-            }
-            addParametersToReport(masterReport, queryParams);
-
-            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-            if ("PDF".equalsIgnoreCase(outputType)) {
-                PdfReportUtil.createPDF(masterReport, baos);
-                return Response.ok().entity(baos.toByteArray()).type("application/pdf").build();
-            }
-
-            if ("XLS".equalsIgnoreCase(outputType)) {
-                ExcelReportUtil.createXLS(masterReport, baos);
-                return Response.ok().entity(baos.toByteArray()).type("application/vnd.ms-excel")
-                        .header("Content-Disposition", "attachment;filename=" + reportName.replaceAll(" ", "") + ".xls").build();
-            }
-
-            if ("XLSX".equalsIgnoreCase(outputType)) {
-                ExcelReportUtil.createXLSX(masterReport, baos);
-                return Response.ok().entity(baos.toByteArray()).type("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-                        .header("Content-Disposition", "attachment;filename=" + reportName.replaceAll(" ", "") + ".xlsx").build();
-            }
-
-            if ("CSV".equalsIgnoreCase(outputType)) {
-                CSVReportUtil.createCSV(masterReport, baos, "UTF-8");
-                return Response.ok().entity(baos.toByteArray()).type("text/csv")
-                        .header("Content-Disposition", "attachment;filename=" + reportName.replaceAll(" ", "") + ".csv").build();
-            }
-
-            if ("HTML".equalsIgnoreCase(outputType)) {
-                HtmlReportUtil.createStreamHTML(masterReport, baos);
-                return Response.ok().entity(baos.toByteArray()).type("text/html").build();
-            }
-        } catch (final ResourceException e) {
-            throw new PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage());
-        } catch (final ReportProcessingException e) {
-            throw new PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage());
-        } catch (final IOException e) {
-            throw new PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage());
-        }
-
-        throw new PlatformDataIntegrityException("error.msg.invalid.outputType", "No matching Output Type: " + outputType);
-    }
-
-    private void addParametersToReport(final MasterReport report, final Map<String, String> queryParams) {
-
-        final AppUser currentUser = this.context.authenticatedUser();
-
-        try {
-
-            final ReportParameterValues rptParamValues = report.getParameterValues();
-            final ReportParameterDefinition paramsDefinition = report.getParameterDefinition();
-
-            /*
-             * only allow integer, long, date and string parameter types and
-             * assume all mandatory - could go more detailed like Pawel did in
-             * Mifos later and could match incoming and pentaho parameters
-             * better... currently assuming they come in ok... and if not an
-             * error
-             */
-            for (final ParameterDefinitionEntry paramDefEntry : paramsDefinition.getParameterDefinitions()) {
-                final String paramName = paramDefEntry.getName();
-                if (!((paramName.equals("tenantUrl")) || (paramName.equals("userhierarchy") || (paramName.equals("username")) || (paramName
-                        .equals("password") || (paramName.equals("userid")))))) {
-                    logger.info("paramName:" + paramName);
-                    final String pValue = queryParams.get(paramName);
-                    if (StringUtils.isBlank(pValue)) { throw new PlatformDataIntegrityException("error.msg.reporting.error",
-                            "Pentaho Parameter: " + paramName + " - not Provided"); }
-
-                    final Class<?> clazz = paramDefEntry.getValueType();
-                    logger.info("addParametersToReport(" + paramName + " : " + pValue + " : " + clazz.getCanonicalName() + ")");
-                    if (clazz.getCanonicalName().equalsIgnoreCase("java.lang.Integer")) {
-                        rptParamValues.put(paramName, Integer.parseInt(pValue));
-                    } else if (clazz.getCanonicalName().equalsIgnoreCase("java.lang.Long")) {
-                        rptParamValues.put(paramName, Long.parseLong(pValue));
-                    } else if (clazz.getCanonicalName().equalsIgnoreCase("java.sql.Date")) {
-                        rptParamValues.put(paramName, Date.valueOf(pValue));
-                    } else {
-                        rptParamValues.put(paramName, pValue);
-                    }
-                }
-
-            }
-
-            // tenant database name and current user's office hierarchy
-            // passed as parameters to allow multitenant penaho reporting
-            // and
-            // data scoping
-            final Connection connection = this.dataSource.getConnection();
-            String tenantUrl;
-            try {
-                tenantUrl = connection.getMetaData().getURL();
-            } finally {
-                connection.close();
-            }
-            final String userhierarchy = currentUser.getOffice().getHierarchy();
-            logger.info("db URL:" + tenantUrl + "      userhierarchy:" + userhierarchy);
-            rptParamValues.put("userhierarchy", userhierarchy);
-
-            final Long userid = currentUser.getId();
-            logger.info("db URL:" + tenantUrl + "      userid:" + userid);
-            rptParamValues.put("userid", userid);
-
-            final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
-            final MifosPlatformTenantConnection tenantConnection = tenant.getConnection();
-
-            rptParamValues.put("tenantUrl", tenantUrl);
-            rptParamValues.put("username", tenantConnection.getSchemaUsername());
-            rptParamValues.put("password", tenantConnection.getSchemaPassword());
-        } catch (final Exception e) {
-            logger.error("error.msg.reporting.error:" + e.getMessage());
-            throw new PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage());
-        }
     }
 
     @Override
