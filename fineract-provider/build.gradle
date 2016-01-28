@@ -1,0 +1,346 @@
+description = '''\
+Run as:
+gradle clean tomcatrunwar
+'''
+
+buildscript {
+  repositories {
+  	 jcenter()
+  }
+
+  dependencies {
+     classpath 'org.gradle.api.plugins:gradle-tomcat-plugin:1.0',
+               'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0',
+               'org.zeroturnaround:gradle-jrebel-plugin:1.1.2',
+               'org.springframework.boot:spring-boot-gradle-plugin:1.1.6.RELEASE' // also change springDataJpaVersion below
+  }
+}
+
+apply plugin: 'rebel'
+apply plugin: 'license'
+apply plugin: 'war'
+apply plugin: 'spring-boot'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'tomcat'
+apply plugin: 'project-report'
+apply plugin: 'java'
+
+/* define the valid syntax level for source files */
+sourceCompatibility = JavaVersion.VERSION_1_7
+/* define binary compatibility version */
+targetCompatibility = JavaVersion.VERSION_1_7
+
+project.ext.springBootVersion = '1.1.6.RELEASE'
+project.ext.springVersion = '4.0.7.RELEASE'
+project.ext.springOauthVersion = '2.0.4.RELEASE'
+project.ext.jerseyVersion = '1.17'
+project.ext.springDataJpaVersion = '1.7.0.RELEASE' // also change spring-boot-gradle-plugin version above
+
+project.ext.mysqlUser='root'
+project.ext.mysqlPassword='mysql'
+
+
+group = 'org.apache.fineract'
+
+repositories {
+	jcenter()
+	// mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
+}
+
+configurations {
+	providedRuntime // needed for Spring Boot executable WAR
+    providedCompile
+	compile
+	runtime
+	all*.exclude group: 'commons-logging'
+}
+/* Pick up dependencies based on the environemnt, defaults to production */
+if (project.hasProperty('env') && project.getProperty('env') == 'dev') {
+    apply from:  'dev-dependencies.gradle'
+}  else {
+    apply from: 'dependencies.gradle'
+}
+
+/* Enable Oauth2 authentication based on environment, default to HTTP basic auth */
+if (project.hasProperty('security') && project.getProperty('security') == 'oauth') {
+	copy {
+	    from './properties/oauth/'
+	    into 'src/main/resources/'
+	    include '*.properties'
+	}
+}  else {
+	copy {
+	    from './properties/basicauth/'
+	    into 'src/main/resources/'
+	    include '*.properties'
+	}
+}
+
+task dist(type:Zip){
+	baseName = 'fineractplatform'
+	version = qualifyVersionIfNecessary(releaseVersion)
+    includeEmptyDirs = true
+	from('../') {
+		fileMode = 0755
+		include '*.md'
+	}
+    from('src/main/dist') {
+        fileMode = 0755
+        include '*'
+    }
+	from('../apps') {
+		fileMode = 0755
+        include '**/*'
+		into('apps')
+	}
+    from('../api-docs/') {
+        fileMode = 0755
+        include '*'
+        into('api-docs')
+    }
+    from('../fineract-db/') {
+        fileMode = 0755
+        include '*.sql'
+        into('database')
+    }
+    from('src/main/resources/sql/migrations') {
+        fileMode = 0755
+        include '**/*'
+        into('database/migrations')
+    }
+    
+    from war.outputs.files
+    into(baseName + '-' + version)
+}
+
+war {
+    war.finalizedBy(bootRepackage)
+}
+
+license {
+    header rootProject.file('../LICENSE.md')
+    excludes(["**/*.html", "**/*.mustache", "**/*.sql", "**/package-info.java", "**/keystore.jks"])
+    strictCheck true
+}
+
+tomcatRun {
+    httpPort = 8080
+    httpsPort = 8443
+    stopPort = 8081
+    stopKey=   'stopKey'
+    enableSSL = true
+    configFile = file('src/test/resources/META-INF/context.xml')
+}
+
+tomcatRunWar {
+    httpPort = 8080
+    httpsPort = 8443
+    stopPort = 8081
+    stopKey=   'stopKey'
+    enableSSL = true
+    keystoreFile = file('src/main/resources/keystore.jks')
+    keystorePass = 'openmf'
+    configFile = file('src/test/resources/META-INF/context.xml')
+}
+
+/* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
+sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
+sourceSets.test.output.resourcesDir = sourceSets.test.output.classesDir
+
+/* Exclude maria db and embedded tomcat related files for non dev builds */
+if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
+sourceSets {
+    main {
+        java {
+            exclude '**/Server*'
+            exclude '**/MariaDB4j*'
+            exclude '**/EmbeddedTomcatWithSSLConfiguration.java'
+        }
+    }
+    test {
+    	java {
+    		exclude '**/core/boot/tests/**'
+    	}
+    }
+}
+}
+
+sourceSets {
+ integrationTest {
+    	compileClasspath += main.output + test.output
+        runtimeClasspath += main.output + test.output
+    }
+}
+
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+}
+
+task integrationTest(type:Test){
+    description = "Run integration tests (located in src/integrationTest/java). Starts tomcat in daemon mode before executing the tests."
+    it.dependsOn war
+    doFirst {
+        tomcatRunWar.daemon = true
+        tomcatRunWar.execute()
+    }
+
+
+    testClassesDir = project.sourceSets.integrationTest.output.classesDir
+    classpath = project.sourceSets.integrationTest.runtimeClasspath
+}
+
+
+import groovy.sql.Sql
+
+repositories {
+    mavenCentral()
+}
+configurations {
+    driver
+}
+dependencies {
+    driver 'mysql:mysql-connector-java:5.1.16'
+}
+
+URLClassLoader loader = GroovyObject.class.classLoader
+configurations.driver.each {File file ->
+    loader.addURL(file.toURL())
+}
+
+task createDB<<{
+    description= "Creates the Database. Needs database name to be passed (like: -PdbName=someDBname)"
+    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
+    sql.execute( 'create database '+"`$dbName`" )
+}
+
+task dropDB<<{
+    description= "Drops the specified database. The database name has to be passed (like: -PdbName=someDBname)"
+    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
+    sql.execute( 'DROP DATABASE '+"`$dbName`")
+}
+task setBlankPassword<<{
+    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
+    sql.execute('USE `mifosplatform-tenants`')
+    sql.execute('UPDATE mifosplatform-tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
+}
+
+
+apply plugin: 'flyway'
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "org.flywaydb:flyway-gradle-plugin:3.0" // version upgraded during Spring Boot & MariaDB4j work, as prev. used v0.2 didn't work well after *.sql moved from fineract-db to fineract-provider/src/main/resources (new version also has clearer errors, e.g. in case of missing DB)
+        classpath 'mysql:mysql-connector-java:5.1.22'
+    }
+}
+
+
+flyway {
+    url = "jdbc:mysql://localhost:3306/mifostenant-default"
+    user = mysqlUser
+    password = mysqlPassword
+}
+
+task migrateTenantDB<<{
+    description="Migrates a Tenant DB. Optionally can pass dbName. Defaults to 'mifostenant-default' (Example: -PdbName=someTenantDBname)"
+
+	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/core_db'
+	def tenantDbName = 'mifostenant-default';
+    if (rootProject.hasProperty("dbName")) {
+		tenantDbName = rootProject.getProperty("dbName")
+	}
+	
+    flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
+    flyway.locations= [filePath]
+    /**We use ${ as the prefix for strecthy reporting, do not want them to be interpreted by Flyway**/
+    flyway.placeholderPrefix = "\$\${"
+    flywayMigrate.execute()
+}
+
+task showTenantDBInfo<<{
+    description="Shows the migration info for a Tenant DB. Optionally can pass dbName. Defaults to 'mifostenant-default' (Example: -PdbName=someTenantDBname)"
+    
+	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/core_db'
+    def tenantDbName = 'mifostenant-default';
+    if (rootProject.hasProperty("dbName")) {
+		tenantDbName = rootProject.getProperty("dbName")
+	}
+	
+    flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
+    flyway.locations= [filePath]
+    flywayInfo.execute()
+}
+
+
+task migrateTenantListDB<<{
+    description="Migrates a Tenant List DB. Optionally can pass dbName. Defaults to 'mifosplatform-tenants' (Example: -PdbName=someDBname)"
+
+	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
+ 	def tenantsDbName = 'mifosplatform-tenants';
+    if (rootProject.hasProperty("dbName")) {
+		tenantsDbName = rootProject.getProperty("dbName")
+	}
+	
+    flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
+    flyway.locations= [filePath]
+
+    flywayMigrate.execute()
+}
+
+task showTenantListDBInfo<<{
+    description="Shows the migration info for a List DB. Optionally can pass dbName. Defaults to 'mifosplatform-tenants' (Example: -PdbName=someDBname)"
+    
+	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
+    def tenantsDbName = 'mifosplatform-tenants';
+    if (rootProject.hasProperty("dbName")) {
+		tenantsDbName = rootProject.getProperty("dbName")
+	}
+    
+    flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
+    flyway.locations= [filePath]
+    flywayInfo.execute()
+}
+
+task repairTenantDB<<{
+    description="repair migrate"
+    
+	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
+    def tenantsDbName = 'mifosplatform-tenants';
+    if (rootProject.hasProperty("dbName")) {
+        tenantsDbName = rootProject.getProperty("dbName")
+    }
+    
+    flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
+    flyway.locations= [filePath]
+    flywayRepair.execute()
+}
+
+/*
+* Support publication of artifacts versioned by topic branch.
+* CI builds supply `-P BRANCH_NAME=<TOPIC>` to gradle at build time.
+* If <TOPIC> starts with 'MIFOSX-', change version
+* from BUILD-SNAPSHOT => <TOPIC>-SNAPSHOT
+* e.g. 1.1.0.BUILD-SNAPSHOT => 1.0.0.MIFOSX-1234-SNAPSHOT
+*/
+def qualifyVersionIfNecessary(version) {
+
+	if (rootProject.hasProperty("BRANCH_NAME")) {
+		def qualifier = rootProject.getProperty("BRANCH_NAME")
+		if (qualifier.startsWith("MIFOSX-")) {
+			return version.replace('BUILD', qualifier)
+		}
+	}
+	return version
+}
+
+springBoot {
+    mainClass = 'org.apache.fineract.ServerWithMariaDB4jApplication'
+}
+bootRepackage {
+    mainClass = 'org.apache.fineract.ServerWithMariaDB4jApplication'
+}

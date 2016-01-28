@@ -1,0 +1,11 @@
+bin
+out/
+build
+repos
+.classpath
+.project
+.settings
+.gradle
+*.log
+!gradle/wrapper/gradle-wrapper.jar
+/gradle

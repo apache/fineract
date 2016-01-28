@@ -1,0 +1,1 @@
+update c_external_service_properties set value = 'support81' where name = 'password' and external_service_id = (select id from c_external_service where name = 'SMTP_Email_Account');

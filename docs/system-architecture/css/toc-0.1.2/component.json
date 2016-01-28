@@ -1,0 +1,14 @@
+{
+  "name": "toc",
+  "description": "jQuery Table of Contents Plugin",
+  "version": "0.1.2",
+  "homepage": "http://projects.jga.me/toc/",
+  "license": "MIT",
+  "copyright": "Greg Allen",
+  "main": "dist/toc.js",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "assert": "*"
+  }
+}
