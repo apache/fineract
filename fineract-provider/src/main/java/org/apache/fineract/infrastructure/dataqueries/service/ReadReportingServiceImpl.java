@@ -45,6 +45,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeader
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 import org.apache.fineract.infrastructure.dataqueries.exception.ReportNotFoundException;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
+import org.apache.fineract.infrastructure.report.provider.ReportingProcessServiceProvider;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
@@ -69,15 +70,17 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     private final DataSource dataSource;
     private final PlatformSecurityContext context;
     private final GenericDataService genericDataService;
+    private final ReportingProcessServiceProvider reportingProcessServiceProvider;
 
     @Autowired
     public ReadReportingServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final GenericDataService genericDataService) {
+            final GenericDataService genericDataService, final ReportingProcessServiceProvider reportingProcessServiceProvider) {
 
         this.context = context;
         this.dataSource = dataSource;
         this.jdbcTemplate = new JdbcTemplate(this.dataSource);
         this.genericDataService = genericDataService;
+        this.reportingProcessServiceProvider = reportingProcessServiceProvider;
     }
 
     @Override
@@ -387,6 +390,15 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final String sql = rm.schema();
         final Collection<ReportParameterData> parameters = this.jdbcTemplate.query(sql, rm, new Object[] {});
         return parameters;
+    }
+
+    @Override
+    public Collection<String> getAllowedReportTypes() {
+        final List<String> reportTypes = new ArrayList<>();
+        reportTypes.add("Table");
+        reportTypes.add("Chart");
+        reportTypes.addAll(this.reportingProcessServiceProvider.findAllReportingTypes());
+        return reportTypes;
     }
 
     private static final class ReportParameterJoinMapper implements RowMapper<ReportParameterJoinData> {
