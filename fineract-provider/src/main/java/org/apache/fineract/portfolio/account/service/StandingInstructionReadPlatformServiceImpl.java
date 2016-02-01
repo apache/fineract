@@ -1,16 +1,29 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.portfolio.account.service;
+package org.apache.fineract.portfolio.account.service;
 
-import static org.mifosplatform.portfolio.account.service.AccountTransferEnumerations.accountType;
-import static org.mifosplatform.portfolio.account.service.AccountTransferEnumerations.recurrenceType;
-import static org.mifosplatform.portfolio.account.service.AccountTransferEnumerations.standingInstructionPriority;
-import static org.mifosplatform.portfolio.account.service.AccountTransferEnumerations.standingInstructionStatus;
-import static org.mifosplatform.portfolio.account.service.AccountTransferEnumerations.standingInstructionType;
-import static org.mifosplatform.portfolio.account.service.AccountTransferEnumerations.transferType;
+import static org.apache.fineract.portfolio.account.service.AccountTransferEnumerations.accountType;
+import static org.apache.fineract.portfolio.account.service.AccountTransferEnumerations.recurrenceType;
+import static org.apache.fineract.portfolio.account.service.AccountTransferEnumerations.standingInstructionPriority;
+import static org.apache.fineract.portfolio.account.service.AccountTransferEnumerations.standingInstructionStatus;
+import static org.apache.fineract.portfolio.account.service.AccountTransferEnumerations.standingInstructionType;
+import static org.apache.fineract.portfolio.account.service.AccountTransferEnumerations.transferType;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -20,33 +33,33 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.Page;
+import org.apache.fineract.infrastructure.core.service.PaginationHelper;
+import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.organisation.office.data.OfficeData;
+import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
+import org.apache.fineract.portfolio.account.PortfolioAccountType;
+import org.apache.fineract.portfolio.account.data.PortfolioAccountDTO;
+import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
+import org.apache.fineract.portfolio.account.data.StandingInstructionDTO;
+import org.apache.fineract.portfolio.account.data.StandingInstructionData;
+import org.apache.fineract.portfolio.account.data.StandingInstructionDuesData;
+import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceType;
+import org.apache.fineract.portfolio.account.domain.AccountTransferType;
+import org.apache.fineract.portfolio.account.domain.StandingInstructionPriority;
+import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
+import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
+import org.apache.fineract.portfolio.account.exception.AccountTransferNotFoundException;
+import org.apache.fineract.portfolio.client.data.ClientData;
+import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
+import org.apache.fineract.portfolio.common.service.CommonEnumerations;
+import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
-import org.mifosplatform.infrastructure.core.data.EnumOptionData;
-import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
-import org.mifosplatform.infrastructure.core.service.DateUtils;
-import org.mifosplatform.infrastructure.core.service.Page;
-import org.mifosplatform.infrastructure.core.service.PaginationHelper;
-import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
-import org.mifosplatform.organisation.office.data.OfficeData;
-import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
-import org.mifosplatform.portfolio.account.PortfolioAccountType;
-import org.mifosplatform.portfolio.account.data.PortfolioAccountDTO;
-import org.mifosplatform.portfolio.account.data.PortfolioAccountData;
-import org.mifosplatform.portfolio.account.data.StandingInstructionDTO;
-import org.mifosplatform.portfolio.account.data.StandingInstructionData;
-import org.mifosplatform.portfolio.account.data.StandingInstructionDuesData;
-import org.mifosplatform.portfolio.account.domain.AccountTransferRecurrenceType;
-import org.mifosplatform.portfolio.account.domain.AccountTransferType;
-import org.mifosplatform.portfolio.account.domain.StandingInstructionPriority;
-import org.mifosplatform.portfolio.account.domain.StandingInstructionStatus;
-import org.mifosplatform.portfolio.account.domain.StandingInstructionType;
-import org.mifosplatform.portfolio.account.exception.AccountTransferNotFoundException;
-import org.mifosplatform.portfolio.client.data.ClientData;
-import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
-import org.mifosplatform.portfolio.common.service.CommonEnumerations;
-import org.mifosplatform.portfolio.common.service.DropdownReadPlatformService;
-import org.mifosplatform.infrastructure.core.service.SearchParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;

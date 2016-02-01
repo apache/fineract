@@ -1,24 +1,37 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.integrationtests;
+package org.apache.fineract.integrationtests;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.fineract.batch.domain.BatchRequest;
+import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.integrationtests.common.BatchHelper;
+import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
+import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mifosplatform.batch.domain.BatchRequest;
-import org.mifosplatform.batch.domain.BatchResponse;
-import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.integrationtests.common.BatchHelper;
-import org.mifosplatform.integrationtests.common.Utils;
-import org.mifosplatform.integrationtests.common.loans.LoanProductTestBuilder;
-import org.mifosplatform.integrationtests.common.loans.LoanTransactionHelper;
-import org.mifosplatform.integrationtests.common.savings.SavingsProductHelper;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -30,14 +43,14 @@ import com.jayway.restassured.specification.ResponseSpecification;
 
 /**
  * Test class for
- * {@link org.mifosplatform.batch.command.CommandStrategyProvider}. This tests
+ * {@link org.apache.fineract.batch.command.CommandStrategyProvider}. This tests
  * the response provided by commandStrategy by injecting it with a
  * {@code BatchRequest}.
  * 
  * @author RishabhShukla
  * 
- * @see org.mifosplatform.integrationtests.common.BatchHelper
- * @see org.mifosplatform.batch.domain.BatchRequest
+ * @see org.apache.fineract.integrationtests.common.BatchHelper
+ * @see org.apache.fineract.batch.domain.BatchRequest
  */
 public class BatchApiTest {
 
@@ -66,7 +79,7 @@ public class BatchApiTest {
      * code. For a unknownRequest a statusCode 501 is returned back with
      * response.
      * 
-     * @see org.mifosplatform.batch.command.internal.UnknownCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.UnknownCommandStrategy
      */
     @Test
     public void shouldReturnStatusNotImplementedUnknownCommand() {
@@ -89,7 +102,7 @@ public class BatchApiTest {
      * createClientCommand. A successful response with statusCode '200' is
      * returned back.
      * 
-     * @see org.mifosplatform.batch.command.internal.CreateClientCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.CreateClientCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForCreateClientCommand() {
@@ -110,9 +123,9 @@ public class BatchApiTest {
      * one of the request in BatchRequest fails then all transactions are rolled
      * back.
      * 
-     * @see org.mifosplatform.batch.command.internal.CreateClientCommandStrategy
-     * @see org.mifosplatform.batch.api.BatchApiResource
-     * @see org.mifosplatform.batch.service.BatchApiService
+     * @see org.apache.fineract.batch.command.internal.CreateClientCommandStrategy
+     * @see org.apache.fineract.batch.api.BatchApiResource
+     * @see org.apache.fineract.batch.service.BatchApiService
      */
     @Test
     public void shouldRollBackAllTransactionsOnFailure() {
@@ -152,7 +165,7 @@ public class BatchApiTest {
      * updateClientCommand. A 'changes' parameter is returned in the response
      * after successful update of client information.
      * 
-     * @see org.mifosplatform.batch.command.internal.UpdateClientCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.UpdateClientCommandStrategy
      */
     @Test
     public void shouldReflectChangesOnClientUpdate() {
@@ -187,7 +200,7 @@ public class BatchApiTest {
      * This also verifies the successful resolution of dependencies among two
      * requests.
      * 
-     * @see org.mifosplatform.batch.command.internal.ApplyLoanCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForApplyLoanCommand() {
@@ -236,7 +249,7 @@ public class BatchApiTest {
      * 200(OK) status was returned. It first creates a new client and a savings
      * product, then uses the cliendId and ProductId to apply a savings account.
      * 
-     * @see org.mifosplatform.batch.command.internal.ApplySavingsCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.ApplySavingsCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForApplySavingsCommand() {
@@ -279,8 +292,8 @@ public class BatchApiTest {
      * It first creates a new client and apply a loan, then creates a new charge
      * for the create loan and then fetches all the applied charges
      * 
-     * @see org.mifosplatform.batch.command.internal.CollectChargesCommandStrategy
-     * @see org.mifosplatform.batch.command.internal.CreateChargeCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.CollectChargesCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.CreateChargeCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForCollectChargesCommand() {
@@ -330,7 +343,7 @@ public class BatchApiTest {
      * 'ActivateClientCommandStrategy'. A '200' status code is expected on
      * successful activation.
      * 
-     * @see org.mifosplatform.batch.command.internal.ActivateClientCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.ActivateClientCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulClientActivation() {
@@ -360,8 +373,8 @@ public class BatchApiTest {
      * 'ApproveLoanCommandStrategy' and 'DisburseLoanCommandStrategy'. A '200'
      * status code is expected on successful activation.
      * 
-     * @see org.mifosplatform.batch.command.internal.ApproveLoanCommandStrategy
-     * @see org.mifosplatform.batch.command.internal.DisburseLoanCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulLoanApprovalAndDisburse() {

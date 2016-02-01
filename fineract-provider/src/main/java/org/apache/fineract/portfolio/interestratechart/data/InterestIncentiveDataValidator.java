@@ -1,20 +1,33 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.portfolio.interestratechart.data;
+package org.apache.fineract.portfolio.interestratechart.data;
 
-import static org.mifosplatform.portfolio.interestratechart.InterestIncentiveApiConstants.INCENTIVE_RESOURCE_NAME;
-import static org.mifosplatform.portfolio.interestratechart.InterestIncentiveApiConstants.INTERESTRATE_INCENTIVE_CREATE_REQUEST_DATA_PARAMETERS;
-import static org.mifosplatform.portfolio.interestratechart.InterestIncentiveApiConstants.INTERESTRATE_INCENTIVE_UPDATE_REQUEST_DATA_PARAMETERS;
-import static org.mifosplatform.portfolio.interestratechart.InterestIncentiveApiConstants.amountParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestIncentiveApiConstants.attributeNameParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestIncentiveApiConstants.attributeValueParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestIncentiveApiConstants.conditionTypeParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestIncentiveApiConstants.entityTypeParamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestIncentiveApiConstants.incentiveTypeparamName;
-import static org.mifosplatform.portfolio.interestratechart.InterestRateChartApiConstants.descriptionParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants.INCENTIVE_RESOURCE_NAME;
+import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants.INTERESTRATE_INCENTIVE_CREATE_REQUEST_DATA_PARAMETERS;
+import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants.INTERESTRATE_INCENTIVE_UPDATE_REQUEST_DATA_PARAMETERS;
+import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants.amountParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants.attributeNameParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants.attributeValueParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants.conditionTypeParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants.entityTypeParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants.incentiveTypeparamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.descriptionParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -24,15 +37,15 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.infrastructure.core.data.ApiParameterError;
-import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
-import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
-import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.portfolio.common.domain.ConditionType;
-import org.mifosplatform.portfolio.interestratechart.incentive.InterestIncentiveAttributeName;
-import org.mifosplatform.portfolio.interestratechart.incentive.InterestIncentiveEntityType;
-import org.mifosplatform.portfolio.interestratechart.incentive.InterestIncentiveType;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.portfolio.common.domain.ConditionType;
+import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncentiveAttributeName;
+import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncentiveEntityType;
+import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncentiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

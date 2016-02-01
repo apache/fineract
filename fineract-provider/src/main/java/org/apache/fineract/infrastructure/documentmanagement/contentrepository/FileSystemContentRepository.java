@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.infrastructure.documentmanagement.contentrepository;
+package org.apache.fineract.infrastructure.documentmanagement.contentrepository;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,14 +24,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
-import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
-import org.mifosplatform.infrastructure.documentmanagement.command.DocumentCommand;
-import org.mifosplatform.infrastructure.documentmanagement.data.DocumentData;
-import org.mifosplatform.infrastructure.documentmanagement.data.FileData;
-import org.mifosplatform.infrastructure.documentmanagement.data.ImageData;
-import org.mifosplatform.infrastructure.documentmanagement.domain.StorageType;
-import org.mifosplatform.infrastructure.documentmanagement.exception.ContentManagementException;
+import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
+import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
+import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
+import org.apache.fineract.infrastructure.documentmanagement.data.ImageData;
+import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
+import org.apache.fineract.infrastructure.documentmanagement.exception.ContentManagementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +41,7 @@ public class FileSystemContentRepository implements ContentRepository {
 
     private final static Logger logger = LoggerFactory.getLogger(FileSystemContentRepository.class);
 
-    public static final String MIFOSX_BASE_DIR = System.getProperty("user.home") + File.separator + ".mifosx";
+    public static final String FINERACT_BASE_DIR = System.getProperty("user.home") + File.separator + ".fineract";
 
     @Override
     public String saveFile(final InputStream uploadedInputStream, final DocumentCommand documentCommand) {
@@ -123,7 +136,7 @@ public class FileSystemContentRepository implements ContentRepository {
      * @return
      */
     private String generateFileParentDirectory(final String entityType, final Long entityId) {
-        return FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator
+        return FileSystemContentRepository.FINERACT_BASE_DIR + File.separator
                 + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim() + File.separator + "documents" + File.separator
                 + entityType + File.separator + entityId + File.separator + ContentRepositoryUtils.generateRandomString();
     }
@@ -132,7 +145,7 @@ public class FileSystemContentRepository implements ContentRepository {
      * Generate directory path for storing new Image
      */
     private String generateClientImageParentDirectory(final Long resourceId) {
-        return FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator
+        return FileSystemContentRepository.FINERACT_BASE_DIR + File.separator
                 + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim() + File.separator + "images" + File.separator
                 + "clients" + File.separator + resourceId;
     }

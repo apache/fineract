@@ -1,17 +1,12 @@
-/**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
- */
-package org.mifosplatform.infrastructure.core.boot.tests;
+package org.apache.fineract.infrastructure.core.boot.tests;
 
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.fineract.infrastructure.core.boot.EmbeddedTomcatWithSSLConfiguration;
 import org.junit.Test;
-import org.mifosplatform.infrastructure.core.boot.EmbeddedTomcatWithSSLConfiguration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 

@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.integrationtests.common.recurringdeposit;
+package org.apache.fineract.integrationtests.common.recurringdeposit;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -13,8 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import org.mifosplatform.integrationtests.common.CommonConstants;
-import org.mifosplatform.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.common.Utils;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -31,7 +44,7 @@ public class RecurringDepositAccountHelper {
         this.responseSpec = responseSpec;
     }
 
-    private static final String RECURRING_DEPOSIT_ACCOUNT_URL = "/mifosng-provider/api/v1/recurringdepositaccounts";
+    private static final String RECURRING_DEPOSIT_ACCOUNT_URL = "/fineract-provider/api/v1/recurringdepositaccounts";
     private static final String APPLY_RECURRING_DEPOSIT_ACCOUNT_URL = RECURRING_DEPOSIT_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER;
     private static final String APPROVE_RECURRING_DEPOSIT_COMMAND = "approve";
     private static final String UNDO_APPROVAL_RECURRING_DEPOSIT_COMMAND = "undoapproval";

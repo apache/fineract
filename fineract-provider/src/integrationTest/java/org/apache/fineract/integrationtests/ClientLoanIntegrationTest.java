@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.integrationtests;
+package org.apache.fineract.integrationtests;
 
 import static org.junit.Assert.assertEquals;
 
@@ -18,27 +31,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
+import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
+import org.apache.fineract.integrationtests.common.accounting.JournalEntry;
+import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
+import org.apache.fineract.integrationtests.common.accounting.PeriodicAccrualAccountingHelper;
+import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
+import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
+import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
+import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
+import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.integrationtests.common.savings.AccountTransferHelper;
+import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
+import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
+import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mifosplatform.integrationtests.common.ClientHelper;
-import org.mifosplatform.integrationtests.common.SchedulerJobHelper;
-import org.mifosplatform.integrationtests.common.Utils;
-import org.mifosplatform.integrationtests.common.accounting.Account;
-import org.mifosplatform.integrationtests.common.accounting.AccountHelper;
-import org.mifosplatform.integrationtests.common.accounting.JournalEntry;
-import org.mifosplatform.integrationtests.common.accounting.JournalEntryHelper;
-import org.mifosplatform.integrationtests.common.accounting.PeriodicAccrualAccountingHelper;
-import org.mifosplatform.integrationtests.common.charges.ChargesHelper;
-import org.mifosplatform.integrationtests.common.loans.LoanApplicationTestBuilder;
-import org.mifosplatform.integrationtests.common.loans.LoanProductTestBuilder;
-import org.mifosplatform.integrationtests.common.loans.LoanStatusChecker;
-import org.mifosplatform.integrationtests.common.loans.LoanTransactionHelper;
-import org.mifosplatform.integrationtests.common.savings.AccountTransferHelper;
-import org.mifosplatform.integrationtests.common.savings.SavingsAccountHelper;
-import org.mifosplatform.integrationtests.common.savings.SavingsProductHelper;
-import org.mifosplatform.integrationtests.common.savings.SavingsStatusChecker;
 
 import com.google.gson.JsonObject;
 import com.jayway.restassured.builder.RequestSpecBuilder;
@@ -2999,7 +3012,7 @@ public class ClientLoanIntegrationTest {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-        final Integer loanProductID = createLoanProduct("100", "0", LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY);
+        final Integer loanProductID = createLoanProduct("100", "0", LoanProductTestBuilder.DEFAULT_STRATEGY);
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, null);
         final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
                 loanID);
@@ -3013,7 +3026,7 @@ public class ClientLoanIntegrationTest {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-        final Integer loanProductID = createLoanProduct("100", "0", LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY);
+        final Integer loanProductID = createLoanProduct("100", "0", LoanProductTestBuilder.DEFAULT_STRATEGY);
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, "5");
         final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
                 loanID);
@@ -3181,14 +3194,14 @@ public class ClientLoanIntegrationTest {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-        final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY,
+        final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.DEFAULT_STRATEGY,
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_EMI_AMOUN,
                 LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_SAME_AS_REPAYMENT_PERIOD, "0", null,
                 LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, null);
 
         final Integer loanID = applyForLoanApplicationForInterestRecalculation(clientID, loanProductID, LOAN_DISBURSEMENT_DATE, null,
-                LoanApplicationTestBuilder.MIFOS_STANDARD_STRATEGY, new ArrayList<HashMap>(0));
+                LoanApplicationTestBuilder.DEFAULT_STRATEGY, new ArrayList<HashMap>(0));
 
         Assert.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
@@ -3289,13 +3302,13 @@ public class ClientLoanIntegrationTest {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-        final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY,
+        final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.DEFAULT_STRATEGY,
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_EMI_AMOUN,
                 LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_SAME_AS_REPAYMENT_PERIOD, "0", null, preCloseInterestStrategy, null);
 
         final Integer loanID = applyForLoanApplicationForInterestRecalculation(clientID, loanProductID, LOAN_DISBURSEMENT_DATE, null,
-                LoanApplicationTestBuilder.MIFOS_STANDARD_STRATEGY, new ArrayList<HashMap>(0));
+                LoanApplicationTestBuilder.DEFAULT_STRATEGY, new ArrayList<HashMap>(0));
 
         Assert.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
@@ -3367,7 +3380,7 @@ public class ClientLoanIntegrationTest {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-        final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY,
+        final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.DEFAULT_STRATEGY,
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_EMI_AMOUN,
                 LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_SAME_AS_REPAYMENT_PERIOD, "0", null,
@@ -3378,7 +3391,7 @@ public class ClientLoanIntegrationTest {
                 ChargesHelper.getLoanInstallmentJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_INTEREST, "10", false));
         addCharges(charges, installmentCharge, "10", null);
         final Integer loanID = applyForLoanApplicationForInterestRecalculation(clientID, loanProductID, LOAN_DISBURSEMENT_DATE, null,
-                LoanApplicationTestBuilder.MIFOS_STANDARD_STRATEGY, charges);
+                LoanApplicationTestBuilder.DEFAULT_STRATEGY, charges);
 
         Assert.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
@@ -3592,14 +3605,14 @@ public class ClientLoanIntegrationTest {
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
         final Integer loanProductID = createLoanProductWithInterestRecalculationAndCompoundingDetails(
-                LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY, LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_INTEREST_AND_FEE,
+                LoanProductTestBuilder.DEFAULT_STRATEGY, LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_INTEREST_AND_FEE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_RESCHEDULE_NEXT_REPAYMENTS,
                 LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_WEEKLY, "1", REST_START_DATE,
                 LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_WEEKLY, "1", LOAN_DISBURSEMENT_DATE,
                 LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, null);
 
         final Integer loanID = applyForLoanApplicationForInterestRecalculation(clientID, loanProductID, LOAN_DISBURSEMENT_DATE,
-                REST_START_DATE, LOAN_DISBURSEMENT_DATE, LoanApplicationTestBuilder.MIFOS_STANDARD_STRATEGY, charges);
+                REST_START_DATE, LOAN_DISBURSEMENT_DATE, LoanApplicationTestBuilder.DEFAULT_STRATEGY, charges);
 
         Assert.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
@@ -3722,13 +3735,13 @@ public class ClientLoanIntegrationTest {
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
         final Integer loanProductID = createLoanProductWithInterestRecalculationAndCompoundingDetails(
-                LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY, LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_INTEREST_AND_FEE,
+                LoanProductTestBuilder.DEFAULT_STRATEGY, LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_INTEREST_AND_FEE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_RESCHEDULE_NEXT_REPAYMENTS,
                 LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_WEEKLY, "1", REST_START_DATE,
                 LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_SAME_AS_REPAYMENT_PERIOD, null, null, preCloseInterestStrategy, null);
 
         final Integer loanID = applyForLoanApplicationForInterestRecalculation(clientID, loanProductID, LOAN_DISBURSEMENT_DATE,
-                REST_START_DATE, LoanApplicationTestBuilder.MIFOS_STANDARD_STRATEGY, charges);
+                REST_START_DATE, LoanApplicationTestBuilder.DEFAULT_STRATEGY, charges);
 
         Assert.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
@@ -3812,7 +3825,7 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
         final String recalculationCompoundingFrequencyInterval = null;
         final String recalculationCompoundingFrequencyDate = null;
-        final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY,
+        final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.DEFAULT_STRATEGY,
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_INTEREST_AND_FEE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_RESCHEDULE_NEXT_REPAYMENTS,
                 LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "1", REST_START_DATE,
@@ -3821,7 +3834,7 @@ public class ClientLoanIntegrationTest {
                 overdueFeeChargeId.toString(), false);
 
         final Integer loanID = applyForLoanApplicationForInterestRecalculation(clientID, loanProductID, LOAN_DISBURSEMENT_DATE,
-                REST_START_DATE, LoanApplicationTestBuilder.MIFOS_STANDARD_STRATEGY, null);
+                REST_START_DATE, LoanApplicationTestBuilder.DEFAULT_STRATEGY, null);
 
         Assert.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
@@ -3923,14 +3936,14 @@ public class ClientLoanIntegrationTest {
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
         Account[] accounts = { assetAccount, incomeAccount, expenseAccount, overpaymentAccount };
-        final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY,
+        final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.DEFAULT_STRATEGY,
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_EMI_AMOUN,
                 LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_SAME_AS_REPAYMENT_PERIOD, "0", null,
                 LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, accounts);
 
         final Integer loanID = applyForLoanApplicationForInterestRecalculation(clientID, loanProductID, LOAN_DISBURSEMENT_DATE, null,
-                LoanApplicationTestBuilder.MIFOS_STANDARD_STRATEGY, new ArrayList<HashMap>(0));
+                LoanApplicationTestBuilder.DEFAULT_STRATEGY, new ArrayList<HashMap>(0));
 
         Assert.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
@@ -4190,13 +4203,13 @@ public class ClientLoanIntegrationTest {
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-        final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY,
+        final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.DEFAULT_STRATEGY,
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_EMI_AMOUN,
                 LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_SAME_AS_REPAYMENT_PERIOD, "0", null, preCloseStrategy, null);
 
         final Integer loanID = applyForLoanApplicationForInterestRecalculationWithMoratorium(clientID, loanProductID,
-                LOAN_DISBURSEMENT_DATE, null, LoanApplicationTestBuilder.MIFOS_STANDARD_STRATEGY, new ArrayList<HashMap>(0), "1", null);
+                LOAN_DISBURSEMENT_DATE, null, LoanApplicationTestBuilder.DEFAULT_STRATEGY, new ArrayList<HashMap>(0), "1", null);
 
         Assert.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
@@ -4400,7 +4413,7 @@ public class ClientLoanIntegrationTest {
     }
 
     /***
-     * Test case to verify Mifos Style payment strategy
+     * Test case to verify default Style payment strategy
      */
     @Test
     public void testLoanRefundByCashCashBasedAccounting() {
@@ -4417,7 +4430,7 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
 
         /***
-         * Create loan product with MIFOS STYLE strategy
+         * Create loan product with Default STYLE strategy
          */
 
         final Account assetAccount = this.accountHelper.createAssetAccount();
@@ -4425,7 +4438,7 @@ public class ClientLoanIntegrationTest {
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
         final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
 
-        final Integer loanProductID = createLoanProduct("0", "0", LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY, CASH_BASED, assetAccount,
+        final Integer loanProductID = createLoanProduct("0", "0", LoanProductTestBuilder.DEFAULT_STRATEGY, CASH_BASED, assetAccount,
                 incomeAccount, expenseAccount, overpaymentAccount);
         Assert.assertNotNull(loanProductID);
 
@@ -4443,7 +4456,7 @@ public class ClientLoanIntegrationTest {
         addCharges(charges, flatInstallmentFee, "50", null);
 
         final Integer loanID = applyForLoanApplicationWithPaymentStrategyAndPastMonth(clientID, loanProductID, charges, savingsId,
-                principal, LoanApplicationTestBuilder.MIFOS_STANDARD_STRATEGY, -4);
+                principal, LoanApplicationTestBuilder.DEFAULT_STRATEGY, -4);
         Assert.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -4512,7 +4525,7 @@ public class ClientLoanIntegrationTest {
 
         // Make refund of 20
         // max 2290 to refund. Pay 20 means only principal
-        // mifos style refund order(principal, interest, fees and penalties
+        // Default style refund order(principal, interest, fees and penalties
         // paid: principal 2000, interest 240, fees 50, penalty 0
         // refund 20 means paid: principal 1980, interest 240, fees 50, penalty
         // 0
@@ -4555,7 +4568,7 @@ public class ClientLoanIntegrationTest {
     }
 
     /***
-     * Test case to verify Mifos style payment strategy
+     * Test case to verify Default style payment strategy
      */
     @Test
     public void testLoanRefundByCashAccrualBasedAccounting() {
@@ -4572,7 +4585,7 @@ public class ClientLoanIntegrationTest {
         ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
 
         /***
-         * Create loan product with MIFOS STYLE strategy
+         * Create loan product with Default STYLE strategy
          */
 
         final Account assetAccount = this.accountHelper.createAssetAccount();
@@ -4580,7 +4593,7 @@ public class ClientLoanIntegrationTest {
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
         final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
 
-        final Integer loanProductID = createLoanProduct("0", "0", LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY, ACCRUAL_UPFRONT,
+        final Integer loanProductID = createLoanProduct("0", "0", LoanProductTestBuilder.DEFAULT_STRATEGY, ACCRUAL_UPFRONT,
                 assetAccount, incomeAccount, expenseAccount, overpaymentAccount);// ,
                                                                                  // LoanProductTestBuilder.EQUAL_INSTALLMENTS,
         // LoanProductTestBuilder.FLAT_BALANCE);
@@ -4600,7 +4613,7 @@ public class ClientLoanIntegrationTest {
         addCharges(charges, flatInstallmentFee, "50", null);
 
         final Integer loanID = applyForLoanApplicationWithPaymentStrategyAndPastMonth(clientID, loanProductID, charges, savingsId,
-                principal, LoanApplicationTestBuilder.MIFOS_STANDARD_STRATEGY, -4);
+                principal, LoanApplicationTestBuilder.DEFAULT_STRATEGY, -4);
         Assert.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -4671,7 +4684,7 @@ public class ClientLoanIntegrationTest {
 
         // Make refund of 20
         // max 2290 to refund. Pay 20 means only principal
-        // mifos style refund order(principal, interest, fees and penalties
+        // Default style refund order(principal, interest, fees and penalties
         // paid: principal 2000, interest 240, fees 50, penalty 0
         // refund 20 means paid: principal 1980, interest 240, fees 50, penalty
         // 0
@@ -4749,7 +4762,7 @@ public class ClientLoanIntegrationTest {
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
         /***
-         * Create loan product with MIFOS STYLE strategy
+         * Create loan product with Default STYLE strategy
          */
 
         final Account assetAccount = this.accountHelper.createAssetAccount();
@@ -4757,7 +4770,7 @@ public class ClientLoanIntegrationTest {
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
         final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
 
-        final Integer loanProductID = createLoanProduct("0", "0", LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY, CASH_BASED, assetAccount,
+        final Integer loanProductID = createLoanProduct("0", "0", LoanProductTestBuilder.DEFAULT_STRATEGY, CASH_BASED, assetAccount,
                 incomeAccount, expenseAccount, overpaymentAccount);
         Assert.assertNotNull(loanProductID);
 
@@ -4775,7 +4788,7 @@ public class ClientLoanIntegrationTest {
         addCharges(charges, flatInstallmentFee, "50", null);
 
         final Integer loanID = applyForLoanApplicationWithPaymentStrategyAndPastMonth(clientID, loanProductID, charges, null, principal,
-                LoanApplicationTestBuilder.MIFOS_STANDARD_STRATEGY, -4);
+                LoanApplicationTestBuilder.DEFAULT_STRATEGY, -4);
         Assert.assertNotNull(loanID);
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
@@ -4844,7 +4857,7 @@ public class ClientLoanIntegrationTest {
 
         // Make refund of 20
         // max 2290 to refund. Pay 20 means only principal
-        // mifos style refund order(principal, interest, fees and penalties
+        // Default style refund order(principal, interest, fees and penalties
         // paid: principal 2000, interest 240, fees 50, penalty 0
         // refund 20 means paid: principal 1980, interest 240, fees 50, penalty
         // 0
@@ -4945,7 +4958,7 @@ public class ClientLoanIntegrationTest {
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
         Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder()
                 .withAmortizationTypeAsEqualInstallments().withRepaymentTypeAsMonth().withRepaymentAfterEvery("1")
-                .withRepaymentStrategy(LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY).withInterestTypeAsDecliningBalance()
+                .withRepaymentStrategy(LoanProductTestBuilder.DEFAULT_STRATEGY).withInterestTypeAsDecliningBalance()
                 .withInterestCalculationPeriodTypeAsDays().withInArrearsTolerance("10").withMoratorium("2", "3")
                 .withLoanProductConfiguration(loanProductConfigurationAsTrue).build(null));
         System.out.println("-----------------------LOAN PRODUCT CREATED WITH ATTRIBUTE CONFIGURATION AS TRUE--------------------------"
@@ -4955,7 +4968,7 @@ public class ClientLoanIntegrationTest {
 
         loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments()
                 .withRepaymentTypeAsMonth().withRepaymentAfterEvery("1")
-                .withRepaymentStrategy(LoanProductTestBuilder.MIFOS_STANDARD_STRATEGY).withInterestTypeAsDecliningBalance()
+                .withRepaymentStrategy(LoanProductTestBuilder.DEFAULT_STRATEGY).withInterestTypeAsDecliningBalance()
                 .withInterestCalculationPeriodTypeAsDays().withInArrearsTolerance("10").withMoratorium("2", "3")
                 .withLoanProductConfiguration(loanProductConfigurationAsFalse).build(null));
         System.out.println("-------------------LOAN PRODUCT CREATED WITH ATTRIBUTE CONFIGURATION AS FALSE----------------------"

@@ -1,19 +1,32 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.organisation.teller.service;
+package org.apache.fineract.organisation.teller.service;
 
-import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.useradministration.domain.AppUser;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.useradministration.domain.AppUser;
 
 /**
  * Provides the local service for adding, modifying and deleting tellers.
  *
  * @author Markus Geiss
- * @see org.mifosplatform.organisation.teller.domain.TellerRepository
+ * @see org.apache.fineract.organisation.teller.domain.TellerRepository
  * @since 2.0.0
  */
 public interface TellerWritePlatformService {
@@ -23,8 +36,8 @@ public interface TellerWritePlatformService {
      *
      * @param command the command to create a new teller
      * @return {@code CommandProcessingResult} if successful
-     * @throws org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException
-     * @throws org.mifosplatform.infrastructure.core.exception.InvalidJsonException
+     * @throws org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException
+     * @throws org.apache.fineract.infrastructure.core.exception.InvalidJsonException
      */
     public CommandProcessingResult createTeller(JsonCommand command);
 
@@ -34,9 +47,9 @@ public interface TellerWritePlatformService {
      * @param tellerId the primary key of the teller
      * @param command  the command to modifya new teller
      * @return {@code CommandProcessingResult} if successful
-     * @throws org.mifosplatform.organisation.teller.exception.TellerNotFoundException
-     * @throws org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException
-     * @throws org.mifosplatform.infrastructure.core.exception.InvalidJsonException
+     * @throws org.apache.fineract.organisation.teller.exception.TellerNotFoundException
+     * @throws org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException
+     * @throws org.apache.fineract.infrastructure.core.exception.InvalidJsonException
      */
     public CommandProcessingResult modifyTeller(Long tellerId, JsonCommand command);
 
@@ -45,8 +58,8 @@ public interface TellerWritePlatformService {
      *
      * @param tellerId the primary key of the teller
      * @return {@code CommandProcessingResult} if successful
-     * @throws org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException
-     * @throws org.mifosplatform.infrastructure.core.exception.InvalidJsonException
+     * @throws org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException
+     * @throws org.apache.fineract.infrastructure.core.exception.InvalidJsonException
      */
     public CommandProcessingResult deleteTeller(Long tellerId);
     
@@ -57,8 +70,8 @@ public interface TellerWritePlatformService {
      *
 	 * @param command the command to allocate a cashier for a specific teller
      * @return {@code CommandProcessingResult} if successful
-     * @throws org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException
-     * @throws org.mifosplatform.infrastructure.core.exception.InvalidJsonException
+     * @throws org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException
+     * @throws org.apache.fineract.infrastructure.core.exception.InvalidJsonException
      */
     public CommandProcessingResult allocateCashierToTeller(Long tellerId, JsonCommand command);
 

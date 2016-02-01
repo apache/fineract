@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.integrationtests;
+package org.apache.fineract.integrationtests;
 
 import static org.junit.Assert.assertEquals;
 
@@ -20,6 +33,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.fineract.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
+import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
+import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
+import org.apache.fineract.integrationtests.common.accounting.JournalEntry;
+import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
+import org.apache.fineract.integrationtests.common.accounting.Account.AccountType;
+import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositAccountHelper;
+import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositAccountStatusChecker;
+import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositProductHelper;
+import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
+import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
+import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
+import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.Months;
@@ -27,23 +57,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mifosplatform.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
-import org.mifosplatform.integrationtests.common.ClientHelper;
-import org.mifosplatform.integrationtests.common.CommonConstants;
-import org.mifosplatform.integrationtests.common.Utils;
-import org.mifosplatform.integrationtests.common.accounting.Account;
-import org.mifosplatform.integrationtests.common.accounting.AccountHelper;
-import org.mifosplatform.integrationtests.common.accounting.FinancialActivityAccountHelper;
-import org.mifosplatform.integrationtests.common.accounting.JournalEntry;
-import org.mifosplatform.integrationtests.common.accounting.JournalEntryHelper;
-import org.mifosplatform.integrationtests.common.accounting.Account.AccountType;
-import org.mifosplatform.integrationtests.common.fixeddeposit.FixedDepositAccountHelper;
-import org.mifosplatform.integrationtests.common.fixeddeposit.FixedDepositAccountStatusChecker;
-import org.mifosplatform.integrationtests.common.fixeddeposit.FixedDepositProductHelper;
-import org.mifosplatform.integrationtests.common.loans.LoanApplicationTestBuilder;
-import org.mifosplatform.integrationtests.common.savings.SavingsAccountHelper;
-import org.mifosplatform.integrationtests.common.savings.SavingsProductHelper;
-import org.mifosplatform.integrationtests.common.savings.SavingsStatusChecker;
 
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
@@ -94,7 +107,7 @@ public class FixedDepositTest {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.requestSpec.header("X-Mifos-Platform-TenantId", "default");
+        this.requestSpec.header("Fineract-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
         this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec);

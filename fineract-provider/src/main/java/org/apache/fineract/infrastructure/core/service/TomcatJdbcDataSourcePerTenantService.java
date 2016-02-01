@@ -1,19 +1,32 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.infrastructure.core.service;
+package org.apache.fineract.infrastructure.core.service;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
-import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
-import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenantConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -24,7 +37,7 @@ import org.springframework.stereotype.Service;
  * variable for this request.
  * 
  * {@link ThreadLocalContextUtil} is used to retrieve the
- * {@link MifosPlatformTenant} for the request.
+ * {@link FineractPlatformTenant} for the request.
  */
 @Service
 public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceService {
@@ -43,9 +56,9 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         // default to tenant database datasource
         DataSource tenantDataSource = this.tenantDataSource;
 
-        final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant(); 
+        final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant(); 
         if (tenant != null) {
-            final MifosPlatformTenantConnection tenantConnection = tenant.getConnection();
+            final FineractPlatformTenantConnection tenantConnection = tenant.getConnection();
 
             synchronized (this.tenantToDataSourceMap) {
                 // if tenantConnection information available switch to
@@ -65,11 +78,11 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
     }
 
     // creates the data source oltp and report databases
-    private DataSource createNewDataSourceFor(final MifosPlatformTenantConnection tenantConnectionObj) {
+    private DataSource createNewDataSourceFor(final FineractPlatformTenantConnection tenantConnectionObj) {
         // see
         // http://www.tomcatexpert.com/blog/2010/04/01/configuring-jdbc-pool-high-concurrency
 
-        // see also org.mifosplatform.DataSourceProperties.setMifosDefaults()
+        // see also org.apache.fineract.DataSourceProperties.setDefaults()
 
         final String jdbcUrl = tenantConnectionObj.databaseURL();
         final PoolConfiguration poolConfiguration = new PoolProperties();

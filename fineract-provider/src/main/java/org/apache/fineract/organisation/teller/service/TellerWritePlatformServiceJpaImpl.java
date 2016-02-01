@@ -1,46 +1,59 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.organisation.teller.service;
+package org.apache.fineract.organisation.teller.service;
 
 import java.util.Map;
 import java.util.Set;
 
-import org.mifosplatform.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
-import org.mifosplatform.accounting.financialactivityaccount.domain.FinancialActivityAccount;
-import org.mifosplatform.accounting.financialactivityaccount.domain.FinancialActivityAccountRepositoryWrapper;
-import org.mifosplatform.accounting.glaccount.domain.GLAccount;
-import org.mifosplatform.accounting.journalentry.domain.JournalEntry;
-import org.mifosplatform.accounting.journalentry.domain.JournalEntryRepository;
-import org.mifosplatform.accounting.journalentry.domain.JournalEntryType;
-import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.office.domain.Office;
-import org.mifosplatform.organisation.office.domain.OfficeRepository;
-import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
-import org.mifosplatform.organisation.staff.domain.Staff;
-import org.mifosplatform.organisation.staff.domain.StaffRepository;
-import org.mifosplatform.organisation.staff.exception.StaffNotFoundException;
-import org.mifosplatform.organisation.teller.domain.Cashier;
-import org.mifosplatform.organisation.teller.domain.CashierRepository;
-import org.mifosplatform.organisation.teller.domain.CashierTransaction;
-import org.mifosplatform.organisation.teller.domain.CashierTransactionRepository;
-import org.mifosplatform.organisation.teller.domain.CashierTxnType;
-import org.mifosplatform.organisation.teller.domain.Teller;
-import org.mifosplatform.organisation.teller.domain.TellerRepository;
-import org.mifosplatform.organisation.teller.domain.TellerRepositoryWrapper;
-import org.mifosplatform.organisation.teller.exception.CashierExistForTellerException;
-import org.mifosplatform.organisation.teller.exception.CashierNotFoundException;
-import org.mifosplatform.organisation.teller.exception.TellerNotFoundException;
-import org.mifosplatform.organisation.teller.serialization.TellerCommandFromApiJsonDeserializer;
-import org.mifosplatform.portfolio.client.domain.ClientTransaction;
-import org.mifosplatform.useradministration.domain.AppUser;
+import org.apache.fineract.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
+import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccount;
+import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccountRepositoryWrapper;
+import org.apache.fineract.accounting.glaccount.domain.GLAccount;
+import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
+import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
+import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.organisation.office.domain.OfficeRepository;
+import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
+import org.apache.fineract.organisation.staff.domain.Staff;
+import org.apache.fineract.organisation.staff.domain.StaffRepository;
+import org.apache.fineract.organisation.staff.exception.StaffNotFoundException;
+import org.apache.fineract.organisation.teller.domain.Cashier;
+import org.apache.fineract.organisation.teller.domain.CashierRepository;
+import org.apache.fineract.organisation.teller.domain.CashierTransaction;
+import org.apache.fineract.organisation.teller.domain.CashierTransactionRepository;
+import org.apache.fineract.organisation.teller.domain.CashierTxnType;
+import org.apache.fineract.organisation.teller.domain.Teller;
+import org.apache.fineract.organisation.teller.domain.TellerRepository;
+import org.apache.fineract.organisation.teller.domain.TellerRepositoryWrapper;
+import org.apache.fineract.organisation.teller.exception.CashierExistForTellerException;
+import org.apache.fineract.organisation.teller.exception.CashierNotFoundException;
+import org.apache.fineract.organisation.teller.exception.TellerNotFoundException;
+import org.apache.fineract.organisation.teller.serialization.TellerCommandFromApiJsonDeserializer;
+import org.apache.fineract.portfolio.client.domain.ClientTransaction;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

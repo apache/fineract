@@ -1,27 +1,40 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.infrastructure.entityaccess.service;
+package org.apache.fineract.infrastructure.entityaccess.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
 
-import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
-import org.mifosplatform.infrastructure.dataqueries.service.GenericDataServiceImpl;
-import org.mifosplatform.infrastructure.entityaccess.MifosEntityAccessConstants;
-import org.mifosplatform.infrastructure.entityaccess.data.MifosEntityAccessData;
-import org.mifosplatform.infrastructure.entityaccess.data.MifosEntityRelationData;
-import org.mifosplatform.infrastructure.entityaccess.data.MifosEntityToEntityMappingData;
-import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntity;
-import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityAccessType;
-import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityType;
-import org.mifosplatform.infrastructure.entityaccess.exception.MifosEntityAccessConfigurationException;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.useradministration.domain.AppUser;
+import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.dataqueries.service.GenericDataServiceImpl;
+import org.apache.fineract.infrastructure.entityaccess.FineractEntityAccessConstants;
+import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityAccessData;
+import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelationData;
+import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityToEntityMappingData;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntity;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
+import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityAccessConfigurationException;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,14 +43,14 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MifosEntityAccessReadServiceImpl implements MifosEntityAccessReadService {
+public class FineractEntityAccessReadServiceImpl implements FineractEntityAccessReadService {
 
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
     private final static Logger logger = LoggerFactory.getLogger(GenericDataServiceImpl.class);
 
     @Autowired
-    public MifosEntityAccessReadServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public FineractEntityAccessReadServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
@@ -45,22 +58,22 @@ public class MifosEntityAccessReadServiceImpl implements MifosEntityAccessReadSe
     /*
      * (non-Javadoc)
      * 
-     * @see org.mifosplatform.infrastructure.entityaccess.service.
-     * MifosEntityAccessReadService#getSQLQueryWithListOfIDsForEntityAccess
+     * @see org.apache.fineract.infrastructure.entityaccess.service.
+     * FineractEntityAccessReadService#getSQLQueryWithListOfIDsForEntityAccess
      * (Long,
-     * org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityType,
-     * org.mifosplatform.infrastructure.entityaccess.domain.
-     * MifosEntityAccessType,
-     * org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityType,
+     * org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType,
+     * org.apache.fineract.infrastructure.entityaccess.domain.
+     * FineractEntityAccessType,
+     * org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType,
      * boolean)
      * 
      * This method returns the list of entity IDs as a comma separated list Or
      * null if there is no entity restrictions or if there
      */
     @Override
-    public String getSQLQueryInClause_WithListOfIDsForEntityAccess(Long firstEntityId, MifosEntityType firstEntityType,
-            MifosEntityAccessType accessType, MifosEntityType secondEntityType, boolean includeAllOffices) {
-        Collection<MifosEntityAccessData> accesslist = retrieveEntityAccessFor(firstEntityId, firstEntityType, accessType, secondEntityType,
+    public String getSQLQueryInClause_WithListOfIDsForEntityAccess(Long firstEntityId, FineractEntityType firstEntityType,
+            FineractEntityAccessType accessType, FineractEntityType secondEntityType, boolean includeAllOffices) {
+        Collection<FineractEntityAccessData> accesslist = retrieveEntityAccessFor(firstEntityId, firstEntityType, accessType, secondEntityType,
                 includeAllOffices);
         String returnIdListStr = null;
         StringBuffer accessListCSVStrBuf = null;
@@ -70,8 +83,8 @@ public class MifosEntityAccessReadServiceImpl implements MifosEntityAccessReadSe
                     + secondEntityType.getType());
             accessListCSVStrBuf = new StringBuffer(" ");
             for (int i = 0; i < accesslist.size(); i++) {
-                MifosEntityAccessData accessData = (MifosEntityAccessData) accesslist.toArray()[i];
-                if (accessData == null) { throw new MifosEntityAccessConfigurationException(firstEntityId, firstEntityType, accessType,
+                FineractEntityAccessData accessData = (FineractEntityAccessData) accesslist.toArray()[i];
+                if (accessData == null) { throw new FineractEntityAccessConfigurationException(firstEntityId, firstEntityType, accessType,
                         secondEntityType); }
                 if (accessData.getSecondEntity().getId() == 0) { // If there is
                                                                  // any ID that
@@ -102,8 +115,8 @@ public class MifosEntityAccessReadServiceImpl implements MifosEntityAccessReadSe
     }
 
     @Override
-    public Collection<MifosEntityAccessData> retrieveEntityAccessFor(Long firstEntityId, MifosEntityType firstEntityType,
-            MifosEntityAccessType accessType, MifosEntityType secondEntityType, boolean includeAllSubOffices) {
+    public Collection<FineractEntityAccessData> retrieveEntityAccessFor(Long firstEntityId, FineractEntityType firstEntityType,
+            FineractEntityAccessType accessType, FineractEntityType secondEntityType, boolean includeAllSubOffices) {
         final AppUser currentUser = this.context.authenticatedUser();
 
         final String hierarchy = currentUser.getOffice().getHierarchy();
@@ -115,8 +128,8 @@ public class MifosEntityAccessReadServiceImpl implements MifosEntityAccessReadSe
         }
         String sql = getSQLForRetriveEntityAccessFor(firstEntityType, accessType, secondEntityType);
 
-        Collection<MifosEntityAccessData> entityAccessData = null;
-        MifosEntityAccessDataMapper mapper = new MifosEntityAccessDataMapper();
+        Collection<FineractEntityAccessData> entityAccessData = null;
+        FineractEntityAccessDataMapper mapper = new FineractEntityAccessDataMapper();
 
         if (includeAllSubOffices && (firstEntityType.getTable().equals("m_office"))) {
             sql += " where firstentity.hierarchy like ? order by firstEntity.hierarchy";
@@ -128,8 +141,8 @@ public class MifosEntityAccessReadServiceImpl implements MifosEntityAccessReadSe
         return entityAccessData;
     }
 
-    private String getSQLForRetriveEntityAccessFor(MifosEntityType firstEntityType, MifosEntityAccessType accessType,
-            MifosEntityType secondEntityType) {
+    private String getSQLForRetriveEntityAccessFor(FineractEntityType firstEntityType, FineractEntityAccessType accessType,
+            FineractEntityType secondEntityType) {
         StringBuffer str = new StringBuffer("select eea.entity_id as entity_id, entity_type as entity_type, ");
         str.append("access_type_code_value_id as access_id, cv.code_value as access_type_desc, c.code_name as code, ");
         str.append("firstentity.id as first_entity_id, firstentity.name as entity_name, ");
@@ -142,7 +155,7 @@ public class MifosEntityAccessReadServiceImpl implements MifosEntityAccessReadSe
         str.append("' ");
         str.append("and eea.access_type_code_value_id = cv.id) ");
         str.append("left join m_code c on (c.code_name = '");
-        str.append(MifosEntityAccessConstants.ENTITY_ACCESS_CODENAME);
+        str.append(FineractEntityAccessConstants.ENTITY_ACCESS_CODENAME);
         str.append("' and cv.code_id = c.id) ");
         str.append("left join ");
         str.append(firstEntityType.getTable());
@@ -163,10 +176,10 @@ public class MifosEntityAccessReadServiceImpl implements MifosEntityAccessReadSe
         return str.toString();
     }
 
-    private static final class MifosEntityAccessDataMapper implements RowMapper<MifosEntityAccessData> {
+    private static final class FineractEntityAccessDataMapper implements RowMapper<FineractEntityAccessData> {
 
         @Override
-        public MifosEntityAccessData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public FineractEntityAccessData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final String entityType = rs.getString("entity_type");
             final Long entityId = rs.getLong("entity_id");
             // final String entityName = rs.getString("entity_name");
@@ -178,37 +191,37 @@ public class MifosEntityAccessReadServiceImpl implements MifosEntityAccessReadSe
             // rs.getString("second_entity_name");
             final String secondEntityType = rs.getString("second_entity_type");
 
-            MifosEntity firstEntity = null;
-            MifosEntityType etype = MifosEntityType.get(entityType);
+            FineractEntity firstEntity = null;
+            FineractEntityType etype = FineractEntityType.get(entityType);
             if (etype != null) {
-                firstEntity = new MifosEntity(entityId, etype);
+                firstEntity = new FineractEntity(entityId, etype);
             }
 
-            MifosEntity secondEntity = null;
-            MifosEntityType secondetype = MifosEntityType.get(secondEntityType);
+            FineractEntity secondEntity = null;
+            FineractEntityType secondetype = FineractEntityType.get(secondEntityType);
             if (etype != null) {
-                secondEntity = new MifosEntity(secondEntityId, secondetype);
+                secondEntity = new FineractEntity(secondEntityId, secondetype);
             }
 
-            MifosEntityAccessType accessType = null;
+            FineractEntityAccessType accessType = null;
             if (accessTypeDesc != null) {
-                accessType = MifosEntityAccessType.get(accessTypeDesc);
+                accessType = FineractEntityAccessType.get(accessTypeDesc);
             }
 
-            MifosEntityAccessData returnMifosEntityAccessData = null;
+            FineractEntityAccessData returnFineractEntityAccessData = null;
             if (firstEntity != null && secondEntity != null && accessType != null) {
-                returnMifosEntityAccessData = new MifosEntityAccessData(firstEntity, accessType, secondEntity);
+                returnFineractEntityAccessData = new FineractEntityAccessData(firstEntity, accessType, secondEntity);
             }
-            return returnMifosEntityAccessData;
+            return returnFineractEntityAccessData;
         }
     }
 
     @Override
     public String getSQLQueryInClauseIDList_ForLoanProductsForOffice(Long officeId, boolean includeAllOffices) {
 
-        MifosEntityType firstEntityType = MifosEntityType.OFFICE;
-        MifosEntityAccessType accessType = MifosEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS;
-        MifosEntityType secondEntityType = MifosEntityType.LOAN_PRODUCT;
+        FineractEntityType firstEntityType = FineractEntityType.OFFICE;
+        FineractEntityAccessType accessType = FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS;
+        FineractEntityType secondEntityType = FineractEntityType.LOAN_PRODUCT;
 
         return getSQLQueryInClause_WithListOfIDsForEntityAccess(officeId, firstEntityType, accessType, secondEntityType, includeAllOffices);
     }
@@ -216,9 +229,9 @@ public class MifosEntityAccessReadServiceImpl implements MifosEntityAccessReadSe
     @Override
     public String getSQLQueryInClauseIDList_ForSavingsProductsForOffice(Long officeId, boolean includeAllOffices) {
 
-        MifosEntityType firstEntityType = MifosEntityType.OFFICE;
-        MifosEntityAccessType accessType = MifosEntityAccessType.OFFICE_ACCESS_TO_SAVINGS_PRODUCTS;
-        MifosEntityType secondEntityType = MifosEntityType.SAVINGS_PRODUCT;
+        FineractEntityType firstEntityType = FineractEntityType.OFFICE;
+        FineractEntityAccessType accessType = FineractEntityAccessType.OFFICE_ACCESS_TO_SAVINGS_PRODUCTS;
+        FineractEntityType secondEntityType = FineractEntityType.SAVINGS_PRODUCT;
 
         return getSQLQueryInClause_WithListOfIDsForEntityAccess(officeId, firstEntityType, accessType, secondEntityType, includeAllOffices);
     }
@@ -226,22 +239,22 @@ public class MifosEntityAccessReadServiceImpl implements MifosEntityAccessReadSe
     @Override
     public String getSQLQueryInClauseIDList_ForChargesForOffice(Long officeId, boolean includeAllOffices) {
 
-        MifosEntityType firstEntityType = MifosEntityType.OFFICE;
-        MifosEntityAccessType accessType = MifosEntityAccessType.OFFICE_ACCESS_TO_CHARGES;
-        MifosEntityType secondEntityType = MifosEntityType.CHARGE;
+        FineractEntityType firstEntityType = FineractEntityType.OFFICE;
+        FineractEntityAccessType accessType = FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES;
+        FineractEntityType secondEntityType = FineractEntityType.CHARGE;
 
         return getSQLQueryInClause_WithListOfIDsForEntityAccess(officeId, firstEntityType, accessType, secondEntityType, includeAllOffices);
     }
 
     @Override
-    public Collection<MifosEntityRelationData> retrieveAllSupportedMappingTypes() {
+    public Collection<FineractEntityRelationData> retrieveAllSupportedMappingTypes() {
         EntityRelationMapper entityMapper = new EntityRelationMapper();
         final String sql = entityMapper.schema();
-        final Collection<MifosEntityRelationData> mapTypes = this.jdbcTemplate.query(sql, entityMapper, new Object[] {});
+        final Collection<FineractEntityRelationData> mapTypes = this.jdbcTemplate.query(sql, entityMapper, new Object[] {});
         return mapTypes;
     }
 
-    private static final class EntityRelationMapper implements RowMapper<MifosEntityRelationData> {
+    private static final class EntityRelationMapper implements RowMapper<FineractEntityRelationData> {
 
         private final StringBuilder sqlBuilder = new StringBuilder("select id as id,code_name as mapping_Types from m_entity_relation ");
 
@@ -250,33 +263,33 @@ public class MifosEntityAccessReadServiceImpl implements MifosEntityAccessReadSe
         }
 
         @Override
-        public MifosEntityRelationData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public FineractEntityRelationData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final Long mappingTypesId = rs.getLong("id");
             final String mappingTypes = rs.getString("mapping_Types");
-            return MifosEntityRelationData.getMappingTypes(mappingTypesId, mappingTypes);
+            return FineractEntityRelationData.getMappingTypes(mappingTypesId, mappingTypes);
         }
     }
 
     @Override
-    public Collection<MifosEntityToEntityMappingData> retrieveEntityToEntityMappings(Long mapId, Long fromId, Long toId) {
+    public Collection<FineractEntityToEntityMappingData> retrieveEntityToEntityMappings(Long mapId, Long fromId, Long toId) {
 
         EntityToEntityMapper entityToEntityMapper = new EntityToEntityMapper();
         String sql = entityToEntityMapper.schema();
-        final Collection<MifosEntityToEntityMappingData> mapTypes = this.jdbcTemplate.query(sql, entityToEntityMapper,
+        final Collection<FineractEntityToEntityMappingData> mapTypes = this.jdbcTemplate.query(sql, entityToEntityMapper,
                 new Object[] { mapId, fromId, fromId, toId, toId });
         return mapTypes;
 
     }
 
     @Override
-    public Collection<MifosEntityToEntityMappingData> retrieveOneMapping(Long mapId) {
+    public Collection<FineractEntityToEntityMappingData> retrieveOneMapping(Long mapId) {
         GetOneEntityMapper entityMapper = new GetOneEntityMapper();
         String sql = entityMapper.schema();
-        final Collection<MifosEntityToEntityMappingData> mapTypes = this.jdbcTemplate.query(sql, entityMapper, new Object[] { mapId });
+        final Collection<FineractEntityToEntityMappingData> mapTypes = this.jdbcTemplate.query(sql, entityMapper, new Object[] { mapId });
         return mapTypes;
     }
 
-    private static final class GetOneEntityMapper implements RowMapper<MifosEntityToEntityMappingData> {
+    private static final class GetOneEntityMapper implements RowMapper<FineractEntityToEntityMappingData> {
 
         private final String schema;
 
@@ -294,19 +307,19 @@ public class MifosEntityAccessReadServiceImpl implements MifosEntityAccessReadSe
         }
 
         @Override
-        public MifosEntityToEntityMappingData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public FineractEntityToEntityMappingData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final Long relId = rs.getLong("relId");
             final Long fromId = rs.getLong("fromId");
             final Long toId = rs.getLong("toId");
             final Date startDate = rs.getDate("startDate");
             final Date endDate = rs.getDate("endDate");
-            return MifosEntityToEntityMappingData.getRelatedEntities(relId, fromId, toId, startDate, endDate);
+            return FineractEntityToEntityMappingData.getRelatedEntities(relId, fromId, toId, startDate, endDate);
         }
 
     }
 
-    private static final class EntityToEntityMapper implements RowMapper<MifosEntityToEntityMappingData> {
+    private static final class EntityToEntityMapper implements RowMapper<FineractEntityToEntityMappingData> {
 
         private final String schema;
 
@@ -363,7 +376,7 @@ public class MifosEntityAccessReadServiceImpl implements MifosEntityAccessReadSe
         }
 
         @Override
-        public MifosEntityToEntityMappingData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public FineractEntityToEntityMappingData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final Long mapId = rs.getLong("mapId");
             final Long relId = rs.getLong("relId");
             final Long fromId = rs.getLong("from_id");
@@ -372,7 +385,7 @@ public class MifosEntityAccessReadServiceImpl implements MifosEntityAccessReadSe
             final String toEntity = rs.getString("to_name");
             final Date startDate = rs.getDate("startDate");
             final Date endDate = rs.getDate("endDate");
-            return MifosEntityToEntityMappingData.getRelatedEntities(mapId, relId, fromId, toId, startDate, endDate, fromEntity, toEntity);
+            return FineractEntityToEntityMappingData.getRelatedEntities(mapId, relId, fromId, toId, startDate, endDate, fromEntity, toEntity);
         }
     }
 

@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.infrastructure.entityaccess.domain;
+package org.apache.fineract.infrastructure.entityaccess.domain;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -18,10 +31,10 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_entity_relation")
-public class MifosEntityRelation extends AbstractPersistable<Long> {
+public class FineractEntityRelation extends AbstractPersistable<Long> {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "relationId", orphanRemoval = true)
-    private Set<MifosEntityToEntityMapping> mifosEntityToEntityMapping = new HashSet<>();
+    private Set<FineractEntityToEntityMapping> fineractEntityToEntityMapping = new HashSet<>();
     
     @Column(name = "from_entity_type", nullable = false, length = 10)
     private String fromEntityType;
@@ -32,27 +45,27 @@ public class MifosEntityRelation extends AbstractPersistable<Long> {
     @Column(name = "code_name", nullable = false, length = 50)
     private String codeName;
 
-   /* private MifosEntityRelation(final String fromEntityType, final String toEntityType, final String codeName) {
+   /* private FineractEntityRelation(final String fromEntityType, final String toEntityType, final String codeName) {
         this.fromEntityType = fromEntityType;
         this.toEntityType = toEntityType;
         this.codeName = codeName;
     }*/
     
     
-    public MifosEntityRelation() {
+    public FineractEntityRelation() {
         // TODO Auto-generated constructor stub
     }
 
 
     
-    public Set<MifosEntityToEntityMapping> getMifosEntityToEntityMapping() {
-        return this.mifosEntityToEntityMapping;
+    public Set<FineractEntityToEntityMapping> getFineractEntityToEntityMapping() {
+        return this.fineractEntityToEntityMapping;
     }
 
 
     
-    public void setMifosEntityToEntityMapping(Set<MifosEntityToEntityMapping> mifosEntityToEntityMapping) {
-        this.mifosEntityToEntityMapping = mifosEntityToEntityMapping;
+    public void setFineractEntityToEntityMapping(Set<FineractEntityToEntityMapping> fineractEntityToEntityMapping) {
+        this.fineractEntityToEntityMapping = fineractEntityToEntityMapping;
     }
 
 

@@ -2,9 +2,9 @@
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-<link rel="stylesheet" href="apidocs.css" type="text/css" media="screen" title="Mifos X API Docs" charset="utf-8" />
+<link rel="stylesheet" href="apidocs.css" type="text/css" media="screen" title="Apache Fineract API Docs" charset="utf-8" />
 <script type="text/javascript" src="jquery-1.7.min.js"></script>
-<title>Mifos X API Documentation</title>
+<title>Apache Fineract API Documentation</title>
 
 <script>
 	QueryParameters = (function() {
@@ -63,8 +63,8 @@
 	}
 
 	function getBaseURL(docURL) {
-		var localhostUrl = "https://localhost:8443/mifosng-provider/api/v1/";
-		var openmfDemoUrl = "/mifosng-provider/api/v1/";
+		var localhostUrl = "https://localhost:8443/fineract-provider/api/v1/";
+		var openmfDemoUrl = "/fineract-provider/api/v1/";
 
 		var baseUrl = "";
 
@@ -75,7 +75,7 @@
 				baseUrl = openmfDemoUrl;
 			} else {
 				baseUrl = "https://" + l.hostname
-						+ ":8443/mifosng-provider/api/v1/"
+						+ ":8443/fineract-provider/api/v1/"
 			}
 		} else {
 			//assume running locally
@@ -97,7 +97,7 @@
 					<div class="toc-column1">
 						<div class="toc-section">
 <ul>
-	<li><a href="#top">Mifos X API Documentation</a></li>
+	<li><a href="#top">Apache Fineract API Documentation</a></li>
 	<li><a href="#interact">Try The API From Your Browser</a></li>
 	<li><a href="#genopts">Generic Options</a></li>
 	<li><a href="#creates_and_updates">Creating and Updating</a></li>
@@ -3249,11 +3249,11 @@
 			<a id="top" name="top" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h3>Mifos X API Documentation</h3>
-					<p>Mifos X is a secure, multi-tenanted microfinance platform.</p>
+					<h3>Apache Fineract API Documentation</h3>
+					<p>Apache Fineract is a secure, multi-tenanted microfinance platform.</p>
 					<p>
-						The goal of the Mifos X API is to empower developers to build apps
-						on top of the Mifos X Platform. The <a
+						The goal of the Apache Fineract API is to empower developers to build apps
+						on top of the Apache Fineract Platform. The <a
 							href="https://demo.openmf.org" target="_blank">reference app</a>
 						(username: mifos, password: password) works on the same demo
 						'tenant' as the interactive links in this documentation.
@@ -3483,7 +3483,7 @@
 				</div>
 				<div class="method-example">
 <code>
-// A Javascript/Jquery example of how to login to Mifos X and use its api.
+// A Javascript/Jquery example of how to login to Apache Fineract and use its api.
 // Typically, the javascript application would
 // 1) Display a login page to retrieve the username and password.
 // 2) Send the username and password to a function
@@ -3540,7 +3540,7 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 				</div>
 				<div class="method-example">
 <code>
-// A Javascript/Jquery example of how to login to Mifos X and use its api.
+// A Javascript/Jquery example of how to login to Apache Fineract and use its api.
 // Typically, the javascript application would
 // 1) Display a login page to retrieve the username and password.
 // 2) Send the username, password, client_id , grant_type and client_secret to a function
@@ -3551,7 +3551,7 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 function getOauthToken(username, password) {
 
 	var jqxhr = $.ajax({
-		url : "/mifosng-provider/api/oauth/token?username=" + credentials.username + "&password=" + credentials.password +"&client_id=community-app&grant_type=password&client_secret=123,
+		url : "/fineract-provider/api/oauth/token?username=" + credentials.username + "&password=" + credentials.password +"&client_id=community-app&grant_type=password&client_secret=123,
 		type : 'POST',
 		contentType : "application/json; charset=utf-8",
 		dataType : 'json',
@@ -3591,7 +3591,7 @@ function executeAjaxRequest(url, verbType, jsonData, authKey, successFunction, e
 					<h3>Batch API</h3>
 
 					<p>
-						The Mifos X Batch API enables a consumer to access significant amounts of data in a single call or to make changes to several objects at once.
+						The Apache Fineract Batch API enables a consumer to access significant amounts of data in a single call or to make changes to several objects at once.
 						Batching allows a consumer to pass instructions for several operations in a  single HTTP request. A consumer can also specify dependencies between related operations. Once all operations have been completed, a consolidated response will be  passed back and the HTTP connection will be closed.
 					</p>
 
@@ -3809,7 +3809,7 @@ Content-Type: application/json Request Body:
 					<h4>Batch requests in a single transaction</h4>
 
 					<p>
-						The Mifos X Batch API is also capable of executing all the requests in a single transaction, by setting a Query Parameter, "enclosingTransaction=true". So, if one or more of the requests in a batch returns an erroneous response all of the Data base transactions made by other successful requests will be rolled back.
+						The Apache Fineract Batch API is also capable of executing all the requests in a single transaction, by setting a Query Parameter, "enclosingTransaction=true". So, if one or more of the requests in a batch returns an erroneous response all of the Data base transactions made by other successful requests will be rolled back.
 					</p>
 
 					<p>
@@ -4032,7 +4032,7 @@ Successful transaction response:
 					<p>Clients can be created in <b>Pending</b> or straight into <b>Active</b> state.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>accountNo</td>
@@ -4200,7 +4200,7 @@ GET https://DomainName/api/v1/clients/template
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>firstname and lastname OR fullname,<br> officeId,<br> active=true and activationDate OR active=false,<br>
@@ -4210,7 +4210,7 @@ GET https://DomainName/api/v1/clients/template
 						<br />
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>groupId, externalId, accountNo, staffId, mobileNo, savingsProductId, genderId, clientTypeId, clientClassificationId</td>
@@ -4336,7 +4336,7 @@ Request Body:
 	        <p>If the client is any other status, this API throws an error.</p>
 	        <table class=matrixHeading>
 				<tr class="matrixHeadingBG">
-					<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+					<td><div class="fineractHeading2">Mandatory Fields</div></td>
 				</tr>
 				<tr class=alt>
 					<td>rejectionDate, rejectionReasonId<br>
@@ -4374,7 +4374,7 @@ Request Body:
 	        <p>If the client is any other status, this API throws an error.</p>
 	        <table class=matrixHeading>
 				<tr class="matrixHeadingBG">
-					<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+					<td><div class="fineractHeading2">Mandatory Fields</div></td>
 				</tr>
 				<tr class=alt>
 					<td>withdrawalDate, withdrawalReasonId<br>
@@ -4413,7 +4413,7 @@ Request Body:
 	        <p>Trying to reactivate a client in any other state throws an error.</p>
 	         <table class=matrixHeading>
 				<tr class="matrixHeadingBG">
-					<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+					<td><div class="fineractHeading2">Mandatory Fields</div></td>
 				</tr>
 				<tr class=alt>
 					<td>reactivationDate<br>
@@ -5066,7 +5066,7 @@ GET https://DomainName/api/v1/clients/{clientId}/accounts
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>documentKey</td>
@@ -5214,7 +5214,7 @@ GET https://DomainName/api/v1/clients/{clientId}/identifiers/{identifierId}
 					<h4>Create an Identifier for a Client</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>documentKey, documentTypeId
@@ -5435,7 +5435,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC
 					<h4>Upload an Image for an Entity (Multi-part Form data)</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>file
@@ -5503,7 +5503,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC
 					<h4>Update an Entity's Image (Multi-part Form data)</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>file
@@ -5563,7 +5563,7 @@ No Request Body:
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>externalId</td>
@@ -5625,7 +5625,7 @@ No Request Body:
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/centers/template
+GET https://DomainName/fineract-provider/api/v1/centers/template
 					</code>
 					<code class="method-response">
 {
@@ -5676,7 +5676,7 @@ GET https://DomainName/mifosng-provider/api/v1/centers/template
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/centers/template?officeId=2
+GET https://DomainName/fineract-provider/api/v1/centers/template?officeId=2
 					</code>
 					<code class="method-response">
 {
@@ -5720,7 +5720,7 @@ GET https://DomainName/mifosng-provider/api/v1/centers/template?officeId=2
 					<h4>Create a Center</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>name, officeId, active, activationDate (if active=true)</td>
@@ -5729,7 +5729,7 @@ GET https://DomainName/mifosng-provider/api/v1/centers/template?officeId=2
 					<br/>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>externalId, staffId, groupMembers</td>
@@ -5739,7 +5739,7 @@ GET https://DomainName/mifosng-provider/api/v1/centers/template?officeId=2
 				<div class="method-example">
 					<p>Create a center as pending with no association to groupMembers.</p>
 					<code class="method-declaration">
-POST https://DomainName/mifosng-provider/api/v1/centers
+POST https://DomainName/fineract-provider/api/v1/centers
 					</code>
 					<code class="method-request">
 POST centers
@@ -5762,7 +5762,7 @@ Content-Type: application/json Request Body:
 				<div class="method-example">
 					<p>Create a center as active with no association to groupMembers.</p>
 					<code class="method-declaration">
-POST https://DomainName/mifosng-provider/api/v1/centers
+POST https://DomainName/fineract-provider/api/v1/centers
 					</code>
 					<code class="method-request">
 POST centers
@@ -6251,7 +6251,7 @@ Request Body:
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-PUT https://DomainName/mifosng-provider/api/v1/centers/{centerId}
+PUT https://DomainName/fineract-provider/api/v1/centers/{centerId}
 						</code>
 					<code class="method-request">
 PUT centers/8
@@ -6282,7 +6282,7 @@ Request Body:
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-POST https://DomainName/mifosng-provider/api/v1/centers/{centerId}
+POST https://DomainName/fineract-provider/api/v1/centers/{centerId}
 						</code>
 					<code class="method-request">
 DELETE centers/8
@@ -6308,7 +6308,7 @@ DELETE centers/8
 				<div class="method-example">
 					<p>Retrieve an existing center with no groups information.</p>
 					<code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/centers/8
+GET https://DomainName/fineract-provider/api/v1/centers/8
 					</code>
 					<code class="method-response">
 {
@@ -6329,7 +6329,7 @@ GET https://DomainName/mifosng-provider/api/v1/centers/8
 				<div class="method-example">
 					<p>Retrieve an existing center without the details of group associations.</p>
 					<code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/centers/9
+GET https://DomainName/fineract-provider/api/v1/centers/9
 					</code>
 					<code class="method-response">
 {
@@ -6430,7 +6430,7 @@ GET https://DomainName/mifosng-provider/api/v1/centers/9
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/centers?paged=true
+GET https://DomainName/fineract-provider/api/v1/centers?paged=true
 					</code>
 					<code class="method-response">
 {
@@ -6479,7 +6479,7 @@ GET https://DomainName/mifosng-provider/api/v1/centers?paged=true
 					<p>Different styles of group lending - Joint-Liability Group, Grameen Model (Center-Group), Self-Help Groups, Village/Communal Banks)</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>name</td>
@@ -6616,7 +6616,7 @@ GET https://DomainName/mifosng-provider/api/v1/centers?paged=true
 				<div class="method-example">
 					<p>Template to create a standard group</p>
 					<code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/groups/template
+GET https://DomainName/fineract-provider/api/v1/groups/template
 					</code>
 					<code class="method-response">
 {
@@ -6659,7 +6659,7 @@ GET https://DomainName/mifosng-provider/api/v1/groups/template
 				<div class="method-example">
 					<p>Template to create a standard group with specific office known. This will return only staffOptions and clientMembersOptions relevant for the chosen office.</p>
 					<code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/groups/template?officeId=2
+GET https://DomainName/fineract-provider/api/v1/groups/template?officeId=2
 					</code>
 					<code class="method-response">
 {
@@ -6692,7 +6692,7 @@ GET https://DomainName/mifosng-provider/api/v1/groups/template?officeId=2
 				<div class="method-example">
 					<p>Template to create a group for an existing center. As an existing center will be assigned to an office, this will return only staffOptions and clientMembersOptions relevant for the chosen center/office.</p>
 					<code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/groups/template?centerId=1
+GET https://DomainName/fineract-provider/api/v1/groups/template?centerId=1
 					</code>
 					<code class="method-response">
 
@@ -6706,7 +6706,7 @@ GET https://DomainName/mifosng-provider/api/v1/groups/template?centerId=1
 					<h4>Create a Group</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>name, officeId, active, activationDate (if active=true)</td>
@@ -6715,7 +6715,7 @@ GET https://DomainName/mifosng-provider/api/v1/groups/template?centerId=1
 					<br/>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>externalId, staffId, clientMembers</td>
@@ -6724,7 +6724,7 @@ GET https://DomainName/mifosng-provider/api/v1/groups/template?centerId=1
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-POST https://DomainName/mifosng-provider/api/v1/groups
+POST https://DomainName/fineract-provider/api/v1/groups
 					</code>
 					<code class="method-request">
 POST groups
@@ -6775,7 +6775,7 @@ Content-Type: application/json Request Body:
 	        <p>If the group happens to be already active this API will result in an error.</p>
             <table class=matrixHeading>
 				<tr class="matrixHeadingBG">
-                    <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                    <td><div class="fineractHeading2">Mandatory Fields</div></td>
 				</tr>
                 <tr class=alt>
 				    <td>activationDate<br>
@@ -6813,7 +6813,7 @@ Request Body:
 	        <p>If client(s) is already associated with group then API will result in an error.</p>
             <table class=matrixHeading>
 				<tr class="matrixHeadingBG">
-                    <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                    <td><div class="fineractHeading2">Mandatory Fields</div></td>
 				</tr>
                 <tr class=alt>
 				    <td>clientMembers<br>
@@ -6849,7 +6849,7 @@ Request Body:
 	        <p>Disassociating a client with active joint liability group loans results in an error.</p>
             <table class=matrixHeading>
 				<tr class="matrixHeadingBG">
-                    <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                    <td><div class="fineractHeading2">Mandatory Fields</div></td>
 				</tr>
                 <tr class=alt>
 				    <td>clientMembers<br>
@@ -6885,7 +6885,7 @@ Request Body:
 			        <p>This API allows to transfer clients from one group to another</p>
 			        <table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>destinationGroupId</td>
@@ -6913,7 +6913,7 @@ Request Body:
 					<br/>
 			        <table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>destinationGroupId, clients</td>
@@ -6922,7 +6922,7 @@ Request Body:
 					<br/>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>inheritDestinationGroupLoanOfficer (defaults to true), transferActiveLoans (defaults to true)</td>
@@ -6960,7 +6960,7 @@ Request Body:
                     <br>
                     <table class=matrixHeading>
 				        <tr class="matrixHeadingBG">
-                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                            <td><div class="fineractHeading2">Mandatory Fields</div></td>
 				        </tr>
                         <tr class=alt>
 				            <td>calendarId, transactionDate</td>
@@ -7075,7 +7075,7 @@ Request Body:
                     <p>This api allows the loan officer to perform bulk repayments of JLG loans for a group on its meeting date.</p>
                     <table class=matrixHeading>
 				        <tr class="matrixHeadingBG">
-                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                            <td><div class="fineractHeading2">Mandatory Fields</div></td>
 				        </tr>
                         <tr class=alt>
 				            <td>calendarId, transactionDate, actualDisbursementDate</td>
@@ -7084,7 +7084,7 @@ Request Body:
                     <br>
                     <table class=matrixHeading>
 				        <tr class="matrixHeadingBG">
-                            <td><div class="mifosXHeading2">Optional Fields</div></td>
+                            <td><div class="fineractHeading2">Optional Fields</div></td>
 				        </tr>
                         <tr class=alt>
 				            <td>clientsAttendance, bulkRepaymentTransaction, bulkDisbursementTransactions</td>
@@ -7133,7 +7133,7 @@ Request Body:
                     <p>Allows you to unassign the <i>Staff</i>.</p>
                     <table class=matrixHeading>
 				        <tr class="matrixHeadingBG">
-                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                            <td><div class="fineractHeading2">Mandatory Fields</div></td>
 				        </tr>
                         <tr class=alt>
 				            <td>staffId</td>
@@ -7168,7 +7168,7 @@ Request Body:
                     <p>The selected Staff should be belong to the same office (or an office higher up in the hierarchy) as this group</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>staffId</td>
@@ -7176,7 +7176,7 @@ Request Body:
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>inheritStaffForClientAccounts</td>
@@ -7242,7 +7242,7 @@ Request Body:
                     <p>We can define the different roles applicable to group members by adding code values to the pre-defined system code <b>GROUPROLE</b>. Example:Group leader etc.</p>
                     <table class=matrixHeading>
 				        <tr class="matrixHeadingBG">
-                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                            <td><div class="fineractHeading2">Mandatory Fields</div></td>
 				        </tr>
                         <tr class=alt>
 				            <td>clientId, role</td>
@@ -7299,7 +7299,7 @@ Request Body:
                     <p>Allows you to update the member <i>Role</i>.</p>
                     <table class=matrixHeading>
 				        <tr class="matrixHeadingBG">
-                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                            <td><div class="fineractHeading2">Mandatory Fields</div></td>
 				        </tr>
                         <tr class=alt>
 				            <td>role</td>
@@ -7360,7 +7360,7 @@ Request Body:
                 <div class="method-example">
                     <p>Group without any associations.</p>
                     <code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/groups/1
+GET https://DomainName/fineract-provider/api/v1/groups/1
                     </code>
                     <code class="method-response">
 {
@@ -7386,7 +7386,7 @@ GET https://DomainName/mifosng-provider/api/v1/groups/1
                 <div class="method-example">
                     <p>Group along with all its Clients.</p>
                     <code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/groups/1?associations=clientMembers
+GET https://DomainName/fineract-provider/api/v1/groups/1?associations=clientMembers
                     </code>
                     <code class="method-response">
 {
@@ -7661,7 +7661,7 @@ GET https://DomainName/api/v1/groups/{groupId}/accounts
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-PUT https://DomainName/mifosng-provider/api/v1/groups/{groupid}
+PUT https://DomainName/fineract-provider/api/v1/groups/{groupid}
 						</code>
 					<code class="method-request">
 PUT groups/1
@@ -7692,7 +7692,7 @@ Request Body:
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-POST https://DomainName/mifosng-provider/api/v1/groups/{groupid}
+POST https://DomainName/fineract-provider/api/v1/groups/{groupid}
 						</code>
 					<code class="method-request">
 DELETE groups/2
@@ -7788,7 +7788,7 @@ DELETE groups/2
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/groups?paged=true
+GET https://DomainName/fineract-provider/api/v1/groups?paged=true
 					</code>
 					<code class="method-response">
 {
@@ -7822,7 +7822,7 @@ GET https://DomainName/mifosng-provider/api/v1/groups?paged=true
 					<p>The API concept of <b>loans</b> models the <b>loan application process</b> and the <b>loan contract/monitoring process</b>.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>accountNo</td>
@@ -8818,7 +8818,7 @@ GET https://DomainName/api/v1/loans/{loanId}
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/loans
+GET https://DomainName/fineract-provider/api/v1/loans
 					</code>
 					<code class="method-response">
 {
@@ -9043,7 +9043,7 @@ No Request Body:
 					<h4>Calculate loan repayment schedule</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>productId, principal, loanTermFrequency,
@@ -9193,7 +9193,7 @@ Request Body:
 					<h4>Submit a new Loan Application</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>clientId, productId, principal, loanTermFrequency,
@@ -9207,7 +9207,7 @@ Request Body:
 					<br/>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Additional Mandatory Fields if interest recalculation is enabled for product and Rest frequency  not same as repayment period</div></td>
+							<td><div class="fineractHeading2">Additional Mandatory Fields if interest recalculation is enabled for product and Rest frequency  not same as repayment period</div></td>
 						</tr>
 						<tr class=alt>
 							<td>recalculationRestFrequencyDate</td>
@@ -9215,7 +9215,7 @@ Request Body:
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Additional Mandatory Fields if interest recalculation with interest/fee compounding is enabled for product and compounding frequency not same as repayment period</div></td>
+							<td><div class="fineractHeading2">Additional Mandatory Fields if interest recalculation with interest/fee compounding is enabled for product and compounding frequency not same as repayment period</div></td>
 						</tr>
 						<tr class=alt>
 							<td>recalculationCompoundingFrequencyDate</td>
@@ -9224,7 +9224,7 @@ Request Body:
 					<br/>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId, allowPartialPeriodInterestCalcualtion,
@@ -9284,7 +9284,7 @@ Request Body:
 					<h4>Approve Loan Application</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>approvedOnDate</td>
@@ -9293,7 +9293,7 @@ Request Body:
 				</br>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>approvedLoanAmount</td>
@@ -9483,7 +9483,7 @@ Request Body:
 					<h4>Reject Loan Application</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>rejectedOnDate</td>
@@ -9541,7 +9541,7 @@ Request Body:
 					<h4>Applicant Withdraws from Loan Application</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>withdrawnOnDate</td>
@@ -9599,7 +9599,7 @@ Request Body:
 					<h4>Disburse Loan</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>actualDisbursementDate</td>
@@ -9608,7 +9608,7 @@ Request Body:
 					<br/>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>transactionAmount,fixedEmiAmount</td>
@@ -9679,7 +9679,7 @@ Request Body:
 					<h4>Disburse Loan To Savings Account</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>actualDisbursementDate</td>
@@ -9688,7 +9688,7 @@ Request Body:
 					<br/>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>transactionAmount,fixedEmiAmount</td>
@@ -9821,7 +9821,7 @@ No Request Body:
 					<p>Capabilities include loan repayment's, interest waivers and the ability to 'adjust' an existing transaction. An 'adjustment' of a transaction is really a 'reversal' of existing transaction followed by creation of a new transaction with the provided details.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>transactionAmount</td>
@@ -10261,7 +10261,7 @@ GET https://DomainName/api/v1/loans/{loanId}/transactions/{transactionId}
 					<p><b>Note:</b> there is no need to specify command={transactionType} parameter.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>transactionDate, transactionAmount</td>
@@ -10303,7 +10303,7 @@ Request Body:
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>guarantorType</td>
@@ -10547,14 +10547,14 @@ GET https://DomainName/api/v1/loans/{loanId}/guarantors/{guarantorId}
                     </p>
                     <table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields
+							<td><div class="fineractHeading2">Mandatory Fields
 								for "internal" guarantors</div></td>
 						</tr>
 						<tr class=alt>
 							<td>guarantorTypeId, entityId</td>
 						</tr>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields for "external" guarantors</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields for "external" guarantors</div></td>
 						</tr>
 						<tr class=alt>
 							<td>guarantorTypeId, firstname, lastname</td>
@@ -10562,7 +10562,7 @@ GET https://DomainName/api/v1/loans/{loanId}/guarantors/{guarantorId}
                     </table>
 					 <table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields
+							<td><div class="fineractHeading2">Optional Fields
 								for "internal" guarantors</div></td>
 						</tr>
 						<tr class=alt>
@@ -10683,7 +10683,7 @@ No Request Body:
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>type</td>
@@ -10857,7 +10857,7 @@ GET https://DomainName/api/v1/loans/{loanId}/collaterals/{guarantorId}
                     </p>
                     <table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields
+							<td><div class="fineractHeading2">Mandatory Fields
 								for "internal" collaterals</div></td>
 						</tr>
 						<tr class=alt>
@@ -10974,7 +10974,7 @@ No Request Body:
 						described here</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>amountPaid</td>
@@ -11280,7 +11280,7 @@ GET https://DomainName/api/v1/loans/{loanId}/charges/{chargeId}
                     <h4>Create a Loan Charge</h4>
                     <table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields
+							<td><div class="fineractHeading2">Mandatory Fields
 								for Loan Charges</div></td>
 						</tr>
 						<tr class=alt>
@@ -11429,7 +11429,7 @@ No Request Body:
 					<p>Loan rescheduling provides the ability to give clients extra grace periods, extend loan term by adding extra installments and adjust the interest rate of a loan.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>loanId</td>
@@ -11507,7 +11507,7 @@ No Request Body:
 					<h4>Create a Loan Reschedule Request</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>loanId, rescheduleFromDate, rescheduleReasonId, submittedOnDate,<br />
@@ -11518,7 +11518,7 @@ No Request Body:
 						<br />
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>recalculateInterest, rescheduleReasonComment</td>
@@ -11806,7 +11806,7 @@ Request Body:
 					<p>Loan Term Variations provides the ability to change due dates, amounts and number of instalments before loan approval.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>loanId</td>
@@ -11826,7 +11826,7 @@ Request Body:
 					<p>Modifiedinstallments Array fields</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>dueDate</td>
@@ -11856,7 +11856,7 @@ Request Body:
 					<p>newinstallments Array fields</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>dueDate</td>
@@ -11880,7 +11880,7 @@ Request Body:
 					<p>deletedinstallments Array fields</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>dueDate</td>
@@ -11901,7 +11901,7 @@ Request Body:
 					<h4>Calculate loan repayment schedule based on Loan term variations</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>exceptions,locale,dateFormat</td>
@@ -12255,7 +12255,7 @@ Request Body:
 					<h4>Updates loan repayment schedule based on Loan term variations</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>exceptions,locale,dateFormat</td>
@@ -12363,7 +12363,7 @@ Request Body:
 					<h4>Updates loan repayment schedule by removing Loan term variations</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td></td>
@@ -12405,7 +12405,7 @@ Request Body:
 						office). All subsequent offices added must have a parent office.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>externalId</td>
@@ -12552,7 +12552,7 @@ GET https://DomainName/api/v1/offices/1
 					<h4>Create an Office</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>name, openingDate, parentId</td>
@@ -12626,7 +12626,7 @@ Request Body:
 
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>name</td>
@@ -13312,22 +13312,22 @@ GET https://DomainName/api/v1/loanproducts/template
     {
       "id": 1,
       "code": "mifos-standard-strategy",
-      "name": "Mifos style"
+      "name": "Penalties, Fees, Interest, Principal order"
     },
     {
       "id": 2,
       "code": "heavensfamily-strategy",
-      "name": "Heavensfamily"
+      "name": "HeavensFamily Unique"
     },
     {
       "id": 3,
       "code": "creocore-strategy",
-      "name": "Creocore"
+      "name": "Creocore Unique"
     },
     {
       "id": 4,
       "code": "rbi-india-strategy",
-      "name": "RBI (India)"
+      "name": "Overdue/Due Fee/Int,Principal"
     },
     {
       "id": 5,
@@ -14232,7 +14232,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 
                     <table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>name, shortName, currencyCode, digitsAfterDecimal, inMultiplesOf, principal,
@@ -14244,7 +14244,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>inArrearsTolerance, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, graceOnArrearsAgeing, charges, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, includeInBorrowerCycle,
@@ -14258,7 +14258,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Additional Mandatory Fields for Cash(2) based accounting</div></td>
+							<td><div class="fineractHeading2">Additional Mandatory Fields for Cash(2) based accounting</div></td>
 						</tr>
 						<tr class=alt>
 							<td>fundSourceAccountId, loanPortfolioAccountId, interestOnLoanAccountId,
@@ -14268,7 +14268,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Additional Mandatory Fields for periodic (3) and upfront (4)accrual accounting</div></td>
+							<td><div class="fineractHeading2">Additional Mandatory Fields for periodic (3) and upfront (4)accrual accounting</div></td>
 						</tr>
 						<tr class=alt>
 							<td>fundSourceAccountId, loanPortfolioAccountId, interestOnLoanAccountId,
@@ -14279,7 +14279,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Additional Mandatory Fields if interest recalculation is enabled(true)</div></td>
+							<td><div class="fineractHeading2">Additional Mandatory Fields if interest recalculation is enabled(true)</div></td>
 						</tr>
 						<tr class=alt>
 							<td>interestRecalculationCompoundingMethod, rescheduleStrategyMethod, recalculationRestFrequencyType</td>
@@ -14287,7 +14287,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Additional Optional Fields if interest recalculation is enabled(true) </div></td>
+							<td><div class="fineractHeading2">Additional Optional Fields if interest recalculation is enabled(true) </div></td>
 						</tr>
 						<tr class=alt>
 							<td>isArrearsBasedOnOriginalSchedule, preClosureInterestCalculationStrategy</td>
@@ -14295,7 +14295,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Additional Optional Fields if interest recalculation is enabled(true) and recalculationRestFrequencyType is not same as repayment period</div></td>
+							<td><div class="fineractHeading2">Additional Optional Fields if interest recalculation is enabled(true) and recalculationRestFrequencyType is not same as repayment period</div></td>
 						</tr>
 						<tr class=alt>
 							<td>recalculationRestFrequencyInterval, recalculationRestFrequencyDate</td>
@@ -14303,7 +14303,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Additional Optional Fields if interest recalculation is enabled(true) and interestRecalculationCompoundingMethod is enabled</div></td>
+							<td><div class="fineractHeading2">Additional Optional Fields if interest recalculation is enabled(true) and interestRecalculationCompoundingMethod is enabled</div></td>
 						</tr>
 						<tr class=alt>
 							<td>recalculationCompoundingFrequencyType</td>
@@ -14311,7 +14311,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Additional Optional Fields if interest recalculation is enabled(true) and interestRecalculationCompoundingMethod is enabled and
+							<td><div class="fineractHeading2">Additional Optional Fields if interest recalculation is enabled(true) and interestRecalculationCompoundingMethod is enabled and
 							recalculationCompoundingFrequencyType is not same as repayment period</div></td>
 						</tr>
 						<tr class=alt>
@@ -14320,7 +14320,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Additional Mandatory Fields if Hold Guarantee funds is enabled(true)</div></td>
+							<td><div class="fineractHeading2">Additional Mandatory Fields if Hold Guarantee funds is enabled(true)</div></td>
 						</tr>
 						<tr class=alt>
 							<td>mandatoryGuarantee</td>
@@ -14328,7 +14328,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Additional Optional Fields if Hold Guarantee funds is enabled(true)</div></td>
+							<td><div class="fineractHeading2">Additional Optional Fields if Hold Guarantee funds is enabled(true)</div></td>
 						</tr>
 						<tr class=alt>
 							<td>minimumGuaranteeFromOwnFunds,minimumGuaranteeFromGuarantor</td>
@@ -14594,7 +14594,7 @@ Request Body:
 
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>restrictedProducts</td>
@@ -14850,7 +14850,7 @@ GET https://DomainName/api/v1/loanproducts/5/productmix
 
           <table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>restrictedProducts</td>
@@ -14948,7 +14948,7 @@ DELETE loanproducts/5/productmix
 					</p>
 				<table class=matrixHeading>
 					<tr class="matrixHeadingBG">
-						<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						<td><div class="fineractHeading2">Field Descriptions</div></td>
 					</tr>
 					<tr class=alt>
 						<td>name</td>
@@ -15039,7 +15039,7 @@ GET https://DomainName/api/v1/holidays?officeId=1
 				<h4>Create a Holiday</h4>
 				<table class=matrixHeading>
 					<tr class="matrixHeadingBG">
-						<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						<td><div class="fineractHeading2">Mandatory Fields</div></td>
 					</tr>
 					<tr class=alt>
 						<td>name, description, fromDate, toDate, repaymentsRescheduledTo, offices</td>
@@ -15216,7 +15216,7 @@ Request Body:
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandotory Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Mandotory Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>recurrence</td>
@@ -15247,7 +15247,7 @@ Request Body:
 					</table>
 				<table id="nw_repayment_schedule_rule" class=matrixHeading>
 					<tr class="matrixHeadingBG">
-						<td><div class="mifosXHeading2">Schedule for repayments on non-working day</div></td>
+						<td><div class="fineractHeading2">Schedule for repayments on non-working day</div></td>
 					</tr>
 					<tr class=alt>
 						<td>Same day</td>
@@ -15358,7 +15358,7 @@ GET https://DomainName/api/v1/workingdays
 				<h4>Update a Working Day</h4>
 				<table class=matrixHeading>
 					<tr class="matrixHeadingBG">
-						<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						<td><div class="fineractHeading2">Mandatory Fields</div></td>
 					</tr>
 					<tr class=alt>
 						<td>recurrence,repaymentRescheduleType,extendTermForDailyRepayments,locale</td>
@@ -16802,7 +16802,7 @@ GET https://DomainName/api/v1/audits
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>accountType</td>
@@ -17049,7 +17049,7 @@ GET https://DomainName/api/v1/accountnumberformats/{accountnumberformatId}
                     </p>
                     <table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields
+							<td><div class="fineractHeading2">Mandatory Fields
 								for Account number formats</div></td>
 						</tr>
 						<tr class=alt>
@@ -17155,7 +17155,7 @@ No Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h3>Maker Checker (or 4-eye) functionality</h3>
-                                        <p>Mifos X Maker Checker functionality allows an MFI to define transactions
+                                        <p>Apache Fineract Maker Checker functionality allows an MFI to define transactions
                                         as having a maker and a checker phase.  One user enters, deletes or changes data.
                                         Then, another user that has "Checker" rights for that transaction, can inspect
                                         and approve the data.
@@ -17553,7 +17553,7 @@ GET https://DomainName/api/v1/jobs
 GET https://DomainName/api/v1/jobs/{jobId}
 					</code>
 					<code class="method-response">
-https://localhost:8443/mifosng-provider/api/v1/jobs/5
+https://localhost:8443/fineract-provider/api/v1/jobs/5
 {
   "jobId": 5,
   "displayName": "Apply Holidays To Loans",
@@ -17704,7 +17704,7 @@ GET https://DomainName/api/v1/jobs/{jobid}/runhistory?offset=0&limit=200
 GET https://DomainName/api/v1/scheduler
 					</code>
 					<code class="method-response">
-https://localhost:8443/mifosng-provider/api/v1/scheduler
+https://localhost:8443/fineract-provider/api/v1/scheduler
 {
   "active": true
 }
@@ -17950,7 +17950,7 @@ Request Body:
 						not.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>firstname</td>
@@ -18004,7 +18004,7 @@ Request Body:
 					<p>Creates a staff member.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>officeId, firstname, lastname</td>
@@ -18013,7 +18013,7 @@ Request Body:
 					<br/>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>isLoanOfficer, isActive</td>
@@ -18180,11 +18180,11 @@ Request Body:
 			Its typical for MFIs to add extra costs for their financial
 			products. These are typically <b>Fees</b> or <b>Penalties</b>.
 		</p>
-		<p>A <strong><i>Charge</i></strong> on mifos platform is what we use to model both <b>Fees</b> and <b>Penalties</b>.</p>
+		<p>A <strong><i>Charge</i></strong> on fineract platform is what we use to model both <b>Fees</b> and <b>Penalties</b>.</p>
 		<p>At present we support defining charges for use with Client accounts and both loan and saving products.</p>
 		<table class=matrixHeading>
 			<tr class="matrixHeadingBG">
-				<td><div class="mifosXHeading2">Field Descriptions</div></td>
+				<td><div class="fineractHeading2">Field Descriptions</div></td>
 			</tr>
 			<tr class=alt>
 				<td>name</td>
@@ -18940,7 +18940,7 @@ Content-Type: application/json
 						users have access to the rule</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>name</td>
@@ -19096,7 +19096,7 @@ GET https://DomainName/api/v1/accountingrules/template
 					<p>Define a new Accounting rule.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>name, officeId,<br> accountToDebit OR debitTags,<br> accountToCredit OR creditTags.<br>
@@ -19106,7 +19106,7 @@ GET https://DomainName/api/v1/accountingrules/template
 						<br />
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>description</td>
@@ -19352,7 +19352,7 @@ Content-Type: application/json
 	        <p>An MFIs savings product offerings are modeled using this API.</p>
 	        <p>When creating savings accounts, the details from the savings product are used to auto fill details of the savings account application process.</p>
 	        <table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Field Descriptions</div></td></tr>
 
 				<tr class=alt><td>name</td></tr>
 	            <tr><td class=fielddesc>The name of the product offering.</td></tr>
@@ -19980,7 +19980,7 @@ Content-Type: application/json
         <div class="method-description">
             <h4>Create a Savings Product</h4>
             <table class=matrixHeading>
-                <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields</div></td></tr>
                 <tr class=alt>
                 	<td>name, shortName, description, currencyCode, digitsAfterDecimal,inMultiplesOf, nominalAnnualInterestRate,
                 		interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType,accountingRule</td>
@@ -19988,14 +19988,14 @@ Content-Type: application/json
             </table>
             <br/>
             <table class=matrixHeading>
-                <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields for Cash based accounting (accountingRule = 2)</div></td></tr>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields for Cash based accounting (accountingRule = 2)</div></td></tr>
                 <tr class=alt>
                 	<td>savingsReferenceAccountId, savingsControlAccountId, interestOnSavingsAccountId, incomeFromFeeAccountId, transfersInSuspenseAccountId, incomeFromPenaltyAccountId</td>
                 </tr>
             </table>
             <br/>
             <table class=matrixHeading>
-                <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Optional Fields</div></td></tr>
                 <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges, allowOverdraft, overdraftLimit, minBalanceForInterestCalculation</tr>
             </table>
         </div>
@@ -20340,7 +20340,7 @@ Content-Type: application/json
 	        <p>The FD products are deposit accounts which are held for a fixed term – like 1 year, 2 years etc.</p>
 	        <p>When creating fixed deposit accounts, the details from the fixed deposit product are used to auto fill details of the fixed deposit account application process.</p>
 	        <table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Field Descriptions</div></td></tr>
 
 				<tr class=alt><td>name</td></tr>
 	            <tr><td class=fielddesc>The name of the product offering.</td></tr>
@@ -20444,7 +20444,7 @@ Content-Type: application/json
         <div class="method-description">
             <h4>Create a Fixed Deposit Product</h4>
             <table class=matrixHeading>
-                <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields</div></td></tr>
                 <tr class=alt>
                 	<td>name, shortName, description, currencyCode, digitsAfterDecimal,inMultiplesOf,
                 		interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minDepositTerm, minDepositTermTypeId, accountingRule</td>
@@ -20452,14 +20452,14 @@ Content-Type: application/json
             </table>
             <br/>
             <table class=matrixHeading>
-                <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields for Cash based accounting (accountingRule = 2)</div></td></tr>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields for Cash based accounting (accountingRule = 2)</div></td></tr>
                 <tr class=alt>
                 	<td>savingsReferenceAccountId, savingsControlAccountId, interestOnSavingsAccountId, incomeFromFeeAccountId, transfersInSuspenseAccountId, incomeFromPenaltyAccountId </td>
                 </tr>
             </table>
             <br/>
             <table class=matrixHeading>
-                <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Optional Fields</div></td></tr>
                 <tr class=alt><td>lockinPeriodFrequency, lockinPeriodFrequencyType, maxDepositTerm, maxDepositTermTypeId, inMultiplesOfDepositTerm, inMultiplesOfDepositTermTypeId, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges, charts</tr>
             </table>
         </div>
@@ -20833,7 +20833,7 @@ Content-Type: application/json
 	        <p>Recurring Deposits help people with regular incomes to deposit a fixed amount every month (specified recurring frequency) into their Recurring Deposit account.</p>
 	        <p>When creating recurring deposit accounts, the details from the recurring deposit product are used to auto fill details of the recurring deposit account application process.</p>
 	        <table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Field Descriptions</div></td></tr>
 
 				<tr class=alt><td>name</td></tr>
 	            <tr><td class=fielddesc>The name of the product offering.</td></tr>
@@ -20946,7 +20946,7 @@ Content-Type: application/json
         <div class="method-description">
             <h4>Create a Recurring Deposit Product</h4>
             <table class=matrixHeading>
-                <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields</div></td></tr>
                 <tr class=alt>
                 	<td>name, shortName, description, currencyCode, digitsAfterDecimal,inMultiplesOf,
                 		interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minDepositTerm, minDepositTermTypeId, recurringDepositFrequency, recurringDepositFrequencyTypeId, accountingRule, depositAmount </td>
@@ -20954,14 +20954,14 @@ Content-Type: application/json
             </table>
             <br/>
             <table class=matrixHeading>
-                <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields for Cash based accounting (accountingRule = 2)</div></td></tr>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields for Cash based accounting (accountingRule = 2)</div></td></tr>
                 <tr class=alt>
                 	<td>savingsReferenceAccountId, savingsControlAccountId, interestOnSavingsAccountId, incomeFromFeeAccountId, transfersInSuspenseAccountId, incomeFromPenaltyAccountId</td>
                 </tr>
             </table>
             <br/>
             <table class=matrixHeading>
-                <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Optional Fields</div></td></tr>
                 <tr class=alt><td>lockinPeriodFrequency, lockinPeriodFrequencyType, maxDepositTerm, maxDepositTermTypeId, inMultiplesOfDepositTerm, inMultiplesOfDepositTermTypeId, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges, charts, minDepositAmount, maxDepositAmount</tr>
             </table>
         </div>
@@ -21355,9 +21355,9 @@ Content-Type: application/json
 	        <table class=matrixHeading>
 	        	<thead>
 	        		<tr class="matrixHeadingBG">
-	        			<td class="mifosXHeading2">Starting State</td>
-	        			<td class="mifosXHeading2">Action</td>
-	        			<td class="mifosXHeading2">Resultant State</td>
+	        			<td class="fineractHeading2">Starting State</td>
+	        			<td class="fineractHeading2">Action</td>
+	        			<td class="fineractHeading2">Resultant State</td>
 	        		</tr>
 	        	</thead>
 	        	<tbody>
@@ -21395,7 +21395,7 @@ Content-Type: application/json
 	        </table>
 	        <br/>
 	      	<table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Field Descriptions</div></td></tr>
 
 				<tr class=alt><td>clientId</td></tr>
 				<tr><td class=fielddesc>The client you are creating the savings account for. Either <i>clientId</i> or <i>groupId</i> must be provided.</td></tr>
@@ -21801,17 +21801,17 @@ Content-Type: application/json
 	        <h2>Submit new savings application</h2>
 	        <br/>
 	        <table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields</div></td></tr>
 	            <tr class=alt><td>clientId or groupId, productId, submittedOnDate</td></tr>
 	        </table>
 	        <br/>
 	        <table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Optional Fields</div></td></tr>
 	            <tr class=alt><td>accountNo, externalId, fieldOfficerId</td></tr>
 	        </table>
 	        <br/>
 	        <table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Inherited from Product (if not provided)</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Inherited from Product (if not provided)</div></td></tr>
 	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, allowOverdraft, overdraftLimit</td>
 	       		</tr>
 	        </table>
@@ -22165,7 +22165,7 @@ Request Body:
             <p><i>withdrawBalance</i> is a boolean value, true value of this field performs a withdrawal transaction with account's running balance.</p>
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG">
-                    <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                    <td><div class="fineractHeading2">Mandatory Fields</div></td>
                 </tr>
                 <tr class=alt>
                     <td>dateFormat,locale,closedOnDate</td>
@@ -22174,7 +22174,7 @@ Request Body:
             <br />
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG">
-                    <td><div class="mifosXHeading2">Optional Fields</div></td>
+                    <td><div class="fineractHeading2">Optional Fields</div></td>
                 </tr>
                 <tr class=alt>
                     <td>note, <i>withdrawBalance</i>, paymentTypeId, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber</td>
@@ -22561,7 +22561,7 @@ No Request Body:
 	        <h2>Savings Account Transactions:</h2>
 	        <p>Transactions possible on a savings account.</p>
 	      	<table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Field Descriptions</div></td></tr>
 
 				<tr class=alt><td>transactionDate</td></tr>
 				<tr><td class=fielddesc>The date of the transaction.</td></tr>
@@ -22853,7 +22853,7 @@ No Request Body:
 						described here</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>amountPaid</td>
@@ -23241,21 +23241,21 @@ GET https://DomainName/api/v1/savingsaccounts/{accountId}/charges/{savingsAccoun
                     <h4>Create a Savings account Charge</h4>
                     <table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields
+							<td><div class="fineractHeading2">Mandatory Fields
 								for Savings account Charges</div></td>
 						</tr>
 						<tr class=alt>
 							<td>chargeId, amount</td>
 						</tr>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields
+							<td><div class="fineractHeading2">Mandatory Fields
 								for Savings account Charges of Specified due date type</div></td>
 						</tr>
 						<tr class=alt>
 							<td>chargeId, amount, dueDate, dateFormat, locale</td>
 						</tr>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields
+							<td><div class="fineractHeading2">Mandatory Fields
 								for Savings account Charges of Annual fee type</div></td>
 						</tr>
 						<tr class=alt>
@@ -23482,9 +23482,9 @@ No Request Body:
 	        <table class=matrixHeading>
 	        	<thead>
 	        		<tr class="matrixHeadingBG">
-	        			<td class="mifosXHeading2">Starting State</td>
-	        			<td class="mifosXHeading2">Action</td>
-	        			<td class="mifosXHeading2">Resultant State</td>
+	        			<td class="fineractHeading2">Starting State</td>
+	        			<td class="fineractHeading2">Action</td>
+	        			<td class="fineractHeading2">Resultant State</td>
 	        		</tr>
 	        	</thead>
 	        	<tbody>
@@ -23522,7 +23522,7 @@ No Request Body:
 	        </table>
 	        <br/>
 	      	<table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Field Descriptions</div></td></tr>
 
 				<tr class=alt><td>clientId</td></tr>
 				<tr><td class=fielddesc>The client you are creating the fixed deposit account for. Either <i>clientId</i> or <i>groupId</i> must be provided.</td></tr>
@@ -23973,17 +23973,17 @@ No Request Body:
 	        <h2>Submit new fixed deposit application</h2>
 	        <br/>
 	        <table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields</div></td></tr>
 	            <tr class=alt><td>clientId or groupId, productId, submittedOnDate, depositAmount, depositPeriod, depositPeriodFrequencyId</td></tr>
 	        </table>
 	        <br/>
 	        <table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Optional Fields</div></td></tr>
 	            <tr class=alt><td>accountNo, externalId, fieldOfficerId,linkAccountId(if provided initial deposit amount will be collected from this account),transferInterestToSavings(By enabling this flag all interest postings will be transferred to linked saving account )</td></tr>
 	        </table>
 	        <br/>
 	        <table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Inherited from Product (if not provided)</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Inherited from Product (if not provided)</div></td></tr>
 	            <tr class=alt><td>interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, lockinPeriodFrequency, lockinPeriodFrequencyType, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, charts</td>
 	       		</tr>
 	        </table>
@@ -24283,8 +24283,8 @@ Request Body:
 	         <table class=matrixHeading>
 	        	<thead>
 	        		<tr class="matrixHeadingBG">
-	        			<td class="mifosXHeading2">Action on Close</td>
-	        			<td class="mifosXHeading2">Result</td>
+	        			<td class="fineractHeading2">Action on Close</td>
+	        			<td class="fineractHeading2">Result</td>
 	        		</tr>
 	        	</thead>
 	        	<tbody>
@@ -24358,8 +24358,8 @@ Request Body:
 	         <table class=matrixHeading>
 	        	<thead>
 	        		<tr class="matrixHeadingBG">
-	        			<td class="mifosXHeading2">Action on Premature Close</td>
-	        			<td class="mifosXHeading2">Result</td>
+	        			<td class="fineractHeading2">Action on Premature Close</td>
+	        			<td class="fineractHeading2">Result</td>
 	        		</tr>
 	        	</thead>
 	        	<tbody>
@@ -24935,9 +24935,9 @@ No Request Body:
 	        <table class=matrixHeading>
 	        	<thead>
 	        		<tr class="matrixHeadingBG">
-	        			<td class="mifosXHeading2">Starting State</td>
-	        			<td class="mifosXHeading2">Action</td>
-	        			<td class="mifosXHeading2">Resultant State</td>
+	        			<td class="fineractHeading2">Starting State</td>
+	        			<td class="fineractHeading2">Action</td>
+	        			<td class="fineractHeading2">Resultant State</td>
 	        		</tr>
 	        	</thead>
 	        	<tbody>
@@ -24975,7 +24975,7 @@ No Request Body:
 	        </table>
 	        <br/>
 	      	<table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Field Descriptions</div></td></tr>
 
 				<tr class=alt><td>clientId</td></tr>
 				<tr><td class=fielddesc>The client you are creating the recurring deposit account for. Either <i>clientId</i> or <i>groupId</i> must be provided.</td></tr>
@@ -25436,17 +25436,17 @@ No Request Body:
 	        <h2>Submit new recurring deposit application</h2>
 	        <br/>
 	        <table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields</div></td></tr>
 	            <tr class=alt><td>clientId or groupId, productId, submittedOnDate, depositPeriod, depositPeriodFrequencyId, recurringFrequency, recurringFrequencyType, depositAmount,isCalendarInherited, mandatoryRecommendedDepositAmount</td></tr>
 	        </table>
 	        <br/>
 	        <table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Optional Fields</div></td></tr>
 	            <tr class=alt><td>accountNo, externalId, fieldOfficerId, expectedFirstDepositOnDate, allowWithdrawal, adjustAdvanceTowardsFuturePayments, isMandatoryDeposit</td></tr>
 	        </table>
 	        <br/>
 	        <table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Inherited from Product (if not provided)</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Inherited from Product (if not provided)</div></td></tr>
 	            <tr class=alt><td>interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, lockinPeriodFrequency, lockinPeriodFrequencyType, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, charts</td>
 	       		</tr>
 	        </table>
@@ -25803,8 +25803,8 @@ Request Body:
 	         <table class=matrixHeading>
 	        	<thead>
 	        		<tr class="matrixHeadingBG">
-	        			<td class="mifosXHeading2">Action on Close</td>
-	        			<td class="mifosXHeading2">Result</td>
+	        			<td class="fineractHeading2">Action on Close</td>
+	        			<td class="fineractHeading2">Result</td>
 	        		</tr>
 	        	</thead>
 	        	<tbody>
@@ -25877,8 +25877,8 @@ Request Body:
 	         <table class=matrixHeading>
 	        	<thead>
 	        		<tr class="matrixHeadingBG">
-	        			<td class="mifosXHeading2">Action on Premature Close</td>
-	        			<td class="mifosXHeading2">Result</td>
+	        			<td class="fineractHeading2">Action on Premature Close</td>
+	        			<td class="fineractHeading2">Result</td>
 	        		</tr>
 	        	</thead>
 	        	<tbody>
@@ -26550,7 +26550,7 @@ No Request Body:
 	        <h2>Recurring Deposit Account Transactions:</h2>
 	        <p>Transactions possible on a recurring deposit account.</p>
 	      	<table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Field Descriptions</div></td></tr>
 
 				<tr class=alt><td>transactionDate</td></tr>
 				<tr><td class=fielddesc>The date of the transaction.</td></tr>
@@ -26839,7 +26839,7 @@ No Request Body:
 	        <p>Ability to be able to transfer monetary funds from one account to another.</p>
 	        <p>Note: At present only savings account to savings account transfers are supported.</p>
 	      	<table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Parameters</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Parameters</div></td></tr>
 
 	            <tr class=alt><td>fromOfficeId</td></tr>
 				<tr><td class=fielddesc>The id of the office/branch from which the transfer is made.</td></tr>
@@ -27948,7 +27948,7 @@ No Request Body:
 	        <p>Standing instructions (or standing orders) refer to instructions a bank account holder ("the payer") gives to his or her bank to pay a set amount at regular intervals to another's ("the payee's") account.</p>
 	        <p>Note: At present only savings account to savings account and savings account to Loan account transfers are permitted.</p>
 	      	<table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Parameters</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Parameters</div></td></tr>
 
 				<tr class=alt><td>name</td></tr>
 				<tr><td class=fielddesc>A name for this Standing Instruction</td></tr>
@@ -27997,7 +27997,7 @@ No Request Body:
 
 	        </table>
 	        <table class=matrixHeading>
-	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Parameters</div></td></tr>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Optional Parameters</div></td></tr>
 
 				<tr class=alt><td>amount</td></tr>
 				<tr><td class=fielddesc>Transfer amount while running the instruction. must be provided if the selected <b>instructionType</b> is fixed</td></tr>
@@ -29476,14 +29476,14 @@ No Request Body:
 				<div class="method-description">
 					<h3>Data Tables</h3>
 					<p>The datatables API allows you to plug-in your own tables
-						(MySql) that have a relationship to a Mifos X core table. For
+						(MySql) that have a relationship to a Apache Fineract core table. For
 						example, you might want to add some extra client fields and record
 						information about each of the clients' family members. Via the API
 						you can create, read, update and delete entries for each
 						'plugged-in' table. The API checks for permission and for 'data
 						scoping' (only data within the users' office hierarchy can be
 						managed by the user).</p>
-					<p>The Mifos X Reference App uses a JQuery plug-in called
+					<p>The Apache Fineract Reference App uses a JQuery plug-in called
 						stretchydatatables (which in turn uses this datatables resource)
 						to provide a pretty flexible CRUD (Create, Read, Update, Delete)
 						User Interface.</p>
@@ -29500,11 +29500,11 @@ No Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Create Data Table</h4>
-                    <p>Create a new data table and registers it with the Mifos X Core application
+                    <p>Create a new data table and registers it with the Apache Fineract Core application
                         table.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
                             <td><strong>Mandatory - </strong> datatableName</td>
@@ -29546,7 +29546,7 @@ No Request Body:
                     </table>
                     <table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions - columns</div></td>
+							<td><div class="fineractHeading2">Field Descriptions - columns</div></td>
 						</tr>
 						<tr class=alt>
                             <td><strong>Mandatory - </strong>name</td>
@@ -29671,7 +29671,7 @@ Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>List Data Tables</h4>
-					<p>Lists registered data tables and the Mifos X Core
+					<p>Lists registered data tables and the Apache Fineract Core
 						application table they are registered to.</p>
 
 					<h5>Arguments</h5>
@@ -29680,7 +29680,7 @@ Request Body:
 						<dd>
 							<span>optional</span>
 						</dd>
-						<dd>The Mifos X core application table.</dd>
+						<dd>The Apache Fineract core application table.</dd>
 					</dl>
 					<p>Example Requests:</p>
 					<div class=apiClick>datatables?apptable=m_client</div>
@@ -29746,7 +29746,7 @@ GET https://DomainName/api/v1/datatables
 			<div class="method-section">
 				<div class="method-description">
                     <h4>Retrieve Data Table Details</h4>
-					<p>Lists a registered data table details and the Mifos X Core
+					<p>Lists a registered data table details and the Apache Fineract Core
 						application table they are registered to.</p>
 				</div>
 				<div class="method-example">
@@ -29809,7 +29809,7 @@ GET https://DomainName/api/v1/datatables/{datatable}
                         data table is deregistered and registered with the new application table.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
                         </tr>
                         <tr class=alt>
                             <td><em>Optional - </em> apptableName</td>
@@ -29847,7 +29847,7 @@ GET https://DomainName/api/v1/datatables/{datatable}
                     </table>
                     <table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions - dropColumns</div></td>
+							<td><div class="fineractHeading2">Field Descriptions - dropColumns</div></td>
 						</tr>
 						<tr class=alt>
                             <td><strong>Mandatory - </strong>name</td>
@@ -29858,7 +29858,7 @@ GET https://DomainName/api/v1/datatables/{datatable}
 					</table>
                     <table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions - addColumns</div></td>
+							<td><div class="fineractHeading2">Field Descriptions - addColumns</div></td>
 						</tr>
 						<tr class=alt>
                             <td><strong>Mandatory - </strong>name</td>
@@ -29911,7 +29911,7 @@ GET https://DomainName/api/v1/datatables/{datatable}
 					</table>
                     <table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions - changeColumns</div></td>
+							<td><div class="fineractHeading2">Field Descriptions - changeColumns</div></td>
 						</tr>
 						<tr class=alt>
                             <td><strong>Mandatory - </strong>name</td>
@@ -30010,7 +30010,7 @@ Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Delete Data Table</h4>
-                    <p>Deletes a data table and deregisters it from the Mifos X Core
+                    <p>Deletes a data table and deregisters it from the Apache Fineract Core
                         application table.</p>
 				</div>
 				<div class="method-example">
@@ -30036,7 +30036,7 @@ No Request Body
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Register Data Table</h4>
-					<p>Registers a data table with the Mifos X Core application
+					<p>Registers a data table with the Apache Fineract Core application
 						table. This allows the data table to be maintained through the
 						API.
 						In case the datatable is a PPI (survey table), a parameter category should be pass along with the request.
@@ -30551,7 +30551,7 @@ Request Body:
              <div class="method-section">
                  <div class="method-description">
                      <h4>Retrieve survey</h4>
-                     <p>Lists a registered survey table details and the Mifos X Core application table they are registered to.
+                     <p>Lists a registered survey table details and the Apache Fineract Core application table they are registered to.
                      </p>
                  </div>
                  <div class="method-example">
@@ -30671,7 +30671,7 @@ Request Body:
 
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>note</td>
@@ -30684,7 +30684,7 @@ Request Body:
 					<br>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Supported Resources</div></td>
+							<td><div class="fineractHeading2">Supported Resources</div></td>
 						</tr>
 						<tr class=alt>
 							<td>
@@ -30709,7 +30709,7 @@ Request Body:
 					<p>Adds a new note to a supported resource.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>note</td>
@@ -30905,7 +30905,7 @@ No Request Body:
 					<br/>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>parentEntityType</td>
@@ -31040,7 +31040,7 @@ GET https://DomainName/api/v1/documents/{clientId}
 						<table class=matrixHeading>
 
 							<tr class="matrixHeadingBG">
-								<td><div class="mifosXHeading2">Body Parts</div></td>
+								<td><div class="fineractHeading2">Body Parts</div></td>
 							</tr>
 							<tr class=alt>
 								<td>name</td>
@@ -31066,7 +31066,7 @@ GET https://DomainName/api/v1/documents/{clientId}
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>file and description</td>
@@ -31102,7 +31102,7 @@ Request Body:
 						<table class=matrixHeading>
 
 							<tr class="matrixHeadingBG">
-								<td><div class="mifosXHeading2">Body Parts</div></td>
+								<td><div class="fineractHeading2">Body Parts</div></td>
 							</tr>
 							<tr class=alt>
 								<td>name</td>
@@ -31544,7 +31544,7 @@ Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Running a Report</h4>
-					<p>This resource allows you to run and receive output from pre-defined Mifos X reports. </p>
+					<p>This resource allows you to run and receive output from pre-defined Apache Fineract reports. </p>
                                         <p>Reports can also be used to provide data for searching and workflow functionality.</p>
                                         <p>
                                                 The default output is a JSON formatted "Generic Resultset". The Generic Resultset contains
@@ -31554,7 +31554,7 @@ Request Body:
 					<p>If Pentaho reports have been pre-defined, they can also be
 						run through this resource. Pentaho reports can return HTML, PDF or
 						CSV formats.</p>
-					<p>The Mifos X reference application uses a
+					<p>The Apache Fineract reference application uses a
 						JQuery plugin called stretchyreporting which, itself, uses this
 						reports resource to provide a pretty flexible reporting User
 						Interface (UI).</p>
@@ -31713,7 +31713,7 @@ GET https://DomainName/api/v1/runreports/{reportName}
 						authentication details using HTTP Basic Authentication.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>base64EncodedAuthenticationKey</td>
@@ -31823,7 +31823,7 @@ No Request Body
 					<p>An API capability that allows client applications to fetch current user details details using Oauth2.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>accessToken</td>
@@ -31846,7 +31846,7 @@ No Request Body
 					<p>API for requesting OAuth2 access token and refresh token.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>grant_type</td>
@@ -31927,7 +31927,7 @@ No Request Body
 					<p>API for requesting OAuth2 access tokens through oAuth2 refresh tokens.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>grant_type</td>
@@ -32242,7 +32242,7 @@ GET https://DomainName/api/v1/users/{userId}
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr>
 							<td>username, firstname, lastname, email, officeId, roles, sendPasswordToEmail</td>
@@ -32251,7 +32251,7 @@ GET https://DomainName/api/v1/users/{userId}
 					<br>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr>
 							<td>staffId,passwordNeverExpires,isSelfServiceUser,clients</td>
@@ -32486,7 +32486,7 @@ GET https://DomainName/api/v1/roles/{roleId}
 					<h4>Create a New Role</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>name, description</td>
@@ -32662,7 +32662,7 @@ Request body:
 				<div class="method-description">
 					<h3>Permissions</h3>
 					<p>An API capability to support management of application permissions for user administration.</p>
-                                        <p>There is no Mifos X functionality for creating or deleting permissions.  Permissions come pre-installed.</p>
+                                        <p>There is no Apache Fineract functionality for creating or deleting permissions.  Permissions come pre-installed.</p>
                                         <p>Permissions are not updated, except in the case of enabling or disabling non-read transactions for
                                         Maker Checker functionality</p>
 				</div>
@@ -32685,7 +32685,7 @@ Request body:
                                             enabled for Maker Check functionality.
                                             </p>
                                             <p>
-                                            Note: Each Mifos X transaction is associated with a permission.
+                                            Note: Each Apache Fineract transaction is associated with a permission.
                                             </p>
                                             </dd>
                                         </dl>
@@ -32749,7 +32749,7 @@ Request Body:
 				<div class="method-description">
 					<h3>Password preferences</h3>
 					<p>This API enables management of password policy for user administration.</p>
-					<p>There is no Mifos X functionality for creating a validation policy.  The validation policies come pre-installed.</p>
+					<p>There is no Apache Fineract functionality for creating a validation policy.  The validation policies come pre-installed.</p>
 					<p>Validation policies may be updated</p>
 				</div>
 			</div>
@@ -32836,7 +32836,7 @@ Request Body:
                     </p>
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG">
-                            <td><div class="mifosXHeading2">Field Descriptions</div></td>
+                            <td><div class="fineractHeading2">Field Descriptions</div></td>
                         </tr>
                         <tr class=alt>
                             <td>name</td>
@@ -33320,7 +33320,7 @@ GET https://DomainName/api/v1/glaccounts/{glaccountsId}
                     </p>
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG">
-                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                            <td><div class="fineractHeading2">Mandatory Fields</div></td>
                         </tr>
                         <tr class=alt>
                             <td>name, glCode, type, usage and manualEntriesAllowed
@@ -33439,7 +33439,7 @@ No Request Body:
                     </p>
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG">
-                            <td><div class="mifosXHeading2">Field Descriptions</div></td>
+                            <td><div class="fineractHeading2">Field Descriptions</div></td>
                         </tr>
                         <tr class=alt>
                             <td>closingDate</td>
@@ -33590,7 +33590,7 @@ GET https://DomainName/api/v1/glclosures/{glclosureId}
                     <h4>Create an Accounting Closure</h4>
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG">
-                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                            <td><div class="fineractHeading2">Mandatory Fields</div></td>
                         </tr>
                         <tr class=alt>
                             <td>officeId,closingDate
@@ -33695,7 +33695,7 @@ No Request Body:
                     </p>
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG">
-                            <td><div class="mifosXHeading2">Field Descriptions</div></td>
+                            <td><div class="fineractHeading2">Field Descriptions</div></td>
                         </tr>
                         <tr class=alt>
                             <td>officeId</td>
@@ -34074,7 +34074,7 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
                     </p>
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG">
-                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                            <td><div class="fineractHeading2">Mandatory Fields</div></td>
                         </tr>
                         <tr class=alt>
                             <td>officeId, transactionDate
@@ -34121,7 +34121,7 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
                     <br />
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>paymentTypeId, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber</td>
@@ -34267,7 +34267,7 @@ Request Body:
                     </p>
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG">
-                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                            <td><div class="fineractHeading2">Mandatory Fields</div></td>
                         </tr>
                         <tr class=alt>
                             <td>officeId
@@ -34412,7 +34412,7 @@ Content-Type: application/json
                     </p>
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG">
-                            <td><div class="mifosXHeading2">Field Descriptions</div></td>
+                            <td><div class="fineractHeading2">Field Descriptions</div></td>
                         </tr>
                         <tr class=alt>
                             <td>financialActivityId</td>
@@ -34484,7 +34484,7 @@ GET https://DomainName/api/v1/financialactivityaccounts
                     <h4>Create a new Financial Activity to Accounts Mapping</h4>
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG">
-                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                            <td><div class="fineractHeading2">Mandatory Fields</div></td>
                         </tr>
                         <tr class=alt>
                             <td>financialActivityId, glAccountId
@@ -34617,7 +34617,7 @@ Content-Type: application/json
                     </p>
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG">
-                            <td><div class="mifosXHeading2">Field Descriptions</div></td>
+                            <td><div class="fineractHeading2">Field Descriptions</div></td>
                         </tr>
                         <tr class=alt>
                             <td>tillDate</td>
@@ -34639,7 +34639,7 @@ Content-Type: application/json
                     <h4>Executes Periodic Accrual Accounting</h4>
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG">
-                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                            <td><div class="fineractHeading2">Mandatory Fields</div></td>
                         </tr>
                         <tr class=alt>
                             <td>tillDate
@@ -34677,7 +34677,7 @@ Request Body:
 					<p>This defines the Provisioning Entries for all active loan products
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>date</td>
@@ -34707,7 +34707,7 @@ Request Body:
 					<p>Creates a new Provisioning Entries</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>date</td>
@@ -34721,7 +34721,7 @@ Request Body:
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>createjournalentries</td>
@@ -34918,8 +34918,8 @@ Request Body:
 
 					<table class=matrixHeading id=scoped_resources>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Scoped Resources</div></td>
-							<td><div class="mifosXHeading2">Scoped fields</div></td>
+							<td><div class="fineractHeading2">Scoped Resources</div></td>
+							<td><div class="fineractHeading2">Scoped fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td rowspan="3"><a href="#clients">Client</a></td>
@@ -34967,8 +34967,8 @@ Request Body:
 					<br>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Parameters</div></td>
-							<td><div class="mifosXHeading2">Description</div></td>
+							<td><div class="fineractHeading2">Parameters</div></td>
+							<td><div class="fineractHeading2">Description</div></td>
 						</tr>
 						<tr class=alt>
 							<td>
@@ -35001,7 +35001,7 @@ Request Body:
 					<br>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Order of Search results</div></td>
+							<td><div class="fineractHeading2">Order of Search results</div></td>
 						</tr>
 						<tr class=alt>
 							<td class=fielddesc>
@@ -35087,7 +35087,7 @@ GET https://DomainName/api/v1/search?query=000000001&exactMatch=true
 					<p>AdHoc Query search supported parameters and field descriptions</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>entities</td>
@@ -35215,7 +35215,7 @@ GET https://DomainName/api/v1/search?query=000000001&exactMatch=true
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>entities</td>
@@ -35224,7 +35224,7 @@ GET https://DomainName/api/v1/search?query=000000001&exactMatch=true
 						<br />
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>
@@ -35296,7 +35296,7 @@ Content-Type: application/json Request Body:
 
 				<table class=matrixHeading>
 					<tr class="matrixHeadingBG">
-						<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						<td><div class="fineractHeading2">Field Descriptions</div></td>
 					</tr>
 					<tr class=alt>
 						<td>name</td>
@@ -35341,7 +35341,7 @@ Content-Type: application/json Request Body:
 					<p>Creats a new chart which can be attached to a term deposit products (FD or RD).</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>fromDate</td>
@@ -35349,7 +35349,7 @@ Content-Type: application/json Request Body:
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>name, description and endDate</td>
@@ -35601,7 +35601,7 @@ GET https://DomainName/api/v1/interestratecharts/template
 
 				<table class=matrixHeading>
 					<tr class="matrixHeadingBG">
-						<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						<td><div class="fineractHeading2">Field Descriptions</div></td>
 					</tr>
 					<tr class=alt>
 						<td>periodType</td>
@@ -35662,7 +35662,7 @@ GET https://DomainName/api/v1/interestratecharts/template
 					<p>Creats a new interest rate slab for an interest rate chart.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>periodType, fromPeriod, annualInterestRate</td>
@@ -35670,7 +35670,7 @@ GET https://DomainName/api/v1/interestratecharts/template
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>toPeriod and description</td>
@@ -35965,7 +35965,7 @@ No Request Body:
 					<p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>Teller name, OfficeId, Description, Start Date, Status</td>
@@ -35973,7 +35973,7 @@ No Request Body:
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>End Date</td>
@@ -36149,7 +36149,7 @@ No Request Body:
 					<p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>Cashier/staff, Fromm Date, To Date, Full Day or From time and To time</td>
@@ -36157,7 +36157,7 @@ No Request Body:
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>Description/Notes</td>
@@ -36532,7 +36532,7 @@ No Request Body:
 					<p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>Date, Amount, Currency, Notes/Comments</td>
@@ -36573,7 +36573,7 @@ No Request Body:
 					<p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>Date, Amount, Currency, Notes/Comments</td>
@@ -36753,7 +36753,7 @@ No Request Body:
 					<p>This defines the payment type
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>name</td>
@@ -36797,7 +36797,7 @@ No Request Body:
 					<p>Creates a new Payment type</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>name</td>
@@ -36805,7 +36805,7 @@ No Request Body:
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>Description, isCashPayment,Position</td>
@@ -36968,7 +36968,7 @@ No Request Body:
 					<p>This defines the Provisioning Criteria
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>Provisioning Criteria Name</td>
@@ -37006,7 +37006,7 @@ No Request Body:
 					<p>Creates a new Provisioning Criteria</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>criteriaName</td>
@@ -37017,7 +37017,7 @@ No Request Body:
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>loanProducts</td>
@@ -37183,7 +37183,7 @@ No Request Body:
 					<p>Updates a new Provisioning Criteria</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>criteriaName, loanProducts, provisioningcriteria</td>
@@ -37283,7 +37283,7 @@ No Request Body:
 					<p>This defines the Floating Rates</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>name</td>
@@ -37320,7 +37320,7 @@ No Request Body:
 					<p>This defines the Floating Rates Periods</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions for ratePeriods</div></td>
+							<td><div class="fineractHeading2">Field Descriptions for ratePeriods</div></td>
 						</tr>
 						<tr class=alt>
 							<td>fromDate</td>
@@ -37359,7 +37359,7 @@ No Request Body:
 					<p>Creates a new Floating Rate</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>name</td>
@@ -37367,7 +37367,7 @@ No Request Body:
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>isBaseLendingRate</td>
@@ -37581,12 +37581,12 @@ No Request Body:
 				<h3>User Generated Documents</h3>
 				<p>User Generated Documents(alternatively, Templates) are used for end-user features such as custom user defined document generation (AKA UGD).  They are based on <a href="http://mustache.github.io/">{{ moustache }} templates</a>. Think of them as a sort of built-in "mail merge" functionality.</p>
 
-				<p>User Generated Documents (and other types of templates) can aggregate data from several Mifos X back-end API calls via <b>mappers</b>.  Mappers can even access non-Mifos X REST services from other servers.  UGDs can render such data in tables, show images, etc. <i>TBD: Please have a look at some of the Example UGDs included in Mifos X (or <a href="https://mifosforge.jira.com/wiki/display/RES/UGD_FinalDoc">the Wiki page</a>, for now.).</i></p>
+				<p>User Generated Documents (and other types of templates) can aggregate data from several Apache Fineract back-end API calls via <b>mappers</b>.  Mappers can even access non-Apache Fineract REST services from other servers.  UGDs can render such data in tables, show images, etc. <i>TBD: Please have a look at some of the Example UGDs included in Apache Fineract (or <a href="https://mifosforge.jira.com/wiki/display/RES/UGD_FinalDoc">the Wiki page</a>, for now.).</i></p>
 
 				<p>UGDs can be assigned to an entity like <b>client</b> or <b>loan</b> and be of a type like <b>Document</b> or <b>SMS</b>.  The entity and type of a UGD is only there for the convenience of user agents (UIs), in order to know where to show UGDs for the user (i.e. which tab).  The Template Engine back-end runner does not actually need this metadata.</p>
 				<table class=matrixHeading>
 					<tr class="matrixHeadingBG">
-						<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						<td><div class="fineractHeading2">Field Descriptions</div></td>
 					</tr>
 					<tr class=alt>
 						<td>name</td>
@@ -37704,7 +37704,7 @@ GET https://DomainName/api/v1/templates/template
 					<p>Adds a new UGD.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>name</td>
@@ -37761,9 +37761,9 @@ Request Body:
 					<br>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Entity</div></td>
+							<td><div class="fineractHeading2">Entity</div></td>
 							<td>Id</td>
-							<td><div class="mifosXHeading2">Type</div></td>
+							<td><div class="fineractHeading2">Type</div></td>
 							<td>Id</td>
 						</tr>
 						<tr class=alt>
@@ -37898,7 +37898,7 @@ Request Body:
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>amountPaid</td>
@@ -37941,7 +37941,7 @@ Request Body:
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
 							<td>id</td>
@@ -38118,7 +38118,7 @@ GET https://DomainName/api/v1/clients/{clientId}/transaction/{transactionId}
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>chargeId and dueDate </td>
@@ -38126,7 +38126,7 @@ GET https://DomainName/api/v1/clients/{clientId}/transaction/{transactionId}
 					</table>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Optional Fields</div></td>
+							<td><div class="fineractHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
 							<td>amount</td>
@@ -38469,7 +38469,7 @@ No Request Body
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr >
 						<td>
@@ -38589,7 +38589,7 @@ No Request Body:
 						<div class="method-description">
 							<h3>SPM API</h3>
 							<p>
-								The Mifos X SPM API provides the ability to create custom surveys to collect social performance measurentment data or any additional questionnaire a financial institute want to collect.
+								The Apache Fineract SPM API provides the ability to create custom surveys to collect social performance measurentment data or any additional questionnaire a financial institute want to collect.
 							</p>
 						</div>
 					</div>
@@ -38600,7 +38600,7 @@ No Request Body:
 							<p>Adds a new survey to collect client related data.</p>
 							<table class=matrixHeading>
 								<tr class="matrixHeadingBG">
-									<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+									<td><div class="fineractHeading2">Mandatory Fields</div></td>
 								</tr>
 								<tr class=alt>
 									<td>countryCode, key, name, questions, responses, sequenceNo, text, value</td>
@@ -38826,7 +38826,7 @@ No Request Body
 							<p>Add a new netry to a survey.</p>
 							<table class=matrixHeading>
 								<tr class="matrixHeadingBG">
-									<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+									<td><div class="fineractHeading2">Mandatory Fields</div></td>
 								</tr>
 								<tr class=alt>
 									<td>key, score, validFrom, validTo</td>
@@ -38973,7 +38973,7 @@ No Request Body
 							<p>Add a new netry to a survey.</p>
 							<table class=matrixHeading>
 								<tr class="matrixHeadingBG">
-									<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+									<td><div class="fineractHeading2">Mandatory Fields</div></td>
 								</tr>
 								<tr class=alt>
 									<td>clientId, createdOn, questionId, responseId, staffId</td>
@@ -42810,8 +42810,7 @@ No Request Body:
 	</ul>
 </p>
 
-	<h4>Mifos Style</h4>
-	<p>Replicates the same payment order of our previous legacy mifos software.</p>
+	<h4>Penalties, Fees, Interest, Principal order</h4>
 	<p>
 		<strong>Payment order</strong>:
 		<ol>

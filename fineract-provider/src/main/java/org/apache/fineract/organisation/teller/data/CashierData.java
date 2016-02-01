@@ -1,20 +1,33 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.organisation.teller.data;
+package org.apache.fineract.organisation.teller.data;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 
+import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.organisation.office.data.OfficeData;
+import org.apache.fineract.organisation.staff.data.StaffData;
+import org.apache.fineract.portfolio.client.data.ClientData;
+import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.codes.data.CodeValueData;
-import org.mifosplatform.organisation.office.data.OfficeData;
-import org.mifosplatform.organisation.staff.data.StaffData;
-import org.mifosplatform.portfolio.client.data.ClientData;
-import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 
 /**
  * Represents a cashier, providing access to the cashier's office, staff
@@ -23,7 +36,7 @@ import org.mifosplatform.portfolio.savings.data.SavingsProductData;
  * @author Markus Geiss
 <<<<<<< HEAD
  * @since 2.0.0
- * @see org.mifosplatform.organisation.teller.domain.Cashier
+ * @see org.apache.fineract.organisation.teller.domain.Cashier
  * @since 2.0.0
  */
 public final class CashierData implements Serializable {

@@ -1,28 +1,41 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.infrastructure.entityaccess.service;
+package org.apache.fineract.infrastructure.entityaccess.service;
 
 import java.util.Date;
 import java.util.Map;
 
-import org.mifosplatform.infrastructure.codes.domain.CodeValue;
-import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.infrastructure.entityaccess.api.MifosEntityApiResourceConstants;
-import org.mifosplatform.infrastructure.entityaccess.data.MifosEntityDataValidator;
-import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityAccess;
-import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityAccessRepository;
-import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityRelation;
-import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityRelationRepositoryWrapper;
-import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityToEntityMapping;
-import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityToEntityMappingRepository;
-import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityToEntityMappingRepositoryWrapper;
-import org.mifosplatform.infrastructure.entityaccess.exception.MifosEntityToEntityMappingDateException;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.entityaccess.api.FineractEntityApiResourceConstants;
+import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityDataValidator;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccess;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessRepository;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelation;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepositoryWrapper;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMapping;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMappingRepository;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMappingRepositoryWrapper;
+import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityToEntityMappingDateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,26 +44,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class MifosEntityAccessWriteServiceImpl implements MifosEntityAccessWriteService {
+public class FineractEntityAccessWriteServiceImpl implements FineractEntityAccessWriteService {
 
-    private final static Logger logger = LoggerFactory.getLogger(MifosEntityAccessWriteServiceImpl.class);
-    private final MifosEntityAccessRepository entityAccessRepository;
-    private final MifosEntityRelationRepositoryWrapper mifosEntityRelationRepositoryWrapper;
-    private final MifosEntityToEntityMappingRepository mifosEntityToEntityMappingRepository;
-    private final MifosEntityToEntityMappingRepositoryWrapper mifosEntityToEntityMappingRepositoryWrapper;
-    private final MifosEntityDataValidator fromApiJsonDeserializer;
+    private final static Logger logger = LoggerFactory.getLogger(FineractEntityAccessWriteServiceImpl.class);
+    private final FineractEntityAccessRepository entityAccessRepository;
+    private final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepositoryWrapper;
+    private final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository;
+    private final FineractEntityToEntityMappingRepositoryWrapper fineractEntityToEntityMappingRepositoryWrapper;
+    private final FineractEntityDataValidator fromApiJsonDeserializer;
 
     @Autowired
-    public MifosEntityAccessWriteServiceImpl(final MifosEntityAccessRepository entityAccessRepository,
-            final MifosEntityRelationRepositoryWrapper mifosEntityRelationRepositoryWrapper,
-            final MifosEntityToEntityMappingRepository mifosEntityToEntityMappingRepository,
-            final MifosEntityToEntityMappingRepositoryWrapper mifosEntityToEntityMappingRepositoryWrapper,
-            MifosEntityDataValidator fromApiJsonDeserializer) {
+    public FineractEntityAccessWriteServiceImpl(final FineractEntityAccessRepository entityAccessRepository,
+            final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepositoryWrapper,
+            final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository,
+            final FineractEntityToEntityMappingRepositoryWrapper fineractEntityToEntityMappingRepositoryWrapper,
+            FineractEntityDataValidator fromApiJsonDeserializer) {
         this.entityAccessRepository = entityAccessRepository;
-        this.mifosEntityToEntityMappingRepository = mifosEntityToEntityMappingRepository;
+        this.fineractEntityToEntityMappingRepository = fineractEntityToEntityMappingRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.mifosEntityRelationRepositoryWrapper = mifosEntityRelationRepositoryWrapper;
-        this.mifosEntityToEntityMappingRepositoryWrapper = mifosEntityToEntityMappingRepositoryWrapper;
+        this.fineractEntityRelationRepositoryWrapper = fineractEntityRelationRepositoryWrapper;
+        this.fineractEntityToEntityMappingRepositoryWrapper = fineractEntityToEntityMappingRepositoryWrapper;
     }
 
     @Override
@@ -63,7 +76,7 @@ public class MifosEntityAccessWriteServiceImpl implements MifosEntityAccessWrite
     @Transactional
     public void addNewEntityAccess(final String entityType, final Long entityId, final CodeValue accessType, final String secondEntityType,
             final Long secondEntityId) {
-        MifosEntityAccess entityAccess = MifosEntityAccess.createNew(entityType, entityId, accessType, secondEntityType, secondEntityId);
+        FineractEntityAccess entityAccess = FineractEntityAccess.createNew(entityType, entityId, accessType, secondEntityType, secondEntityId);
         entityAccessRepository.save(entityAccess);
     }
 
@@ -75,22 +88,22 @@ public class MifosEntityAccessWriteServiceImpl implements MifosEntityAccessWrite
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
-            final MifosEntityRelation mapId = this.mifosEntityRelationRepositoryWrapper.findOneWithNotFoundDetection(relId);
+            final FineractEntityRelation mapId = this.fineractEntityRelationRepositoryWrapper.findOneWithNotFoundDetection(relId);
 
-            final Long fromId = command.longValueOfParameterNamed(MifosEntityApiResourceConstants.fromEnityType);
-            final Long toId = command.longValueOfParameterNamed(MifosEntityApiResourceConstants.toEntityType);
-            final Date startDate = command.DateValueOfParameterNamed(MifosEntityApiResourceConstants.startDate);
-            final Date endDate = command.DateValueOfParameterNamed(MifosEntityApiResourceConstants.endDate);
+            final Long fromId = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.fromEnityType);
+            final Long toId = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.toEntityType);
+            final Date startDate = command.DateValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
+            final Date endDate = command.DateValueOfParameterNamed(FineractEntityApiResourceConstants.endDate);
 
             fromApiJsonDeserializer.checkForEntity(relId.toString(), fromId, toId);
             if (startDate != null && endDate != null) {
                 if (endDate
-                        .before(startDate)) { throw new MifosEntityToEntityMappingDateException(startDate.toString(), endDate.toString()); }
+                        .before(startDate)) { throw new FineractEntityToEntityMappingDateException(startDate.toString(), endDate.toString()); }
             }
 
-            final MifosEntityToEntityMapping newMap = MifosEntityToEntityMapping.newMap(mapId, fromId, toId, startDate, endDate);
+            final FineractEntityToEntityMapping newMap = FineractEntityToEntityMapping.newMap(mapId, fromId, toId, startDate, endDate);
 
-            this.mifosEntityToEntityMappingRepository.save(newMap);
+            this.fineractEntityToEntityMappingRepository.save(newMap);
 
             return new CommandProcessingResultBuilder().withEntityId(newMap.getId()).withCommandId(command.commandId()).build();
         } catch (final DataIntegrityViolationException dve) {
@@ -107,18 +120,18 @@ public class MifosEntityAccessWriteServiceImpl implements MifosEntityAccessWrite
 
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
-            final MifosEntityToEntityMapping mapForUpdate = this.mifosEntityToEntityMappingRepositoryWrapper
+            final FineractEntityToEntityMapping mapForUpdate = this.fineractEntityToEntityMappingRepositoryWrapper
                     .findOneWithNotFoundDetection(mapId);
 
             String relId = mapForUpdate.getRelationId().getId().toString();
-            final Long fromId = command.longValueOfParameterNamed(MifosEntityApiResourceConstants.fromEnityType);
-            final Long toId = command.longValueOfParameterNamed(MifosEntityApiResourceConstants.toEntityType);
+            final Long fromId = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.fromEnityType);
+            final Long toId = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.toEntityType);
             fromApiJsonDeserializer.checkForEntity(relId, fromId, toId);
 
             final Map<String, Object> changes = mapForUpdate.updateMap(command);
 
             if (!changes.isEmpty()) {
-                this.mifosEntityToEntityMappingRepository.saveAndFlush(mapForUpdate);
+                this.fineractEntityToEntityMappingRepository.saveAndFlush(mapForUpdate);
             }
             return new CommandProcessingResultBuilder(). //
                     withEntityId(mapForUpdate.getId()).withCommandId(command.commandId()).build();
@@ -133,8 +146,8 @@ public class MifosEntityAccessWriteServiceImpl implements MifosEntityAccessWrite
     public CommandProcessingResult deleteEntityToEntityMapping(Long mapId) {
         // TODO Auto-generated method stub
 
-        final MifosEntityToEntityMapping deleteMap = this.mifosEntityToEntityMappingRepositoryWrapper.findOneWithNotFoundDetection(mapId);
-        this.mifosEntityToEntityMappingRepository.delete(deleteMap);
+        final FineractEntityToEntityMapping deleteMap = this.fineractEntityToEntityMappingRepositoryWrapper.findOneWithNotFoundDetection(mapId);
+        this.fineractEntityToEntityMappingRepository.delete(deleteMap);
 
         return new CommandProcessingResultBuilder(). //
                 withEntityId(deleteMap.getId()).build();
@@ -146,8 +159,8 @@ public class MifosEntityAccessWriteServiceImpl implements MifosEntityAccessWrite
         final Throwable realCause = dve.getMostSpecificCause();
         realCause.printStackTrace();
         if (realCause.getMessage().contains("rel_id_from_id_to_id")) {
-            final String fromId = command.stringValueOfParameterNamed(MifosEntityApiResourceConstants.fromEnityType);
-            final String toId = command.stringValueOfParameterNamed(MifosEntityApiResourceConstants.toEntityType);
+            final String fromId = command.stringValueOfParameterNamed(FineractEntityApiResourceConstants.fromEnityType);
+            final String toId = command.stringValueOfParameterNamed(FineractEntityApiResourceConstants.toEntityType);
             throw new PlatformDataIntegrityException("error.msg.duplicate.entity.mapping",
                     "EntityMapping from " + fromId + " to " + toId + " already exist");
         }

@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.batch.api;
+package org.apache.fineract.batch.api;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,30 +31,30 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosplatform.batch.domain.BatchRequest;
-import org.mifosplatform.batch.domain.BatchResponse;
-import org.mifosplatform.batch.serialization.BatchRequestJsonHelper;
-import org.mifosplatform.batch.service.BatchApiService;
-import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.batch.domain.BatchRequest;
+import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.batch.serialization.BatchRequestJsonHelper;
+import org.apache.fineract.batch.service.BatchApiService;
+import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
  * Provides a REST resource for Batch Requests. This class acts as a proxy to
- * {@link org.mifosplatform.batch.service.BatchApiService} and de-serializes the
+ * {@link org.apache.fineract.batch.service.BatchApiService} and de-serializes the
  * incoming JSON string to a list of
- * {@link org.mifosplatform.batch.domain .BatchRequest} type. This list is
+ * {@link org.apache.fineract.batch.domain .BatchRequest} type. This list is
  * forwarded to BatchApiService which finally returns a list of
- * {@link org.mifosplatform.batch.domain.BatchResponse} type which is then
+ * {@link org.apache.fineract.batch.domain.BatchResponse} type which is then
  * serialized into JSON response by this Resource class.
  * 
  * @author Rishabh Shukla
  * 
- * @see org.mifosplatform.batch.service.BatchApiService
- * @see org.mifosplatform.batch.domain.BatchRequest
- * @see org.mifosplatform.batch.domain.BatchResponse
+ * @see org.apache.fineract.batch.service.BatchApiService
+ * @see org.apache.fineract.batch.domain.BatchRequest
+ * @see org.apache.fineract.batch.domain.BatchResponse
  */
 @Path("/batches")
 @Component

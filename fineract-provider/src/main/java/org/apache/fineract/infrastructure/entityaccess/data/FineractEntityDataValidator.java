@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.infrastructure.entityaccess.data;
+package org.apache.fineract.infrastructure.entityaccess.data;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -11,24 +24,24 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.entityaccess.api.FineractEntityApiResourceConstants;
+import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
+import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
+import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
+import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
+import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
+import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
+import org.apache.fineract.useradministration.domain.Role;
+import org.apache.fineract.useradministration.domain.RoleRepository;
+import org.apache.fineract.useradministration.exception.RoleNotFoundException;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.core.data.ApiParameterError;
-import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
-import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
-import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.infrastructure.entityaccess.api.MifosEntityApiResourceConstants;
-import org.mifosplatform.organisation.office.domain.OfficeRepositoryWrapper;
-import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
-import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
-import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
-import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
-import org.mifosplatform.portfolio.savings.domain.SavingsProduct;
-import org.mifosplatform.portfolio.savings.domain.SavingsProductRepository;
-import org.mifosplatform.portfolio.savings.exception.SavingsProductNotFoundException;
-import org.mifosplatform.useradministration.domain.Role;
-import org.mifosplatform.useradministration.domain.RoleRepository;
-import org.mifosplatform.useradministration.exception.RoleNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +49,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 @Component
-public class MifosEntityDataValidator {
+public class FineractEntityDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final OfficeRepositoryWrapper officeRepositoryWrapper;
@@ -46,7 +59,7 @@ public class MifosEntityDataValidator {
     private final RoleRepository roleRepository;
 
     @Autowired
-    public MifosEntityDataValidator(final FromJsonHelper fromApiJsonHelper, final OfficeRepositoryWrapper officeRepositoryWrapper,
+    public FineractEntityDataValidator(final FromJsonHelper fromApiJsonHelper, final OfficeRepositoryWrapper officeRepositoryWrapper,
             final LoanProductRepository loanProductRepository, final SavingsProductRepository savingsProductRepository,
             final ChargeRepositoryWrapper chargeRepositoryWrapper, final RoleRepository roleRepository) {
         this.fromApiJsonHelper = fromApiJsonHelper;
@@ -63,34 +76,34 @@ public class MifosEntityDataValidator {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                MifosEntityApiResourceConstants.CREATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS);
+                FineractEntityApiResourceConstants.CREATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(MifosEntityApiResourceConstants.MIFOS_ENTITY_RESOURCE_NAME);
+                .resource(FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
 
-        if (this.fromApiJsonHelper.parameterExists(MifosEntityApiResourceConstants.fromEnityType, element)) {
-            final Long fromId = this.fromApiJsonHelper.extractLongNamed(MifosEntityApiResourceConstants.fromEnityType, element);
-            baseDataValidator.reset().parameter(MifosEntityApiResourceConstants.fromEnityType).value(fromId).notNull()
+        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.fromEnityType, element)) {
+            final Long fromId = this.fromApiJsonHelper.extractLongNamed(FineractEntityApiResourceConstants.fromEnityType, element);
+            baseDataValidator.reset().parameter(FineractEntityApiResourceConstants.fromEnityType).value(fromId).notNull()
                     .integerGreaterThanZero();
         }
 
-        if (this.fromApiJsonHelper.parameterExists(MifosEntityApiResourceConstants.toEntityType, element)) {
-            final Long toId = this.fromApiJsonHelper.extractLongNamed(MifosEntityApiResourceConstants.toEntityType, element);
-            baseDataValidator.reset().parameter(MifosEntityApiResourceConstants.toEntityType).value(toId).notNull()
+        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.toEntityType, element)) {
+            final Long toId = this.fromApiJsonHelper.extractLongNamed(FineractEntityApiResourceConstants.toEntityType, element);
+            baseDataValidator.reset().parameter(FineractEntityApiResourceConstants.toEntityType).value(toId).notNull()
                     .integerGreaterThanZero();
         }
 
-        if (this.fromApiJsonHelper.parameterExists(MifosEntityApiResourceConstants.startDate, element)) {
-            final LocalDate startDate = this.fromApiJsonHelper.extractLocalDateNamed(MifosEntityApiResourceConstants.startDate, element);
-            baseDataValidator.reset().parameter(MifosEntityApiResourceConstants.startDate).value(startDate);
+        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.startDate, element)) {
+            final LocalDate startDate = this.fromApiJsonHelper.extractLocalDateNamed(FineractEntityApiResourceConstants.startDate, element);
+            baseDataValidator.reset().parameter(FineractEntityApiResourceConstants.startDate).value(startDate);
         }
 
-        if (this.fromApiJsonHelper.parameterExists(MifosEntityApiResourceConstants.endDate, element)) {
-            final LocalDate endDate = this.fromApiJsonHelper.extractLocalDateNamed(MifosEntityApiResourceConstants.endDate, element);
-            baseDataValidator.reset().parameter(MifosEntityApiResourceConstants.endDate).value(endDate);
+        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.endDate, element)) {
+            final LocalDate endDate = this.fromApiJsonHelper.extractLocalDateNamed(FineractEntityApiResourceConstants.endDate, element);
+            baseDataValidator.reset().parameter(FineractEntityApiResourceConstants.endDate).value(endDate);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -160,36 +173,36 @@ public class MifosEntityDataValidator {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                MifosEntityApiResourceConstants.UPDATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS);
+                FineractEntityApiResourceConstants.UPDATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(MifosEntityApiResourceConstants.MIFOS_ENTITY_RESOURCE_NAME);
+                .resource(FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
 
         boolean atLeastOneParameterPassedForUpdate = false;
-        if (this.fromApiJsonHelper.parameterExists(MifosEntityApiResourceConstants.fromEnityType, element)) {
+        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.fromEnityType, element)) {
             atLeastOneParameterPassedForUpdate = true;
-            final String fromEnityType = this.fromApiJsonHelper.extractStringNamed(MifosEntityApiResourceConstants.fromEnityType, element);
-            baseDataValidator.reset().parameter(MifosEntityApiResourceConstants.fromEnityType).value(fromEnityType);
+            final String fromEnityType = this.fromApiJsonHelper.extractStringNamed(FineractEntityApiResourceConstants.fromEnityType, element);
+            baseDataValidator.reset().parameter(FineractEntityApiResourceConstants.fromEnityType).value(fromEnityType);
         }
 
-        if (this.fromApiJsonHelper.parameterExists(MifosEntityApiResourceConstants.fromEnityType, element)) {
+        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.fromEnityType, element)) {
             atLeastOneParameterPassedForUpdate = true;
-            final String toEnityType = this.fromApiJsonHelper.extractStringNamed(MifosEntityApiResourceConstants.toEntityType, element);
-            baseDataValidator.reset().parameter(MifosEntityApiResourceConstants.fromEnityType).value(toEnityType);
+            final String toEnityType = this.fromApiJsonHelper.extractStringNamed(FineractEntityApiResourceConstants.toEntityType, element);
+            baseDataValidator.reset().parameter(FineractEntityApiResourceConstants.fromEnityType).value(toEnityType);
         }
 
-        if (this.fromApiJsonHelper.parameterExists(MifosEntityApiResourceConstants.toEntityType, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(MifosEntityApiResourceConstants.startDate, element)) {
+        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.toEntityType, element)) {
             atLeastOneParameterPassedForUpdate = true;
         }
 
-        if (this.fromApiJsonHelper.parameterExists(MifosEntityApiResourceConstants.endDate, element)) {
+        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.startDate, element)) {
+            atLeastOneParameterPassedForUpdate = true;
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(FineractEntityApiResourceConstants.endDate, element)) {
             atLeastOneParameterPassedForUpdate = true;
         }
 

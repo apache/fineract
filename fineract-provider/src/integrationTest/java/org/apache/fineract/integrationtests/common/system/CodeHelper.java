@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.integrationtests.common.system;
+package org.apache.fineract.integrationtests.common.system;
 
 import static com.jayway.restassured.RestAssured.given;
 
@@ -11,7 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.mifosplatform.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.Utils;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.path.json.JsonPath;
@@ -25,13 +38,13 @@ public class CodeHelper {
 	public static final String SUBRESPONSE_ID_ATTRIBUTE_NAME = "subResourceId";
 	public static final String CODE_NAME_ATTRIBUTE_NAME = "name";
 	public static final String CODE_SYSTEM_DEFINED_ATTRIBUTE_NAME = "systemDefined";
-	public static final String CODE_URL = "/mifosng-provider/api/v1/codes";
+	public static final String CODE_URL = "/fineract-provider/api/v1/codes";
 
 	public static final String CODE_VALUE_ID_ATTRIBUTE_NAME = "id";
 	public static final String CODE_VALUE_NAME_ATTRIBUTE_NAME = "name";
 	public static final String CODE_VALUE_DESCRIPTION_ATTRIBUTE_NAME = "description";
 	public static final String CODE_VALUE_POSITION_ATTRIBUTE_NAME = "position";
-	public static final String CODE_VALUE_URL = "/mifosng-provider/api/v1/codes/[codeId]/codevalues";
+	public static final String CODE_VALUE_URL = "/fineract-provider/api/v1/codes/[codeId]/codevalues";
 
 	public static Object createCode(final RequestSpecification requestSpec,
 			final ResponseSpecification responseSpec, final String codeName,

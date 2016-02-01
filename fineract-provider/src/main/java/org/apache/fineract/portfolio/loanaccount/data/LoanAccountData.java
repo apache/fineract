@@ -1,14 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-/**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. .0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/.0/.
- */
-package org.mifosplatform.portfolio.loanaccount.data;
+package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -18,27 +26,27 @@ import java.util.Map;
 
 import javax.persistence.Transient;
 
+import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.staff.data.StaffData;
+import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
+import org.apache.fineract.portfolio.calendar.data.CalendarData;
+import org.apache.fineract.portfolio.charge.data.ChargeData;
+import org.apache.fineract.portfolio.collateral.data.CollateralData;
+import org.apache.fineract.portfolio.floatingrates.data.InterestRatePeriodData;
+import org.apache.fineract.portfolio.fund.data.FundData;
+import org.apache.fineract.portfolio.group.data.GroupGeneralData;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.guarantor.data.GuarantorData;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
+import org.apache.fineract.portfolio.loanproduct.data.LoanProductBorrowerCycleVariationData;
+import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
+import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductConfigurableAttributes;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditionType;
+import org.apache.fineract.portfolio.note.data.NoteData;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.codes.data.CodeValueData;
-import org.mifosplatform.infrastructure.core.data.EnumOptionData;
-import org.mifosplatform.organisation.monetary.data.CurrencyData;
-import org.mifosplatform.organisation.staff.data.StaffData;
-import org.mifosplatform.portfolio.account.data.PortfolioAccountData;
-import org.mifosplatform.portfolio.calendar.data.CalendarData;
-import org.mifosplatform.portfolio.charge.data.ChargeData;
-import org.mifosplatform.portfolio.collateral.data.CollateralData;
-import org.mifosplatform.portfolio.floatingrates.data.InterestRatePeriodData;
-import org.mifosplatform.portfolio.fund.data.FundData;
-import org.mifosplatform.portfolio.group.data.GroupGeneralData;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
-import org.mifosplatform.portfolio.loanaccount.guarantor.data.GuarantorData;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
-import org.mifosplatform.portfolio.loanproduct.data.LoanProductBorrowerCycleVariationData;
-import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
-import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
-import org.mifosplatform.portfolio.loanproduct.domain.LoanProductConfigurableAttributes;
-import org.mifosplatform.portfolio.loanproduct.domain.LoanProductValueConditionType;
-import org.mifosplatform.portfolio.note.data.NoteData;
 import org.springframework.util.CollectionUtils;
 
 /**

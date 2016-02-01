@@ -1,26 +1,39 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.portfolio.savings.service;
+package org.apache.fineract.portfolio.savings.service;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-import org.mifosplatform.accounting.common.AccountingEnumerations;
-import org.mifosplatform.infrastructure.core.data.EnumOptionData;
-import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
-import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
-import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityType;
-import org.mifosplatform.infrastructure.entityaccess.service.MifosEntityAccessUtil;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.monetary.data.CurrencyData;
-import org.mifosplatform.portfolio.savings.DepositAccountType;
-import org.mifosplatform.portfolio.savings.data.SavingsProductData;
-import org.mifosplatform.portfolio.savings.exception.SavingsProductNotFoundException;
+import org.apache.fineract.accounting.common.AccountingEnumerations;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
+import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.portfolio.savings.DepositAccountType;
+import org.apache.fineract.portfolio.savings.data.SavingsProductData;
+import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -34,14 +47,14 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
     private final JdbcTemplate jdbcTemplate;
     private final SavingProductMapper savingsProductRowMapper = new SavingProductMapper();
     private final SavingProductLookupMapper savingsProductLookupsRowMapper = new SavingProductLookupMapper();
-    private final MifosEntityAccessUtil mifosEntityAccessUtil;
+    private final FineractEntityAccessUtil fineractEntityAccessUtil;
 
     @Autowired
     public SavingsProductReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-    		final MifosEntityAccessUtil mifosEntityAccessUtil) {
+    		final FineractEntityAccessUtil fineractEntityAccessUtil) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.mifosEntityAccessUtil = mifosEntityAccessUtil;
+        this.fineractEntityAccessUtil = fineractEntityAccessUtil;
     }
 
     @Override
@@ -52,9 +65,9 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         String sql = "select " + this.savingsProductRowMapper.schema() + "where sp.deposit_type_enum = ?";
         
 		// Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
-		String inClause = mifosEntityAccessUtil.
+		String inClause = fineractEntityAccessUtil.
 				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
-						MifosEntityType.SAVINGS_PRODUCT);
+						FineractEntityType.SAVINGS_PRODUCT);
 		if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
 			sql += " and sp.id in ( " + inClause + " ) ";
 		}
@@ -68,9 +81,9 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         String sql = "select " + this.savingsProductLookupsRowMapper.schema() + " where sp.deposit_type_enum = ? ";
         
         // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
- 		String inClause = mifosEntityAccessUtil.
+ 		String inClause = fineractEntityAccessUtil.
  				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
-						MifosEntityType.SAVINGS_PRODUCT);
+						FineractEntityType.SAVINGS_PRODUCT);
     	if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
     		sql += " and id in ( " + inClause + " ) ";
     	}
@@ -218,9 +231,9 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         boolean inClauseAdded = false;
         
         // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
-  		String inClause = mifosEntityAccessUtil.
+  		String inClause = fineractEntityAccessUtil.
   				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
-						MifosEntityType.SAVINGS_PRODUCT);
+						FineractEntityType.SAVINGS_PRODUCT);
     	if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
     		sql += " where id in ( " + inClause + " ) ";
     		inClauseAdded = true;
@@ -247,9 +260,9 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         String sql = "select " + this.savingsProductRowMapper.schema() + " where sp.currency_code='" + currencyCode + "'";
         
         // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
-  		String inClause = mifosEntityAccessUtil.
+  		String inClause = fineractEntityAccessUtil.
   				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
-						MifosEntityType.SAVINGS_PRODUCT);
+						FineractEntityType.SAVINGS_PRODUCT);
     	if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
     		sql += " and id in ( " + inClause + " ) ";
     	}

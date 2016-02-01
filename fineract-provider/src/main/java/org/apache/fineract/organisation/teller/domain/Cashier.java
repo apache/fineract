@@ -1,14 +1,27 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.organisation.teller.domain;
+package org.apache.fineract.organisation.teller.domain;
 
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.organisation.staff.domain.Staff;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.organisation.office.domain.Office;
-import org.mifosplatform.organisation.staff.domain.Staff;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 import javax.persistence.*;
@@ -195,7 +208,7 @@ public class Cashier extends AbstractPersistable<Long> {
      * Returns the office of this cashier.
      * 
      * @return the office of this cashier
-     * @see org.mifosplatform.organisation.office.domain.Office
+     * @see org.apache.fineract.organisation.office.domain.Office
      */
     public Office getOffice() {
         return office;
@@ -242,7 +255,7 @@ public class Cashier extends AbstractPersistable<Long> {
      * 
      * @param office
      *            the office of this cashier
-     * @see org.mifosplatform.organisation.office.domain.Office
+     * @see org.apache.fineract.organisation.office.domain.Office
      */
     public void setOffice(Office office) {
         this.office = office;
@@ -252,7 +265,7 @@ public class Cashier extends AbstractPersistable<Long> {
      * Returns the staff of this cashier.
      * 
      * @return the staff of this cashier
-     * @see org.mifosplatform.organisation.staff.domain.Staff
+     * @see org.apache.fineract.organisation.staff.domain.Staff
      */
     public Staff getStaff() {
         return staff;
@@ -263,7 +276,7 @@ public class Cashier extends AbstractPersistable<Long> {
      * 
      * @param staff
      *            the staff of this cashier
-     * @see org.mifosplatform.organisation.staff.domain.Staff
+     * @see org.apache.fineract.organisation.staff.domain.Staff
      */
     public void setStaff(Staff staff) {
         this.staff = staff;
@@ -273,7 +286,7 @@ public class Cashier extends AbstractPersistable<Long> {
      * Returns the teller of this cashier.
      * 
      * @return the teller of this cashier
-     * @see org.mifosplatform.organisation.teller.domain.Teller
+     * @see org.apache.fineract.organisation.teller.domain.Teller
      */
     public Teller getTeller() {
         return teller;
@@ -284,7 +297,7 @@ public class Cashier extends AbstractPersistable<Long> {
      * 
      * @param teller
      *            the teller of this cashier
-     * @see org.mifosplatform.organisation.teller.domain.Teller
+     * @see org.apache.fineract.organisation.teller.domain.Teller
      */
     public void setTeller(Teller teller) {
         this.teller = teller;

@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.template;
+package org.apache.fineract.template;
 
 import static org.junit.Assert.assertEquals;
 
@@ -18,17 +31,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.portfolio.loanaccount.LoanScheduleTestDataHelper;
+import org.apache.fineract.portfolio.loanaccount.MonetaryCurrencyBuilder;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.template.domain.Template;
+import org.apache.fineract.template.domain.TemplateMapper;
+import org.apache.fineract.template.service.TemplateMergeService;
 import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
-import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
-import org.mifosplatform.organisation.monetary.domain.MoneyHelper;
-import org.mifosplatform.portfolio.loanaccount.LoanScheduleTestDataHelper;
-import org.mifosplatform.portfolio.loanaccount.MonetaryCurrencyBuilder;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.mifosplatform.template.domain.Template;
-import org.mifosplatform.template.domain.TemplateMapper;
-import org.mifosplatform.template.service.TemplateMergeService;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;

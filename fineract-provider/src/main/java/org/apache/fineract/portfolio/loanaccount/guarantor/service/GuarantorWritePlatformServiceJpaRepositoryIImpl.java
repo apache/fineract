@@ -1,46 +1,59 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.portfolio.loanaccount.guarantor.service;
+package org.apache.fineract.portfolio.loanaccount.guarantor.service;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
+import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
+import org.apache.fineract.portfolio.account.domain.AccountAssociations;
+import org.apache.fineract.portfolio.account.domain.AccountAssociationsRepository;
+import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.guarantor.GuarantorConstants;
+import org.apache.fineract.portfolio.loanaccount.guarantor.GuarantorConstants.GUARANTOR_JSON_INPUT_PARAMS;
+import org.apache.fineract.portfolio.loanaccount.guarantor.command.GuarantorCommand;
+import org.apache.fineract.portfolio.loanaccount.guarantor.domain.Guarantor;
+import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorFundStatusType;
+import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorFundingDetails;
+import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorRepository;
+import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorType;
+import org.apache.fineract.portfolio.loanaccount.guarantor.exception.DuplicateGuarantorException;
+import org.apache.fineract.portfolio.loanaccount.guarantor.exception.GuarantorNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.guarantor.exception.InvalidGuarantorException;
+import org.apache.fineract.portfolio.loanaccount.guarantor.serialization.GuarantorCommandFromApiJsonDeserializer;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.codes.domain.CodeValue;
-import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
-import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.ApiParameterError;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
-import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
-import org.mifosplatform.portfolio.account.domain.AccountAssociationType;
-import org.mifosplatform.portfolio.account.domain.AccountAssociations;
-import org.mifosplatform.portfolio.account.domain.AccountAssociationsRepository;
-import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
-import org.mifosplatform.portfolio.loanaccount.domain.Loan;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanRepositoryWrapper;
-import org.mifosplatform.portfolio.loanaccount.guarantor.GuarantorConstants;
-import org.mifosplatform.portfolio.loanaccount.guarantor.GuarantorConstants.GUARANTOR_JSON_INPUT_PARAMS;
-import org.mifosplatform.portfolio.loanaccount.guarantor.command.GuarantorCommand;
-import org.mifosplatform.portfolio.loanaccount.guarantor.domain.Guarantor;
-import org.mifosplatform.portfolio.loanaccount.guarantor.domain.GuarantorFundStatusType;
-import org.mifosplatform.portfolio.loanaccount.guarantor.domain.GuarantorFundingDetails;
-import org.mifosplatform.portfolio.loanaccount.guarantor.domain.GuarantorRepository;
-import org.mifosplatform.portfolio.loanaccount.guarantor.domain.GuarantorType;
-import org.mifosplatform.portfolio.loanaccount.guarantor.exception.DuplicateGuarantorException;
-import org.mifosplatform.portfolio.loanaccount.guarantor.exception.GuarantorNotFoundException;
-import org.mifosplatform.portfolio.loanaccount.guarantor.exception.InvalidGuarantorException;
-import org.mifosplatform.portfolio.loanaccount.guarantor.serialization.GuarantorCommandFromApiJsonDeserializer;
-import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
-import org.mifosplatform.portfolio.savings.domain.SavingsAccountAssembler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

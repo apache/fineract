@@ -1,9 +1,4 @@
-/**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
- */
-package org.mifosplatform.infrastructure.core.boot.db;
+package org.apache.fineract.infrastructure.core.boot.db;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +30,7 @@ public class MariaDB4jDataSourceConfiguration extends DataSourceConfiguration {
 		// Because TenantDataSourcePortFixService needs separate
 		// host/port/db/uid/pwd:
 		// (DataSourceProperties getUrl() creates the correct JDBC URL from it)
-		// This intentionally overrides any mifos.datasource.* settings, because
+		// This intentionally overrides any fineract.datasource.* settings, because
 		// in this configuration, logically the mariaDB4j settings take
 		// precedence:
 		p.setHost("localhost");

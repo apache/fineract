@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.accounting.rule.service;
+package org.apache.fineract.accounting.rule.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,28 +27,28 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.accounting.closure.api.GLClosureJsonInputParams;
-import org.mifosplatform.accounting.glaccount.domain.GLAccount;
-import org.mifosplatform.accounting.glaccount.domain.GLAccountRepositoryWrapper;
-import org.mifosplatform.accounting.journalentry.domain.JournalEntryType;
-import org.mifosplatform.accounting.rule.api.AccountingRuleJsonInputParams;
-import org.mifosplatform.accounting.rule.domain.AccountingRule;
-import org.mifosplatform.accounting.rule.domain.AccountingRuleRepository;
-import org.mifosplatform.accounting.rule.domain.AccountingRuleRepositoryWrapper;
-import org.mifosplatform.accounting.rule.domain.AccountingTagRule;
-import org.mifosplatform.accounting.rule.exception.AccountingRuleDataException;
-import org.mifosplatform.accounting.rule.exception.AccountingRuleDuplicateException;
-import org.mifosplatform.accounting.rule.serialization.AccountingRuleCommandFromApiJsonDeserializer;
-import org.mifosplatform.infrastructure.codes.domain.CodeValue;
-import org.mifosplatform.infrastructure.codes.domain.CodeValueRepository;
-import org.mifosplatform.infrastructure.codes.exception.CodeValueNotFoundException;
-import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.organisation.office.domain.Office;
-import org.mifosplatform.organisation.office.domain.OfficeRepository;
-import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
+import org.apache.fineract.accounting.closure.api.GLClosureJsonInputParams;
+import org.apache.fineract.accounting.glaccount.domain.GLAccount;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
+import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
+import org.apache.fineract.accounting.rule.api.AccountingRuleJsonInputParams;
+import org.apache.fineract.accounting.rule.domain.AccountingRule;
+import org.apache.fineract.accounting.rule.domain.AccountingRuleRepository;
+import org.apache.fineract.accounting.rule.domain.AccountingRuleRepositoryWrapper;
+import org.apache.fineract.accounting.rule.domain.AccountingTagRule;
+import org.apache.fineract.accounting.rule.exception.AccountingRuleDataException;
+import org.apache.fineract.accounting.rule.exception.AccountingRuleDuplicateException;
+import org.apache.fineract.accounting.rule.serialization.AccountingRuleCommandFromApiJsonDeserializer;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
+import org.apache.fineract.infrastructure.codes.exception.CodeValueNotFoundException;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.organisation.office.domain.OfficeRepository;
+import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

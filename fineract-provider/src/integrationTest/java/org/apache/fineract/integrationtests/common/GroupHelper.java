@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.integrationtests.common;
+package org.apache.fineract.integrationtests.common;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -21,7 +34,7 @@ import com.jayway.restassured.specification.ResponseSpecification;
 
 public class GroupHelper {
 
-    private static final String CREATE_GROUP_URL = "/mifosng-provider/api/v1/groups?" + Utils.TENANT_IDENTIFIER;
+    private static final String CREATE_GROUP_URL = "/fineract-provider/api/v1/groups?" + Utils.TENANT_IDENTIFIER;
 
     public static Integer createGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             @SuppressWarnings("unused") final boolean active) {
@@ -42,7 +55,7 @@ public class GroupHelper {
 
     public static Integer associateClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId, final String clientMember) {
-        final String GROUP_ASSOCIATE_URL = "/mifosng-provider/api/v1/groups/" + groupId
+        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId
                 + "?command=associateClients&" + Utils.TENANT_IDENTIFIER;
         System.out.println("---------------------------------Associate Client To A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, associateClientAsJSON(clientMember), "groupId");
@@ -50,7 +63,7 @@ public class GroupHelper {
 
     public static Integer disAssociateClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId, final String clientMember) {
-        final String GROUP_ASSOCIATE_URL = "/mifosng-provider/api/v1/groups/" + groupId
+        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId
                 + "?command=disassociateClients&" + Utils.TENANT_IDENTIFIER;
         System.out.println("---------------------------------Disassociate Client To A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, associateClientAsJSON(clientMember), "groupId");
@@ -58,32 +71,32 @@ public class GroupHelper {
 
     public static Integer activateGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId) {
-        final String GROUP_ASSOCIATE_URL = "/mifosng-provider/api/v1/groups/" + groupId + "?command=activate&" + Utils.TENANT_IDENTIFIER;
+        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?command=activate&" + Utils.TENANT_IDENTIFIER;
         System.out.println("---------------------------------Activate A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, activateGroupAsJSON(""), "groupId");
     }
 
     public static Integer updateGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String name,
             final String groupId) {
-        final String GROUP_ASSOCIATE_URL = "/mifosng-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER;
+        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER;
         System.out.println("---------------------------------UPDATE GROUP---------------------------------------------");
         return Utils.performServerPut(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, updateGroupAsJSON(name), "groupId");
     }
 
     public static Integer deleteGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId) {
-        final String GROUP_ASSOCIATE_URL = "/mifosng-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER;
+        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER;
         System.out.println("---------------------------------DELETE GROUP---------------------------------------------");
         return Utils.performServerDelete(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, "groupId");
     }
 
 
     public static Object assignStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId,final Long staffId){
-        final String GROUP_ASSIGN_STAFF_URL = "/mifosng-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER + "&command=assignStaff";
+        final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER + "&command=assignStaff";
         System.out.println("---------------------------------DELETE GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL,assignStaffAsJSON(staffId),"changes");
     }
     public static Object assignStaffInheritStaffForClientAccounts(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId,final String staffId){
-        final String GROUP_ASSIGN_STAFF_URL = "/mifosng-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER + "&command=assignStaff";
+        final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER + "&command=assignStaff";
         System.out.println("---------------------------------DELETE GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL,assignStaffAndInheritStaffForClientAccountsAsJSON(staffId),"changes");
     }
@@ -156,7 +169,7 @@ public class GroupHelper {
     public static void verifyGroupCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID) {
         System.out.println("------------------------------CHECK GROUP DETAILS------------------------------------\n");
-        final String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID + "?" + Utils.TENANT_IDENTIFIER;
+        final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseGroupID = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "id");
         assertEquals("ERROR IN CREATING THE GROUP", generatedGroupID, responseGroupID);
     }
@@ -164,7 +177,7 @@ public class GroupHelper {
     public static void verifyGroupDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID, final String field, final String expectedValue) {
         System.out.println("------------------------------CHECK GROUP DETAILS------------------------------------\n");
-        final String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID + "?" + Utils.TENANT_IDENTIFIER;
+        final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?" + Utils.TENANT_IDENTIFIER;
         final String responseValue = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, field);
         assertEquals("ERROR IN CREATING THE GROUP", expectedValue, responseValue);
     }
@@ -172,7 +185,7 @@ public class GroupHelper {
     public static void verifyGroupActivatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedGroupID, final boolean generatedGroupStatus) {
         System.out.println("------------------------------CHECK GROUP STATUS------------------------------------\n");
-        final String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID + "?" + Utils.TENANT_IDENTIFIER;
+        final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID + "?" + Utils.TENANT_IDENTIFIER;
         final Boolean responseGroupStatus = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "active");
         assertEquals("ERROR IN ACTIVATING THE GROUP", generatedGroupStatus, responseGroupStatus);
     }
@@ -181,7 +194,7 @@ public class GroupHelper {
             final Integer generatedGroupID, final Integer groupMember) {
         List<String> list = new ArrayList<>();
         System.out.println("------------------------------CHECK GROUP MEMBERS------------------------------------\n");
-        final String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID
+        final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID
                 + "?associations=clientMembers&" + Utils.TENANT_IDENTIFIER;
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "clientMembers");
         assertTrue("ERROR IN GROUP MEMBER", list.toString().contains("id=" + groupMember.toString()));
@@ -191,7 +204,7 @@ public class GroupHelper {
             final Integer generatedGroupID) {
         List<String> list = new ArrayList<>();
         System.out.println("------------------------------CHECK EMPTY GROUP MEMBER LIST------------------------------------\n");
-        final String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID
+        final String GROUP_URL = "/fineract-provider/api/v1/groups/" + generatedGroupID
                 + "?associations=clientMembers&" + Utils.TENANT_IDENTIFIER;
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "clientMembers");
         assertEquals("GROUP MEMBER LIST NOT EMPTY", list, null);
@@ -201,7 +214,7 @@ public class GroupHelper {
             final Integer generatedGroupID) {
         List<String> list = new ArrayList<>();
         System.out.println("------------------------------CHECK GROUP DELETED------------------------------------\n");
-        final String GROUP_URL = "/mifosng-provider/api/v1/groups/?" + Utils.TENANT_IDENTIFIER;
+        final String GROUP_URL = "/fineract-provider/api/v1/groups/?" + Utils.TENANT_IDENTIFIER;
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "pageItems");
 
         assertFalse("GROUP NOT DELETED", list.toString().contains("id=" + generatedGroupID.toString()));

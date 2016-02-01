@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.portfolio.loanproduct.service;
+package org.apache.fineract.portfolio.loanproduct.service;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -11,26 +24,26 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.fineract.accounting.common.AccountingEnumerations;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
+import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.portfolio.charge.data.ChargeData;
+import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.common.service.CommonEnumerations;
+import org.apache.fineract.portfolio.loanproduct.data.LoanProductBorrowerCycleVariationData;
+import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
+import org.apache.fineract.portfolio.loanproduct.data.LoanProductGuaranteeData;
+import org.apache.fineract.portfolio.loanproduct.data.LoanProductInterestRecalculationData;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductConfigurableAttributes;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductParamType;
+import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.joda.time.LocalDate;
-import org.mifosplatform.accounting.common.AccountingEnumerations;
-import org.mifosplatform.infrastructure.core.data.EnumOptionData;
-import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
-import org.mifosplatform.infrastructure.core.service.DateUtils;
-import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
-import org.mifosplatform.infrastructure.entityaccess.domain.MifosEntityType;
-import org.mifosplatform.infrastructure.entityaccess.service.MifosEntityAccessUtil;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.monetary.data.CurrencyData;
-import org.mifosplatform.portfolio.charge.data.ChargeData;
-import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
-import org.mifosplatform.portfolio.common.service.CommonEnumerations;
-import org.mifosplatform.portfolio.loanproduct.data.LoanProductBorrowerCycleVariationData;
-import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
-import org.mifosplatform.portfolio.loanproduct.data.LoanProductGuaranteeData;
-import org.mifosplatform.portfolio.loanproduct.data.LoanProductInterestRecalculationData;
-import org.mifosplatform.portfolio.loanproduct.domain.LoanProductConfigurableAttributes;
-import org.mifosplatform.portfolio.loanproduct.domain.LoanProductParamType;
-import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -43,16 +56,16 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
     private final ChargeReadPlatformService chargeReadPlatformService;
-    private final MifosEntityAccessUtil mifosEntityAccessUtil;
+    private final FineractEntityAccessUtil fineractEntityAccessUtil;
 
     @Autowired
     public LoanProductReadPlatformServiceImpl(final PlatformSecurityContext context,
             final ChargeReadPlatformService chargeReadPlatformService, final RoutingDataSource dataSource,
-            final MifosEntityAccessUtil mifosEntityAccessUtil) {
+            final FineractEntityAccessUtil fineractEntityAccessUtil) {
         this.context = context;
         this.chargeReadPlatformService = chargeReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.mifosEntityAccessUtil = mifosEntityAccessUtil;
+        this.fineractEntityAccessUtil = fineractEntityAccessUtil;
     }
 
     @Override
@@ -89,8 +102,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         // Check if branch specific products are enabled. If yes, fetch only
         // products mapped to current user's office
-        String inClause = mifosEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(MifosEntityType.LOAN_PRODUCT);
+        String inClause = fineractEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
         if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
             sql += " where lp.id in ( " + inClause + " ) ";
         }
@@ -134,8 +147,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         // Check if branch specific products are enabled. If yes, fetch only
         // products mapped to current user's office
-        String inClause = mifosEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(MifosEntityType.LOAN_PRODUCT);
+        String inClause = fineractEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
         if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
             if (activeOnly) {
                 sql += " and id in ( " + inClause + " )";
@@ -484,8 +497,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         // Check if branch specific products are enabled. If yes, fetch only
         // products mapped to current user's office
-        String inClause = mifosEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(MifosEntityType.LOAN_PRODUCT);
+        String inClause = fineractEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
         if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
             sql += " and id in ( " + inClause + " ) ";
         }
@@ -504,8 +517,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         // Check if branch specific products are enabled. If yes, fetch only
         // products mapped to current user's office
-        String inClause = mifosEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(MifosEntityType.LOAN_PRODUCT);
+        String inClause = fineractEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
         if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
             sql += " and lp.id in ( " + inClause + " ) ";
         }
@@ -523,8 +536,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         String sql = "Select " + rm.restrictedProductsSchema() + " where pm.product_id=? ";
         // Check if branch specific products are enabled. If yes, fetch only
         // products mapped to current user's office
-        String inClause1 = mifosEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(MifosEntityType.LOAN_PRODUCT);
+        String inClause1 = fineractEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
         if ((inClause1 != null) && (!(inClause1.trim().isEmpty()))) {
             sql += " and rp.id in ( " + inClause1 + " ) ";
         }
@@ -533,8 +546,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         // Check if branch specific products are enabled. If yes, fetch only
         // products mapped to current user's office
-        String inClause2 = mifosEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(MifosEntityType.LOAN_PRODUCT);
+        String inClause2 = fineractEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
         if ((inClause2 != null) && (!(inClause2.trim().isEmpty()))) {
             sql += " and lp.id in ( " + inClause2 + " ) ";
         }
@@ -553,8 +566,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         // Check if branch specific products are enabled. If yes, fetch only
         // products mapped to current user's office
-        String inClause = mifosEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(MifosEntityType.LOAN_PRODUCT);
+        String inClause = fineractEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
         if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
             sql += " lp.id in ( " + inClause + " ) and ";
         }

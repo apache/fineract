@@ -1,23 +1,36 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.batch.exception;
+package org.apache.fineract.batch.exception;
 
-import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
-import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.infrastructure.core.exception.PlatformInternalServerException;
-import org.mifosplatform.infrastructure.core.exception.UnsupportedParameterException;
-import org.mifosplatform.infrastructure.core.exceptionmapper.PlatformApiDataValidationExceptionMapper;
-import org.mifosplatform.infrastructure.core.exceptionmapper.PlatformDataIntegrityExceptionMapper;
-import org.mifosplatform.infrastructure.core.exceptionmapper.PlatformDomainRuleExceptionMapper;
-import org.mifosplatform.infrastructure.core.exceptionmapper.PlatformInternalServerExceptionMapper;
-import org.mifosplatform.infrastructure.core.exceptionmapper.PlatformResourceNotFoundExceptionMapper;
-import org.mifosplatform.infrastructure.core.exceptionmapper.UnsupportedParameterExceptionMapper;
-import org.mifosplatform.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
-import org.mifosplatform.portfolio.loanproduct.exception.LinkedAccountRequiredException;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
+import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
+import org.apache.fineract.infrastructure.core.exceptionmapper.PlatformApiDataValidationExceptionMapper;
+import org.apache.fineract.infrastructure.core.exceptionmapper.PlatformDataIntegrityExceptionMapper;
+import org.apache.fineract.infrastructure.core.exceptionmapper.PlatformDomainRuleExceptionMapper;
+import org.apache.fineract.infrastructure.core.exceptionmapper.PlatformInternalServerExceptionMapper;
+import org.apache.fineract.infrastructure.core.exceptionmapper.PlatformResourceNotFoundExceptionMapper;
+import org.apache.fineract.infrastructure.core.exceptionmapper.UnsupportedParameterExceptionMapper;
+import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
+import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
 import org.springframework.transaction.TransactionException;
 
 import com.google.gson.Gson;
@@ -32,8 +45,8 @@ import com.google.gson.GsonBuilder;
  * 
  * @author Rishabh Shukla
  * 
- * @see org.mifosplatform.batch.command.CommandStrategy
- * @see org.mifosplatform.batch.command.internal.CreateClientCommandStrategy
+ * @see org.apache.fineract.batch.command.CommandStrategy
+ * @see org.apache.fineract.batch.command.internal.CreateClientCommandStrategy
  */
 public class ErrorHandler extends RuntimeException {
 

@@ -1,20 +1,33 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.infrastructure.hooks.processor;
+package org.apache.fineract.infrastructure.hooks.processor;
 
-import static org.mifosplatform.infrastructure.hooks.api.HookApiConstants.contentTypeName;
-import static org.mifosplatform.infrastructure.hooks.api.HookApiConstants.payloadURLName;
+import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.contentTypeName;
+import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.payloadURLName;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.mifosplatform.infrastructure.hooks.domain.Hook;
-import org.mifosplatform.infrastructure.hooks.domain.HookConfiguration;
-import org.mifosplatform.useradministration.domain.AppUser;
+import org.apache.fineract.infrastructure.hooks.domain.Hook;
+import org.apache.fineract.infrastructure.hooks.domain.HookConfiguration;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.stereotype.Service;
 
 import retrofit.Callback;
@@ -59,7 +72,7 @@ public class WebHookProcessor implements HookProcessor {
 			final String actionName, final String tenantIdentifier,
 			@SuppressWarnings("unused") final String authToken) {
 
-		final String mifosEndpointUrl = System.getProperty("baseUrl");
+		final String fineractEndpointUrl = System.getProperty("baseUrl");
 		final WebHookService service = ProcessorHelper
 				.createWebHookService(url);
 
@@ -71,12 +84,12 @@ public class WebHookProcessor implements HookProcessor {
 			final JsonObject json = new JsonParser().parse(payload)
 					.getAsJsonObject();
 			service.sendJsonRequest(entityName, actionName, tenantIdentifier,
-					mifosEndpointUrl, json, callback);
+					fineractEndpointUrl, json, callback);
 		} else {
 			Map<String, String> map = new HashMap<>();
 			map = new Gson().fromJson(payload, map.getClass());
 			service.sendFormRequest(entityName, actionName, tenantIdentifier,
-					mifosEndpointUrl, map, callback);
+					fineractEndpointUrl, map, callback);
 		}
 
 	}

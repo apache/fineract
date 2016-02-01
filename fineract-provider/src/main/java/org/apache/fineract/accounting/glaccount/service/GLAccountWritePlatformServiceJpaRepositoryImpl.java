@@ -1,36 +1,49 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.accounting.glaccount.service;
+package org.apache.fineract.accounting.glaccount.service;
 
 import java.util.List;
 import java.util.Map;
 
-import org.mifosplatform.accounting.common.AccountingConstants;
-import org.mifosplatform.accounting.glaccount.api.GLAccountJsonInputParams;
-import org.mifosplatform.accounting.glaccount.command.GLAccountCommand;
-import org.mifosplatform.accounting.glaccount.domain.GLAccount;
-import org.mifosplatform.accounting.glaccount.domain.GLAccountRepository;
-import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
-import org.mifosplatform.accounting.glaccount.exception.GLAccountDuplicateException;
-import org.mifosplatform.accounting.glaccount.exception.GLAccountInvalidDeleteException;
-import org.mifosplatform.accounting.glaccount.exception.GLAccountInvalidDeleteException.GL_ACCOUNT_INVALID_DELETE_REASON;
-import org.mifosplatform.accounting.glaccount.exception.GLAccountInvalidParentException;
-import org.mifosplatform.accounting.glaccount.exception.GLAccountInvalidUpdateException;
-import org.mifosplatform.accounting.glaccount.exception.GLAccountInvalidUpdateException.GL_ACCOUNT_INVALID_UPDATE_REASON;
-import org.mifosplatform.accounting.glaccount.exception.GLAccountNotFoundException;
-import org.mifosplatform.accounting.glaccount.exception.InvalidParentGLAccountHeadException;
-import org.mifosplatform.accounting.glaccount.serialization.GLAccountCommandFromApiJsonDeserializer;
-import org.mifosplatform.accounting.journalentry.domain.JournalEntry;
-import org.mifosplatform.accounting.journalentry.domain.JournalEntryRepository;
-import org.mifosplatform.infrastructure.codes.domain.CodeValue;
-import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
-import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.accounting.common.AccountingConstants;
+import org.apache.fineract.accounting.glaccount.api.GLAccountJsonInputParams;
+import org.apache.fineract.accounting.glaccount.command.GLAccountCommand;
+import org.apache.fineract.accounting.glaccount.domain.GLAccount;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
+import org.apache.fineract.accounting.glaccount.exception.GLAccountDuplicateException;
+import org.apache.fineract.accounting.glaccount.exception.GLAccountInvalidDeleteException;
+import org.apache.fineract.accounting.glaccount.exception.GLAccountInvalidParentException;
+import org.apache.fineract.accounting.glaccount.exception.GLAccountInvalidUpdateException;
+import org.apache.fineract.accounting.glaccount.exception.GLAccountNotFoundException;
+import org.apache.fineract.accounting.glaccount.exception.InvalidParentGLAccountHeadException;
+import org.apache.fineract.accounting.glaccount.exception.GLAccountInvalidDeleteException.GL_ACCOUNT_INVALID_DELETE_REASON;
+import org.apache.fineract.accounting.glaccount.exception.GLAccountInvalidUpdateException.GL_ACCOUNT_INVALID_UPDATE_REASON;
+import org.apache.fineract.accounting.glaccount.serialization.GLAccountCommandFromApiJsonDeserializer;
+import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
+import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

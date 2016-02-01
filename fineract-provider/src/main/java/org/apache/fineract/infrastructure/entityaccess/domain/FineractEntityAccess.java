@@ -1,10 +1,22 @@
-package org.mifosplatform.infrastructure.entityaccess.domain;
-
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
+package org.apache.fineract.infrastructure.entityaccess.domain;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -15,14 +27,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.mifosplatform.infrastructure.codes.domain.CodeValue;
-import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.entityaccess.MifosEntityAccessConstants;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.entityaccess.FineractEntityAccessConstants;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_entity_to_entity_access")
-public class MifosEntityAccess extends AbstractPersistable<Long> {
+public class FineractEntityAccess extends AbstractPersistable<Long> {
 	
 	@Column(name = "entity_type", length = 50)
     private String entityType;
@@ -40,18 +52,18 @@ public class MifosEntityAccess extends AbstractPersistable<Long> {
 	@Column(name = "second_entity_id")
     private Long secondEntityId;
 
-    protected MifosEntityAccess () {
+    protected FineractEntityAccess () {
 
     }
 
-    public static MifosEntityAccess createNew(final String entityType, final Long entityId,
+    public static FineractEntityAccess createNew(final String entityType, final Long entityId,
     		final CodeValue accessType,
     		final String secondEntityType, final Long secondEntityId) {
-        return new MifosEntityAccess(entityType, entityId, accessType,
+        return new FineractEntityAccess(entityType, entityId, accessType,
         		secondEntityType, secondEntityId);
     }
 
-    public MifosEntityAccess(final String entityType, final Long entityId,
+    public FineractEntityAccess(final String entityType, final Long entityId,
     		final CodeValue accessType,
     		final String secondEntityType, final Long secondEntityId) {
     	this.entityType = entityType;
@@ -61,17 +73,17 @@ public class MifosEntityAccess extends AbstractPersistable<Long> {
     	this.secondEntityId = secondEntityId;
     }
 
-    public static MifosEntityAccess fromJson(final CodeValue accessType, final JsonCommand command) {
+    public static FineractEntityAccess fromJson(final CodeValue accessType, final JsonCommand command) {
         final String entityType = command.stringValueOfParameterNamed(
-        		MifosEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.ENTITY_TYPE.getValue());
+        		FineractEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.ENTITY_TYPE.getValue());
         final Long entityId = command.longValueOfParameterNamed(
-        		MifosEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.ENTITY_ID.getValue());
+        		FineractEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.ENTITY_ID.getValue());
         final String secondEntityType = command.stringValueOfParameterNamed(
-        		MifosEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.SECOND_ENTITY_ID.getValue());
+        		FineractEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.SECOND_ENTITY_ID.getValue());
         final Long secondEntityId = command.longValueOfParameterNamed(
-        		MifosEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.SECOND_ENTITY_ID.getValue());
+        		FineractEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.SECOND_ENTITY_ID.getValue());
         
-        return new MifosEntityAccess (entityType, entityId, accessType,
+        return new FineractEntityAccess (entityType, entityId, accessType,
         		secondEntityType, secondEntityId);
 
     }
@@ -82,14 +94,14 @@ public class MifosEntityAccess extends AbstractPersistable<Long> {
 
         String paramName = null;
 
-        paramName = MifosEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.ENTITY_TYPE.getValue();
+        paramName = FineractEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.ENTITY_TYPE.getValue();
         if (command.isChangeInStringParameterNamed(paramName, this.entityType)) {
             final String newValue = command.stringValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
             this.entityType = newValue;
         }
 
-        paramName = MifosEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.ENTITY_ID.getValue(); 
+        paramName = FineractEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.ENTITY_ID.getValue(); 
         if (command.isChangeInLongParameterNamed(paramName, getEntityId())) {
         	this.entityId = command.longValueOfParameterNamed(paramName);
             actualChanges.put(paramName, this.entityId);
@@ -100,20 +112,20 @@ public class MifosEntityAccess extends AbstractPersistable<Long> {
             existingAccessTypeId = this.accessType.getId();
         }
         
-        paramName = MifosEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.ENTITY_ACCESS_TYPE_ID.getValue(); 
+        paramName = FineractEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.ENTITY_ACCESS_TYPE_ID.getValue(); 
         if (command.isChangeInLongParameterNamed(paramName, existingAccessTypeId)) {
         	final Long newValue = command.longValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
         }
 
-        paramName = MifosEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.SECOND_ENTITY_TYPE.getValue();
+        paramName = FineractEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.SECOND_ENTITY_TYPE.getValue();
         if (command.isChangeInStringParameterNamed(paramName, this.secondEntityType)) {
             final String newValue = command.stringValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
             this.secondEntityType = newValue;
         }
 
-        paramName = MifosEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.SECOND_ENTITY_ID.getValue(); 
+        paramName = FineractEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.SECOND_ENTITY_ID.getValue(); 
         if (command.isChangeInLongParameterNamed(paramName, getSecondEntityId())) {
         	this.secondEntityId = command.longValueOfParameterNamed(paramName);
             actualChanges.put(paramName, this.secondEntityId);

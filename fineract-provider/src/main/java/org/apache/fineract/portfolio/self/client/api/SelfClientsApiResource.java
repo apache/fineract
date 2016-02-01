@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.portfolio.self.client.api;
+package org.apache.fineract.portfolio.self.client.api;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -17,16 +30,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosplatform.infrastructure.documentmanagement.api.ImagesApiResource;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.client.api.ClientApiConstants;
-import org.mifosplatform.portfolio.client.api.ClientChargesApiResource;
-import org.mifosplatform.portfolio.client.api.ClientTransactionsApiResource;
-import org.mifosplatform.portfolio.client.api.ClientsApiResource;
-import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
-import org.mifosplatform.portfolio.self.client.data.SelfClientDataValidator;
-import org.mifosplatform.portfolio.self.client.service.AppuserClientMapperReadService;
-import org.mifosplatform.useradministration.domain.AppUser;
+import org.apache.fineract.infrastructure.documentmanagement.api.ImagesApiResource;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+import org.apache.fineract.portfolio.client.api.ClientChargesApiResource;
+import org.apache.fineract.portfolio.client.api.ClientTransactionsApiResource;
+import org.apache.fineract.portfolio.client.api.ClientsApiResource;
+import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
+import org.apache.fineract.portfolio.self.client.data.SelfClientDataValidator;
+import org.apache.fineract.portfolio.self.client.service.AppuserClientMapperReadService;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

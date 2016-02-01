@@ -1,34 +1,47 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.infrastructure.hooks.listener;
+package org.apache.fineract.infrastructure.hooks.listener;
 
-import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
-import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
-import org.mifosplatform.infrastructure.hooks.domain.Hook;
-import org.mifosplatform.infrastructure.hooks.event.HookEvent;
-import org.mifosplatform.infrastructure.hooks.event.HookEventSource;
-import org.mifosplatform.infrastructure.hooks.processor.HookProcessor;
-import org.mifosplatform.infrastructure.hooks.processor.HookProcessorProvider;
-import org.mifosplatform.infrastructure.hooks.service.HookReadPlatformService;
-import org.mifosplatform.infrastructure.security.service.TenantDetailsService;
-import org.mifosplatform.useradministration.domain.AppUser;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.hooks.domain.Hook;
+import org.apache.fineract.infrastructure.hooks.event.HookEvent;
+import org.apache.fineract.infrastructure.hooks.event.HookEventSource;
+import org.apache.fineract.infrastructure.hooks.processor.HookProcessor;
+import org.apache.fineract.infrastructure.hooks.processor.HookProcessorProvider;
+import org.apache.fineract.infrastructure.hooks.service.HookReadPlatformService;
+import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class MifosHookListener implements HookListener {
+public class FineractHookListener implements HookListener {
 
     private final HookProcessorProvider hookProcessorProvider;
     private final HookReadPlatformService hookReadPlatformService;
     private final TenantDetailsService tenantDetailsService;
 
     @Autowired
-    public MifosHookListener(final HookProcessorProvider hookProcessorProvider,
+    public FineractHookListener(final HookProcessorProvider hookProcessorProvider,
             final HookReadPlatformService hookReadPlatformService,
             final TenantDetailsService tenantDetailsService) {
         this.hookReadPlatformService = hookReadPlatformService;
@@ -40,7 +53,7 @@ public class MifosHookListener implements HookListener {
     public void onApplicationEvent(final HookEvent event) {
 
         final String tenantIdentifier = event.getTenantIdentifier();
-        final MifosPlatformTenant tenant = this.tenantDetailsService
+        final FineractPlatformTenant tenant = this.tenantDetailsService
                 .loadTenantById(tenantIdentifier);
         ThreadLocalContextUtil.setTenant(tenant);
 

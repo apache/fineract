@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.infrastructure.security.filter;
+package org.apache.fineract.infrastructure.security.filter;
 
 import java.io.IOException;
 
@@ -15,16 +28,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.time.StopWatch;
-import org.mifosplatform.infrastructure.cache.domain.CacheType;
-import org.mifosplatform.infrastructure.cache.service.CacheWritePlatformService;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
-import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
-import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
-import org.mifosplatform.infrastructure.security.data.PlatformRequestLog;
-import org.mifosplatform.infrastructure.security.exception.InvalidTenantIdentiferException;
-import org.mifosplatform.infrastructure.security.service.BasicAuthTenantDetailsService;
-import org.mifosplatform.useradministration.domain.AppUser;
+import org.apache.fineract.infrastructure.cache.domain.CacheType;
+import org.apache.fineract.infrastructure.cache.service.CacheWritePlatformService;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.security.data.PlatformRequestLog;
+import org.apache.fineract.infrastructure.security.exception.InvalidTenantIdentiferException;
+import org.apache.fineract.infrastructure.security.service.BasicAuthTenantDetailsService;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +59,7 @@ import org.springframework.stereotype.Service;
  * valid.
  * 
  * If multi-tenant and basic auth credentials are valid, the details of the
- * tenant are stored in {@link MifosPlatformTenant} and stored in a
+ * tenant are stored in {@link FineractPlatformTenant} and stored in a
  * {@link ThreadLocal} variable for this request using
  * {@link ThreadLocalContextUtil}.
  * 
@@ -65,7 +78,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
     private final ConfigurationDomainService configurationDomainService;
     private final CacheWritePlatformService cacheWritePlatformService;
 
-    private final String tenantRequestHeader = "X-Mifos-Platform-TenantId";
+    private final String tenantRequestHeader = "Fineract-Platform-TenantId";
     private final boolean exceptionIfHeaderMissing = true;
 
     @Autowired
@@ -111,7 +124,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                 if (pathInfo != null && pathInfo.contains("report")) {
                     isReportRequest = true;
                 }
-                final MifosPlatformTenant tenant = this.basicAuthTenantDetailsService.loadTenantById(tenantIdentifier, isReportRequest);
+                final FineractPlatformTenant tenant = this.basicAuthTenantDetailsService.loadTenantById(tenantIdentifier, isReportRequest);
 
                 ThreadLocalContextUtil.setTenant(tenant);
                 String authToken = request.getHeader("Authorization");
@@ -139,7 +152,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
             // deal with exception at low level
             SecurityContextHolder.getContext().setAuthentication(null);
 
-            response.addHeader("WWW-Authenticate", "Basic realm=\"" + "Mifos Platform API" + "\"");
+            response.addHeader("WWW-Authenticate", "Basic realm=\"" + "Fineract Platform API" + "\"");
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         } finally {
             task.stop();

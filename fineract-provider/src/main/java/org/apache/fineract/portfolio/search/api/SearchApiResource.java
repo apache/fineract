@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.portfolio.search.api;
+package org.apache.fineract.portfolio.search.api;
 
 import java.util.Collection;
 import java.util.Set;
@@ -19,16 +32,16 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
-import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
-import org.mifosplatform.portfolio.search.SearchConstants.SEARCH_RESPONSE_PARAMETERS;
-import org.mifosplatform.portfolio.search.data.AdHocQueryDataValidator;
-import org.mifosplatform.portfolio.search.data.AdHocQuerySearchConditions;
-import org.mifosplatform.portfolio.search.data.AdHocSearchQueryData;
-import org.mifosplatform.portfolio.search.data.SearchConditions;
-import org.mifosplatform.portfolio.search.data.SearchData;
-import org.mifosplatform.portfolio.search.service.SearchReadPlatformService;
+import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
+import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.portfolio.search.SearchConstants.SEARCH_RESPONSE_PARAMETERS;
+import org.apache.fineract.portfolio.search.data.AdHocQueryDataValidator;
+import org.apache.fineract.portfolio.search.data.AdHocQuerySearchConditions;
+import org.apache.fineract.portfolio.search.data.AdHocSearchQueryData;
+import org.apache.fineract.portfolio.search.data.SearchConditions;
+import org.apache.fineract.portfolio.search.data.SearchData;
+import org.apache.fineract.portfolio.search.service.SearchReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

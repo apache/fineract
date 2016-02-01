@@ -41,7 +41,7 @@ project.ext.mysqlUser='root'
 project.ext.mysqlPassword='mysql'
 
 
-group = 'org.mifosplatform'
+group = 'org.apache.fineract'
 
 repositories {
 	jcenter()
@@ -78,7 +78,7 @@ if (project.hasProperty('security') && project.getProperty('security') == 'oauth
 }
 
 task dist(type:Zip){
-	baseName = 'mifosplatform'
+	baseName = 'fineractplatform'
 	version = qualifyVersionIfNecessary(releaseVersion)
     includeEmptyDirs = true
 	from('../') {
@@ -99,7 +99,7 @@ task dist(type:Zip){
         include '*'
         into('api-docs')
     }
-    from('../mifosng-db/') {
+    from('../fineract-db/') {
         fileMode = 0755
         include '*.sql'
         into('database')
@@ -234,7 +234,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "org.flywaydb:flyway-gradle-plugin:3.0" // version upgraded during Spring Boot & MariaDB4j work, as prev. used v0.2 didn't work well after *.sql moved from mifosng-db to mifosng-provider/src/main/resources (new version also has clearer errors, e.g. in case of missing DB)
+        classpath "org.flywaydb:flyway-gradle-plugin:3.0" // version upgraded during Spring Boot & MariaDB4j work, as prev. used v0.2 didn't work well after *.sql moved from fineract-db to fineract-provider/src/main/resources (new version also has clearer errors, e.g. in case of missing DB)
         classpath 'mysql:mysql-connector-java:5.1.22'
     }
 }
@@ -339,8 +339,8 @@ def qualifyVersionIfNecessary(version) {
 }
 
 springBoot {
-    mainClass = 'org.mifosplatform.ServerWithMariaDB4jApplication'
+    mainClass = 'org.apache.fineract.ServerWithMariaDB4jApplication'
 }
 bootRepackage {
-    mainClass = 'org.mifosplatform.ServerWithMariaDB4jApplication'
+    mainClass = 'org.apache.fineract.ServerWithMariaDB4jApplication'
 }

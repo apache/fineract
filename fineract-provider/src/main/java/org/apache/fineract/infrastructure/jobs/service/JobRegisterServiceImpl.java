@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.infrastructure.jobs.service;
+package org.apache.fineract.infrastructure.jobs.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,15 +27,15 @@ import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
 
-import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
-import org.mifosplatform.infrastructure.core.exception.PlatformInternalServerException;
-import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
-import org.mifosplatform.infrastructure.jobs.annotation.CronMethodParser;
-import org.mifosplatform.infrastructure.jobs.annotation.CronMethodParser.ClassMethodNamesPair;
-import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetail;
-import org.mifosplatform.infrastructure.jobs.domain.SchedulerDetail;
-import org.mifosplatform.infrastructure.jobs.exception.JobNotFoundException;
-import org.mifosplatform.infrastructure.security.service.TenantDetailsService;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.jobs.annotation.CronMethodParser;
+import org.apache.fineract.infrastructure.jobs.annotation.CronMethodParser.ClassMethodNamesPair;
+import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
+import org.apache.fineract.infrastructure.jobs.domain.SchedulerDetail;
+import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
+import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
@@ -99,8 +112,8 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
     @PostConstruct
     public void loadAllJobs() {
-        final List<MifosPlatformTenant> allTenants = this.tenantDetailsService.findAllTenants();
-        for (final MifosPlatformTenant tenant : allTenants) {
+        final List<FineractPlatformTenant> allTenants = this.tenantDetailsService.findAllTenants();
+        for (final FineractPlatformTenant tenant : allTenants) {
             ThreadLocalContextUtil.setTenant(tenant);
             final List<ScheduledJobDetail> scheduledJobDetails = this.schedularWritePlatformService.retrieveAllJobs();
             for (final ScheduledJobDetail jobDetails : scheduledJobDetails) {
@@ -301,7 +314,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
 
     private String getSchedulerName(final ScheduledJobDetail scheduledJobDetail) {
         final StringBuilder sb = new StringBuilder(20);
-        final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+        final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
         sb.append(SchedulerServiceConstants.SCHEDULER).append(tenant.getId());
         if (scheduledJobDetail.getSchedulerGroup() > 0) {
             sb.append(SchedulerServiceConstants.SCHEDULER_GROUP).append(scheduledJobDetail.getSchedulerGroup());
@@ -324,7 +337,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     }
 
     private JobDetail createJobDetail(final ScheduledJobDetail scheduledJobDetail) throws Exception {
-        final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+        final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
         final ClassMethodNamesPair jobDetails = CronMethodParser.findTargetMethodDetails(scheduledJobDetail.getJobName());
         if (jobDetails == null) { throw new IllegalArgumentException(
                 "Code has no @CronTarget with this job name (@see JobName); seems like DB/code are not in line: "
@@ -370,7 +383,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     }
 
     private Trigger createTrigger(final ScheduledJobDetail scheduledJobDetails, final JobDetail jobDetail) {
-        final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+        final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
         final CronTriggerFactoryBean cronTriggerFactoryBean = new CronTriggerFactoryBean();
         cronTriggerFactoryBean.setName(scheduledJobDetails.getJobName() + "Trigger" + tenant.getId());
         cronTriggerFactoryBean.setJobDetail(jobDetail);

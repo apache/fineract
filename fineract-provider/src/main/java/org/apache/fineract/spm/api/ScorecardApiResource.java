@@ -1,22 +1,35 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.spm.api;
+package org.apache.fineract.spm.api;
 
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.client.domain.Client;
-import org.mifosplatform.portfolio.client.domain.ClientRepository;
-import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
-import org.mifosplatform.spm.data.ScorecardData;
-import org.mifosplatform.spm.domain.Scorecard;
-import org.mifosplatform.spm.domain.Survey;
-import org.mifosplatform.spm.exception.SurveyNotFoundException;
-import org.mifosplatform.spm.service.ScorecardService;
-import org.mifosplatform.spm.service.SpmService;
-import org.mifosplatform.spm.util.ScorecardMapper;
-import org.mifosplatform.useradministration.domain.AppUser;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.client.domain.ClientRepository;
+import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
+import org.apache.fineract.spm.data.ScorecardData;
+import org.apache.fineract.spm.domain.Scorecard;
+import org.apache.fineract.spm.domain.Survey;
+import org.apache.fineract.spm.exception.SurveyNotFoundException;
+import org.apache.fineract.spm.service.ScorecardService;
+import org.apache.fineract.spm.service.SpmService;
+import org.apache.fineract.spm.util.ScorecardMapper;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

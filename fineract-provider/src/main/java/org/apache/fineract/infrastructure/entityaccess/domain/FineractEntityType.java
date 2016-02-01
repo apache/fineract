@@ -1,21 +1,34 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.infrastructure.entityaccess.domain;
+package org.apache.fineract.infrastructure.entityaccess.domain;
 
-public class MifosEntityType {
+public class FineractEntityType {
 	private String type;
 	private String description;
 	private String table_name;
 	
-	public static MifosEntityType OFFICE = new MifosEntityType ("office", "Offices", "m_office"); 
-	public static MifosEntityType LOAN_PRODUCT = new MifosEntityType ("loan_product", "Loan Products", "m_product_loan");
-	public static MifosEntityType SAVINGS_PRODUCT = new MifosEntityType ("savings_product", "Savings Products", "m_savings_product");
-	public static MifosEntityType CHARGE = new MifosEntityType ("charge", "Fees/Charges", "m_charge");
+	public static FineractEntityType OFFICE = new FineractEntityType ("office", "Offices", "m_office"); 
+	public static FineractEntityType LOAN_PRODUCT = new FineractEntityType ("loan_product", "Loan Products", "m_product_loan");
+	public static FineractEntityType SAVINGS_PRODUCT = new FineractEntityType ("savings_product", "Savings Products", "m_savings_product");
+	public static FineractEntityType CHARGE = new FineractEntityType ("charge", "Fees/Charges", "m_charge");
 		
-	private MifosEntityType (String type, String description, String table_name) {
+	private FineractEntityType (String type, String description, String table_name) {
 		this.type = type;
 		this.description = description;
 		this.table_name = table_name;
@@ -33,9 +46,9 @@ public class MifosEntityType {
 		return this.table_name;
 	}
 	
-	public static MifosEntityType get (String type) {
+	public static FineractEntityType get (String type) {
 
-    	MifosEntityType retType = null;
+    	FineractEntityType retType = null;
     	
     	if (type.equals(OFFICE.type)) {
     		retType =  OFFICE;

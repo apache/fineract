@@ -1,17 +1,30 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.integrationtests.common.loans;
+package org.apache.fineract.integrationtests.common.loans;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.mifosplatform.integrationtests.common.Utils;
-import org.mifosplatform.integrationtests.common.accounting.Account;
+import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.accounting.Account;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -29,7 +42,7 @@ public class LoanProductTestBuilder {
     private static final String EQUAL_INSTALLMENTS = "1";
     private static final String DECLINING_BALANCE = "0";
     private static final String FLAT_BALANCE = "1";
-    public static final String MIFOS_STANDARD_STRATEGY = "1";
+    public static final String DEFAULT_STRATEGY = "1";
     // private static final String HEAVENS_FAMILY_STRATEGY ="2";
     // private static final String CREO_CORE_STRATEGY ="3";
     public static final String RBI_INDIA_STRATEGY = "4";
@@ -71,7 +84,7 @@ public class LoanProductTestBuilder {
     private String overdueDaysForNPA = "5";
     private String interestCalculationPeriodType = CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD;
     private String inArrearsTolerance = "0";
-    private String transactionProcessingStrategy = MIFOS_STANDARD_STRATEGY;
+    private String transactionProcessingStrategy = DEFAULT_STRATEGY;
     private String accountingRule = NONE;
     private final String currencyCode = USD;
     private String amortizationType = EQUAL_INSTALLMENTS;

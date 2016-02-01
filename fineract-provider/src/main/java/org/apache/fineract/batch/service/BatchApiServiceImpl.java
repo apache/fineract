@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.batch.service;
+package org.apache.fineract.batch.service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -13,14 +26,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosplatform.batch.command.CommandContext;
-import org.mifosplatform.batch.command.CommandStrategy;
-import org.mifosplatform.batch.command.CommandStrategyProvider;
-import org.mifosplatform.batch.domain.BatchRequest;
-import org.mifosplatform.batch.domain.BatchResponse;
-import org.mifosplatform.batch.exception.ErrorHandler;
-import org.mifosplatform.batch.exception.ErrorInfo;
-import org.mifosplatform.batch.service.ResolutionHelper.BatchRequestNode;
+import org.apache.fineract.batch.command.CommandContext;
+import org.apache.fineract.batch.command.CommandStrategy;
+import org.apache.fineract.batch.command.CommandStrategyProvider;
+import org.apache.fineract.batch.domain.BatchRequest;
+import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.batch.exception.ErrorHandler;
+import org.apache.fineract.batch.exception.ErrorInfo;
+import org.apache.fineract.batch.service.ResolutionHelper.BatchRequestNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionException;
@@ -39,9 +52,9 @@ import edu.emory.mathcs.backport.java.util.Collections;
  * 
  * @author Rishabh Shukla
  * 
- * @see org.mifosplatform.batch.domain.BatchRequest
- * @see org.mifosplatform.batch.domain.BatchResponse
- * @see org.mifosplatform.batch.command.CommandStrategyProvider
+ * @see org.apache.fineract.batch.domain.BatchRequest
+ * @see org.apache.fineract.batch.domain.BatchResponse
+ * @see org.apache.fineract.batch.command.CommandStrategyProvider
  */
 @Service
 public class BatchApiServiceImpl implements BatchApiService {
@@ -53,7 +66,7 @@ public class BatchApiServiceImpl implements BatchApiService {
 
     /**
      * Constructs a 'BatchApiServiceImpl' with an argument of
-     * {@link org.mifosplatform.batch.command.CommandStrategyProvider} type.
+     * {@link org.apache.fineract.batch.command.CommandStrategyProvider} type.
      * 
      * @param strategyProvider
      * @param resolutionHelper
@@ -69,7 +82,7 @@ public class BatchApiServiceImpl implements BatchApiService {
 
     /**
      * Returns the response list by getting a proper
-     * {@link org.mifosplatform.batch.command.CommandStrategy}. execute() method
+     * {@link org.apache.fineract.batch.command.CommandStrategy}. execute() method
      * of acquired commandStrategy is then provided with the separate Request.
      * 
      * @param requestList

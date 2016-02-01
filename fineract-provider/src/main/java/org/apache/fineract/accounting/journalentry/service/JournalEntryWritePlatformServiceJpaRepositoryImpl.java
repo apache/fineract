@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.accounting.journalentry.service;
+package org.apache.fineract.accounting.journalentry.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -16,52 +29,52 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.fineract.accounting.closure.domain.GLClosure;
+import org.apache.fineract.accounting.closure.domain.GLClosureRepository;
+import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccount;
+import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccountRepositoryWrapper;
+import org.apache.fineract.accounting.glaccount.data.GLAccountDataForLookup;
+import org.apache.fineract.accounting.glaccount.domain.GLAccount;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
+import org.apache.fineract.accounting.glaccount.exception.GLAccountNotFoundException;
+import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformService;
+import org.apache.fineract.accounting.journalentry.api.JournalEntryJsonInputParams;
+import org.apache.fineract.accounting.journalentry.command.JournalEntryCommand;
+import org.apache.fineract.accounting.journalentry.command.SingleDebitOrCreditEntryCommand;
+import org.apache.fineract.accounting.journalentry.data.ClientTransactionDTO;
+import org.apache.fineract.accounting.journalentry.data.LoanDTO;
+import org.apache.fineract.accounting.journalentry.data.SavingsDTO;
+import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
+import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
+import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
+import org.apache.fineract.accounting.journalentry.exception.JournalEntriesNotFoundException;
+import org.apache.fineract.accounting.journalentry.exception.JournalEntryInvalidException;
+import org.apache.fineract.accounting.journalentry.exception.JournalEntryInvalidException.GL_JOURNAL_ENTRY_INVALID_REASON;
+import org.apache.fineract.accounting.journalentry.serialization.JournalEntryCommandFromApiJsonDeserializer;
+import org.apache.fineract.accounting.provisioning.domain.LoanProductProvisioningEntry;
+import org.apache.fineract.accounting.provisioning.domain.ProvisioningEntry;
+import org.apache.fineract.accounting.rule.domain.AccountingRule;
+import org.apache.fineract.accounting.rule.domain.AccountingRuleRepository;
+import org.apache.fineract.accounting.rule.exception.AccountingRuleNotFoundException;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.organisation.office.domain.OfficeRepository;
+import org.apache.fineract.organisation.office.domain.OrganisationCurrencyRepositoryWrapper;
+import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
+import org.apache.fineract.portfolio.client.domain.ClientTransaction;
+import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
-import org.mifosplatform.accounting.closure.domain.GLClosure;
-import org.mifosplatform.accounting.closure.domain.GLClosureRepository;
-import org.mifosplatform.accounting.financialactivityaccount.domain.FinancialActivityAccount;
-import org.mifosplatform.accounting.financialactivityaccount.domain.FinancialActivityAccountRepositoryWrapper;
-import org.mifosplatform.accounting.glaccount.data.GLAccountDataForLookup;
-import org.mifosplatform.accounting.glaccount.domain.GLAccount;
-import org.mifosplatform.accounting.glaccount.domain.GLAccountRepository;
-import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
-import org.mifosplatform.accounting.glaccount.exception.GLAccountNotFoundException;
-import org.mifosplatform.accounting.glaccount.service.GLAccountReadPlatformService;
-import org.mifosplatform.accounting.journalentry.api.JournalEntryJsonInputParams;
-import org.mifosplatform.accounting.journalentry.command.JournalEntryCommand;
-import org.mifosplatform.accounting.journalentry.command.SingleDebitOrCreditEntryCommand;
-import org.mifosplatform.accounting.journalentry.data.ClientTransactionDTO;
-import org.mifosplatform.accounting.journalentry.data.LoanDTO;
-import org.mifosplatform.accounting.journalentry.data.SavingsDTO;
-import org.mifosplatform.accounting.journalentry.domain.JournalEntry;
-import org.mifosplatform.accounting.journalentry.domain.JournalEntryRepository;
-import org.mifosplatform.accounting.journalentry.domain.JournalEntryType;
-import org.mifosplatform.accounting.journalentry.exception.JournalEntriesNotFoundException;
-import org.mifosplatform.accounting.journalentry.exception.JournalEntryInvalidException;
-import org.mifosplatform.accounting.journalentry.exception.JournalEntryInvalidException.GL_JOURNAL_ENTRY_INVALID_REASON;
-import org.mifosplatform.accounting.journalentry.serialization.JournalEntryCommandFromApiJsonDeserializer;
-import org.mifosplatform.accounting.provisioning.domain.LoanProductProvisioningEntry;
-import org.mifosplatform.accounting.provisioning.domain.ProvisioningEntry;
-import org.mifosplatform.accounting.rule.domain.AccountingRule;
-import org.mifosplatform.accounting.rule.domain.AccountingRuleRepository;
-import org.mifosplatform.accounting.rule.exception.AccountingRuleNotFoundException;
-import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.ApiParameterError;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
-import org.mifosplatform.infrastructure.core.exception.GeneralPlatformDomainRuleException;
-import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.office.domain.Office;
-import org.mifosplatform.organisation.office.domain.OfficeRepository;
-import org.mifosplatform.organisation.office.domain.OrganisationCurrencyRepositoryWrapper;
-import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
-import org.mifosplatform.portfolio.client.domain.ClientTransaction;
-import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
-import org.mifosplatform.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
-import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

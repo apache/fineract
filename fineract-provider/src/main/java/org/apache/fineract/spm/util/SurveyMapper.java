@@ -1,18 +1,31 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.spm.util;
+package org.apache.fineract.spm.util;
 
-import org.mifosplatform.spm.data.ComponentData;
-import org.mifosplatform.spm.data.QuestionData;
-import org.mifosplatform.spm.data.ResponseData;
-import org.mifosplatform.spm.data.SurveyData;
-import org.mifosplatform.spm.domain.Component;
-import org.mifosplatform.spm.domain.Question;
-import org.mifosplatform.spm.domain.Response;
-import org.mifosplatform.spm.domain.Survey;
+import org.apache.fineract.spm.data.ComponentData;
+import org.apache.fineract.spm.data.QuestionData;
+import org.apache.fineract.spm.data.ResponseData;
+import org.apache.fineract.spm.data.SurveyData;
+import org.apache.fineract.spm.domain.Component;
+import org.apache.fineract.spm.domain.Question;
+import org.apache.fineract.spm.domain.Response;
+import org.apache.fineract.spm.domain.Survey;
 
 import java.util.ArrayList;
 import java.util.List;

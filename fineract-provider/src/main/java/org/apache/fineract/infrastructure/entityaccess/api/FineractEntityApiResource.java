@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.infrastructure.entityaccess.api;
+package org.apache.fineract.infrastructure.entityaccess.api;
 
 import java.util.Collection;
 
@@ -19,17 +32,17 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosplatform.commands.domain.CommandWrapper;
-import org.mifosplatform.commands.service.CommandWrapperBuilder;
-import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
-import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.mifosplatform.infrastructure.entityaccess.data.MifosEntityRelationData;
-import org.mifosplatform.infrastructure.entityaccess.data.MifosEntityToEntityMappingData;
-import org.mifosplatform.infrastructure.entityaccess.service.MifosEntityAccessReadService;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.commands.service.CommandWrapperBuilder;
+import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelationData;
+import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityToEntityMappingData;
+import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessReadService;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -39,19 +52,19 @@ import org.springframework.stereotype.Component;
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
 @Scope("singleton")
-public class MifosEntityApiResource {
+public class FineractEntityApiResource {
 
     private final PlatformSecurityContext context;
-    private final MifosEntityAccessReadService readPlatformService;
-    private final DefaultToApiJsonSerializer<MifosEntityRelationData> toApiJsonSerializer;
-    private final DefaultToApiJsonSerializer<MifosEntityToEntityMappingData> toApiJsonSerializerOfficeToLoanProducts;
+    private final FineractEntityAccessReadService readPlatformService;
+    private final DefaultToApiJsonSerializer<FineractEntityRelationData> toApiJsonSerializer;
+    private final DefaultToApiJsonSerializer<FineractEntityToEntityMappingData> toApiJsonSerializerOfficeToLoanProducts;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
-    public MifosEntityApiResource(final PlatformSecurityContext context, final MifosEntityAccessReadService readPlatformService,
-            final DefaultToApiJsonSerializer<MifosEntityRelationData> toApiJsonSerializer,
-            final DefaultToApiJsonSerializer<MifosEntityToEntityMappingData> toApiJsonSerializerOfficeToLoanProducts,
+    public FineractEntityApiResource(final PlatformSecurityContext context, final FineractEntityAccessReadService readPlatformService,
+            final DefaultToApiJsonSerializer<FineractEntityRelationData> toApiJsonSerializer,
+            final DefaultToApiJsonSerializer<FineractEntityToEntityMappingData> toApiJsonSerializerOfficeToLoanProducts,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
@@ -67,11 +80,11 @@ public class MifosEntityApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAll(@Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(MifosEntityApiResourceConstants.MIFOS_ENTITY_RESOURCE_NAME);
+        this.context.authenticatedUser().validateHasReadPermission(FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
 
-        final Collection<MifosEntityRelationData> entityMappings = this.readPlatformService.retrieveAllSupportedMappingTypes();
+        final Collection<FineractEntityRelationData> entityMappings = this.readPlatformService.retrieveAllSupportedMappingTypes();
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, entityMappings, MifosEntityApiResourceConstants.RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, entityMappings, FineractEntityApiResourceConstants.RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -80,12 +93,12 @@ public class MifosEntityApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveOne(@PathParam("mapId") final Long mapId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(MifosEntityApiResourceConstants.MIFOS_ENTITY_RESOURCE_NAME);
+        this.context.authenticatedUser().validateHasReadPermission(FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
 
-        final Collection<MifosEntityToEntityMappingData> entityToEntityMappings = this.readPlatformService.retrieveOneMapping(mapId);
+        final Collection<FineractEntityToEntityMappingData> entityToEntityMappings = this.readPlatformService.retrieveOneMapping(mapId);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializerOfficeToLoanProducts.serialize(settings, entityToEntityMappings,
-                MifosEntityApiResourceConstants.FETCH_ENTITY_TO_ENTITY_MAPPINGS);
+                FineractEntityApiResourceConstants.FETCH_ENTITY_TO_ENTITY_MAPPINGS);
     }
 
     @GET
@@ -95,13 +108,13 @@ public class MifosEntityApiResource {
     public String getEntityToEntityMappings(@PathParam("mapId") final Long mapId, @PathParam("fromId") final Long fromId,
             @PathParam("toId") final Long toId, @Context final UriInfo uriInfo) {
 
-        this.context.authenticatedUser().validateHasReadPermission(MifosEntityApiResourceConstants.MIFOS_ENTITY_RESOURCE_NAME);
+        this.context.authenticatedUser().validateHasReadPermission(FineractEntityApiResourceConstants.FINERACT_ENTITY_RESOURCE_NAME);
 
-        final Collection<MifosEntityToEntityMappingData> entityToEntityMappings = this.readPlatformService.retrieveEntityToEntityMappings(
+        final Collection<FineractEntityToEntityMappingData> entityToEntityMappings = this.readPlatformService.retrieveEntityToEntityMappings(
                 mapId, fromId, toId);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializerOfficeToLoanProducts.serialize(settings, entityToEntityMappings,
-                MifosEntityApiResourceConstants.FETCH_ENTITY_TO_ENTITY_MAPPINGS);
+                FineractEntityApiResourceConstants.FETCH_ENTITY_TO_ENTITY_MAPPINGS);
     }
 
     @POST

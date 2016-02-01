@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.infrastructure.security.service;
+package org.apache.fineract.infrastructure.security.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,9 +24,9 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
-import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenantConnection;
-import org.mifosplatform.infrastructure.security.exception.InvalidTenantIdentiferException;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
+import org.apache.fineract.infrastructure.security.exception.InvalidTenantIdentiferException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
@@ -36,7 +49,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-    private static final class TenantMapper implements RowMapper<MifosPlatformTenant> {
+    private static final class TenantMapper implements RowMapper<FineractPlatformTenant> {
 
         private final StringBuilder sqlBuilder = new StringBuilder("t.id, ts.id as connectionId , ")//
                 .append(" t.timezone_id as timezoneId , t.name,t.identifier, ts.schema_name as schemaName, ts.schema_server as schemaServer,")//
@@ -56,18 +69,18 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
         }
 
         @Override
-        public MifosPlatformTenant mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public FineractPlatformTenant mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
             final String tenantIdentifier = rs.getString("identifier");
             final String name = rs.getString("name");
             final String timezoneId = rs.getString("timezoneId");
-            final MifosPlatformTenantConnection connection = getDBConnection(rs);
+            final FineractPlatformTenantConnection connection = getDBConnection(rs);
 
-            return new MifosPlatformTenant(id, tenantIdentifier, name, timezoneId, connection);
+            return new FineractPlatformTenant(id, tenantIdentifier, name, timezoneId, connection);
         }
 
         // gets the DB connection
-        private MifosPlatformTenantConnection getDBConnection(ResultSet rs) throws SQLException {
+        private FineractPlatformTenantConnection getDBConnection(ResultSet rs) throws SQLException {
 
             final Long connectionId = rs.getLong("connectionId");
             final String schemaName = rs.getString("schemaName");
@@ -95,7 +108,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
             maxRetriesOnDeadlock = bindValueInMinMaxRange(maxRetriesOnDeadlock, 0, 15);
             maxIntervalBetweenRetries = bindValueInMinMaxRange(maxIntervalBetweenRetries, 1, 15);
 
-            return new MifosPlatformTenantConnection(connectionId, schemaName, schemaServer, schemaServerPort, schemaUsername,
+            return new FineractPlatformTenantConnection(connectionId, schemaName, schemaServer, schemaServerPort, schemaUsername,
                     schemaPassword, autoUpdateEnabled, initialSize, validationInterval, removeAbandoned, removeAbandonedTimeout,
                     logAbandoned, abandonWhenPercentageFull, maxActive, minIdle, maxIdle, suspectTimeout, timeBetweenEvictionRunsMillis,
                     minEvictableIdleTimeMillis, maxRetriesOnDeadlock, maxIntervalBetweenRetries, testOnBorrow);
@@ -112,7 +125,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
 
     @Override
     @Cacheable(value = "tenantsById")
-    public MifosPlatformTenant loadTenantById(final String tenantIdentifier) {
+    public FineractPlatformTenant loadTenantById(final String tenantIdentifier) {
 
         try {
             final TenantMapper rm = new TenantMapper();
@@ -125,11 +138,11 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
     }
 
     @Override
-    public List<MifosPlatformTenant> findAllTenants() {
+    public List<FineractPlatformTenant> findAllTenants() {
         final TenantMapper rm = new TenantMapper();
         final String sql = "select  " + rm.schema();
 
-        final List<MifosPlatformTenant> mifosPlatformTenants = this.jdbcTemplate.query(sql, rm, new Object[] {});
-        return mifosPlatformTenants;
+        final List<FineractPlatformTenant> fineractPlatformTenants = this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return fineractPlatformTenants;
     }
 }

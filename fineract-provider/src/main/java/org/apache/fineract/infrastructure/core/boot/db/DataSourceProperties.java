@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.infrastructure.core.boot.db;
+package org.apache.fineract.infrastructure.core.boot.db;
 
 import javax.validation.constraints.NotNull;
 
@@ -16,18 +29,18 @@ import org.springframework.util.StringUtils;
  * override those via the Spring Values listed below; i.e. via -D Java System
  * properties, or main() command line arguments, OS environment variables, from
  * JNDI, or application.properties (thanks Spring Boot). For example:
- * -Dmifos.datasource.port=3307.
+ * -Dfineract.datasource.port=3307.
  */
 // NOT a @Component - we do not want this to picked up by component scan, only explicitly declared in DataSourceConfiguration (if that's active)
 public class DataSourceProperties extends PoolProperties {
 
-    public final static String PORT = "mifos.datasource.port";
-    public final static String HOST = "mifos.datasource.host";
-    public final static String DB = "mifos.datasource.db";
-    public final static String UID = "mifos.datasource.username";
-    public final static String PWD = "mifos.datasource.password";
-    public final static String PROTOCOL = "mifos.datasource.protocol";
-    public final static String SUBPROTOCOL = "mifos.datasource.subprotocol";
+    public final static String PORT = "fineract.datasource.port";
+    public final static String HOST = "fineract.datasource.host";
+    public final static String DB = "fineract.datasource.db";
+    public final static String UID = "fineract.datasource.username";
+    public final static String PWD = "fineract.datasource.password";
+    public final static String PROTOCOL = "fineract.datasource.protocol";
+    public final static String SUBPROTOCOL = "fineract.datasource.subprotocol";
 
     @Value("${" + PORT + ":3306}")
     private volatile @NotNull int port;
@@ -58,16 +71,16 @@ public class DataSourceProperties extends PoolProperties {
         // overridden
         setDriverClassName(com.mysql.jdbc.Driver.class.getName());
 
-        setMifosDefaults();
+        setDefaults();
     }
 
     /**
      * as per (some of..) INSTALL.md and
-     * org.mifosplatform.infrastructure.core.service
+     * org.apache.fineract.infrastructure.core.service
      * .TomcatJdbcDataSourcePerTenantService
-     * .createNewDataSourceFor(MifosPlatformTenant)
+     * .createNewDataSourceFor(FineractPlatformTenant)
      */
-    protected void setMifosDefaults() {
+    protected void setDefaults() {
         setInitialSize(3);
         // setMaxIdle(6); -- strange, why?
         // setMinIdle(3); -- JavaDoc says default is initialSize.. so shouldn't

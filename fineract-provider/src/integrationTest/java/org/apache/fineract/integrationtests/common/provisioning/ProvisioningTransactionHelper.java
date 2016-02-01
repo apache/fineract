@@ -1,14 +1,27 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.integrationtests.common.provisioning;
+package org.apache.fineract.integrationtests.common.provisioning;
 
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.mifosplatform.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.Utils;
 
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
@@ -16,10 +29,10 @@ import com.jayway.restassured.specification.ResponseSpecification;
 
 public class ProvisioningTransactionHelper {
 
-    private static final String PROVISIONING_CATEGORY_URL = "/mifosng-provider/api/v1/provisioningcategory?" + Utils.TENANT_IDENTIFIER ;
+    private static final String PROVISIONING_CATEGORY_URL = "/fineract-provider/api/v1/provisioningcategory?" + Utils.TENANT_IDENTIFIER ;
     
-    private static final String CREATE_PROVISIONING_CRITERIA_URL = "/mifosng-provider/api/v1/provisioningcriteria?" + Utils.TENANT_IDENTIFIER;
-    private static final String CREATE_PROVISIONING_ENTRY_URL = "/mifosng-provider/api/v1/provisioningentries?" + Utils.TENANT_IDENTIFIER;
+    private static final String CREATE_PROVISIONING_CRITERIA_URL = "/fineract-provider/api/v1/provisioningcriteria?" + Utils.TENANT_IDENTIFIER;
+    private static final String CREATE_PROVISIONING_ENTRY_URL = "/fineract-provider/api/v1/provisioningentries?" + Utils.TENANT_IDENTIFIER;
     
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
@@ -38,17 +51,17 @@ public class ProvisioningTransactionHelper {
     }
     
     public Map retrieveProvisioningCriteria(final Integer criteriaId) {
-        String url = "/mifosng-provider/api/v1/provisioningcriteria/"+criteriaId+"?"+Utils.TENANT_IDENTIFIER ;
+        String url = "/fineract-provider/api/v1/provisioningcriteria/"+criteriaId+"?"+Utils.TENANT_IDENTIFIER ;
         return Utils.performServerGet(requestSpec, responseSpec, url, "");
     }
     
     public Integer updateProvisioningCriteria(final Integer criteriaId, final String provsioningCriteriaJson) {
-        String url = "/mifosng-provider/api/v1/provisioningcriteria/"+criteriaId+"?"+Utils.TENANT_IDENTIFIER ;
+        String url = "/fineract-provider/api/v1/provisioningcriteria/"+criteriaId+"?"+Utils.TENANT_IDENTIFIER ;
         return Utils.performServerPut(this.requestSpec, this.responseSpec, url, provsioningCriteriaJson, "resourceId");
     }
     
     public Integer deleteProvisioningCriteria(final Integer criteriaId) {
-        String url = "/mifosng-provider/api/v1/provisioningcriteria/"+criteriaId+"?"+Utils.TENANT_IDENTIFIER;
+        String url = "/fineract-provider/api/v1/provisioningcriteria/"+criteriaId+"?"+Utils.TENANT_IDENTIFIER;
         return Utils.performServerDelete(this.requestSpec, this.responseSpec, url, "resourceId");
     }
     
@@ -57,22 +70,22 @@ public class ProvisioningTransactionHelper {
     }
     
     public Integer updateProvisioningEntry(final String command, final Integer entryId, String jsonBody) {
-        String url = "/mifosng-provider/api/v1/provisioningentries/" + entryId + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
+        String url = "/fineract-provider/api/v1/provisioningentries/" + entryId + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, url, jsonBody, "resourceId") ;
     }
     
     public Map retrieveProvisioningEntry(final Integer provisioningEntry) {
-        String url = "/mifosng-provider/api/v1/provisioningentries/"+provisioningEntry+"?"+Utils.TENANT_IDENTIFIER; ;
+        String url = "/fineract-provider/api/v1/provisioningentries/"+provisioningEntry+"?"+Utils.TENANT_IDENTIFIER; ;
         return Utils.performServerGet(requestSpec, responseSpec, url, "") ;
     }
     
     public Map retrieveProvisioningEntries(final Integer provisioningEntry) {
-        String url = "/mifosng-provider/api/v1/provisioningentries/entries?entryId="+provisioningEntry+"&"+Utils.TENANT_IDENTIFIER; ;
+        String url = "/fineract-provider/api/v1/provisioningentries/entries?entryId="+provisioningEntry+"&"+Utils.TENANT_IDENTIFIER; ;
         return Utils.performServerGet(requestSpec, responseSpec, url, "") ;
     }
     
     public Map retrieveAllProvisioningEntries() {
-        String url = "/mifosng-provider/api/v1/provisioningentries?dateFormat=dd MMMM yyyy"+"&"+"locale=en"+"&"+Utils.TENANT_IDENTIFIER; ;
+        String url = "/fineract-provider/api/v1/provisioningentries?dateFormat=dd MMMM yyyy"+"&"+"locale=en"+"&"+Utils.TENANT_IDENTIFIER; ;
         return Utils.performServerGet(requestSpec, responseSpec, url, "") ;
     }
     

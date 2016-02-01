@@ -1,16 +1,29 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.integrationtests.common;
+package org.apache.fineract.integrationtests.common;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 
-import org.mifosplatform.infrastructure.codes.domain.CodeValue;
-import org.mifosplatform.integrationtests.common.system.CodeHelper;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.integrationtests.common.system.CodeHelper;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -21,8 +34,8 @@ public class ClientHelper {
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
-    private static final String CREATE_CLIENT_URL = "/mifosng-provider/api/v1/clients?" + Utils.TENANT_IDENTIFIER;
-    private static final String CLIENT_URL = "/mifosng-provider/api/v1/clients";
+    private static final String CREATE_CLIENT_URL = "/fineract-provider/api/v1/clients?" + Utils.TENANT_IDENTIFIER;
+    private static final String CLIENT_URL = "/fineract-provider/api/v1/clients";
     private static final String CLOSE_CLIENT_COMMAND = "close";
     private static final String REACTIVATE_CLIENT_COMMAND = "reactivate";
     private static final String REJECT_CLIENT_COMMAND = "reject";
@@ -106,7 +119,7 @@ public class ClientHelper {
 
     public static Object assignStaffToClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String clientId, final String staffId) {
-        final String CLIENT_ASSIGN_STAFF_URL = "/mifosng-provider/api/v1/clients/" + clientId + "?" + Utils.TENANT_IDENTIFIER
+        final String CLIENT_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/clients/" + clientId + "?" + Utils.TENANT_IDENTIFIER
                 + "&command=assignStaff";
 
         System.out.println("---------------------------------CREATING A CLIENT---------------------------------------------");
@@ -191,14 +204,14 @@ public class ClientHelper {
     public static void verifyClientCreatedOnServer(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer generatedClientID) {
         System.out.println("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
-        final String CLIENT_URL = "/mifosng-provider/api/v1/clients/" + generatedClientID + "?" + Utils.TENANT_IDENTIFIER;
+        final String CLIENT_URL = "/fineract-provider/api/v1/clients/" + generatedClientID + "?" + Utils.TENANT_IDENTIFIER;
         final Integer responseClientID = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL, "id");
         assertEquals("ERROR IN CREATING THE CLIENT", generatedClientID, responseClientID);
     }
 
     public static Object getClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String clientId,
             final String jsonReturn) {
-        final String GET_CLIENT_URL = "/mifosng-provider/api/v1/clients/" + clientId + "?" + Utils.TENANT_IDENTIFIER;
+        final String GET_CLIENT_URL = "/fineract-provider/api/v1/clients/" + clientId + "?" + Utils.TENANT_IDENTIFIER;
         System.out.println("---------------------------------GET A CLIENT---------------------------------------------");
         return Utils.performServerGet(requestSpec, responseSpec, GET_CLIENT_URL, jsonReturn);
 
@@ -375,7 +388,7 @@ public class ClientHelper {
     public static Integer addChargesForClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer clientId, final String request) {
         System.out.println("--------------------------------- ADD CHARGES FOR Client --------------------------------");
-        final String ADD_CHARGES_URL = "/mifosng-provider/api/v1/clients/" + clientId + "/charges?" + Utils.TENANT_IDENTIFIER;
+        final String ADD_CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/charges?" + Utils.TENANT_IDENTIFIER;
         final HashMap<?, ?> response = Utils.performServerPost(requestSpec, responseSpec, ADD_CHARGES_URL, request, "");
         return (Integer) response.get("resourceId");
     }
@@ -383,7 +396,7 @@ public class ClientHelper {
     public static String payChargesForClients(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer clientId, final Integer clientChargeId, final String json) {
         System.out.println("--------------------------------- PAY CHARGES FOR CLIENT --------------------------------");
-        final String CHARGES_URL = "/mifosng-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?command=paycharge&"
+        final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?command=paycharge&"
                 + Utils.TENANT_IDENTIFIER;
         final HashMap<?, ?> response = Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, json, "");
         return response.get("transactionId") != null ? response.get("transactionId").toString() : null;
@@ -392,7 +405,7 @@ public class ClientHelper {
     public static String waiveChargesForClients(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer clientId, final Integer clientChargeId, final String json) {
         System.out.println("--------------------------------- WAIVE CHARGES FOR CLIENT --------------------------------");
-        final String CHARGES_URL = "/mifosng-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?command=waive&"
+        final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?command=waive&"
                 + Utils.TENANT_IDENTIFIER;
 
         final HashMap<?, ?> response = Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, json, "");
@@ -402,7 +415,7 @@ public class ClientHelper {
     public static Integer revertClientChargeTransaction(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String clientId, String clientChargeId) {
         System.out.println("---------------------------------UNDO TRANSACTION---------------------------------------------");
-        final String CHARGES_URL = "/mifosng-provider/api/v1/clients/" + clientId + "/transactions/" + clientChargeId + "?command=undo&"
+        final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/transactions/" + clientChargeId + "?command=undo&"
                 + Utils.TENANT_IDENTIFIER;
 
         final HashMap<?, ?> response = Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, "", "");
@@ -413,7 +426,7 @@ public class ClientHelper {
     public static Object getClientCharge(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String clientId, final String clientChargeId) {
         System.out.println("---------------------------------GET CLIENT CHARGE---------------------------------------------");
-        final String CHARGES_URL = "/mifosng-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?"
+        final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/charges/" + clientChargeId + "?"
                 + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL, "amountOutstanding");
     }
@@ -421,7 +434,7 @@ public class ClientHelper {
     public static Boolean getClientTransactions(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String clientId, final String transactionId) {
         System.out.println("---------------------------------GET CLIENT CHARGE TRANSACTIONS---------------------------------------------");
-        final String CHARGES_URL = "/mifosng-provider/api/v1/clients/" + clientId + "/transactions/" + transactionId + "?"
+        final String CHARGES_URL = "/fineract-provider/api/v1/clients/" + clientId + "/transactions/" + transactionId + "?"
                 + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL, "reversed");
     }

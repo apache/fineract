@@ -1,14 +1,27 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.infrastructure.entityaccess.data;
+package org.apache.fineract.infrastructure.entityaccess.data;
 
 import java.io.Serializable;
 import java.util.Date;
 
-public class MifosEntityToEntityMappingData implements Serializable {
+public class FineractEntityToEntityMappingData implements Serializable {
 
     @SuppressWarnings("unused")
     private Long mapId;
@@ -34,7 +47,7 @@ public class MifosEntityToEntityMappingData implements Serializable {
     @SuppressWarnings("unused")
     private final String toEntity;
 
-    private MifosEntityToEntityMappingData(final Long mapId, final Long relationId, final Long fromId, final Long toId,
+    private FineractEntityToEntityMappingData(final Long mapId, final Long relationId, final Long fromId, final Long toId,
             final Date startDate, final Date endDate, final String fromEntity, final String toEntity) {
         this.mapId = mapId;
         this.relationId = relationId;
@@ -46,21 +59,21 @@ public class MifosEntityToEntityMappingData implements Serializable {
         this.toEntity = toEntity;
     }
 
-    public static MifosEntityToEntityMappingData getRelatedEntities(final Long mapId, final Long relationId, final Long fromId,
+    public static FineractEntityToEntityMappingData getRelatedEntities(final Long mapId, final Long relationId, final Long fromId,
             final Long toId, final Date startDate, final Date endDate ,final String fromEntity, final String toEntity) {
 
 
-        return new MifosEntityToEntityMappingData(mapId, relationId, fromId, toId, startDate, endDate, fromEntity, toEntity);
+        return new FineractEntityToEntityMappingData(mapId, relationId, fromId, toId, startDate, endDate, fromEntity, toEntity);
 
     }
 
-    public static MifosEntityToEntityMappingData getRelatedEntities(final Long relationId, final Long fromId, final Long toId,
+    public static FineractEntityToEntityMappingData getRelatedEntities(final Long relationId, final Long fromId, final Long toId,
             final Date startDate, final Date endDate) {
         final Long mapId = null;
         final String fromEntity = null;
         final String toEntity = null;
 
-        return new MifosEntityToEntityMappingData(mapId, relationId, fromId, toId, startDate, endDate, fromEntity, toEntity);
+        return new FineractEntityToEntityMappingData(mapId, relationId, fromId, toId, startDate, endDate, fromEntity, toEntity);
 
     }
 

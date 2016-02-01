@@ -1,9 +1,22 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.integrationtests;
+package org.apache.fineract.integrationtests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -14,12 +27,12 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.fineract.integrationtests.common.*;
+import org.apache.fineract.integrationtests.common.loans.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mifosplatform.integrationtests.common.*;
-import org.mifosplatform.integrationtests.common.loans.*;
 
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
@@ -51,7 +64,7 @@ public class DisbursalAndRepaymentScheduleTest {
     private final String numberOfRepayments = "12";
     private final String interestRatePerPeriod = "18";
 
-    private final SimpleDateFormat dateFormatterMifosStandard = new SimpleDateFormat("dd MMMM yyyy");
+    private final SimpleDateFormat dateFormatterStandard = new SimpleDateFormat("dd MMMM yyyy");
 
     @Before
     public void setup() {
@@ -78,17 +91,17 @@ public class DisbursalAndRepaymentScheduleTest {
 
         meetingCalendar.add(Calendar.WEEK_OF_YEAR, -3);
 
-        final String groupMeetingDate = this.dateFormatterMifosStandard.format(meetingCalendar.getTime());
+        final String groupMeetingDate = this.dateFormatterStandard.format(meetingCalendar.getTime());
 
         final String disbursalDate = groupMeetingDate; // first meeting date
         // after group creation
 
-        final String rescheduleSubmittedDate = this.dateFormatterMifosStandard.format(new java.util.Date());
+        final String rescheduleSubmittedDate = this.dateFormatterStandard.format(new java.util.Date());
 
         final String loanType = "jlg";
         final String rescheduleInterestRate = "28.0";
         groupMeetingChangeCalendar.add(Calendar.DAY_OF_YEAR, 1);
-        final String groupMeetingNewStartDate = this.dateFormatterMifosStandard.format(groupMeetingChangeCalendar.getTime());
+        final String groupMeetingNewStartDate = this.dateFormatterStandard.format(groupMeetingChangeCalendar.getTime());
         // The date
         // from
         // which we
@@ -99,11 +112,11 @@ public class DisbursalAndRepaymentScheduleTest {
         // this is a
         // tuesday.
         groupMeetingChangeCalendar.add(Calendar.WEEK_OF_YEAR, 2);
-        final String rescheduleDate = this.dateFormatterMifosStandard.format(groupMeetingChangeCalendar.getTime());
+        final String rescheduleDate = this.dateFormatterStandard.format(groupMeetingChangeCalendar.getTime());
 
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.requestSpec.header("X-Mifos-Platform-TenantId", "default");
+        this.requestSpec.header("Fineract-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.generalResponseSpec = new ResponseSpecBuilder().build();
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
@@ -218,14 +231,14 @@ public class DisbursalAndRepaymentScheduleTest {
 
         meetingCalendar.add(Calendar.WEEK_OF_YEAR, -3);
 
-        final String groupMeetingDate = this.dateFormatterMifosStandard.format(meetingCalendar.getTime());
+        final String groupMeetingDate = this.dateFormatterStandard.format(meetingCalendar.getTime());
 
         final String disbursalDate = groupMeetingDate; // first meeting date
                                                        // after group creation
 
         final String loanType = "jlg";
         groupMeetingChangeCalendar.add(Calendar.DAY_OF_YEAR, 1);
-        final String groupMeetingNewStartDate = this.dateFormatterMifosStandard.format(groupMeetingChangeCalendar.getTime());
+        final String groupMeetingNewStartDate = this.dateFormatterStandard.format(groupMeetingChangeCalendar.getTime());
         // The date
         // from
         // which we
@@ -238,7 +251,7 @@ public class DisbursalAndRepaymentScheduleTest {
 
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.requestSpec.header("X-Mifos-Platform-TenantId", "default");
+        this.requestSpec.header("Fineract-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.generalResponseSpec = new ResponseSpecBuilder().build();
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);

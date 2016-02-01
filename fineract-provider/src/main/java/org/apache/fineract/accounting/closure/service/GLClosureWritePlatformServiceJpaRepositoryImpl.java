@@ -1,31 +1,44 @@
 /**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-package org.mifosplatform.accounting.closure.service;
+package org.apache.fineract.accounting.closure.service;
 
 import java.util.Date;
 import java.util.Map;
 
+import org.apache.fineract.accounting.closure.api.GLClosureJsonInputParams;
+import org.apache.fineract.accounting.closure.command.GLClosureCommand;
+import org.apache.fineract.accounting.closure.domain.GLClosure;
+import org.apache.fineract.accounting.closure.domain.GLClosureRepository;
+import org.apache.fineract.accounting.closure.exception.GLClosureDuplicateException;
+import org.apache.fineract.accounting.closure.exception.GLClosureInvalidDeleteException;
+import org.apache.fineract.accounting.closure.exception.GLClosureInvalidException;
+import org.apache.fineract.accounting.closure.exception.GLClosureNotFoundException;
+import org.apache.fineract.accounting.closure.exception.GLClosureInvalidException.GL_CLOSURE_INVALID_REASON;
+import org.apache.fineract.accounting.closure.serialization.GLClosureCommandFromApiJsonDeserializer;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.organisation.office.domain.OfficeRepository;
+import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
 import org.joda.time.LocalDate;
-import org.mifosplatform.accounting.closure.api.GLClosureJsonInputParams;
-import org.mifosplatform.accounting.closure.command.GLClosureCommand;
-import org.mifosplatform.accounting.closure.domain.GLClosure;
-import org.mifosplatform.accounting.closure.domain.GLClosureRepository;
-import org.mifosplatform.accounting.closure.exception.GLClosureDuplicateException;
-import org.mifosplatform.accounting.closure.exception.GLClosureInvalidDeleteException;
-import org.mifosplatform.accounting.closure.exception.GLClosureInvalidException;
-import org.mifosplatform.accounting.closure.exception.GLClosureInvalidException.GL_CLOSURE_INVALID_REASON;
-import org.mifosplatform.accounting.closure.exception.GLClosureNotFoundException;
-import org.mifosplatform.accounting.closure.serialization.GLClosureCommandFromApiJsonDeserializer;
-import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.organisation.office.domain.Office;
-import org.mifosplatform.organisation.office.domain.OfficeRepository;
-import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
