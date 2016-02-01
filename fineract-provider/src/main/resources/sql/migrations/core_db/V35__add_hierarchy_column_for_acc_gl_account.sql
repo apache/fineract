@@ -1,1 +1,0 @@
-ALTER TABLE `acc_gl_account` ADD COLUMN `hierarchy` varchar(50) AFTER `parent_id`;

@@ -1,4 +1,0 @@
-
-suite('toc', function() {
-
-});

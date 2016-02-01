@@ -1,1 +1,0 @@
-ALTER TABLE `m_cashier_transactions` ADD COLUMN `currency_code` VARCHAR(3) NULL AFTER `txn_note`;

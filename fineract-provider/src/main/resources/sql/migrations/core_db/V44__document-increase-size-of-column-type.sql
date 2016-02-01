@@ -1,2 +1,0 @@
-ALTER TABLE `m_document`
-	CHANGE COLUMN `type` `type` VARCHAR(500) NULL DEFAULT NULL AFTER `size`;

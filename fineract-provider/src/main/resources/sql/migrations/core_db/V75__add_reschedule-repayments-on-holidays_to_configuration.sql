@@ -1,1 +1,0 @@
-INSERT INTO `c_configuration` (`name`) VALUES ('reschedule-repayments-on-holidays');

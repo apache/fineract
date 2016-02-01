@@ -1,2 +1,0 @@
-INSERT INTO m_permission (grouping,code,entity_name,action_name,can_maker_checker) VALUES ('portfolio','READ_PAYMENTTYPE','PAYMENTTYPE','READ',0);
-INSERT INTO m_permission (grouping,code,entity_name,action_name,can_maker_checker) VALUES ('report','READ_Staff Assignment History','Staff Assignment History(Pentaho)','READ',0);

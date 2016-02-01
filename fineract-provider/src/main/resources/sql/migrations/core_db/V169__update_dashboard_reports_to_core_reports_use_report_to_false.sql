@@ -1,1 +1,0 @@
-UPDATE stretchy_report SET core_report=1, use_report=0 WHERE report_name in ('ClientTrendsByDay','ClientTrendsByWeek','ClientTrendsByMonth','LoanTrendsByDay','LoanTrendsByWeek','LoanTrendsByMonth','Demand_Vs_Collection','Disbursal_Vs_Awaitingdisbursal');
