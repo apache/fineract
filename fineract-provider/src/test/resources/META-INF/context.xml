@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public
+    License, v. 2.0. If a copy of the MPL was not distributed with this file,
+    You can obtain one at http://mozilla.org/MPL/2.0/.
+
+-->
+<Context>
+	<Resource type="javax.sql.DataSource" name="jdbc/mifosplatform-tenants"
+		driverClassName="com.mysql.jdbc.Driver" url="jdbc:mysql://localhost:3306/mifosplatform-tenants"
+		username="root" password="mysql" validationQuery="select 1" maxActive="10"
+		maxIdle="4" />
+</Context>

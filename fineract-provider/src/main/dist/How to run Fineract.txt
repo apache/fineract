@@ -1,0 +1,30 @@
+Welcome to the Fineract community!
+===============================
+
+Depending on the OS you're running, you should have "runfineract.sh" (for Linux and Mac) and
+"runfineract.bat" (for Windows) in this directory. These are small scripts that allow you to
+run Apache Fineract on your computer locally. To be able to run Fineract, just double-click on the script,
+that is, "runfineract.sh" if you are on Linux or Mac, or "runfineract.bat" if you are on Windows.
+
+If you have a web front-end that you want to use along with the backend server, put your index.html
+along with all the other source files inside a (sub-folder of) the "apps" folder in the current
+directory from where runfineract.bat/.sh is launched.  The web UI front-end is then accessible
+under fineract-provider/apps - for example:
+
+    https://localhost:8443/fineract-provider/apps/community-app/index.html?baseApiUrl=https://localhost:8443&tenantIdentifier=default#/home
+
+We hope you'll have an amazing experience working with Fineract!
+
+
+PS, internal note to fineract developers preparing packages, only: For this to work, the WAR of
+the Fineract distribution ZIP package will (currently) have to be built using
+the Gradle 'dev' environment profile - e.g. using this command:
+
+    ./gradlew -Penv=dev clean war dist
+
+We now also have a script which convenently prepares both the
+UI front-end and the API back-end together into a ZIP:
+
+    git clone --recursive  https://github.com/openMF/mifosx/
+    git submodule update --init --recursive; git submodule status
+    ./build.sh

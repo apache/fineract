@@ -1,0 +1,1 @@
+ALTER TABLE `m_staff` ADD COLUMN `is_active` TINYINT(1) DEFAULT '0' AFTER `organisational_role_parent_staff_id`;

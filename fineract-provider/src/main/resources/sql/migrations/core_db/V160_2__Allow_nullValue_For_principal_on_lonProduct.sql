@@ -1,0 +1,1 @@
+ALTER TABLE  `m_product_loan` CHANGE  `principal_amount`  `principal_amount` DECIMAL( 19, 6 ) NULL ;

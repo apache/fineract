@@ -1,0 +1,1 @@
+INSERT INTO `c_configuration` (`name`, `enabled`) VALUES ('reschedule-future-repayments', 1);

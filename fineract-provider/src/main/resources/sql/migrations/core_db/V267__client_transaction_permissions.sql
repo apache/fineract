@@ -1,0 +1,3 @@
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('transaction_client', 'READTRANSACTION_CLIENT', 'CLIENT', 'READTRANSACTION', 0);
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('transaction_client', 'UNDOTRANSACTION_CLIENT', 'CLIENT', 'UNDOTRANSACTION', 0);
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('transaction_client', 'UNDOTRANSACTION_CLIENT_CHECKER', 'CLIENT', 'UNDOTRANSACTION_CHECKER', 0);
