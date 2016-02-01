@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa" xmlns:sec="http://www.springframework.org/schema/security"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:cache="http://www.springframework.org/schema/cache"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+	<sec:global-method-security
+		pre-post-annotations="enabled" />
+
+	<tx:annotation-driven />
+
+	<context:component-scan
+		base-package="org.apache.fineract.accounting.*,
+									      org.apache.fineract.commands.provider.*,
+									      org.apache.fineract.commands.handler.*,
+										  org.apache.fineract.commands.service.*,
+										  org.apache.fineract.commands.*,
+										  org.apache.fineract.audit.*,
+										  org.apache.fineract.infrastructure.*,
+										  org.apache.fineract.scheduledjobs.*,
+										  org.apache.fineract.organisation.*,
+										  org.apache.fineract.portfolio.loanaccount.*,
+										  org.apache.fineract.portfolio.savingsaccount.*,
+										  org.apache.fineract.portfolio.*,
+										  org.apache.fineract.useradministration.*,
+										  org.apache.fineract.mix.*,
+										  org.apache.fineract.template.*,
+										  org.apache.fineract.template.service.*,
+										  org.apache.fineract.useradministration.*,
+										  org.apache.fineract.batch">
+		<context:exclude-filter expression="org.springframework.stereotype.Controller"
+			type="annotation" />
+
+		<!-- We do NOT want all @Configuration "beans" to be auto-detected by ComponentScan,
+			 but we want to use / import them explicitly in Tests & Spring Boot applications,
+			 or other import in other @Configuration, so that we could have mutually exclusive ones.
+		 -->
+		<context:exclude-filter expression="org.springframework.context.annotation.Configuration"
+			type="annotation" />
+	</context:component-scan>
+
+	<bean id="auditorAware"
+		class="org.apache.fineract.infrastructure.core.domain.AuditorAwareImpl" />
+	<jpa:auditing auditor-aware-ref="auditorAware" />
+
+	<jpa:repositories base-package="org.apache.fineract.commands.domain" />
+	<jpa:repositories base-package="org.apache.fineract.infrastructure.*.domain" />
+	<jpa:repositories base-package="org.apache.fineract.accounting.*.domain" />
+	<jpa:repositories base-package="org.apache.fineract.useradministration.domain" />
+	<jpa:repositories base-package="org.apache.fineract.organisation.*.domain" />
+	<jpa:repositories base-package="org.apache.fineract.portfolio.*" />
+	<jpa:repositories base-package="org.apache.fineract.mix.domain" />
+	<jpa:repositories base-package="org.apache.fineract.scheduledjobs.domain" />
+	<jpa:repositories base-package="org.apache.fineract.template.domain" />
+	
+	<import resource="infrastructure.xml" />
+
+	<import resource="securityContext.xml" />
+
+	<import resource="cache.xml" />
+
+	<bean id="applicationEventMulticaster" class="org.springframework.context.event.SimpleApplicationEventMulticaster">
+		<property name="taskExecutor">
+			<bean class="org.springframework.core.task.SimpleAsyncTaskExecutor"/>
+		</property>
+	</bean>
+
+	<import resource="spmContext.xml"/>
+</beans>

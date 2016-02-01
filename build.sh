@@ -15,5 +15,5 @@ git submodule foreach 'git checkout develop && git pull --ff-only origin develop
 
 cd apps/community-app
 ./build.sh
-cd ../../mifosng-provider/
+cd ../../fineract-provider/
 ./gradlew -Penv=dev clean dist

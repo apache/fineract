@@ -1,5 +1,5 @@
 #!/bin/bash
-cd mifosng-provider
+cd fineract-provider
 # NOTE: The --info, while quite a bit more verbose, is VERY useful to understand failures on Travis,
 # where you do not have access to any files like build/reports/tests/index.html, only the Console. 
 # @see http://mrhaki.blogspot.ch/2013/05/gradle-goodness-show-more-information.html

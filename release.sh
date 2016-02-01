@@ -13,5 +13,5 @@ fi
 
 APPDIR=apps/community-app
 "$APPDIR/release.sh" "$VERSION" "$RELDATE"
-echo "releaseVersion=$VERSION.RELEASE" > mifosng-provider/gradle.properties
+echo "releaseVersion=$VERSION.RELEASE" > fineract-provider/gradle.properties
 
