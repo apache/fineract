@@ -38,9 +38,10 @@ public class OfficeHelper {
 	}
 
 	public OfficeDomain retrieveOfficeByID(int id) {
-		final String json = new Gson().toJson(Utils.performServerGet(
+		Object get = Utils.performServerGet(
 				requestSpec, responseSpec, OFFICE_URL + "/" + id + "?"
-						+ Utils.TENANT_IDENTIFIER, ""));
+						+ Utils.TENANT_IDENTIFIER, "");
+		final String json = new Gson().toJson(get);
 		return new Gson().fromJson(json, new TypeToken<OfficeDomain>() {
 		}.getType());
 	}

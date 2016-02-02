@@ -27,9 +27,9 @@ apply plugin: 'project-report'
 apply plugin: 'java'
 
 /* define the valid syntax level for source files */
-sourceCompatibility = JavaVersion.VERSION_1_7
+sourceCompatibility = JavaVersion.VERSION_1_8
 /* define binary compatibility version */
-targetCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_8
 
 project.ext.springBootVersion = '1.1.6.RELEASE'
 project.ext.springVersion = '4.0.7.RELEASE'

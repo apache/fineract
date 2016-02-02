@@ -12,7 +12,8 @@ if "%OS%"=="Windows_NT" setlocal
 set DEFAULT_JVM_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,address=8005,server=y,suspend=n
 
 set CATALINA_OPTS=-Xms512m -Xmx512m
-set JAVA_OPTS=-Xms512m -Xmx512m -XX:PermSize=256m -XX:MaxPermSize=512m
+set JAVA_OPTS=-Xms512m -Xmx512m 
+
 
 set DIRNAME=%~dp0
 if "%DIRNAME%" == "" set DIRNAME=.

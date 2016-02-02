@@ -4990,7 +4990,9 @@ public class ClientLoanIntegrationTest {
                 "inArrearsTolerance", "graceOnArrearsAgeing");
 
         for (String comparisonAttribute : comparisonAttributes) {
-            assertEquals(JsonPath.from(loanProductDetails).get(comparisonAttribute), JsonPath.from(loanDetails).get(comparisonAttribute));
+        	Object val1 = JsonPath.from(loanProductDetails).get(comparisonAttribute);
+        	Object val2 = JsonPath.from(loanDetails).get(comparisonAttribute);
+            assertEquals(val1, val2);
         }
     }
 
