@@ -128,7 +128,8 @@ public final class ResultsetColumnHeaderData {
     }
 
     private boolean isDecimal() {
-        return "decimal".equalsIgnoreCase(this.columnType);
+        return "decimal".equalsIgnoreCase(this.columnType) || "NEWDECIMAL".equalsIgnoreCase(this.columnType);
+        //Refer org.drizzle.jdbc.internal.mysql.MySQLType.java
     }
 
     private boolean isDate() {
@@ -152,7 +153,7 @@ public final class ResultsetColumnHeaderData {
     }
 
     private boolean isAnyInteger() {
-        return isInt() || isSmallInt() || isTinyInt() || isMediumInt() || isBigInt();
+        return isInt() || isSmallInt() || isTinyInt() || isMediumInt() || isBigInt() || isLong();
     }
 
     private boolean isInt() {
@@ -173,6 +174,11 @@ public final class ResultsetColumnHeaderData {
 
     private boolean isBigInt() {
         return "bigint".equalsIgnoreCase(this.columnType);
+    }
+    
+    private boolean isLong() {
+        return "LONG".equalsIgnoreCase(this.columnType) || "LONGLONG".equalsIgnoreCase(this.columnType);
+        //Refer org.drizzle.jdbc.internal.mysql.MySQLType.java
     }
 
     private boolean isBit() {
