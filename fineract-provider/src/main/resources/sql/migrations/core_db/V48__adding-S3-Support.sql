@@ -31,7 +31,7 @@ ALTER TABLE `m_client`
 	ADD CONSTRAINT `FK_m_client_m_image` FOREIGN KEY (`image_id`) REFERENCES `m_image` (`id`);
 
 /*Move existing image locations to new table*/
-drop procedure if exists migrate_customer_image_data;
+/*drop procedure if exists migrate_customer_image_data;
 
 delimiter #
 create procedure migrate_customer_image_data()
@@ -64,9 +64,10 @@ end#
 
 delimiter ;
 call migrate_customer_image_data();
-
+*/
+	
 /*Now drop the procedure*/
-drop procedure if exists migrate_customer_image_data;
+/*drop procedure if exists migrate_customer_image_data; */
 
 /*Delete image key from client*/
 ALTER TABLE `m_client` DROP COLUMN `image_key`;

@@ -201,7 +201,7 @@ configurations {
     driver
 }
 dependencies {
-    driver 'mysql:mysql-connector-java:5.1.16'
+    driver 'org.drizzle.jdbc:drizzle-jdbc:1.3'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
@@ -211,17 +211,17 @@ configurations.driver.each {File file ->
 
 task createDB<<{
     description= "Creates the Database. Needs database name to be passed (like: -PdbName=someDBname)"
-    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
+    sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
     sql.execute( 'create database '+"`$dbName`" )
 }
 
 task dropDB<<{
     description= "Drops the specified database. The database name has to be passed (like: -PdbName=someDBname)"
-    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
+    sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
     sql.execute( 'DROP DATABASE '+"`$dbName`")
 }
 task setBlankPassword<<{
-    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
+    sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
     sql.execute('USE `mifosplatform-tenants`')
     sql.execute('UPDATE mifosplatform-tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
 }
@@ -235,13 +235,13 @@ buildscript {
 
     dependencies {
         classpath "org.flywaydb:flyway-gradle-plugin:3.0" // version upgraded during Spring Boot & MariaDB4j work, as prev. used v0.2 didn't work well after *.sql moved from fineract-db to fineract-provider/src/main/resources (new version also has clearer errors, e.g. in case of missing DB)
-        classpath 'mysql:mysql-connector-java:5.1.22'
+        classpath 'org.drizzle.jdbc:drizzle-jdbc:1.3'
     }
 }
 
 
 flyway {
-    url = "jdbc:mysql://localhost:3306/mifostenant-default"
+    url = "jdbc:mysql:thin://localhost:3306/mifostenant-default"
     user = mysqlUser
     password = mysqlPassword
 }
@@ -255,7 +255,7 @@ task migrateTenantDB<<{
 		tenantDbName = rootProject.getProperty("dbName")
 	}
 	
-    flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
+    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantDbName"
     flyway.locations= [filePath]
     /**We use ${ as the prefix for strecthy reporting, do not want them to be interpreted by Flyway**/
     flyway.placeholderPrefix = "\$\${"
@@ -271,7 +271,7 @@ task showTenantDBInfo<<{
 		tenantDbName = rootProject.getProperty("dbName")
 	}
 	
-    flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
+    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantDbName"
     flyway.locations= [filePath]
     flywayInfo.execute()
 }
@@ -286,7 +286,7 @@ task migrateTenantListDB<<{
 		tenantsDbName = rootProject.getProperty("dbName")
 	}
 	
-    flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
+    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
     flyway.locations= [filePath]
 
     flywayMigrate.execute()
@@ -301,7 +301,7 @@ task showTenantListDBInfo<<{
 		tenantsDbName = rootProject.getProperty("dbName")
 	}
     
-    flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
+    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
     flyway.locations= [filePath]
     flywayInfo.execute()
 }
@@ -315,7 +315,7 @@ task repairTenantDB<<{
         tenantsDbName = rootProject.getProperty("dbName")
     }
     
-    flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
+    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
     flyway.locations= [filePath]
     flywayRepair.execute()
 }

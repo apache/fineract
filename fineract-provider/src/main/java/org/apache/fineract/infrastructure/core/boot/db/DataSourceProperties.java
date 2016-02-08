@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.core.boot.db;
 import javax.validation.constraints.NotNull;
 
 import org.apache.tomcat.jdbc.pool.PoolProperties;
+import org.drizzle.jdbc.DrizzleDriver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 
@@ -60,7 +61,7 @@ public class DataSourceProperties extends PoolProperties {
     @Value("${" + PROTOCOL + ":jdbc}")
     private volatile @NotNull String jdbcProtocol;
 
-    @Value("${" + SUBPROTOCOL + ":mysql}")
+    @Value("${" + SUBPROTOCOL + ":mysql:thin}")
     private volatile @NotNull String jdbcSubprotocol;
 
 
@@ -69,7 +70,7 @@ public class DataSourceProperties extends PoolProperties {
 
         // default to save us from re-specifying this; note that it can still be
         // overridden
-        setDriverClassName(com.mysql.jdbc.Driver.class.getName());
+        setDriverClassName(DrizzleDriver.class.getName());
 
         setDefaults();
     }

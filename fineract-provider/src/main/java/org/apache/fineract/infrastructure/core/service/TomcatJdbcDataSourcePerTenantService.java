@@ -86,7 +86,7 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
 
         final String jdbcUrl = tenantConnectionObj.databaseURL();
         final PoolConfiguration poolConfiguration = new PoolProperties();
-        poolConfiguration.setDriverClassName("com.mysql.jdbc.Driver");
+        poolConfiguration.setDriverClassName("org.drizzle.jdbc.DrizzleDriver");
         poolConfiguration.setName(tenantConnectionObj.getSchemaName() + "_pool");
         poolConfiguration.setUrl(jdbcUrl);
         poolConfiguration.setUsername(tenantConnectionObj.getSchemaUsername());

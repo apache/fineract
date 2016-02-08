@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 import com.googlecode.flyway.core.Flyway;
 import com.googlecode.flyway.core.api.FlywayException;
+import com.googlecode.flyway.core.util.jdbc.DriverDataSource;
 
 /**
  * A service that picks up on tenants that are configured to auto-update their
@@ -41,6 +42,7 @@ import com.googlecode.flyway.core.api.FlywayException;
 @Service
 public class TenantDatabaseUpgradeService {
 
+	private final String DRIVER_CLASS = "org.drizzle.jdbc.DrizzleDriver" ;
     private final TenantDetailsService tenantDetailsService;
     protected final DataSource tenantDataSource;
     protected final TenantDataSourcePortFixService tenantDataSourcePortFixService;
@@ -61,7 +63,8 @@ public class TenantDatabaseUpgradeService {
             final FineractPlatformTenantConnection connection = tenant.getConnection();
             if (connection.isAutoUpdateEnabled()) {
                 final Flyway flyway = new Flyway();
-                flyway.setDataSource(connection.databaseURL(), connection.getSchemaUsername(), connection.getSchemaPassword());
+                DriverDataSource source = new DriverDataSource(DRIVER_CLASS, connection.databaseURL(), connection.getSchemaUsername(), connection.getSchemaPassword()) ;
+                flyway.setDataSource(source);
                 flyway.setLocations("sql/migrations/core_db");
                 flyway.setOutOfOrder(true);
                 try {

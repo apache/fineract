@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -333,8 +334,8 @@ public class LoanArrearsAgingServiceImpl implements LoanArrearsAgingService, Bus
 
     private void updateSchheduleWithPaidDetail(Map<Long, List<LoanSchedulePeriodData>> scheduleDate, List<Map<String, Object>> loanSummary) {
         for (Map<String, Object> transactionMap : loanSummary) {
-            Long loanId = (Long) transactionMap.get("loanId");
-
+        	String longValue = transactionMap.get("loanId").toString() ; //From JDBC Template API, we are getting BigInteger but in other call, we are getting Long
+        	Long loanId = Long.parseLong(longValue) ;
             BigDecimal principalAmtPaid = (BigDecimal) transactionMap.get("principalAmtPaid");
             BigDecimal principalAmtWrittenoff = (BigDecimal) transactionMap.get("principalAmtWrittenoff");
             BigDecimal interestAmtPaid = (BigDecimal) transactionMap.get("interestAmtPaid");

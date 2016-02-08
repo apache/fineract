@@ -78,7 +78,7 @@ public class FineractPlatformTenantConnection {
     }
 
     public String databaseURL() {
-        final String url = new StringBuilder("jdbc:mysql://").append(this.schemaServer).append(':').append(this.schemaServerPort)
+        final String url = new StringBuilder("jdbc:mysql:thin://").append(this.schemaServer).append(':').append(this.schemaServerPort)
                 .append('/').append(this.schemaName).toString();
         return url;
     }
