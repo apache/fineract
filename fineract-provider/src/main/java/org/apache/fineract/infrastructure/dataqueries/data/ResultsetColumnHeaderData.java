@@ -29,7 +29,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 public final class ResultsetColumnHeaderData {
 
     private final String columnName;
-    private final String columnType;
+    private String columnType;
     private final Long columnLength;
     private final String columnDisplayType;
     private final boolean isColumnNullable;
@@ -68,6 +68,21 @@ public final class ResultsetColumnHeaderData {
         this.columnValues = columnValues;
         this.columnCode = columnCode;
 
+        if("NEWDECIMAL".equalsIgnoreCase(this.columnType)) {
+        	this.columnType = "DECIMAL" ;
+        	//Refer org.drizzle.jdbc.internal.mysql.MySQLType.java
+        }
+        
+        if("CLOB".equalsIgnoreCase(this.columnType)) {
+        	this.columnType = "varchar" ;
+        	//Drizzle is returning some of the String data a CLOB
+        }
+        
+        if("LONGLONG".equalsIgnoreCase(this.columnType) || "LONG".equalsIgnoreCase(this.columnType)) {
+        	this.columnType = "bigint" ;
+        	//Refer org.drizzle.jdbc.internal.mysql.MySQLType.java
+        }
+        
         String displayType = null;
         if (this.columnCode == null) {
             if (isString()) {
