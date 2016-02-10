@@ -8,14 +8,12 @@ package org.mifosplatform.infrastructure.report.service;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.sql.DataSource;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
@@ -24,7 +22,6 @@ import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.report.annotation.ReportService;
 import org.apache.fineract.infrastructure.report.service.ReportingProcessService;
@@ -56,18 +53,16 @@ public class PentahoReportingProcessServiceImpl implements ReportingProcessServi
     private final static Logger logger = LoggerFactory.getLogger(PentahoReportingProcessServiceImpl.class);
     public static final String MIFOS_BASE_DIR = System.getProperty("user.home") + File.separator + ".mifosx";
 
-    private final DataSource dataSource;
     private final PlatformSecurityContext context;
     private boolean noPentaho = false;
 
     @Autowired
-    public PentahoReportingProcessServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public PentahoReportingProcessServiceImpl(final PlatformSecurityContext context) {
         // kick off pentaho reports server
         ClassicEngineBoot.getInstance().start();
         this.noPentaho = false;
 
         this.context = context;
-        this.dataSource = dataSource;
     }
 
     @Override
@@ -190,13 +185,10 @@ public class PentahoReportingProcessServiceImpl implements ReportingProcessServi
             // passed as parameters to allow multitenant penaho reporting
             // and
             // data scoping
-            final Connection connection = this.dataSource.getConnection();
-            String tenantUrl;
-            try {
-                tenantUrl = connection.getMetaData().getURL();
-            } finally {
-                connection.close();
-            }
+            final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+            final FineractPlatformTenantConnection tenantConnection = tenant.getConnection();
+
+            final String tenantUrl = tenantConnection.databaseURL();
             final String userhierarchy = currentUser.getOffice().getHierarchy();
             logger.info("db URL:" + tenantUrl + "      userhierarchy:" + userhierarchy);
             rptParamValues.put("userhierarchy", userhierarchy);
@@ -204,9 +196,6 @@ public class PentahoReportingProcessServiceImpl implements ReportingProcessServi
             final Long userid = currentUser.getId();
             logger.info("db URL:" + tenantUrl + "      userid:" + userid);
             rptParamValues.put("userid", userid);
-
-            final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
-            final FineractPlatformTenantConnection tenantConnection = tenant.getConnection();
 
             rptParamValues.put("tenantUrl", tenantUrl);
             rptParamValues.put("username", tenantConnection.getSchemaUsername());
