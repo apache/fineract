@@ -1596,15 +1596,14 @@ public class Loan extends AbstractPersistable<Long> {
 
     private void recalculateLoanCharge(final LoanCharge loanCharge, final int penaltyWaitPeriod) {
         BigDecimal amount = BigDecimal.ZERO;
-        if (loanCharge.isOverdueInstallmentCharge()) {
-            amount = calculateOverdueAmountPercentageAppliedTo(loanCharge, penaltyWaitPeriod);
-        } else {
-            amount = calculateAmountPercentageAppliedTo(loanCharge);
-        }
-
         BigDecimal chargeAmt = BigDecimal.ZERO;
         BigDecimal totalChargeAmt = BigDecimal.ZERO;
         if (loanCharge.getChargeCalculation().isPercentageBased()) {
+        	 if (loanCharge.isOverdueInstallmentCharge()) {
+                 amount = calculateOverdueAmountPercentageAppliedTo(loanCharge, penaltyWaitPeriod);
+             } else {
+                 amount = calculateAmountPercentageAppliedTo(loanCharge);
+             }
             chargeAmt = loanCharge.getPercentage();
             if (loanCharge.isInstalmentFee()) {
                 totalChargeAmt = calculatePerInstallmentChargeAmount(loanCharge);
@@ -1621,7 +1620,7 @@ public class Loan extends AbstractPersistable<Long> {
 
     private BigDecimal calculateOverdueAmountPercentageAppliedTo(final LoanCharge loanCharge, final int penaltyWaitPeriod) {
         LoanRepaymentScheduleInstallment installment = loanCharge.getOverdueInstallmentCharge().getInstallment();
-        LocalDate graceDate = LocalDate.now().minusDays(penaltyWaitPeriod);
+        LocalDate graceDate = DateUtils.getLocalDateOfTenant().minusDays(penaltyWaitPeriod);
         Money amount = Money.zero(getCurrency());
         if (graceDate.isAfter(installment.getDueDate())) {
             amount = calculateOverdueAmountPercentageAppliedTo(installment, loanCharge.getChargeCalculation());
