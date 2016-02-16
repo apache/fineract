@@ -23,6 +23,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
+import org.apache.fineract.infrastructure.core.boot.JDBCDriverConfig;
 import org.apache.fineract.infrastructure.core.boot.db.TenantDataSourcePortFixService;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
@@ -42,11 +43,12 @@ import com.googlecode.flyway.core.util.jdbc.DriverDataSource;
 @Service
 public class TenantDatabaseUpgradeService {
 
-	private final String DRIVER_CLASS = "org.drizzle.jdbc.DrizzleDriver" ;
     private final TenantDetailsService tenantDetailsService;
     protected final DataSource tenantDataSource;
     protected final TenantDataSourcePortFixService tenantDataSourcePortFixService;
-
+    
+    @Autowired private JDBCDriverConfig driverConfig ;
+    
     @Autowired
     public TenantDatabaseUpgradeService(final TenantDetailsService detailsService,
             @Qualifier("tenantDataSourceJndi") final DataSource dataSource, TenantDataSourcePortFixService tenantDataSourcePortFixService) {
@@ -63,14 +65,15 @@ public class TenantDatabaseUpgradeService {
             final FineractPlatformTenantConnection connection = tenant.getConnection();
             if (connection.isAutoUpdateEnabled()) {
                 final Flyway flyway = new Flyway();
-                DriverDataSource source = new DriverDataSource(DRIVER_CLASS, connection.databaseURL(), connection.getSchemaUsername(), connection.getSchemaPassword()) ;
+                String connectionProtocol = driverConfig.constructProtocol(connection.getSchemaServer(), connection.getSchemaServerPort(), connection.getSchemaName()) ;
+                DriverDataSource source = new DriverDataSource(driverConfig.getDriverClassName(), connectionProtocol, connection.getSchemaUsername(), connection.getSchemaPassword()) ;
                 flyway.setDataSource(source);
                 flyway.setLocations("sql/migrations/core_db");
                 flyway.setOutOfOrder(true);
                 try {
                     flyway.migrate();
                 } catch (FlywayException e) {
-                    String betterMessage = e.getMessage() + "; for Tenant DB URL: " + connection.databaseURL() + ", username: "
+                    String betterMessage = e.getMessage() + "; for Tenant DB URL: " + connectionProtocol + ", username: "
                             + connection.getSchemaPassword();
                     throw new FlywayException(betterMessage, e.getCause());
                 }

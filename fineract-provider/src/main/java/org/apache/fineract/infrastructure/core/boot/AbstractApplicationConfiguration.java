@@ -26,6 +26,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.PropertySource;
 
 /**
  * Base Spring Configuration with what's common to all Configuration subclasses.
@@ -41,6 +42,7 @@ import org.springframework.context.annotation.ImportResource;
 @Configuration
 @Import({ WebXmlConfiguration.class, WebXmlOauthConfiguration.class, WebFrontEndConfiguration.class })
 @ImportResource({ "classpath*:META-INF/spring/appContext.xml" })
+@PropertySource(value="classpath:META-INF/spring/jdbc.properties")
 @EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class,
 		HibernateJpaAutoConfiguration.class,
 		DataSourceTransactionManagerAutoConfiguration.class,

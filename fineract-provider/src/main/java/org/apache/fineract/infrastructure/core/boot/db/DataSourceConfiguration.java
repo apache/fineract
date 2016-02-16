@@ -20,9 +20,11 @@ package org.apache.fineract.infrastructure.core.boot.db;
 
 import javax.sql.DataSource;
 
+import org.apache.fineract.infrastructure.core.boot.JDBCDriverConfig;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,10 +35,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DataSourceConfiguration {
 	private static final Logger logger = LoggerFactory.getLogger(DataSourceConfiguration.class);
-
+	
+	@Autowired JDBCDriverConfig config ;
+	
     @Bean
     public DataSourceProperties dataSourceProperties() {
-	return new DataSourceProperties();
+	return new DataSourceProperties(config.getDriverClassName(), config.getProtocol(), config.getSubProtocol(), config.getPort());
     }
 
     @Bean
@@ -50,5 +54,4 @@ public class DataSourceConfiguration {
     protected DataSourceProperties getProperties() {
         return dataSourceProperties();
     }
-
 }
