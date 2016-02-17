@@ -19,6 +19,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
+import org.apache.fineract.infrastructure.core.boot.JDBCDriverConfig;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -56,6 +57,8 @@ public class PentahoReportingProcessServiceImpl implements ReportingProcessServi
     private final PlatformSecurityContext context;
     private boolean noPentaho = false;
 
+    @Autowired private JDBCDriverConfig driverConfig ;
+    
     @Autowired
     public PentahoReportingProcessServiceImpl(final PlatformSecurityContext context) {
         // kick off pentaho reports server
@@ -187,8 +190,7 @@ public class PentahoReportingProcessServiceImpl implements ReportingProcessServi
             // data scoping
             final FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
             final FineractPlatformTenantConnection tenantConnection = tenant.getConnection();
-
-            final String tenantUrl = tenantConnection.databaseURL();
+            String tenantUrl = driverConfig.constructProtocol(tenantConnection.getSchemaServer(), tenantConnection.getSchemaServerPort(), tenantConnection.getSchemaName()) ;
             final String userhierarchy = currentUser.getOffice().getHierarchy();
             logger.info("db URL:" + tenantUrl + "      userhierarchy:" + userhierarchy);
             rptParamValues.put("userhierarchy", userhierarchy);
