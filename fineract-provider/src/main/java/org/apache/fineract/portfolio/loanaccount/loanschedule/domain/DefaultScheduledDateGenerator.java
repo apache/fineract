@@ -68,14 +68,20 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                 // calendar associated with
                 // the loan, and we should use it in order to calculate next
                 // repayment
+                boolean isSkipRepaymentOnFirstDayofMonth = false;
+                if (loanApplicationTerms.isSkipRepaymentOnFirstDayofMonth() && loanApplicationTerms.isCalenderbelongstogroup()) {
+                    isSkipRepaymentOnFirstDayofMonth = true;
+                }
+
                 LocalDate seedDate = currentCalendar.getStartDateLocalDate();
                 String reccuringString = currentCalendar.getRecurrence();
-                dueRepaymentPeriodDate = CalendarUtils.getNewRepaymentMeetingDate(reccuringString, seedDate, dueRepaymentPeriodDate,
+                dueRepaymentPeriodDate = CalendarUtils.getNewRepaymentMeetingDate(reccuringString, seedDate, lastRepaymentDate.plusDays(1),
                         loanApplicationTerms.getRepaymentEvery(),
                         CalendarUtils.getMeetingFrequencyFromPeriodFrequencyType(loanApplicationTerms.getLoanTermPeriodFrequencyType()),
-                        holidayDetailDTO.getWorkingDays());
+                        holidayDetailDTO.getWorkingDays(), isSkipRepaymentOnFirstDayofMonth, loanApplicationTerms.getNumberOfdays());
             }
         }
+
         return dueRepaymentPeriodDate;
     }
 
@@ -89,8 +95,8 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                 loanApplicationTerms.getRepaymentEvery(), adjustedDate, loanApplicationTerms.getNthDay(),
                 loanApplicationTerms.getWeekDayType());
 
-        final RepaymentRescheduleType rescheduleType = RepaymentRescheduleType.fromInt(holidayDetailDTO.getWorkingDays()
-                .getRepaymentReschedulingType());
+        final RepaymentRescheduleType rescheduleType = RepaymentRescheduleType
+                .fromInt(holidayDetailDTO.getWorkingDays().getRepaymentReschedulingType());
 
         /**
          * Fix for https://mifosforge.jira.com/browse/MIFOSX-1357

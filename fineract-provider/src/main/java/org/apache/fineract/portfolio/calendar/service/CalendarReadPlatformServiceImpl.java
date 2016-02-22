@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -45,10 +46,13 @@ import org.springframework.util.CollectionUtils;
 public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
-    public CalendarReadPlatformServiceImpl(final RoutingDataSource dataSource) {
+    public CalendarReadPlatformServiceImpl(final RoutingDataSource dataSource,
+            final ConfigurationDomainService configurationDomainService) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.configurationDomainService = configurationDomainService;
     }
 
     private static final class CalendarDataMapper implements RowMapper<CalendarData> {
@@ -200,7 +204,8 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     }
 
     @Override
-    public Collection<LocalDate> generateRecurringDates(final CalendarData calendarData, final boolean withHistory, final LocalDate tillDate) {
+    public Collection<LocalDate> generateRecurringDates(final CalendarData calendarData, final boolean withHistory,
+            final LocalDate tillDate) {
         final LocalDate fromDate = null;
         Collection<LocalDate> recurringDates = generateRecurringDate(calendarData, fromDate, tillDate, -1);
 
@@ -220,8 +225,8 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         return generateRecurringDate(calendarData, DateUtils.getLocalDateOfTenant(), tillDate, 10);
     }
 
-    private Collection<LocalDate> generateRecurringDate(final CalendarData calendarData, final LocalDate fromDate,
-            final LocalDate tillDate, final int maxCount) {
+    private Collection<LocalDate> generateRecurringDate(final CalendarData calendarData, final LocalDate fromDate, final LocalDate tillDate,
+            final int maxCount) {
 
         if (!calendarData.isRepeating()) { return null; }
         final String rrule = calendarData.getRecurrence();
@@ -237,9 +242,19 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
          * till periodEndDate recurring dates will be generated.
          */
         final LocalDate periodEndDate = this.getPeriodEndDate(calendarData.getEndDate(), tillDate);
+        final Long calendarTypeId = calendarData.getEntityType().getId();
+        final Long calenderTypeEnumvalue = CalendarEntityType.GROUPS.getValue().longValue();
+        boolean isCalendarbelongtoGruop = calendarTypeId.equals(calenderTypeEnumvalue);
+        boolean isSkipMeetingOnFirstDayEnabled = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
+        boolean isSkipMeetingOnFirstDay = false;
+        int numberOfDays = 0;
+        if (isSkipMeetingOnFirstDayEnabled && isCalendarbelongtoGruop) {
+            isSkipMeetingOnFirstDay = true;
+            numberOfDays = configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
+        }
 
         final Collection<LocalDate> recurringDates = CalendarUtils.getRecurringDates(rrule, seedDate, periodStartDate, periodEndDate,
-                maxCount);
+                maxCount, isSkipMeetingOnFirstDay, numberOfDays);
         return recurringDates;
     }
 
