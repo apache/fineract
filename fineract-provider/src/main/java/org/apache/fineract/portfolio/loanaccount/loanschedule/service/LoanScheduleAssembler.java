@@ -270,14 +270,20 @@ public class LoanScheduleAssembler {
          * If it is JLG loan/Group Loan synched with a meeting, then make sure
          * first repayment falls on meeting date
          */
-        boolean isSkipRepaymentonFirstDayofMonth = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
-        boolean isCalenderbelongstogroup = false;
-        final int numberOfdays = configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
-        if ((loanType.isJLGAccount() || loanType.isGroupAccount()) && calendar != null) {
-            isCalenderbelongstogroup = true;
-            if (!isSkipRepaymentonFirstDayofMonth) {
-                validateRepaymentsStartDateWithMeetingDates(calculatedRepaymentsStartingFromDate, calendar);
-            }
+		final Integer groupId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("groupId", element);
+		boolean isCalenderbelongstogroup = false;
+		if (groupId != null) {
+			isCalenderbelongstogroup = true;
+		}
+		boolean isSkipRepaymentonFirstDayofMonth = configurationDomainService
+				.isSkippingMeetingOnFirstDayOfMonthEnabled();
+		if(isSkipRepaymentonFirstDayofMonth && isCalenderbelongstogroup ){isSkipRepaymentonFirstDayofMonth=true;};
+
+		final int numberOfdays = configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
+		if ((loanType.isJLGAccount() || loanType.isGroupAccount()) && calendar != null) {
+			if (!isSkipRepaymentonFirstDayofMonth) {
+				validateRepaymentsStartDateWithMeetingDates(calculatedRepaymentsStartingFromDate, calendar);
+			}
             /*
              * If disbursement is synced on meeting, make sure disbursement date
              * is on a meeting date
@@ -402,7 +408,7 @@ public class LoanScheduleAssembler {
                 maxOutstandingBalance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                 recalculationFrequencyType, restCalendarInstance, compoundingCalendarInstance, compoundingFrequencyType,
                 principalThresholdForLastInstalment, installmentAmountInMultiplesOf, loanProduct.preCloseInterestCalculationStrategy(),
-                calendar, BigDecimal.ZERO, loanTermVariations, numberOfdays, isSkipRepaymentonFirstDayofMonth, isCalenderbelongstogroup);
+                calendar, BigDecimal.ZERO, loanTermVariations, numberOfdays, isSkipRepaymentonFirstDayofMonth);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,

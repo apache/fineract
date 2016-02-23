@@ -102,9 +102,14 @@ public class LoanUtilService {
             overdurPenaltyWaitPeriod = this.configurationDomainService.retrievePenaltyWaitPeriod();
         }
         FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
+        int numberofDays=configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
+        boolean isSkipRepamentonMonthFirst=configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
+        boolean isCalendarbelongsgroup =false;
+        if(loan.getGroupId()!=null){isCalendarbelongsgroup =true;}
+        if(isSkipRepamentonMonthFirst && isCalendarbelongsgroup){isSkipRepamentonMonthFirst =true;}
         ScheduleGeneratorDTO scheduleGeneratorDTO = new ScheduleGeneratorDTO(loanScheduleFactory, applicationCurrency,
                 calculatedRepaymentsStartingFromDate, holidayDetails, restCalendarInstance, compoundingCalendarInstance, recalculateFrom,
-                overdurPenaltyWaitPeriod, floatingRateDTO);
+                overdurPenaltyWaitPeriod, floatingRateDTO, numberofDays, isSkipRepamentonMonthFirst);
 
         return scheduleGeneratorDTO;
     }

@@ -1969,18 +1969,30 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         // loop through each loan to reschedule the repayment dates
         for (final Loan loan : loans) {
             if (loan != null) {
+            	final boolean isSkipRepaymentOnfirstdayofmonth=configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
+                boolean isCalandarbelongstogroup=false;
+                if(loan.getGroupId()!=null){isCalandarbelongstogroup=true;}
+                int numberofDays=0;
+                boolean isSkipRepaymentonfirstdayofmonth=false;
+                if(isSkipRepaymentOnfirstdayofmonth && isCalandarbelongstogroup){
+                	isSkipRepaymentonfirstdayofmonth=true;
+                	numberofDays=configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
+                }
                 if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
                     final String defaultUserMessage = "Meeting calendar type update is not supported";
                     throw new CalendarParameterUpdateNotSupportedException("jlg.loan.recalculation", defaultUserMessage);
                 }
                 holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan.getDisbursementDate().toDate());
-
+                
+                
+                
                 if (reschedulebasedOnMeetingDates != null && reschedulebasedOnMeetingDates) {
                     loan.updateLoanRepaymentScheduleDates(calendar.getStartDateLocalDate(), calendar.getRecurrence(), isHolidayEnabled,
-                            holidays, workingDays, reschedulebasedOnMeetingDates, presentMeetingDate, newMeetingDate);
+                            holidays, workingDays, reschedulebasedOnMeetingDates, presentMeetingDate, newMeetingDate,
+                            isSkipRepaymentonfirstdayofmonth,numberofDays);
                 } else {
                     loan.updateLoanRepaymentScheduleDates(calendar.getStartDateLocalDate(), calendar.getRecurrence(), isHolidayEnabled,
-                            holidays, workingDays);
+                            holidays, workingDays,isSkipRepaymentonfirstdayofmonth,numberofDays);
                 }
 
                 saveLoanWithDataIntegrityViolationChecks(loan);
