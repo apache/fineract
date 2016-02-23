@@ -84,7 +84,7 @@ public class LoanTermVariationsData implements Comparable<LoanTermVariationsData
     }
 
     private boolean occursBefore(final LocalDate date, final LocalDate target) {
-        return target != null && target.isBefore(date);
+        return target != null && !target.isAfter(date);
     }
 
     public LocalDate getDateValue() {

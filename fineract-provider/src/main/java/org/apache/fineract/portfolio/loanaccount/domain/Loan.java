@@ -2597,6 +2597,7 @@ public class Loan extends AbstractPersistable<Long> {
         final boolean isSpecificToInstallment = false;
         BigDecimal interestRate = annualNominalInterestRate;
         if (loanProduct.isLinkedToFloatingInterestRate()) {
+            floatingRateDTO.resetInterestRateDiff();
             Collection<FloatingRatePeriodData> applicableRates = loanProduct.fetchInterestRates(floatingRateDTO);
             LocalDate interestRateStartDate = DateUtils.getLocalDateOfTenant();
             for (FloatingRatePeriodData periodData : applicableRates) {
