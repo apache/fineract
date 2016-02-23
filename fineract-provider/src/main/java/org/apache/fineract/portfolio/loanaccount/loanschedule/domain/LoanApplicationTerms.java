@@ -182,8 +182,6 @@ public final class LoanApplicationTerms {
 
     private final boolean isSkipRepaymentOnFirstDayofMonth;
 
-    
-
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
             final PeriodFrequencyType repaymentPeriodFrequencyType, Integer nthDay, DayOfWeekType weekDayType,
@@ -230,7 +228,7 @@ public final class LoanApplicationTerms {
             final RecalculationFrequencyType compoundingFrequencyType,
             final LoanPreClosureInterestCalculationStrategy loanPreClosureInterestCalculationStrategy,
             final LoanRescheduleStrategyMethod rescheduleStrategyMethod, BigDecimal approvedAmount, BigDecimal annualNominalInterestRate,
-            List<LoanTermVariationsData> loanTermVariations, final int numberOfdays,final boolean isSkipRepaymentOnFirstDayofMonth) {
+            List<LoanTermVariationsData> loanTermVariations, final int numberOfdays, final boolean isSkipRepaymentOnFirstDayofMonth) {
         final Calendar loanCalendar = null;
 
         return assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, nthDay, dayOfWeek,
@@ -238,7 +236,7 @@ public final class LoanApplicationTerms {
                 loanProductRelatedDetail, multiDisburseLoan, emiAmount, disbursementDatas, maxOutstandingBalance, interestChargedFromDate,
                 principalThresholdForLastInstalment, installmentAmountInMultiplesOf, recalculationFrequencyType, restCalendarInstance,
                 compoundingMethod, compoundingCalendarInstance, compoundingFrequencyType, loanPreClosureInterestCalculationStrategy,
-                rescheduleStrategyMethod, loanCalendar, approvedAmount, annualNominalInterestRate, loanTermVariations,  numberOfdays, 
+                rescheduleStrategyMethod, loanCalendar, approvedAmount, annualNominalInterestRate, loanTermVariations, numberOfdays,
                 isSkipRepaymentOnFirstDayofMonth);
     }
 
@@ -333,7 +331,7 @@ public final class LoanApplicationTerms {
         final Calendar loanCalendar = null;
         final int numberOfdays = 0;
         final boolean isSkipRepaymentOnFirstDayofMonth = false;
-        
+
         return new LoanApplicationTerms(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, null, null, amortizationMethod, interestMethod, interestRatePerPeriod,
                 interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod,
@@ -440,7 +438,6 @@ public final class LoanApplicationTerms {
         this.preClosureInterestCalculationStrategy = preClosureInterestCalculationStrategy;
         this.isSkipRepaymentOnFirstDayofMonth = isSkipRepaymentOnFirstDayofMonth;
         this.numberOfdays = numberOfdays;
-        
 
         this.loanCalendar = loanCalendar;
         this.approvedPrincipal = Money.of(principal.getCurrency(), approvedAmount);
@@ -1457,7 +1454,5 @@ public final class LoanApplicationTerms {
     public boolean isSkipRepaymentOnFirstDayofMonth() {
         return isSkipRepaymentOnFirstDayofMonth;
     }
-
-   
 
 }

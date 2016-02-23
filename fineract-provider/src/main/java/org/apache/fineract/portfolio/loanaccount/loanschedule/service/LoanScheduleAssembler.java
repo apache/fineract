@@ -270,20 +270,22 @@ public class LoanScheduleAssembler {
          * If it is JLG loan/Group Loan synched with a meeting, then make sure
          * first repayment falls on meeting date
          */
-		final Integer groupId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("groupId", element);
-		boolean isCalenderbelongstogroup = false;
-		if (groupId != null) {
-			isCalenderbelongstogroup = true;
-		}
-		boolean isSkipRepaymentonFirstDayofMonth = configurationDomainService
-				.isSkippingMeetingOnFirstDayOfMonthEnabled();
-		if(isSkipRepaymentonFirstDayofMonth && isCalenderbelongstogroup ){isSkipRepaymentonFirstDayofMonth=true;};
+        final Integer groupId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("groupId", element);
+        boolean isCalenderbelongstogroup = false;
+        if (groupId != null) {
+            isCalenderbelongstogroup = true;
+        }
+        boolean isSkipRepaymentonFirstDayofMonth = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
+        if (isSkipRepaymentonFirstDayofMonth && isCalenderbelongstogroup) {
+            isSkipRepaymentonFirstDayofMonth = true;
+        }
+        ;
 
-		final int numberOfdays = configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
-		if ((loanType.isJLGAccount() || loanType.isGroupAccount()) && calendar != null) {
-			if (!isSkipRepaymentonFirstDayofMonth) {
-				validateRepaymentsStartDateWithMeetingDates(calculatedRepaymentsStartingFromDate, calendar);
-			}
+        final int numberOfdays = configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
+        if ((loanType.isJLGAccount() || loanType.isGroupAccount()) && calendar != null) {
+            if (!isSkipRepaymentonFirstDayofMonth) {
+                validateRepaymentsStartDateWithMeetingDates(calculatedRepaymentsStartingFromDate, calendar);
+            }
             /*
              * If disbursement is synced on meeting, make sure disbursement date
              * is on a meeting date

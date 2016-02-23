@@ -50,7 +50,7 @@ public class DefaultLoanReschedulerFactory implements LoanReschedulerFactory {
             case FLAT:
                 loanRescheduleModel = new FlatInterestLoanScheduleGenerator().reschedule(mathContext, loanRescheduleRequest,
                         applicationCurrency, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance, loanCalendar,
-                        floatingRateDTO,  isSkipRepaymentonmonthFirst,  numberofdays);
+                        floatingRateDTO, isSkipRepaymentonmonthFirst, numberofdays);
             break;
 
             case INVALID:
