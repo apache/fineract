@@ -335,16 +335,16 @@ public class CalendarData {
     }
 
     public boolean isValidRecurringDate(final LocalDate compareDate) {
-        if (isBetweenStartAndEndDate(compareDate)) { return CalendarUtils.isValidRedurringDate(this.getRecurrence(), this.getStartDate(),
-                compareDate); }
+        if (isBetweenStartAndEndDate(
+                compareDate)) { return CalendarUtils.isValidRedurringDate(this.getRecurrence(), this.getStartDate(), compareDate); }
         return false;
     }
-    
-    public Integer interval(){
+
+    public Integer interval() {
         return this.interval;
     }
-    
-    public EnumOptionData frequencyType(){
+
+    public EnumOptionData frequencyType() {
         return this.frequency;
     }
 }

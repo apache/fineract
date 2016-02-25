@@ -33,6 +33,7 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
+import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
@@ -43,6 +44,7 @@ import org.apache.fineract.portfolio.floatingrates.exception.FloatingRateNotFoun
 import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistory;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleHistoryWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.DefaultLoanReschedulerFactory;
@@ -66,6 +68,7 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
     private final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
+    private final LoanRepository loanRepository;
 
     @Autowired
     public LoanReschedulePreviewPlatformServiceImpl(final LoanRescheduleRequestRepository loanRescheduleRequestRepository,
@@ -74,7 +77,7 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
             final WorkingDaysRepositoryWrapper workingDaysRepository,
             final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService,
             final CalendarInstanceRepository calendarInstanceRepository,
-            final FloatingRatesReadPlatformService floatingRatesReadPlatformService) {
+            final FloatingRatesReadPlatformService floatingRatesReadPlatformService, final LoanRepository loanRepository) {
         this.loanRescheduleRequestRepository = loanRescheduleRequestRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
         this.configurationDomainService = configurationDomainService;
@@ -83,6 +86,7 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
         this.loanScheduleHistoryWritePlatformService = loanScheduleHistoryWritePlatformService;
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.floatingRatesReadPlatformService = floatingRatesReadPlatformService;
+        this.loanRepository = loanRepository;
     }
 
     @Override
@@ -122,14 +126,17 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
             loanCalendar = loanCalendarInstance.getCalendar();
         }
         final FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
-
+        final long lonType = loanRepository.retreiveLoanTypeIdByLoanId(loan.getId());
+        final long jlgTypeEnum = AccountType.JLG.getValue().longValue();
         boolean isCalenderbelongstogroup = false;
-        boolean isSkipRepaymentonmonthFirst = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
-        int numberofdays = 0;
-        if (loan.getGroupId() != null) {
+        if (lonType == jlgTypeEnum) {
             isCalenderbelongstogroup = true;
+            ;
         }
-        if (isSkipRepaymentonmonthFirst && isCalenderbelongstogroup) {
+        boolean isSkipRepaymentonmonthFirstEnabled = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
+        int numberofdays = 0;
+        boolean isSkipRepaymentonmonthFirst=false;
+        if (isSkipRepaymentonmonthFirstEnabled && isCalenderbelongstogroup) {
             isSkipRepaymentonmonthFirst = true;
             numberofdays = configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
         }

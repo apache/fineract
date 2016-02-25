@@ -29,14 +29,13 @@ import java.util.StringTokenizer;
 
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.organisation.holiday.service.HolidayUtil;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.organisation.workingdays.service.WorkingDaysUtil;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarWeekDaysType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
+
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -151,27 +150,18 @@ public class CalendarUtils {
     }
 
     private static Collection<LocalDate> getRecurringDates(final Recur recur, final LocalDate seedDate, final LocalDate periodStartDate,
-            final LocalDate periodEndDate, final int maxCount) {
-        if (recur == null) { return null; }
-        final Date seed = convertToiCal4JCompatibleDate(seedDate);
-        final DateTime periodStart = new DateTime(periodStartDate.toDate());
-        final DateTime periodEnd = new DateTime(periodEndDate.toDate());
-
-        final boolean isSkippMeetingOnFirstDay = false;
-        final int numberOfDays = 0;
-        final Value value = new Value(Value.DATE.getValue());
-        final DateList recurringDates = recur.getDates(seed, periodStart, periodEnd, value, maxCount);
-        return convertToLocalDateList(recurringDates, seedDate, getMeetingPeriodFrequencyType(recur), isSkippMeetingOnFirstDay,
-                numberOfDays);
-    }
-
-    private static Collection<LocalDate> getRecurringDates(final Recur recur, final LocalDate seedDate, final LocalDate periodStartDate,
             final LocalDate periodEndDate, final int maxCount, boolean isSkippMeetingOnFirstDay, final int numberOfDays) {
         if (recur == null) { return null; }
-        final Date seed = convertToiCal4JCompatibleDate(seedDate);
-        final DateTime periodStart = new DateTime(periodStartDate.toDate());
-        final DateTime periodEnd = new DateTime(periodEndDate.toDate());
 
+        LocalDate periodStartTemp = periodStartDate;
+
+        if (isSkippMeetingOnFirstDay && periodStartDate.getDayOfMonth() == (numberOfDays + 1)) {
+            periodStartTemp = periodStartDate.minusDays(numberOfDays);
+        }
+
+        final Date seed = convertToiCal4JCompatibleDate(seedDate);
+        final DateTime periodStart = new DateTime(periodStartTemp.toDate());
+        final DateTime periodEnd = new DateTime(periodEndDate.toDate());
         final Value value = new Value(Value.DATE.getValue());
         final DateList recurringDates = recur.getDates(seed, periodStart, periodEnd, value, maxCount);
         return convertToLocalDateList(recurringDates, seedDate, getMeetingPeriodFrequencyType(recur), isSkippMeetingOnFirstDay,
@@ -312,13 +302,25 @@ public class CalendarUtils {
 
         final Recur recur = CalendarUtils.getICalRecur(recurringRule);
         if (recur == null) { return false; }
-
-        return isValidRecurringDate(recur, seedDate, date);
+        final boolean isSkipRepaymentonFirstDayOfMonth = false;
+        final int numberOfDays = 0;
+        return isValidRecurringDate(recur, seedDate, date, isSkipRepaymentonFirstDayOfMonth, numberOfDays);
     }
 
-    public static boolean isValidRecurringDate(final Recur recur, final LocalDate seedDate, final LocalDate date) {
+    public static boolean isValidRedurringDate(final String recurringRule, final LocalDate seedDate, final LocalDate date,
+            boolean isSkipRepaymentonFirstDayOfMonth, final int numberOfDays) {
 
-        final Collection<LocalDate> recurDate = getRecurringDates(recur, seedDate, date, date.plusDays(1), 1);
+        final Recur recur = CalendarUtils.getICalRecur(recurringRule);
+        if (recur == null) { return false; }
+
+        return isValidRecurringDate(recur, seedDate, date, isSkipRepaymentonFirstDayOfMonth, numberOfDays);
+    }
+
+    public static boolean isValidRecurringDate(final Recur recur, final LocalDate seedDate, final LocalDate date,
+            boolean isSkipRepaymentonFirstDayOfMonth, final int numberOfDays) {
+
+        final Collection<LocalDate> recurDate = getRecurringDates(recur, seedDate, date, date.plusDays(1), 1,
+                isSkipRepaymentonFirstDayOfMonth, numberOfDays);
         return (recurDate == null || recurDate.isEmpty()) ? false : true;
     }
 
@@ -402,11 +404,15 @@ public class CalendarUtils {
     }
 
     public static LocalDate getFirstRepaymentMeetingDate(final Calendar calendar, final LocalDate disbursementDate,
-            final Integer loanRepaymentInterval, final String frequency, boolean isSkipRepaymentOnFirstDayofMonth, final int numberOfDays) {
+            final Integer loanRepaymentInterval, final String frequency, boolean isSkipRepaymentOnFirstDayOfMonth, final int numberOfDays) {
         final Recur recur = CalendarUtils.getICalRecur(calendar.getRecurrence());
         if (recur == null) { return null; }
         LocalDate startDate = disbursementDate;
         final LocalDate seedDate = calendar.getStartDateLocalDate();
+        /*
+         * boolean isFirstRepaymentDateChanged=false; List
+         * firstRepaymentDateAndBoolean=new ArrayList<>();
+         */
         if (isValidRedurringDate(calendar.getRecurrence(), seedDate, startDate)) {
             startDate = startDate.plusDays(1);
         }
@@ -429,31 +435,37 @@ public class CalendarUtils {
         }
 
         final LocalDate firstRepaymentDate = getNextRecurringDate(recur, seedDate, startDate);
+        disbursementDate.plusDays(1);
+        if (isSkipRepaymentOnFirstDayOfMonth && firstRepaymentDate.getDayOfMonth() == 1) {
 
-        if (isSkipRepaymentOnFirstDayofMonth) { return adjustRecurringDate(firstRepaymentDate, numberOfDays); }
+        return adjustRecurringDate(firstRepaymentDate, numberOfDays);
+
+        }
+
         return firstRepaymentDate;
     }
 
     public static LocalDate getNewRepaymentMeetingDate(final String recurringRule, final LocalDate seedDate,
             final LocalDate oldRepaymentDate, final Integer loanRepaymentInterval, final String frequency, final WorkingDays workingDays,
-            final boolean isSkipRepaymentOnFirstDayofMonth, final int numberOfDays) {
+            final boolean isSkipRepaymentOnFirstDayOfMonth, final int numberOfDays) {
         final Recur recur = CalendarUtils.getICalRecur(recurringRule);
         if (recur == null) { return null; }
-        if (isValidRecurringDate(recur, seedDate, oldRepaymentDate)) { return oldRepaymentDate; }
+        if (isValidRecurringDate(recur, seedDate, oldRepaymentDate, isSkipRepaymentOnFirstDayOfMonth,
+                numberOfDays)) { return oldRepaymentDate; }
         LocalDate nextRapaymentDate = getNextRepaymentMeetingDate(recurringRule, seedDate, oldRepaymentDate, loanRepaymentInterval,
-                frequency, workingDays, isSkipRepaymentOnFirstDayofMonth, numberOfDays);
+                frequency, workingDays, isSkipRepaymentOnFirstDayOfMonth, numberOfDays);
 
         return nextRapaymentDate;
     }
 
     public static LocalDate getNextRepaymentMeetingDate(final String recurringRule, final LocalDate seedDate, final LocalDate repaymentDate,
             final Integer loanRepaymentInterval, final String frequency, final WorkingDays workingDays,
-            boolean isSkipRepaymentOnFirstDayofMonth, final int numberOfDays) {
+            boolean isSkipRepaymentOnFirstDayOfMonth, final int numberOfDays) {
 
         final Recur recur = CalendarUtils.getICalRecur(recurringRule);
         if (recur == null) { return null; }
         LocalDate tmpDate = repaymentDate;
-        if (isValidRecurringDate(recur, seedDate, repaymentDate)) {
+        if (isValidRecurringDate(recur, seedDate, repaymentDate, isSkipRepaymentOnFirstDayOfMonth, numberOfDays)) {
             tmpDate = repaymentDate.plusDays(1);
         }
         /*
@@ -479,10 +491,9 @@ public class CalendarUtils {
         final LocalDate nextRepaymentDate = getNextRecurringDate(recur, seedDate, newRepaymentDate);
 
         newRepaymentDate = WorkingDaysUtil.getOffSetDateIfNonWorkingDay(newRepaymentDate, nextRepaymentDate, workingDays);
-        if (isSkipRepaymentOnFirstDayofMonth) {
+        if (isSkipRepaymentOnFirstDayOfMonth) {
             LocalDate newRepaymentDatetemp = adjustRecurringDate(newRepaymentDate, numberOfDays);
-            final LocalDate nextRepaymentDateTemp = getNextRecurringDate(recur, seedDate, newRepaymentDatetemp);
-            return WorkingDaysUtil.getOffSetDateIfNonWorkingDay(newRepaymentDatetemp, nextRepaymentDateTemp, workingDays);
+            return WorkingDaysUtil.getOffSetDateIfNonWorkingDay(newRepaymentDatetemp, nextRepaymentDate, workingDays);
         }
 
         return newRepaymentDate;
@@ -554,12 +565,13 @@ public class CalendarUtils {
         return sqlCalendarTypeOptions;
     }
 
-    public static LocalDate getRecentEligibleMeetingDate(final String recurringRule, final LocalDate seedDate) {
+    public static LocalDate getRecentEligibleMeetingDate(final String recurringRule, final LocalDate seedDate,
+            final boolean isSkipMeetingOnFirstDay, final int numberOfDays) {
         LocalDate currentDate = DateUtils.getLocalDateOfTenant();
         final Recur recur = CalendarUtils.getICalRecur(recurringRule);
         if (recur == null) { return null; }
 
-        if (isValidRecurringDate(recur, seedDate, currentDate)) { return currentDate; }
+        if (isValidRecurringDate(recur, seedDate, currentDate, isSkipMeetingOnFirstDay, numberOfDays)) { return currentDate; }
 
         if (recur.getFrequency().equals(Recur.DAILY)) {
             currentDate = currentDate.plusDays(recur.getInterval());

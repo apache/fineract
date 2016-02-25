@@ -30,6 +30,7 @@ import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepos
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
+import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
@@ -42,6 +43,7 @@ import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadPlat
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.joda.time.LocalDate;
@@ -58,13 +60,15 @@ public class LoanUtilService {
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
     private final LoanScheduleGeneratorFactory loanScheduleFactory;
     private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
+    private final LoanRepository loanRepository;
 
     @Autowired
     public LoanUtilService(final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
             final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
             final HolidayRepository holidayRepository, final WorkingDaysRepositoryWrapper workingDaysRepository,
             final LoanScheduleGeneratorFactory loanScheduleFactory,
-            final FloatingRatesReadPlatformService floatingRatesReadPlatformService) {
+            final FloatingRatesReadPlatformService floatingRatesReadPlatformService,
+            final LoanRepository loanRepository) {
         this.applicationCurrencyRepository = applicationCurrencyRepository;
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.configurationDomainService = configurationDomainService;
@@ -72,6 +76,7 @@ public class LoanUtilService {
         this.workingDaysRepository = workingDaysRepository;
         this.loanScheduleFactory = loanScheduleFactory;
         this.floatingRatesReadPlatformService = floatingRatesReadPlatformService;
+        this.loanRepository=loanRepository;
     }
 
     public ScheduleGeneratorDTO buildScheduleGeneratorDTO(final Loan loan, final LocalDate recalculateFrom) {
@@ -104,10 +109,14 @@ public class LoanUtilService {
         FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
         int numberofDays = configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
         boolean isSkipRepamentonMonthFirst = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
-        boolean isCalendarbelongsgroup = false;
-        if (loan.getGroupId() != null) {
+        final long lonType = loanRepository.retreiveLoanTypeIdByLoanId(loan.getId());
+        final long jlgTypeEnum = AccountType.JLG.getValue().longValue();
+        boolean isCalendarbelongsgroup=false;
+        if (lonType == jlgTypeEnum) {
             isCalendarbelongsgroup = true;
+            ;
         }
+        
         if (isSkipRepamentonMonthFirst && isCalendarbelongsgroup) {
             isSkipRepamentonMonthFirst = true;
         }

@@ -132,6 +132,9 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     List<Loan> findByGroupOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds,
             @Param("loanStatuses") Collection<Integer> loanStatuses);
 
+    @Query("Select loan.loanType from Loan loan where loan.id= :id ")
+     Long retreiveLoanTypeIdByLoanId(@Param("id") Long id);
+     
     /*** FIXME: Add more appropriate names for the query ***/
     @Query(FIND_ACTIVE_LOANS_PRODUCT_IDS_BY_CLIENT)
     List<Long> findActiveLoansLoanProductIdsByClient(@Param("clientId") Long clientId, @Param("loanStatus") Integer loanStatus);
@@ -144,5 +147,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     
     @Query(DOES_PRODUCT_HAVE_NON_CLOSED_LOANS)
     boolean doNonClosedLoanAccountsExistForProduct(@Param("productId") Long productId);
+    
+    
+    
 
 }

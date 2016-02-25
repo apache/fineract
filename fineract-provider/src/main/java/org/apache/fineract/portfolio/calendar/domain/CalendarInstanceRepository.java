@@ -38,9 +38,13 @@ public interface CalendarInstanceRepository extends JpaRepository<CalendarInstan
     Collection<CalendarInstance> findByEntityIdAndEntityTypeId(Long entityId, Integer entityTypeId);
 
     /**
-     * @param entityId : Id of {@link Client}, {@link Group}, {@link Loan} or {@link SavingsAccount}.
-     * @param entityTypeId: {@link CalendarEntityType}
-     * @param calendarTypeId: {@link CalendarType}
+     * @param entityId
+     *            : Id of {@link Client}, {@link Group}, {@link Loan} or
+     *            {@link SavingsAccount}.
+     * @param entityTypeId:
+     *            {@link CalendarEntityType}
+     * @param calendarTypeId:
+     *            {@link CalendarType}
      * @return
      */
     CalendarInstance findByEntityIdAndEntityTypeIdAndCalendarTypeId(Long entityId, Integer entityTypeId, Integer calendarTypeId);
@@ -54,12 +58,12 @@ public interface CalendarInstanceRepository extends JpaRepository<CalendarInstan
     @Query("from CalendarInstance ci where ci.entityId in (select id from Loan loan where loan.client.id = :clientId and loan.group.id = :groupId and (loan.loanStatus = 100 or loan.loanStatus = 200 or loan.loanStatus = 300)) and ci.entityTypeId = 3")
     List<CalendarInstance> findCalendarInstancesForActiveLoansByGroupIdAndClientId(@Param("groupId") Long groupId,
             @Param("clientId") Long clientId);
-    
-    /** 
-     *  EntityType = 3 is for loan
+
+    /**
+     * EntityType = 3 is for loan
      */
-    
-    @Query("SELECT COUNT(ci.id) FROM CalendarInstance ci, Loan ln WHERE ln.id = ci.entityId AND ci.entityTypeId = 3 AND ci.calendar.id = :calendarId AND ln.loanStatus IN :loanStatuses ") 
-    Integer countOfLoansSyncedWithCalendar(@Param("calendarId") Long calendarId, @Param("loanStatuses") Collection<Integer> loanStatuses );
+
+    @Query("SELECT COUNT(ci.id) FROM CalendarInstance ci, Loan ln WHERE ln.id = ci.entityId AND ci.entityTypeId = 3 AND ci.calendar.id = :calendarId AND ln.loanStatus IN :loanStatuses ")
+    Integer countOfLoansSyncedWithCalendar(@Param("calendarId") Long calendarId, @Param("loanStatuses") Collection<Integer> loanStatuses);
 
 }

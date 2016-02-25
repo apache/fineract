@@ -48,6 +48,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
+import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
@@ -312,8 +313,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final Map<String, Object> changes = new LinkedHashMap<>();
 
             LocalDate approvedOnDate = jsonCommand.localDateValueOfParameterNamed("approvedOnDate");
-            final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(jsonCommand.dateFormat()).withLocale(
-                    jsonCommand.extractLocale());
+            final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(jsonCommand.dateFormat())
+                    .withLocale(jsonCommand.extractLocale());
 
             changes.put("locale", jsonCommand.locale());
             changes.put("dateFormat", jsonCommand.dateFormat());
@@ -325,8 +326,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 final LoanSummary loanSummary = loan.getSummary();
 
                 final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
-                final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan
-                        .getDisbursementDate().toDate());
+                final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
+                        loan.getDisbursementDate().toDate());
                 final WorkingDays workingDays = this.workingDaysRepository.findOne();
                 final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail = loan.getLoanRepaymentScheduleDetail();
                 final MonetaryCurrency currency = loanProductRelatedDetail.getCurrency();
@@ -355,17 +356,24 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     loanCalendar = loanCalendarInstance.getCalendar();
                 }
                 FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
-                
-                boolean isCalenderbelongstogroup=false;
-                boolean isSkipRepaymentonmonthFirst=configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
-                int numberofdays=0;
-                if(loan.getGroupId()!=null){isCalenderbelongstogroup=true;}
-                if(isSkipRepaymentonmonthFirst&& isCalenderbelongstogroup){
-                isSkipRepaymentonmonthFirst=true;
-                numberofdays=configurationDomainService.retrieveSkippingMeetingPeriod().intValue();}
+
+                boolean isCalenderbelongstogroup = false;
+                boolean isSkipRepaymentonmonthFirsConfigtEnabled = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
+                boolean isSkipRepaymentonmonthFirst = false;
+                int numberofdays = 0;
+                final long lonType = loanRepository.retreiveLoanTypeIdByLoanId(loan.getId());
+                final long jlgTypeEnum = AccountType.JLG.getValue().longValue();
+                if (lonType == jlgTypeEnum) {
+                    isCalenderbelongstogroup = true;
+                    ;
+                }
+                if (isSkipRepaymentonmonthFirsConfigtEnabled && isCalenderbelongstogroup) {
+                    isSkipRepaymentonmonthFirst = true;
+                    numberofdays = configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
+                }
                 LoanRescheduleModel loanRescheduleModel = new DefaultLoanReschedulerFactory().reschedule(mathContext, interestMethod,
                         loanRescheduleRequest, applicationCurrency, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance,
-                        loanCalendar, floatingRateDTO, isSkipRepaymentonmonthFirst, numberofdays );
+                        loanCalendar, floatingRateDTO, isSkipRepaymentonmonthFirst, numberofdays);
 
                 final Collection<LoanRescheduleModelRepaymentPeriod> periods = loanRescheduleModel.getPeriods();
                 List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();
@@ -422,8 +430,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 waiveLoanCharges(loan, waiveLoanCharges);
 
                 // update the Loan summary
-                loanSummary
-                        .updateSummary(currency, loan.getPrincpal(), repaymentScheduleInstallments, new LoanSummaryWrapper(), true, null);
+                loanSummary.updateSummary(currency, loan.getPrincpal(), repaymentScheduleInstallments, new LoanSummaryWrapper(), true,
+                        null);
 
                 // update the total number of schedule repayments
                 loan.updateNumberOfRepayments(periods.size());
@@ -499,8 +507,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
                 Money accruedCharge = Money.zero(loan.getCurrency());
                 if (loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
-                    Collection<LoanChargePaidByData> chargePaidByDatas = this.loanChargeReadPlatformService.retriveLoanChargesPaidBy(
-                            loanCharge.getId(), LoanTransactionType.ACCRUAL, loanInstallmentNumber);
+                    Collection<LoanChargePaidByData> chargePaidByDatas = this.loanChargeReadPlatformService
+                            .retriveLoanChargesPaidBy(loanCharge.getId(), LoanTransactionType.ACCRUAL, loanInstallmentNumber);
                     for (LoanChargePaidByData chargePaidByData : chargePaidByDatas) {
                         accruedCharge = accruedCharge.plus(chargePaidByData.getAmount());
                     }
@@ -550,8 +558,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final Map<String, Object> changes = new LinkedHashMap<>();
 
             LocalDate rejectedOnDate = jsonCommand.localDateValueOfParameterNamed("rejectedOnDate");
-            final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(jsonCommand.dateFormat()).withLocale(
-                    jsonCommand.extractLocale());
+            final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern(jsonCommand.dateFormat())
+                    .withLocale(jsonCommand.extractLocale());
 
             changes.put("locale", jsonCommand.locale());
             changes.put("dateFormat", jsonCommand.dateFormat());

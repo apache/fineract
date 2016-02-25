@@ -244,11 +244,11 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         final LocalDate periodEndDate = this.getPeriodEndDate(calendarData.getEndDate(), tillDate);
         final Long calendarTypeId = calendarData.getEntityType().getId();
         final Long calenderTypeEnumvalue = CalendarEntityType.GROUPS.getValue().longValue();
-        boolean isCalendarbelongtoGruop = calendarTypeId.equals(calenderTypeEnumvalue);
+        boolean isCalendarBelongToGruop = calendarTypeId.equals(calenderTypeEnumvalue);
         boolean isSkipMeetingOnFirstDayEnabled = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
         boolean isSkipMeetingOnFirstDay = false;
         int numberOfDays = 0;
-        if (isSkipMeetingOnFirstDayEnabled && isCalendarbelongtoGruop) {
+        if (isSkipMeetingOnFirstDayEnabled && isCalendarBelongToGruop) {
             isSkipMeetingOnFirstDay = true;
             numberOfDays = configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
         }
@@ -316,14 +316,13 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
          * which is still on Tuesday and next collection sheet date should be on
          * 18th of Oct as per current calendar
          */
-
         final Long calendarTypeId = calendarData.getEntityType().getId();
         final Long calenderTypeEnumvalue = CalendarEntityType.GROUPS.getValue().longValue();
-        boolean isCalendarbelongtoGruop = calendarTypeId.equals(calenderTypeEnumvalue);
+        boolean isCalendarBelongToGruop = calendarTypeId.equals(calenderTypeEnumvalue);
         boolean isSkipMeetingOnFirstDayEnabled = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
         boolean isSkipMeetingOnFirstDay = false;
         int numberOfDays = 0;
-        if (isSkipMeetingOnFirstDayEnabled && isCalendarbelongtoGruop) {
+        if (isSkipMeetingOnFirstDayEnabled && isCalendarBelongToGruop) {
             isSkipMeetingOnFirstDay = true;
             numberOfDays = configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
         }
@@ -331,7 +330,8 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         if (lastMeetingDate != null && !calendarData.isBetweenStartAndEndDate(lastMeetingDate)
                 && !calendarData.isBetweenStartAndEndDate(DateUtils.getLocalDateOfTenant())) {
             applicableCalendarData = this.retrieveApplicableCalendarFromHistory(calendarData.getId(), lastMeetingDate);
-            nextEligibleMeetingDate = CalendarUtils.getRecentEligibleMeetingDate(applicableCalendarData.getRecurrence(), lastMeetingDate);
+            nextEligibleMeetingDate = CalendarUtils.getRecentEligibleMeetingDate(applicableCalendarData.getRecurrence(), lastMeetingDate,
+                    isSkipMeetingOnFirstDay, numberOfDays);
         }
 
         /**
@@ -340,10 +340,11 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
          */
         if (nextEligibleMeetingDate == null) {
             final LocalDate seedDate = (lastMeetingDate != null) ? lastMeetingDate : calendarData.getStartDate();
-            nextEligibleMeetingDate = CalendarUtils.getRecentEligibleMeetingDate(applicableCalendarData.getRecurrence(), seedDate);
+            nextEligibleMeetingDate = CalendarUtils.getRecentEligibleMeetingDate(applicableCalendarData.getRecurrence(), seedDate,
+                    isSkipMeetingOnFirstDay, numberOfDays);
         } else if (calendarData.isBetweenStartAndEndDate(nextEligibleMeetingDate)) {
             nextEligibleMeetingDate = CalendarUtils.getRecentEligibleMeetingDate(applicableCalendarData.getRecurrence(),
-                    calendarData.getStartDate());
+                    calendarData.getStartDate(), isSkipMeetingOnFirstDay, numberOfDays);
         }
 
         return nextEligibleMeetingDate;

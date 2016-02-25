@@ -178,9 +178,9 @@ public final class LoanApplicationTerms {
 
     private final LocalDate seedDate;
 
-    private final int numberOfdays;
+    private final int numberOfDays;
 
-    private final boolean isSkipRepaymentOnFirstDayofMonth;
+    private final boolean isSkipRepaymentOnFirstDayOfMonth;
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
@@ -349,7 +349,6 @@ public final class LoanApplicationTerms {
             final List<LoanTermVariationsData> loanTermVariations) {
         final int numberOfdays = 0;
         final boolean isSkipRepaymentOnFirstDayofMonth = false;
-        final boolean isCalenderbelongstogroup = false;
         return new LoanApplicationTerms(applicationTerms.currency, applicationTerms.loanTermFrequency,
                 applicationTerms.loanTermPeriodFrequencyType, applicationTerms.numberOfRepayments, applicationTerms.repaymentEvery,
                 applicationTerms.repaymentPeriodFrequencyType, applicationTerms.nthDay, applicationTerms.weekDayType,
@@ -436,8 +435,8 @@ public final class LoanApplicationTerms {
         this.principalThresholdForLastInstalment = principalThresholdForLastInstalment;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
         this.preClosureInterestCalculationStrategy = preClosureInterestCalculationStrategy;
-        this.isSkipRepaymentOnFirstDayofMonth = isSkipRepaymentOnFirstDayofMonth;
-        this.numberOfdays = numberOfdays;
+        this.isSkipRepaymentOnFirstDayOfMonth = isSkipRepaymentOnFirstDayofMonth;
+        this.numberOfDays = numberOfdays;
 
         this.loanCalendar = loanCalendar;
         this.approvedPrincipal = Money.of(principal.getCurrency(), approvedAmount);
@@ -1448,11 +1447,11 @@ public final class LoanApplicationTerms {
     }
 
     public int getNumberOfdays() {
-        return numberOfdays;
+        return numberOfDays;
     }
 
     public boolean isSkipRepaymentOnFirstDayofMonth() {
-        return isSkipRepaymentOnFirstDayofMonth;
+        return isSkipRepaymentOnFirstDayOfMonth;
     }
 
 }
