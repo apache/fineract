@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.configuration.domain;
 
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -42,6 +43,9 @@ public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
 
     @Column(name = "value", nullable = true)
     private Long value;
+    
+    @Column(name = "date_value", nullable = true)
+    private Date dateValue;
 
     @Column(name = "description", nullable = true)
     private final String description;
@@ -53,15 +57,17 @@ public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
         this.name = null;
         this.enabled = false;
         this.value = null;
+        this.dateValue = null;
         this.description = null;
         this.isTrapDoor = false;
     }
 
-    public GlobalConfigurationProperty(final String name, final boolean enabled, final Long value, final String description,
+    public GlobalConfigurationProperty(final String name, final boolean enabled, final Long value, final Date dateValue ,final String description,
             final boolean isTrapDoor) {
         this.name = name;
         this.enabled = enabled;
         this.value = value;
+        this.dateValue = dateValue;
         this.description = description;
         this.isTrapDoor = isTrapDoor;
     }
@@ -72,6 +78,10 @@ public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
 
     public Long getValue() {
         return this.value;
+    }
+    
+    public Date getDateValue(){
+        return this.dateValue;
     }
 
     public boolean updateTo(final boolean value) {
@@ -100,6 +110,13 @@ public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
             actualChanges.put(valueParamName, newValue);
             this.value = newValue;
         }
+        
+        final String dateValueParamName = "dateValue";
+        if(command.isChangeInDateParameterNamed(dateValueParamName, this.dateValue)){
+            final Date newDateValue = command.DateValueOfParameterNamed(dateValueParamName);
+            actualChanges.put(dateValueParamName, newDateValue);
+            this.dateValue = newDateValue;
+        }
 
         final String passwordPropertyName = "force-password-reset-days";
         if (this.name.equalsIgnoreCase(passwordPropertyName)) {
@@ -112,7 +129,7 @@ public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
     }
 
     public static GlobalConfigurationProperty newSurveyConfiguration(final String name) {
-        return new GlobalConfigurationProperty(name, false, null, null, false);
+        return new GlobalConfigurationProperty(name, false, null, null, null, false);
     }
 
 }
