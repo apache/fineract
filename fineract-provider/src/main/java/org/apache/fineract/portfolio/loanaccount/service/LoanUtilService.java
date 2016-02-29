@@ -107,22 +107,22 @@ public class LoanUtilService {
             overdurPenaltyWaitPeriod = this.configurationDomainService.retrievePenaltyWaitPeriod();
         }
         FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
-        int numberofDays = configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
-        boolean isSkipRepamentonMonthFirst = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
-        final long lonType = loanRepository.retreiveLoanTypeIdByLoanId(loan.getId());
+        int numberOfDays = configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
+        boolean isSkipRepaymentOnMonthFirst = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
+        final long loanType = loanRepository.retreiveLoanTypeIdByLoanId(loan.getId());
         final long jlgTypeEnum = AccountType.JLG.getValue().longValue();
-        boolean isCalendarbelongsgroup=false;
-        if (lonType == jlgTypeEnum) {
-            isCalendarbelongsgroup = true;
+        boolean isCalendarBelongsGroup=false;
+        if (loanType == jlgTypeEnum) {
+            isCalendarBelongsGroup = true;
             ;
         }
         
-        if (isSkipRepamentonMonthFirst && isCalendarbelongsgroup) {
-            isSkipRepamentonMonthFirst = true;
+        if (isSkipRepaymentOnMonthFirst && isCalendarBelongsGroup) {
+            isSkipRepaymentOnMonthFirst = true;
         }
         ScheduleGeneratorDTO scheduleGeneratorDTO = new ScheduleGeneratorDTO(loanScheduleFactory, applicationCurrency,
                 calculatedRepaymentsStartingFromDate, holidayDetails, restCalendarInstance, compoundingCalendarInstance, recalculateFrom,
-                overdurPenaltyWaitPeriod, floatingRateDTO, numberofDays, isSkipRepamentonMonthFirst);
+                overdurPenaltyWaitPeriod, floatingRateDTO, numberOfDays, isSkipRepaymentOnMonthFirst);
 
         return scheduleGeneratorDTO;
     }

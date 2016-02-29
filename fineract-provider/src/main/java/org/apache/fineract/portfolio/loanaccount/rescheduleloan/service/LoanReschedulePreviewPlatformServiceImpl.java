@@ -128,21 +128,20 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
         final FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
         final long lonType = loanRepository.retreiveLoanTypeIdByLoanId(loan.getId());
         final long jlgTypeEnum = AccountType.JLG.getValue().longValue();
-        boolean isCalenderbelongstogroup = false;
+        boolean isCalenderBelongsToGroup = false;
         if (lonType == jlgTypeEnum) {
-            isCalenderbelongstogroup = true;
-            ;
+            isCalenderBelongsToGroup = true;
         }
-        boolean isSkipRepaymentonmonthFirstEnabled = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
-        int numberofdays = 0;
-        boolean isSkipRepaymentonmonthFirst=false;
-        if (isSkipRepaymentonmonthFirstEnabled && isCalenderbelongstogroup) {
-            isSkipRepaymentonmonthFirst = true;
-            numberofdays = configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
+        boolean isSkipRepaymentOnMonthFirstEnabled = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
+        int numberOfDays = 0;
+        boolean isSkipRepaymentOnMonthFirst=false;
+        if (isSkipRepaymentOnMonthFirstEnabled && isCalenderBelongsToGroup) {
+            isSkipRepaymentOnMonthFirst = true;
+            numberOfDays = configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
         }
         LoanRescheduleModel loanRescheduleModel = new DefaultLoanReschedulerFactory().reschedule(mathContext, interestMethod,
                 loanRescheduleRequest, applicationCurrency, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance,
-                loanCalendar, floatingRateDTO, isSkipRepaymentonmonthFirst, numberofdays);
+                loanCalendar, floatingRateDTO, isSkipRepaymentOnMonthFirst, numberOfDays);
         LoanRescheduleModel loanRescheduleModelWithOldPeriods = LoanRescheduleModel.createWithSchedulehistory(loanRescheduleModel,
                 oldPeriods);
         return loanRescheduleModelWithOldPeriods;

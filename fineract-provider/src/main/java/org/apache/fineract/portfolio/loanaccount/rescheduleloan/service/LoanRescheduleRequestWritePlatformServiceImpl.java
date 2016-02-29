@@ -357,23 +357,23 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 }
                 FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
 
-                boolean isCalenderbelongstogroup = false;
-                boolean isSkipRepaymentonmonthFirsConfigtEnabled = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
-                boolean isSkipRepaymentonmonthFirst = false;
-                int numberofdays = 0;
-                final long lonType = loanRepository.retreiveLoanTypeIdByLoanId(loan.getId());
+                boolean isCalenderBelongsToGroup = false;
+                boolean isSkipRepaymentOnMonthFirsConfigEnabled = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
+                boolean isSkipRepaymentOnMonthFirst = false;
+                int numberOfDays = 0;
+                final long loanType = loanRepository.retreiveLoanTypeIdByLoanId(loan.getId());
                 final long jlgTypeEnum = AccountType.JLG.getValue().longValue();
-                if (lonType == jlgTypeEnum) {
-                    isCalenderbelongstogroup = true;
+                if (loanType == jlgTypeEnum) {
+                    isCalenderBelongsToGroup = true;
                     ;
                 }
-                if (isSkipRepaymentonmonthFirsConfigtEnabled && isCalenderbelongstogroup) {
-                    isSkipRepaymentonmonthFirst = true;
-                    numberofdays = configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
+                if (isSkipRepaymentOnMonthFirsConfigEnabled && isCalenderBelongsToGroup) {
+                    isSkipRepaymentOnMonthFirst = true;
+                    numberOfDays = configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
                 }
                 LoanRescheduleModel loanRescheduleModel = new DefaultLoanReschedulerFactory().reschedule(mathContext, interestMethod,
                         loanRescheduleRequest, applicationCurrency, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance,
-                        loanCalendar, floatingRateDTO, isSkipRepaymentonmonthFirst, numberofdays);
+                        loanCalendar, floatingRateDTO, isSkipRepaymentOnMonthFirst, numberOfDays);
 
                 final Collection<LoanRescheduleModelRepaymentPeriod> periods = loanRescheduleModel.getPeriods();
                 List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();

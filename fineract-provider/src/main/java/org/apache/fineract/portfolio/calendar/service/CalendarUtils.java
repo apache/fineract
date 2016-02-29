@@ -492,8 +492,8 @@ public class CalendarUtils {
 
         newRepaymentDate = WorkingDaysUtil.getOffSetDateIfNonWorkingDay(newRepaymentDate, nextRepaymentDate, workingDays);
         if (isSkipRepaymentOnFirstDayOfMonth) {
-            LocalDate newRepaymentDatetemp = adjustRecurringDate(newRepaymentDate, numberOfDays);
-            return WorkingDaysUtil.getOffSetDateIfNonWorkingDay(newRepaymentDatetemp, nextRepaymentDate, workingDays);
+            LocalDate newRepaymentDateTemp = adjustRecurringDate(newRepaymentDate, numberOfDays);
+            return WorkingDaysUtil.getOffSetDateIfNonWorkingDay(newRepaymentDateTemp, nextRepaymentDate, workingDays);
         }
 
         return newRepaymentDate;

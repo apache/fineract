@@ -270,21 +270,20 @@ public class LoanScheduleAssembler {
          * If it is JLG loan/Group Loan synched with a meeting, then make sure
          * first repayment falls on meeting date
          */
-        boolean isCalenderbelongstogroup = loanType.isJLGAccount();
-        boolean isSkipRepaymentonFirstDayOfMonthEnabled = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
-        boolean isSkipRepaymentonFirstDayOfMonth = false;
+        boolean isCalenderBelongsToGroup = loanType.isJLGAccount();
+        boolean isSkipRepaymentOnFirstDayOfMonthEnabled = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
+        boolean isSkipRepaymentOnFirstDayOfMonth = false;
 
-        if (isSkipRepaymentonFirstDayOfMonthEnabled && isCalenderbelongstogroup) {
-            isSkipRepaymentonFirstDayOfMonth = true;
+        if (isSkipRepaymentOnFirstDayOfMonthEnabled && isCalenderBelongsToGroup) {
+            isSkipRepaymentOnFirstDayOfMonth = true;
         }
         ;
 
         final int numberOfDays = configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
         if ((loanType.isJLGAccount() || loanType.isGroupAccount()) && calendar != null) {
-            /* if (!isSkipRepaymentonFirstDayOfMonth) { */
-            validateRepaymentsStartDateWithMeetingDates(calculatedRepaymentsStartingFromDate, calendar, isSkipRepaymentonFirstDayOfMonth,
+            validateRepaymentsStartDateWithMeetingDates(calculatedRepaymentsStartingFromDate, calendar, isSkipRepaymentOnFirstDayOfMonth,
                     numberOfDays);
-            // }
+
             /*
              * If disbursement is synced on meeting, make sure disbursement date
              * is on a meeting date
@@ -409,7 +408,7 @@ public class LoanScheduleAssembler {
                 maxOutstandingBalance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                 recalculationFrequencyType, restCalendarInstance, compoundingCalendarInstance, compoundingFrequencyType,
                 principalThresholdForLastInstalment, installmentAmountInMultiplesOf, loanProduct.preCloseInterestCalculationStrategy(),
-                calendar, BigDecimal.ZERO, loanTermVariations, numberOfDays, isSkipRepaymentonFirstDayOfMonth);
+                calendar, BigDecimal.ZERO, loanTermVariations, numberOfDays, isSkipRepaymentOnFirstDayOfMonth);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,
@@ -481,9 +480,9 @@ public class LoanScheduleAssembler {
     }
 
     private void validateRepaymentsStartDateWithMeetingDates(final LocalDate repaymentsStartingFromDate, final Calendar calendar,
-            boolean isSkipRepaymentonFirstDayOfMonth, final int numberOfDays) {
+            boolean isSkipRepaymentOnFirstDayOfMonth, final int numberOfDays) {
         if (repaymentsStartingFromDate != null && !CalendarUtils.isValidRedurringDate(calendar.getRecurrence(),
-                calendar.getStartDateLocalDate(), repaymentsStartingFromDate, isSkipRepaymentonFirstDayOfMonth, numberOfDays)) {
+                calendar.getStartDateLocalDate(), repaymentsStartingFromDate, isSkipRepaymentOnFirstDayOfMonth, numberOfDays)) {
             final String errorMessage = "First repayment date '" + repaymentsStartingFromDate + "' do not fall on a meeting date";
             throw new LoanApplicationDateException("first.repayment.date.do.not.match.meeting.date", errorMessage,
                     repaymentsStartingFromDate);
