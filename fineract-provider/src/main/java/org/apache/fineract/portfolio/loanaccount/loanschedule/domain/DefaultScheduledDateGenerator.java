@@ -18,10 +18,13 @@
  */
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
+
 import org.apache.fineract.organisation.holiday.service.HolidayUtil;
 import org.apache.fineract.organisation.workingdays.domain.RepaymentRescheduleType;
 import org.apache.fineract.organisation.workingdays.service.WorkingDaysUtil;
+import org.apache.fineract.portfolio.calendar.data.CalendarHistoryDataWrapper;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
+import org.apache.fineract.portfolio.calendar.domain.CalendarHistory;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.common.domain.DayOfWeekType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
@@ -68,9 +71,26 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                 // calendar associated with
                 // the loan, and we should use it in order to calculate next
                 // repayment
-                LocalDate seedDate = currentCalendar.getStartDateLocalDate();
-                String reccuringString = currentCalendar.getRecurrence();
-                dueRepaymentPeriodDate = CalendarUtils.getNewRepaymentMeetingDate(reccuringString, seedDate, dueRepaymentPeriodDate,
+                
+                CalendarHistory calendarHistory = null;
+                CalendarHistoryDataWrapper calendarHistoryDataWrapper = loanApplicationTerms.getCalendarHistoryDataWrapper();
+                if(calendarHistoryDataWrapper != null && 
+                        loanApplicationTerms.getCalendarHistoryDataWrapper().hasVariation(dueRepaymentPeriodDate)){
+                    calendarHistory = calendarHistoryDataWrapper.getCalendarHistory(dueRepaymentPeriodDate);
+                }
+ 
+                // get the start date from the calendar history
+                LocalDate seedDate = null;
+                String reccuringString = null;
+                if (calendarHistory == null) {
+                    seedDate = currentCalendar.getStartDateLocalDate();
+                    reccuringString = currentCalendar.getRecurrence();
+                } else {
+                    seedDate = calendarHistory.getStartDateLocalDate();
+                    reccuringString = calendarHistory.getRecurrence();
+                }
+
+                dueRepaymentPeriodDate = CalendarUtils.getNewRepaymentMeetingDate(reccuringString, seedDate, lastRepaymentDate.plusDays(1),
                         loanApplicationTerms.getRepaymentEvery(),
                         CalendarUtils.getMeetingFrequencyFromPeriodFrequencyType(loanApplicationTerms.getLoanTermPeriodFrequencyType()),
                         holidayDetailDTO.getWorkingDays());

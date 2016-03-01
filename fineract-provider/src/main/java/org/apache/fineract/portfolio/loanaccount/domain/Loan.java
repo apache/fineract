@@ -71,7 +71,9 @@ import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.organisation.workingdays.service.WorkingDaysUtil;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
+import org.apache.fineract.portfolio.calendar.data.CalendarHistoryDataWrapper;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
+import org.apache.fineract.portfolio.calendar.domain.CalendarHistory;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.charge.domain.Charge;
@@ -5032,6 +5034,8 @@ public class Loan extends AbstractPersistable<Long> {
         InterestRecalculationCompoundingMethod compoundingMethod = null;
         RecalculationFrequencyType compoundingFrequencyType = null;
         LoanRescheduleStrategyMethod rescheduleStrategyMethod = null;
+        Calendar calendar = null;
+        CalendarHistoryDataWrapper calendarHistoryDataWrapper = null;
         if (this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
             restCalendarInstance = scheduleGeneratorDTO.getCalendarInstanceForInterestRecalculation();
             compoundingCalendarInstance = scheduleGeneratorDTO.getCompoundingCalendarInstance();
@@ -5039,6 +5043,8 @@ public class Loan extends AbstractPersistable<Long> {
             compoundingMethod = this.loanInterestRecalculationDetails.getInterestRecalculationCompoundingMethod();
             compoundingFrequencyType = this.loanInterestRecalculationDetails.getCompoundingFrequencyType();
             rescheduleStrategyMethod = this.loanInterestRecalculationDetails.getRescheduleStrategyMethod();
+            calendar = scheduleGeneratorDTO.getCalendar();
+            calendarHistoryDataWrapper = scheduleGeneratorDTO.getCalendarHistoryDataWrapper();
         }
 
         BigDecimal annualNominalInterestRate = this.loanRepaymentScheduleDetail.getAnnualNominalInterestRate();
@@ -5053,7 +5059,7 @@ public class Loan extends AbstractPersistable<Long> {
                 this.maxOutstandingLoanBalance, getInterestChargedFromDate(), this.loanProduct.getPrincipalThresholdForLastInstallment(),
                 this.loanProduct.getInstallmentAmountInMultiplesOf(), recalculationFrequencyType, restCalendarInstance, compoundingMethod,
                 compoundingCalendarInstance, compoundingFrequencyType, this.loanProduct.preCloseInterestCalculationStrategy(),
-                rescheduleStrategyMethod, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations);
+                rescheduleStrategyMethod, calendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations, calendarHistoryDataWrapper);
         return loanApplicationTerms;
     }
 
@@ -5269,6 +5275,13 @@ public class Loan extends AbstractPersistable<Long> {
         final BigDecimal maxOutstandingBalance = getMaxOutstandingLoanBalance();
 
         final List<DisbursementData> disbursementData = getDisbursmentData();
+        
+        CalendarHistoryDataWrapper calendarHistoryDataWrapper = null;
+        if (loanCalendar != null) {
+            Set<CalendarHistory> calendarHistories = loanCalendar.getCalendarHistory();
+            List<CalendarHistory> calendarHistoryList = new ArrayList<>(calendarHistories);
+            calendarHistoryDataWrapper = new CalendarHistoryDataWrapper(calendarHistoryList);
+        }
 
         RecalculationFrequencyType recalculationFrequencyType = null;
         InterestRecalculationCompoundingMethod compoundingMethod = null;
@@ -5290,7 +5303,8 @@ public class Loan extends AbstractPersistable<Long> {
                 maxOutstandingBalance, interestChargedFromDate, this.loanProduct.getPrincipalThresholdForLastInstallment(),
                 this.loanProduct.getInstallmentAmountInMultiplesOf(), recalculationFrequencyType, restCalendarInstance, compoundingMethod,
                 compoundingCalendarInstance, compoundingFrequencyType, this.loanProduct.preCloseInterestCalculationStrategy(),
-                rescheduleStrategyMethod, loanCalendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations);
+                rescheduleStrategyMethod, loanCalendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations, 
+                calendarHistoryDataWrapper);
     }
 
     /**
