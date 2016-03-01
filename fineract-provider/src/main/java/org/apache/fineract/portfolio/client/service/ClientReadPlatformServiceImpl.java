@@ -27,6 +27,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -68,6 +69,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final StaffReadPlatformService staffReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final SavingsProductReadPlatformService savingsProductReadPlatformService;
+    private final ConfigurationDomainService configurationDomainService;
     // data mappers
     private final PaginationHelper<ClientData> paginationHelper = new PaginationHelper<>();
     private final ClientMapper clientMapper = new ClientMapper();
@@ -79,13 +81,15 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final OfficeReadPlatformService officeReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
             final CodeValueReadPlatformService codeValueReadPlatformService,
-            final SavingsProductReadPlatformService savingsProductReadPlatformService) {
+            final SavingsProductReadPlatformService savingsProductReadPlatformService,
+            final ConfigurationDomainService configurationDomainService) {
         this.context = context;
         this.officeReadPlatformService = officeReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.staffReadPlatformService = staffReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.savingsProductReadPlatformService = savingsProductReadPlatformService;
+        this.configurationDomainService = configurationDomainService;
     }
 
     @Override
@@ -100,6 +104,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         Collection<StaffData> staffOptions = null;
 
+        final boolean isFullNameInCreateClientEnabled = configurationDomainService.isFullNameInCreateClientEnabled();
         final boolean loanOfficersOnly = false;
         if (staffInSelectedOfficeOnly) {
             staffOptions = this.staffReadPlatformService.retrieveAllStaffForDropdown(defaultOfficeId);
@@ -129,7 +134,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         return ClientData.template(defaultOfficeId, new LocalDate(), offices, staffOptions, null, genderOptions, savingsProductDatas,
                 clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions,
-                clientLegalFormOptions);
+                clientLegalFormOptions, isFullNameInCreateClientEnabled);
     }
 
     @Override
@@ -251,7 +256,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final Collection<GroupGeneralData> parentGroups = this.jdbcTemplate.query(clientGroupsSql, this.clientGroupsMapper,
                     new Object[] { clientId });
 
-            return ClientData.setParentGroups(clientData, parentGroups);
+            final boolean isFullNameInCreateClientEnabled = configurationDomainService.isFullNameInCreateClientEnabled();
+            return ClientData.setParentGroups(clientData, parentGroups, isFullNameInCreateClientEnabled);
 
         } catch (final EmptyResultDataAccessException e) {
             throw new ClientNotFoundException(clientId);
@@ -759,8 +765,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final Collection<CodeValueData> clientNonPersonConstitutionOptions = null;
         final Collection<CodeValueData> clientNonPersonMainBusinessLineOptions = null;
         final List<EnumOptionData> clientLegalFormOptions = null;
+        final boolean isFullNameInCreateClientEnabled = configurationDomainService.isFullNameInCreateClientEnabled();
         return ClientData.template(null, null, null, null, narrations, null, null, clientTypeOptions, clientClassificationOptions, 
-        		clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions, clientLegalFormOptions);
+        		clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions, clientLegalFormOptions, 
+        		isFullNameInCreateClientEnabled);
     }
 
 }

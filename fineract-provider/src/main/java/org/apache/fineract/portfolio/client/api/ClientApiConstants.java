@@ -166,6 +166,7 @@ public class ClientApiConstants {
     public static final String dateParamName = "date";
     private static final String transactionTypeParamName = "type";
     private static final String transactionCurrencyParamName = "currency";
+    private static final String clientParamisFullNameEnabled = "clientParamisFullNameEnabled";
 
     // associations related part of response
     public static final String groupsParamName = "groups";
@@ -207,7 +208,7 @@ public class ClientApiConstants {
             transferToOfficeIdParamName, transferToOfficeNameParamName, hierarchyParamName, imageIdParamName, imagePresentParamName,
             staffIdParamName, staffNameParamName, timelineParamName, groupsParamName, officeOptionsParamName, staffOptionsParamName,
             dateOfBirthParamName, genderParamName, clientTypeParamName, clientClassificationParamName, legalFormParamName, 
-            clientNonPersonDetailsParamName));
+            clientNonPersonDetailsParamName, clientParamisFullNameEnabled));
 
     public static final Set<String> ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(localeParamName, dateFormatParamName, activationDateParamName));
