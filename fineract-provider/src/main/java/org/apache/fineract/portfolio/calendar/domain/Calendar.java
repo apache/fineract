@@ -95,7 +95,7 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "calendar_id")
-    private final Set<CalendarHistory> calendarHistory = new HashSet<>();
+    private Set<CalendarHistory> calendarHistory = new HashSet<>();
 
     protected Calendar() {
 
@@ -580,5 +580,13 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
         this.recurrence = newRecurrence;
         this.startDate = startDate.toDate();
         this.endDate = endDate.toDate();
+    }
+    
+    public Set<CalendarHistory> getCalendarHistory(){
+    	return this.calendarHistory;
+    }
+    
+    public void updateCalendarHistory(final Set<CalendarHistory> calendarHistory){
+    	this.calendarHistory = calendarHistory;
     }
 }

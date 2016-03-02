@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
@@ -30,8 +31,10 @@ import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepos
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
+import org.apache.fineract.portfolio.calendar.data.CalendarHistoryDataWrapper;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
+import org.apache.fineract.portfolio.calendar.domain.CalendarHistory;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
@@ -88,8 +91,15 @@ public class LoanUtilService {
         ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
         final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
                 CalendarEntityType.LOANS.getValue());
+        Calendar calendar = null;
+        CalendarHistoryDataWrapper calendarHistoryDataWrapper = null;
+        if (calendarInstance != null) {
+            calendar = calendarInstance.getCalendar();
+            Set<CalendarHistory> calendarHistory = calendar.getCalendarHistory();
+            calendarHistoryDataWrapper = new CalendarHistoryDataWrapper(calendarHistory);
+        }
         LocalDate calculatedRepaymentsStartingFromDate = this.getCalculatedRepaymentsStartingFromDate(loan.getDisbursementDate(), loan,
-                calendarInstance);
+                calendarInstance, calendarHistoryDataWrapper);
         CalendarInstance restCalendarInstance = null;
         CalendarInstance compoundingCalendarInstance = null;
         Long overdurPenaltyWaitPeriod = null;
@@ -103,7 +113,7 @@ public class LoanUtilService {
         FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
         ScheduleGeneratorDTO scheduleGeneratorDTO = new ScheduleGeneratorDTO(loanScheduleFactory, applicationCurrency,
                 calculatedRepaymentsStartingFromDate, holidayDetails, restCalendarInstance, compoundingCalendarInstance, recalculateFrom,
-                overdurPenaltyWaitPeriod, floatingRateDTO);
+                overdurPenaltyWaitPeriod, floatingRateDTO, calendar, calendarHistoryDataWrapper);
 
         return scheduleGeneratorDTO;
     }
@@ -111,7 +121,8 @@ public class LoanUtilService {
     public LocalDate getCalculatedRepaymentsStartingFromDate(final Loan loan) {
         final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
                 CalendarEntityType.LOANS.getValue());
-        return this.getCalculatedRepaymentsStartingFromDate(loan.getDisbursementDate(), loan, calendarInstance);
+        final CalendarHistoryDataWrapper calendarHistoryDataWrapper = null;
+        return this.getCalculatedRepaymentsStartingFromDate(loan.getDisbursementDate(), loan, calendarInstance, calendarHistoryDataWrapper);
     }
 
     private HolidayDetailDTO constructHolidayDTO(final Loan loan) {
@@ -146,21 +157,32 @@ public class LoanUtilService {
     }
 
     private LocalDate getCalculatedRepaymentsStartingFromDate(final LocalDate actualDisbursementDate, final Loan loan,
-            final CalendarInstance calendarInstance) {
+            final CalendarInstance calendarInstance, final CalendarHistoryDataWrapper calendarHistoryDataWrapper) {
         final Calendar calendar = calendarInstance == null ? null : calendarInstance.getCalendar();
-        return calculateRepaymentStartingFromDate(actualDisbursementDate, loan, calendar);
+        return calculateRepaymentStartingFromDate(actualDisbursementDate, loan, calendar, calendarHistoryDataWrapper);
     }
 
     public LocalDate getCalculatedRepaymentsStartingFromDate(final LocalDate actualDisbursementDate, final Loan loan,
             final Calendar calendar) {
+        final CalendarHistoryDataWrapper calendarHistoryDataWrapper = null;
         if (calendar == null) { return getCalculatedRepaymentsStartingFromDate(loan); }
-        return calculateRepaymentStartingFromDate(actualDisbursementDate, loan, calendar);
+        return calculateRepaymentStartingFromDate(actualDisbursementDate, loan, calendar, calendarHistoryDataWrapper);
 
     }
 
-    private LocalDate calculateRepaymentStartingFromDate(final LocalDate actualDisbursementDate, final Loan loan, final Calendar calendar) {
+    private LocalDate calculateRepaymentStartingFromDate(final LocalDate actualDisbursementDate, final Loan loan, final Calendar calendar, 
+            final CalendarHistoryDataWrapper calendarHistoryDataWrapper) {
         LocalDate calculatedRepaymentsStartingFromDate = loan.getExpectedFirstRepaymentOnDate();
         if (calendar != null) {// sync repayments
+
+            if (calculatedRepaymentsStartingFromDate == null && !calendar.getCalendarHistory().isEmpty() &&
+                    calendarHistoryDataWrapper != null) {
+                for (CalendarHistory calendarHistory : calendarHistoryDataWrapper.getCalendarHistoryList()) {
+                    calculatedRepaymentsStartingFromDate = calendarHistory.getStartDateLocalDate();
+                    break;
+                }
+                return calculatedRepaymentsStartingFromDate;
+            }
 
             // TODO: AA - user provided first repayment date takes precedence
             // over recalculated meeting date
