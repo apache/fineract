@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -239,7 +240,6 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         if (calendarForUpdate == null) { throw new CalendarNotFoundException(calendarId); }
         
         final Date oldStartDate = calendarForUpdate.getStartDate();
-        final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
         // create calendar history before updating calendar
         final CalendarHistory calendarHistory = new CalendarHistory(calendarForUpdate, oldStartDate);
 
@@ -288,12 +288,12 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         if (!changes.isEmpty()) {
             // update calendar history table only if there is a change in
             // calendar start date.
-            if (currentDate.isAfter(new LocalDate(oldStartDate))) {
-                final Date endDate = calendarForUpdate.getStartDateLocalDate().minusDays(1).toDate();
-                calendarHistory.updateEndDate(endDate);
-                this.calendarHistoryRepository.save(calendarHistory);
-            }
-
+            final Date endDate = presentMeetingDate.minusDays(1).toDate();
+            calendarHistory.updateEndDate(endDate);
+            this.calendarHistoryRepository.save(calendarHistory);
+            Set<CalendarHistory> history = calendarForUpdate.getCalendarHistory();
+            history.add(calendarHistory);
+            calendarForUpdate.updateCalendarHistory(history);
             this.calendarRepository.saveAndFlush(calendarForUpdate);
 
             if (this.configurationDomainService.isRescheduleFutureRepaymentsEnabled() && calendarForUpdate.isRepeating()) {
