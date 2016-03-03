@@ -228,5 +228,12 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
         return property.getDateValue();
     }
+    
+    @Override
+    public boolean isFullNameInCreateClientEnabled() {
+        final String propertyName = "Enable Full Name for Clients (Persons)";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
+        return property.isEnabled();
+    }
 
 }
