@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.adjustAdvanceTowardsFuturePaymentsParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowWithdrawalParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.chartsParamName;
@@ -52,11 +54,16 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalA
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNameParamName;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
@@ -147,7 +154,11 @@ public class DepositProductAssembler {
         // Savings product charges
         final Set<Charge> charges = assembleListOfSavingsProductCharges(command, currencyCode);
         // Interest rate charts
-        final Set<InterestRateChart> charts = assembleListOfCharts(command, currency.getCode());
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME);
+        final Set<InterestRateChart> charts = assembleListOfCharts(command, currency.getCode(), baseDataValidator);
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
         if (interestRate == null) {
             interestRate = BigDecimal.ZERO;
         }
@@ -162,6 +173,10 @@ public class DepositProductAssembler {
         fixedDepositProduct.validateDomainRules();
 
         return fixedDepositProduct;
+    }
+
+    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
     public RecurringDepositProduct assembleRecurringDepositProduct(final JsonCommand command) {
@@ -225,7 +240,11 @@ public class DepositProductAssembler {
         // Savings product charges
         final Set<Charge> charges = assembleListOfSavingsProductCharges(command, currencyCode);
         // Interest rate charts
-        final Set<InterestRateChart> charts = assembleListOfCharts(command, currency.getCode());
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME);
+        final Set<InterestRateChart> charts = assembleListOfCharts(command, currency.getCode(), baseDataValidator);
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
         if (interestRate == null) {
             interestRate = BigDecimal.ZERO;
@@ -435,15 +454,14 @@ public class DepositProductAssembler {
         return charges;
     }
 
-    private Set<InterestRateChart> assembleListOfCharts(JsonCommand command, String currencyCode) {
+    private Set<InterestRateChart> assembleListOfCharts(JsonCommand command, String currencyCode, DataValidatorBuilder baseDataValidator) {
         final Set<InterestRateChart> charts = new HashSet<>();
-
         if (command.parameterExists(chartsParamName)) {
             final JsonArray chartsArray = command.arrayOfParameterNamed(chartsParamName);
             if (chartsArray != null) {
                 for (int i = 0; i < chartsArray.size(); i++) {
                     final JsonObject interstRateChartElement = chartsArray.get(i).getAsJsonObject();
-                    InterestRateChart chart = this.chartAssembler.assembleFrom(interstRateChartElement, currencyCode);
+                    InterestRateChart chart = this.chartAssembler.assembleFrom(interstRateChartElement, currencyCode, baseDataValidator);
                     charts.add(chart);
                 }
             }

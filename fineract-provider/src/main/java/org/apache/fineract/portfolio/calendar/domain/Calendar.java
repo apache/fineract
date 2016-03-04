@@ -142,7 +142,12 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
 
     public static Calendar createRepeatingCalendar(final String title, final LocalDate startDate, final Integer typeId,
             final CalendarFrequencyType frequencyType, final Integer interval, final Integer repeatsOnDay) {
+        final String recurrence = constructRecurrence(frequencyType, interval, repeatsOnDay);
+        return createRepeatingCalendar(title, startDate, typeId, recurrence);
+    }
 
+    public static Calendar createRepeatingCalendar(final String title, final LocalDate startDate, final Integer typeId,
+            final String recurrence) {
         final String description = null;
         final String location = null;
         final LocalDate endDate = null;
@@ -151,8 +156,6 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
         final Integer remindById = null;
         final Integer firstReminder = null;
         final Integer secondReminder = null;
-        final String recurrence = constructRecurrence(frequencyType, interval, repeatsOnDay);
-
         return new Calendar(title, description, location, startDate, endDate, duration, typeId, repeating, recurrence, remindById,
                 firstReminder, secondReminder);
     }
@@ -233,7 +236,7 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
 
     }
 
-    public Map<String, Object> update(final JsonCommand command, final Boolean areActiveEntitiesSynced ) {
+    public Map<String, Object> update(final JsonCommand command, final Boolean areActiveEntitiesSynced) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
@@ -345,7 +348,7 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
              * calendar then do not allow to change meeting frequency
              */
 
-            if ( areActiveEntitiesSynced && !CalendarUtils.isFrequencySame(this.recurrence, newRecurrence)) {
+            if (areActiveEntitiesSynced && !CalendarUtils.isFrequencySame(this.recurrence, newRecurrence)) {
                 final String defaultUserMessage = "Update of meeting frequency is not supported";
                 throw new CalendarParameterUpdateNotSupportedException("meeting.frequency", defaultUserMessage);
             }

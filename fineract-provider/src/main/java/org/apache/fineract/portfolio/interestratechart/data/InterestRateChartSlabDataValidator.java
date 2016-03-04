@@ -84,12 +84,14 @@ public class InterestRateChartSlabDataValidator {
         final String currencyCode = this.fromApiJsonHelper.extractStringNamed(currencyCodeParamName, element);
         baseDataValidator.reset().parameter(currencyCodeParamName).value(currencyCode).notBlank().notExceedingLengthOf(3);
 
-        validateChartSlabsCreate(element, baseDataValidator, locale);
+        final Boolean isPrimaryGroupingByAmount = null;
+        validateChartSlabsCreate(element, baseDataValidator, locale, isPrimaryGroupingByAmount);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateChartSlabsCreate(final JsonElement element, final DataValidatorBuilder baseDataValidator, final Locale locale) {
+    public void validateChartSlabsCreate(final JsonElement element, final DataValidatorBuilder baseDataValidator, final Locale locale,
+            final Boolean isPrimaryGroupingByAmount) {
 
         if (this.fromApiJsonHelper.parameterExists(descriptionParamName, element)) {
             final String description = this.fromApiJsonHelper.extractStringNamed(descriptionParamName, element);
@@ -97,17 +99,25 @@ public class InterestRateChartSlabDataValidator {
         }
 
         final Integer periodType = this.fromApiJsonHelper.extractIntegerNamed(periodTypeParamName, element, locale);
-        baseDataValidator.reset().parameter(periodTypeParamName).value(periodType).notNull()
-                .isOneOfTheseValues(PeriodFrequencyType.integerValues());
-
+        if (this.fromApiJsonHelper.parameterExists(periodTypeParamName, element)) {
+            baseDataValidator.reset().parameter(periodTypeParamName).value(periodType)
+                    .isOneOfTheseValues(PeriodFrequencyType.integerValues());
+        }
         Integer toPeriod = null;
 
         final Integer fromPeriod = this.fromApiJsonHelper.extractIntegerNamed(fromPeriodParamName, element, locale);
-        baseDataValidator.reset().parameter(fromPeriodParamName).value(fromPeriod).notNull().integerZeroOrGreater();
+        if (this.fromApiJsonHelper.parameterExists(fromPeriodParamName, element)) {
+            baseDataValidator.reset().parameter(fromPeriodParamName).value(fromPeriod).integerZeroOrGreater();
+        }
+
+        if ((isPrimaryGroupingByAmount != null && !isPrimaryGroupingByAmount) || (periodType != null || fromPeriod != null)) {
+            baseDataValidator.reset().parameter(periodTypeParamName).value(periodType).notNull();
+            baseDataValidator.reset().parameter(fromPeriodParamName).value(fromPeriod).notNull();
+        }
 
         if (this.fromApiJsonHelper.parameterExists(toPeriodParamName, element)) {
             toPeriod = this.fromApiJsonHelper.extractIntegerNamed(toPeriodParamName, element, locale);
-            baseDataValidator.reset().parameter(toPeriodParamName).value(toPeriod).notNull().integerZeroOrGreater();
+            baseDataValidator.reset().parameter(toPeriodParamName).value(toPeriod).integerGreaterThanZero();
         }
 
         if (fromPeriod != null && toPeriod != null) {
@@ -115,21 +125,26 @@ public class InterestRateChartSlabDataValidator {
                 baseDataValidator.parameter(fromPeriodParamName).value(fromPeriod).failWithCode("fromperiod.greater.than.to.period");
             }
         }
-        BigDecimal amountRangeFrom = null;
-        BigDecimal amountRangeTo = null;
+        final BigDecimal amountRangeFrom = this.fromApiJsonHelper.extractBigDecimalNamed(amountRangeFromParamName, element, locale);
+        final BigDecimal amountRangeTo = this.fromApiJsonHelper.extractBigDecimalNamed(amountRangeToParamName, element, locale);
         if (this.fromApiJsonHelper.parameterExists(amountRangeFromParamName, element)) {
-            amountRangeFrom = this.fromApiJsonHelper.extractBigDecimalNamed(amountRangeFromParamName, element, locale);
-            baseDataValidator.reset().parameter(amountRangeFromParamName).value(amountRangeFrom).notNull().positiveAmount();
+            baseDataValidator.reset().parameter(amountRangeFromParamName).value(amountRangeFrom).zeroOrPositiveAmount();
+            if (isPrimaryGroupingByAmount != null && isPrimaryGroupingByAmount) {
+                baseDataValidator.reset().parameter(amountRangeFromParamName).value(amountRangeFrom).notNull();
+            }
         }
 
         if (this.fromApiJsonHelper.parameterExists(amountRangeToParamName, element)) {
-            amountRangeTo = this.fromApiJsonHelper.extractBigDecimalNamed(amountRangeToParamName, element, locale);
-            baseDataValidator.reset().parameter(amountRangeToParamName).value(amountRangeTo).notNull().positiveAmount();
+            baseDataValidator.reset().parameter(amountRangeToParamName).value(amountRangeTo).positiveAmount();
+        }
+
+        if (amountRangeFrom == null && fromPeriod == null) {
+            baseDataValidator.failWithCodeNoParameterAddedToErrorCode("fromperiod.or.amountRangeFrom.required");
         }
 
         if (amountRangeFrom != null && amountRangeTo != null) {
             if (amountRangeFrom.compareTo(amountRangeTo) > 1) {
-                baseDataValidator.parameter(fromPeriodParamName).value(fromPeriod).failWithCode("fromperiod.greater.than.toperiod");
+                baseDataValidator.parameter(amountRangeFromParamName).value(fromPeriod).failWithCode("from.amount.greater.than.to.amount");
             }
         }
 
@@ -152,12 +167,14 @@ public class InterestRateChartSlabDataValidator {
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final JsonObject objectElement = element.getAsJsonObject();
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(objectElement);
-        validateChartSlabsUpdate(element, baseDataValidator, locale);
+        final Boolean isPrimaryGroupingByAmount = null;
+        validateChartSlabsUpdate(element, baseDataValidator, locale, isPrimaryGroupingByAmount);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateChartSlabsUpdate(final JsonElement element, final DataValidatorBuilder baseDataValidator, final Locale locale) {
+    public void validateChartSlabsUpdate(final JsonElement element, final DataValidatorBuilder baseDataValidator, final Locale locale,
+            final Boolean isPrimaryGroupingByAmount) {
 
         if (this.fromApiJsonHelper.parameterExists(descriptionParamName, element)) {
             final String description = this.fromApiJsonHelper.extractStringNamed(descriptionParamName, element);
@@ -166,8 +183,12 @@ public class InterestRateChartSlabDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(periodTypeParamName, element)) {
             final Integer periodType = this.fromApiJsonHelper.extractIntegerNamed(periodTypeParamName, element, locale);
-            baseDataValidator.reset().parameter(periodTypeParamName).value(periodType).notNull()
+            baseDataValidator.reset().parameter(periodTypeParamName).value(periodType)
                     .isOneOfTheseValues(PeriodFrequencyType.integerValues());
+            if (isPrimaryGroupingByAmount != null && !isPrimaryGroupingByAmount) {
+                baseDataValidator.reset().parameter(periodTypeParamName).value(periodType).notNull();
+            }
+
         }
 
         Integer fromPeriod = null;
@@ -175,12 +196,15 @@ public class InterestRateChartSlabDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(fromPeriodParamName, element)) {
             fromPeriod = this.fromApiJsonHelper.extractIntegerNamed(fromPeriodParamName, element, locale);
-            baseDataValidator.reset().parameter(fromPeriodParamName).value(fromPeriod).notNull().integerGreaterThanNumber(-1);
+            baseDataValidator.reset().parameter(fromPeriodParamName).value(fromPeriod).integerZeroOrGreater();
+            if (isPrimaryGroupingByAmount != null && !isPrimaryGroupingByAmount) {
+                baseDataValidator.reset().parameter(fromPeriodParamName).value(fromPeriod).notNull();
+            }
         }
 
         if (this.fromApiJsonHelper.parameterExists(toPeriodParamName, element)) {
             toPeriod = this.fromApiJsonHelper.extractIntegerNamed(toPeriodParamName, element, locale);
-            baseDataValidator.reset().parameter(toPeriodParamName).value(toPeriod).notNull().integerGreaterThanNumber(-1);
+            baseDataValidator.reset().parameter(toPeriodParamName).value(toPeriod).integerGreaterThanZero();
         }
 
         if (fromPeriod != null && toPeriod != null) {
@@ -192,12 +216,15 @@ public class InterestRateChartSlabDataValidator {
         BigDecimal amountRangeTo = null;
         if (this.fromApiJsonHelper.parameterExists(amountRangeFromParamName, element)) {
             amountRangeFrom = this.fromApiJsonHelper.extractBigDecimalNamed(amountRangeFromParamName, element, locale);
-            baseDataValidator.reset().parameter(amountRangeFromParamName).value(amountRangeFrom).notNull().positiveAmount();
+            baseDataValidator.reset().parameter(amountRangeFromParamName).value(amountRangeFrom).zeroOrPositiveAmount();
+            if (isPrimaryGroupingByAmount != null && isPrimaryGroupingByAmount) {
+                baseDataValidator.reset().parameter(amountRangeFromParamName).value(amountRangeFrom).notNull();
+            }
         }
 
         if (this.fromApiJsonHelper.parameterExists(amountRangeToParamName, element)) {
             amountRangeTo = this.fromApiJsonHelper.extractBigDecimalNamed(amountRangeToParamName, element, locale);
-            baseDataValidator.reset().parameter(amountRangeToParamName).value(amountRangeTo).notNull().positiveAmount();
+            baseDataValidator.reset().parameter(amountRangeToParamName).value(amountRangeTo).positiveAmount();
         }
 
         if (amountRangeFrom != null && amountRangeTo != null) {

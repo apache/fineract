@@ -2496,6 +2496,169 @@ public class RecurringDepositTest {
 
     }
 
+    @Test
+    public void testRecurringDepositAccountWithPeriodInterestRateChart() {
+        final String chartToUse = "period";
+        final String depositAmount = "1000";
+        final String depositPeriod = "12";
+        final Float interestRate = new Float(6.0);
+        testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
+    }
+    
+    @Test
+    public void testRecurringDepositAccountWithPeriodInterestRateChart_AMOUNT_VARIATION() {
+        final String chartToUse = "period";
+        final String depositAmount = "10000";
+        final String depositPeriod = "12";
+        final Float interestRate = new Float(6.0);
+        testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
+    }
+    
+    @Test
+    public void testRecurringDepositAccountWithPeriodInterestRateChart_PERIOD_VARIATION() {
+        final String chartToUse = "period";
+        final String depositAmount = "1000";
+        final String depositPeriod = "18";
+        final Float interestRate = new Float(7.0);
+        testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
+    }
+    
+    @Test
+    public void testRecurringDepositAccountWithAmountInterestRateChart() {
+        final String chartToUse = "amount";
+        final String depositAmount = "1000";
+        final String depositPeriod = "12";
+        final Float interestRate = new Float(8.0);
+        testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
+    }
+    
+    @Test
+    public void testRecurringDepositAccountWithAmountInterestRateChart_AMOUNT_VARIATION() {
+        final String chartToUse = "amount";
+        final String depositAmount = "500";
+        final String depositPeriod = "12";
+        final Float interestRate = new Float(7.0);
+        testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
+    }
+    
+    @Test
+    public void testRecurringDepositAccountWithAmountInterestRateChart_PERIOD_VARIATION() {
+        final String chartToUse = "amount";
+        final String depositAmount = "500";
+        final String depositPeriod = "10";
+        final Float interestRate = new Float(5.0);
+        testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
+    }
+    
+    @Test
+    public void testRecurringDepositAccountWithPeriodAndAmountInterestRateChart() {
+        final String chartToUse = "period_amount";
+        final String depositAmount = "1000";
+        final String depositPeriod = "12";
+        final Float interestRate = new Float(7.0);
+        testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
+    }
+    
+    @Test
+    public void testRecurringDepositAccountWithPeriodAndAmountInterestRateChart_AMOUNT_VARIATION() {
+        final String chartToUse = "period_amount";
+        final String depositAmount = "400";
+        final String depositPeriod = "12";
+        final Float interestRate = new Float(6.0);
+        testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
+    }
+    
+    @Test
+    public void testRecurringDepositAccountWithPeriodAndAmountInterestRateChart_PERIOD_VARIATION() {
+        final String chartToUse = "period_amount";
+        final String depositAmount = "1000";
+        final String depositPeriod = "14";
+        final Float interestRate = new Float(8.0);
+        testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
+    }
+    
+    @Test
+    public void testRecurringDepositAccountWithAmountAndPeriodInterestRateChart() {
+        final String chartToUse = "amount_period";
+        final String depositAmount = "1000";
+        final String depositPeriod = "12";
+        final Float interestRate = new Float(8.0);
+        testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
+    }
+    
+    @Test
+    public void testRecurringDepositAccountWithAmountAndPeriodInterestRateChart_AMOUNT_VARIATION() {
+        final String chartToUse = "amount_period";
+        final String depositAmount = "100";
+        final String depositPeriod = "12";
+        final Float interestRate = new Float(6.0);
+        testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
+    }
+    
+    @Test
+    public void testRecurringDepositAccountWithAmountAndPeriodInterestRateChart_PERIOD_VARIATION() {
+        final String chartToUse = "amount_period";
+        final String depositAmount = "1000";
+        final String depositPeriod = "6";
+        final Float interestRate = new Float(7.0);
+        testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
+    }
+
+    private void testFixedDepositAccountForInterestRate(final String chartToUse, final String depositAmount, final String depositPeriod,
+            final Float interestRate) {
+        this.recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec, this.responseSpec);
+        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.recurringDepositAccountHelper = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec);
+
+        final String VALID_FROM = "01 March 2014";
+        final String VALID_TO = "01 March 2016";
+
+        final String SUBMITTED_ON_DATE = "01 March 2015";
+        final String APPROVED_ON_DATE = "01 March 2015";
+        final String ACTIVATION_DATE = "01 March 2015";
+
+        Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientId);
+
+        /***
+         * Create FD product with CashBased accounting enabled
+         */
+        final String accountingRule = NONE;
+        Integer recurringDepositProductId = createRecurringDepositProduct(VALID_FROM, VALID_TO, accountingRule, chartToUse);
+        Assert.assertNotNull(recurringDepositProductId);
+
+        /***
+         * Apply for FD account with created product and verify status
+         */
+        Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, SUBMITTED_ON_DATE, depositAmount, depositPeriod);
+        Assert.assertNotNull(recurringDepositAccountId);
+
+        HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker.getStatusOfRecurringDepositAccount(
+                this.requestSpec, this.responseSpec, recurringDepositAccountId.toString());
+        RecurringDepositAccountStatusChecker.verifyRecurringDepositIsPending(recurringDepositAccountStatusHashMap);
+
+        /***
+         * Approve the RD account and verify whether account is approved
+         */
+        recurringDepositAccountStatusHashMap = this.recurringDepositAccountHelper.approveRecurringDeposit(recurringDepositAccountId,
+                APPROVED_ON_DATE);
+        RecurringDepositAccountStatusChecker.verifyRecurringDepositIsApproved(recurringDepositAccountStatusHashMap);
+
+        /***
+         * Activate the RD Account and verify whether account is activated
+         */
+        recurringDepositAccountStatusHashMap = this.recurringDepositAccountHelper.activateRecurringDeposit(recurringDepositAccountId,
+                ACTIVATION_DATE);
+        RecurringDepositAccountStatusChecker.verifyRecurringDepositIsActive(recurringDepositAccountStatusHashMap);
+
+        HashMap recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
+                this.responseSpec, recurringDepositAccountId);
+
+        Assert.assertEquals(interestRate, recurringDepositAccountData.get("nominalAnnualInterestRate"));
+    }
+
     private Integer createRecurringDepositProduct(final String validFrom, final String validTo, final String accountingRule,
             Account... accounts) {
         System.out.println("------------------------------CREATING NEW RECURRING DEPOSIT PRODUCT ---------------------------------------");
@@ -2504,6 +2667,36 @@ public class RecurringDepositTest {
             recurringDepositProductHelper = recurringDepositProductHelper.withAccountingRuleAsCashBased(accounts);
         } else if (accountingRule.equals(NONE)) {
             recurringDepositProductHelper = recurringDepositProductHelper.withAccountingRuleAsNone();
+        }
+        final String recurringDepositProductJSON = recurringDepositProductHelper.withPeriodRangeChart().build(validFrom, validTo);
+        return RecurringDepositProductHelper.createRecurringDepositProduct(recurringDepositProductJSON, requestSpec, responseSpec);
+    }
+
+    private Integer createRecurringDepositProduct(final String validFrom, final String validTo, final String accountingRule,
+            final String chartToBePicked, Account... accounts) {
+        System.out.println("------------------------------CREATING NEW RECURRING DEPOSIT PRODUCT ---------------------------------------");
+        RecurringDepositProductHelper recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec, this.responseSpec);
+        if (accountingRule.equals(CASH_BASED)) {
+            recurringDepositProductHelper = recurringDepositProductHelper.withAccountingRuleAsCashBased(accounts);
+        } else if (accountingRule.equals(NONE)) {
+            recurringDepositProductHelper = recurringDepositProductHelper.withAccountingRuleAsNone();
+        }
+
+        switch (chartToBePicked) {
+            case "period":
+                recurringDepositProductHelper = recurringDepositProductHelper.withPeriodRangeChart();
+            break;
+            case "amount":
+                recurringDepositProductHelper = recurringDepositProductHelper.withAmountRangeChart();
+            break;
+            case "period_amount":
+                recurringDepositProductHelper = recurringDepositProductHelper.withPeriodAndAmountRangeChart();
+            break;
+            case "amount_period":
+                recurringDepositProductHelper = recurringDepositProductHelper.withAmountAndPeriodRangeChart();
+            break;
+            default:
+            break;
         }
         final String recurringDepositProductJSON = recurringDepositProductHelper.build(validFrom, validTo);
         return RecurringDepositProductHelper.createRecurringDepositProduct(recurringDepositProductJSON, requestSpec, responseSpec);
@@ -2514,7 +2707,18 @@ public class RecurringDepositTest {
         System.out.println("--------------------------------APPLYING FOR RECURRING DEPOSIT ACCOUNT --------------------------------");
         final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec)
                 .withSubmittedOnDate(submittedOnDate).withExpectedFirstDepositOnDate(expectedFirstDepositOnDate)
-                .build(clientID, productID, validFrom, validTo, penalInterestType);
+                .build(clientID, productID, penalInterestType);
+        return this.recurringDepositAccountHelper.applyRecurringDepositApplication(recurringDepositApplicationJSON, this.requestSpec,
+                this.responseSpec);
+    }
+
+    private Integer applyForRecurringDepositApplication(final String clientID, final String productID, final String validFrom,
+            final String validTo, final String submittedOnDate, final String penalInterestType, final String expectedFirstDepositOnDate,
+            final String depositAmount, final String depositPeriod) {
+        System.out.println("--------------------------------APPLYING FOR RECURRING DEPOSIT ACCOUNT --------------------------------");
+        final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec)
+                .withSubmittedOnDate(submittedOnDate).withExpectedFirstDepositOnDate(expectedFirstDepositOnDate)
+                .withDepositPeriod(depositPeriod).withMandatoryDepositAmount(depositAmount).build(clientID, productID, penalInterestType);
         return this.recurringDepositAccountHelper.applyRecurringDepositApplication(recurringDepositApplicationJSON, this.requestSpec,
                 this.responseSpec);
     }
