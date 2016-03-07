@@ -178,7 +178,7 @@ public final class LoanApplicationTerms {
     private Money adjustPrincipalForFlatLoans;
 
     private final LocalDate seedDate;
-    
+
     private final CalendarHistoryDataWrapper calendarHistoryDataWrapper;
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
@@ -235,7 +235,8 @@ public final class LoanApplicationTerms {
                 loanProductRelatedDetail, multiDisburseLoan, emiAmount, disbursementDatas, maxOutstandingBalance, interestChargedFromDate,
                 principalThresholdForLastInstalment, installmentAmountInMultiplesOf, recalculationFrequencyType, restCalendarInstance,
                 compoundingMethod, compoundingCalendarInstance, compoundingFrequencyType, loanPreClosureInterestCalculationStrategy,
-                rescheduleStrategyMethod, loanCalendar, approvedAmount, annualNominalInterestRate, loanTermVariations, calendarHistoryDataWrapper);
+                rescheduleStrategyMethod, loanCalendar, approvedAmount, annualNominalInterestRate, loanTermVariations,
+                calendarHistoryDataWrapper);
     }
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency applicationCurrency, final Integer loanTermFrequency,
@@ -250,7 +251,7 @@ public final class LoanApplicationTerms {
             final CalendarInstance compoundingCalendarInstance, final RecalculationFrequencyType compoundingFrequencyType,
             final LoanPreClosureInterestCalculationStrategy loanPreClosureInterestCalculationStrategy,
             final LoanRescheduleStrategyMethod rescheduleStrategyMethod, final Calendar loanCalendar, BigDecimal approvedAmount,
-            BigDecimal annualNominalInterestRate, final List<LoanTermVariationsData> loanTermVariations, 
+            BigDecimal annualNominalInterestRate, final List<LoanTermVariationsData> loanTermVariations,
             final CalendarHistoryDataWrapper calendarHistoryDataWrapper) {
 
         final Integer numberOfRepayments = loanProductRelatedDetail.getNumberOfRepayments();
@@ -326,7 +327,7 @@ public final class LoanApplicationTerms {
             interestRecalculationCompoundingMethod = interestRecalculationDetails.getInterestRecalculationCompoundingMethod();
         }
         final CalendarHistoryDataWrapper calendarHistoryDataWrapper = null;
-        
+
         return new LoanApplicationTerms(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, null, null, amortizationMethod, interestMethod, interestRatePerPeriod,
                 interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod,
@@ -379,7 +380,8 @@ public final class LoanApplicationTerms {
             final CalendarInstance compoundingCalendarInstance, final RecalculationFrequencyType compoundingFrequencyType,
             final BigDecimal principalThresholdForLastInstalment, final Integer installmentAmountInMultiplesOf,
             final LoanPreClosureInterestCalculationStrategy preClosureInterestCalculationStrategy, final Calendar loanCalendar,
-            BigDecimal approvedAmount, List<LoanTermVariationsData> loanTermVariations, final CalendarHistoryDataWrapper calendarHistoryDataWrapper) {
+            BigDecimal approvedAmount, List<LoanTermVariationsData> loanTermVariations,
+            final CalendarHistoryDataWrapper calendarHistoryDataWrapper) {
         this.currency = currency;
         this.loanTermFrequency = loanTermFrequency;
         this.loanTermPeriodFrequencyType = loanTermPeriodFrequencyType;
@@ -709,8 +711,13 @@ public final class LoanApplicationTerms {
             case INVALID:
             break;
             case SAME_AS_REPAYMENT_PERIOD:
-                LocalDate startDate = getExpectedDisbursementDate();
-                periodsInLoanTerm = calculatePeriodsBetweenDates(startDate, this.loanEndDate);
+                if (this.allowPartialPeriodInterestCalcualtion) {
+                    LocalDate startDate = getExpectedDisbursementDate();
+                    if (getInterestChargedFromDate() != null) {
+                        startDate = getInterestChargedFromLocalDate();
+                    }
+                    periodsInLoanTerm = calculatePeriodsBetweenDates(startDate, this.loanEndDate);
+                }
             break;
         }
 
@@ -1429,8 +1436,8 @@ public final class LoanApplicationTerms {
     public LocalDate getSeedDate() {
         return this.seedDate;
     }
-    
-    public CalendarHistoryDataWrapper getCalendarHistoryDataWrapper(){
+
+    public CalendarHistoryDataWrapper getCalendarHistoryDataWrapper() {
         return this.calendarHistoryDataWrapper;
     }
 
