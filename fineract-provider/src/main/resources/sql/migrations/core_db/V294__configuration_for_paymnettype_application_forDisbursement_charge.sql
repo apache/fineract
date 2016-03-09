@@ -1,0 +1,1 @@
+INSERT INTO `c_configuration` (`name`, `value`, `enabled`, `is_trap_door`, `description`) VALUES ('paymenttype-applicable-for-disbursement-charges', NULL, 0, 0, 'Is the Disbursement Entry need to be considering the fund source of the paymnet type');

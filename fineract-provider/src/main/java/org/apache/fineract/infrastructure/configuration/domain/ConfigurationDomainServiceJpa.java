@@ -229,4 +229,11 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         return property.getDateValue();
     }
 
+	@Override
+	public boolean isPaymnetypeApplicableforDisbursementCharge() {
+		final String propertyName = "paymenttype-applicable-for-disbursement-charges";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
+        return property.isEnabled();
+	}
+
 }
