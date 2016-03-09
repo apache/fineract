@@ -361,8 +361,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 this.loanScheduleHistoryWritePlatformService.createAndSaveLoanScheduleArchive(loan.fetchRepaymentScheduleInstallments(),
                         loan, null);
             }
-
-            changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO);
+            if(configurationDomainService.isPaymnetypeApplicableforDisbursementCharge()){
+            	changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO,paymentDetail);
+            }else{
+            	changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO,null);
+            }
         }
         if (!changes.isEmpty()) {
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
@@ -594,8 +597,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     this.loanScheduleHistoryWritePlatformService.createAndSaveLoanScheduleArchive(
                             loan.fetchRepaymentScheduleInstallments(), loan, null);
                 }
-
-                changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO);
+                if(configurationDomainService.isPaymnetypeApplicableforDisbursementCharge()){
+                	changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO,paymentDetail);
+                }else{
+                	changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO,null);
+                }
             }
             if (!changes.isEmpty()) {
 

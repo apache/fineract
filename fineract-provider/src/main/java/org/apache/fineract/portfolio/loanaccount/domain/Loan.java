@@ -125,6 +125,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMe
 import org.apache.fineract.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
+import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -2287,7 +2288,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public ChangedTransactionDetail disburse(final AppUser currentUser, final JsonCommand command, final Map<String, Object> actualChanges,
-            final ScheduleGeneratorDTO scheduleGeneratorDTO) {
+            final ScheduleGeneratorDTO scheduleGeneratorDTO,final PaymentDetail paymentDetail) {
 
         final LoanStatus statusEnum = this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED,
                 LoanStatus.fromInt(this.loanStatus));
@@ -2318,7 +2319,7 @@ public class Loan extends AbstractPersistable<Long> {
         updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
         updateLoanRepaymentPeriodsDerivedFields(actualDisbursementDate);
         LocalDateTime createdDate = DateUtils.getLocalDateTimeOfTenant();
-        handleDisbursementTransaction(actualDisbursementDate, createdDate, currentUser);
+        handleDisbursementTransaction(actualDisbursementDate, createdDate, currentUser,paymentDetail);
         updateLoanSummaryDerivedFields();
         final Money interestApplied = Money.of(getCurrency(), this.summary.getTotalInterestCharged());
 
@@ -2616,7 +2617,7 @@ public class Loan extends AbstractPersistable<Long> {
         return interestRate;
     }
 
-    private void handleDisbursementTransaction(final LocalDate disbursedOn, final LocalDateTime createdDate, final AppUser currentUser) {
+    private void handleDisbursementTransaction(final LocalDate disbursedOn, final LocalDateTime createdDate, final AppUser currentUser, final PaymentDetail paymentDetail) {
 
         // add repayment transaction to track incoming money from client to mfi
         // for (charges due at time of disbursement)
@@ -2634,7 +2635,7 @@ public class Loan extends AbstractPersistable<Long> {
          **/
 
         Money disbursentMoney = Money.zero(getCurrency());
-        final LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(getOffice(), disbursentMoney, null, disbursedOn,
+        final LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(getOffice(), disbursentMoney, paymentDetail, disbursedOn,
                 null, createdDate, currentUser);
         final Integer installmentNumber = null;
         for (final LoanCharge charge : charges()) {
