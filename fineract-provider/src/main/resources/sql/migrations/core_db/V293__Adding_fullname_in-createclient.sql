@@ -1,0 +1,1 @@
+insert into c_configuration(name,value,description) values("Enable Full Name for Clients (Persons)",0,"Enable Full Name for Clients instead of First Name, Middle Name and Last Name");
