@@ -28,6 +28,7 @@ import java.util.Locale;
 
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositAccountHelper;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -99,67 +100,18 @@ public class RecurringDepositAccountHelper {
     private final String currencyCode = USD;
     private String interestCalculationDaysInYearType = DAYS_365;
     private final String depositAmount = "2000";
-    private final String depositPeriod = "14";
+    private String depositPeriod = "14";
     private final String depositPeriodFrequencyId = MONTHS;
     private final String recurringFrequency = "1";
     private final String recurringFrequencyType = MONTHS;
-    private final String mandatoryRecommendedDepositAmount = "2000";
+    private String mandatoryRecommendedDepositAmount = "2000";
     private String submittedOnDate = "";
     private String expectedFirstDepositOnDate = "";
     private boolean isCalendarInherited = false;
 
-    public String build(final String clientId, final String productId, final String validFrom, final String validTo,
-            final String penalInterestType) {
+    public String build(final String clientId, final String productId, final String penalInterestType) {
         final HashMap<String, Object> map = new HashMap<>();
 
-        List<HashMap<String, String>> chartSlabs = new ArrayList<HashMap<String, String>>();
-        HashMap<String, String> chartSlabsMap1 = new HashMap<>();
-        chartSlabsMap1.put("description", "First");
-        chartSlabsMap1.put("periodType", MONTHS);
-        chartSlabsMap1.put("fromPeriod", "1");
-        chartSlabsMap1.put("toPeriod", "6");
-        chartSlabsMap1.put("annualInterestRate", "5");
-        chartSlabsMap1.put("locale", LOCALE);
-        chartSlabs.add(0, chartSlabsMap1);
-
-        HashMap<String, String> chartSlabsMap2 = new HashMap<>();
-        chartSlabsMap2.put("description", "Second");
-        chartSlabsMap2.put("periodType", MONTHS);
-        chartSlabsMap2.put("fromPeriod", "7");
-        chartSlabsMap2.put("toPeriod", "12");
-        chartSlabsMap2.put("annualInterestRate", "6");
-        chartSlabsMap2.put("locale", LOCALE);
-        chartSlabs.add(1, chartSlabsMap2);
-
-        HashMap<String, String> chartSlabsMap3 = new HashMap<>();
-        chartSlabsMap3.put("description", "Third");
-        chartSlabsMap3.put("periodType", MONTHS);
-        chartSlabsMap3.put("fromPeriod", "13");
-        chartSlabsMap3.put("toPeriod", "18");
-        chartSlabsMap3.put("annualInterestRate", "7");
-        chartSlabsMap3.put("locale", LOCALE);
-        chartSlabs.add(2, chartSlabsMap3);
-
-        HashMap<String, String> chartSlabsMap4 = new HashMap<>();
-        chartSlabsMap4.put("description", "Fourth");
-        chartSlabsMap4.put("periodType", MONTHS);
-        chartSlabsMap4.put("fromPeriod", "19");
-        chartSlabsMap4.put("toPeriod", "24");
-        chartSlabsMap4.put("annualInterestRate", "8");
-        chartSlabsMap4.put("locale", LOCALE);
-        chartSlabs.add(3, chartSlabsMap4);
-
-        List<HashMap<String, Object>> charts = new ArrayList<HashMap<String, Object>>();
-        HashMap<String, Object> chartsMap = new HashMap<>();
-        chartsMap.put("fromDate", validFrom);
-        chartsMap.put("endDate", validTo);
-        chartsMap.put("dateFormat", "dd MMMM yyyy");
-        chartsMap.put("locale", LOCALE);
-        chartsMap.put("isActiveChart", this.isActiveChart);
-        chartsMap.put("chartSlabs", chartSlabs);
-        charts.add(chartsMap);
-
-        map.put("charts", charts);
         map.put("productId", productId);
         map.put("clientId", clientId);
         map.put("interestCalculationDaysInYearType", this.interestCalculationDaysInYearType);
@@ -231,8 +183,8 @@ public class RecurringDepositAccountHelper {
         return annualInterestRate;
     }
 
-    public static Float getPrincipalAfterCompoundingInterest(Calendar currentDate, Float principal, Float depositAmount, Integer depositPeriod,
-            double interestPerDay, Integer compoundingInterval, Integer postingInterval) {
+    public static Float getPrincipalAfterCompoundingInterest(Calendar currentDate, Float principal, Float depositAmount,
+            Integer depositPeriod, double interestPerDay, Integer compoundingInterval, Integer postingInterval) {
 
         Float totalInterest = 0.0f;
         Float interestEarned = 0.0f;
@@ -274,7 +226,7 @@ public class RecurringDepositAccountHelper {
         final String EXPECTED_FIRST_DEPOSIT_ON_ON_DATE = SUBMITTED_ON_DATE;
         final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec)
                 .withSubmittedOnDate(SUBMITTED_ON_DATE).withExpectedFirstDepositOnDate(EXPECTED_FIRST_DEPOSIT_ON_ON_DATE)
-                .build(clientID, productID, validFrom, validTo, penalInterestType);
+                .build(clientID, productID, penalInterestType);
 
         return Utils.performServerPut(this.requestSpec, this.responseSpec, RECURRING_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?"
                 + Utils.TENANT_IDENTIFIER, recurringDepositApplicationJSON, CommonConstants.RESPONSE_CHANGES);
@@ -292,7 +244,7 @@ public class RecurringDepositAccountHelper {
                 .withInterestCompoundingPeriodType(interestCompoundingPeriodType) //
                 .withInterestPostingPeriodType(interestPostingPeriodType) //
                 .withExpectedFirstDepositOnDate(expectedFirstDepositOnDate) //
-                .build(clientID, productID, validFrom, validTo, penalInterestType);
+                .build(clientID, productID, penalInterestType);
 
         return Utils.performServerPut(this.requestSpec, this.responseSpec, RECURRING_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?"
                 + Utils.TENANT_IDENTIFIER, recurringDepositApplicationJSON, CommonConstants.RESPONSE_CHANGES);
@@ -550,6 +502,16 @@ public class RecurringDepositAccountHelper {
 
     public RecurringDepositAccountHelper withInterestPostingPeriodType(final String interestPostingPeriodTypeId) {
         this.interestPostingPeriodType = interestPostingPeriodTypeId;
+        return this;
+    }
+    
+    public RecurringDepositAccountHelper withDepositPeriod(final String depositPeriod) {
+        this.depositPeriod = depositPeriod;
+        return this;
+    }
+
+    public RecurringDepositAccountHelper withMandatoryDepositAmount(final String depositAmount) {
+        this.mandatoryRecommendedDepositAmount = depositAmount;
         return this;
     }
 

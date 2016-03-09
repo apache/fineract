@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -437,6 +438,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     @Override
     public void recalculateAccruals(Loan loan) {
         LocalDate accruedTill = loan.getAccruedTill();
+        boolean isOrganisationDateEnabled = this.configurationDomainService.isOrganisationstartDateEnabled();
+        Date organisationStartDate = new Date();
+        if(isOrganisationDateEnabled){
+            organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate(); 
+        }
+        
         if (!loan.isPeriodicAccrualAccountingEnabledOnLoanProduct() || !loan.repaymentScheduleDetail().isInterestRecalculationEnabled()
                 || accruedTill == null || loan.isNpa() || !loan.status().isActive()) { return; }
         Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas = new ArrayList<>();
@@ -454,33 +461,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         Set<LoanCharge> loanCharges = loan.charges();
 
         for (LoanRepaymentScheduleInstallment installment : installments) {
-            if (!accruedTill.isBefore(installment.getDueDate())
-                    || (accruedTill.isAfter(installment.getFromDate()) && !accruedTill.isAfter(installment.getDueDate()))) {
-                BigDecimal dueDateFeeIncome = BigDecimal.ZERO;
-                BigDecimal dueDatePenaltyIncome = BigDecimal.ZERO;
-                LocalDate chargesTillDate = installment.getDueDate();
-                if (!accruedTill.isAfter(installment.getDueDate())) {
-                    chargesTillDate = accruedTill;
-                }
-
-                for (final LoanCharge loanCharge : loanCharges) {
-                    if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(installment.getFromDate(), chargesTillDate)) {
-                        if (loanCharge.isFeeCharge()) {
-                            dueDateFeeIncome = dueDateFeeIncome.add(loanCharge.amount());
-                        } else if (loanCharge.isPenaltyCharge()) {
-                            dueDatePenaltyIncome = dueDatePenaltyIncome.add(loanCharge.amount());
-                        }
-                    }
-                }
-                LoanScheduleAccrualData accrualData = new LoanScheduleAccrualData(loanId, officeId, installment.getInstallmentNumber(),
-                        accrualStartDate, repaymentFrequency, repayEvery, installment.getDueDate(), installment.getFromDate(),
-                        installment.getId(), loanProductId, installment.getInterestCharged(currency).getAmount(), installment
-                                .getFeeChargesCharged(currency).getAmount(), installment.getPenaltyChargesCharged(currency).getAmount(),
-                        installment.getInterestAccrued(currency).getAmount(), installment.getFeeAccrued(currency).getAmount(), installment
-                                .getPenaltyAccrued(currency).getAmount(), currencyData, interestCalculatedFrom, installment
-                                .getInterestWaived(currency).getAmount());
-                loanScheduleAccrualDatas.add(accrualData);
-
+            if(!isOrganisationDateEnabled || new LocalDate(organisationStartDate).isBefore(installment.getDueDate())){
+                generateLoanScheduleAccrualData(accruedTill, loanScheduleAccrualDatas, loanId, officeId, accrualStartDate, repaymentFrequency, 
+                        repayEvery, interestCalculatedFrom, loanProductId, currency, currencyData, loanCharges, installment);
             }
         }
 
@@ -490,6 +473,41 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 String globalisationMessageCode = "error.msg.accrual.exception";
                 throw new GeneralPlatformDomainRuleException(globalisationMessageCode, error, error);
             }
+        }
+    }
+
+    private void generateLoanScheduleAccrualData(final LocalDate accruedTill, final Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas, 
+            final Long loanId, Long officeId, final LocalDate accrualStartDate, final PeriodFrequencyType repaymentFrequency, final Integer repayEvery, 
+            final LocalDate interestCalculatedFrom, final Long loanProductId, final MonetaryCurrency currency, final CurrencyData currencyData, 
+            final Set<LoanCharge> loanCharges, final LoanRepaymentScheduleInstallment installment) {
+        
+        if (!accruedTill.isBefore(installment.getDueDate())
+                || (accruedTill.isAfter(installment.getFromDate()) && !accruedTill.isAfter(installment.getDueDate()))) {
+            BigDecimal dueDateFeeIncome = BigDecimal.ZERO;
+            BigDecimal dueDatePenaltyIncome = BigDecimal.ZERO;
+            LocalDate chargesTillDate = installment.getDueDate();
+            if (!accruedTill.isAfter(installment.getDueDate())) {
+                chargesTillDate = accruedTill;
+            }
+
+            for (final LoanCharge loanCharge : loanCharges) {
+                if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(installment.getFromDate(), chargesTillDate)) {
+                    if (loanCharge.isFeeCharge()) {
+                        dueDateFeeIncome = dueDateFeeIncome.add(loanCharge.amount());
+                    } else if (loanCharge.isPenaltyCharge()) {
+                        dueDatePenaltyIncome = dueDatePenaltyIncome.add(loanCharge.amount());
+                    }
+                }
+            }
+            LoanScheduleAccrualData accrualData = new LoanScheduleAccrualData(loanId, officeId, installment.getInstallmentNumber(),
+                    accrualStartDate, repaymentFrequency, repayEvery, installment.getDueDate(), installment.getFromDate(),
+                    installment.getId(), loanProductId, installment.getInterestCharged(currency).getAmount(), installment
+                            .getFeeChargesCharged(currency).getAmount(), installment.getPenaltyChargesCharged(currency).getAmount(),
+                    installment.getInterestAccrued(currency).getAmount(), installment.getFeeAccrued(currency).getAmount(), installment
+                            .getPenaltyAccrued(currency).getAmount(), currencyData, interestCalculatedFrom, installment
+                            .getInterestWaived(currency).getAmount());
+            loanScheduleAccrualDatas.add(accrualData);
+
         }
     }
 

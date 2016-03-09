@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.configuration.domain;
 
+import java.util.Date;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 import org.apache.fineract.infrastructure.cache.domain.PlatformCache;
@@ -213,5 +214,26 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
         return property.isEnabled();
     }
+
+    @Override
+    public boolean isOrganisationstartDateEnabled() {
+        final String propertyName = "organisation-start-date";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
+        return property.isEnabled();
+    }
+
+    @Override
+    public Date retrieveOrganisationStartDate() {
+        final String propertyName = "organisation-start-date";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
+        return property.getDateValue();
+    }
+
+	@Override
+	public boolean isPaymnetypeApplicableforDisbursementCharge() {
+		final String propertyName = "paymenttype-applicable-for-disbursement-charges";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
+        return property.isEnabled();
+	}
 
 }

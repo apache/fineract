@@ -92,6 +92,7 @@ public class DepositAccountInterestRateChart extends AbstractPersistable<Long> {
         if (this.chartSlabs == null) {
             this.chartSlabs = new HashSet<>();
         }
+
         return this.chartSlabs;
     }
 
@@ -152,5 +153,9 @@ public class DepositAccountInterestRateChart extends AbstractPersistable<Long> {
         }
 
         return effectiveInterestRate;
+    }
+
+    public boolean isPrimaryGroupingByAmount() {
+        return this.chartFields.isPrimaryGroupingByAmount();
     }
 }

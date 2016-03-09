@@ -32,6 +32,8 @@ public class CalendarHelper {
     private static final String BASE_URL = "/fineract-provider/api/v1/";
     private static final String PARENT_ENTITY_NAME = "groups/";
     private static final String ENITY_NAME = "/calendars";
+    private static final String Center_Entity = "centers/";
+    private static final String Edit_Calendar = "editcalendarbasedonmeetingdates/";
 
     public static Integer createMeetingCalendarForGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer groupId, final String startDate, final String frequency, final String interval, final String repeatsOnDay) {
@@ -85,5 +87,44 @@ public class CalendarHelper {
                 "collectionMeetingCalendar");
         final Integer responseCalendarId = from(responseCalendarDetailsinJSON).get("id");
         assertEquals("ERROR IN CREATING THE CALENDAR", generatedCalendarId, responseCalendarId);
+    }
+    
+    public static Integer createMeetingForGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+    final Integer groupId, final String startDate, final String frequency, final String interval, final String repeatsOnDay) {
+
+    	System.out.println("---------------------------------CREATING A MEETING CALENDAR FOR THE GROUP------------------------------");
+
+    	final String CALENDAR_RESOURCE_URL = BASE_URL + Center_Entity + groupId + ENITY_NAME + "?" + Utils.TENANT_IDENTIFIER;
+
+    	System.out.println(CALENDAR_RESOURCE_URL);
+
+    	return Utils.performServerPost(requestSpec, responseSpec, CALENDAR_RESOURCE_URL,
+    			getTestCalendarAsJSON(frequency, interval, repeatsOnDay, startDate), "resourceId");
+    }
+
+    public static Integer updateMeetingCalendarForCenter(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            Integer centerId, String calendarID, String oldDate, String startDate) {
+
+        System.out.println("---------------------------------UPADATING A MEETING CALENDAR FOR THE CENTER------------------------------");
+
+        final String CALENDAR_RESOURCE_URL = BASE_URL + Center_Entity + centerId + ENITY_NAME + "/" + calendarID + "?"
+                + Utils.TENANT_IDENTIFIER;
+
+        System.out.println(CALENDAR_RESOURCE_URL);
+
+        return Utils.performServerPut(requestSpec, responseSpec, CALENDAR_RESOURCE_URL, getTestCalendarMeetingAsJSON(oldDate, startDate),
+                "resourceId");
+
+    }
+
+    private static String getTestCalendarMeetingAsJSON(String oldDate, String startDate) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("locale", "en");
+        map.put("newMeetingDate", startDate);
+        map.put("presentMeetingDate", oldDate);
+        map.put("reschedulebasedOnMeetingDates", "true");
+        System.out.println("map : " + map);
+        return new Gson().toJson(map);
     }
 }
