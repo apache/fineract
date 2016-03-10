@@ -355,9 +355,16 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     loanCalendar = loanCalendarInstance.getCalendar();
                 }
                 FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
+                Boolean isSkipRepaymentOnFirstMonth = false;
+                Integer numberOfDays = 0;
+                boolean isSkipRepaymentOnFirstMonthEnabled = this.configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
+                if(isSkipRepaymentOnFirstMonthEnabled){
+                    numberOfDays = configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
+                    isSkipRepaymentOnFirstMonth = this.loanUtilService.isLoanRepaymentsSyncWithMeeting(loan.group(), loanCalendar);
+                }
                 LoanRescheduleModel loanRescheduleModel = new DefaultLoanReschedulerFactory().reschedule(mathContext, interestMethod,
                         loanRescheduleRequest, applicationCurrency, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance,
-                        loanCalendar, floatingRateDTO);
+                        loanCalendar, floatingRateDTO, isSkipRepaymentOnFirstMonth, numberOfDays);
 
                 final Collection<LoanRescheduleModelRepaymentPeriod> periods = loanRescheduleModel.getPeriods();
                 List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();

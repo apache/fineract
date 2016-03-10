@@ -235,5 +235,18 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
         return property.isEnabled();
 	}
+	
+    @Override
+    public boolean isSkippingMeetingOnFirstDayOfMonthEnabled() {
+        return this.globalConfigurationRepository.findOneByNameWithNotFoundDetection("skip-repayment-on-first-day-of-month").isEnabled();
+    }
+
+    @Override
+    public Long retrieveSkippingMeetingPeriod() {
+        final String propertyName = "skip-repayment-on-first-day-of-month";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
+        return property.getValue();
+
+    }
 
 }

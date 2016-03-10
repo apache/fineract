@@ -321,7 +321,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         final Calendar calendar = this.calendarRepositoryWrapper.findOneWithNotFoundDetection(calendarId);
         // check if transaction against calendar effective from date
 
-        if (!calendar.isValidRecurringDate(transactionDate)) { throw new NotValidRecurringDateException("collectionsheet", "The date '"
+        if (!calendar.isValidRecurringDate(transactionDate, false, 0)) { throw new NotValidRecurringDateException("collectionsheet", "The date '"
                 + transactionDate + "' is not a valid meeting date.", transactionDate); }
 
         final AppUser currentUser = this.context.authenticatedUser();

@@ -70,4 +70,9 @@ public interface ConfigurationDomainService {
     Date retrieveOrganisationStartDate();
     
     boolean isPaymnetypeApplicableforDisbursementCharge();
+
+    boolean isSkippingMeetingOnFirstDayOfMonthEnabled();
+    
+    Long retrieveSkippingMeetingPeriod();
+
 }
