@@ -1,0 +1,1 @@
+insert into c_configuration(name,value,description) values("skip-repayment-on-first-day-of-month",14,"skipping repayment on first day of month");

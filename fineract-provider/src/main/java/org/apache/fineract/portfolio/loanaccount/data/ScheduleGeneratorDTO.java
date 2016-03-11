@@ -39,12 +39,15 @@ public class ScheduleGeneratorDTO {
     final FloatingRateDTO floatingRateDTO;
     final Calendar calendar;
     final CalendarHistoryDataWrapper calendarHistoryDataWrapper;
+    final Integer numberOfdays;
+    final boolean isSkipRepaymentOnFirstDayofMonth;
 
     public ScheduleGeneratorDTO(final LoanScheduleGeneratorFactory loanScheduleFactory, final ApplicationCurrency applicationCurrency,
             final LocalDate calculatedRepaymentsStartingFromDate, final HolidayDetailDTO holidayDetailDTO,
             final CalendarInstance calendarInstanceForInterestRecalculation, final CalendarInstance compoundingCalendarInstance,
             final LocalDate recalculateFrom, final Long overdurPenaltyWaitPeriod, final FloatingRateDTO floatingRateDTO,
-            final Calendar calendar, final CalendarHistoryDataWrapper calendarHistoryDataWrapper) {
+            final Calendar calendar, final CalendarHistoryDataWrapper calendarHistoryDataWrapper, final Integer numberOfdays, 
+            final boolean isSkipRepaymentOnFirstDayofMonth) {
 
         this.loanScheduleFactory = loanScheduleFactory;
         this.applicationCurrency = applicationCurrency;
@@ -57,6 +60,8 @@ public class ScheduleGeneratorDTO {
         this.floatingRateDTO = floatingRateDTO;
         this.calendar = calendar;
         this.calendarHistoryDataWrapper  = calendarHistoryDataWrapper;
+        this.numberOfdays = numberOfdays;
+        this.isSkipRepaymentOnFirstDayofMonth = isSkipRepaymentOnFirstDayofMonth;
 
     }
 
@@ -114,6 +119,14 @@ public class ScheduleGeneratorDTO {
     
     public CalendarHistoryDataWrapper getCalendarHistoryDataWrapper(){
         return this.calendarHistoryDataWrapper;
+    }
+
+    public Integer getNumberOfdays() {
+        return numberOfdays;
+    }
+
+    public boolean isSkipRepaymentOnFirstDayofMonth() {
+        return isSkipRepaymentOnFirstDayofMonth;
     }
 
 }

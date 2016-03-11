@@ -184,7 +184,7 @@ public class Meeting extends AbstractPersistable<Long> {
             meetingDateLocalDate = LocalDate.fromDateFields(meetingDate);
         }
 
-        if (meetingDateLocalDate == null || !calendar.isValidRecurringDate(meetingDateLocalDate)) { return false; }
+        if (meetingDateLocalDate == null || !calendar.isValidRecurringDate(meetingDateLocalDate, false, 0)) { return false; }
         return true;
     }
 
