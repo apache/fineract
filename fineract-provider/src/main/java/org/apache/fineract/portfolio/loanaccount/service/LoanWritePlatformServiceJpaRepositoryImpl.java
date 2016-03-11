@@ -328,6 +328,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Map<String, Object> changes = new LinkedHashMap<>();
 
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
+        
+        final Boolean isPaymnetypeApplicableforDisbursementCharge=configurationDomainService.isPaymnetypeApplicableforDisbursementCharge();
 
         // Recalculate first repayment date based in actual disbursement date.
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
@@ -361,7 +363,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 this.loanScheduleHistoryWritePlatformService.createAndSaveLoanScheduleArchive(loan.fetchRepaymentScheduleInstallments(),
                         loan, null);
             }
-            if(configurationDomainService.isPaymnetypeApplicableforDisbursementCharge()){
+            if(isPaymnetypeApplicableforDisbursementCharge){
             	changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO,paymentDetail);
             }else{
             	changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO,null);
