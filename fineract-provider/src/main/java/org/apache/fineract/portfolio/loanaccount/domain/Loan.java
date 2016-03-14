@@ -5569,7 +5569,9 @@ public class Loan extends AbstractPersistable<Long> {
         updateLoanToLastDisbursalState(actualDisbursementDate);
         for (Iterator<LoanTermVariations> iterator = this.loanTermVariations.iterator(); iterator.hasNext();) {
             LoanTermVariations loanTermVariations = iterator.next();
-            if (loanTermVariations.fetchDateValue().isAfter(actualDisbursementDate)) {
+            if (loanTermVariations.getTermType().isDueDateVariation() && loanTermVariations.fetchDateValue().isAfter(actualDisbursementDate) ||
+                    loanTermVariations.getTermType().isEMIAmountVariation() && loanTermVariations.getTermApplicableFrom().equals(actualDisbursementDate.toDate())
+                    || loanTermVariations.getTermApplicableFrom().after(actualDisbursementDate.toDate())) {
                 iterator.remove();
             }
         }
