@@ -31,6 +31,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -50,6 +51,7 @@ import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.calendar.service.CalendarEnumerations;
+import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
@@ -79,6 +81,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     private final OfficeReadPlatformService officeReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
+    private final ConfigurationDomainService configurationDomainService;
+    private final CalendarReadPlatformService calendarReadPlatformService;
 
     // data mappers
     private final CenterDataMapper centerMapper = new CenterDataMapper();
@@ -92,7 +96,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     public CenterReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
             final StaffReadPlatformService staffReadPlatformService, final CodeValueReadPlatformService codeValueReadPlatformService,
-            final PaginationParametersDataValidator paginationParametersDataValidator) {
+            final PaginationParametersDataValidator paginationParametersDataValidator, final ConfigurationDomainService configurationDomainService,
+            final CalendarReadPlatformService calendarReadPlatformService) {
         this.context = context;
         this.clientReadPlatformService = clientReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -100,6 +105,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         this.staffReadPlatformService = staffReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.paginationParametersDataValidator = paginationParametersDataValidator;
+        this.configurationDomainService = configurationDomainService;
+        this.calendarReadPlatformService = calendarReadPlatformService;
     }
 
     // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where
@@ -521,8 +528,15 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         Collection<StaffCenterData> staffCenterDataArray = new ArrayList<>();
         Boolean flag = false;
+        Boolean isSkipMeetingOnFirstDay = false;
+        Integer numberOfDays = 0;
+        boolean isSkipRepaymentOnFirstMonthEnabled = this.configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
+        if (isSkipRepaymentOnFirstMonthEnabled) {
+            numberOfDays = this.configurationDomainService.retrieveSkippingMeetingPeriod().intValue();
+        }
         for (CenterData centerData : centerDataArray) {
-            if (centerData.getCollectionMeetingCalendar().isValidRecurringDate(new LocalDate(meetingDate))) {
+            isSkipMeetingOnFirstDay = this.calendarReadPlatformService.isEntitySyncWithMeeting(centerData.getCollectionMeetingCalendar());
+            if (centerData.getCollectionMeetingCalendar().isValidRecurringDate(new LocalDate(meetingDate), isSkipMeetingOnFirstDay, numberOfDays)) {
                 if (staffCenterDataArray.size() <= 0) {
                     Collection<CenterData> meetingFallCenter = new ArrayList<>();
                     meetingFallCenter.add(centerData);

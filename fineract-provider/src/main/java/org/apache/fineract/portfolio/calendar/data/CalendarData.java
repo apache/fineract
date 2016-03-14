@@ -334,9 +334,9 @@ public class CalendarData {
         return false;
     }
 
-    public boolean isValidRecurringDate(final LocalDate compareDate) {
+    public boolean isValidRecurringDate(final LocalDate compareDate, final Boolean isSkipMeetingOnFirstDay, final Integer numberOfDays) {
         if (isBetweenStartAndEndDate(compareDate)) { return CalendarUtils.isValidRedurringDate(this.getRecurrence(), this.getStartDate(),
-                compareDate); }
+                compareDate, isSkipMeetingOnFirstDay, numberOfDays); }
         return false;
     }
     
