@@ -61,7 +61,7 @@ import org.springframework.stereotype.Component;
 public class LoanTransactionsApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "type", "date", "currency", "amount",
-            "externalId"));
+            "externalId","note"));
 
     private final String resourceNameForPermissions = "LOAN";
 

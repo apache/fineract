@@ -47,6 +47,7 @@ public class AccountTransferData {
     private final ClientData toClient;
     private final EnumOptionData toAccountType;
     private final PortfolioAccountData toAccount;
+    private final String note;
 
     // template
     private final Collection<OfficeData> fromOfficeOptions;
@@ -78,7 +79,7 @@ public class AccountTransferData {
         final Boolean reversed = null;
         return new AccountTransferData(id, reversed, fromOffice, fromClient, fromAccountType, fromAccount, currency, transferAmount,
                 transferDate, transferDescription, toOffice, toClient, toAccountType, toAccount, fromOfficeOptions, fromClientOptions,
-                fromAccountTypeOptions, fromAccountOptions, toOfficeOptions, toClientOptions, toAccountTypeOptions, toAccountOptions);
+                fromAccountTypeOptions, fromAccountOptions, toOfficeOptions, toClientOptions, toAccountTypeOptions, toAccountOptions,null);
     }
 
     public static AccountTransferData instance(final Long id, final Boolean reversed, final LocalDate transferDate,
@@ -88,7 +89,7 @@ public class AccountTransferData {
 
         return new AccountTransferData(id, reversed, fromOffice, fromClient, fromAccountType, fromAccount, currency, transferAmount,
                 transferDate, transferDescription, toOffice, toClient, toAccountType, toAccount, null, null, null, null, null, null, null,
-                null);
+                null,null);
     }
 
     public static AccountTransferData transferBasicDetails(final Long id, final CurrencyData currency, final BigDecimal transferAmount,
@@ -98,7 +99,7 @@ public class AccountTransferData {
         final EnumOptionData toAccountType = null;
 
         return new AccountTransferData(id, reversed, null, null, fromAccountType, null, currency, transferAmount, transferDate,
-                description, null, null, toAccountType, null, null, null, null, null, null, null, null, null);
+                description, null, null, toAccountType, null, null, null, null, null, null, null, null, null,null);
     }
 
     private AccountTransferData(final Long id, final Boolean reversed, final OfficeData fromOffice, final ClientData fromClient,
@@ -108,7 +109,7 @@ public class AccountTransferData {
             final Collection<OfficeData> fromOfficeOptions, final Collection<ClientData> fromClientOptions,
             final Collection<EnumOptionData> fromAccountTypeOptions, final Collection<PortfolioAccountData> fromAccountOptions,
             final Collection<OfficeData> toOfficeOptions, final Collection<ClientData> toClientOptions,
-            final Collection<EnumOptionData> toAccountTypeOptions, final Collection<PortfolioAccountData> toAccountOptions) {
+            final Collection<EnumOptionData> toAccountTypeOptions, final Collection<PortfolioAccountData> toAccountOptions,final String note) {
         this.id = id;
         this.reversed = reversed;
         this.fromOffice = fromOffice;
@@ -133,5 +134,6 @@ public class AccountTransferData {
         this.toClientOptions = toClientOptions;
         this.toAccountTypeOptions = toAccountTypeOptions;
         this.toAccountOptions = toAccountOptions;
+        this.note=note;
     }
 }
