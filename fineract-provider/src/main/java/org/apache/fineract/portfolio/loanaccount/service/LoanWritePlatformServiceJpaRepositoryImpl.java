@@ -888,20 +888,25 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         final String noteText = command.stringValueOfParameterNamed("note");
-        if (StringUtils.isNotBlank(noteText)) {
-            changes.put("note", noteText);
-            Note note = null;
-            /**
-             * If a new transaction is not created, associate note with the
-             * transaction to be adjusted
-             **/
-            if (newTransactionDetail.isGreaterThanZero(loan.getPrincpal().getCurrency())) {
-                note = Note.loanTransactionNote(loan, newTransactionDetail, noteText);
-            } else {
-                note = Note.loanTransactionNote(loan, transactionToAdjust, noteText);
+        changes.put("note", noteText);  
+         Note note = null;  
+         /**  
+          * If a new transaction is not created, associate note with the  
+          * transaction to be adjusted  
+          **/  
+         if (newTransactionDetail.isGreaterThanZero(loan.getPrincpal().getCurrency())) {  
+             note = Note.loanTransactionNote(loan, newTransactionDetail, noteText);  
+         } else {  
+            note = this.noteRepository.findByLoanTransactionId(transactionId);  
+            if (note == null) {  
+                note = Note.loanTransactionNote(loan, transactionToAdjust, noteText);  
+            } else {  
+               note.updateNoteWithAdjustmentTransaction(loan, transactionToAdjust, noteText);  
             }
-            this.noteRepository.save(note);
-        }
+         }
+         this.noteRepository.save(note); 
+
+        
 
         Collection<Long> transactionIds = new ArrayList<>();
         for (LoanTransaction transaction : loan.getLoanTransactions()) {

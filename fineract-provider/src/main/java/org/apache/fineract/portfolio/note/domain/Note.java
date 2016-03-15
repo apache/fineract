@@ -109,7 +109,7 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         this.noteTypeId = NoteType.LOAN.getValue();
     }
 
-    private Note(final Loan loan, final LoanTransaction loanTransaction, final String note) {
+    public Note(final Loan loan, final LoanTransaction loanTransaction, final String note) {
         this.loan = loan;
         this.loanTransaction = loanTransaction;
         this.client = loan.client();
@@ -148,5 +148,19 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
     public boolean isNotAgainstClientWithIdOf(final Long clientId) {
         return !this.client.identifiedBy(clientId);
     }
+
+	public String getNote() {
+		return this.note;
+	}
+
+	public Note updateNoteWithAdjustmentTransaction(final Loan loan,
+			final LoanTransaction loanTransaction, final String note) {
+		this.loan = loan;
+		this.loanTransaction = loanTransaction;
+		this.note = note;
+		return this;
+	}
+
+    
 
 }
