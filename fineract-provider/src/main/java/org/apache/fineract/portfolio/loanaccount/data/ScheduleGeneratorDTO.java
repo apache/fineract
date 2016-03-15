@@ -39,12 +39,14 @@ public class ScheduleGeneratorDTO {
     final FloatingRateDTO floatingRateDTO;
     final Calendar calendar;
     final CalendarHistoryDataWrapper calendarHistoryDataWrapper;
+    final Boolean isInterestChargedFromDateAsDisbursementDateEnabled;
 
     public ScheduleGeneratorDTO(final LoanScheduleGeneratorFactory loanScheduleFactory, final ApplicationCurrency applicationCurrency,
             final LocalDate calculatedRepaymentsStartingFromDate, final HolidayDetailDTO holidayDetailDTO,
             final CalendarInstance calendarInstanceForInterestRecalculation, final CalendarInstance compoundingCalendarInstance,
             final LocalDate recalculateFrom, final Long overdurPenaltyWaitPeriod, final FloatingRateDTO floatingRateDTO,
-            final Calendar calendar, final CalendarHistoryDataWrapper calendarHistoryDataWrapper) {
+            final Calendar calendar, final CalendarHistoryDataWrapper calendarHistoryDataWrapper, 
+            final Boolean isInterestChargedFromDateAsDisbursementDateEnabled) {
 
         this.loanScheduleFactory = loanScheduleFactory;
         this.applicationCurrency = applicationCurrency;
@@ -57,6 +59,7 @@ public class ScheduleGeneratorDTO {
         this.floatingRateDTO = floatingRateDTO;
         this.calendar = calendar;
         this.calendarHistoryDataWrapper  = calendarHistoryDataWrapper;
+        this.isInterestChargedFromDateAsDisbursementDateEnabled = isInterestChargedFromDateAsDisbursementDateEnabled;
 
     }
 
@@ -114,6 +117,10 @@ public class ScheduleGeneratorDTO {
     
     public CalendarHistoryDataWrapper getCalendarHistoryDataWrapper(){
         return this.calendarHistoryDataWrapper;
+    }
+    
+    public Boolean isInterestChargedFromDateAsDisbursementDateEnabled(){
+        return this.isInterestChargedFromDateAsDisbursementDateEnabled;
     }
 
 }
