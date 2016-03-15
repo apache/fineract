@@ -160,7 +160,4 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
 		this.note = note;
 		return this;
 	}
-
-    
-
 }

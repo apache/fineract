@@ -906,8 +906,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
          }
          this.noteRepository.save(note); 
 
-        
-
         Collection<Long> transactionIds = new ArrayList<>();
         for (LoanTransaction transaction : loan.getLoanTransactions()) {
             if (transaction.isRefund() && transaction.isNotReversed()) {
