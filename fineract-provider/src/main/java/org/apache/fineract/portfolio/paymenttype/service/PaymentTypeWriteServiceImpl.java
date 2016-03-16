@@ -20,6 +20,12 @@ package org.apache.fineract.portfolio.paymenttype.service;
 
 import java.util.Map;
 
+import org.apache.fineract.accounting.glaccount.domain.GLAccount;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
+import org.apache.fineract.accounting.glaccount.exception.GLAccountInvalidClassificationException;
+import org.apache.fineract.accounting.glaccount.exception.GLAccountInvalidParentException;
+import org.apache.fineract.accounting.glaccount.exception.GLAccountNotFoundException;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -39,25 +45,41 @@ public class PaymentTypeWriteServiceImpl implements PaymentTypeWriteService {
     private final PaymentTypeRepository repository;
     private final PaymentTypeRepositoryWrapper repositoryWrapper;
     private final PaymentTypeDataValidator fromApiJsonDeserializer;
+    private final GLAccountRepository glAccountRepository;
 
     @Autowired
     public PaymentTypeWriteServiceImpl(PaymentTypeRepository repository, PaymentTypeRepositoryWrapper repositoryWrapper,
-            PaymentTypeDataValidator fromApiJsonDeserializer) {
+            PaymentTypeDataValidator fromApiJsonDeserializer,final GLAccountRepository glAccountRepository) {
         this.repository = repository;
         this.repositoryWrapper = repositoryWrapper;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-
+        this.glAccountRepository = glAccountRepository;
     }
 
-    @Override
+	@Override
     public CommandProcessingResult createPaymentType(JsonCommand command) {
         this.fromApiJsonDeserializer.validateForCreate(command.json());
         String name = command.stringValueOfParameterNamed(PaymentTypeApiResourceConstants.NAME);
         String description = command.stringValueOfParameterNamed(PaymentTypeApiResourceConstants.DESCRIPTION);
         Boolean isCashPayment = command.booleanObjectValueOfParameterNamed(PaymentTypeApiResourceConstants.ISCASHPAYMENT);
         Long position = command.longValueOfParameterNamed(PaymentTypeApiResourceConstants.POSITION);
-
-        PaymentType newPaymentType = PaymentType.create(name, description, isCashPayment, position);
+        GLAccount fundSourceAccount = null;
+        if(command.hasParameter(PaymentTypeApiResourceConstants.FUNDSOURCEACCOUNTID)){
+        Long fundSourceId = command.longValueOfParameterNamed(PaymentTypeApiResourceConstants.FUNDSOURCEACCOUNTID);
+        if(fundSourceId != null){
+        	fundSourceAccount = glAccountRepository.findOne(fundSourceId);
+        }
+        if(fundSourceId != null && fundSourceAccount==null){
+        	throw new GLAccountNotFoundException(fundSourceId);
+        }
+        if(fundSourceAccount != null && fundSourceAccount.getType() != GLAccountType.ASSET.getValue()){
+        	throw new GLAccountInvalidClassificationException(fundSourceAccount.getType());
+        }
+        if(fundSourceAccount != null && !fundSourceAccount.isDetailAccount()){
+        	throw new GLAccountInvalidParentException(fundSourceId);
+        }
+        }
+        PaymentType newPaymentType = PaymentType.create(name, description, isCashPayment, position, fundSourceAccount);
         this.repository.save(newPaymentType);
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(newPaymentType.getId()).build();
     }
@@ -67,8 +89,24 @@ public class PaymentTypeWriteServiceImpl implements PaymentTypeWriteService {
 
         this.fromApiJsonDeserializer.validateForUpdate(command.json());
         final PaymentType paymentType = this.repositoryWrapper.findOneWithNotFoundDetection(paymentTypeId);
-        final Map<String, Object> changes = paymentType.update(command);
-
+        Long fundSourceId = command.longValueOfParameterNamed(PaymentTypeApiResourceConstants.FUNDSOURCEACCOUNTID);
+        GLAccount fundSourceAccount = null;
+        if(command.hasParameter(PaymentTypeApiResourceConstants.FUNDSOURCEACCOUNTID)){
+        if(fundSourceId != null){
+        	fundSourceAccount = glAccountRepository.findOne(fundSourceId);
+        }
+        if(fundSourceId != null && fundSourceAccount==null){
+        	throw new GLAccountNotFoundException(fundSourceId);
+        }
+        if(fundSourceAccount != null && fundSourceAccount.getType() != GLAccountType.ASSET.getValue()){
+        	throw new GLAccountInvalidClassificationException(fundSourceAccount.getType());
+        }
+        if(fundSourceAccount != null && !fundSourceAccount.isDetailAccount()){
+        	throw new GLAccountInvalidParentException(fundSourceId);
+        }
+        }
+        final Map<String, Object> changes = paymentType.update(command,fundSourceAccount);
+        
         if (!changes.isEmpty()) {
             this.repository.save(paymentType);
         }

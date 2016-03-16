@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.client.domain.ClientTransactionType;
 
@@ -45,10 +46,11 @@ public class ClientTransactionDTO {
 
     /** Breakdowns of fees this Transaction pays **/
     private final List<ClientChargePaymentDTO> chargePayments;
+    private final Long fundSourceAccountId;
 
     public ClientTransactionDTO(final Long clientId, final Long officeId, final Long paymentTypeId, final Long transactionId,
             final Date transactionDate, final EnumOptionData transactionType, final String currencyCode, final BigDecimal amount,
-            final boolean reversed, final boolean accountingEnabled, final List<ClientChargePaymentDTO> clientChargePayments) {
+            final boolean reversed, final boolean accountingEnabled, final List<ClientChargePaymentDTO> clientChargePayments, final Long fundSourceAccountId) {
         this.clientId = clientId;
         this.paymentTypeId = paymentTypeId;
         this.transactionId = transactionId;
@@ -60,6 +62,7 @@ public class ClientTransactionDTO {
         this.officeId = officeId;
         this.accountingEnabled = accountingEnabled;
         this.currencyCode = currencyCode;
+        this.fundSourceAccountId = fundSourceAccountId;
     }
 
     public Long getOfficeId() {
@@ -110,4 +113,8 @@ public class ClientTransactionDTO {
         return this.clientId;
     }
 
+	public Long getFundSourceAccountId() {
+		return fundSourceAccountId;
+	}
+    
 }

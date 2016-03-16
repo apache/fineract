@@ -33,12 +33,15 @@ public class PaymentTypeApiResourceConstants {
     public static final String DESCRIPTION = "description";
     public static final String ISCASHPAYMENT = "isCashPayment";
     public static final String POSITION = "position";
+    public static final String FUNDSOURCEACCOUNTID = "fundSourceAccountId";
+    public static final String FUNDSOURCEACCOUNTNAME = "fundSourceAccountName";
 
-    public static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(ID, NAME, DESCRIPTION, ISCASHPAYMENT));
+    public static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(ID, NAME, DESCRIPTION, ISCASHPAYMENT,
+    		FUNDSOURCEACCOUNTID, FUNDSOURCEACCOUNTNAME));
 
     public static final Set<String> CREATE_PAYMENT_TYPE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(NAME, DESCRIPTION,
-            ISCASHPAYMENT, POSITION));
+            ISCASHPAYMENT, POSITION,FUNDSOURCEACCOUNTID));
 
     public static final Set<String> UPDATE_PAYMENT_TYPE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(NAME, DESCRIPTION,
-            ISCASHPAYMENT, POSITION));
+            ISCASHPAYMENT, POSITION,FUNDSOURCEACCOUNTID));
 }

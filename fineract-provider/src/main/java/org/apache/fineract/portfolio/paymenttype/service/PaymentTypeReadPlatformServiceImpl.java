@@ -67,19 +67,25 @@ public class PaymentTypeReadPlatformServiceImpl implements PaymentTypeReadPlatfo
     private static final class PaymentTypeMapper implements RowMapper<PaymentTypeData> {
 
         public String schema() {
-            return " pt.id as id, pt.value as name, pt.description as description,pt.is_cash_payment as isCashPayment,pt.order_position as position from m_payment_type pt ";
+        	StringBuilder query  = new StringBuilder();
+        	query.append(" pt.id as id, pt.value as name, pt.description as description,pt.is_cash_payment as isCashPayment ");
+        	query.append(" ,pt.order_position as position, pt.fundsourceaccountid as fundSourceAcccountId , aga.name as fundSourceAccountName ");
+        	query.append(" FROM m_payment_type pt ");
+        	query.append(" left join acc_gl_account aga on aga.id  = pt.fundsourceaccountid ");
+            return query.toString();
         }
 
         @Override
-        public PaymentTypeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public PaymentTypeData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("id");
             final String name = rs.getString("name");
             final String description = rs.getString("description");
             final boolean isCashPayment = rs.getBoolean("isCashPayment");
             final Long position = rs.getLong("position");
-
-            return PaymentTypeData.instance(id, name, description, isCashPayment, position);
+            final Long fundSourceAcccountId = rs.getLong("fundSourceAcccountId");
+            final String fundSourceAccountName = rs.getString("fundSourceAccountName");
+            return PaymentTypeData.instance(id, name, description, isCashPayment, position, fundSourceAcccountId, fundSourceAccountName);
         }
 
     }

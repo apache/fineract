@@ -81,6 +81,12 @@ public class PaymentTypeDataValidator {
             baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.POSITION).value(position).ignoreIfNull()
                     .integerZeroOrGreater();
         }
+        
+        if (this.fromApiJsonHelper.parameterExists(PaymentTypeApiResourceConstants.FUNDSOURCEACCOUNTID, element)) {
+            final Long fundSourceId = this.fromApiJsonHelper.extractLongNamed(PaymentTypeApiResourceConstants.FUNDSOURCEACCOUNTID, element);
+            baseDataValidator.reset().parameter(PaymentTypeApiResourceConstants.FUNDSOURCEACCOUNTID).value(fundSourceId).ignoreIfNull()
+                    .integerZeroOrGreater();
+        }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
