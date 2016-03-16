@@ -30,24 +30,33 @@ public class PaymentTypeData {
     private Boolean isCashPayment;
     @SuppressWarnings("unused")
     private Long position;
+    @SuppressWarnings("unused")
+	private String fundSourceAccountName;
+    @SuppressWarnings("unused")
+	private Long fundSourceAccountId;
 
-    public PaymentTypeData(final Long id, final String name, final String description, final Boolean isCashPayment, final Long position) {
+    public PaymentTypeData(final Long id, final String name, final String description, final Boolean isCashPayment, final Long position,
+    		final Long fundSourceAccountId, final String fundSourceAccountName) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.isCashPayment = isCashPayment;
         this.position = position;
+        this.fundSourceAccountId = fundSourceAccountId;
+        this.fundSourceAccountName = fundSourceAccountName;
     }
 
     public static PaymentTypeData instance(final Long id, final String name, final String description, final Boolean isCashPayment,
-            final Long position) {
-        return new PaymentTypeData(id, name, description, isCashPayment, position);
+            final Long position, final Long fundSourceAccountId, final String fundSourceAccountName) {
+        return new PaymentTypeData(id, name, description, isCashPayment, position, fundSourceAccountId, fundSourceAccountName);
     }
 
     public static PaymentTypeData instance(final Long id, final String name) {
         String description = null;
         Boolean isCashPayment = null;
         Long position = null;
-        return new PaymentTypeData(id, name, description, isCashPayment, position);
+        Long fundSourceAccountId = null;
+        String fundSourceAccountName = null;
+        return new PaymentTypeData(id, name, description, isCashPayment, position, fundSourceAccountId, fundSourceAccountName);
     }
 }

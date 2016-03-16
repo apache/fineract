@@ -166,6 +166,7 @@ public class ClientTransaction extends AbstractPersistable<Long> {
 
         if (this.paymentDetail != null) {
             thisTransactionData.put("paymentTypeId", this.paymentDetail.getPaymentType().getId());
+            thisTransactionData.put("fundSourceAccountId", this.paymentDetail.getPaymentType().getFundSourceAccount().getId());
         }
 
         if (!this.clientChargePaidByCollection.isEmpty()) {

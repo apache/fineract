@@ -34,10 +34,6 @@ import com.jayway.restassured.specification.ResponseSpecification;
  * IntegrationTest for ClientCharges.
  * 
  */
-/**
- * @author lenovo
- * 
- */
 public class ClientChargesTest {
 
     private ResponseSpecification responseSpec;

@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import org.apache.fineract.accounting.closure.domain.GLClosure;
+import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.journalentry.data.ClientTransactionDTO;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,10 +45,13 @@ public class CashBasedAccountingProcessorForClientTransactions implements Accoun
             final Date transactionDate = clientTransactionDTO.getTransactionDate();
             final Office office = this.helper.getOfficeById(clientTransactionDTO.getOfficeId());
             this.helper.checkForBranchClosures(latestGLClosure, transactionDate);
-
+            GLAccount fundSource = null;
+            if(clientTransactionDTO.getFundSourceAccountId() != null){
+            fundSource = this.helper.getGLAccountById(clientTransactionDTO.getFundSourceAccountId());
+            }
             /** Handle client payments **/
             if (clientTransactionDTO.isChargePayment()) {
-                createJournalEntriesForChargePayments(clientTransactionDTO, office);
+                createJournalEntriesForChargePayments(clientTransactionDTO, office, fundSource);
             }
         }
     }
@@ -59,7 +63,7 @@ public class CashBasedAccountingProcessorForClientTransactions implements Accoun
      * In case the loan transaction is a reversal, all debits are turned into
      * credits and vice versa
      */
-    private void createJournalEntriesForChargePayments(final ClientTransactionDTO clientTransactionDTO, final Office office) {
+    private void createJournalEntriesForChargePayments(final ClientTransactionDTO clientTransactionDTO, final Office office, final GLAccount fundSourceAccount) {
         // client properties
         final Long clientId = clientTransactionDTO.getClientId();
 
@@ -80,7 +84,7 @@ public class CashBasedAccountingProcessorForClientTransactions implements Accoun
              * each charge that has been paid by this transaction)
              **/
             this.helper.createDebitJournalEntryOrReversalForClientChargePayments(office, currencyCode, clientId, transactionId,
-                    transactionDate, totalCreditedAmount, isReversal);
+                    transactionDate, totalCreditedAmount, isReversal, fundSourceAccount);
         }
 
     }

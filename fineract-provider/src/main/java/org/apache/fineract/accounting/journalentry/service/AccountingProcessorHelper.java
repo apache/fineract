@@ -239,6 +239,7 @@ public class AccountingProcessorHelper {
         final BigDecimal amount = (BigDecimal) accountingBridgeData.get("amount");
         final boolean reversed = (Boolean) accountingBridgeData.get("reversed");
         final Long paymentTypeId = (Long) accountingBridgeData.get("paymentTypeId");
+        final Long fundSourceAccountId = (Long) accountingBridgeData.get("fundSourceAccountId");
         final String currencyCode = (String) accountingBridgeData.get("currencyCode");
         final Boolean accountingEnabled = (Boolean) accountingBridgeData.get("accountingEnabled");
 
@@ -262,7 +263,7 @@ public class AccountingProcessorHelper {
 
         final ClientTransactionDTO clientTransactionDTO = new ClientTransactionDTO(clientId, transactionOfficeId, paymentTypeId,
                 transactionId, transactionDate, transactionType, currencyCode, amount, reversed, accountingEnabled,
-                clientChargePaymentDTOs);
+                clientChargePaymentDTOs,fundSourceAccountId);
 
         return clientTransactionDTO;
 
@@ -911,9 +912,15 @@ public class AccountingProcessorHelper {
     }
 
     public void createDebitJournalEntryOrReversalForClientChargePayments(final Office office, final String currencyCode,
-            final Long clientId, final Long transactionId, final Date transactionDate, final BigDecimal amount, final Boolean isReversal) {
-        final GLAccount account = financialActivityAccountRepository
+            final Long clientId, final Long transactionId, final Date transactionDate, final BigDecimal amount, final Boolean isReversal,
+            final GLAccount fundSourceAccount) {
+    	GLAccount account = null;
+    	if(fundSourceAccount == null){
+        account = financialActivityAccountRepository
                 .findByFinancialActivityTypeWithNotFoundDetection(FINANCIAL_ACTIVITY.ASSET_FUND_SOURCE.getValue()).getGlAccount();
+    	}else{
+    		account = fundSourceAccount;
+    	}
         if (isReversal) {
             createCreditJournalEntryForClientPayments(office, currencyCode, account, clientId, transactionId, transactionDate, amount);
         } else {
@@ -921,7 +928,7 @@ public class AccountingProcessorHelper {
         }
     }
 
-    private GLAccount getGLAccountById(final Long accountId) {
+    public GLAccount getGLAccountById(final Long accountId) {
         return this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountId);
     }
 }

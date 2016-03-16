@@ -23,14 +23,21 @@ import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.paymenttype.api.PaymentTypeApiResourceConstants;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
+/**
+ * @author 15
+ *
+ */
 @Entity
 @Table(name = "m_payment_type")
 public class PaymentType extends AbstractPersistable<Long> {
@@ -46,21 +53,27 @@ public class PaymentType extends AbstractPersistable<Long> {
 
     @Column(name = "order_position")
     private Long position;
+    
+    @OneToOne
+    @JoinColumn(name  = "fundsourceaccountid", nullable = true)
+    private GLAccount fundSourceAccount;
 
     protected PaymentType() {}
 
-    public PaymentType(final String name, final String description, final Boolean isCashPayment, final Long position) {
+    public PaymentType(final String name, final String description, final Boolean isCashPayment, final Long position, final GLAccount fundSourceAccount) {
         this.name = name;
         this.description = description;
         this.isCashPayment = isCashPayment;
         this.position = position;
+        this.fundSourceAccount = fundSourceAccount;
     }
 
-    public static PaymentType create(String name, String description, Boolean isCashPayment, Long position) {
-        return new PaymentType(name, description, isCashPayment, position);
+    public static PaymentType create(final String name, final String description, final Boolean isCashPayment, final Long position,
+    	final GLAccount fundSourceAccount) {
+        return new PaymentType(name, description, isCashPayment, position,fundSourceAccount);
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
+    public Map<String, Object> update(final JsonCommand command,GLAccount newFundSource) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(3);
 
@@ -87,11 +100,24 @@ public class PaymentType extends AbstractPersistable<Long> {
             actualChanges.put(PaymentTypeApiResourceConstants.POSITION, newPosition);
             this.position = newPosition;
         }
-
+        
+        if(this.fundSourceAccount != newFundSource){
+            actualChanges.put(PaymentTypeApiResourceConstants.FUNDSOURCEACCOUNTID, newFundSource.getId());
+            this.fundSourceAccount = newFundSource;
+         }
+        
         return actualChanges;
     }
 
     public PaymentTypeData toData() {
-        return PaymentTypeData.instance(getId(), this.name, this.description, this.isCashPayment, this.position);
+    	if(this.fundSourceAccount != null){
+        return PaymentTypeData.instance(getId(), this.name, this.description, this.isCashPayment, this.position,this.fundSourceAccount.getId(), this.fundSourceAccount.getName());
+    	}else{
+    		return PaymentTypeData.instance(getId(), this.name, this.description, this.isCashPayment, this.position,null, null);
+    	}
     }
+
+	public GLAccount getFundSourceAccount() {
+		return fundSourceAccount;
+	}
 }

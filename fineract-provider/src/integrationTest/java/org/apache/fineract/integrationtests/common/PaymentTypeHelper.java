@@ -34,19 +34,20 @@ public class PaymentTypeHelper {
     private static final String PAYMENTTYPE_URL = "/fineract-provider/api/v1/paymenttypes";
 
     public static Integer createPaymentType(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String name, final String description, final Boolean isCashPayment, final Integer position) {
+            final String name, final String description, final Boolean isCashPayment, final Integer position,final Long fundSourceAccountId) {
         System.out.println("---------------------------------CREATING A PAYMENT TYPE---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_PAYMENTTYPE_URL,
-                getJsonToCreatePaymentType(name, description, isCashPayment, position), "resourceId");
+                getJsonToCreatePaymentType(name, description, isCashPayment, position,fundSourceAccountId), "resourceId");
     }
 
     public static String getJsonToCreatePaymentType(final String name, final String description, final Boolean isCashPayment,
-            final Integer position) {
+            final Integer position,final Long fundSourceAccountId) {
         HashMap hm = new HashMap();
         hm.put("name", name);
         if (description != null) hm.put("description", description);
         hm.put("isCashPayment", isCashPayment);
         if (position != null) hm.put("position", position);
+        if (fundSourceAccountId!=null) hm.put("fundSourceAccountId", fundSourceAccountId);
 
         System.out.println("------------------------CREATING PAYMENT TYPE-------------------------" + hm);
         return new Gson().toJson(hm);

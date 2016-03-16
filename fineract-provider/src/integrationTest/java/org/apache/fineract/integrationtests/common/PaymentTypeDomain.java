@@ -25,15 +25,16 @@ public class PaymentTypeDomain {
     private String description;
     private Boolean isCashPayment;
     private Integer position;
+    private Long fundSourceAccountId;
 
     private PaymentTypeDomain(final Integer id, final String name, final String description, final Boolean isCashPayment,
-            final Integer position) {
+            final Integer position,final Long fundSourceId) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.isCashPayment = isCashPayment;
         this.position = position;
-
+        this.fundSourceAccountId = fundSourceAccountId;
     }
 
     public Integer getId() {
@@ -75,5 +76,13 @@ public class PaymentTypeDomain {
     public void setPosition(Integer position) {
         this.position = position;
     }
+
+	public Long getFundSourceAccountId() {
+		return fundSourceAccountId;
+	}
+
+	public void setFundSourceAccountId(Long fundSourceAccountId) {
+		this.fundSourceAccountId = fundSourceAccountId;
+	}
 
 }
