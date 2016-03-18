@@ -77,9 +77,11 @@ public class Meeting extends AbstractPersistable<Long> {
         this.meetingDate = meetingDate;
     }
 
-    public static Meeting createNew(final CalendarInstance calendarInstance, final Date meetingDate, Boolean isTransactionDateOnNonMeetingDate) {
+    public static Meeting createNew(final CalendarInstance calendarInstance, final Date meetingDate, Boolean isTransactionDateOnNonMeetingDate,
+    		final boolean isSkipRepaymentOnFirstMonth, final int numberOfDays) {
     	
-    	if (!isTransactionDateOnNonMeetingDate && !isValidMeetingDate(calendarInstance, meetingDate)) { throw new NotValidRecurringDateException("meeting", "The date '"
+    	if (!isTransactionDateOnNonMeetingDate && !isValidMeetingDate(calendarInstance, meetingDate,isSkipRepaymentOnFirstMonth, numberOfDays)) 
+    	{ throw new NotValidRecurringDateException("meeting", "The date '"
                 + meetingDate + "' is not a valid meeting date.", meetingDate); }
         return new Meeting(calendarInstance, meetingDate);
     }
@@ -93,7 +95,7 @@ public class Meeting extends AbstractPersistable<Long> {
         this.clientsAttendance = new HashSet<>(clientsAttendance);
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
+    public Map<String, Object> update(final JsonCommand command, final boolean isSkipRepaymentOnFirstMonth, final int numberOfDays) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
@@ -106,7 +108,7 @@ public class Meeting extends AbstractPersistable<Long> {
             actualChanges.put("locale", localeAsInput);
             this.meetingDate = newValue.toDate();
 
-            if (!isValidMeetingDate(this.calendarInstance, this.meetingDate)) { throw new NotValidRecurringDateException("meeting",
+            if (!isValidMeetingDate(this.calendarInstance, this.meetingDate, isSkipRepaymentOnFirstMonth, numberOfDays)) { throw new NotValidRecurringDateException("meeting",
                     "Not a valid meeting date", this.meetingDate); }
 
         }
@@ -177,14 +179,15 @@ public class Meeting extends AbstractPersistable<Long> {
         return this.meetingDate != null && newStartDate != null && getMeetingDateLocalDate().isBefore(newStartDate) ? true : false;
     }
 
-    private static boolean isValidMeetingDate(final CalendarInstance calendarInstance, final Date meetingDate) {
+    private static boolean isValidMeetingDate(final CalendarInstance calendarInstance, final Date meetingDate,
+    		final boolean isSkipRepaymentOnFirstMonth, final int numberOfDays) {
         final Calendar calendar = calendarInstance.getCalendar();
         LocalDate meetingDateLocalDate = null;
         if (meetingDate != null) {
             meetingDateLocalDate = LocalDate.fromDateFields(meetingDate);
         }
 
-        if (meetingDateLocalDate == null || !calendar.isValidRecurringDate(meetingDateLocalDate)) { return false; }
+        if (meetingDateLocalDate == null || !calendar.isValidRecurringDate(meetingDateLocalDate, isSkipRepaymentOnFirstMonth, numberOfDays)) { return false; }
         return true;
     }
 
