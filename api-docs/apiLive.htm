@@ -3159,10 +3159,42 @@
 								<td></td>
 							</tr>
 							<tr>
-								<td><a href="#selfloan">Loans</a></td>
+								<td><a href="#selfloantemplate">Loans</a></td>
+								<td>self/loans/template?templateType=individual</td>
+								<td></td>
+								<td><a href="#selfloantemplate">Loan Application Template</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/loans?command=calculateLoanSchedule</td>
+								<td><a href="#selfloancalc">Calculate Loan Repayment Schedule</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/loans</td>
+								<td><a href="#selfloanapply">Submit new Loan Application</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
 								<td>self/loans/{loanId}</td>
 								<td></td>
 								<td><a href="#selfloan">Retrieve a Loan</a></td>
+								<td><a href="#selfloanupdate">Update a Loan Application</a></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/loans/{loanId}?command=withdrawnByApplicant</td>
+								<td><a href="#selfloanwithdraw">Withdraw Loan Application</a></td>
+								<td></td>
 								<td></td>
 								<td></td>
 							</tr>
@@ -39210,10 +39242,10 @@ No Request Body
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-POST https://DomainName/api/v1/userdetails?access_token={access_token}
+POST https://DomainName/api/v1/self/userdetails?access_token={access_token}
 					</code>
 					<code class="method-request">
-POST userdetails?access_token=bWlmb3M6cGFzc3dvcmQ=
+POST self/userdetails?access_token=bWlmb3M6cGFzc3dvcmQ=
 Content-Type: application/json
 No Request Body
 					</code>
@@ -39989,6 +40021,610 @@ GET https://DomainName/api/v1/self/clients/{clientId}/transaction/{transactionId
 				</div>
 			</div>
 
+			<a id="selfloantemplate" name="selfloantemplate" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Loan Details Template</h4>
+					<p>This is a convenience resource. It can be useful when
+						building maintenance user interface screens for client
+						applications. The template data returned consists of any or all
+						of:
+					<ul>
+						<li class=normalli>Field Defaults</li>
+						<li class=normalli>Allowed Value Lists</li>
+					</ul>
+					</p>
+					<h5>Arguments</h5>
+					<dl class="argument-list">
+						<dt>templateType</dt>
+						<dd>
+							String <span>mandatory</span>, only allowed value is <span>individual</span>
+						</dd>
+						<dd>
+							<br>templateType value decides the required template data for creating a new loan application.
+
+						</dd>
+						<dd>
+							<br><b>'individual':</b> Loan template data for creating individual loans.
+						</dd>
+						<dt>clientId</dt>
+						<dd>
+							Integer <span>mandatory</span>
+						</dd>
+					</dl>
+					<h5>Optional Arguments</h5>
+					<dl class="argument-list">
+						<dt>productId</dt>
+						<dd>
+							Integer <span>optional</span>
+						</dd>
+						<dd>If entered, productId, productName and selectedProduct
+							fields are returned.</dd>
+
+					</dl>
+					<p>Example Requests:</p>
+					<div class=apiClick>self/loans/template?templateType=individual&clientId=1</div>
+					<br>
+					<br>
+					<div class=apiClick>self/loans/template?templateType=individual&clientId=1&productId=1</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/loans/template?templateType=individual&clientId=1
+					</code>
+					<code class="method-response">
+{
+  "clientId": 1,
+  "clientName": "Kampala first Client",
+  "clientOfficeId": 2,
+  "timeline": {
+    "expectedDisbursementDate": [
+      2013,
+      3,
+      8
+    ]
+  },
+  "productOptions": [
+    {
+      "id": 1,
+      "name": "Kampala Product (with cash accounting)"
+    }
+  ]
+}
+					</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/loans/template?templateType=individual&clientId=1&productId=1
+					</code>
+					<code class="method-response">
+{
+  "clientId": 1,
+  "clientName": "Kampala first Client",
+  "clientOfficeId": 2,
+  "loanProductId": 1,
+  "loanProductName": "Kampala Product (with cash accounting)",
+  "loanProductDescription": "Typical Kampala loan product with cash accounting enabled for testing.",
+  "currency": {
+    "code": "UGX",
+    "name": "Uganda Shilling",
+    "decimalPlaces": 2,
+    "displaySymbol": "USh",
+    "nameCode": "currency.UGX",
+    "displayLabel": "Uganda Shilling (USh)"
+  },
+  "principal": 1000000,
+  "termFrequency": 12,
+  "termPeriodFrequencyType": {
+    "id": 2,
+    "code": "repaymentFrequency.periodFrequencyType.months",
+    "value": "Months"
+  },
+  "numberOfRepayments": 12,
+  "repaymentEvery": 1,
+  "repaymentFrequencyType": {
+    "id": 2,
+    "code": "repaymentFrequency.periodFrequencyType.months",
+    "value": "Months"
+  },
+  "interestRatePerPeriod": 24,
+  "interestRateFrequencyType": {
+    "id": 3,
+    "code": "interestRateFrequency.periodFrequencyType.years",
+    "value": "Per year"
+  },
+  "annualInterestRate": 24,
+  "amortizationType": {
+    "id": 1,
+    "code": "amortizationType.equal.installments",
+    "value": "Equal installments"
+  },
+  "interestType": {
+    "id": 1,
+    "code": "interestType.flat",
+    "value": "Flat"
+  },
+  "interestCalculationPeriodType": {
+    "id": 1,
+    "code": "interestCalculationPeriodType.same.as.repayment.period",
+    "value": "Same as repayment period"
+  },
+  "transactionProcessingStrategyId": 2,
+  "timeline": {
+    "expectedDisbursementDate": [
+      2013,
+      3,
+      8
+    ]
+  },
+  "daysInMonthType": {
+    "id": 30,
+    "code": "DaysInMonthType.days360",
+    "value": "30 Days"
+  },
+  "daysInYearType": {
+	"id": 360,
+	"code": "DaysInYearType.days360",
+	"value": "360 Days"
+  },
+  "isInterestRecalculationEnabled": true,
+  "interestRecalculationData": {
+    "interestRecalculationCompoundingType": {
+      "id": 2,
+      "code": "interestRecalculationCompoundingMethod.fee",
+      "value": "Fee"
+    },
+	"recalculationCompoundingFrequencyType": {
+		    "id":1,
+			"code":"interestRecalculationFrequencyType.same.as.repayment.period",
+			"value":"Same as repayment period"
+	},
+    "rescheduleStrategyType": {
+      "id": 2,
+      "code": "loanRescheduleStrategyMethod.reduce.number.of.installments",
+      "value": "Reduce number of installments"
+    },
+	"recalculationRestFrequencyType": {
+		    "id":1,
+			"code":"interestRecalculationFrequencyType.same.as.repayment.period",
+			"value":"Same as repayment period"
+	}
+  }
+  "charges": [],
+  "productOptions": [
+    {
+      "id": 1,
+      "name": "Kampala Product (with cash accounting)"
+    }
+  ],
+  "loanOfficerOptions": [
+    {
+      "id": 2,
+      "firstname": "Kampala",
+      "lastname": "LoanOfficer",
+      "displayName": "LoanOfficer, Kampala",
+      "officeId": 2,
+      "officeName": "Uganda (Kampala)",
+      "isLoanOfficer": true
+    }
+  ],
+  "loanPurposeOptions": [
+    {
+      "id": 20,
+      "name": "option.Agriculture",
+      "position": 1
+    },
+    {
+      "id": 21,
+      "name": "option.Manufacturing",
+      "position": 20
+    },
+    {
+      "id": 22,
+      "name": "option.HousingImprovement",
+      "position": 21
+    }
+  ],
+  "termFrequencyTypeOptions": [
+    {
+      "id": 0,
+      "code": "loanTermFrequency.periodFrequencyType.days",
+      "value": "Days"
+    },
+    {
+      "id": 1,
+      "code": "loanTermFrequency.periodFrequencyType.weeks",
+      "value": "Weeks"
+    },
+    {
+      "id": 2,
+      "code": "loanTermFrequency.periodFrequencyType.months",
+      "value": "Months"
+    },
+    {
+      "id": 3,
+      "code": "loanTermFrequency.periodFrequencyType.years",
+      "value": "Years"
+    }
+  ],
+  "repaymentFrequencyTypeOptions": [
+    {
+      "id": 0,
+      "code": "repaymentFrequency.periodFrequencyType.days",
+      "value": "Days"
+    },
+    {
+      "id": 1,
+      "code": "repaymentFrequency.periodFrequencyType.weeks",
+      "value": "Weeks"
+    },
+    {
+      "id": 2,
+      "code": "repaymentFrequency.periodFrequencyType.months",
+      "value": "Months"
+    }
+  ],
+  "interestRateFrequencyTypeOptions": [
+    {
+      "id": 2,
+      "code": "interestRateFrequency.periodFrequencyType.months",
+      "value": "Per month"
+    },
+    {
+      "id": 3,
+      "code": "interestRateFrequency.periodFrequencyType.years",
+      "value": "Per year"
+    }
+  ],
+  "amortizationTypeOptions": [
+    {
+      "id": 1,
+      "code": "amortizationType.equal.installments",
+      "value": "Equal installments"
+    },
+    {
+      "id": 0,
+      "code": "amortizationType.equal.principal",
+      "value": "Equal principle payments"
+    }
+  ],
+  "interestTypeOptions": [
+    {
+      "id": 1,
+      "code": "interestType.flat",
+      "value": "Flat"
+    },
+    {
+      "id": 0,
+      "code": "interestType.declining.balance",
+      "value": "Declining Balance"
+    }
+  ],
+  "interestCalculationPeriodTypeOptions": [
+    {
+      "id": 0,
+      "code": "interestCalculationPeriodType.daily",
+      "value": "Daily"
+    },
+    {
+      "id": 1,
+      "code": "interestCalculationPeriodType.same.as.repayment.period",
+      "value": "Same as repayment period"
+    }
+  ],
+  "transactionProcessingStrategyOptions": [
+    {
+      "id": 2,
+      "code": "heavensfamily-strategy",
+      "name": "Heavensfamily"
+    }
+  ],
+  "chargeOptions": [
+    {
+      "id": 1,
+      "name": "Bank Fee (per installment)",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "UGX",
+        "name": "Uganda Shilling",
+        "decimalPlaces": 2,
+        "displaySymbol": "USh",
+        "nameCode": "currency.UGX",
+        "displayLabel": "Uganda Shilling (USh)"
+      },
+      "amount": 1500,
+      "chargeTimeType": {
+        "id": 2,
+        "code": "chargeTimeType.specifiedDueDate",
+        "value": "Specified due date"
+      },
+      "chargeAppliesTo": {
+        "id": 1,
+        "code": "chargeAppliesTo.loan",
+        "value": "Loan"
+      },
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      }
+    }
+  ],
+  "loanCollateralOptions": [
+    {
+      "id": 17,
+      "name": "option.House",
+      "position": 1
+    },
+    {
+      "id": 18,
+      "name": "option.Television",
+      "position": 17
+    },
+    {
+      "id": 19,
+      "name": "option.Gold",
+      "position": 18
+    }
+  ],
+  "accountLinkingOptions":[
+  	{
+  		"id":1,
+  		"accountNo":"000000001",
+  		"clientId":1,
+  		"clientName":"pramod nuthakki",
+  		"productId":1,
+  		"productName":"pramod sav",
+  		"fieldOfficerId":0,
+  		"currency":{"code":"USD","name":"US Dollar","decimalPlaces":2,"displaySymbol":"$","nameCode":"currency.USD","displayLabel":"US Dollar ($)"}
+  	}
+  ]
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="selfloancalc" name="selfloancalc" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Calculate Loan Repayment Schedule</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>productId, principal, loanTermFrequency,
+								loanTermFrequencyType, numberOfRepayments, repaymentEvery,
+								repaymentFrequencyType, interestRatePerPeriod,
+								amortizationType, interestType,
+								interestCalculationPeriodType, expectedDisbursementDate,
+								transactionProcessingStrategyId</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/self/loans?command=calculateLoanSchedule
+					</code>
+					<code class="method-request">
+POST self/loans?command=calculateLoanSchedule
+Content-Type: application/json
+Request Body:
+{
+    "dateFormat": "dd MMMM yyyy",
+    "locale": "en_GB",
+    "productId": 1,
+    "principal": "100,000.00",
+    "loanTermFrequency": 12,
+    "loanTermFrequencyType": 2,
+    "numberOfRepayments": 12,
+    "repaymentEvery": 1,
+    "repaymentFrequencyType": 2,
+    "interestRatePerPeriod": 2,
+    "amortizationType": 1,
+    "interestType": 0,
+    "interestCalculationPeriodType": 1,
+    "expectedDisbursementDate": "20 September 2011",
+    "transactionProcessingStrategyId": 2
+}
+					</code>
+					<code class="method-response">
+{
+  "currency": {
+    "code": "UGX",
+    "name": "Uganda Shilling",
+    "decimalPlaces": 2,
+    "displaySymbol": "USh",
+    "nameCode": "currency.UGX",
+    "displayLabel": "Uganda Shilling (USh)"
+  },
+  "loanTermInDays": 366,
+  "totalPrincipalDisbursed": 100000,
+  "totalPrincipalExpected": 100000,
+  "totalPrincipalPaid": 0,
+  "totalInterestCharged": 13471.52,
+  "totalFeeChargesCharged": 0,
+  "totalPenaltyChargesCharged": 0,
+  "totalWaived": 0,
+  "totalWrittenOff": 0,
+  "totalRepaymentExpected": 113471.52,
+  "totalRepayment": 0,
+  "totalOutstanding": 0,
+  "periods": [
+    {
+      "period": 0,
+      "dueDate": [
+        2011,
+        9,
+        20
+      ],
+      "principalDisbursed": 100000,
+      "principalLoanBalanceOutstanding": 100000,
+      "feeChargesDue": 0,
+      "feeChargesOutstanding": 0,
+      "totalOriginalDueForPeriod": 0,
+      "totalDueForPeriod": 0,
+      "totalOutstandingForPeriod": 0,
+      "totalOverdue": 0,
+      "totalActualCostOfLoanForPeriod": 0
+    },
+    {
+      "period": 1,
+      "fromDate": [
+        2011,
+        9,
+        20
+      ],
+      "dueDate": [
+        2011,
+        10,
+        20
+      ],
+      "daysInPeriod": 30,
+      "principalOriginalDue": 7455.96,
+      "principalDue": 7455.96,
+      "principalOutstanding": 7455.96,
+      "principalLoanBalanceOutstanding": 92544.04,
+      "interestOriginalDue": 2000,
+      "interestDue": 2000,
+      "interestOutstanding": 2000,
+      "feeChargesDue": 0,
+      "penaltyChargesDue": 0,
+      "totalOriginalDueForPeriod": 9455.96,
+      "totalDueForPeriod": 9455.96,
+      "totalPaidForPeriod": 0,
+      "totalOutstandingForPeriod": 9455.96,
+      "totalOverdue": 9455.96,
+      "totalActualCostOfLoanForPeriod": 2000
+    },
+    ...
+    ...
+    {
+      "period": 12,
+      "fromDate": [
+        2012,
+        8,
+        20
+      ],
+      "dueDate": [
+        2012,
+        9,
+        20
+      ],
+      "daysInPeriod": 31,
+      "principalOriginalDue": 9270.56,
+      "principalDue": 9270.56,
+      "principalOutstanding": 9270.56,
+      "principalLoanBalanceOutstanding": 0,
+      "interestOriginalDue": 185.4,
+      "interestDue": 185.4,
+      "interestOutstanding": 185.4,
+      "feeChargesDue": 0,
+      "penaltyChargesDue": 0,
+      "totalOriginalDueForPeriod": 9455.96,
+      "totalDueForPeriod": 9455.96,
+      "totalPaidForPeriod": 0,
+      "totalOutstandingForPeriod": 9455.96,
+      "totalOverdue": 9455.96,
+      "totalActualCostOfLoanForPeriod": 185.4
+    }
+  ]
+}
+					</code>
+				</div>
+			</div>
+			
+			
+			<a id="selfloanapply" name="selfloanapply" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Submit a new Loan Application</h4>
+					<p>Only individual loanType can be used by Self Service User </p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>clientId, productId, principal, loanTermFrequency,
+								loanTermFrequencyType, loanType, numberOfRepayments, repaymentEvery,
+								repaymentFrequencyType, interestRatePerPeriod,
+								amortizationType, interestType,
+								interestCalculationPeriodType, transactionProcessingStrategyId,
+								expectedDisbursementDate, submittedOnDate, loanType</td>
+						</tr>
+					</table>
+					<br/>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Additional Mandatory Fields if interest recalculation is enabled for product and Rest frequency  not same as repayment period</div></td>
+						</tr>
+						<tr class=alt>
+							<td>recalculationRestFrequencyDate</td>
+						</tr>
+					</table>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Additional Mandatory Fields if interest recalculation with interest/fee compounding is enabled for product and compounding frequency not same as repayment period</div></td>
+						</tr>
+						<tr class=alt>
+							<td>recalculationCompoundingFrequencyDate</td>
+						</tr>
+					</table>
+					<br/>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId, allowPartialPeriodInterestCalcualtion,
+								 fixedEmiAmount, maxOutstandingLoanBalance, disbursementData, graceOnArrearsAgeing, createStandingInstructionAtDisbursement (requires linkedAccountId if set to true)
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/self/loans
+					</code>
+					<code class="method-request">
+POST self/loans
+Content-Type: application/json
+Request Body:
+{
+    "dateFormat": "dd MMMM yyyy",
+    "locale": "en_GB",
+    "clientId": 1,
+    "productId": 1,
+    "principal": "10,000.00",
+    "loanTermFrequency": 12,
+    "loanTermFrequencyType": 2,
+    "loanType": "individual",
+    "numberOfRepayments": 10,
+    "repaymentEvery": 1,
+    "repaymentFrequencyType": 2,
+    "interestRatePerPeriod": 10,
+    "amortizationType": 1,
+    "interestType": 0,
+    "interestCalculationPeriodType": 1,
+    "transactionProcessingStrategyId": 1,
+    "expectedDisbursementDate": "10 Jun 2013",
+    "submittedOnDate": "10 Jun 2013",
+    "linkAccountId" : "1",
+    "fixedEmiAmount":1100,
+    "maxOutstandingLoanBalance":"35000",
+    "disbursementData":[{"expectedDisbursementDate":"01 November 2013",
+    					"principal":22000,"approvedPrincipal":22000}]
+}
+					</code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "clientId": 1,
+    "loanId": 1,
+    "resourceId": 1
+}
+					</code>
+				</div>
+			</div>
 			<a id="selfloan" name="selfloan" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -40259,6 +40895,108 @@ GET https://DomainName/api/v1/self/loans/{loanId}
       }
     }
   ]
+  }
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="selfloanupdate" name="selfloanupdate" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h2>Update a Loan Application</h2>
+					<p>Loan application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">PUT https://Domain Name/api/v1/self/loans/{loanId}</code>
+					<code class="method-request">PUT self/loans/1
+Content-Type: application/json
+No Request Body:
+{
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "productId": 1,
+  "principal": "5000",
+  "loanTermFrequency": 10,
+  "loanTermFrequencyType": 0,
+  "numberOfRepayments": 10,
+  "repaymentEvery": 1,
+  "repaymentFrequencyType": 0,
+  "interestRatePerPeriod": 2,
+  "interestType": 0,
+  "interestCalculationPeriodType": 0,
+  "amortizationType": 1,
+  "expectedDisbursementDate": "04 March 2014",
+  "transactionProcessingStrategyId": 1
+}
+					</code>
+					<code class="method-response">
+{
+  "officeId": 2,
+  "clientId": 1,
+  "loanId": 1,
+  "resourceId": 1,
+  "changes": {
+    "principal": 5000,
+    "locale": "en"
+  }
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="selfloanwithdraw" name="selfloanwithdraw" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Applicant Withdraws from Loan Application</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>withdrawnOnDate</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/self/loans/{loanId}?command=withdrawnByApplicant
+					</code>
+					<code class="method-request">
+POST self/loans/1?command=withdrawnByApplicant
+Content-Type: application/json
+Request Body:
+{
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "withdrawnOnDate": "20 September 2011",
+    "note": "Reason loan applicant withdrew from application."
+}
+</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 2,
+  "resourceId": 2,
+  "changes": {
+    "status": {
+      "id": 400,
+      "code": "loanStatusType.withdrawn.by.client",
+      "value": "Withdrawn by applicant",
+      "pendingApproval": false,
+      "waitingForDisbursal": false,
+      "active": false,
+      "closedObligationsMet": false,
+      "closedWrittenOff": false,
+      "closedRescheduled": false,
+      "closed": false,
+      "overpaid": false
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "withdrawnOnDate": "20 September 2011",
+    "closedOnDate": "20 September 2011"
   }
 }
 					</code>

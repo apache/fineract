@@ -325,7 +325,7 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
         }else if(!this.isSelfServiceUser && actualChanges.containsKey(AppUserConstants.IS_SELF_SERVICE_USER)){
         	actualChanges.put(AppUserConstants.CLIENTS, new ArrayList<>());
         	if(this.appUserClientMappings != null){
-        		this.appUserClientMappings = null;
+        		this.appUserClientMappings.clear();
         	}
         }
 
