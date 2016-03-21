@@ -856,7 +856,7 @@ public class Loan extends AbstractPersistable<Long> {
         if (loanCharge.isOverdueInstallmentCharge()) { return loanCharge.getAmountPercentageAppliedTo(); }
         switch (loanCharge.getChargeCalculation()) {
             case PERCENT_OF_AMOUNT:
-                amount = getPrincpal().getAmount();
+                    amount = getDerivedAmountForCharge(loanCharge);
             break;
             case PERCENT_OF_AMOUNT_AND_INTEREST:
                 final BigDecimal totalInterestCharged = getTotalInterest();
@@ -1074,7 +1074,7 @@ public class Loan extends AbstractPersistable<Long> {
             if (loanCharge.getId() == null) {
                 LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = null;
                 loanCharge.update(this);
-                if (this.loanProduct.isMultiDisburseLoan()) {
+                if (this.loanProduct.isMultiDisburseLoan() && loanCharge.isTrancheDisbursementCharge()) {
                     loanCharge.getTrancheDisbursementCharge().getloanDisbursementDetails().updateLoan(this);
                     for (final LoanDisbursementDetails loanDisbursementDetails : this.disbursementDetails) {
                         if (loanCharge.getTrancheDisbursementCharge().getloanDisbursementDetails().getId() == null) {
@@ -2576,7 +2576,7 @@ public class Loan extends AbstractPersistable<Long> {
         updateLoanSchedule(loanSchedule, currentUser);
         Set<LoanCharge> charges = this.charges();
         for (LoanCharge loanCharge : charges) {
-            recalculateLoanCharge(loanCharge, scheduleGeneratorDTO.getPenaltyWaitPeriod());
+                recalculateLoanCharge(loanCharge, scheduleGeneratorDTO.getPenaltyWaitPeriod());
         }
     }
 
@@ -2640,7 +2640,9 @@ public class Loan extends AbstractPersistable<Long> {
         final Integer installmentNumber = null;
         for (final LoanCharge charge : charges()) {
             Date actualDisbursementDate = getActualDisbursementDate(charge);
-            if (charge.getCharge().getChargeTimeType() == ChargeTimeType.DISBURSEMENT.getValue()
+            if ((charge.getCharge().getChargeTimeType() == ChargeTimeType.DISBURSEMENT.getValue() 
+            		&& disbursedOn.equals(new LocalDate(actualDisbursementDate)) && actualDisbursementDate != null
+                    && !charge.isWaived() && !charge.isFullyPaid())
                     || (charge.getCharge().getChargeTimeType() == ChargeTimeType.TRANCHE_DISBURSEMENT.getValue()
                             && disbursedOn.equals(new LocalDate(actualDisbursementDate)) && actualDisbursementDate != null
                             && !charge.isWaived() && !charge.isFullyPaid())) {
@@ -5530,7 +5532,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     private Date getActualDisbursementDate(final LoanCharge loanCharge) {
-        Date actualDisbursementDate = null;
+        Date actualDisbursementDate = this.actualDisbursementDate;
         if (loanCharge.isDueAtDisbursement() && loanCharge.isActive()) {
             LoanTrancheDisbursementCharge trancheDisbursementCharge = loanCharge.getTrancheDisbursementCharge();
             if (trancheDisbursementCharge != null) {
@@ -5697,6 +5699,16 @@ public class Loan extends AbstractPersistable<Long> {
             }
         }
         return nextRepaymentDate;
+    }
+    
+    public BigDecimal getDerivedAmountForCharge(LoanCharge loanCharge) {
+        BigDecimal amount = BigDecimal.ZERO;
+        if (isMultiDisburmentLoan() && (loanCharge.getCharge().getChargeTimeType() == ChargeTimeType.DISBURSEMENT.getValue())) {
+            amount = getApprovedPrincipal();
+        } else {
+            amount = getPrincpal().getAmount();
+        }
+        return amount;
     }
 
 }
