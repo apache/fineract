@@ -191,10 +191,9 @@ public class LoanUtilService {
 
             if (calculatedRepaymentsStartingFromDate == null && !calendar.getCalendarHistory().isEmpty() &&
                     calendarHistoryDataWrapper != null) {
-                for (CalendarHistory calendarHistory : calendarHistoryDataWrapper.getCalendarHistoryList()) {
-                    calculatedRepaymentsStartingFromDate = calendarHistory.getStartDateLocalDate();
-                    break;
-                }
+                // generate the first repayment date based on calendar history
+                calculatedRepaymentsStartingFromDate = generateCalculatedRepaymentStartDate(calendarHistoryDataWrapper,
+                        calculatedRepaymentsStartingFromDate, actualDisbursementDate, loan);
                 return calculatedRepaymentsStartingFromDate;
             }
 
@@ -215,6 +214,23 @@ public class LoanUtilService {
                             repayEvery, frequency);
                 }
             }
+        }
+        return calculatedRepaymentsStartingFromDate;
+    }
+
+    private LocalDate generateCalculatedRepaymentStartDate(final CalendarHistoryDataWrapper calendarHistoryDataWrapper,
+            LocalDate calculatedRepaymentsStartingFromDate, LocalDate actualDisbursementDate, Loan loan) {
+        final LoanProductRelatedDetail repaymentScheduleDetails = loan.repaymentScheduleDetail();
+        final WorkingDays workingDays = this.workingDaysRepository.findOne();
+        for (CalendarHistory calendarHistory : calendarHistoryDataWrapper.getCalendarHistoryList()) {
+                if(repaymentScheduleDetails != null){
+                    final Integer repayEvery = repaymentScheduleDetails.getRepayEvery();
+                    final String frequency = CalendarUtils.getMeetingFrequencyFromPeriodFrequencyType(repaymentScheduleDetails
+                            .getRepaymentPeriodFrequencyType());
+                    calculatedRepaymentsStartingFromDate = CalendarUtils.getNextRepaymentMeetingDate(calendarHistory.getRecurrence(), calendarHistory.getStartDateLocalDate(), 
+                            actualDisbursementDate, repayEvery, frequency, workingDays);
+                }
+            break;
         }
         return calculatedRepaymentsStartingFromDate;
     }
