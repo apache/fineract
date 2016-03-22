@@ -162,8 +162,11 @@ public class LoanChargeAssembler {
                                         final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition, principal, amount,
                                                 chargeTime, chargeCalculation, dueDate, chargePaymentModeEnum, numberOfRepayments);
                                         loanCharges.add(loanCharge);
-                                        loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge, disbursementDetail);
-                                        loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
+                                        if (loanCharge.isTrancheDisbursementCharge()) {
+                                            loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge,
+                                                    disbursementDetail);
+                                            loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
+                                        }
                                     } else {
                                         if (disbursementDetail.expectedDisbursementDateAsLocalDate().equals(expectedDisbursementDate)) {
                                             final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition,
@@ -171,9 +174,11 @@ public class LoanChargeAssembler {
                                                     disbursementDetail.expectedDisbursementDateAsLocalDate(), chargePaymentModeEnum,
                                                     numberOfRepayments);
                                             loanCharges.add(loanCharge);
-                                            loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge,
-                                                    disbursementDetail);
-                                            loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
+                                            if (loanCharge.isTrancheDisbursementCharge()) {
+                                                loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge,
+                                                        disbursementDetail);
+                                                loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
+                                            }
                                         }
                                     }
                                 }
