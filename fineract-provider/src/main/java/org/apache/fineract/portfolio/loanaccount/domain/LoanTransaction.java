@@ -552,7 +552,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return result;
     }
 
-    public LoanTransactionData toData(final CurrencyData currencyData, final AccountTransferData transfer) {
+    public LoanTransactionData toData(final CurrencyData currencyData, final AccountTransferData transfer,final String note) {
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(this.typeOf);
         PaymentDetailData paymentDetailData = null;
         if (this.paymentDetail != null) {
@@ -561,7 +561,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return new LoanTransactionData(getId(), this.office.getId(), this.office.getName(), transactionType, paymentDetailData,
                 currencyData, getTransactionDate(), this.amount, this.principalPortion, this.interestPortion, this.feeChargesPortion,
                 this.penaltyChargesPortion, this.overPaymentPortion, this.externalId, transfer, null, outstandingLoanBalance,
-                this.unrecognizedIncomePortion, this.manuallyAdjustedOrReversed);
+                this.unrecognizedIncomePortion, this.manuallyAdjustedOrReversed,note);
     }
 
     public Map<String, Object> toMapData(final CurrencyData currencyData) {
