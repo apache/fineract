@@ -40,14 +40,18 @@ public class ScheduleGeneratorDTO {
     final Calendar calendar;
     final CalendarHistoryDataWrapper calendarHistoryDataWrapper;
     final Boolean isInterestChargedFromDateAsDisbursementDateEnabled;
+    final Integer numberOfdays;
+    final boolean isSkipRepaymentOnFirstDayofMonth;
+
 
     public ScheduleGeneratorDTO(final LoanScheduleGeneratorFactory loanScheduleFactory, final ApplicationCurrency applicationCurrency,
             final LocalDate calculatedRepaymentsStartingFromDate, final HolidayDetailDTO holidayDetailDTO,
             final CalendarInstance calendarInstanceForInterestRecalculation, final CalendarInstance compoundingCalendarInstance,
             final LocalDate recalculateFrom, final Long overdurPenaltyWaitPeriod, final FloatingRateDTO floatingRateDTO,
-            final Calendar calendar, final CalendarHistoryDataWrapper calendarHistoryDataWrapper, 
-            final Boolean isInterestChargedFromDateAsDisbursementDateEnabled) {
 
+            final Calendar calendar, final CalendarHistoryDataWrapper calendarHistoryDataWrapper, 
+            final Boolean isInterestChargedFromDateAsDisbursementDateEnabled, final Integer numberOfdays, final boolean isSkipRepaymentOnFirstDayofMonth) {
+    	
         this.loanScheduleFactory = loanScheduleFactory;
         this.applicationCurrency = applicationCurrency;
         this.calculatedRepaymentsStartingFromDate = calculatedRepaymentsStartingFromDate;
@@ -61,6 +65,8 @@ public class ScheduleGeneratorDTO {
         this.calendarHistoryDataWrapper  = calendarHistoryDataWrapper;
         this.isInterestChargedFromDateAsDisbursementDateEnabled = isInterestChargedFromDateAsDisbursementDateEnabled;
 
+        this.numberOfdays = numberOfdays;
+        this.isSkipRepaymentOnFirstDayofMonth = isSkipRepaymentOnFirstDayofMonth;
     }
 
     public LoanScheduleGeneratorFactory getLoanScheduleFactory() {
@@ -121,6 +127,14 @@ public class ScheduleGeneratorDTO {
     
     public Boolean isInterestChargedFromDateAsDisbursementDateEnabled(){
         return this.isInterestChargedFromDateAsDisbursementDateEnabled;
+    }
+
+    public Integer getNumberOfdays() {
+        return numberOfdays;
+    }
+
+    public boolean isSkipRepaymentOnFirstDayofMonth() {
+        return isSkipRepaymentOnFirstDayofMonth;
     }
 
 }
