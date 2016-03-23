@@ -4,43 +4,8 @@ Changelog
 Releases
 ===============
 
-1. 16 Mar 2015 - 16.03.02.RELEASE
-1. 09 Mar 2015 - 16.03.01.RELEASE
 1. 24 Feb 2016 - 0.1.1-incubating
 
-16.03.02.RELEASE
-=============
-
-This release is being made to fix critical regression issue found by QA. Also 2 more major issues have been addressed.
- 
-Platform & API
-
-Bugs
- 
- - [MIFOSX-2626] - Repayment schedule generated for multi tranche loan is not proper
- - [FINERACT-67] - undo last tranche not working
- - [FINERACT-68] - validation for center meeting rescheduling(Should not allow to reschedule FRP of loans under that center
-
- 16.03.01.RELEASE
-=============
-
-This release includes following features and Bug fixes as mentioned below:
- 
-Platform & API
-
-New Features & Improvements
-
- - Added organization start date global configuration
- - Center rescheduling
- - Support for Interest Rate Charts based on amount
-  
-Bugs
- 
- - Infinite loop fix when retrying for loan schedular service
- - Fix for repayment information
- - [FINERACT-59] corrected interest calculation for flat loans
- - [FINERACT-62] payment type applicable for disbursement charge configuration
- 
 0.1.1-incubating
 =============
 
