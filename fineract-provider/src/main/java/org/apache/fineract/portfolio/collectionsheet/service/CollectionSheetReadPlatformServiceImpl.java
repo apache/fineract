@@ -36,6 +36,7 @@ import java.util.Set;
 
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -44,8 +45,10 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
+import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.apache.fineract.portfolio.calendar.domain.CalendarRepositoryWrapper;
 import org.apache.fineract.portfolio.calendar.exception.NotValidRecurringDateException;
+import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
 import org.apache.fineract.portfolio.collectionsheet.data.IndividualClientData;
 import org.apache.fineract.portfolio.collectionsheet.data.IndividualCollectionSheetData;
 import org.apache.fineract.portfolio.collectionsheet.data.IndividualCollectionSheetLoanFlatData;
@@ -91,6 +94,9 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
     private final MandatorySavingsCollectionsheetExtractor mandatorySavingsExtractor = new MandatorySavingsCollectionsheetExtractor();
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    private final CalendarReadPlatformService calendarReadPlatformService;
+    private final ConfigurationDomainService configurationDomainService;
+    private final CalendarInstanceRepository calendarInstanceRepository;
 
     @Autowired
     public CollectionSheetReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -98,7 +104,9 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final CollectionSheetGenerateCommandFromApiJsonDeserializer collectionSheetGenerateCommandFromApiJsonDeserializer,
             final CalendarRepositoryWrapper calendarRepositoryWrapper,
             final AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService, final PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
+            final CodeValueReadPlatformService codeValueReadPlatformService, final PaymentTypeReadPlatformService paymentTypeReadPlatformService,
+            final CalendarReadPlatformService calendarReadPlatformService, final ConfigurationDomainService configurationDomainService,
+            final CalendarInstanceRepository calendarInstanceRepository) {
         this.context = context;
         this.centerReadPlatformService = centerReadPlatformService;
         this.namedParameterjdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
@@ -108,6 +116,9 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         this.attendanceDropdownReadPlatformService = attendanceDropdownReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
+        this.calendarReadPlatformService = calendarReadPlatformService;
+        this.configurationDomainService = configurationDomainService;
+        this.calendarInstanceRepository = calendarInstanceRepository;
     }
 
     /*
@@ -320,20 +331,39 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         final Calendar calendar = this.calendarRepositoryWrapper.findOneWithNotFoundDetection(calendarId);
         // check if transaction against calendar effective from date
+        
+        final GroupGeneralData group = this.groupReadPlatformService.retrieveOne(groupId);
+        
+        // entityType should be center if it's within a center
+        final CalendarEntityType entityType = (group.isChildGroup()) ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
+        
+        Long entityId = null;
+        if(group.isChildGroup()){
+        	entityId = group.getParentId();
+        }else{
+        	entityId = group.getId();
+        }
 
-        if (!calendar.isValidRecurringDate(transactionDate)) { throw new NotValidRecurringDateException("collectionsheet", "The date '"
+        Boolean isSkipMeetingOnFirstDay = false;
+        Integer numberOfDays = 0;
+        boolean isSkipRepaymentOnFirstMonthEnabled = this.configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
+        if(isSkipRepaymentOnFirstMonthEnabled){
+            numberOfDays = this.configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
+            isSkipMeetingOnFirstDay = this.calendarReadPlatformService.isCalendarAssociatedWithEntity(entityId, calendar.getId(), 
+            		entityType.getValue().longValue());
+        }
+
+        if (!calendar.isValidRecurringDate(transactionDate, isSkipMeetingOnFirstDay, numberOfDays)) { throw new NotValidRecurringDateException("collectionsheet", "The date '"
                 + transactionDate + "' is not a valid meeting date.", transactionDate); }
 
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String officeHierarchy = hierarchy + "%";
 
-        final GroupGeneralData group = this.groupReadPlatformService.retrieveOne(groupId);
+        
 
         final JLGCollectionSheetFaltDataMapper mapper = new JLGCollectionSheetFaltDataMapper();
 
-        // entityType should be center if it's within a center
-        final CalendarEntityType entityType = (group.isChildGroup()) ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
 
         final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("dueDate", transactionDateStr)
                 .addValue("groupId", group.getId()).addValue("officeHierarchy", officeHierarchy)

@@ -560,15 +560,15 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
         return recurrenceBuilder.toString();
     }
 
-    public boolean isValidRecurringDate(final LocalDate compareDate) {
+    public boolean isValidRecurringDate(final LocalDate compareDate, Boolean isSkipRepaymentOnFirstMonth, Integer numberOfDays) {
 
         if (isBetweenStartAndEndDate(compareDate)) { return CalendarUtils.isValidRedurringDate(getRecurrence(), getStartDateLocalDate(),
-                compareDate); }
+                compareDate, isSkipRepaymentOnFirstMonth, numberOfDays); }
 
         // validate with history details.
         for (CalendarHistory history : history()) {
             if (history.isBetweenStartAndEndDate(compareDate)) { return CalendarUtils.isValidRedurringDate(history.getRecurrence(),
-                    history.getStartDateLocalDate(), compareDate); }
+                    history.getStartDateLocalDate(), compareDate, isSkipRepaymentOnFirstMonth, numberOfDays); }
         }
 
         return false;
