@@ -289,6 +289,7 @@ public class LoanScheduleAssembler {
         final Integer graceOnInterestPayment = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestPayment", element);
         final Integer graceOnInterestCharged = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestCharged", element);
         final LocalDate interestChargedFromDate = this.fromApiJsonHelper.extractLocalDateNamed("interestChargedFromDate", element);
+        final Boolean isInterestChargedFromDateSameAsDisbursalDateEnabled = this.configurationDomainService.isInterestChargedFromDateSameAsDisbursementDate();
 
         final Integer graceOnArrearsAgeing = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
                 LoanProductConstants.graceOnArrearsAgeingParameterName, element);
@@ -396,7 +397,7 @@ public class LoanScheduleAssembler {
                 maxOutstandingBalance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                 recalculationFrequencyType, restCalendarInstance, compoundingCalendarInstance, compoundingFrequencyType,
                 principalThresholdForLastInstalment, installmentAmountInMultiplesOf, loanProduct.preCloseInterestCalculationStrategy(),
-                calendar, BigDecimal.ZERO, loanTermVariations);
+                calendar, BigDecimal.ZERO, loanTermVariations, isInterestChargedFromDateSameAsDisbursalDateEnabled);
     }
 
     private CalendarInstance createCalendarForSameAsRepayment(final Integer repaymentEvery,
