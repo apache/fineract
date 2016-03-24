@@ -35,6 +35,7 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarType;
 import org.apache.fineract.portfolio.calendar.exception.CalendarNotFoundException;
 import org.apache.fineract.portfolio.meeting.data.MeetingData;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -62,7 +63,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
                     + " c.duration as duration, c.calendar_type_enum as typeId, c.repeating as repeating, "
                     + " c.recurrence as recurrence, c.remind_by_enum as remindById, c.first_reminder as firstReminder, c.second_reminder as secondReminder, "
                     + " c.created_date as createdDate, c.lastmodified_date as updatedDate, creatingUser.id as creatingUserId, creatingUser.username as creatingUserName, "
-                    + " updatingUser.id as updatingUserId, updatingUser.username as updatingUserName "
+                    + " updatingUser.id as updatingUserId, updatingUser.username as updatingUserName,c.meeting_time as meetingTime "
                     + " from m_calendar c join m_calendar_instance ci on ci.calendar_id=c.id, m_appuser as creatingUser, m_appuser as updatingUser"
                     + " where c.createdby_id=creatingUser.id and c.lastmodifiedby_id=updatingUser.id ";
         }
@@ -106,11 +107,12 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             final String createdByUserName = rs.getString("creatingUserName");
             final Long lastUpdatedByUserId = rs.getLong("updatingUserId");
             final String lastUpdatedByUserName = rs.getString("updatingUserName");
+            final LocalTime meetingTime = JdbcSupport.getLocalTime(rs,"meetingTime");
 
             return CalendarData.instance(id, calendarInstanceId, entityId, entityType, title, description, location, startDate, endDate,
                     duration, type, repeating, recurrence, frequency, interval, repeatsOnDay, remindBy, firstReminder, secondReminder,
                     humanReadable, createdDate, lastUpdatedDate, createdByUserId, createdByUserName, lastUpdatedByUserId,
-                    lastUpdatedByUserName);
+                    lastUpdatedByUserName,meetingTime);
         }
     }
 
@@ -495,11 +497,12 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             final String createdByUserName = null;
             final Long lastUpdatedByUserId = null;
             final String lastUpdatedByUserName = null;
+            final LocalTime meetingTime = null;
 
             return CalendarData.instance(id, calendarInstanceId, entityId, entityType, title, description, location, startDate, endDate,
                     duration, type, repeating, recurrence, frequency, interval, repeatsOnDay, remindBy, firstReminder, secondReminder,
                     humanReadable, createdDate, lastUpdatedDate, createdByUserId, createdByUserName, lastUpdatedByUserId,
-                    lastUpdatedByUserName);
+                    lastUpdatedByUserName, meetingTime);
         }
     }
     

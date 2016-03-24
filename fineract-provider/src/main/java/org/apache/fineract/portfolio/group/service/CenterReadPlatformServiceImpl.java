@@ -65,6 +65,7 @@ import org.apache.fineract.portfolio.group.domain.GroupingTypeEnumerations;
 import org.apache.fineract.portfolio.group.exception.CenterNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -234,7 +235,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
                     + " g.status_enum as statusEnum, g.activation_date as activationDate, g.hierarchy as hierarchy,  "
                     + " c.id as calendarId, ci.id as calendarInstanceId, ci.entity_id as entityId,  "
                     + " ci.entity_type_enum as entityTypeId, c.title as title,  c.description as description,  "
-                    + " c.location as location, c.start_date as startDate, c.end_date as endDate, c.recurrence as recurrence  "
+                    + " c.location as location, c.start_date as startDate, c.end_date as endDate, c.recurrence as recurrence,c.meeting_time as meetingTime  "
                     + " from m_calendar c join m_calendar_instance ci on ci.calendar_id=c.id and ci.entity_type_enum=4 join m_group g  "
                     + " on g.id = ci.entity_id join m_staff s on g.staff_id = s.id where g.office_id=? ";
         }
@@ -269,10 +270,11 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             final LocalDate startDate = JdbcSupport.getLocalDate(rs, "startDate");
             final LocalDate endDate = JdbcSupport.getLocalDate(rs, "endDate");
             final String recurrence = rs.getString("recurrence");
+            final LocalTime meetingTime = JdbcSupport.getLocalTime(rs,"meetingTime");
 
             CalendarData calendarData = CalendarData.instance(calendarId, calendarInstanceId, entityId, entityType, title, description,
                     location, startDate, endDate, null, null, false, recurrence, null, null, null, null, null, null, null, null, null,
-                    null, null, null, null);
+                    null, null, null, null,meetingTime);
             return CenterData.instance(id, accountNo, name, externalId, status, activationDate, officeId, null, staffId, staffName, hierarchy, null,
                     calendarData);
         }
