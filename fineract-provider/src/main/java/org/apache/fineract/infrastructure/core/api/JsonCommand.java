@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.security.domain.BasicPasswordEncodable
 import org.apache.fineract.infrastructure.security.domain.PlatformUser;
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.joda.time.MonthDay;
 
 import com.google.gson.JsonArray;
@@ -297,6 +298,9 @@ public final class JsonCommand {
 
     public LocalDate localDateValueOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractLocalDateNamed(parameterName, this.parsedCommand);
+    }
+    public LocalDateTime localTimeValueOfParameterNamed(final String parameterName) {
+        return this.fromApiJsonHelper.extractLocalTimeNamed(parameterName, this.parsedCommand);
     }
 
     public MonthDay extractMonthDayNamed(final String parameterName) {

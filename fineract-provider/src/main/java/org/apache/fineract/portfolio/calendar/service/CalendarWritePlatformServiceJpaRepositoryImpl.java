@@ -270,7 +270,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         LocalDate presentMeetingDate = null;
         
         if (reschedulebasedOnMeetingDates != null && reschedulebasedOnMeetingDates) {
-
+            
             newMeetingDate = command.localDateValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.NEW_MEETING_DATE.getValue());
             presentMeetingDate = command.localDateValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.PRESENT_MEETING_DATE.getValue());
 
@@ -288,6 +288,9 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         if (!changes.isEmpty()) {
             // update calendar history table only if there is a change in
             // calendar start date.
+            if (reschedulebasedOnMeetingDates == null){
+            presentMeetingDate = command.localDateValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.START_DATE.getValue());
+            }
             final Date endDate = presentMeetingDate.minusDays(1).toDate();
             calendarHistory.updateEndDate(endDate);
             this.calendarHistoryRepository.save(calendarHistory);

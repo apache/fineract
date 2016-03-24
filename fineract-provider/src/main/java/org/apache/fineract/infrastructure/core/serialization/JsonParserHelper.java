@@ -197,6 +197,20 @@ public class JsonParserHelper {
         }
         return value;
     }
+    
+    public String extractTimeFormatParameter(final JsonObject element) {
+        String value = null;
+        if (element.isJsonObject()) {
+            final JsonObject object = element.getAsJsonObject();
+
+            final String timeFormatParameter = "timeFormat";
+            if (object.has(timeFormatParameter) && object.get(timeFormatParameter).isJsonPrimitive()) {
+                final JsonPrimitive primitive = object.get(timeFormatParameter).getAsJsonPrimitive();
+                value = primitive.getAsString();
+            }
+        }
+        return value;
+    }
 
     public String extractMonthDayFormatParameter(final JsonObject element) {
         String value = null;
@@ -340,6 +354,54 @@ public class JsonParserHelper {
             final String dateFormat = extractDateFormatParameter(object);
             final Locale clientApplicationLocale = extractLocaleParameter(object);
             value = extractLocalDateNamed(parameterName, object, dateFormat, clientApplicationLocale, parametersPassedInCommand);
+        }
+        return value;
+    }
+    
+    public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonElement element,
+            final Set<String> parametersPassedInCommand) {
+
+        LocalDateTime value = null;
+
+        if (element.isJsonObject()) {
+            final JsonObject object = element.getAsJsonObject();
+
+            final String timeFormat = extractTimeFormatParameter(object);
+            final Locale clientApplicationLocale = extractLocaleParameter(object);
+            value = extractLocalTimeNamed(parameterName, object, timeFormat, clientApplicationLocale, parametersPassedInCommand);
+        }
+        return value;
+    }
+    
+    public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonObject element, final String timeFormat,
+            final Locale clientApplicationLocale, final Set<String> parametersPassedInCommand) {
+        LocalDateTime value = null;
+        String timeValueAsString=null;
+        if (element.isJsonObject()) {
+            final JsonObject object = element.getAsJsonObject();
+            if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
+                parametersPassedInCommand.add(parameterName);
+                
+                try{
+                    DateTimeFormatter timeFormtter = DateTimeFormat.forPattern(timeFormat);
+                    final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
+                     timeValueAsString = primitive.getAsString();
+                    if (StringUtils.isNotBlank(timeValueAsString)) {
+                        value = LocalDateTime.parse(timeValueAsString, timeFormtter);
+                    }    
+                }
+                catch(IllegalArgumentException e ){
+                    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                    final String defaultMessage = new StringBuilder("The parameter '" + timeValueAsString
+                            + "' is not in correct format.").toString();
+                    final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.TimeFormat", defaultMessage,
+                            parameterName);
+                    dataValidationErrors.add(error);
+                    throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                            dataValidationErrors);
+                }
+                
+            }
         }
         return value;
     }

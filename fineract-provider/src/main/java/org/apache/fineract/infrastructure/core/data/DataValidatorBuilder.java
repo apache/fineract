@@ -25,7 +25,6 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.quartz.CronExpression;
 import org.springframework.util.ObjectUtils;
-
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Arrays;
@@ -203,7 +202,7 @@ public class DataValidatorBuilder {
         }
         return this;
     }
-
+   
     public DataValidatorBuilder notExceedingLengthOf(final Integer maxLength) {
         if (this.value == null && this.ignoreNullValue) { return this; }
 

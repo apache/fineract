@@ -50,6 +50,7 @@ import org.apache.fineract.portfolio.calendar.exception.CalendarParameterUpdateN
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 
 @Entity
 @Table(name = "m_calendar")
@@ -92,7 +93,11 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
 
     @Column(name = "second_reminder", nullable = true)
     private Integer secondReminder;
-
+    
+    @Column(name="meeting_time",nullable=true)
+    @Temporal(TemporalType.TIME)
+    private Date meetingtime;
+    
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "calendar_id")
     private Set<CalendarHistory> calendarHistory = new HashSet<>();
@@ -103,7 +108,7 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
 
     public Calendar(final String title, final String description, final String location, final LocalDate startDate,
             final LocalDate endDate, final Integer duration, final Integer typeId, final boolean repeating, final String recurrence,
-            final Integer remindById, final Integer firstReminder, final Integer secondReminder) {
+            final Integer remindById, final Integer firstReminder, final Integer secondReminder,final Date meetingtime) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(CALENDAR_RESOURCE_NAME);
@@ -138,10 +143,11 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
         this.remindById = remindById;
         this.firstReminder = firstReminder;
         this.secondReminder = secondReminder;
+        this.meetingtime=meetingtime;
     }
 
     public static Calendar createRepeatingCalendar(final String title, final LocalDate startDate, final Integer typeId,
-            final CalendarFrequencyType frequencyType, final Integer interval, final Integer repeatsOnDay) {
+            final CalendarFrequencyType frequencyType, final Integer interval, final Integer repeatsOnDay,final LocalTime meetingtime) {
         final String recurrence = constructRecurrence(frequencyType, interval, repeatsOnDay);
         return createRepeatingCalendar(title, startDate, typeId, recurrence);
     }
@@ -156,8 +162,9 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
         final Integer remindById = null;
         final Integer firstReminder = null;
         final Integer secondReminder = null;
+        final Date meetingtime=null;
         return new Calendar(title, description, location, startDate, endDate, duration, typeId, repeating, recurrence, remindById,
-                firstReminder, secondReminder);
+                firstReminder, secondReminder,meetingtime);
     }
 
     public static Calendar fromJson(final JsonCommand command) {
@@ -178,10 +185,11 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
                 .getValue());
         final Integer secondReminder = command.integerValueSansLocaleOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.SECOND_REMINDER
                 .getValue());
+        final Date meetingtime=command.localTimeValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue()).toDate();
         final String recurrence = Calendar.constructRecurrence(command, null);
 
         return new Calendar(title, description, location, startDate, endDate, duration, typeId, repeating, recurrence, remindById,
-                firstReminder, secondReminder);
+                firstReminder, secondReminder,meetingtime);
     }
 
     public Map<String, Object> updateStartDateAndDerivedFeilds(final LocalDate newMeetingStartDate) {
@@ -387,7 +395,14 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
             actualChanges.put(secondRemindarParamName, newValue);
             this.secondReminder = newValue;
         }
-
+        final String meetingtime = CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue();
+        if (command.isChangeInStringParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue(), this.meetingtime.toString())) {
+            final String newValue = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue());
+            actualChanges.put(CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue(), newValue);
+            this.meetingtime= command.localTimeValueOfParameterNamed(meetingtime).toDate();
+           
+        }
+        
         return actualChanges;
     }
 
@@ -457,6 +472,10 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
 
     public Integer getSecondReminder() {
         return this.secondReminder;
+    }
+    
+    public Date getMeetingTime(){
+        return this.meetingtime;
     }
 
     public LocalDate getStartDateLocalDate() {
