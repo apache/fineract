@@ -115,6 +115,7 @@ import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -432,6 +433,7 @@ public class LoanScheduleAssembler {
             CalendarFrequencyType calendarFrequencyType) {
         final Integer repeatsOnDay = calendarStartDate.getDayOfWeek();
         final String title = "loan_recalculation_detail";
+        
         final Calendar calendar = Calendar.createRepeatingCalendar(title, calendarStartDate, CalendarType.COLLECTION.getValue(),
                 calendarFrequencyType, frequency, repeatsOnDay);
         return CalendarInstance.from(calendar, null, CalendarEntityType.LOAN_RECALCULATION_REST_DETAIL.getValue());

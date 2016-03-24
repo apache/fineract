@@ -108,6 +108,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -411,7 +412,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             default:
             break;
         }
-
+         
         final Calendar calendar = Calendar.createRepeatingCalendar(title, calendarStartDate, CalendarType.COLLECTION.getValue(),
                 calendarFrequencyType, frequency, repeatsOnDay);
         final CalendarInstance calendarInstance = CalendarInstance.from(calendar, loan.loanInterestRecalculationDetails().getId(),
