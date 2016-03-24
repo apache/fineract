@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.service;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -432,8 +433,9 @@ public class LoanScheduleAssembler {
             CalendarFrequencyType calendarFrequencyType) {
         final Integer repeatsOnDay = calendarStartDate.getDayOfWeek();
         final String title = "loan_recalculation_detail";
+        final Time meetingTime = null;
         final Calendar calendar = Calendar.createRepeatingCalendar(title, calendarStartDate, CalendarType.COLLECTION.getValue(),
-                calendarFrequencyType, frequency, repeatsOnDay);
+                calendarFrequencyType, frequency, repeatsOnDay,meetingTime);
         return CalendarInstance.from(calendar, null, CalendarEntityType.LOAN_RECALCULATION_REST_DETAIL.getValue());
     }
 

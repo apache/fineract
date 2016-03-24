@@ -196,6 +196,12 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
             baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.SECOND_REMINDER.getValue()).value(secondReminder)
                     .ignoreIfNull().integerGreaterThanZero();
         }
+        if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue(), element)) {
+            final String meetingTime = this.fromApiJsonHelper.extractStringNamed(
+                    CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue(), element);
+            baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue()).value(meetingTime)
+                    .notBlank().timeFormat();    
+        }                      
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
@@ -326,6 +332,12 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
                     CALENDAR_SUPPORTED_PARAMETERS.SECOND_REMINDER.getValue(), element);
             baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.SECOND_REMINDER.getValue()).value(secondReminder)
                     .ignoreIfNull();
+        }
+        
+        if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue(), element)) {
+            final String meetingTime = this.fromApiJsonHelper.extractStringNamed(CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue(),
+                    element);
+            baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue()).value(meetingTime).notBlank().timeFormat();
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",

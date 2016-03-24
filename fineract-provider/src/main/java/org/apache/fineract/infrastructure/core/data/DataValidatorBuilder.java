@@ -25,10 +25,11 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.quartz.CronExpression;
 import org.springframework.util.ObjectUtils;
-
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -200,6 +201,21 @@ public class DataValidatorBuilder {
             final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
                     defaultEnglishMessage.toString(), realParameterName, this.arrayIndex);
             this.dataValidationErrors.add(error);
+        }
+        return this;
+    }
+    public DataValidatorBuilder timeFormat(){
+        if (this.value == null && this.ignoreNullValue) { return this; }
+        if(this.value!=null){
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+             Date dt1 = null;         
+                try {
+                    dt1 = sdf.parse(this.value.toString());
+                } catch (ParseException e) {
+                    // TODO Auto-generated catch block
+                    final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.value).append(".")
+                            .append(this.parameter).append("is not in HH:mm:ss format");
+                }          
         }
         return this;
     }
