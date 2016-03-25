@@ -33,7 +33,7 @@ public class LoanTrancheDisbursementCharge extends AbstractPersistable<Long> {
     @JoinColumn(name = "loan_charge_id", referencedColumnName = "id", nullable = false)
     private LoanCharge loancharge;
     
-    @ManyToOne(cascade = CascadeType.ALL, optional = false)
+    @ManyToOne(cascade = CascadeType.PERSIST, optional = false)
     @JoinColumn(name="disbursement_detail_id", referencedColumnName = "id", nullable = false)
     private LoanDisbursementDetails loanDisbursementDetails; 
     
