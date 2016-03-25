@@ -45,6 +45,9 @@ group = 'org.apache.fineract'
 
 repositories {
 	jcenter()
+	maven {
+	url "http://nexus.pentaho.org/content/repositories/pentaho-public-release-repos/"
+    }
 	// mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
 }
 
@@ -94,6 +97,11 @@ task dist(type:Zip){
         include '**/*'
 		into('apps')
 	}
+	from('src/main/pentahoReports/') {
+        fileMode = 0755
+        include '*'
+        into('pentahoReports')
+    }
     from('../api-docs/') {
         fileMode = 0755
         include '*'
@@ -114,7 +122,20 @@ task dist(type:Zip){
     into(baseName + '-' + version)
 }
 
+task deployPentahoReports() {
+	def pentahoReportDir = System.properties['user.home'] + System.properties['file.separator'] + '.mifosx' + System.properties['file.separator'] + 'pentahoReports'
+	copy {
+        from "src/main/pentahoReports"
+        into pentahoReportDir
+    }
+
+    doLast {
+        println ':deployPentahoReports - moving pentaho reports under: ' + pentahoReportDir
+    }
+}
+
 war {
+    it.dependsOn deployPentahoReports
     war.finalizedBy(bootRepackage)
 }
 
