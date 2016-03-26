@@ -35,6 +35,7 @@ public class RescheduleLoansApiConstants {
     // create action request parameters
     public static final String loanIdParamName = "loanId";
     public static final String graceOnPrincipalParamName = "graceOnPrincipal";
+    public static final String recurringMoratoriumOnPrincipalPeriodsParamName = "recurringMoratoriumOnPrincipalPeriods";
     public static final String graceOnInterestParamName = "graceOnInterest";
     public static final String extraTermsParamName = "extraTerms";
     public static final String rescheduleFromDateParamName = "rescheduleFromDate";
@@ -48,7 +49,7 @@ public class RescheduleLoansApiConstants {
     public static final String resheduleWithInterestRecalculationNotSupportedErrorCode = "loan.reschedule.interestrecalculation.error.code";
     
     public static final Set<String> CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName, dateFormatParamName,
-            graceOnPrincipalParamName, graceOnInterestParamName, extraTermsParamName, rescheduleFromDateParamName,
+            graceOnPrincipalParamName, recurringMoratoriumOnPrincipalPeriodsParamName, graceOnInterestParamName, extraTermsParamName, rescheduleFromDateParamName,
             newInterestRateParamName, rescheduleReasonIdParamName, rescheduleReasonCommentParamName, submittedOnDateParamName,
             loanIdParamName, adjustedDueDateParamName, recalculateInterestParamName));
 
