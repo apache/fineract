@@ -679,6 +679,10 @@ public final class Client extends AbstractPersistable<Long> {
             if (StringUtils.isNotBlank(this.lastname)) {
                 nameBuilder.append(this.lastname);
             }
+            
+            if (StringUtils.isNotBlank(this.fullname)) {
+                nameBuilder = new StringBuilder(this.fullname);
+            }
         }
         else if(LegalForm.fromInt(legalForm).isEntity())
         {
