@@ -144,6 +144,7 @@ public class LoanProductRelatedDetailTestHelper {
             final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance) {
 
         final Integer graceOnPrincipalPayment = Integer.valueOf(0);
+        final Integer recurringMoratoriumOnPrincipalPeriods = Integer.valueOf(0);
         final Integer graceOnInterestPayment = Integer.valueOf(0);
         final Integer graceOnInterestCharged = Integer.valueOf(0);
         final Integer graceOnArrearsAgeing = Integer.valueOf(0);
@@ -155,7 +156,7 @@ public class LoanProductRelatedDetailTestHelper {
 
         return new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType,
                 defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, considerPartialPeriodInterest, repayEvery,
-                repaymentFrequencyType, defaultNumberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
+                repaymentFrequencyType, defaultNumberOfRepayments, graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged,
                 amortizationMethod, inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled);
     }
 }

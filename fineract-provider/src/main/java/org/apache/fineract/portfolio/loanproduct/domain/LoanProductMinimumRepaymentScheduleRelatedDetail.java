@@ -40,6 +40,8 @@ public interface LoanProductMinimumRepaymentScheduleRelatedDetail {
 	
 	Integer graceOnPrincipalPayment();
 	
+	Integer recurringMoratoriumOnPrincipalPeriods();
+	
 	Money getInArrearsTolerance();
 	
 	BigDecimal getNominalInterestRatePerPeriod();
