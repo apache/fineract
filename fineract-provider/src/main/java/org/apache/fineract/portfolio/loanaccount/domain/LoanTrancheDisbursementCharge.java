@@ -29,11 +29,11 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name="m_loan_tranche_disbursement_charge")
 public class LoanTrancheDisbursementCharge extends AbstractPersistable<Long> {
     
-    @ManyToOne(cascade = CascadeType.ALL, optional = false)
+    @ManyToOne
     @JoinColumn(name = "loan_charge_id", referencedColumnName = "id", nullable = false)
     private LoanCharge loancharge;
     
-    @ManyToOne(cascade = CascadeType.ALL, optional = false)
+    @ManyToOne(cascade = CascadeType.PERSIST, optional = false)
     @JoinColumn(name="disbursement_detail_id", referencedColumnName = "id", nullable = false)
     private LoanDisbursementDetails loanDisbursementDetails; 
     
