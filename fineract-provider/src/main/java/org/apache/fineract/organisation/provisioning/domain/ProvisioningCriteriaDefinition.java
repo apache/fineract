@@ -44,7 +44,7 @@ public class ProvisioningCriteriaDefinition extends AbstractPersistable<Long> {
     @Column(name = "min_age", nullable = false)
     private Long minimumAge;
 
-    @Column(name = "max_age", nullable = false)
+    @Column(name = "max_age", nullable = true)
     private Long maximumAge;
 
     @Column(name = "provision_percentage", nullable = false)
@@ -91,6 +91,11 @@ public class ProvisioningCriteriaDefinition extends AbstractPersistable<Long> {
     
     
     public boolean isOverlapping(ProvisioningCriteriaDefinition def) {
-        return this.minimumAge <= def.maximumAge && def.minimumAge <= this.maximumAge;
+        if(this.maximumAge == null || def.maximumAge == null){ //NUll symbolises infinity
+            return false;
+        }
+        else {
+            return this.minimumAge <= def.maximumAge && def.minimumAge <= this.maximumAge;
+        }
     }
 }
