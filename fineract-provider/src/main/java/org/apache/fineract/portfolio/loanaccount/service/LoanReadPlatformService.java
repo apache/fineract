@@ -107,8 +107,6 @@ public interface LoanReadPlatformService {
 
     LoanTransactionData retrieveLoanWriteoffTemplate(Long loanId);
 
-    Collection<LoanScheduleAccrualData> retrivePeriodicAccrualData(LocalDate tillDate);
-
     Collection<Long> fetchLoansForInterestRecalculation();
 
     LoanTransactionData retrieveLoanPrePaymentTemplate(Long loanId, LocalDate onDate);
@@ -126,4 +124,6 @@ public interface LoanReadPlatformService {
     LoanTransactionData retrieveRefundByCashTemplate(Long loanId);
     
     Collection<InterestRatePeriodData> retrieveLoanInterestRatePeriodData(Long loanId);
+
+	Page<LoanScheduleAccrualData> retrivePeriodicAccrualData(LocalDate tillDate, int offset, int maxPageSize, Integer fromLoanId, Integer toLoanId);
 }

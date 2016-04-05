@@ -70,7 +70,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         this.configurationDomainService = configurationDomainService;
         this.commandHandlerProvider = commandHandlerProvider;
     }
-
+       
     @Transactional
     @Override
     public CommandProcessingResult processAndLogCommand(final CommandWrapper wrapper, final JsonCommand command,

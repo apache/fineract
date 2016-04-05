@@ -51,7 +51,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlatformService {
 
-    private final LoanReadPlatformService loanReadPlatformService;
+	private final LoanReadPlatformService loanReadPlatformService;
     private final LoanChargeReadPlatformService loanChargeReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
@@ -96,12 +96,11 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         Collection<LoanChargeData> chargeData = this.loanChargeReadPlatformService.retrieveLoanChargesForAccural(loanId);
         Collection<LoanSchedulePeriodData> loanWaiverScheduleData = new ArrayList<>(1);
         Collection<LoanTransactionData> loanWaiverTansactionData = new ArrayList<>(1);
-        for (final LoanScheduleAccrualData accrualData : loanScheduleAccrualDatas) {
+        for (final LoanScheduleAccrualData accrualData : loanScheduleAccrualDatas) {        	
             if (accrualData.getWaivedInterestIncome() != null && loanWaiverScheduleData.isEmpty()) {
                 loanWaiverScheduleData = this.loanReadPlatformService.fetchWaiverInterestRepaymentData(accrualData.getLoanId());
                 loanWaiverTansactionData = this.loanReadPlatformService.retrieveWaiverLoanTransactions(accrualData.getLoanId());
             }
-
             if (accrualData.getDueDateAsLocaldate().isAfter(tilldate)) {
                 if (accruredTill == null || firstTime) {
                     accruredTill = accrualData.getAccruedTill();
@@ -117,7 +116,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
                 updateInterestIncome(accrualData, loanWaiverTansactionData, loanWaiverScheduleData, tilldate);
                 addAccrualAccounting(accrualData);
                 accruredTill = accrualData.getDueDateAsLocaldate();
-            }
+            }           
         }
     }
 
@@ -260,7 +259,6 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
                 DateUtils.getDateOfTenant());
         @SuppressWarnings("deprecation")
         final Long transactonId = this.jdbcTemplate.queryForLong("SELECT LAST_INSERT_ID()");
-
         Map<LoanChargeData, BigDecimal> applicableCharges = scheduleAccrualData.getApplicableCharges();
         String chargespaidSql = "INSERT INTO m_loan_charge_paid_by (loan_transaction_id, loan_charge_id, amount,installment_number) VALUES (?,?,?,?)";
         for (Map.Entry<LoanChargeData, BigDecimal> entry : applicableCharges.entrySet()) {
@@ -271,12 +269,10 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
 
         Map<String, Object> transactionMap = toMapData(transactonId, amount, interestportion, feeportion, penaltyportion,
                 scheduleAccrualData, accruedTill);
-
         String repaymetUpdatesql = "UPDATE m_loan_repayment_schedule SET accrual_interest_derived=?, accrual_fee_charges_derived=?, "
                 + "accrual_penalty_charges_derived=? WHERE  id=?";
         this.jdbcTemplate.update(repaymetUpdatesql, totalAccInterest, totalAccFee, totalAccPenalty,
                 scheduleAccrualData.getRepaymentScheduleId());
-
         String updateLoan = "UPDATE m_loan  SET accrued_till=?  WHERE  id=?";
         this.jdbcTemplate.update(updateLoan, accruedTill.toDate(), scheduleAccrualData.getLoanId());
         final Map<String, Object> accountingBridgeData = deriveAccountingBridgeData(scheduleAccrualData, transactionMap);

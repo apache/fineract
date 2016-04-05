@@ -94,8 +94,8 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                 wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getSavingsId(),
                 wrapper.getTransactionId(), wrapper.getHref(), wrapper.getProductId());
         while (numberOfRetries <= maxNumberOfRetries) {
-            try {
-                result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
+            try {            	
+            	result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);               
                 numberOfRetries = maxNumberOfRetries + 1;
             } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
                 logger.info("The following command " + command.json() + " has been retried  " + numberOfRetries + " time(s)");

@@ -20,18 +20,19 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.util.Collection;
 
+import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.joda.time.LocalDate;
 
 public interface LoanAccrualPlatformService {
 
-    String addPeriodicAccruals(LocalDate tilldate);
+    String addPeriodicAccruals(LocalDate tilldate, Integer fromLoanId, Integer toLoanId);
 
-    String addPeriodicAccruals(LocalDate tilldate, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas);
+   String addPeriodicAccruals(LocalDate tilldate, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas);
 
     void addAccrualAccounting() throws JobExecutionException;
 
-    void addPeriodicAccruals() throws JobExecutionException;
+    void addPeriodicAccruals() throws JobExecutionException;	
 
 }
