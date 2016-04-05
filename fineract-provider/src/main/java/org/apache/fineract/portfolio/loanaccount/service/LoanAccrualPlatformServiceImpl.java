@@ -23,17 +23,21 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LoanAccrualPlatformServiceImpl implements LoanAccrualPlatformService {
 
+	private final static Logger logger = LoggerFactory.getLogger(LoanAccrualPlatformServiceImpl.class);
     private final LoanReadPlatformService loanReadPlatformService;
     private final LoanAccrualWritePlatformService loanAccrualWritePlatformService;
 
@@ -78,20 +82,36 @@ public class LoanAccrualPlatformServiceImpl implements LoanAccrualPlatformServic
     @Override
     @CronTarget(jobName = JobName.ADD_PERIODIC_ACCRUAL_ENTRIES)
     public void addPeriodicAccruals() throws JobExecutionException {
-        String errors = addPeriodicAccruals(LocalDate.now());
+        String errors = addPeriodicAccruals(LocalDate.now(), null, null);
         if (errors.length() > 0) { throw new JobExecutionException(errors); }
     }
 
     @Override
-    public String addPeriodicAccruals(final LocalDate tilldate) {
-        Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas = this.loanReadPlatformService.retrivePeriodicAccrualData(tilldate);
-        return addPeriodicAccruals(tilldate, loanScheduleAccrualDatas);
+	public String addPeriodicAccruals(final LocalDate tilldate, Integer fromLoanId, Integer toLoanId) {
+		int offsetCounter = 0;
+		int maxPageSize = 5000;
+		final StringBuilder exceptionReasons = new StringBuilder();
+        Page<LoanScheduleAccrualData> loanScheduleAccrualDatas = this.loanReadPlatformService.retrivePeriodicAccrualData(tilldate, offsetCounter, maxPageSize, fromLoanId, toLoanId);
+        
+        int totalFilteredRecords = loanScheduleAccrualDatas.getTotalFilteredRecords();
+        logger.info("Post retrivePeriodicAccrualData entry for " + totalFilteredRecords + " loans : In Progress...");
+        exceptionReasons.append(addPeriodicAccruals(tilldate, loanScheduleAccrualDatas.getPageItems()));
+        offsetCounter = maxPageSize;
+        int processedRecords = maxPageSize;
+        while (totalFilteredRecords > processedRecords) {
+        	loanScheduleAccrualDatas = this.loanReadPlatformService.retrivePeriodicAccrualData(tilldate, offsetCounter, maxPageSize, fromLoanId, toLoanId);
+        	exceptionReasons.append(addPeriodicAccruals(tilldate, loanScheduleAccrualDatas.getPageItems()));
+        	offsetCounter += maxPageSize;
+            processedRecords += maxPageSize;
+        }
+        return exceptionReasons.toString();
     }
 
     @Override
     public String addPeriodicAccruals(final LocalDate tilldate, Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas) {
         StringBuilder sb = new StringBuilder();
         Map<Long, Collection<LoanScheduleAccrualData>> loanDataMap = new HashMap<>();
+        
         for (final LoanScheduleAccrualData accrualData : loanScheduleAccrualDatas) {
             if (loanDataMap.containsKey(accrualData.getLoanId())) {
                 loanDataMap.get(accrualData.getLoanId()).add(accrualData);
