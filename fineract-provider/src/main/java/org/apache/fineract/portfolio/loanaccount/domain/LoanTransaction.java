@@ -77,15 +77,15 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     private PaymentDetail paymentDetail;
 
     @Column(name = "transaction_type_enum", nullable = false)
-    private final Integer typeOf;
+    private Integer typeOf;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "transaction_date", nullable = false)
-    private final Date dateOf;
+    private  Date dateOf;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "submitted_on_date", nullable = false)
-    private final Date submittedOnDate;
+    private  Date submittedOnDate;
 
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
@@ -116,11 +116,11 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date", nullable = false)
-    private final Date createdDate;
+    private Date createdDate;
 
     @ManyToOne
     @JoinColumn(name = "appuser_id", nullable = true)
-    private final AppUser appUser;
+    private AppUser appUser;
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanTransaction", orphanRemoval = true)
@@ -144,6 +144,10 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         this.submittedOnDate = DateUtils.getDateOfTenant();
         this.createdDate = new Date();
         this.appUser = null;
+    }
+    
+    public LoanTransaction(Long Id){
+    	this.setId(Id);
     }
 
     public static LoanTransaction disbursement(final Office office, final Money amount, final PaymentDetail paymentDetail,

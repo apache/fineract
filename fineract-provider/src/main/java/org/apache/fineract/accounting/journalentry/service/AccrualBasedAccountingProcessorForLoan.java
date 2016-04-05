@@ -35,8 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AccrualBasedAccountingProcessorForLoan implements AccountingProcessorForLoan {
-
+public class AccrualBasedAccountingProcessorForLoan implements AccountingProcessorForLoan {	
     private final AccountingProcessorHelper helper;
 
     @Autowired
@@ -105,7 +104,6 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
      */
     private void createJournalEntriesForDisbursements(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
             final Office office) {
-
         // loan properties
         final Long loanProductId = loanDTO.getLoanProductId();
         final Long loanId = loanDTO.getLoanId();
@@ -307,8 +305,8 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
      * @param office
      */
     private void createJournalEntriesForAccruals(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO, final Office office) {
-
-        // loan properties
+    	
+    	// loan properties
         final Long loanProductId = loanDTO.getLoanProductId();
         final Long loanId = loanDTO.getLoanId();
         final String currencyCode = loanDTO.getCurrencyCode();
@@ -341,7 +339,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                     ACCRUAL_ACCOUNTS_FOR_LOAN.PENALTIES_RECEIVABLE.getValue(), ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.getValue(),
                     loanProductId, loanId, transactionId, transactionDate, penaltiesAmount, isReversed,
                     loanTransactionDTO.getPenaltyPayments());
-        }
+        }             
     }
 
     private void createJournalEntriesForRefund(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO, final Office office) {

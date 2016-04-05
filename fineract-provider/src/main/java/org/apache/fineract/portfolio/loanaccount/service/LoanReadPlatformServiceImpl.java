@@ -149,7 +149,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
     private final LoanUtilService loanUtilService;
-    private final ConfigurationDomainService configurationDomainService;
+    private final ConfigurationDomainService configurationDomainService;    
+    private final PaginationHelper<LoanScheduleAccrualData> paginationHelperLoanScheduleAccrualData = new PaginationHelper<>();
+
 
     @Autowired
     public LoanReadPlatformServiceImpl(final PlatformSecurityContext context, final LoanRepository loanRepository,
@@ -1585,30 +1587,58 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-    public Collection<LoanScheduleAccrualData> retrivePeriodicAccrualData(final LocalDate tillDate) {
+    public Page<LoanScheduleAccrualData> retrivePeriodicAccrualData(final LocalDate tillDate, int offset, int maxPageSize, Integer fromLoanId, Integer toLoanId) {
 
         LoanSchedulePeriodicAccrualMapper mapper = new LoanSchedulePeriodicAccrualMapper();
         Date organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate();
         final StringBuilder sqlBuilder = new StringBuilder(400);
         sqlBuilder
-                .append("select ")
+                .append("select SQL_CALC_FOUND_ROWS ")
                 .append(mapper.schema())
                 .append(" where ((ls.fee_charges_amount <> if(ls.accrual_fee_charges_derived is null,0, ls.accrual_fee_charges_derived))")
                 .append(" or (ls.penalty_charges_amount <> if(ls.accrual_penalty_charges_derived is null,0,ls.accrual_penalty_charges_derived))")
                 .append(" or (ls.interest_amount <> if(ls.accrual_interest_derived is null,0,ls.accrual_interest_derived)))")
-                .append(" and loan.loan_status_id=:active and mpl.accounting_type=:type and (loan.closedon_date <= :tilldate or loan.closedon_date is null)")
-                .append(" and loan.is_npa=0 and (ls.duedate <= :tilldate or (ls.duedate > :tilldate and ls.fromdate < :tilldate)) ");
+                .append(" and loan.loan_status_id=? and mpl.accounting_type=? and (loan.closedon_date <= ? or loan.closedon_date is null)")
+                .append(" and loan.is_npa=0 and (ls.duedate <= ? or (ls.duedate > ? and ls.fromdate < ?)) ");
         if(organisationStartDate != null){
-            sqlBuilder.append(" and ls.duedate > :organisationstartdate ");
+            sqlBuilder.append(" and ls.duedate > ? ");
         }
-            sqlBuilder.append(" order by loan.id,ls.duedate ");
-        Map<String, Object> paramMap = new HashMap<>(4);
-        paramMap.put("active", LoanStatus.ACTIVE.getValue());
-        paramMap.put("type", AccountingRuleType.ACCRUAL_PERIODIC.getValue());
-        paramMap.put("tilldate", formatter.print(tillDate));
-        paramMap.put("organisationstartdate", formatter.print(new LocalDate(organisationStartDate)));
+        if(fromLoanId != null && toLoanId != null && fromLoanId > -1 && toLoanId > fromLoanId){
+        	 sqlBuilder.append(" and loan.id >= ? ");
+        	 sqlBuilder.append(" and loan.id <= ? ");
+        }
+        sqlBuilder.append(" order by loan.id,ls.duedate ");        
+        sqlBuilder.append(" limit ").append(maxPageSize);        
+        sqlBuilder.append(" offset ").append(offset);
+                
+            
+        ArrayList<Object> arraylist = new ArrayList<Object>();
+        arraylist.add(LoanStatus.ACTIVE.getValue());
+        arraylist.add(AccountingRuleType.ACCRUAL_PERIODIC.getValue());
+        arraylist.add(formatter.print(tillDate));
+        arraylist.add(formatter.print(tillDate));
+        arraylist.add(formatter.print(tillDate));
+        arraylist.add(formatter.print(tillDate));
+        
+        if(organisationStartDate != null){
+        	arraylist.add(formatter.print(new LocalDate(organisationStartDate)));
+        }
+        
+        if(fromLoanId != null && toLoanId != null && fromLoanId > -1 && toLoanId > fromLoanId){
+        	arraylist.add(fromLoanId);
+        	arraylist.add(toLoanId);
+       }
+        
+            
+        Object[] finalObjectArray = arraylist.toArray();
+       
+        
+       
+        
+        final String sqlCountRows = "SELECT FOUND_ROWS()";
+        return this.paginationHelperLoanScheduleAccrualData.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), finalObjectArray, mapper);
 
-        return this.namedParameterJdbcTemplate.query(sqlBuilder.toString(), paramMap, mapper);
+        //return this.namedParameterJdbcTemplate.query(sqlBuilder.toString(), finalObjectArray, mapper);
     }
 
     private static final class LoanSchedulePeriodicAccrualMapper implements RowMapper<LoanScheduleAccrualData> {
