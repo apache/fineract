@@ -33,7 +33,7 @@ public class AccountNumberFormatEnumerations {
     public final static Set<AccountNumberPrefixType> accountNumberPrefixesForClientAccounts = new HashSet<>(Arrays.asList(
             AccountNumberPrefixType.OFFICE_NAME, AccountNumberPrefixType.CLIENT_TYPE));
     public final static Set<AccountNumberPrefixType> accountNumberPrefixesForLoanAccounts = new HashSet<>(Arrays.asList(
-            AccountNumberPrefixType.OFFICE_NAME, AccountNumberPrefixType.LOAN_PRODUCT_SHORT_NAME));
+            AccountNumberPrefixType.OFFICE_NAME, AccountNumberPrefixType.LOAN_PRODUCT_SHORT_NAME, AccountNumberPrefixType.OFFICE_AND_LOAN_PRODUCT_NAME));
     public final static Set<AccountNumberPrefixType> accountNumberPrefixesForSavingsAccounts = new HashSet<>(Arrays.asList(
             AccountNumberPrefixType.OFFICE_NAME, AccountNumberPrefixType.SAVINGS_PRODUCT_SHORT_NAME));
     public final static Set<AccountNumberPrefixType> accountNumberPrefixesForCenters = new HashSet<>(Arrays.asList(
@@ -44,7 +44,7 @@ public class AccountNumberFormatEnumerations {
     public enum AccountNumberPrefixType {
         OFFICE_NAME(1, "accountNumberPrefixType.officeName"), CLIENT_TYPE(101, "accountNumberPrefixType.clientType"), LOAN_PRODUCT_SHORT_NAME(
                 201, "accountNumberPrefixType.loanProductShortName"), SAVINGS_PRODUCT_SHORT_NAME(301,
-                "accountNumberPrefixType.savingsProductShortName");
+                "accountNumberPrefixType.savingsProductShortName"), OFFICE_AND_LOAN_PRODUCT_NAME(401,"accountNumberPrefixType.officeNameandLoanProductShortName");
 
         private final Integer value;
         private final String code;
