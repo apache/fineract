@@ -36,6 +36,7 @@ import org.apache.fineract.portfolio.savings.data.DepositProductData;
 import org.apache.fineract.portfolio.savings.data.FixedDepositProductData;
 import org.apache.fineract.portfolio.savings.data.RecurringDepositProductData;
 import org.apache.fineract.portfolio.savings.exception.FixedDepositProductNotFoundException;
+import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -144,7 +145,9 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             sqlBuilder.append("sp.lockin_period_frequency as lockinPeriodFrequency,");
             sqlBuilder.append("sp.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
             sqlBuilder.append("sp.accounting_type as accountingType, ");
-            sqlBuilder.append("sp.min_balance_for_interest_calculation as minBalanceForInterestCalculation ");
+            sqlBuilder.append("sp.min_balance_for_interest_calculation as minBalanceForInterestCalculation, ");
+            sqlBuilder.append("sp.withhold_tax as withHoldTax,");
+            sqlBuilder.append("tg.id as taxGroupId, tg.name as taxGroupName ");
             this.schemaSql = sqlBuilder.toString();
         }
 
@@ -197,9 +200,18 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             }
             final BigDecimal minBalanceForInterestCalculation = rs.getBigDecimal("minBalanceForInterestCalculation");
 
+            final boolean withHoldTax = rs.getBoolean("withHoldTax");
+            final Long taxGroupId = JdbcSupport.getLong(rs, "taxGroupId");
+            final String taxGroupName = rs.getString("taxGroupName");
+            TaxGroupData taxGroupData = null;
+            if (taxGroupId != null) {
+                taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
+            }
+
             return DepositProductData.instance(id, name, shortName, description, currency, nominalAnnualInterestRate,
                     compoundingInterestPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, accountingRuleType, minBalanceForInterestCalculation);
+                    lockinPeriodFrequency, lockinPeriodFrequencyType, accountingRuleType, minBalanceForInterestCalculation, withHoldTax,
+                    taxGroupData);
         }
     }
 
@@ -224,6 +236,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             sqlBuilder.append("from m_savings_product sp ");
             sqlBuilder.append("left join m_deposit_product_term_and_preclosure dptp on sp.id=dptp.savings_product_id ");
             sqlBuilder.append("join m_currency curr on curr.code = sp.currency_code ");
+            sqlBuilder.append(" left join m_tax_group tg on tg.id = sp.tax_group_id  ");
 
             this.schemaSql = sqlBuilder.toString();
         }
@@ -292,6 +305,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             sqlBuilder.append("left join m_deposit_product_term_and_preclosure dptp on sp.id=dptp.savings_product_id ");
             sqlBuilder.append("left join m_deposit_product_recurring_detail dprd on sp.id=dprd.savings_product_id ");
             sqlBuilder.append("join m_currency curr on curr.code = sp.currency_code ");
+            sqlBuilder.append(" left join m_tax_group tg on tg.id = sp.tax_group_id  ");
 
             this.schemaSql = sqlBuilder.toString();
         }

@@ -41,13 +41,14 @@ public class SavingsTransactionDTO {
     /** Breakdowns of fees and penalties this Transaction pays **/
     private final List<ChargePaymentDTO> penaltyPayments;
     private final List<ChargePaymentDTO> feePayments;
+    private final List<TaxPaymentDTO> taxPayments;
 
     private final boolean isAccountTransfer;
 
     public SavingsTransactionDTO(final Long officeId, final Long paymentTypeId, final String transactionId, final Date transactionDate,
             final SavingsAccountTransactionEnumData transactionType, final BigDecimal amount, final boolean reversed,
             final List<ChargePaymentDTO> feePayments, final List<ChargePaymentDTO> penaltyPayments, final BigDecimal overdraftAmount,
-            boolean isAccountTransfer) {
+            boolean isAccountTransfer, final List<TaxPaymentDTO> taxPayments) {
         this.paymentTypeId = paymentTypeId;
         this.transactionId = transactionId;
         this.transactionDate = transactionDate;
@@ -59,6 +60,7 @@ public class SavingsTransactionDTO {
         this.officeId = officeId;
         this.overdraftAmount = overdraftAmount;
         this.isAccountTransfer = isAccountTransfer;
+        this.taxPayments = taxPayments;
     }
 
     public Long getOfficeId() {
@@ -107,6 +109,10 @@ public class SavingsTransactionDTO {
 
     public boolean isAccountTransfer() {
         return this.isAccountTransfer;
+    }
+
+    public List<TaxPaymentDTO> getTaxPayments() {
+        return this.taxPayments;
     }
 
 }

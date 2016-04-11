@@ -209,7 +209,15 @@ public class SavingsAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String update(@PathParam("accountId") final Long accountId, final String apiRequestBodyAsJson) {
+    public String update(@PathParam("accountId") final Long accountId, final String apiRequestBodyAsJson,
+            @QueryParam("command") final String commandParam) {
+
+        if (is(commandParam, "updateWithHoldTax")) {
+            final CommandWrapper commandRequest = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson).updateWithHoldTax(accountId)
+                    .build();
+            final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
+        }
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSavingsAccount(accountId).withJson(apiRequestBodyAsJson)
                 .build();
@@ -273,9 +281,9 @@ public class SavingsAccountsApiResource {
 
         if (result == null) {
             //
-            throw new UnrecognizedQueryParamException("command", commandParam,
-                    new Object[] { "reject", "withdrawnByApplicant", "approve", "undoapproval", "activate", "calculateInterest",
-                            "postInterest", "close", "assignSavingsOfficer", "unassignSavingsOfficer" });
+            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "reject", "withdrawnByApplicant", "approve",
+                    "undoapproval", "activate", "calculateInterest", "postInterest", "close", "assignSavingsOfficer",
+                    "unassignSavingsOfficer" });
         }
 
         return this.toApiJsonSerializer.serialize(result);

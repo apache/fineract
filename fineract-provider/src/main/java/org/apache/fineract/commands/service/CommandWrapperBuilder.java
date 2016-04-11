@@ -2616,4 +2616,44 @@ public class CommandWrapperBuilder {
         this.href = "/accounts/" + accountType+"/"+accountId;
         return this;
     }
+    
+    public CommandWrapperBuilder createTaxComponent() {
+        this.actionName = "CREATE";
+        this.entityName = "TAXCOMPONENT";
+        this.entityId = null;
+        this.href = "/taxes/component";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateTaxComponent(final Long taxComponentId) {
+        this.actionName = "UPDATE";
+        this.entityName = "TAXCOMPONENT";
+        this.entityId = taxComponentId;
+        this.href = "/taxes/component/" + taxComponentId;
+        return this;
+    }
+
+    public CommandWrapperBuilder createTaxGroup() {
+        this.actionName = "CREATE";
+        this.entityName = "TAXGROUP";
+        this.entityId = null;
+        this.href = "/taxes/group";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateTaxGroup(final Long taxGroupId) {
+        this.actionName = "UPDATE";
+        this.entityName = "TAXGROUP";
+        this.entityId = taxGroupId;
+        this.href = "/taxes/group/" + taxGroupId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder updateWithHoldTax(final Long accountId) {
+        this.actionName = "UPDATEWITHHOLDTAX";
+        this.entityName = "SAVINGSACCOUNT";
+        this.entityId = accountId;
+        this.href = "/savingsaccounts/" + accountId + "?commad=updateTaxWithHoldTax";
+        return this;
+    }
 }

@@ -168,6 +168,13 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                 }
             }
 
+            else if (savingsTransactionDTO.getTransactionType().isWithholdTax()) {
+                this.helper.createCashBasedJournalEntriesAndReversalsForSavingsTax(office, currencyCode,
+                        CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL, CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_REFERENCE, savingsProductId,
+                        paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal,
+                        savingsTransactionDTO.getTaxPayments());
+            }
+
             /** Handle Fees Deductions and reversals of Fees Deductions **/
             else if (savingsTransactionDTO.getTransactionType().isFeeDeduction() && savingsTransactionDTO.isOverdraftTransaction()) {
                 // Is the Charge a penalty?

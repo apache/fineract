@@ -48,6 +48,7 @@ public class SavingsAccountHelper {
     private static final String CALCULATE_INTEREST_SAVINGS_COMMAND = "calculateInterest";
     private static final String POST_INTEREST_SAVINGS_COMMAND = "postInterest";
     private static final String CLOSE_SAVINGS_COMMAND = "close";
+    private static final String UPDATE_WITHHOLD_TAX_STATUS = "updateWithHoldTax";
 
     private static final String DEPOSIT_SAVINGS_COMMAND = "deposit";
     private static final String WITHDRAW_SAVINGS_COMMAND = "withdrawal";
@@ -94,6 +95,15 @@ public class SavingsAccountHelper {
 
         return Utils.performServerPut(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "/" + savingsId + "?"
                 + Utils.TENANT_IDENTIFIER, savingsApplicationJSON, CommonConstants.RESPONSE_CHANGES);
+    }
+
+    public HashMap updateSavingsAccountWithHoldTaxStatus(final Integer savingsId, final boolean value) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("withHoldTax", value);
+        String json = new Gson().toJson(map);
+
+        return Utils.performServerPut(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "/" + savingsId + "?command="
+                + UPDATE_WITHHOLD_TAX_STATUS + "&" + Utils.TENANT_IDENTIFIER, json, CommonConstants.RESPONSE_CHANGES);
     }
 
     public HashMap approveSavings(final Integer savingsID) {
@@ -341,9 +351,9 @@ public class SavingsAccountHelper {
         final ArrayList<HashMap> response = Utils.performServerGet(requestSpec, responseSpec, URL, jSONAttribute);
         return response;
     }
-    
-    public Object getSavingsAccountDetail(final Integer savingsID, final String jsonAttribute){
-    	final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "?associations=all&" + Utils.TENANT_IDENTIFIER;
+
+    public Object getSavingsAccountDetail(final Integer savingsID, final String jsonAttribute) {
+        final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "?associations=all&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, URL, jsonAttribute);
     }
 

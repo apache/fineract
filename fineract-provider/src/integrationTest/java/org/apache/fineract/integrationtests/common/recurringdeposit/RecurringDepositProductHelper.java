@@ -98,6 +98,8 @@ public class RecurringDepositProductHelper {
     private Account[] accountList = null;
     private List<HashMap<String, String>> chartSlabs = null;
     private boolean isPrimaryGroupingByAmount = false;
+    private Boolean withHoldTax = false;
+    private String taxGroupId = null;
 
     public String build(final String validFrom, final String validTo) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -144,6 +146,10 @@ public class RecurringDepositProductHelper {
         map.put("depositAmount", this.depositAmount);
         map.put("minDepositAmount", this.minDepositAmount);
         map.put("maxDepositAmount", this.maxDepositAmount);
+        map.put("withHoldTax", this.withHoldTax.toString());
+        if (withHoldTax) {
+            map.put("taxGroupId", taxGroupId);
+        }
 
         if (this.accountingRule.equals(CASH_BASED)) {
             map.putAll(getAccountMappingForCashBased());
@@ -184,6 +190,15 @@ public class RecurringDepositProductHelper {
         this.chartSlabs = constructChartSlabWithAmountAndPeriodRange();
         return this;
     }
+    
+    public RecurringDepositProductHelper withWithHoldTax(final String taxGroupId) {
+        if (taxGroupId != null) {
+            this.withHoldTax = true;
+            this.taxGroupId = taxGroupId;
+        }
+        return this;
+    }
+
 
     private Map<String, String> getAccountMappingForCashBased() {
         final Map<String, String> map = new HashMap<>();

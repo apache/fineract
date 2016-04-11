@@ -25,6 +25,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +36,9 @@ import net.sf.ehcache.transaction.xa.EhcacheXAException;
 import org.apache.fineract.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
+import org.apache.fineract.integrationtests.common.TaxComponentHelper;
+import org.apache.fineract.integrationtests.common.TaxGroupHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
@@ -472,6 +476,384 @@ public class RecurringDepositTest {
 
     }
 
+    @Test
+    public void testRecurringDepositAccountWithPrematureClosureTypeTransferToSavings_WITH_HOLD_TAX() {
+        this.recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec, this.responseSpec);
+        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.recurringDepositAccountHelper = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec);
+        
+
+        /***
+         * Create GL Accounts for product account mapping
+         */
+        final Account assetAccount = this.accountHelper.createAssetAccount();
+        final Account incomeAccount = this.accountHelper.createIncomeAccount();
+        final Account expenseAccount = this.accountHelper.createExpenseAccount();
+        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+        final Account liabilityAccountForTax = this.accountHelper.createLiabilityAccount();
+
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        DateFormat monthDayFormat = new SimpleDateFormat("dd MMM", Locale.US);
+        DateFormat currentDateFormat = new SimpleDateFormat("dd");
+
+        Calendar todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -3);
+        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
+        todaysDate.add(Calendar.YEAR, 10);
+        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+
+        todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -1);
+        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+
+        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
+        Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
+        todaysDate.add(Calendar.DATE, numberOfDaysLeft);
+        final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate.getTime());
+        final String CLOSED_ON_DATE = dateFormat.format(Calendar.getInstance().getTime());
+
+        /***
+         * Create client for applying Deposit and Savings accounts
+         */
+        Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientId);
+
+        /***
+         * Create Savings product with CashBased accounting enabled
+         */
+        final String accountingRule = CASH_BASED;
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, accountingRule,
+                assetAccount, liabilityAccount, incomeAccount, expenseAccount);
+        Assert.assertNotNull(savingsProductID);
+
+        /***
+         * Create Savings account and verify status is pending
+         */
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertNotNull(savingsProductID);
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        /***
+         * Approve the savings account and verify account is approved
+         */
+        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        /***
+         * Activate the savings account and verify account is activated
+         */
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        /***
+         * Create RD product with CashBased accounting enabled
+         */
+        final Integer taxGroupId = createTaxGroup("10", liabilityAccountForTax);
+        Integer recurringDepositProductId = createRecurringDepositProductWithWithHoldTax(VALID_FROM, VALID_TO,String.valueOf(taxGroupId), accountingRule, assetAccount,
+                liabilityAccount, incomeAccount, expenseAccount);
+        Assert.assertNotNull(recurringDepositProductId);
+
+        /***
+         * Apply for RD account with created product and verify status
+         */
+        Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+        Assert.assertNotNull(recurringDepositAccountId);
+
+        HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker.getStatusOfRecurringDepositAccount(
+                this.requestSpec, this.responseSpec, recurringDepositAccountId.toString());
+        RecurringDepositAccountStatusChecker.verifyRecurringDepositIsPending(recurringDepositAccountStatusHashMap);
+
+        /***
+         * Approve the RD account and verify whether account is approved
+         */
+        recurringDepositAccountStatusHashMap = this.recurringDepositAccountHelper.approveRecurringDeposit(recurringDepositAccountId,
+                APPROVED_ON_DATE);
+        RecurringDepositAccountStatusChecker.verifyRecurringDepositIsApproved(recurringDepositAccountStatusHashMap);
+
+        /***
+         * Activate the RD Account and verify whether account is activated
+         */
+        recurringDepositAccountStatusHashMap = this.recurringDepositAccountHelper.activateRecurringDeposit(recurringDepositAccountId,
+                ACTIVATION_DATE);
+        RecurringDepositAccountStatusChecker.verifyRecurringDepositIsActive(recurringDepositAccountStatusHashMap);
+
+        HashMap recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
+                this.responseSpec, recurringDepositAccountId);
+        Float depositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
+
+        /***
+         * Perform Deposit transaction and verify journal entries are posted for
+         * the transaction
+         */
+        Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
+                depositAmount, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+        Assert.assertNotNull(depositTransactionId);
+
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, EXPECTED_FIRST_DEPOSIT_ON_DATE, new JournalEntry(
+                depositAmount, JournalEntry.TransactionType.DEBIT));
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, EXPECTED_FIRST_DEPOSIT_ON_DATE, new JournalEntry(
+                depositAmount, JournalEntry.TransactionType.CREDIT));
+
+        /***
+         * Update interest earned field for RD account
+         */
+        recurringDepositAccountId = this.recurringDepositAccountHelper.calculateInterestForRecurringDeposit(recurringDepositAccountId);
+        Assert.assertNotNull(recurringDepositAccountId);
+
+        /***
+         * Post interest and verify journal entries
+         */
+        Integer transactionIdForPostInterest = this.recurringDepositAccountHelper
+                .postInterestForRecurringDeposit(recurringDepositAccountId);
+        Assert.assertNotNull(transactionIdForPostInterest);
+        
+
+        HashMap accountSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
+        Float totalInterestPosted = (Float) accountSummary.get("totalInterestPosted");
+        Assert.assertNull(accountSummary.get("totalWithholdTax"));
+
+
+        final JournalEntry[] expenseAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.DEBIT) };
+        final JournalEntry[] liablilityAccountEntry = { new JournalEntry(totalInterestPosted, JournalEntry.TransactionType.CREDIT) };
+        this.journalEntryHelper.checkJournalEntryForAssetAccount(expenseAccount, INTEREST_POSTED_DATE, expenseAccountEntry);
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, INTEREST_POSTED_DATE, liablilityAccountEntry);
+
+        /***
+         * Get saving account balance before preClosing RD account
+         */
+        HashMap savingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        Float balanceBefore = (Float) savingsSummaryBefore.get("accountBalance");
+
+        HashMap recurringDepositPrematureData = this.recurringDepositAccountHelper.calculatePrematureAmountForRecurringDeposit(
+                recurringDepositAccountId, CLOSED_ON_DATE);
+
+        /***
+         * Retrieve mapped financial account for liability transfer
+         */
+        Account financialAccount = getMappedLiabilityFinancialAccount();
+
+        /***
+         * Preclose the RD account verify whether account is preClosed
+         */
+        Integer prematureClosureTransactionId = (Integer) this.recurringDepositAccountHelper.prematureCloseForRecurringDeposit(
+                recurringDepositAccountId, CLOSED_ON_DATE, CLOSURE_TYPE_TRANSFER_TO_SAVINGS, savingsId,
+                CommonConstants.RESPONSE_RESOURCE_ID);
+        Assert.assertNotNull(prematureClosureTransactionId);
+
+        recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker.getStatusOfRecurringDepositAccount(this.requestSpec,
+                this.responseSpec, recurringDepositAccountId.toString());
+        RecurringDepositAccountStatusChecker.verifyRecurringDepositAccountIsPrematureClosed(recurringDepositAccountStatusHashMap);
+
+        recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
+                this.responseSpec, recurringDepositAccountId);
+        Float maturityAmount = Float.valueOf(recurringDepositAccountData.get("maturityAmount").toString());
+        /***
+         * Verify journal entry transactions for preclosure transaction As this
+         * transaction is an account transfer you should get financial account
+         * mapping details and verify amounts
+         */
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, CLOSED_ON_DATE, new JournalEntry(maturityAmount,
+                JournalEntry.TransactionType.CREDIT), new JournalEntry(maturityAmount, JournalEntry.TransactionType.DEBIT));
+
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(financialAccount, CLOSED_ON_DATE, new JournalEntry(maturityAmount,
+                JournalEntry.TransactionType.DEBIT), new JournalEntry(maturityAmount, JournalEntry.TransactionType.CREDIT));
+        /***
+         * Verify rd account maturity amount and savings account balance
+         */
+        HashMap recurringDepositData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
+                this.responseSpec, recurringDepositAccountId);
+        Float prematurityAmount = (Float) recurringDepositData.get("maturityAmount");
+        HashMap summary = (HashMap) recurringDepositData.get("summary");
+        Assert.assertNotNull(summary.get("totalWithholdTax"));
+        Float withHoldTax = (Float) summary.get("totalWithholdTax");
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccountForTax, CLOSED_ON_DATE, new JournalEntry(withHoldTax,
+                JournalEntry.TransactionType.CREDIT));
+
+        HashMap savingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        Float balanceAfter = (Float) savingsSummaryAfter.get("accountBalance");
+        Float expectedSavingsBalance = balanceBefore + prematurityAmount;
+
+        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
+        decimalFormat.applyPattern(".");
+
+        Assert.assertEquals("Verifying Savings Account Balance after Premature Closure", decimalFormat.format(expectedSavingsBalance),
+                decimalFormat.format(balanceAfter));
+
+    }
+
+
+
+    @Test
+    public void testRecurringDepositAccountWithClosureTypeTransferToSavings_WITH_HOLD_TAX() throws InterruptedException {
+        this.recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec, this.responseSpec);
+        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.recurringDepositAccountHelper = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec);
+        
+
+        /***
+         * Create GL Accounts for product account mapping
+         */
+        final Account assetAccount = this.accountHelper.createAssetAccount();
+        final Account incomeAccount = this.accountHelper.createIncomeAccount();
+        final Account expenseAccount = this.accountHelper.createExpenseAccount();
+        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+        final Account liabilityAccountForTax = this.accountHelper.createLiabilityAccount();
+
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        DateFormat monthDayFormat = new SimpleDateFormat("dd MMM", Locale.US);
+        DateFormat currentDateFormat = new SimpleDateFormat("dd");
+
+        Calendar todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -20);
+        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
+        todaysDate.add(Calendar.YEAR, 10);
+        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+
+        todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -20);
+        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+        final String EXPECTED_FIRST_DEPOSIT_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String MONTH_DAY = monthDayFormat.format(todaysDate.getTime());
+
+        Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
+        Integer daysInMonth = todaysDate.getActualMaximum(Calendar.DATE);
+        Integer numberOfDaysLeft = (daysInMonth - currentDate) + 1;
+        todaysDate.add(Calendar.DATE, numberOfDaysLeft);
+        final String INTEREST_POSTED_DATE = dateFormat.format(todaysDate.getTime());
+        Calendar closedOn = Calendar.getInstance();
+        closedOn.add(Calendar.MONTH, -6);
+        final String CLOSED_ON_DATE = dateFormat.format(closedOn.getTime());
+
+        /***
+         * Create client for applying Deposit and Savings accounts
+         */
+        Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientId);
+
+        /***
+         * Create Savings product with CashBased accounting enabled
+         */
+        final String accountingRule = CASH_BASED;
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, accountingRule,
+                assetAccount, liabilityAccount, incomeAccount, expenseAccount);
+        Assert.assertNotNull(savingsProductID);
+
+        /***
+         * Create Savings account and verify status is pending
+         */
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertNotNull(savingsProductID);
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        /***
+         * Approve the savings account and verify account is approved
+         */
+        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        /***
+         * Activate the savings account and verify account is activated
+         */
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        /***
+         * Create RD product with CashBased accounting enabled
+         */
+        final Integer taxGroupId = createTaxGroup("10", liabilityAccountForTax);
+        Integer recurringDepositProductId = createRecurringDepositProductWithWithHoldTax(VALID_FROM, VALID_TO,String.valueOf(taxGroupId), accountingRule, assetAccount,
+                liabilityAccount, incomeAccount, expenseAccount);
+        Assert.assertNotNull(recurringDepositProductId);
+
+        /***
+         * Apply for RD account with created product and verify status
+         */
+        Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+        Assert.assertNotNull(recurringDepositAccountId);
+
+        HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker.getStatusOfRecurringDepositAccount(
+                this.requestSpec, this.responseSpec, recurringDepositAccountId.toString());
+        RecurringDepositAccountStatusChecker.verifyRecurringDepositIsPending(recurringDepositAccountStatusHashMap);
+
+        /***
+         * Approve the RD account and verify whether account is approved
+         */
+        recurringDepositAccountStatusHashMap = this.recurringDepositAccountHelper.approveRecurringDeposit(recurringDepositAccountId,
+                APPROVED_ON_DATE);
+        RecurringDepositAccountStatusChecker.verifyRecurringDepositIsApproved(recurringDepositAccountStatusHashMap);
+
+        /***
+         * Activate the RD Account and verify whether account is activated
+         */
+        recurringDepositAccountStatusHashMap = this.recurringDepositAccountHelper.activateRecurringDeposit(recurringDepositAccountId,
+                ACTIVATION_DATE);
+        RecurringDepositAccountStatusChecker.verifyRecurringDepositIsActive(recurringDepositAccountStatusHashMap);
+
+        HashMap recurringDepositAccountData = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec,
+                this.responseSpec, recurringDepositAccountId);
+        Float depositAmount = (Float) recurringDepositAccountData.get("mandatoryRecommendedDepositAmount");
+
+        /***
+         * Perform Deposit transaction and verify journal entries are posted for
+         * the transaction
+         */
+        todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -20);
+        
+        for (int i = 0; i < 14; i++) {
+            Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
+                    depositAmount, dateFormat.format(todaysDate.getTime()));
+            Assert.assertNotNull(depositTransactionId);
+
+            this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, dateFormat.format(todaysDate.getTime()), new JournalEntry(
+                    depositAmount, JournalEntry.TransactionType.DEBIT));
+            this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccount, dateFormat.format(todaysDate.getTime()),
+                    new JournalEntry(depositAmount, JournalEntry.TransactionType.CREDIT));
+            todaysDate.add(Calendar.MONTH, 1);
+        }
+
+        /***
+         * FD account verify whether account is matured
+         */
+        
+        SchedulerJobHelper schedulerJobHelper =  new SchedulerJobHelper(requestSpec, responseSpec);
+        String JobName = "Update Deposit Accounts Maturity details";
+        schedulerJobHelper.executeJob(JobName);
+        
+        HashMap accountDetails = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec, this.responseSpec,
+                recurringDepositAccountId);
+        
+        HashMap summary = (HashMap) accountDetails.get("summary");
+        Assert.assertNotNull(summary.get("totalWithholdTax"));
+        Float withHoldTax = (Float) summary.get("totalWithholdTax");
+        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccountForTax, CLOSED_ON_DATE, new JournalEntry(withHoldTax,
+                JournalEntry.TransactionType.CREDIT));
+        
+
+        recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker.getStatusOfRecurringDepositAccount(this.requestSpec,
+                this.responseSpec, recurringDepositAccountId.toString());
+        RecurringDepositAccountStatusChecker.verifyRecurringDepositAccountIsMatured(recurringDepositAccountStatusHashMap);
+
+
+    }
+
+
+    
     /***
      * Test case for Recurring Deposit Account premature closure with
      * transaction type ReInvest and Cash Based accounting enabled
@@ -2671,6 +3053,21 @@ public class RecurringDepositTest {
         final String recurringDepositProductJSON = recurringDepositProductHelper.withPeriodRangeChart().build(validFrom, validTo);
         return RecurringDepositProductHelper.createRecurringDepositProduct(recurringDepositProductJSON, requestSpec, responseSpec);
     }
+    
+    private Integer createRecurringDepositProductWithWithHoldTax(final String validFrom, final String validTo,final String taxGroupId, final String accountingRule,
+            Account... accounts) {
+        System.out.println("------------------------------CREATING NEW RECURRING DEPOSIT PRODUCT ---------------------------------------");
+        RecurringDepositProductHelper recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec, this.responseSpec);
+        if (accountingRule.equals(CASH_BASED)) {
+            recurringDepositProductHelper = recurringDepositProductHelper.withAccountingRuleAsCashBased(accounts);
+        } else if (accountingRule.equals(NONE)) {
+            recurringDepositProductHelper = recurringDepositProductHelper.withAccountingRuleAsNone();
+        }
+        final String recurringDepositProductJSON = recurringDepositProductHelper.withPeriodRangeChart()
+                .withWithHoldTax(taxGroupId)//
+                .build(validFrom, validTo);
+        return RecurringDepositProductHelper.createRecurringDepositProduct(recurringDepositProductJSON, requestSpec, responseSpec);
+    }
 
     private Integer createRecurringDepositProduct(final String validFrom, final String validTo, final String accountingRule,
             final String chartToBePicked, Account... accounts) {
@@ -2793,6 +3190,13 @@ public class RecurringDepositTest {
         Assert.assertEquals(financialActivityId, ((HashMap) mappingDetails.get("financialActivityData")).get("id"));
         Assert.assertEquals(glAccount.getAccountID(), ((HashMap) mappingDetails.get("glAccountData")).get("id"));
     }
+    
+    private Integer createTaxGroup(final String percentage, final Account liabilityAccountForTax){
+        final Integer liabilityAccountId = liabilityAccountForTax.getAccountID();
+        final Integer taxComponentId = TaxComponentHelper.createTaxComponent(this.requestSpec, this.responseSpec, percentage, liabilityAccountId);
+        return TaxGroupHelper.createTaxGroup(this.requestSpec, this.responseSpec, Arrays.asList(taxComponentId));
+    }
+
 
     /**
      * Delete the Liability transfer account

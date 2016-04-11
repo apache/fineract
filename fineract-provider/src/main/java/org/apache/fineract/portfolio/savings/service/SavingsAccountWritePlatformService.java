@@ -79,4 +79,6 @@ public interface SavingsAccountWritePlatformService {
             Set<Long> existingReversedTransactionIds);
 
     void postInterest(SavingsAccount account);
+
+    CommandProcessingResult modifyWithHoldTax(Long savingsAccountId, JsonCommand command);
 }

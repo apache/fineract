@@ -39,6 +39,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.minDepo
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalApplicableParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalInterestOnTypeIdParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalInterestParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.descriptionParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
@@ -56,6 +57,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minRequi
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nameParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNameParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
 import java.lang.reflect.Type;
@@ -333,6 +335,8 @@ public class DepositProductDataValidator {
             validatePaymentChannelFundSourceMappings(fromApiJsonHelper, baseDataValidator, element);
             validateChargeToIncomeAccountMappings(fromApiJsonHelper, baseDataValidator, element);
         }
+        
+        validateTaxWithHoldingParams(baseDataValidator, element, true);
     }
 
     public void validatePreClosureDetailForCreate(JsonElement element, DataValidatorBuilder baseDataValidator) {
@@ -539,6 +543,7 @@ public class DepositProductDataValidator {
 
         validatePaymentChannelFundSourceMappings(fromApiJsonHelper, baseDataValidator, element);
         validateChargeToIncomeAccountMappings(fromApiJsonHelper, baseDataValidator, element);
+        validateTaxWithHoldingParams(baseDataValidator, element, false);
     }
 
     public void validatePreClosureDetailForUpdate(JsonElement element, DataValidatorBuilder baseDataValidator) {
@@ -777,5 +782,30 @@ public class DepositProductDataValidator {
                 baseDataValidator.reset().parameter(depositAmountParamName).value(depositAmount).notLessThanMin(depositMinAmount);
             }
         }
+    }
+    
+    private void validateTaxWithHoldingParams(final DataValidatorBuilder baseDataValidator, final JsonElement element,
+            final boolean isCreate) {
+        if (this.fromApiJsonHelper.parameterExists(withHoldTaxParamName, element)) {
+            final String withHoldTax = this.fromApiJsonHelper.extractStringNamed(withHoldTaxParamName, element);
+            baseDataValidator.reset().parameter(withHoldTaxParamName).value(withHoldTax).ignoreIfNull().validateForBooleanValue();
+        }
+        Boolean withHoldTax = this.fromApiJsonHelper.extractBooleanNamed(withHoldTaxParamName, element);
+        if (withHoldTax == null) {
+            withHoldTax = false;
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(taxGroupIdParamName, element)) {
+            final Long taxGroupId = this.fromApiJsonHelper.extractLongNamed(taxGroupIdParamName, element);
+            baseDataValidator.reset().parameter(taxGroupIdParamName).value(taxGroupId).ignoreIfNull().longGreaterThanZero();
+            if (withHoldTax) {
+                baseDataValidator.reset().parameter(taxGroupIdParamName).value(taxGroupId).notBlank();
+            }
+
+        } else if (withHoldTax && isCreate) {
+            final Long taxGroupId = null;
+            baseDataValidator.reset().parameter(taxGroupIdParamName).value(taxGroupId).notBlank();
+        }
+
     }
 }

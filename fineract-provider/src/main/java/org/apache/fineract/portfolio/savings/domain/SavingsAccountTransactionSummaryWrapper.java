@@ -122,8 +122,7 @@ public final class SavingsAccountTransactionSummaryWrapper {
         return total.getAmountDefaultedToNullIfZero();
     }
 
-	public BigDecimal calculateTotalOverdraftInterest(MonetaryCurrency currency,
-			List<SavingsAccountTransaction> transactions) {
+    public BigDecimal calculateTotalOverdraftInterest(MonetaryCurrency currency, List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (final SavingsAccountTransaction transaction : transactions) {
             if (transaction.isOverdraftInterestAndNotReversed()) {
@@ -131,6 +130,16 @@ public final class SavingsAccountTransactionSummaryWrapper {
             }
         }
         return total.getAmountDefaultedToNullIfZero();
-	}
+    }
+    
+    public BigDecimal calculateTotalWithholdTaxWithdrawal(MonetaryCurrency currency, List<SavingsAccountTransaction> transactions) {
+        Money total = Money.zero(currency);
+        for (final SavingsAccountTransaction transaction : transactions) {
+            if (transaction.isWithHoldTaxAndNotReversed()) {
+                total = total.plus(transaction.getAmount(currency));
+            }
+        }
+        return total.getAmountDefaultedToNullIfZero();
+    }
 
 }

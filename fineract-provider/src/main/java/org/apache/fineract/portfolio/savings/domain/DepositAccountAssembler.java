@@ -48,10 +48,12 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minRequi
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.productIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
@@ -60,6 +62,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
+import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -166,6 +169,7 @@ public class DepositAccountAssembler {
         }
 
         if (product == null) { throw new SavingsProductNotFoundException(productId); }
+        
 
         Client client = null;
         Group group = null;
@@ -286,6 +290,14 @@ public class DepositAccountAssembler {
         if (productChart != null) {
             accountChart = DepositAccountInterestRateChart.from(productChart);
         }
+        
+        boolean withHoldTax = product.withHoldTax();
+        if (command.parameterExists(withHoldTaxParamName)) {
+            withHoldTax = command.booleanPrimitiveValueOfParameterNamed(withHoldTaxParamName);
+            if(withHoldTax && product.getTaxGroup()  == null){
+                throw new UnsupportedParameterException(Arrays.asList(withHoldTaxParamName));
+            }
+        }
 
         SavingsAccount account = null;
         if (depositAccountType.isFixedDeposit()) {
@@ -297,7 +309,7 @@ public class DepositAccountAssembler {
                     accountNo, externalId, accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                     lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, charges,
-                    accountTermAndPreClosure, accountChart);
+                    accountTermAndPreClosure, accountChart, withHoldTax);
             accountTermAndPreClosure.updateAccountReference(fdAccount);
             fdAccount.validateDomainRules();
             account = fdAccount;
@@ -315,7 +327,7 @@ public class DepositAccountAssembler {
                     fieldOfficer, accountNo, externalId, accountType, submittedOnDate, submittedBy, interestRate,
                     interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer,
-                    charges, accountTermAndPreClosure, accountRecurringDetail, accountChart);
+                    charges, accountTermAndPreClosure, accountRecurringDetail, accountChart, withHoldTax);
 
             accountTermAndPreClosure.updateAccountReference(rdAccount);
             accountRecurringDetail.updateAccountReference(rdAccount);
