@@ -4800,7 +4800,9 @@ public class Loan extends AbstractPersistable<Long> {
         Collection<LoanDisbursementDetails> loanDisburseDetails = this.getDisbursementDetails();
         BigDecimal setPrincipalAmount = BigDecimal.ZERO;
         for (LoanDisbursementDetails details : loanDisburseDetails) {
-            setPrincipalAmount = setPrincipalAmount.add(details.principal());
+            if (details.actualDisbursementDate() != null) {
+                setPrincipalAmount = setPrincipalAmount.add(details.principal());
+            }
         }
 
         this.loanRepaymentScheduleDetail.setPrincipal(setPrincipalAmount);
