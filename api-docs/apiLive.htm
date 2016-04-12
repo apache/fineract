@@ -511,6 +511,14 @@
 							</tr>
 							<tr>
 								<td></td>
+								<td>savingsaccounts/{accountId}?command=updateWithHoldTax</td>
+								<td></td>
+								<td></td>
+								<td><a href="#savingsaccounts_withholdtaxupdate">Modify savings application withhold tax</a></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
 								<td>savingsaccounts/{accountId}?command=approve</td>
 								<td><a href="#savingsaccounts_approve">Approve a savings application</a></td>
 								<td></td>
@@ -2165,6 +2173,40 @@
 								<td></td>
 								<td><a href="#retrieve_floatingrate">Retrieve Floating Rate</a></td>
 								<td><a href="#update_floatingrate">Update Floating Rate</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#taxcomponent">Tax Component</a></td>
+								<td>taxes/component</td>
+								<td><a href="#create_taxcomponent">Create Tax Component</a></td>
+								<td><a href="#taxcomponents_list">List Tax Components</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>taxes/component/{taxComponentId}</td>
+								<td></td>
+								<td><a href="#retrieve_taxcomponent">Retrieve Tax component</a></td>
+								<td><a href="#update_taxcomponent">Update Tax Component</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#taxgroup">Tax Group</a></td>
+								<td>taxes/group</td>
+								<td><a href="#create_taxgroup">Create Tax Group</a></td>
+								<td><a href="#taxgroup_list">List Tax Groups</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>taxes/group/{taxGroupId}</td>
+								<td></td>
+								<td><a href="#retrieve_taxgroup">Retrieve Tax Group</a></td>
+								<td><a href="#update_taxgroup">Update Tax Group</a></td>
 								<td></td>
 								<td></td>
 							</tr>
@@ -19457,6 +19499,13 @@ Content-Type: application/json
 				<tr class=alt><td>minRequiredBalance</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If provided, sets an indicator of the minimum required balance of the  savings account e.g. <b>5,000</b> else set the limit as zero. Note that <span>enforceMinRequiredBalance</span> determines if the minimum required balance is enforced</td></tr>
 
+				<tr class=alt><td>withHoldTax</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, sets an indicator for applying withhold tax on interest posting for savings account </td></tr>
+
+				<tr class=alt><td>taxGroupId</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If withhold tax set as true, with hold tax will be applied as per the tax group provided </td></tr>
+
+				
 	        </table>
 	    </div>
 	</div>
@@ -20028,7 +20077,7 @@ Content-Type: application/json
             <br/>
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Optional Fields</div></td></tr>
-                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges, allowOverdraft, overdraftLimit, minBalanceForInterestCalculation</tr>
+                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges, allowOverdraft, overdraftLimit, minBalanceForInterestCalculation,withHoldTax,taxGroupId</tr>
             </table>
         </div>
         <div class="method-example">
@@ -20466,6 +20515,12 @@ Content-Type: application/json
 					product and the type of the accounting rule to be used
 					<span>Example Values:</span>1=NONE,2=CASH_BASED</td>
 				</tr>
+				<tr class=alt><td>withHoldTax</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, sets an indicator for applying withhold tax on interest posting for savings account </td></tr>
+
+				<tr class=alt><td>taxGroupId</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If withhold tax set as true, with hold tax will be applied as per the tax group provided </td></tr>
+
 
 	        </table>
 	    </div>
@@ -20492,7 +20547,7 @@ Content-Type: application/json
             <br/>
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Optional Fields</div></td></tr>
-                <tr class=alt><td>lockinPeriodFrequency, lockinPeriodFrequencyType, maxDepositTerm, maxDepositTermTypeId, inMultiplesOfDepositTerm, inMultiplesOfDepositTermTypeId, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges, charts</tr>
+                <tr class=alt><td>lockinPeriodFrequency, lockinPeriodFrequencyType, maxDepositTerm, maxDepositTermTypeId, inMultiplesOfDepositTerm, inMultiplesOfDepositTermTypeId, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges, charts, , withHoldTax, taxGroupId</tr>
             </table>
         </div>
         <div class="method-example">
@@ -20968,6 +21023,11 @@ Content-Type: application/json
 					product and the type of the accounting rule to be used
 					<span>Example Values:</span>1=NONE,2=CASH_BASED</td>
 				</tr>
+				<tr class=alt><td>withHoldTax</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, sets an indicator for applying withhold tax on interest posting for savings account </td></tr>
+
+				<tr class=alt><td>taxGroupId</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If withhold tax set as true, with hold tax will be applied as per the tax group provided </td></tr>
 
 	        </table>
 	    </div>
@@ -20994,7 +21054,7 @@ Content-Type: application/json
             <br/>
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Optional Fields</div></td></tr>
-                <tr class=alt><td>lockinPeriodFrequency, lockinPeriodFrequencyType, maxDepositTerm, maxDepositTermTypeId, inMultiplesOfDepositTerm, inMultiplesOfDepositTermTypeId, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges, charts, minDepositAmount, maxDepositAmount</tr>
+                <tr class=alt><td>lockinPeriodFrequency, lockinPeriodFrequencyType, maxDepositTerm, maxDepositTermTypeId, inMultiplesOfDepositTerm, inMultiplesOfDepositTermTypeId, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges, charts, minDepositAmount, maxDepositAmount, withHoldTax, taxGroupId</tr>
             </table>
         </div>
         <div class="method-example">
@@ -21480,6 +21540,10 @@ Content-Type: application/json
 
 				<tr class=alt><td>overdraftLimit</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If provided, sets the maximum allowed overdraft amount for a  savings account e.g. <b>5,000</b> else set the limit as zero</td></tr>
+				
+				<tr class=alt><td>withHoldTax</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If tax group provided at product level, will allow to Enable or disable withhold tax on interest posting for savings account </td></tr>
+
 
 	        </table>
 	    </div>
@@ -21844,7 +21908,7 @@ Content-Type: application/json
 	        <br/>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Inherited from Product (if not provided)</div></td></tr>
-	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, allowOverdraft, overdraftLimit</td>
+	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, allowOverdraft, overdraftLimit, withHoldTax</td>
 	       		</tr>
 	        </table>
 	    </div>
@@ -22561,6 +22625,34 @@ No Request Body:
     "locale": "en"
   }
 }
+	        </code>
+	    </div>
+	</div>
+	
+	
+	<a id="savingsaccounts_withholdtaxupdate" name="savingsaccounts_withholdtaxupdate" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Modify savings account withhold tax applicability</h2>
+	        <p>Savings application's withhold tax can  be modified when in 'Active' state. Once the application is activated, can modify the account withhold tax to post tax or vice-versa</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">PUT https://Domain Name/api/v1/savingsaccounts/{accountsId}?command=updateWithHoldTax</code>
+	        <code class="method-request">PUT savingsaccounts/1?command=updateWithHoldTax
+Content-Type: application/json
+No Request Body:
+			{
+				"withHoldTax": false
+			}
+	        </code>
+	        <code class="method-response">
+			{
+				"savingsId": 138,
+				"resourceId": 138,
+				"changes": {
+					"withHoldTax": false
+				}
+			}
 	        </code>
 	    </div>
 	</div>
@@ -23652,6 +23744,9 @@ No Request Body:
 	            <tr>
 	            	<td class=fielddesc><b>Optional</b>: Must provide when <i>preClosurePenalApplicable</i> is true. Used along with <i>preClosurePenalInterest</i> to decide what should be the applicable interest rate to which penalalty can be applied on Pre-mature closure of accounts. 1=Whole Term, 2=Till Premature withdrawal e.g. “1%” means 1% less than the interest rate applicable till premature withdrawal.</td>
 	            </tr>
+				<tr class=alt><td>withHoldTax</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If tax group provided at product level, will allow to Enable or disable withhold tax on interest posting for savings account </td></tr>
+
 
 	        </table>
 	    </div>
@@ -24016,7 +24111,7 @@ No Request Body:
 	        <br/>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Inherited from Product (if not provided)</div></td></tr>
-	            <tr class=alt><td>interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, lockinPeriodFrequency, lockinPeriodFrequencyType, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, charts</td>
+	            <tr class=alt><td>interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, lockinPeriodFrequency, lockinPeriodFrequencyType, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, charts, withHoldTax</td>
 	       		</tr>
 	        </table>
 	    </div>
@@ -25116,6 +25211,10 @@ No Request Body:
 	            	<td class=fielddesc><b>Optional</b>: Must provide when <i>preClosurePenalApplicable</i> is true. Used along with <i>preClosurePenalInterest</i> to decide what should be the applicable interest rate to which penalalty can be applied on Pre-mature closure of accounts. 1=Whole Term, 2=Till Premature withdrawal e.g. “1%” means 1% less than the interest rate applicable till premature withdrawal.</td>
 	            </tr>
 
+				<tr class=alt><td>withHoldTax</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If tax group provided at product level, will allow to Enable or disable withhold tax on interest posting for savings account </td></tr>
+
+				
 	        </table>
 	    </div>
 	</div>
@@ -25479,7 +25578,7 @@ No Request Body:
 	        <br/>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Inherited from Product (if not provided)</div></td></tr>
-	            <tr class=alt><td>interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, lockinPeriodFrequency, lockinPeriodFrequencyType, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, charts</td>
+	            <tr class=alt><td>interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, lockinPeriodFrequency, lockinPeriodFrequencyType, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, charts, withHoldTax</td>
 	       		</tr>
 	        </table>
 	    </div>
@@ -37605,6 +37704,529 @@ No Request Body:
 				</div>
 			</div>
 			<!-- End of floatingrates -->
+			
+			<!-- Tax components-->
+			<a id="taxcomponent" name="taxcomponent" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Tax Components</h3>
+					<p>This defines the Tax Components</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>name</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Name of the Tax component
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>percentage</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								Percentage that should be applied on a amount as tax.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>debitAccountType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								Debit Account type that should be applicable only for particular cases depending on requirement ex with hold tax doesn't require debit account for the accounting operation. .
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>debitAcountId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								GL Account that should debited when tax applied. used only for particular cases depending on requirement ex with hold tax doesn't require debit account for the accounting operation. .
+							</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								Credit Account type that should be applicable only for particular cases depending on requirement ex with hold tax  require credit account for the accounting operation. .
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>debitAcountId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								GL Account that should credited when tax applied. used only for particular cases depending on requirement ex with hold tax require only credit account for the accounting operation. .
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>startDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								Start date from which this tax component is applicable.
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<a id="create_taxcomponent" name="create_taxcomponent"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create a new Tax Component</h4>
+					<p>Creates a new Tax Component</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>name</td>
+						</tr>
+						<tr class=alt>
+							<td>percentage</td>
+						</tr>
+					</table>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>debitAccountType</td>
+						</tr>
+						<tr class=alt>
+							<td>debitAcountId</td>
+						</tr>
+						<tr class=alt>
+							<td>creditAccountType</td>
+						</tr>
+						<tr class=alt>
+							<td>creditAcountId</td>
+						</tr>
+						<tr class=alt>
+							<td>startDate</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					POST https://DomainName/api/v1/taxes/component
+					</code>
+					<code class="method-request">
+					POST taxes/component
+					Content-Type: application/json
+					Request Body:
+					{
+						"name": "tax component 1",
+						"percentage": "10",
+						"creditAccountType": 2,
+						"creditAcountId": 4,
+						"locale": "en",
+						"dateFormat": "dd MMMM yyyy",
+						"startDate": "11 April 2016"
+					}
+					</code>
+					<code class="method-response">
+					{
+						"resourceId": 1
+					}
+					</code>
+				</div>
+			</div>
+			<a id="taxcomponents_list" name="taxcomponents_list"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Tax Components</h4>
+					<p>List Tax Components/p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					GET https://DomainName/api/v1/taxes/component
+					</code>
+					<code class="method-request">
+					GET taxes/component
+					Content-Type: application/json
+					</code>
+					<code class="method-response">
+					[{
+						"id": 1,
+						"name": "tax component 1",
+						"percentage": 10.000000,
+						"creditAccountType": {
+							"id": 2,
+							"code": "accountType.liability",
+							"value": "LIABILITY"
+						},
+						"creditAccount": {
+							"id": 4,
+							"name": "ACCOUNT_NAME_7BR9C",
+							"glCode": "LIABILITY_PA1460364665046"
+						},
+						"startDate": [2016,
+						4,
+						11],
+						"taxComponentHistories": [{
+							
+						}]
+					},
+					{
+						"id": 2,
+						"name": "tax component 2",
+						"percentage": 10.000000,
+						"creditAccountType": {
+							"id": 2,
+							"code": "accountType.liability",
+							"value": "LIABILITY"
+						},
+						"creditAccount": {
+							"id": 4,
+							"name": "ACCOUNT_NAME_7BR9C",
+							"glCode": "LIABILITY_PA1460364665046"
+						},
+						"startDate": [2016,
+						4,
+						11],
+						"taxComponentHistories": [{
+							
+						}]
+					}]	
+					</code>
+				</div>
+			</div>
+			<a id="retrieve_taxcomponent" name="retrieve_taxcomponent"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Tax Component</h4>
+					<p>Retrieve Tax Component</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					GET https://DomainName/api/v1/taxes/component/1
+					</code>
+					<code class="method-request">
+					GET taxes/component/1
+					Content-Type: application/json
+					</code>
+					<code class="method-response">
+					{
+						"id": 1,
+						"name": "tax component 1",
+						"percentage": 10.000000,
+						"creditAccountType": {
+							"id": 2,
+							"code": "accountType.liability",
+							"value": "LIABILITY"
+						},
+						"creditAccount": {
+							"id": 4,
+							"name": "ACCOUNT_NAME_7BR9C",
+							"glCode": "LIABILITY_PA1460364665046"
+						},
+						"startDate": [2016,
+						4,
+						11],
+						"taxComponentHistories": [{
+							
+						}]
+					}
+					</code>
+				</div>
+			</div>
+						<a id="update_taxcomponent" name="update_taxcomponent"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update Tax Component</h4>
+					<p>Updates Tax component. Debit and credit account details cannot be modified.
+					All the future tax components would be replaced with the new percentage.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					PUT https://DomainName/api/v1/taxes/component/1
+					</code>
+					<code class="method-request">
+					PUT taxes/component/1
+					Content-Type: application/json
+					Request Body:
+					{
+						"name": "tax component 2",
+						"percentage": "15",
+						"locale": "en",
+						"dateFormat": "dd MMMM yyyy",
+						"startDate": "15 April 2016"
+					}
+					</code>
+					<code class="method-response">
+					{
+						"resourceId": 1,
+						"changes": {
+							"percentage": 15,
+							"name": "tax component 2",
+							"startDate": [2016,
+							4,
+							15]
+						}
+					}
+					</code>
+				</div>
+			</div>
+			<!-- End of Tax component -->
+
+			<!-- Tax components-->
+			<a id="taxgroup" name="taxgroup" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Tax Group</h3>
+					<p>This defines the Tax Group</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>name</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Name of the Tax Group
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>taxComponents</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								Array of tax components to be added part of tax group.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>id</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								Tax group and tax component mapping id.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>taxComponentId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								Tax component id.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>startDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								Start date from which this tax component is applicable.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>endDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								End date from which this tax component is applicable.
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<a id="create_taxgroup" name="create_taxgroup"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create a new Tax Group</h4>
+					<p>Creates a new Tax Group</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>name</td>
+						</tr>
+						<tr class=alt>
+							<td>taxComponents</td>
+						</tr>
+					</table>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields in taxComponents</div></td>
+						</tr>
+						<tr class=alt>
+							<td>taxComponentId</td>
+						</tr>
+					</table>
+					<table class=matrixHeading>
+					<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Optional Fields in taxComponents</div></td>
+						</tr>
+						<tr class=alt>
+							<td>id</td>
+						</tr>
+						<tr class=alt>
+							<td>startDate</td>
+						</tr>
+						<tr class=alt>
+							<td>endDate</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					POST https://DomainName/api/v1/taxes/group
+					</code>
+					<code class="method-request">
+					POST taxes/component
+					Content-Type: application/json
+					Request Body:
+					{
+						"name": "tax group 1",
+						"locale": "en",
+						"taxComponents": [{
+							"taxComponentId": 7,
+							"startDate": "11 April 2016"
+						}],
+						"dateFormat": "dd MMMM yyyy"
+					}  
+					</code>
+					<code class="method-response">
+					{
+						"resourceId": 1
+					}
+					</code>
+				</div>
+			</div>
+			<a id="taxgroup_list" name="taxgroup_list"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Tax Group</h4>
+					<p>List Tax Group/p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					GET https://DomainName/api/v1/taxes/group
+					</code>
+					<code class="method-request">
+					GET taxes/group
+					Content-Type: application/json
+					</code>
+					<code class="method-response">
+					[{
+						"id": 6,
+						"name": "Tax_component_Name_PAX65",
+						"taxAssociations": [{
+							"id": 6,
+							"taxComponent": {
+								"id": 6,
+								"name": "Tax_component_Name_FPNXE"
+							},
+							"startDate": [2013,
+							1,
+							1]
+						}]
+					},
+					{
+						"id": 7,
+						"name": "tax group 1",
+						"taxAssociations": [{
+							"id": 7,
+							"taxComponent": {
+								"id": 7,
+								"name": "tax component 2"
+							},
+							"startDate": [2016,
+							4,
+							11]
+						}]
+					}]	
+					</code>
+				</div>
+			</div>
+			<a id="retrieve_taxgroup" name="retrieve_taxgroup"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Tax Group</h4>
+					<p>Retrieve Tax Group</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					GET https://DomainName/api/v1/taxes/group/1
+					</code>
+					<code class="method-request">
+					GET taxes/group/1
+					Content-Type: application/json
+					</code>
+					<code class="method-response">
+					{
+						"id": 7,
+						"name": "tax group 1",
+						"taxAssociations": [{
+							"id": 7,
+							"taxComponent": {
+								"id": 7,
+								"name": "tax component 2"
+							},
+							"startDate": [2016,
+							4,
+							11]
+						}]
+					}
+					</code>
+				</div>
+			</div>
+						<a id="update_taxgroup" name="update_taxgroup"
+			   class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update Tax Group</h4>
+					<p>Updates Tax Group. Only end date can be up-datable and can insert new tax components.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+					PUT https://DomainName/api/v1/taxes/group/1
+					</code>
+					<code class="method-request">
+					PUT taxes/group/1
+					Content-Type: application/json
+					Request Body:
+					{
+						"name": "tax group 2",
+						"locale": "en",
+						"taxComponents": [{
+							"id": 7,
+							"taxComponentId": 7,
+							"endDate": "22 April 2016"
+						},
+						{
+							"taxComponentId": 6,
+							"startDate": "14 April 2016"
+						}],
+						"dateFormat": "dd MMMM yyyy"
+					}
+					</code>
+					<code class="method-response">
+					{
+						"resourceId": 7,
+						"changes": {
+							"addComponents": [6],
+							"modifiedComponents": [{
+								"endDate": "Apr 22, 2016 12:00:00 AM",
+								"taxComponentId": 7
+							}],
+							"name": "tax group 2"
+						}
+					}
+					</code>
+				</div>
+			</div>
+			<!-- End of Tax Group -->
 
 		<!-- start of clients api docs -->
 		<a id="templates" name="clients" class="old-syle-anchor">&nbsp;</a>
@@ -43026,6 +43648,14 @@ No Request Body:
 					<td><a href="#savingsaccounts_retrieve">Retrieve a savings application/account</a></td>
 					<td><a href="#savingsaccounts_update">Modify a savings application</a></td>
 					<td><a href="#savingsaccounts_delete">Delete a savings application</a></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=updateWithHoldTax</td>
+					<td></td>
+					<td></td>
+					<td><a href="#savingsaccounts_withholdtaxupdate">Modify savings application withhold tax</a></td>
+					<td></td>
 				</tr>
 				<tr>
 					<td></td>
