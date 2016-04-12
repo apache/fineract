@@ -46,9 +46,14 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.useradministration.data.AppUserData;
+import org.apache.fineract.useradministration.exception.IncorrectPasswordException;
 import org.apache.fineract.useradministration.service.AppUserReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 @Path("/users")
@@ -73,12 +78,15 @@ public class UsersApiResource {
     private final DefaultToApiJsonSerializer<AppUserData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final DaoAuthenticationProvider customAuthenticationProvider;
 
     @Autowired
-    public UsersApiResource(final PlatformSecurityContext context, final AppUserReadPlatformService readPlatformService,
+    public UsersApiResource(@Qualifier("customAuthenticationProvider") final DaoAuthenticationProvider customAuthenticationProvider,
+            final PlatformSecurityContext context, final AppUserReadPlatformService readPlatformService,
             final OfficeReadPlatformService officeReadPlatformService, final DefaultToApiJsonSerializer<AppUserData> toApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+        this.customAuthenticationProvider = customAuthenticationProvider;
         this.context = context;
         this.readPlatformService = readPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
@@ -140,25 +148,40 @@ public class UsersApiResource {
         return this.toApiJsonSerializer.serialize(result);
     }
 
-    @PUT
-    @Path("{userId}")
-    public String update(@PathParam("userId") final Long userId, final String apiRequestBodyAsJson) {
+  @PUT
+  @Path("/{userId}/usrnme/{usrnme}/currentPass/{currentPass}")
+    public String update(@PathParam("userId") final Long userId,@PathParam("usrnme") final String usrnme,
+            @PathParam("currentPass") final String currentPass, final String apiRequestBodyAsJson) {
+      
+        final Authentication authentication = new UsernamePasswordAuthenticationToken(usrnme, currentPass);
+        final Authentication authenticationCheck = this.customAuthenticationProvider.authenticate(authentication);
+        
+        if(authenticationCheck.isAuthenticated())
+        {
+            final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+                    .updateUser(userId) //
+                    .withJson(apiRequestBodyAsJson) //
+                    .build();
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .updateUser(userId) //
-                .withJson(apiRequestBodyAsJson) //
-                .build();
+            final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
+            return this.toApiJsonSerializer.serialize(result);
+        }
+        if(!authenticationCheck.isAuthenticated())
+        {
+           throw new IncorrectPasswordException();
+        }
+            
+   return ""; 
+  
     }
 
     @DELETE
     @Path("{userId}")
     public String delete(@PathParam("userId") final Long userId) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+        
+          final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .deleteUser(userId) //
                 .build();
 
