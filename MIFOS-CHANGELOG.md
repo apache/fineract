@@ -4,6 +4,7 @@ Changelog
 Releases
 ===============
 
+1. 13 Apr 2016 - 16.04.01.RELEASE
 1. 23 Mar 2016 - 16.03.03.RELEASE
 1. 16 Mar 2016 - 16.03.02.RELEASE
 1. 09 Mar 2016 - 16.03.01.RELEASE
@@ -86,7 +87,43 @@ Releases
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
 
-16.03.03.RELEASE
+16.04.01.RELEASE
+=============
+
+This release contains following improvements and bug fixes
+ 
+Platform & API
+New Features & Improvements
+
+ - Shares and Dividends Feature
+ - [FINERACT-33] % on Interest Charge for Savings (Tax with holding feature on savings)
+ - Skip Repayment Date Falling On First Day of Month
+ - Capturing time of group meeting
+ 
+ 
+Bugs
+ 
+ - [FINERACT-86] - After Rescheduling Future meetings for the loan with multi tranche and interest recalculation enabled is not proper
+ - [FINERACT-98] - unable to delete a tranche from loan tranche details screen
+ - Populate Display Name as Full Name when client is a Person
+ 
+Community-app
+New Features & Improvements
+
+ - Shares and Dividends Feature
+ - [FINERACT-33] % on Interest Charge for Savings (Tax with holding feature on savings)
+ 
+Bugs
+ 
+ - [MIFOSX-2528] - Add support for YYYY-MM-DD date format
+ - [MIFOSX-2555] - Some of the places in community app error message displayed is improper
+ - [MIFOSX-2669] - Make tooltip for rounding mode global configuration setting more informative
+ - [MIFOSX-2616] - Add # of staff to Office Display under Navigation Drilldown
+ - [MIFOSX-2617] - Display total number of centers from Loan Officer under Navigational Drilldown. 
+ - Number formatting
+ - Fixes for missing permissions
+
+ 16.03.03.RELEASE
 =============
 
 This release contains following improvements and bug fixes

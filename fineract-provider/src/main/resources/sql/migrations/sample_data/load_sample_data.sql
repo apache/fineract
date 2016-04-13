@@ -11,6 +11,7 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
 -- Dumping structure for table mifostenant-reference.acc_accounting_rule
+DROP TABLE IF EXISTS `acc_accounting_rule`;
 CREATE TABLE IF NOT EXISTS `acc_accounting_rule` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
@@ -37,6 +38,7 @@ CREATE TABLE IF NOT EXISTS `acc_accounting_rule` (
 
 
 -- Dumping structure for table mifostenant-reference.acc_gl_account
+DROP TABLE IF EXISTS `acc_gl_account`;
 CREATE TABLE IF NOT EXISTS `acc_gl_account` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(200) NOT NULL,
@@ -119,6 +121,7 @@ INSERT INTO `acc_gl_account` (`id`, `name`, `parent_id`, `hierarchy`, `gl_code`,
 
 
 -- Dumping structure for table mifostenant-reference.acc_gl_closure
+DROP TABLE IF EXISTS `acc_gl_closure`;
 CREATE TABLE IF NOT EXISTS `acc_gl_closure` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `office_id` bigint(20) NOT NULL,
@@ -145,6 +148,7 @@ CREATE TABLE IF NOT EXISTS `acc_gl_closure` (
 
 
 -- Dumping structure for table mifostenant-reference.acc_gl_financial_activity_account
+DROP TABLE IF EXISTS `acc_gl_financial_activity_account`;
 CREATE TABLE IF NOT EXISTS `acc_gl_financial_activity_account` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `gl_account_id` bigint(20) NOT NULL DEFAULT '0',
@@ -163,6 +167,7 @@ INSERT INTO `acc_gl_financial_activity_account` (`id`, `gl_account_id`, `financi
 
 
 -- Dumping structure for table mifostenant-reference.acc_gl_journal_entry
+DROP TABLE IF EXISTS `acc_gl_journal_entry`;
 CREATE TABLE IF NOT EXISTS `acc_gl_journal_entry` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `account_id` bigint(20) NOT NULL,
@@ -190,6 +195,7 @@ CREATE TABLE IF NOT EXISTS `acc_gl_journal_entry` (
   `office_running_balance` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `organization_running_balance` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `payment_details_id` bigint(20) DEFAULT NULL,
+  `share_transaction_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_acc_gl_journal_entry_m_office` (`office_id`),
   KEY `FK_acc_gl_journal_entry_m_appuser` (`createdby_id`),
@@ -200,6 +206,8 @@ CREATE TABLE IF NOT EXISTS `acc_gl_journal_entry` (
   KEY `FK_acc_gl_journal_entry_m_savings_account_transaction` (`savings_transaction_id`),
   KEY `FK_acc_gl_journal_entry_m_payment_detail` (`payment_details_id`),
   KEY `FK_acc_gl_journal_entry_m_client_transaction` (`client_transaction_id`),
+  KEY `FK_acc_gl_journal_entry_m_share_account_transaction` (`share_transaction_id`),
+  CONSTRAINT `FK_acc_gl_journal_entry_m_share_account_transaction` FOREIGN KEY (`share_transaction_id`) REFERENCES `m_share_account_transactions` (`id`),
   CONSTRAINT `FK_acc_gl_journal_entry_acc_gl_account` FOREIGN KEY (`account_id`) REFERENCES `acc_gl_account` (`id`),
   CONSTRAINT `FK_acc_gl_journal_entry_acc_gl_journal_entry` FOREIGN KEY (`reversal_id`) REFERENCES `acc_gl_journal_entry` (`id`),
   CONSTRAINT `FK_acc_gl_journal_entry_m_appuser` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
@@ -217,6 +225,7 @@ CREATE TABLE IF NOT EXISTS `acc_gl_journal_entry` (
 
 
 -- Dumping structure for table mifostenant-reference.acc_product_mapping
+DROP TABLE IF EXISTS `acc_product_mapping`;
 CREATE TABLE IF NOT EXISTS `acc_product_mapping` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `gl_account_id` bigint(20) DEFAULT NULL,
@@ -257,6 +266,7 @@ INSERT INTO `acc_product_mapping` (`id`, `gl_account_id`, `product_id`, `product
 
 
 -- Dumping structure for table mifostenant-reference.acc_rule_tags
+DROP TABLE IF EXISTS `acc_rule_tags`;
 CREATE TABLE IF NOT EXISTS `acc_rule_tags` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `acc_rule_id` bigint(20) NOT NULL,
@@ -276,6 +286,7 @@ CREATE TABLE IF NOT EXISTS `acc_rule_tags` (
 
 
 -- Dumping structure for table mifostenant-reference.c_account_number_format
+DROP TABLE IF EXISTS `c_account_number_format`;
 CREATE TABLE IF NOT EXISTS `c_account_number_format` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `account_type_enum` smallint(1) NOT NULL,
@@ -290,6 +301,7 @@ CREATE TABLE IF NOT EXISTS `c_account_number_format` (
 
 
 -- Dumping structure for table mifostenant-reference.c_cache
+DROP TABLE IF EXISTS `c_cache`;
 CREATE TABLE IF NOT EXISTS `c_cache` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `cache_type_enum` tinyint(1) NOT NULL DEFAULT '1',
@@ -304,6 +316,7 @@ INSERT INTO `c_cache` (`id`, `cache_type_enum`) VALUES
 
 
 -- Dumping structure for table mifostenant-reference.c_configuration
+DROP TABLE IF EXISTS `c_configuration`;
 CREATE TABLE IF NOT EXISTS `c_configuration` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) DEFAULT NULL,
@@ -314,9 +327,9 @@ CREATE TABLE IF NOT EXISTS `c_configuration` (
   `description` varchar(300) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.c_configuration: ~23 rows (approximately)
+-- Dumping data for table mifostenant-reference.c_configuration: ~24 rows (approximately)
 /*!40000 ALTER TABLE `c_configuration` DISABLE KEYS */;
 INSERT INTO `c_configuration` (`id`, `name`, `value`, `date_value`, `enabled`, `is_trap_door`, `description`) VALUES
 	(1, 'maker-checker', NULL, NULL, 0, 0, NULL),
@@ -341,11 +354,13 @@ INSERT INTO `c_configuration` (`id`, `name`, `value`, `date_value`, `enabled`, `
 	(24, 'backdate-penalties-enabled', 0, NULL, 1, 0, 'If this parameter is disabled penalties will only be added to instalments due moving forward, any old overdue instalments will not be affected.'),
 	(26, 'organisation-start-date', 0, NULL, 0, 0, NULL),
 	(27, 'paymenttype-applicable-for-disbursement-charges', NULL, NULL, 0, 0, 'Is the Disbursement Entry need to be considering the fund source of the paymnet type'),
-	(28, 'interest-charged-from-date-same-as-disbursal-date', 0, NULL, 0, 0, NULL);
+	(28, 'interest-charged-from-date-same-as-disbursal-date', 0, NULL, 0, 0, NULL),
+	(29, 'skip-repayment-on-first-day-of-month', 14, NULL, 0, 0, 'skipping repayment on first day of month');
 /*!40000 ALTER TABLE `c_configuration` ENABLE KEYS */;
 
 
 -- Dumping structure for table mifostenant-reference.c_external_service
+DROP TABLE IF EXISTS `c_external_service`;
 CREATE TABLE IF NOT EXISTS `c_external_service` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
@@ -362,6 +377,7 @@ INSERT INTO `c_external_service` (`id`, `name`) VALUES
 
 
 -- Dumping structure for table mifostenant-reference.c_external_service_properties
+DROP TABLE IF EXISTS `c_external_service_properties`;
 CREATE TABLE IF NOT EXISTS `c_external_service_properties` (
   `name` varchar(150) NOT NULL,
   `value` varchar(250) DEFAULT NULL,
@@ -385,6 +401,7 @@ INSERT INTO `c_external_service_properties` (`name`, `value`, `external_service_
 
 
 -- Dumping structure for table mifostenant-reference.job
+DROP TABLE IF EXISTS `job`;
 CREATE TABLE IF NOT EXISTS `job` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
@@ -403,34 +420,36 @@ CREATE TABLE IF NOT EXISTS `job` (
   `scheduler_group` smallint(2) NOT NULL DEFAULT '0',
   `is_misfired` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.job: ~19 rows (approximately)
+-- Dumping data for table mifostenant-reference.job: ~20 rows (approximately)
 /*!40000 ALTER TABLE `job` DISABLE KEYS */;
 INSERT INTO `job` (`id`, `name`, `display_name`, `cron_expression`, `create_time`, `task_priority`, `group_name`, `previous_run_start_time`, `next_run_time`, `job_key`, `initializing_errorlog`, `is_active`, `currently_running`, `updates_allowed`, `scheduler_group`, `is_misfired`) VALUES
-	(1, 'Update loan Summary', 'Update loan Summary', '0 0 22 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, '2014-06-11 09:30:00', '2016-03-23 22:00:00', 'Update loan SummaryJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(2, 'Update Loan Arrears Ageing', 'Update Loan Arrears Ageing', '0 1 0 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, NULL, '2016-03-24 00:01:00', 'Update Loan Arrears AgeingJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(3, 'Update Loan Paid In Advance', 'Update Loan Paid In Advance', '0 5 0 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, NULL, '2016-03-24 00:05:00', 'Update Loan Paid In AdvanceJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(4, 'Apply Annual Fee For Savings', 'Apply Annual Fee For Savings', '0 20 22 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, '2014-06-11 09:50:00', '2016-03-23 22:20:00', 'Apply Annual Fee For SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(5, 'Apply Holidays To Loans', 'Apply Holidays To Loans', '0 0 12 * * ?', '2014-03-07 18:29:14', 5, NULL, '2014-03-24 12:00:04', '2016-03-24 12:00:00', 'Apply Holidays To LoansJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(6, 'Post Interest For Savings', 'Post Interest For Savings', '0 0 0 1/1 * ? *', '2014-03-07 18:29:21', 5, NULL, NULL, '2016-03-24 00:00:00', 'Post Interest For SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
-	(7, 'Transfer Fee For Loans From Savings', 'Transfer Fee For Loans From Savings', '0 1 0 1/1 * ? *', '2014-03-07 18:29:32', 5, NULL, NULL, '2016-03-24 00:01:00', 'Transfer Fee For Loans From SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(8, 'Pay Due Savings Charges', 'Pay Due Savings Charges', '0 0 12 * * ?', '2013-09-23 00:00:00', 5, NULL, '2014-03-24 12:00:04', '2016-03-24 12:00:00', 'Pay Due Savings ChargesJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(9, 'Update Accounting Running Balances', 'Update Accounting Running Balances', '0 1 0 1/1 * ? *', '2014-03-07 18:29:37', 5, NULL, NULL, '2016-03-24 00:01:00', 'Update Accounting Running BalancesJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(10, 'Execute Standing Instruction', 'Execute Standing Instruction', '0 0 0 1/1 * ? *', '2014-05-01 16:10:35', 5, NULL, NULL, '2016-03-24 00:00:00', 'Execute Standing InstructionJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(11, 'Add Accrual Transactions', 'Add Accrual Transactions', '0 1 0 1/1 * ? *', '2014-05-01 16:10:36', 3, NULL, NULL, '2016-03-24 00:01:00', 'Add Accrual TransactionsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(12, 'Apply penalty to overdue loans', 'Apply penalty to overdue loans', '0 0 0 1/1 * ? *', '2014-05-01 16:10:36', 5, NULL, NULL, '2016-03-24 00:00:00', 'Apply penalty to overdue loansJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(13, 'Update Non Performing Assets', 'Update Non Performing Assets', '0 0 0 1/1 * ? *', '2014-05-01 16:10:41', 5, NULL, NULL, '2016-03-24 00:00:00', 'Update Non Performing AssetsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(14, 'Transfer Interest To Savings', 'Transfer Interest To Savings', '0 2 0 1/1 * ? *', '2014-06-11 09:09:15', 4, NULL, NULL, '2016-03-24 00:02:00', 'Transfer Interest To SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
-	(15, 'Update Deposit Accounts Maturity details', 'Update Deposit Accounts Maturity details', '0 0 0 1/1 * ? *', '2014-06-11 09:09:15', 5, NULL, NULL, '2016-03-24 00:00:00', 'Update Deposit Accounts Maturity detailsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(16, 'Add Periodic Accrual Transactions', 'Add Periodic Accrual Transactions', '0 2 0 1/1 * ? *', '2014-10-14 16:19:45', 2, NULL, NULL, '2016-03-24 00:02:00', 'Add Periodic Accrual TransactionsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(17, 'Recalculate Interest For Loans', 'Recalculate Interest For Loans', '0 1 0 1/1 * ? *', '2014-10-14 16:19:55', 4, NULL, NULL, '2016-03-24 00:01:00', 'Recalculate Interest For LoansJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(18, 'Generate Mandatory Savings Schedule', 'Generate Mandatory Savings Schedule', '0 5 0 1/1 * ? *', '2015-04-16 02:28:43', 5, NULL, NULL, '2016-03-24 00:05:00', 'Generate Mandatory Savings ScheduleJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(19, 'Generate Loan Loss Provisioning', 'Generate Loan Loss Provisioning', '0 0 0 1/1 * ? *', '2015-10-20 19:57:58', 5, NULL, NULL, '2016-03-24 00:00:00', 'Generate Loan Loss ProvisioningJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0);
+	(1, 'Update loan Summary', 'Update loan Summary', '0 0 22 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, '2014-06-11 09:30:00', '2016-04-13 22:00:00', 'Update loan SummaryJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(2, 'Update Loan Arrears Ageing', 'Update Loan Arrears Ageing', '0 1 0 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, NULL, '2016-04-14 00:01:00', 'Update Loan Arrears AgeingJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(3, 'Update Loan Paid In Advance', 'Update Loan Paid In Advance', '0 5 0 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, NULL, '2016-04-14 00:05:00', 'Update Loan Paid In AdvanceJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(4, 'Apply Annual Fee For Savings', 'Apply Annual Fee For Savings', '0 20 22 1/1 * ? *', '2014-03-07 18:29:14', 5, NULL, '2014-06-11 09:50:00', '2016-04-13 22:20:00', 'Apply Annual Fee For SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(5, 'Apply Holidays To Loans', 'Apply Holidays To Loans', '0 0 12 * * ?', '2014-03-07 18:29:14', 5, NULL, '2014-03-24 12:00:04', '2016-04-14 12:00:00', 'Apply Holidays To LoansJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(6, 'Post Interest For Savings', 'Post Interest For Savings', '0 0 0 1/1 * ? *', '2014-03-07 18:29:21', 5, NULL, NULL, '2016-04-14 00:00:00', 'Post Interest For SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
+	(7, 'Transfer Fee For Loans From Savings', 'Transfer Fee For Loans From Savings', '0 1 0 1/1 * ? *', '2014-03-07 18:29:32', 5, NULL, NULL, '2016-04-14 00:01:00', 'Transfer Fee For Loans From SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(8, 'Pay Due Savings Charges', 'Pay Due Savings Charges', '0 0 12 * * ?', '2013-09-23 00:00:00', 5, NULL, '2014-03-24 12:00:04', '2016-04-14 12:00:00', 'Pay Due Savings ChargesJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(9, 'Update Accounting Running Balances', 'Update Accounting Running Balances', '0 1 0 1/1 * ? *', '2014-03-07 18:29:37', 5, NULL, NULL, '2016-04-14 00:01:00', 'Update Accounting Running BalancesJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(10, 'Execute Standing Instruction', 'Execute Standing Instruction', '0 0 0 1/1 * ? *', '2014-05-01 16:10:35', 5, NULL, NULL, '2016-04-14 00:00:00', 'Execute Standing InstructionJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(11, 'Add Accrual Transactions', 'Add Accrual Transactions', '0 1 0 1/1 * ? *', '2014-05-01 16:10:36', 3, NULL, NULL, '2016-04-14 00:01:00', 'Add Accrual TransactionsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(12, 'Apply penalty to overdue loans', 'Apply penalty to overdue loans', '0 0 0 1/1 * ? *', '2014-05-01 16:10:36', 5, NULL, NULL, '2016-04-14 00:00:00', 'Apply penalty to overdue loansJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(13, 'Update Non Performing Assets', 'Update Non Performing Assets', '0 0 0 1/1 * ? *', '2014-05-01 16:10:41', 5, NULL, NULL, '2016-04-14 00:00:00', 'Update Non Performing AssetsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(14, 'Transfer Interest To Savings', 'Transfer Interest To Savings', '0 2 0 1/1 * ? *', '2014-06-11 09:09:15', 4, NULL, NULL, '2016-04-14 00:02:00', 'Transfer Interest To SavingsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
+	(15, 'Update Deposit Accounts Maturity details', 'Update Deposit Accounts Maturity details', '0 0 0 1/1 * ? *', '2014-06-11 09:09:15', 5, NULL, NULL, '2016-04-14 00:00:00', 'Update Deposit Accounts Maturity detailsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(16, 'Add Periodic Accrual Transactions', 'Add Periodic Accrual Transactions', '0 2 0 1/1 * ? *', '2014-10-14 16:19:45', 2, NULL, NULL, '2016-04-14 00:02:00', 'Add Periodic Accrual TransactionsJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(17, 'Recalculate Interest For Loans', 'Recalculate Interest For Loans', '0 1 0 1/1 * ? *', '2014-10-14 16:19:55', 4, NULL, NULL, '2016-04-14 00:01:00', 'Recalculate Interest For LoansJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(18, 'Generate Mandatory Savings Schedule', 'Generate Mandatory Savings Schedule', '0 5 0 1/1 * ? *', '2015-04-16 02:28:43', 5, NULL, NULL, '2016-04-14 00:05:00', 'Generate Mandatory Savings ScheduleJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(19, 'Generate Loan Loss Provisioning', 'Generate Loan Loss Provisioning', '0 0 0 1/1 * ? *', '2015-10-20 19:57:58', 5, NULL, NULL, '2016-04-14 00:00:00', 'Generate Loan Loss ProvisioningJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(20, 'Post Dividends For Shares', 'Post Dividends For Shares', '0 0 0 1/1 * ? *', '2016-04-13 20:19:18', 5, NULL, NULL, '2016-04-14 00:00:00', 'Post Dividends For SharesJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 0, 0);
 /*!40000 ALTER TABLE `job` ENABLE KEYS */;
 
 
 -- Dumping structure for table mifostenant-reference.job_run_history
+DROP TABLE IF EXISTS `job_run_history`;
 CREATE TABLE IF NOT EXISTS `job_run_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `job_id` bigint(20) NOT NULL,
@@ -471,6 +490,7 @@ INSERT INTO `job_run_history` (`id`, `job_id`, `version`, `start_time`, `end_tim
 
 
 -- Dumping structure for table mifostenant-reference.mix_taxonomy
+DROP TABLE IF EXISTS `mix_taxonomy`;
 CREATE TABLE IF NOT EXISTS `mix_taxonomy` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
@@ -537,6 +557,7 @@ INSERT INTO `mix_taxonomy` (`id`, `name`, `namespace_id`, `dimension`, `type`, `
 
 
 -- Dumping structure for table mifostenant-reference.mix_taxonomy_mapping
+DROP TABLE IF EXISTS `mix_taxonomy_mapping`;
 CREATE TABLE IF NOT EXISTS `mix_taxonomy_mapping` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `identifier` varchar(50) NOT NULL DEFAULT '',
@@ -554,6 +575,7 @@ INSERT INTO `mix_taxonomy_mapping` (`id`, `identifier`, `config`, `last_update_d
 
 
 -- Dumping structure for table mifostenant-reference.mix_xbrl_namespace
+DROP TABLE IF EXISTS `mix_xbrl_namespace`;
 CREATE TABLE IF NOT EXISTS `mix_xbrl_namespace` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `prefix` varchar(20) NOT NULL DEFAULT '',
@@ -576,6 +598,7 @@ INSERT INTO `mix_xbrl_namespace` (`id`, `prefix`, `url`) VALUES
 
 
 -- Dumping structure for table mifostenant-reference.m_account_transfer_details
+DROP TABLE IF EXISTS `m_account_transfer_details`;
 CREATE TABLE IF NOT EXISTS `m_account_transfer_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `from_office_id` bigint(20) NOT NULL,
@@ -612,6 +635,7 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_details` (
 
 
 -- Dumping structure for table mifostenant-reference.m_account_transfer_standing_instructions
+DROP TABLE IF EXISTS `m_account_transfer_standing_instructions`;
 CREATE TABLE IF NOT EXISTS `m_account_transfer_standing_instructions` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(250) NOT NULL,
@@ -640,6 +664,7 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_standing_instructions` (
 
 
 -- Dumping structure for table mifostenant-reference.m_account_transfer_standing_instructions_history
+DROP TABLE IF EXISTS `m_account_transfer_standing_instructions_history`;
 CREATE TABLE IF NOT EXISTS `m_account_transfer_standing_instructions_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `standing_instruction_id` bigint(20) NOT NULL,
@@ -658,6 +683,7 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_standing_instructions_history` (
 
 
 -- Dumping structure for table mifostenant-reference.m_account_transfer_transaction
+DROP TABLE IF EXISTS `m_account_transfer_transaction`;
 CREATE TABLE IF NOT EXISTS `m_account_transfer_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `account_transfer_details_id` bigint(20) NOT NULL,
@@ -691,6 +717,7 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_transaction` (
 
 
 -- Dumping structure for table mifostenant-reference.m_appuser
+DROP TABLE IF EXISTS `m_appuser`;
 CREATE TABLE IF NOT EXISTS `m_appuser` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
@@ -730,6 +757,7 @@ INSERT INTO `m_appuser` (`id`, `is_deleted`, `office_id`, `staff_id`, `username`
 
 
 -- Dumping structure for table mifostenant-reference.m_appuser_previous_password
+DROP TABLE IF EXISTS `m_appuser_previous_password`;
 CREATE TABLE IF NOT EXISTS `m_appuser_previous_password` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) NOT NULL,
@@ -746,6 +774,7 @@ CREATE TABLE IF NOT EXISTS `m_appuser_previous_password` (
 
 
 -- Dumping structure for table mifostenant-reference.m_appuser_role
+DROP TABLE IF EXISTS `m_appuser_role`;
 CREATE TABLE IF NOT EXISTS `m_appuser_role` (
   `appuser_id` bigint(20) NOT NULL,
   `role_id` bigint(20) NOT NULL,
@@ -767,6 +796,7 @@ INSERT INTO `m_appuser_role` (`appuser_id`, `role_id`) VALUES
 
 
 -- Dumping structure for table mifostenant-reference.m_calendar
+DROP TABLE IF EXISTS `m_calendar`;
 CREATE TABLE IF NOT EXISTS `m_calendar` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `title` varchar(70) NOT NULL,
@@ -785,6 +815,7 @@ CREATE TABLE IF NOT EXISTS `m_calendar` (
   `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
+  `meeting_time` time DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -794,6 +825,7 @@ CREATE TABLE IF NOT EXISTS `m_calendar` (
 
 
 -- Dumping structure for table mifostenant-reference.m_calendar_history
+DROP TABLE IF EXISTS `m_calendar_history`;
 CREATE TABLE IF NOT EXISTS `m_calendar_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `calendar_id` bigint(20) NOT NULL,
@@ -820,6 +852,7 @@ CREATE TABLE IF NOT EXISTS `m_calendar_history` (
 
 
 -- Dumping structure for table mifostenant-reference.m_calendar_instance
+DROP TABLE IF EXISTS `m_calendar_instance`;
 CREATE TABLE IF NOT EXISTS `m_calendar_instance` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `calendar_id` bigint(20) NOT NULL,
@@ -836,6 +869,7 @@ CREATE TABLE IF NOT EXISTS `m_calendar_instance` (
 
 
 -- Dumping structure for table mifostenant-reference.m_cashiers
+DROP TABLE IF EXISTS `m_cashiers`;
 CREATE TABLE IF NOT EXISTS `m_cashiers` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `staff_id` bigint(20) DEFAULT NULL,
@@ -859,6 +893,7 @@ CREATE TABLE IF NOT EXISTS `m_cashiers` (
 
 
 -- Dumping structure for table mifostenant-reference.m_cashier_transactions
+DROP TABLE IF EXISTS `m_cashier_transactions`;
 CREATE TABLE IF NOT EXISTS `m_cashier_transactions` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `cashier_id` bigint(20) NOT NULL,
@@ -881,6 +916,7 @@ CREATE TABLE IF NOT EXISTS `m_cashier_transactions` (
 
 
 -- Dumping structure for table mifostenant-reference.m_charge
+DROP TABLE IF EXISTS `m_charge`;
 CREATE TABLE IF NOT EXISTS `m_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
@@ -900,20 +936,24 @@ CREATE TABLE IF NOT EXISTS `m_charge` (
   `max_cap` decimal(19,6) DEFAULT NULL,
   `fee_frequency` smallint(5) DEFAULT NULL,
   `income_or_liability_account_id` bigint(20) DEFAULT NULL,
+  `tax_group_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   KEY `FK_m_charge_acc_gl_account` (`income_or_liability_account_id`),
+  KEY `FK_m_charge_m_tax_group` (`tax_group_id`),
+  CONSTRAINT `FK_m_charge_m_tax_group` FOREIGN KEY (`tax_group_id`) REFERENCES `m_tax_group` (`id`),
   CONSTRAINT `FK_m_charge_acc_gl_account` FOREIGN KEY (`income_or_liability_account_id`) REFERENCES `acc_gl_account` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 -- Dumping data for table mifostenant-reference.m_charge: ~1 rows (approximately)
 /*!40000 ALTER TABLE `m_charge` DISABLE KEYS */;
-INSERT INTO `m_charge` (`id`, `name`, `currency_code`, `charge_applies_to_enum`, `charge_time_enum`, `charge_calculation_enum`, `charge_payment_mode_enum`, `amount`, `fee_on_day`, `fee_interval`, `fee_on_month`, `is_penalty`, `is_active`, `is_deleted`, `min_cap`, `max_cap`, `fee_frequency`, `income_or_liability_account_id`) VALUES
-	(1, 'Processing Fee', 'USD', 1, 1, 1, 0, 500.000000, NULL, NULL, NULL, 0, 1, 0, NULL, NULL, NULL, NULL);
+INSERT INTO `m_charge` (`id`, `name`, `currency_code`, `charge_applies_to_enum`, `charge_time_enum`, `charge_calculation_enum`, `charge_payment_mode_enum`, `amount`, `fee_on_day`, `fee_interval`, `fee_on_month`, `is_penalty`, `is_active`, `is_deleted`, `min_cap`, `max_cap`, `fee_frequency`, `income_or_liability_account_id`, `tax_group_id`) VALUES
+	(1, 'Processing Fee', 'USD', 1, 1, 1, 0, 500.000000, NULL, NULL, NULL, 0, 1, 0, NULL, NULL, NULL, NULL, NULL);
 /*!40000 ALTER TABLE `m_charge` ENABLE KEYS */;
 
 
 -- Dumping structure for table mifostenant-reference.m_client
+DROP TABLE IF EXISTS `m_client`;
 CREATE TABLE IF NOT EXISTS `m_client` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `account_no` varchar(20) NOT NULL,
@@ -1001,6 +1041,7 @@ INSERT INTO `m_client` (`id`, `account_no`, `external_id`, `status_enum`, `sub_s
 
 
 -- Dumping structure for table mifostenant-reference.m_client_attendance
+DROP TABLE IF EXISTS `m_client_attendance`;
 CREATE TABLE IF NOT EXISTS `m_client_attendance` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `client_id` bigint(20) NOT NULL DEFAULT '0',
@@ -1019,6 +1060,7 @@ CREATE TABLE IF NOT EXISTS `m_client_attendance` (
 
 
 -- Dumping structure for table mifostenant-reference.m_client_charge
+DROP TABLE IF EXISTS `m_client_charge`;
 CREATE TABLE IF NOT EXISTS `m_client_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `client_id` bigint(20) NOT NULL,
@@ -1049,6 +1091,7 @@ CREATE TABLE IF NOT EXISTS `m_client_charge` (
 
 
 -- Dumping structure for table mifostenant-reference.m_client_charge_paid_by
+DROP TABLE IF EXISTS `m_client_charge_paid_by`;
 CREATE TABLE IF NOT EXISTS `m_client_charge_paid_by` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `client_transaction_id` bigint(20) NOT NULL,
@@ -1067,6 +1110,7 @@ CREATE TABLE IF NOT EXISTS `m_client_charge_paid_by` (
 
 
 -- Dumping structure for table mifostenant-reference.m_client_identifier
+DROP TABLE IF EXISTS `m_client_identifier`;
 CREATE TABLE IF NOT EXISTS `m_client_identifier` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `client_id` bigint(20) NOT NULL,
@@ -1092,6 +1136,7 @@ CREATE TABLE IF NOT EXISTS `m_client_identifier` (
 
 
 -- Dumping structure for table mifostenant-reference.m_client_non_person
+DROP TABLE IF EXISTS `m_client_non_person`;
 CREATE TABLE IF NOT EXISTS `m_client_non_person` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `client_id` bigint(20) NOT NULL,
@@ -1112,6 +1157,7 @@ CREATE TABLE IF NOT EXISTS `m_client_non_person` (
 
 
 -- Dumping structure for table mifostenant-reference.m_client_transaction
+DROP TABLE IF EXISTS `m_client_transaction`;
 CREATE TABLE IF NOT EXISTS `m_client_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `client_id` bigint(20) NOT NULL,
@@ -1139,6 +1185,7 @@ CREATE TABLE IF NOT EXISTS `m_client_transaction` (
 
 
 -- Dumping structure for table mifostenant-reference.m_code
+DROP TABLE IF EXISTS `m_code`;
 CREATE TABLE IF NOT EXISTS `m_code` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `code_name` varchar(100) DEFAULT NULL,
@@ -1178,6 +1225,7 @@ INSERT INTO `m_code` (`id`, `code_name`, `is_system_defined`) VALUES
 
 
 -- Dumping structure for table mifostenant-reference.m_code_value
+DROP TABLE IF EXISTS `m_code_value`;
 CREATE TABLE IF NOT EXISTS `m_code_value` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `code_id` int(11) NOT NULL,
@@ -1225,6 +1273,7 @@ INSERT INTO `m_code_value` (`id`, `code_id`, `code_value`, `code_description`, `
 
 
 -- Dumping structure for table mifostenant-reference.m_currency
+DROP TABLE IF EXISTS `m_currency`;
 CREATE TABLE IF NOT EXISTS `m_currency` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `code` varchar(3) NOT NULL,
@@ -1407,6 +1456,7 @@ INSERT INTO `m_currency` (`id`, `code`, `decimal_places`, `currency_multiplesof`
 
 
 -- Dumping structure for table mifostenant-reference.m_deposit_account_on_hold_transaction
+DROP TABLE IF EXISTS `m_deposit_account_on_hold_transaction`;
 CREATE TABLE IF NOT EXISTS `m_deposit_account_on_hold_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `savings_account_id` bigint(20) NOT NULL,
@@ -1426,6 +1476,7 @@ CREATE TABLE IF NOT EXISTS `m_deposit_account_on_hold_transaction` (
 
 
 -- Dumping structure for table mifostenant-reference.m_deposit_account_recurring_detail
+DROP TABLE IF EXISTS `m_deposit_account_recurring_detail`;
 CREATE TABLE IF NOT EXISTS `m_deposit_account_recurring_detail` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `savings_account_id` bigint(20) NOT NULL DEFAULT '0',
@@ -1447,6 +1498,7 @@ CREATE TABLE IF NOT EXISTS `m_deposit_account_recurring_detail` (
 
 
 -- Dumping structure for table mifostenant-reference.m_deposit_account_term_and_preclosure
+DROP TABLE IF EXISTS `m_deposit_account_term_and_preclosure`;
 CREATE TABLE IF NOT EXISTS `m_deposit_account_term_and_preclosure` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `savings_account_id` bigint(20) NOT NULL DEFAULT '0',
@@ -1478,6 +1530,7 @@ CREATE TABLE IF NOT EXISTS `m_deposit_account_term_and_preclosure` (
 
 
 -- Dumping structure for table mifostenant-reference.m_deposit_product_interest_rate_chart
+DROP TABLE IF EXISTS `m_deposit_product_interest_rate_chart`;
 CREATE TABLE IF NOT EXISTS `m_deposit_product_interest_rate_chart` (
   `deposit_product_id` bigint(20) NOT NULL,
   `interest_rate_chart_id` bigint(20) NOT NULL,
@@ -1493,6 +1546,7 @@ CREATE TABLE IF NOT EXISTS `m_deposit_product_interest_rate_chart` (
 
 
 -- Dumping structure for table mifostenant-reference.m_deposit_product_recurring_detail
+DROP TABLE IF EXISTS `m_deposit_product_recurring_detail`;
 CREATE TABLE IF NOT EXISTS `m_deposit_product_recurring_detail` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `savings_product_id` bigint(20) NOT NULL DEFAULT '0',
@@ -1510,6 +1564,7 @@ CREATE TABLE IF NOT EXISTS `m_deposit_product_recurring_detail` (
 
 
 -- Dumping structure for table mifostenant-reference.m_deposit_product_term_and_preclosure
+DROP TABLE IF EXISTS `m_deposit_product_term_and_preclosure`;
 CREATE TABLE IF NOT EXISTS `m_deposit_product_term_and_preclosure` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `savings_product_id` bigint(20) NOT NULL DEFAULT '0',
@@ -1536,6 +1591,7 @@ CREATE TABLE IF NOT EXISTS `m_deposit_product_term_and_preclosure` (
 
 
 -- Dumping structure for table mifostenant-reference.m_document
+DROP TABLE IF EXISTS `m_document`;
 CREATE TABLE IF NOT EXISTS `m_document` (
   `id` int(20) NOT NULL AUTO_INCREMENT,
   `parent_entity_type` varchar(50) NOT NULL,
@@ -1556,6 +1612,7 @@ CREATE TABLE IF NOT EXISTS `m_document` (
 
 
 -- Dumping structure for table mifostenant-reference.m_entity_relation
+DROP TABLE IF EXISTS `m_entity_relation`;
 CREATE TABLE IF NOT EXISTS `m_entity_relation` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `from_entity_type` int(10) NOT NULL,
@@ -1577,6 +1634,7 @@ INSERT INTO `m_entity_relation` (`id`, `from_entity_type`, `to_entity_type`, `co
 
 
 -- Dumping structure for table mifostenant-reference.m_entity_to_entity_access
+DROP TABLE IF EXISTS `m_entity_to_entity_access`;
 CREATE TABLE IF NOT EXISTS `m_entity_to_entity_access` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `entity_type` varchar(50) NOT NULL,
@@ -1597,6 +1655,7 @@ CREATE TABLE IF NOT EXISTS `m_entity_to_entity_access` (
 
 
 -- Dumping structure for table mifostenant-reference.m_entity_to_entity_mapping
+DROP TABLE IF EXISTS `m_entity_to_entity_mapping`;
 CREATE TABLE IF NOT EXISTS `m_entity_to_entity_mapping` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `rel_id` bigint(20) NOT NULL DEFAULT '0',
@@ -1615,6 +1674,7 @@ CREATE TABLE IF NOT EXISTS `m_entity_to_entity_mapping` (
 
 
 -- Dumping structure for table mifostenant-reference.m_floating_rates
+DROP TABLE IF EXISTS `m_floating_rates`;
 CREATE TABLE IF NOT EXISTS `m_floating_rates` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(200) NOT NULL,
@@ -1634,6 +1694,7 @@ CREATE TABLE IF NOT EXISTS `m_floating_rates` (
 
 
 -- Dumping structure for table mifostenant-reference.m_floating_rates_periods
+DROP TABLE IF EXISTS `m_floating_rates_periods`;
 CREATE TABLE IF NOT EXISTS `m_floating_rates_periods` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `floating_rates_id` bigint(20) NOT NULL,
@@ -1656,6 +1717,7 @@ CREATE TABLE IF NOT EXISTS `m_floating_rates_periods` (
 
 
 -- Dumping structure for table mifostenant-reference.m_fund
+DROP TABLE IF EXISTS `m_fund`;
 CREATE TABLE IF NOT EXISTS `m_fund` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
@@ -1673,6 +1735,7 @@ INSERT INTO `m_fund` (`id`, `name`, `external_id`) VALUES
 
 
 -- Dumping structure for table mifostenant-reference.m_group
+DROP TABLE IF EXISTS `m_group`;
 CREATE TABLE IF NOT EXISTS `m_group` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `external_id` varchar(100) DEFAULT NULL,
@@ -1718,6 +1781,7 @@ INSERT INTO `m_group` (`id`, `external_id`, `status_enum`, `activation_date`, `o
 
 
 -- Dumping structure for table mifostenant-reference.m_group_client
+DROP TABLE IF EXISTS `m_group_client`;
 CREATE TABLE IF NOT EXISTS `m_group_client` (
   `group_id` bigint(20) NOT NULL,
   `client_id` bigint(20) NOT NULL,
@@ -1740,6 +1804,7 @@ INSERT INTO `m_group_client` (`group_id`, `client_id`) VALUES
 
 
 -- Dumping structure for table mifostenant-reference.m_group_level
+DROP TABLE IF EXISTS `m_group_level`;
 CREATE TABLE IF NOT EXISTS `m_group_level` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `parent_id` int(11) DEFAULT NULL,
@@ -1761,6 +1826,7 @@ INSERT INTO `m_group_level` (`id`, `parent_id`, `super_parent`, `level_name`, `r
 
 
 -- Dumping structure for table mifostenant-reference.m_group_roles
+DROP TABLE IF EXISTS `m_group_roles`;
 CREATE TABLE IF NOT EXISTS `m_group_roles` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `client_id` bigint(20) DEFAULT NULL,
@@ -1782,6 +1848,7 @@ CREATE TABLE IF NOT EXISTS `m_group_roles` (
 
 
 -- Dumping structure for table mifostenant-reference.m_guarantor
+DROP TABLE IF EXISTS `m_guarantor`;
 CREATE TABLE IF NOT EXISTS `m_guarantor` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
@@ -1814,6 +1881,7 @@ CREATE TABLE IF NOT EXISTS `m_guarantor` (
 
 
 -- Dumping structure for table mifostenant-reference.m_guarantor_funding_details
+DROP TABLE IF EXISTS `m_guarantor_funding_details`;
 CREATE TABLE IF NOT EXISTS `m_guarantor_funding_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `guarantor_id` bigint(20) NOT NULL,
@@ -1836,6 +1904,7 @@ CREATE TABLE IF NOT EXISTS `m_guarantor_funding_details` (
 
 
 -- Dumping structure for table mifostenant-reference.m_guarantor_transaction
+DROP TABLE IF EXISTS `m_guarantor_transaction`;
 CREATE TABLE IF NOT EXISTS `m_guarantor_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `guarantor_fund_detail_id` bigint(20) NOT NULL,
@@ -1857,6 +1926,7 @@ CREATE TABLE IF NOT EXISTS `m_guarantor_transaction` (
 
 
 -- Dumping structure for table mifostenant-reference.m_holiday
+DROP TABLE IF EXISTS `m_holiday`;
 CREATE TABLE IF NOT EXISTS `m_holiday` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
@@ -1876,6 +1946,7 @@ CREATE TABLE IF NOT EXISTS `m_holiday` (
 
 
 -- Dumping structure for table mifostenant-reference.m_holiday_office
+DROP TABLE IF EXISTS `m_holiday_office`;
 CREATE TABLE IF NOT EXISTS `m_holiday_office` (
   `holiday_id` bigint(20) NOT NULL,
   `office_id` bigint(20) NOT NULL,
@@ -1892,6 +1963,7 @@ CREATE TABLE IF NOT EXISTS `m_holiday_office` (
 
 
 -- Dumping structure for table mifostenant-reference.m_hook
+DROP TABLE IF EXISTS `m_hook`;
 CREATE TABLE IF NOT EXISTS `m_hook` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `template_id` smallint(6) NOT NULL,
@@ -1915,6 +1987,7 @@ CREATE TABLE IF NOT EXISTS `m_hook` (
 
 
 -- Dumping structure for table mifostenant-reference.m_hook_configuration
+DROP TABLE IF EXISTS `m_hook_configuration`;
 CREATE TABLE IF NOT EXISTS `m_hook_configuration` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `hook_id` bigint(20) DEFAULT NULL,
@@ -1932,6 +2005,7 @@ CREATE TABLE IF NOT EXISTS `m_hook_configuration` (
 
 
 -- Dumping structure for table mifostenant-reference.m_hook_registered_events
+DROP TABLE IF EXISTS `m_hook_registered_events`;
 CREATE TABLE IF NOT EXISTS `m_hook_registered_events` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `hook_id` bigint(20) NOT NULL,
@@ -1948,6 +2022,7 @@ CREATE TABLE IF NOT EXISTS `m_hook_registered_events` (
 
 
 -- Dumping structure for table mifostenant-reference.m_hook_schema
+DROP TABLE IF EXISTS `m_hook_schema`;
 CREATE TABLE IF NOT EXISTS `m_hook_schema` (
   `id` smallint(6) NOT NULL AUTO_INCREMENT,
   `hook_template_id` smallint(6) NOT NULL,
@@ -1974,6 +2049,7 @@ INSERT INTO `m_hook_schema` (`id`, `hook_template_id`, `field_type`, `field_name
 
 
 -- Dumping structure for table mifostenant-reference.m_hook_templates
+DROP TABLE IF EXISTS `m_hook_templates`;
 CREATE TABLE IF NOT EXISTS `m_hook_templates` (
   `id` smallint(6) NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
@@ -1989,6 +2065,7 @@ INSERT INTO `m_hook_templates` (`id`, `name`) VALUES
 
 
 -- Dumping structure for table mifostenant-reference.m_image
+DROP TABLE IF EXISTS `m_image`;
 CREATE TABLE IF NOT EXISTS `m_image` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `location` varchar(500) DEFAULT NULL,
@@ -2002,6 +2079,7 @@ CREATE TABLE IF NOT EXISTS `m_image` (
 
 
 -- Dumping structure for table mifostenant-reference.m_interest_incentives
+DROP TABLE IF EXISTS `m_interest_incentives`;
 CREATE TABLE IF NOT EXISTS `m_interest_incentives` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `interest_rate_slab_id` bigint(20) NOT NULL,
@@ -2022,6 +2100,7 @@ CREATE TABLE IF NOT EXISTS `m_interest_incentives` (
 
 
 -- Dumping structure for table mifostenant-reference.m_interest_rate_chart
+DROP TABLE IF EXISTS `m_interest_rate_chart`;
 CREATE TABLE IF NOT EXISTS `m_interest_rate_chart` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) DEFAULT NULL,
@@ -2038,6 +2117,7 @@ CREATE TABLE IF NOT EXISTS `m_interest_rate_chart` (
 
 
 -- Dumping structure for table mifostenant-reference.m_interest_rate_slab
+DROP TABLE IF EXISTS `m_interest_rate_slab`;
 CREATE TABLE IF NOT EXISTS `m_interest_rate_slab` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `interest_rate_chart_id` bigint(20) NOT NULL,
@@ -2060,6 +2140,7 @@ CREATE TABLE IF NOT EXISTS `m_interest_rate_slab` (
 
 
 -- Dumping structure for table mifostenant-reference.m_loan
+DROP TABLE IF EXISTS `m_loan`;
 CREATE TABLE IF NOT EXISTS `m_loan` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `account_no` varchar(20) NOT NULL,
@@ -2203,6 +2284,7 @@ INSERT INTO `m_loan` (`id`, `account_no`, `external_id`, `client_id`, `group_id`
 
 
 -- Dumping structure for table mifostenant-reference.m_loanproduct_provisioning_entry
+DROP TABLE IF EXISTS `m_loanproduct_provisioning_entry`;
 CREATE TABLE IF NOT EXISTS `m_loanproduct_provisioning_entry` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `history_id` bigint(20) NOT NULL,
@@ -2240,6 +2322,7 @@ CREATE TABLE IF NOT EXISTS `m_loanproduct_provisioning_entry` (
 
 
 -- Dumping structure for table mifostenant-reference.m_loanproduct_provisioning_mapping
+DROP TABLE IF EXISTS `m_loanproduct_provisioning_mapping`;
 CREATE TABLE IF NOT EXISTS `m_loanproduct_provisioning_mapping` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `product_id` bigint(20) NOT NULL,
@@ -2257,6 +2340,7 @@ CREATE TABLE IF NOT EXISTS `m_loanproduct_provisioning_mapping` (
 
 
 -- Dumping structure for table mifostenant-reference.m_loan_arrears_aging
+DROP TABLE IF EXISTS `m_loan_arrears_aging`;
 CREATE TABLE IF NOT EXISTS `m_loan_arrears_aging` (
   `loan_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `principal_overdue_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
@@ -2275,6 +2359,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_arrears_aging` (
 
 
 -- Dumping structure for table mifostenant-reference.m_loan_charge
+DROP TABLE IF EXISTS `m_loan_charge`;
 CREATE TABLE IF NOT EXISTS `m_loan_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
@@ -2312,6 +2397,7 @@ INSERT INTO `m_loan_charge` (`id`, `loan_id`, `charge_id`, `is_penalty`, `charge
 
 
 -- Dumping structure for table mifostenant-reference.m_loan_charge_paid_by
+DROP TABLE IF EXISTS `m_loan_charge_paid_by`;
 CREATE TABLE IF NOT EXISTS `m_loan_charge_paid_by` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_transaction_id` bigint(20) NOT NULL,
@@ -2331,6 +2417,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_charge_paid_by` (
 
 
 -- Dumping structure for table mifostenant-reference.m_loan_collateral
+DROP TABLE IF EXISTS `m_loan_collateral`;
 CREATE TABLE IF NOT EXISTS `m_loan_collateral` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
@@ -2350,6 +2437,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_collateral` (
 
 
 -- Dumping structure for table mifostenant-reference.m_loan_disbursement_detail
+DROP TABLE IF EXISTS `m_loan_disbursement_detail`;
 CREATE TABLE IF NOT EXISTS `m_loan_disbursement_detail` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
@@ -2367,6 +2455,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_disbursement_detail` (
 
 
 -- Dumping structure for table mifostenant-reference.m_loan_installment_charge
+DROP TABLE IF EXISTS `m_loan_installment_charge`;
 CREATE TABLE IF NOT EXISTS `m_loan_installment_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_charge_id` bigint(20) NOT NULL,
@@ -2393,6 +2482,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_installment_charge` (
 
 
 -- Dumping structure for table mifostenant-reference.m_loan_officer_assignment_history
+DROP TABLE IF EXISTS `m_loan_officer_assignment_history`;
 CREATE TABLE IF NOT EXISTS `m_loan_officer_assignment_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
@@ -2416,6 +2506,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_officer_assignment_history` (
 
 
 -- Dumping structure for table mifostenant-reference.m_loan_overdue_installment_charge
+DROP TABLE IF EXISTS `m_loan_overdue_installment_charge`;
 CREATE TABLE IF NOT EXISTS `m_loan_overdue_installment_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_charge_id` bigint(20) NOT NULL,
@@ -2434,6 +2525,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_overdue_installment_charge` (
 
 
 -- Dumping structure for table mifostenant-reference.m_loan_paid_in_advance
+DROP TABLE IF EXISTS `m_loan_paid_in_advance`;
 CREATE TABLE IF NOT EXISTS `m_loan_paid_in_advance` (
   `loan_id` bigint(20) NOT NULL,
   `principal_in_advance_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
@@ -2451,6 +2543,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_paid_in_advance` (
 
 
 -- Dumping structure for table mifostenant-reference.m_loan_recalculation_details
+DROP TABLE IF EXISTS `m_loan_recalculation_details`;
 CREATE TABLE IF NOT EXISTS `m_loan_recalculation_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
@@ -2473,6 +2566,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_recalculation_details` (
 
 
 -- Dumping structure for table mifostenant-reference.m_loan_repayment_schedule
+DROP TABLE IF EXISTS `m_loan_repayment_schedule`;
 CREATE TABLE IF NOT EXISTS `m_loan_repayment_schedule` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
@@ -2543,6 +2637,7 @@ INSERT INTO `m_loan_repayment_schedule` (`id`, `loan_id`, `fromdate`, `duedate`,
 
 
 -- Dumping structure for table mifostenant-reference.m_loan_repayment_schedule_history
+DROP TABLE IF EXISTS `m_loan_repayment_schedule_history`;
 CREATE TABLE IF NOT EXISTS `m_loan_repayment_schedule_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
@@ -2572,6 +2667,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_repayment_schedule_history` (
 
 
 -- Dumping structure for table mifostenant-reference.m_loan_reschedule_request
+DROP TABLE IF EXISTS `m_loan_reschedule_request`;
 CREATE TABLE IF NOT EXISTS `m_loan_reschedule_request` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
@@ -2611,6 +2707,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_reschedule_request` (
 
 
 -- Dumping structure for table mifostenant-reference.m_loan_term_variations
+DROP TABLE IF EXISTS `m_loan_term_variations`;
 CREATE TABLE IF NOT EXISTS `m_loan_term_variations` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
@@ -2631,6 +2728,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_term_variations` (
 
 
 -- Dumping structure for table mifostenant-reference.m_loan_tranche_charges
+DROP TABLE IF EXISTS `m_loan_tranche_charges`;
 CREATE TABLE IF NOT EXISTS `m_loan_tranche_charges` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
@@ -2648,6 +2746,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_tranche_charges` (
 
 
 -- Dumping structure for table mifostenant-reference.m_loan_tranche_disbursement_charge
+DROP TABLE IF EXISTS `m_loan_tranche_disbursement_charge`;
 CREATE TABLE IF NOT EXISTS `m_loan_tranche_disbursement_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_charge_id` bigint(20) NOT NULL,
@@ -2665,6 +2764,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_tranche_disbursement_charge` (
 
 
 -- Dumping structure for table mifostenant-reference.m_loan_transaction
+DROP TABLE IF EXISTS `m_loan_transaction`;
 CREATE TABLE IF NOT EXISTS `m_loan_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
@@ -2702,6 +2802,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_transaction` (
 
 
 -- Dumping structure for table mifostenant-reference.m_loan_transaction_repayment_schedule_mapping
+DROP TABLE IF EXISTS `m_loan_transaction_repayment_schedule_mapping`;
 CREATE TABLE IF NOT EXISTS `m_loan_transaction_repayment_schedule_mapping` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_transaction_id` bigint(20) NOT NULL,
@@ -2724,6 +2825,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_transaction_repayment_schedule_mapping` (
 
 
 -- Dumping structure for table mifostenant-reference.m_mandatory_savings_schedule
+DROP TABLE IF EXISTS `m_mandatory_savings_schedule`;
 CREATE TABLE IF NOT EXISTS `m_mandatory_savings_schedule` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `savings_account_id` bigint(20) NOT NULL,
@@ -2751,6 +2853,7 @@ CREATE TABLE IF NOT EXISTS `m_mandatory_savings_schedule` (
 
 
 -- Dumping structure for table mifostenant-reference.m_meeting
+DROP TABLE IF EXISTS `m_meeting`;
 CREATE TABLE IF NOT EXISTS `m_meeting` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `calendar_instance_id` bigint(20) NOT NULL,
@@ -2766,6 +2869,7 @@ CREATE TABLE IF NOT EXISTS `m_meeting` (
 
 
 -- Dumping structure for table mifostenant-reference.m_note
+DROP TABLE IF EXISTS `m_note`;
 CREATE TABLE IF NOT EXISTS `m_note` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `client_id` bigint(20) DEFAULT NULL,
@@ -2803,6 +2907,7 @@ CREATE TABLE IF NOT EXISTS `m_note` (
 
 
 -- Dumping structure for table mifostenant-reference.m_office
+DROP TABLE IF EXISTS `m_office`;
 CREATE TABLE IF NOT EXISTS `m_office` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `parent_id` bigint(20) DEFAULT NULL,
@@ -2827,6 +2932,7 @@ INSERT INTO `m_office` (`id`, `parent_id`, `hierarchy`, `external_id`, `name`, `
 
 
 -- Dumping structure for table mifostenant-reference.m_office_transaction
+DROP TABLE IF EXISTS `m_office_transaction`;
 CREATE TABLE IF NOT EXISTS `m_office_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `from_office_id` bigint(20) DEFAULT NULL,
@@ -2849,6 +2955,7 @@ CREATE TABLE IF NOT EXISTS `m_office_transaction` (
 
 
 -- Dumping structure for table mifostenant-reference.m_organisation_currency
+DROP TABLE IF EXISTS `m_organisation_currency`;
 CREATE TABLE IF NOT EXISTS `m_organisation_currency` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `code` varchar(3) NOT NULL,
@@ -2868,6 +2975,7 @@ INSERT INTO `m_organisation_currency` (`id`, `code`, `decimal_places`, `currency
 
 
 -- Dumping structure for table mifostenant-reference.m_password_validation_policy
+DROP TABLE IF EXISTS `m_password_validation_policy`;
 CREATE TABLE IF NOT EXISTS `m_password_validation_policy` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `regex` text NOT NULL,
@@ -2886,6 +2994,7 @@ INSERT INTO `m_password_validation_policy` (`id`, `regex`, `description`, `activ
 
 
 -- Dumping structure for table mifostenant-reference.m_payment_detail
+DROP TABLE IF EXISTS `m_payment_detail`;
 CREATE TABLE IF NOT EXISTS `m_payment_detail` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `payment_type_id` int(11) DEFAULT NULL,
@@ -2905,6 +3014,7 @@ CREATE TABLE IF NOT EXISTS `m_payment_detail` (
 
 
 -- Dumping structure for table mifostenant-reference.m_payment_type
+DROP TABLE IF EXISTS `m_payment_type`;
 CREATE TABLE IF NOT EXISTS `m_payment_type` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `value` varchar(100) DEFAULT NULL,
@@ -2920,6 +3030,7 @@ CREATE TABLE IF NOT EXISTS `m_payment_type` (
 
 
 -- Dumping structure for table mifostenant-reference.m_permission
+DROP TABLE IF EXISTS `m_permission`;
 CREATE TABLE IF NOT EXISTS `m_permission` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `grouping` varchar(45) DEFAULT NULL,
@@ -2929,9 +3040,9 @@ CREATE TABLE IF NOT EXISTS `m_permission` (
   `can_maker_checker` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=705 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=733 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.m_permission: ~652 rows (approximately)
+-- Dumping data for table mifostenant-reference.m_permission: ~803 rows (approximately)
 /*!40000 ALTER TABLE `m_permission` DISABLE KEYS */;
 INSERT INTO `m_permission` (`id`, `grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES
 	(1, 'special', 'ALL_FUNCTIONS', NULL, NULL, 0),
@@ -3615,11 +3726,40 @@ INSERT INTO `m_permission` (`id`, `grouping`, `code`, `entity_name`, `action_nam
 	(701, 'SHAREPRODUCT', 'CREATE_SHAREPRODUCT', 'SHAREPRODUCT', 'CREATE', 0),
 	(702, 'SHAREPRODUCT', 'UPDATE_SHAREPRODUCT', 'SHAREPRODUCT', 'CREATE', 0),
 	(703, 'SHAREACCOUNT', 'CREATE_SHAREACCOUNT', 'SHAREACCOUNT', 'CREATE', 0),
-	(704, 'SHAREACCOUNT', 'UPDATE_SHAREACCOUNT', 'SHAREACCOUNT', 'CREATE', 0);
+	(704, 'SHAREACCOUNT', 'UPDATE_SHAREACCOUNT', 'SHAREACCOUNT', 'CREATE', 0),
+	(705, 'organisation', 'READ_TAXCOMPONENT', 'TAXCOMPONENT', 'READ', 0),
+	(706, 'organisation', 'CREATE_TAXCOMPONENT', 'TAXCOMPONENT', 'CREATE', 0),
+	(707, 'organisation', 'CREATE_TAXCOMPONENT_CHECKER', 'TAXCOMPONENT', 'CREATE_CHECKER', 0),
+	(708, 'organisation', 'UPDATE_TAXCOMPONENT', 'TAXCOMPONENT', 'UPDATE', 0),
+	(709, 'organisation', 'UPDATE_TAXCOMPONENT_CHECKER', 'TAXCOMPONENT', 'UPDATE_CHECKER', 0),
+	(710, 'organisation', 'READ_TAXGROUP', 'TAXGROUP', 'READ', 0),
+	(711, 'organisation', 'CREATE_TAXGROUP', 'TAXGROUP', 'CREATE', 0),
+	(712, 'organisation', 'CREATE_TAXGROUP_CHECKER', 'TAXGROUP', 'CREATE_CHECKER', 0),
+	(713, 'organisation', 'UPDATE_TAXGROUP', 'TAXGROUP', 'UPDATE', 0),
+	(714, 'organisation', 'UPDATE_TAXGROUP_CHECKER', 'TAXGROUP', 'UPDATE_CHECKER', 0),
+	(715, 'portfolio', 'UPDATEWITHHOLDTAX_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'UPDATEWITHHOLDTAX', 0),
+	(716, 'portfolio', 'UPDATEWITHHOLDTAX_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'UPDATEWITHHOLDTAX_CHECKER', 0),
+	(717, 'SHAREPRODUCT', 'CREATE_DIVIDEND_SHAREPRODUCT', 'SHAREPRODUCT', 'CREATE_DIVIDEND', 0),
+	(718, 'SHAREPRODUCT', 'CREATE_DIVIDEND_SHAREPRODUCT_CHECKER', 'SHAREPRODUCT', 'CREATE_DIVIDEND_CHECKER', 0),
+	(719, 'SHAREPRODUCT', 'APPROVE_DIVIDEND_SHAREPRODUCT', 'SHAREPRODUCT', 'APPROVE_DIVIDEND', 0),
+	(720, 'SHAREPRODUCT', 'APPROVE_DIVIDEND_SHAREPRODUCT_CHECKER', 'SHAREPRODUCT', 'APPROVE_DIVIDEND_CHECKER', 0),
+	(721, 'SHAREPRODUCT', 'DELETE_DIVIDEND_SHAREPRODUCT', 'SHAREPRODUCT', 'DELETE_DIVIDEND', 0),
+	(722, 'SHAREPRODUCT', 'DELETE_DIVIDEND_SHAREPRODUCT_CHECKER', 'SHAREPRODUCT', 'DELETE_DIVIDEND_CHECKER', 0),
+	(723, 'SHAREPRODUCT', 'READ_DIVIDEND_SHAREPRODUCT', 'SHAREPRODUCT', 'READ_DIVIDEND', 0),
+	(724, 'SHAREACCOUNT', 'APPROVE_SHAREACCOUNT', 'SHAREACCOUNT', 'APPROVE', 0),
+	(725, 'SHAREACCOUNT', 'ACTIVATE_SHAREACCOUNT', 'SHAREACCOUNT', 'ACTIVATE', 0),
+	(726, 'SHAREACCOUNT', 'UNDOAPPROVAL_SHAREACCOUNT', 'SHAREACCOUNT', 'UNDOAPPROVAL', 0),
+	(727, 'SHAREACCOUNT', 'REJECT_SHAREACCOUNT', 'SHAREACCOUNT', 'REJECT', 0),
+	(728, 'SHAREACCOUNT', 'APPLYADDITIONALSHARES_SHAREACCOUNT', 'SHAREACCOUNT', 'APPLYADDITIONALSHARES', 0),
+	(729, 'SHAREACCOUNT', 'APPROVEADDITIONALSHARES_SHAREACCOUNT', 'SHAREACCOUNT', 'APPROVEADDITIONALSHARES', 0),
+	(730, 'SHAREACCOUNT', 'REJECTADDITIONALSHARES_SHAREACCOUNT', 'SHAREACCOUNT', 'REJECTADDITIONALSHARES', 0),
+	(731, 'SHAREACCOUNT', 'REDEEMSHARES_SHAREACCOUNT', 'SHAREACCOUNT', 'REDEEMSHARES', 0),
+	(732, 'SHAREACCOUNT', 'CLOSE_SHAREACCOUNT', 'SHAREACCOUNT', 'CLOSE', 0);
 /*!40000 ALTER TABLE `m_permission` ENABLE KEYS */;
 
 
 -- Dumping structure for table mifostenant-reference.m_portfolio_account_associations
+DROP TABLE IF EXISTS `m_portfolio_account_associations`;
 CREATE TABLE IF NOT EXISTS `m_portfolio_account_associations` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_account_id` bigint(20) DEFAULT NULL,
@@ -3645,6 +3785,7 @@ CREATE TABLE IF NOT EXISTS `m_portfolio_account_associations` (
 
 
 -- Dumping structure for table mifostenant-reference.m_portfolio_command_source
+DROP TABLE IF EXISTS `m_portfolio_command_source`;
 CREATE TABLE IF NOT EXISTS `m_portfolio_command_source` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `action_name` varchar(50) NOT NULL,
@@ -3760,6 +3901,7 @@ INSERT INTO `m_portfolio_command_source` (`id`, `action_name`, `entity_name`, `o
 
 
 -- Dumping structure for table mifostenant-reference.m_product_loan
+DROP TABLE IF EXISTS `m_product_loan`;
 CREATE TABLE IF NOT EXISTS `m_product_loan` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `short_name` varchar(4) NOT NULL,
@@ -3831,6 +3973,7 @@ INSERT INTO `m_product_loan` (`id`, `short_name`, `currency_code`, `currency_dig
 
 
 -- Dumping structure for table mifostenant-reference.m_product_loan_charge
+DROP TABLE IF EXISTS `m_product_loan_charge`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_charge` (
   `product_loan_id` bigint(20) NOT NULL,
   `charge_id` bigint(20) NOT NULL,
@@ -3848,6 +3991,7 @@ INSERT INTO `m_product_loan_charge` (`product_loan_id`, `charge_id`) VALUES
 
 
 -- Dumping structure for table mifostenant-reference.m_product_loan_configurable_attributes
+DROP TABLE IF EXISTS `m_product_loan_configurable_attributes`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_configurable_attributes` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_product_id` bigint(20) NOT NULL,
@@ -3872,6 +4016,7 @@ INSERT INTO `m_product_loan_configurable_attributes` (`id`, `loan_product_id`, `
 
 
 -- Dumping structure for table mifostenant-reference.m_product_loan_floating_rates
+DROP TABLE IF EXISTS `m_product_loan_floating_rates`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_floating_rates` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_product_id` bigint(20) NOT NULL,
@@ -3894,6 +4039,7 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_floating_rates` (
 
 
 -- Dumping structure for table mifostenant-reference.m_product_loan_guarantee_details
+DROP TABLE IF EXISTS `m_product_loan_guarantee_details`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_guarantee_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_product_id` bigint(20) NOT NULL,
@@ -3911,6 +4057,7 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_guarantee_details` (
 
 
 -- Dumping structure for table mifostenant-reference.m_product_loan_recalculation_details
+DROP TABLE IF EXISTS `m_product_loan_recalculation_details`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_recalculation_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `product_id` bigint(20) NOT NULL,
@@ -3935,6 +4082,7 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_recalculation_details` (
 
 
 -- Dumping structure for table mifostenant-reference.m_product_loan_variable_installment_config
+DROP TABLE IF EXISTS `m_product_loan_variable_installment_config`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_variable_installment_config` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_product_id` bigint(20) NOT NULL,
@@ -3951,6 +4099,7 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_variable_installment_config` (
 
 
 -- Dumping structure for table mifostenant-reference.m_product_loan_variations_borrower_cycle
+DROP TABLE IF EXISTS `m_product_loan_variations_borrower_cycle`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_variations_borrower_cycle` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_product_id` bigint(20) NOT NULL DEFAULT '0',
@@ -3971,6 +4120,7 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_variations_borrower_cycle` (
 
 
 -- Dumping structure for table mifostenant-reference.m_product_mix
+DROP TABLE IF EXISTS `m_product_mix`;
 CREATE TABLE IF NOT EXISTS `m_product_mix` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `product_id` bigint(20) NOT NULL,
@@ -3988,6 +4138,7 @@ CREATE TABLE IF NOT EXISTS `m_product_mix` (
 
 
 -- Dumping structure for table mifostenant-reference.m_provisioning_criteria
+DROP TABLE IF EXISTS `m_provisioning_criteria`;
 CREATE TABLE IF NOT EXISTS `m_provisioning_criteria` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `criteria_name` varchar(200) NOT NULL,
@@ -4009,6 +4160,7 @@ CREATE TABLE IF NOT EXISTS `m_provisioning_criteria` (
 
 
 -- Dumping structure for table mifostenant-reference.m_provisioning_criteria_definition
+DROP TABLE IF EXISTS `m_provisioning_criteria_definition`;
 CREATE TABLE IF NOT EXISTS `m_provisioning_criteria_definition` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `criteria_id` bigint(20) NOT NULL,
@@ -4035,6 +4187,7 @@ CREATE TABLE IF NOT EXISTS `m_provisioning_criteria_definition` (
 
 
 -- Dumping structure for table mifostenant-reference.m_provisioning_history
+DROP TABLE IF EXISTS `m_provisioning_history`;
 CREATE TABLE IF NOT EXISTS `m_provisioning_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `journal_entry_created` bit(1) DEFAULT b'0',
@@ -4055,6 +4208,7 @@ CREATE TABLE IF NOT EXISTS `m_provisioning_history` (
 
 
 -- Dumping structure for table mifostenant-reference.m_provision_category
+DROP TABLE IF EXISTS `m_provision_category`;
 CREATE TABLE IF NOT EXISTS `m_provision_category` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `category_name` varchar(100) NOT NULL,
@@ -4074,6 +4228,7 @@ INSERT INTO `m_provision_category` (`id`, `category_name`, `description`) VALUES
 
 
 -- Dumping structure for table mifostenant-reference.m_role
+DROP TABLE IF EXISTS `m_role`;
 CREATE TABLE IF NOT EXISTS `m_role` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
@@ -4091,6 +4246,7 @@ INSERT INTO `m_role` (`id`, `name`, `description`, `is_disabled`) VALUES
 
 
 -- Dumping structure for table mifostenant-reference.m_role_permission
+DROP TABLE IF EXISTS `m_role_permission`;
 CREATE TABLE IF NOT EXISTS `m_role_permission` (
   `role_id` bigint(20) NOT NULL,
   `permission_id` bigint(20) NOT NULL,
@@ -4109,6 +4265,7 @@ INSERT INTO `m_role_permission` (`role_id`, `permission_id`) VALUES
 
 
 -- Dumping structure for table mifostenant-reference.m_savings_account
+DROP TABLE IF EXISTS `m_savings_account`;
 CREATE TABLE IF NOT EXISTS `m_savings_account` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `account_no` varchar(20) NOT NULL,
@@ -4158,6 +4315,7 @@ CREATE TABLE IF NOT EXISTS `m_savings_account` (
   `total_interest_earned_derived` decimal(19,6) DEFAULT NULL,
   `total_interest_posted_derived` decimal(19,6) DEFAULT NULL,
   `total_overdraft_interest_derived` decimal(19,6) DEFAULT '0.000000',
+  `total_withhold_tax_derived` decimal(19,6) DEFAULT NULL,
   `account_balance_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `min_required_balance` decimal(19,6) DEFAULT NULL,
   `enforce_min_required_balance` tinyint(1) NOT NULL DEFAULT '0',
@@ -4165,12 +4323,16 @@ CREATE TABLE IF NOT EXISTS `m_savings_account` (
   `start_interest_calculation_date` date DEFAULT NULL,
   `on_hold_funds_derived` decimal(19,6) DEFAULT NULL,
   `version` int(15) NOT NULL DEFAULT '1',
+  `withhold_tax` tinyint(4) NOT NULL DEFAULT '0',
+  `tax_group_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `sa_account_no_UNIQUE` (`account_no`),
   UNIQUE KEY `sa_externalid_UNIQUE` (`external_id`),
   KEY `FKSA00000000000001` (`client_id`),
   KEY `FKSA00000000000002` (`group_id`),
   KEY `FKSA00000000000003` (`product_id`),
+  KEY `FK_savings_account_tax_group` (`tax_group_id`),
+  CONSTRAINT `FK_savings_account_tax_group` FOREIGN KEY (`tax_group_id`) REFERENCES `m_tax_group` (`id`),
   CONSTRAINT `FKSA00000000000001` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
   CONSTRAINT `FKSA00000000000002` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`),
   CONSTRAINT `FKSA00000000000003` FOREIGN KEY (`product_id`) REFERENCES `m_savings_product` (`id`)
@@ -4182,6 +4344,7 @@ CREATE TABLE IF NOT EXISTS `m_savings_account` (
 
 
 -- Dumping structure for table mifostenant-reference.m_savings_account_charge
+DROP TABLE IF EXISTS `m_savings_account_charge`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `savings_account_id` bigint(20) NOT NULL,
@@ -4217,6 +4380,7 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_charge` (
 
 
 -- Dumping structure for table mifostenant-reference.m_savings_account_charge_paid_by
+DROP TABLE IF EXISTS `m_savings_account_charge_paid_by`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_charge_paid_by` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `savings_account_transaction_id` bigint(20) NOT NULL,
@@ -4235,6 +4399,7 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_charge_paid_by` (
 
 
 -- Dumping structure for table mifostenant-reference.m_savings_account_interest_rate_chart
+DROP TABLE IF EXISTS `m_savings_account_interest_rate_chart`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_chart` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `savings_account_id` bigint(20) NOT NULL,
@@ -4254,6 +4419,7 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_chart` (
 
 
 -- Dumping structure for table mifostenant-reference.m_savings_account_interest_rate_slab
+DROP TABLE IF EXISTS `m_savings_account_interest_rate_slab`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_slab` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `savings_account_interest_rate_chart_id` bigint(20) NOT NULL,
@@ -4276,6 +4442,7 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_slab` (
 
 
 -- Dumping structure for table mifostenant-reference.m_savings_account_transaction
+DROP TABLE IF EXISTS `m_savings_account_transaction`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `savings_account_id` bigint(20) NOT NULL,
@@ -4306,7 +4473,27 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_transaction` (
 /*!40000 ALTER TABLE `m_savings_account_transaction` ENABLE KEYS */;
 
 
+-- Dumping structure for table mifostenant-reference.m_savings_account_transaction_tax_details
+DROP TABLE IF EXISTS `m_savings_account_transaction_tax_details`;
+CREATE TABLE IF NOT EXISTS `m_savings_account_transaction_tax_details` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `savings_transaction_id` bigint(20) NOT NULL,
+  `tax_component_id` bigint(20) NOT NULL,
+  `amount` decimal(19,6) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_savings_account_transaction_tax_details_savings_transaction` (`savings_transaction_id`),
+  KEY `FK_savings_account_transaction_tax_details_tax_component` (`tax_component_id`),
+  CONSTRAINT `FK_savings_account_transaction_tax_details_savings_transaction` FOREIGN KEY (`savings_transaction_id`) REFERENCES `m_savings_account_transaction` (`id`),
+  CONSTRAINT `FK_savings_account_transaction_tax_details_tax_component` FOREIGN KEY (`tax_component_id`) REFERENCES `m_tax_component` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_savings_account_transaction_tax_details: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_savings_account_transaction_tax_details` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_savings_account_transaction_tax_details` ENABLE KEYS */;
+
+
 -- Dumping structure for table mifostenant-reference.m_savings_interest_incentives
+DROP TABLE IF EXISTS `m_savings_interest_incentives`;
 CREATE TABLE IF NOT EXISTS `m_savings_interest_incentives` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `deposit_account_interest_rate_slab_id` bigint(20) NOT NULL,
@@ -4327,6 +4514,7 @@ CREATE TABLE IF NOT EXISTS `m_savings_interest_incentives` (
 
 
 -- Dumping structure for table mifostenant-reference.m_savings_officer_assignment_history
+DROP TABLE IF EXISTS `m_savings_officer_assignment_history`;
 CREATE TABLE IF NOT EXISTS `m_savings_officer_assignment_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `account_id` bigint(20) NOT NULL,
@@ -4350,6 +4538,7 @@ CREATE TABLE IF NOT EXISTS `m_savings_officer_assignment_history` (
 
 
 -- Dumping structure for table mifostenant-reference.m_savings_product
+DROP TABLE IF EXISTS `m_savings_product`;
 CREATE TABLE IF NOT EXISTS `m_savings_product` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
@@ -4378,19 +4567,24 @@ CREATE TABLE IF NOT EXISTS `m_savings_product` (
   `min_required_balance` decimal(19,6) DEFAULT NULL,
   `enforce_min_required_balance` tinyint(1) NOT NULL DEFAULT '0',
   `min_balance_for_interest_calculation` decimal(19,6) DEFAULT NULL,
+  `withhold_tax` tinyint(4) NOT NULL DEFAULT '0',
+  `tax_group_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `sp_unq_name` (`name`),
-  UNIQUE KEY `sp_unq_short_name` (`short_name`)
+  UNIQUE KEY `sp_unq_short_name` (`short_name`),
+  KEY `FK_savings_product_tax_group` (`tax_group_id`),
+  CONSTRAINT `FK_savings_product_tax_group` FOREIGN KEY (`tax_group_id`) REFERENCES `m_tax_group` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 -- Dumping data for table mifostenant-reference.m_savings_product: ~1 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_product` DISABLE KEYS */;
-INSERT INTO `m_savings_product` (`id`, `name`, `short_name`, `description`, `deposit_type_enum`, `currency_code`, `currency_digits`, `currency_multiplesof`, `nominal_annual_interest_rate`, `interest_compounding_period_enum`, `interest_posting_period_enum`, `interest_calculation_type_enum`, `interest_calculation_days_in_year_type_enum`, `min_required_opening_balance`, `lockin_period_frequency`, `lockin_period_frequency_enum`, `accounting_type`, `withdrawal_fee_amount`, `withdrawal_fee_type_enum`, `withdrawal_fee_for_transfer`, `allow_overdraft`, `overdraft_limit`, `nominal_annual_interest_rate_overdraft`, `min_overdraft_for_interest_calculation`, `min_required_balance`, `enforce_min_required_balance`, `min_balance_for_interest_calculation`) VALUES
-	(1, 'Voluntary savings', 'VS', 'Save money', 100, 'USD', 2, 0, 9.500000, 1, 4, 1, 365, 1000.000000, 1.000000, 1, 2, NULL, NULL, 0, 0, NULL, 0.000000, 0.000000, NULL, 0, NULL);
+INSERT INTO `m_savings_product` (`id`, `name`, `short_name`, `description`, `deposit_type_enum`, `currency_code`, `currency_digits`, `currency_multiplesof`, `nominal_annual_interest_rate`, `interest_compounding_period_enum`, `interest_posting_period_enum`, `interest_calculation_type_enum`, `interest_calculation_days_in_year_type_enum`, `min_required_opening_balance`, `lockin_period_frequency`, `lockin_period_frequency_enum`, `accounting_type`, `withdrawal_fee_amount`, `withdrawal_fee_type_enum`, `withdrawal_fee_for_transfer`, `allow_overdraft`, `overdraft_limit`, `nominal_annual_interest_rate_overdraft`, `min_overdraft_for_interest_calculation`, `min_required_balance`, `enforce_min_required_balance`, `min_balance_for_interest_calculation`, `withhold_tax`, `tax_group_id`) VALUES
+	(1, 'Voluntary savings', 'VS', 'Save money', 100, 'USD', 2, 0, 9.500000, 1, 4, 1, 365, 1000.000000, 1.000000, 1, 2, NULL, NULL, 0, 0, NULL, 0.000000, 0.000000, NULL, 0, NULL, 0, NULL);
 /*!40000 ALTER TABLE `m_savings_product` ENABLE KEYS */;
 
 
 -- Dumping structure for table mifostenant-reference.m_savings_product_charge
+DROP TABLE IF EXISTS `m_savings_product_charge`;
 CREATE TABLE IF NOT EXISTS `m_savings_product_charge` (
   `savings_product_id` bigint(20) NOT NULL,
   `charge_id` bigint(20) NOT NULL,
@@ -4406,6 +4600,7 @@ CREATE TABLE IF NOT EXISTS `m_savings_product_charge` (
 
 
 -- Dumping structure for table mifostenant-reference.m_selfservice_user_client_mapping
+DROP TABLE IF EXISTS `m_selfservice_user_client_mapping`;
 CREATE TABLE IF NOT EXISTS `m_selfservice_user_client_mapping` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `appuser_id` bigint(20) NOT NULL,
@@ -4422,7 +4617,267 @@ CREATE TABLE IF NOT EXISTS `m_selfservice_user_client_mapping` (
 /*!40000 ALTER TABLE `m_selfservice_user_client_mapping` ENABLE KEYS */;
 
 
+-- Dumping structure for table mifostenant-reference.m_share_account
+DROP TABLE IF EXISTS `m_share_account`;
+CREATE TABLE IF NOT EXISTS `m_share_account` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `account_no` varchar(50) NOT NULL,
+  `product_id` bigint(20) NOT NULL,
+  `client_id` bigint(20) NOT NULL,
+  `external_id` varchar(100) DEFAULT NULL,
+  `status_enum` smallint(5) NOT NULL DEFAULT '300',
+  `total_approved_shares` bigint(20) DEFAULT NULL,
+  `total_pending_shares` bigint(20) DEFAULT NULL,
+  `submitted_date` date NOT NULL,
+  `submitted_userid` bigint(20) DEFAULT NULL,
+  `approved_date` date DEFAULT NULL,
+  `approved_userid` bigint(20) DEFAULT NULL,
+  `rejected_date` date DEFAULT NULL,
+  `rejected_userid` bigint(20) DEFAULT NULL,
+  `activated_date` date DEFAULT NULL,
+  `activated_userid` bigint(20) DEFAULT NULL,
+  `closed_date` date DEFAULT NULL,
+  `closed_userid` bigint(20) DEFAULT NULL,
+  `currency_code` varchar(3) NOT NULL,
+  `currency_digits` smallint(5) NOT NULL,
+  `currency_multiplesof` smallint(5) DEFAULT NULL,
+  `savings_account_id` bigint(20) NOT NULL,
+  `minimum_active_period_frequency` decimal(19,6) DEFAULT NULL,
+  `minimum_active_period_frequency_enum` smallint(5) DEFAULT NULL,
+  `lockin_period_frequency` decimal(19,6) DEFAULT NULL,
+  `lockin_period_frequency_enum` smallint(5) DEFAULT NULL,
+  `allow_dividends_inactive_clients` smallint(1) DEFAULT '0',
+  `created_date` datetime DEFAULT NULL,
+  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodified_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `m_share_account_ibfk_1` (`product_id`),
+  KEY `m_share_account_ibfk_2` (`savings_account_id`),
+  KEY `m_share_account_ibfk_3` (`submitted_userid`),
+  KEY `m_share_account_ibfk_4` (`approved_userid`),
+  KEY `m_share_account_ibfk_5` (`rejected_userid`),
+  KEY `m_share_account_ibfk_6` (`activated_userid`),
+  KEY `m_share_account_ibfk_7` (`closed_userid`),
+  KEY `m_share_account_ibfk_8` (`lastmodifiedby_id`),
+  KEY `m_share_account_ibfk_9` (`client_id`),
+  CONSTRAINT `m_share_account_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `m_share_product` (`id`),
+  CONSTRAINT `m_share_account_ibfk_2` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`),
+  CONSTRAINT `m_share_account_ibfk_3` FOREIGN KEY (`submitted_userid`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `m_share_account_ibfk_4` FOREIGN KEY (`approved_userid`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `m_share_account_ibfk_5` FOREIGN KEY (`rejected_userid`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `m_share_account_ibfk_6` FOREIGN KEY (`activated_userid`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `m_share_account_ibfk_7` FOREIGN KEY (`closed_userid`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `m_share_account_ibfk_8` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `m_share_account_ibfk_9` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_share_account: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_share_account` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_share_account` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-reference.m_share_account_charge
+DROP TABLE IF EXISTS `m_share_account_charge`;
+CREATE TABLE IF NOT EXISTS `m_share_account_charge` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `account_id` bigint(20) NOT NULL,
+  `charge_id` bigint(20) NOT NULL,
+  `charge_time_enum` smallint(5) NOT NULL,
+  `charge_calculation_enum` smallint(5) NOT NULL,
+  `charge_payment_mode_enum` smallint(5) NOT NULL DEFAULT '0',
+  `calculation_percentage` decimal(19,6) DEFAULT NULL,
+  `calculation_on_amount` decimal(19,6) DEFAULT NULL,
+  `charge_amount_or_percentage` decimal(19,6) DEFAULT NULL,
+  `amount` decimal(19,6) NOT NULL,
+  `amount_paid_derived` decimal(19,6) DEFAULT NULL,
+  `amount_waived_derived` decimal(19,6) DEFAULT NULL,
+  `amount_writtenoff_derived` decimal(19,6) DEFAULT NULL,
+  `amount_outstanding_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
+  `is_paid_derived` tinyint(1) NOT NULL DEFAULT '0',
+  `waived` tinyint(1) NOT NULL DEFAULT '0',
+  `min_cap` decimal(19,6) DEFAULT NULL,
+  `max_cap` decimal(19,6) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`),
+  KEY `charge_id` (`charge_id`),
+  KEY `m_share_account_charge_ibfk_2` (`account_id`),
+  CONSTRAINT `m_share_account_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
+  CONSTRAINT `m_share_account_charge_ibfk_2` FOREIGN KEY (`account_id`) REFERENCES `m_share_account` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_share_account_charge: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_share_account_charge` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_share_account_charge` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-reference.m_share_account_charge_paid_by
+DROP TABLE IF EXISTS `m_share_account_charge_paid_by`;
+CREATE TABLE IF NOT EXISTS `m_share_account_charge_paid_by` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `share_transaction_id` bigint(20) NOT NULL,
+  `charge_transaction_id` bigint(20) NOT NULL,
+  `amount` decimal(20,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `m_share_account_transactions_charge_mapping_ibfk1` (`share_transaction_id`),
+  KEY `m_share_account_transactions_charge_mapping_ibfk2` (`charge_transaction_id`),
+  CONSTRAINT `m_share_account_transactions_charge_mapping_ibfk1` FOREIGN KEY (`share_transaction_id`) REFERENCES `m_share_account_transactions` (`id`),
+  CONSTRAINT `m_share_account_transactions_charge_mapping_ibfk2` FOREIGN KEY (`charge_transaction_id`) REFERENCES `m_share_account_charge` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_share_account_charge_paid_by: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_share_account_charge_paid_by` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_share_account_charge_paid_by` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-reference.m_share_account_dividend_details
+DROP TABLE IF EXISTS `m_share_account_dividend_details`;
+CREATE TABLE IF NOT EXISTS `m_share_account_dividend_details` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `dividend_pay_out_id` bigint(20) NOT NULL,
+  `account_id` bigint(20) NOT NULL,
+  `amount` decimal(19,6) NOT NULL,
+  `status` smallint(3) NOT NULL,
+  `savings_transaction_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_m_share_account_dividend_details_dividend_pay_out_id` (`dividend_pay_out_id`),
+  KEY `FK_m_share_account_dividend_details_account_id` (`account_id`),
+  CONSTRAINT `FK_m_share_account_dividend_details_dividend_pay_out_id` FOREIGN KEY (`dividend_pay_out_id`) REFERENCES `m_share_product_dividend_pay_out` (`id`),
+  CONSTRAINT `FK_m_share_account_dividend_details_account_id` FOREIGN KEY (`account_id`) REFERENCES `m_share_account` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_share_account_dividend_details: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_share_account_dividend_details` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_share_account_dividend_details` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-reference.m_share_account_transactions
+DROP TABLE IF EXISTS `m_share_account_transactions`;
+CREATE TABLE IF NOT EXISTS `m_share_account_transactions` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `account_id` bigint(20) NOT NULL,
+  `transaction_date` date DEFAULT NULL,
+  `total_shares` bigint(20) DEFAULT NULL,
+  `unit_price` decimal(10,2) DEFAULT NULL,
+  `amount` decimal(20,2) DEFAULT NULL,
+  `charge_amount` decimal(20,2) DEFAULT NULL,
+  `status_enum` smallint(5) NOT NULL DEFAULT '300',
+  `type_enum` smallint(5) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `m_share_account_purchased_shares_ibfk_1` (`account_id`),
+  CONSTRAINT `m_share_account_purchased_shares_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `m_share_account` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_share_account_transactions: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_share_account_transactions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_share_account_transactions` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-reference.m_share_product
+DROP TABLE IF EXISTS `m_share_product`;
+CREATE TABLE IF NOT EXISTS `m_share_product` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(200) NOT NULL,
+  `short_name` varchar(4) NOT NULL,
+  `external_id` varchar(100) DEFAULT NULL,
+  `description` varchar(500) NOT NULL,
+  `start_date` datetime DEFAULT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `currency_code` varchar(3) NOT NULL,
+  `currency_digits` smallint(5) NOT NULL,
+  `currency_multiplesof` smallint(5) DEFAULT NULL,
+  `total_shares` bigint(20) NOT NULL,
+  `issued_shares` bigint(20) DEFAULT NULL,
+  `totalsubscribed_shares` bigint(20) DEFAULT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `capital_amount` decimal(20,2) NOT NULL,
+  `minimum_client_shares` bigint(20) DEFAULT NULL,
+  `nominal_client_shares` bigint(20) NOT NULL,
+  `maximum_client_shares` bigint(20) DEFAULT NULL,
+  `minimum_active_period_frequency` decimal(19,6) DEFAULT NULL,
+  `minimum_active_period_frequency_enum` smallint(5) DEFAULT NULL,
+  `lockin_period_frequency` decimal(19,6) DEFAULT NULL,
+  `lockin_period_frequency_enum` smallint(5) DEFAULT NULL,
+  `allow_dividends_inactive_clients` smallint(1) DEFAULT '0',
+  `createdby_id` bigint(20) DEFAULT NULL,
+  `created_date` datetime DEFAULT NULL,
+  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodified_date` datetime DEFAULT NULL,
+  `accounting_type` smallint(2) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  KEY `m_share_product_ibfk_1` (`createdby_id`),
+  KEY `m_share_product_ibfk_2` (`lastmodifiedby_id`),
+  CONSTRAINT `m_share_product_ibfk_1` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `m_share_product_ibfk_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_share_product: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_share_product` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_share_product` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-reference.m_share_product_charge
+DROP TABLE IF EXISTS `m_share_product_charge`;
+CREATE TABLE IF NOT EXISTS `m_share_product_charge` (
+  `product_id` bigint(20) NOT NULL,
+  `charge_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`product_id`,`charge_id`),
+  KEY `m_share_product_charge_ibfk_1` (`charge_id`),
+  CONSTRAINT `m_share_product_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
+  CONSTRAINT `m_share_product_charge_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `m_share_product` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_share_product_charge: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_share_product_charge` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_share_product_charge` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-reference.m_share_product_dividend_pay_out
+DROP TABLE IF EXISTS `m_share_product_dividend_pay_out`;
+CREATE TABLE IF NOT EXISTS `m_share_product_dividend_pay_out` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `product_id` bigint(20) NOT NULL,
+  `amount` decimal(19,6) NOT NULL,
+  `dividend_period_start_date` date NOT NULL,
+  `dividend_period_end_date` date NOT NULL,
+  `status` smallint(3) NOT NULL,
+  `createdby_id` bigint(20) DEFAULT NULL,
+  `created_date` datetime DEFAULT NULL,
+  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodified_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_m_share_product_dividend_pay_out_product_id` (`product_id`),
+  KEY `FK_m_share_product_dividend_pay_out_createdby_id` (`createdby_id`),
+  KEY `FK_m_share_product_dividend_pay_out_lastmodifiedby_id` (`lastmodifiedby_id`),
+  CONSTRAINT `FK_m_share_product_dividend_pay_out_product_id` FOREIGN KEY (`product_id`) REFERENCES `m_share_product` (`id`),
+  CONSTRAINT `FK_m_share_product_dividend_pay_out_createdby_id` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_m_share_product_dividend_pay_out_lastmodifiedby_id` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_share_product_dividend_pay_out: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_share_product_dividend_pay_out` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_share_product_dividend_pay_out` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-reference.m_share_product_market_price
+DROP TABLE IF EXISTS `m_share_product_market_price`;
+CREATE TABLE IF NOT EXISTS `m_share_product_market_price` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `product_id` bigint(20) NOT NULL,
+  `from_date` date DEFAULT NULL,
+  `share_value` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `m_share_product_market_price_ibfk_1` (`product_id`),
+  CONSTRAINT `m_share_product_market_price_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `m_share_product` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_share_product_market_price: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_share_product_market_price` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_share_product_market_price` ENABLE KEYS */;
+
+
 -- Dumping structure for table mifostenant-reference.m_staff
+DROP TABLE IF EXISTS `m_staff`;
 CREATE TABLE IF NOT EXISTS `m_staff` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `is_loan_officer` tinyint(1) NOT NULL DEFAULT '0',
@@ -4457,6 +4912,7 @@ INSERT INTO `m_staff` (`id`, `is_loan_officer`, `office_id`, `firstname`, `lastn
 
 
 -- Dumping structure for table mifostenant-reference.m_staff_assignment_history
+DROP TABLE IF EXISTS `m_staff_assignment_history`;
 CREATE TABLE IF NOT EXISTS `m_staff_assignment_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `centre_id` bigint(20) DEFAULT NULL,
@@ -4480,6 +4936,7 @@ CREATE TABLE IF NOT EXISTS `m_staff_assignment_history` (
 
 
 -- Dumping structure for table mifostenant-reference.m_surveys
+DROP TABLE IF EXISTS `m_surveys`;
 CREATE TABLE IF NOT EXISTS `m_surveys` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `a_key` varchar(32) NOT NULL,
@@ -4497,6 +4954,7 @@ CREATE TABLE IF NOT EXISTS `m_surveys` (
 
 
 -- Dumping structure for table mifostenant-reference.m_survey_components
+DROP TABLE IF EXISTS `m_survey_components`;
 CREATE TABLE IF NOT EXISTS `m_survey_components` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `survey_id` bigint(20) NOT NULL,
@@ -4515,6 +4973,7 @@ CREATE TABLE IF NOT EXISTS `m_survey_components` (
 
 
 -- Dumping structure for table mifostenant-reference.m_survey_lookup_tables
+DROP TABLE IF EXISTS `m_survey_lookup_tables`;
 CREATE TABLE IF NOT EXISTS `m_survey_lookup_tables` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `survey_id` bigint(20) NOT NULL,
@@ -4534,6 +4993,7 @@ CREATE TABLE IF NOT EXISTS `m_survey_lookup_tables` (
 
 
 -- Dumping structure for table mifostenant-reference.m_survey_questions
+DROP TABLE IF EXISTS `m_survey_questions`;
 CREATE TABLE IF NOT EXISTS `m_survey_questions` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `survey_id` bigint(20) NOT NULL,
@@ -4553,6 +5013,7 @@ CREATE TABLE IF NOT EXISTS `m_survey_questions` (
 
 
 -- Dumping structure for table mifostenant-reference.m_survey_responses
+DROP TABLE IF EXISTS `m_survey_responses`;
 CREATE TABLE IF NOT EXISTS `m_survey_responses` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `question_id` bigint(20) NOT NULL,
@@ -4570,6 +5031,7 @@ CREATE TABLE IF NOT EXISTS `m_survey_responses` (
 
 
 -- Dumping structure for table mifostenant-reference.m_survey_scorecards
+DROP TABLE IF EXISTS `m_survey_scorecards`;
 CREATE TABLE IF NOT EXISTS `m_survey_scorecards` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `survey_id` bigint(20) NOT NULL,
@@ -4597,7 +5059,114 @@ CREATE TABLE IF NOT EXISTS `m_survey_scorecards` (
 /*!40000 ALTER TABLE `m_survey_scorecards` ENABLE KEYS */;
 
 
+-- Dumping structure for table mifostenant-reference.m_tax_component
+DROP TABLE IF EXISTS `m_tax_component`;
+CREATE TABLE IF NOT EXISTS `m_tax_component` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `percentage` decimal(19,6) NOT NULL,
+  `debit_account_type_enum` smallint(2) DEFAULT NULL,
+  `debit_account_id` bigint(20) DEFAULT NULL,
+  `credit_account_type_enum` smallint(2) DEFAULT NULL,
+  `credit_account_id` bigint(20) DEFAULT NULL,
+  `start_date` date NOT NULL,
+  `createdby_id` bigint(20) NOT NULL,
+  `created_date` datetime NOT NULL,
+  `lastmodifiedby_id` bigint(20) NOT NULL,
+  `lastmodified_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_tax_component_debit_gl_account` (`debit_account_id`),
+  KEY `FK_tax_component_credit_gl_account` (`credit_account_id`),
+  KEY `FK_tax_component_createdby` (`createdby_id`),
+  KEY `FK_tax_component_lastmodifiedby` (`lastmodifiedby_id`),
+  CONSTRAINT `FK_tax_component_createdby` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_tax_component_credit_gl_account` FOREIGN KEY (`credit_account_id`) REFERENCES `acc_gl_account` (`id`),
+  CONSTRAINT `FK_tax_component_debit_gl_account` FOREIGN KEY (`debit_account_id`) REFERENCES `acc_gl_account` (`id`),
+  CONSTRAINT `FK_tax_component_lastmodifiedby` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_tax_component: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_tax_component` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_tax_component` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-reference.m_tax_component_history
+DROP TABLE IF EXISTS `m_tax_component_history`;
+CREATE TABLE IF NOT EXISTS `m_tax_component_history` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `tax_component_id` bigint(20) NOT NULL,
+  `percentage` decimal(19,6) NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date NOT NULL,
+  `createdby_id` bigint(20) NOT NULL,
+  `created_date` datetime NOT NULL,
+  `lastmodifiedby_id` bigint(20) NOT NULL,
+  `lastmodified_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_tax_component_history_tax_component_id` (`tax_component_id`),
+  KEY `FK_tax_component_history_createdby` (`createdby_id`),
+  KEY `FK_tax_component_history_lastmodifiedby` (`lastmodifiedby_id`),
+  CONSTRAINT `FK_tax_component_history_createdby` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_tax_component_history_lastmodifiedby` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_tax_component_history_tax_component_id` FOREIGN KEY (`tax_component_id`) REFERENCES `m_tax_component` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_tax_component_history: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_tax_component_history` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_tax_component_history` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-reference.m_tax_group
+DROP TABLE IF EXISTS `m_tax_group`;
+CREATE TABLE IF NOT EXISTS `m_tax_group` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `createdby_id` bigint(20) NOT NULL,
+  `created_date` datetime NOT NULL,
+  `lastmodifiedby_id` bigint(20) NOT NULL,
+  `lastmodified_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_tax_group_createdby` (`createdby_id`),
+  KEY `FK_tax_group_lastmodifiedby` (`lastmodifiedby_id`),
+  CONSTRAINT `FK_tax_group_createdby` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_tax_group_lastmodifiedby` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_tax_group: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_tax_group` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_tax_group` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-reference.m_tax_group_mappings
+DROP TABLE IF EXISTS `m_tax_group_mappings`;
+CREATE TABLE IF NOT EXISTS `m_tax_group_mappings` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `tax_group_id` bigint(20) NOT NULL,
+  `tax_component_id` bigint(20) NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date DEFAULT NULL,
+  `createdby_id` bigint(20) NOT NULL,
+  `created_date` datetime NOT NULL,
+  `lastmodifiedby_id` bigint(20) NOT NULL,
+  `lastmodified_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_tax_group_mappings_tax_group` (`tax_group_id`),
+  KEY `FK_tax_group_mappings_tax_component` (`tax_component_id`),
+  KEY `FK_tax_group_mappings_createdby` (`createdby_id`),
+  KEY `FK_tax_group_mappings_lastmodifiedby` (`lastmodifiedby_id`),
+  CONSTRAINT `FK_tax_group_mappings_createdby` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_tax_group_mappings_lastmodifiedby` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_tax_group_mappings_tax_component` FOREIGN KEY (`tax_component_id`) REFERENCES `m_tax_component` (`id`),
+  CONSTRAINT `FK_tax_group_mappings_tax_group` FOREIGN KEY (`tax_group_id`) REFERENCES `m_tax_group` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_tax_group_mappings: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_tax_group_mappings` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_tax_group_mappings` ENABLE KEYS */;
+
+
 -- Dumping structure for table mifostenant-reference.m_tellers
+DROP TABLE IF EXISTS `m_tellers`;
 CREATE TABLE IF NOT EXISTS `m_tellers` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `office_id` bigint(20) NOT NULL,
@@ -4624,6 +5193,7 @@ CREATE TABLE IF NOT EXISTS `m_tellers` (
 
 
 -- Dumping structure for table mifostenant-reference.m_template
+DROP TABLE IF EXISTS `m_template`;
 CREATE TABLE IF NOT EXISTS `m_template` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
@@ -4640,6 +5210,7 @@ CREATE TABLE IF NOT EXISTS `m_template` (
 
 
 -- Dumping structure for table mifostenant-reference.m_templatemappers
+DROP TABLE IF EXISTS `m_templatemappers`;
 CREATE TABLE IF NOT EXISTS `m_templatemappers` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `mapperkey` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -4654,6 +5225,7 @@ CREATE TABLE IF NOT EXISTS `m_templatemappers` (
 
 
 -- Dumping structure for table mifostenant-reference.m_template_m_templatemappers
+DROP TABLE IF EXISTS `m_template_m_templatemappers`;
 CREATE TABLE IF NOT EXISTS `m_template_m_templatemappers` (
   `m_template_id` bigint(20) NOT NULL,
   `mappers_id` bigint(20) NOT NULL,
@@ -4668,6 +5240,7 @@ CREATE TABLE IF NOT EXISTS `m_template_m_templatemappers` (
 
 
 -- Dumping structure for table mifostenant-reference.m_working_days
+DROP TABLE IF EXISTS `m_working_days`;
 CREATE TABLE IF NOT EXISTS `m_working_days` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `recurrence` varchar(100) DEFAULT NULL,
@@ -4684,6 +5257,7 @@ INSERT INTO `m_working_days` (`id`, `recurrence`, `repayment_rescheduling_enum`,
 
 
 -- Dumping structure for table mifostenant-reference.oauth_access_token
+DROP TABLE IF EXISTS `oauth_access_token`;
 CREATE TABLE IF NOT EXISTS `oauth_access_token` (
   `token_id` varchar(256) DEFAULT NULL,
   `token` blob,
@@ -4700,6 +5274,7 @@ CREATE TABLE IF NOT EXISTS `oauth_access_token` (
 
 
 -- Dumping structure for table mifostenant-reference.oauth_client_details
+DROP TABLE IF EXISTS `oauth_client_details`;
 CREATE TABLE IF NOT EXISTS `oauth_client_details` (
   `client_id` varchar(128) NOT NULL,
   `resource_ids` varchar(256) DEFAULT NULL,
@@ -4723,6 +5298,7 @@ INSERT INTO `oauth_client_details` (`client_id`, `resource_ids`, `client_secret`
 
 
 -- Dumping structure for table mifostenant-reference.oauth_refresh_token
+DROP TABLE IF EXISTS `oauth_refresh_token`;
 CREATE TABLE IF NOT EXISTS `oauth_refresh_token` (
   `token_id` varchar(256) DEFAULT NULL,
   `token` blob,
@@ -4735,6 +5311,7 @@ CREATE TABLE IF NOT EXISTS `oauth_refresh_token` (
 
 
 -- Dumping structure for table mifostenant-reference.ppi_likelihoods
+DROP TABLE IF EXISTS `ppi_likelihoods`;
 CREATE TABLE IF NOT EXISTS `ppi_likelihoods` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `code` varchar(100) NOT NULL,
@@ -4748,6 +5325,7 @@ CREATE TABLE IF NOT EXISTS `ppi_likelihoods` (
 
 
 -- Dumping structure for table mifostenant-reference.ppi_likelihoods_ppi
+DROP TABLE IF EXISTS `ppi_likelihoods_ppi`;
 CREATE TABLE IF NOT EXISTS `ppi_likelihoods_ppi` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `likelihood_id` bigint(20) NOT NULL,
@@ -4762,6 +5340,7 @@ CREATE TABLE IF NOT EXISTS `ppi_likelihoods_ppi` (
 
 
 -- Dumping structure for table mifostenant-reference.ppi_scores
+DROP TABLE IF EXISTS `ppi_scores`;
 CREATE TABLE IF NOT EXISTS `ppi_scores` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `score_from` int(11) NOT NULL,
@@ -4796,6 +5375,7 @@ INSERT INTO `ppi_scores` (`id`, `score_from`, `score_to`) VALUES
 
 
 -- Dumping structure for table mifostenant-reference.ref_loan_transaction_processing_strategy
+DROP TABLE IF EXISTS `ref_loan_transaction_processing_strategy`;
 CREATE TABLE IF NOT EXISTS `ref_loan_transaction_processing_strategy` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `code` varchar(100) DEFAULT NULL,
@@ -4819,6 +5399,7 @@ INSERT INTO `ref_loan_transaction_processing_strategy` (`id`, `code`, `name`, `s
 
 
 -- Dumping structure for table mifostenant-reference.rpt_sequence
+DROP TABLE IF EXISTS `rpt_sequence`;
 CREATE TABLE IF NOT EXISTS `rpt_sequence` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`)
@@ -4830,6 +5411,7 @@ CREATE TABLE IF NOT EXISTS `rpt_sequence` (
 
 
 -- Dumping structure for table mifostenant-reference.r_enum_value
+DROP TABLE IF EXISTS `r_enum_value`;
 CREATE TABLE IF NOT EXISTS `r_enum_value` (
   `enum_name` varchar(100) NOT NULL,
   `enum_id` int(11) NOT NULL,
@@ -4912,6 +5494,7 @@ INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `en
 
 
 -- Dumping structure for table mifostenant-reference.scheduler_detail
+DROP TABLE IF EXISTS `scheduler_detail`;
 CREATE TABLE IF NOT EXISTS `scheduler_detail` (
   `id` smallint(2) NOT NULL AUTO_INCREMENT,
   `is_suspended` tinyint(1) NOT NULL DEFAULT '0',
@@ -4928,6 +5511,7 @@ INSERT INTO `scheduler_detail` (`id`, `is_suspended`, `execute_misfired_jobs`, `
 
 
 -- Dumping structure for table mifostenant-reference.schema_version
+DROP TABLE IF EXISTS `schema_version`;
 CREATE TABLE IF NOT EXISTS `schema_version` (
   `version_rank` int(11) NOT NULL,
   `installed_rank` int(11) NOT NULL,
@@ -4946,7 +5530,7 @@ CREATE TABLE IF NOT EXISTS `schema_version` (
   KEY `schema_version_s_idx` (`success`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Dumping data for table mifostenant-reference.schema_version: ~304 rows (approximately)
+-- Dumping data for table mifostenant-reference.schema_version: ~296 rows (approximately)
 /*!40000 ALTER TABLE `schema_version` DISABLE KEYS */;
 INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `description`, `type`, `script`, `checksum`, `installed_by`, `installed_on`, `execution_time`, `success`) VALUES
 	(1, 1, '1', 'mifosplatform-core-ddl-latest', 'SQL', 'V1__mifosplatform-core-ddl-latest.sql', -1957145051, 'root', '2014-03-08 02:28:38', 10710, 1),
@@ -5180,6 +5764,10 @@ INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `desc
 	(306, 306, '293', 'interest rate chart support for amounts', 'SQL', 'V293__interest_rate_chart_support_for_amounts.sql', -1134261995, 'root', '2016-03-09 21:33:17', 2182, 1),
 	(307, 307, '294', 'configuration for paymnettype application forDisbursement charge', 'SQL', 'V294__configuration_for_paymnettype_application_forDisbursement_charge.sql', -1369433752, 'root', '2016-03-09 21:33:17', 34, 1),
 	(308, 308, '295', 'configuration for interest charged date same as disbursal date', 'SQL', 'V295__configuration_for_interest_charged_date_same_as_disbursal_date.sql', 772901568, 'root', '2016-03-23 15:15:05', 58, 1),
+	(309, 309, '296', 'skip repayment on first-day of month', 'SQL', 'V296__skip_repayment_on first-day_of_month.sql', 1675224847, 'root', '2016-04-13 20:19:15', 25, 1),
+	(310, 310, '297', 'Adding Meeting Time column', 'SQL', 'V297__Adding_Meeting_Time_column.sql', -173690634, 'root', '2016-04-13 20:19:15', 145, 1),
+	(311, 311, '298', 'savings interest tax', 'SQL', 'V298__savings_interest_tax.sql', 1441298172, 'root', '2016-04-13 20:19:17', 1491, 1),
+	(312, 312, '299', 'share products', 'SQL', 'V299__share_products.sql', -985543868, 'root', '2016-04-13 20:19:18', 1249, 1),
 	(3, 3, '3', 'mifosx-permissions-and-authorisation-utf8', 'SQL', 'V3__mifosx-permissions-and-authorisation-utf8.sql', 1922951887, 'root', '2014-03-08 02:28:38', 110, 1),
 	(30, 30, '30', 'add-referenceNumber-to-acc gl journal entry', 'SQL', 'V30__add-referenceNumber-to-acc_gl_journal_entry.sql', 2079970797, 'root', '2014-03-08 02:28:55', 327, 1),
 	(31, 31, '31', 'drop-autopostings', 'SQL', 'V31__drop-autopostings.sql', 630501407, 'root', '2014-03-08 02:28:55', 39, 1),
@@ -5261,6 +5849,7 @@ INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `desc
 
 
 -- Dumping structure for table mifostenant-reference.sms_messages_outbound
+DROP TABLE IF EXISTS `sms_messages_outbound`;
 CREATE TABLE IF NOT EXISTS `sms_messages_outbound` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `group_id` bigint(20) DEFAULT NULL,
@@ -5284,6 +5873,7 @@ CREATE TABLE IF NOT EXISTS `sms_messages_outbound` (
 
 
 -- Dumping structure for table mifostenant-reference.stretchy_parameter
+DROP TABLE IF EXISTS `stretchy_parameter`;
 CREATE TABLE IF NOT EXISTS `stretchy_parameter` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `parameter_name` varchar(45) NOT NULL,
@@ -5329,6 +5919,7 @@ INSERT INTO `stretchy_parameter` (`id`, `parameter_name`, `parameter_variable`, 
 
 
 -- Dumping structure for table mifostenant-reference.stretchy_report
+DROP TABLE IF EXISTS `stretchy_report`;
 CREATE TABLE IF NOT EXISTS `stretchy_report` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `report_name` varchar(100) NOT NULL,
@@ -5343,7 +5934,7 @@ CREATE TABLE IF NOT EXISTS `stretchy_report` (
   UNIQUE KEY `report_name_UNIQUE` (`report_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=165 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-reference.stretchy_report: ~61 rows (approximately)
+-- Dumping data for table mifostenant-reference.stretchy_report: ~125 rows (approximately)
 /*!40000 ALTER TABLE `stretchy_report` DISABLE KEYS */;
 INSERT INTO `stretchy_report` (`id`, `report_name`, `report_type`, `report_subtype`, `report_category`, `report_sql`, `description`, `core_report`, `use_report`) VALUES
 	(1, 'Client Listing', 'Table', NULL, 'Client', 'select \nconcat(repeat("..",   \n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\n c.account_no as "Client Account No.",  \nc.display_name as "Name",  \nr.enum_message_property as "Status",\nc.activation_date as "Activation", c.external_id as "External Id"\nfrom m_office o \njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\njoin m_client c on c.office_id = ounder.id\nleft join r_enum_value r on r.enum_name = \'status_enum\' and r.enum_id = c.status_enum\nwhere o.id = ${officeId}\norder by ounder.hierarchy, c.account_no', 'Individual Client Report\r\n\r\nLists the small number of defined fields on the client table.  Would expect to copy this \n\nreport and add any \'one to one\' additional data for specific tenant needs.\r\n\r\nCan be run for any size MFI but you\'d expect it only to be run within a branch for \n\nlarger ones.  Depending on how many columns are displayed, there is probably is a limit of about 20/50k clients returned for html display (export to excel doesn\'t \n\nhave that client browser/memory impact).', 1, 1),
@@ -5442,6 +6033,7 @@ INSERT INTO `stretchy_report` (`id`, `report_name`, `report_type`, `report_subty
 
 
 -- Dumping structure for table mifostenant-reference.stretchy_report_parameter
+DROP TABLE IF EXISTS `stretchy_report_parameter`;
 CREATE TABLE IF NOT EXISTS `stretchy_report_parameter` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `report_id` int(11) NOT NULL,
@@ -5796,6 +6388,7 @@ INSERT INTO `stretchy_report_parameter` (`id`, `report_id`, `parameter_id`, `rep
 
 
 -- Dumping structure for table mifostenant-reference.x_registered_table
+DROP TABLE IF EXISTS `x_registered_table`;
 CREATE TABLE IF NOT EXISTS `x_registered_table` (
   `registered_table_name` varchar(50) NOT NULL,
   `application_table_name` varchar(50) NOT NULL,
@@ -5809,6 +6402,7 @@ CREATE TABLE IF NOT EXISTS `x_registered_table` (
 
 
 -- Dumping structure for table mifostenant-reference.x_table_column_code_mappings
+DROP TABLE IF EXISTS `x_table_column_code_mappings`;
 CREATE TABLE IF NOT EXISTS `x_table_column_code_mappings` (
   `column_alias_name` varchar(50) NOT NULL,
   `code_id` int(10) NOT NULL,

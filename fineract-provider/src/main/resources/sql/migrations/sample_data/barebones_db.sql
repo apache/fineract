@@ -137,6 +137,7 @@ CREATE TABLE IF NOT EXISTS `acc_gl_journal_entry` (
   `office_running_balance` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `organization_running_balance` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `payment_details_id` bigint(20) DEFAULT NULL,
+  `share_transaction_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_acc_gl_journal_entry_m_office` (`office_id`),
   KEY `FK_acc_gl_journal_entry_m_appuser` (`createdby_id`),
@@ -147,6 +148,8 @@ CREATE TABLE IF NOT EXISTS `acc_gl_journal_entry` (
   KEY `FK_acc_gl_journal_entry_m_savings_account_transaction` (`savings_transaction_id`),
   KEY `FK_acc_gl_journal_entry_m_payment_detail` (`payment_details_id`),
   KEY `FK_acc_gl_journal_entry_m_client_transaction` (`client_transaction_id`),
+  KEY `FK_acc_gl_journal_entry_m_share_account_transaction` (`share_transaction_id`),
+  CONSTRAINT `FK_acc_gl_journal_entry_m_share_account_transaction` FOREIGN KEY (`share_transaction_id`) REFERENCES `m_share_account_transactions` (`id`),
   CONSTRAINT `FK_acc_gl_journal_entry_acc_gl_account` FOREIGN KEY (`account_id`) REFERENCES `acc_gl_account` (`id`),
   CONSTRAINT `FK_acc_gl_journal_entry_acc_gl_journal_entry` FOREIGN KEY (`reversal_id`) REFERENCES `acc_gl_journal_entry` (`id`),
   CONSTRAINT `FK_acc_gl_journal_entry_m_appuser` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
@@ -247,9 +250,9 @@ CREATE TABLE IF NOT EXISTS `c_configuration` (
   `description` varchar(300) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-default.c_configuration: ~23 rows (approximately)
+-- Dumping data for table mifostenant-default.c_configuration: ~24 rows (approximately)
 /*!40000 ALTER TABLE `c_configuration` DISABLE KEYS */;
 INSERT INTO `c_configuration` (`id`, `name`, `value`, `date_value`, `enabled`, `is_trap_door`, `description`) VALUES
 	(1, 'maker-checker', NULL, NULL, 0, 0, NULL),
@@ -274,7 +277,8 @@ INSERT INTO `c_configuration` (`id`, `name`, `value`, `date_value`, `enabled`, `
 	(24, 'backdate-penalties-enabled', 0, NULL, 1, 0, 'If this parameter is disabled penalties will only be added to instalments due moving forward, any old overdue instalments will not be affected.'),
 	(26, 'organisation-start-date', 0, NULL, 0, 0, NULL),
 	(27, 'paymenttype-applicable-for-disbursement-charges', NULL, NULL, 0, 0, 'Is the Disbursement Entry need to be considering the fund source of the paymnet type'),
-	(28, 'interest-charged-from-date-same-as-disbursal-date', 0, NULL, 0, 0, NULL);
+	(28, 'interest-charged-from-date-same-as-disbursal-date', 0, NULL, 0, 0, NULL),
+	(29, 'skip-repayment-on-first-day-of-month', 14, NULL, 0, 0, 'skipping repayment on first day of month');
 /*!40000 ALTER TABLE `c_configuration` ENABLE KEYS */;
 
 
@@ -339,30 +343,31 @@ CREATE TABLE IF NOT EXISTS `job` (
   `scheduler_group` smallint(2) NOT NULL DEFAULT '0',
   `is_misfired` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-default.job: ~19 rows (approximately)
+-- Dumping data for table mifostenant-default.job: ~20 rows (approximately)
 /*!40000 ALTER TABLE `job` DISABLE KEYS */;
 INSERT INTO `job` (`id`, `name`, `display_name`, `cron_expression`, `create_time`, `task_priority`, `group_name`, `previous_run_start_time`, `next_run_time`, `job_key`, `initializing_errorlog`, `is_active`, `currently_running`, `updates_allowed`, `scheduler_group`, `is_misfired`) VALUES
-	(1, 'Update loan Summary', 'Update loan Summary', '0 0 22 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-03-23 22:00:00', 'Update loan SummaryJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(2, 'Update Loan Arrears Ageing', 'Update Loan Arrears Ageing', '0 1 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-03-24 00:01:00', 'Update Loan Arrears AgeingJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(3, 'Update Loan Paid In Advance', 'Update Loan Paid In Advance', '0 5 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-03-24 00:05:00', 'Update Loan Paid In AdvanceJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(4, 'Apply Annual Fee For Savings', 'Apply Annual Fee For Savings', '0 20 22 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-03-23 22:20:00', 'Apply Annual Fee For SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(5, 'Apply Holidays To Loans', 'Apply Holidays To Loans', '0 0 12 * * ?', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-03-24 12:00:00', 'Apply Holidays To LoansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(6, 'Post Interest For Savings', 'Post Interest For Savings', '0 0 0 1/1 * ? *', '2015-06-03 02:56:58', 5, NULL, NULL, '2016-03-24 00:00:00', 'Post Interest For SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
-	(7, 'Transfer Fee For Loans From Savings', 'Transfer Fee For Loans From Savings', '0 1 0 1/1 * ? *', '2015-06-03 02:57:00', 5, NULL, NULL, '2016-03-24 00:01:00', 'Transfer Fee For Loans From SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(8, 'Pay Due Savings Charges', 'Pay Due Savings Charges', '0 0 12 * * ?', '2013-09-23 00:00:00', 5, NULL, NULL, '2016-03-24 12:00:00', 'Pay Due Savings ChargesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(9, 'Update Accounting Running Balances', 'Update Accounting Running Balances', '0 1 0 1/1 * ? *', '2015-06-03 02:57:00', 5, NULL, NULL, '2016-03-24 00:01:00', 'Update Accounting Running BalancesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(10, 'Execute Standing Instruction', 'Execute Standing Instruction', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 5, NULL, NULL, '2016-03-24 00:00:00', 'Execute Standing InstructionJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(11, 'Add Accrual Transactions', 'Add Accrual Transactions', '0 1 0 1/1 * ? *', '2015-06-03 02:57:04', 3, NULL, NULL, '2016-03-24 00:01:00', 'Add Accrual TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(12, 'Apply penalty to overdue loans', 'Apply penalty to overdue loans', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 5, NULL, NULL, '2016-03-24 00:00:00', 'Apply penalty to overdue loansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(13, 'Update Non Performing Assets', 'Update Non Performing Assets', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 5, NULL, NULL, '2016-03-24 00:00:00', 'Update Non Performing AssetsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(14, 'Transfer Interest To Savings', 'Transfer Interest To Savings', '0 2 0 1/1 * ? *', '2015-06-03 02:57:05', 4, NULL, NULL, '2016-03-24 00:02:00', 'Transfer Interest To SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
-	(15, 'Update Deposit Accounts Maturity details', 'Update Deposit Accounts Maturity details', '0 0 0 1/1 * ? *', '2015-06-03 02:57:05', 5, NULL, NULL, '2016-03-24 00:00:00', 'Update Deposit Accounts Maturity detailsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(16, 'Add Periodic Accrual Transactions', 'Add Periodic Accrual Transactions', '0 2 0 1/1 * ? *', '2015-06-03 02:57:06', 2, NULL, NULL, '2016-03-24 00:02:00', 'Add Periodic Accrual TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(17, 'Recalculate Interest For Loans', 'Recalculate Interest For Loans', '0 1 0 1/1 * ? *', '2015-06-03 02:57:07', 4, NULL, NULL, '2016-03-24 00:01:00', 'Recalculate Interest For LoansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(18, 'Generate Mandatory Savings Schedule', 'Generate Mandatory Savings Schedule', '0 5 0 1/1 * ? *', '2015-06-03 02:57:12', 5, NULL, NULL, '2016-03-24 00:05:00', 'Generate Mandatory Savings ScheduleJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(19, 'Generate Loan Loss Provisioning', 'Generate Loan Loss Provisioning', '0 0 0 1/1 * ? *', '2015-10-20 19:57:53', 5, NULL, NULL, '2016-03-24 00:00:00', 'Generate Loan Loss ProvisioningJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0);
+	(1, 'Update loan Summary', 'Update loan Summary', '0 0 22 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-04-13 22:00:00', 'Update loan SummaryJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(2, 'Update Loan Arrears Ageing', 'Update Loan Arrears Ageing', '0 1 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-04-14 00:01:00', 'Update Loan Arrears AgeingJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(3, 'Update Loan Paid In Advance', 'Update Loan Paid In Advance', '0 5 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-04-14 00:05:00', 'Update Loan Paid In AdvanceJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(4, 'Apply Annual Fee For Savings', 'Apply Annual Fee For Savings', '0 20 22 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-04-13 22:20:00', 'Apply Annual Fee For SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(5, 'Apply Holidays To Loans', 'Apply Holidays To Loans', '0 0 12 * * ?', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-04-14 12:00:00', 'Apply Holidays To LoansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(6, 'Post Interest For Savings', 'Post Interest For Savings', '0 0 0 1/1 * ? *', '2015-06-03 02:56:58', 5, NULL, NULL, '2016-04-14 00:00:00', 'Post Interest For SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
+	(7, 'Transfer Fee For Loans From Savings', 'Transfer Fee For Loans From Savings', '0 1 0 1/1 * ? *', '2015-06-03 02:57:00', 5, NULL, NULL, '2016-04-14 00:01:00', 'Transfer Fee For Loans From SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(8, 'Pay Due Savings Charges', 'Pay Due Savings Charges', '0 0 12 * * ?', '2013-09-23 00:00:00', 5, NULL, NULL, '2016-04-14 12:00:00', 'Pay Due Savings ChargesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(9, 'Update Accounting Running Balances', 'Update Accounting Running Balances', '0 1 0 1/1 * ? *', '2015-06-03 02:57:00', 5, NULL, NULL, '2016-04-14 00:01:00', 'Update Accounting Running BalancesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(10, 'Execute Standing Instruction', 'Execute Standing Instruction', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 5, NULL, NULL, '2016-04-14 00:00:00', 'Execute Standing InstructionJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(11, 'Add Accrual Transactions', 'Add Accrual Transactions', '0 1 0 1/1 * ? *', '2015-06-03 02:57:04', 3, NULL, NULL, '2016-04-14 00:01:00', 'Add Accrual TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(12, 'Apply penalty to overdue loans', 'Apply penalty to overdue loans', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 5, NULL, NULL, '2016-04-14 00:00:00', 'Apply penalty to overdue loansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(13, 'Update Non Performing Assets', 'Update Non Performing Assets', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 5, NULL, NULL, '2016-04-14 00:00:00', 'Update Non Performing AssetsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(14, 'Transfer Interest To Savings', 'Transfer Interest To Savings', '0 2 0 1/1 * ? *', '2015-06-03 02:57:05', 4, NULL, NULL, '2016-04-14 00:02:00', 'Transfer Interest To SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
+	(15, 'Update Deposit Accounts Maturity details', 'Update Deposit Accounts Maturity details', '0 0 0 1/1 * ? *', '2015-06-03 02:57:05', 5, NULL, NULL, '2016-04-14 00:00:00', 'Update Deposit Accounts Maturity detailsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(16, 'Add Periodic Accrual Transactions', 'Add Periodic Accrual Transactions', '0 2 0 1/1 * ? *', '2015-06-03 02:57:06', 2, NULL, NULL, '2016-04-14 00:02:00', 'Add Periodic Accrual TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(17, 'Recalculate Interest For Loans', 'Recalculate Interest For Loans', '0 1 0 1/1 * ? *', '2015-06-03 02:57:07', 4, NULL, NULL, '2016-04-14 00:01:00', 'Recalculate Interest For LoansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(18, 'Generate Mandatory Savings Schedule', 'Generate Mandatory Savings Schedule', '0 5 0 1/1 * ? *', '2015-06-03 02:57:12', 5, NULL, NULL, '2016-04-14 00:05:00', 'Generate Mandatory Savings ScheduleJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(19, 'Generate Loan Loss Provisioning', 'Generate Loan Loss Provisioning', '0 0 0 1/1 * ? *', '2015-10-20 19:57:53', 5, NULL, NULL, '2016-04-14 00:00:00', 'Generate Loan Loss ProvisioningJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(20, 'Post Dividends For Shares', 'Post Dividends For Shares', '0 0 0 1/1 * ? *', '2016-04-13 20:19:14', 5, NULL, NULL, '2016-04-14 00:00:00', 'Post Dividends For SharesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0);
 /*!40000 ALTER TABLE `job` ENABLE KEYS */;
 
 
@@ -708,6 +713,7 @@ CREATE TABLE IF NOT EXISTS `m_calendar` (
   `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
+  `meeting_time` time DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -828,9 +834,12 @@ CREATE TABLE IF NOT EXISTS `m_charge` (
   `max_cap` decimal(19,6) DEFAULT NULL,
   `fee_frequency` smallint(5) DEFAULT NULL,
   `income_or_liability_account_id` bigint(20) DEFAULT NULL,
+  `tax_group_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   KEY `FK_m_charge_acc_gl_account` (`income_or_liability_account_id`),
+  KEY `FK_m_charge_m_tax_group` (`tax_group_id`),
+  CONSTRAINT `FK_m_charge_m_tax_group` FOREIGN KEY (`tax_group_id`) REFERENCES `m_tax_group` (`id`),
   CONSTRAINT `FK_m_charge_acc_gl_account` FOREIGN KEY (`income_or_liability_account_id`) REFERENCES `acc_gl_account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -2859,9 +2868,9 @@ CREATE TABLE IF NOT EXISTS `m_permission` (
   `can_maker_checker` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=705 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=733 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-default.m_permission: ~616 rows (approximately)
+-- Dumping data for table mifostenant-default.m_permission: ~778 rows (approximately)
 /*!40000 ALTER TABLE `m_permission` DISABLE KEYS */;
 INSERT INTO `m_permission` (`id`, `grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES
 	(1, 'special', 'ALL_FUNCTIONS', NULL, NULL, 0),
@@ -3545,7 +3554,35 @@ INSERT INTO `m_permission` (`id`, `grouping`, `code`, `entity_name`, `action_nam
 	(701, 'SHAREPRODUCT', 'CREATE_SHAREPRODUCT', 'SHAREPRODUCT', 'CREATE', 0),
 	(702, 'SHAREPRODUCT', 'UPDATE_SHAREPRODUCT', 'SHAREPRODUCT', 'CREATE', 0),
 	(703, 'SHAREACCOUNT', 'CREATE_SHAREACCOUNT', 'SHAREACCOUNT', 'CREATE', 0),
-	(704, 'SHAREACCOUNT', 'UPDATE_SHAREACCOUNT', 'SHAREACCOUNT', 'CREATE', 0);
+	(704, 'SHAREACCOUNT', 'UPDATE_SHAREACCOUNT', 'SHAREACCOUNT', 'CREATE', 0),
+	(705, 'organisation', 'READ_TAXCOMPONENT', 'TAXCOMPONENT', 'READ', 0),
+	(706, 'organisation', 'CREATE_TAXCOMPONENT', 'TAXCOMPONENT', 'CREATE', 0),
+	(707, 'organisation', 'CREATE_TAXCOMPONENT_CHECKER', 'TAXCOMPONENT', 'CREATE_CHECKER', 0),
+	(708, 'organisation', 'UPDATE_TAXCOMPONENT', 'TAXCOMPONENT', 'UPDATE', 0),
+	(709, 'organisation', 'UPDATE_TAXCOMPONENT_CHECKER', 'TAXCOMPONENT', 'UPDATE_CHECKER', 0),
+	(710, 'organisation', 'READ_TAXGROUP', 'TAXGROUP', 'READ', 0),
+	(711, 'organisation', 'CREATE_TAXGROUP', 'TAXGROUP', 'CREATE', 0),
+	(712, 'organisation', 'CREATE_TAXGROUP_CHECKER', 'TAXGROUP', 'CREATE_CHECKER', 0),
+	(713, 'organisation', 'UPDATE_TAXGROUP', 'TAXGROUP', 'UPDATE', 0),
+	(714, 'organisation', 'UPDATE_TAXGROUP_CHECKER', 'TAXGROUP', 'UPDATE_CHECKER', 0),
+	(715, 'portfolio', 'UPDATEWITHHOLDTAX_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'UPDATEWITHHOLDTAX', 0),
+	(716, 'portfolio', 'UPDATEWITHHOLDTAX_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'UPDATEWITHHOLDTAX_CHECKER', 0),
+	(717, 'SHAREPRODUCT', 'CREATE_DIVIDEND_SHAREPRODUCT', 'SHAREPRODUCT', 'CREATE_DIVIDEND', 0),
+	(718, 'SHAREPRODUCT', 'CREATE_DIVIDEND_SHAREPRODUCT_CHECKER', 'SHAREPRODUCT', 'CREATE_DIVIDEND_CHECKER', 0),
+	(719, 'SHAREPRODUCT', 'APPROVE_DIVIDEND_SHAREPRODUCT', 'SHAREPRODUCT', 'APPROVE_DIVIDEND', 0),
+	(720, 'SHAREPRODUCT', 'APPROVE_DIVIDEND_SHAREPRODUCT_CHECKER', 'SHAREPRODUCT', 'APPROVE_DIVIDEND_CHECKER', 0),
+	(721, 'SHAREPRODUCT', 'DELETE_DIVIDEND_SHAREPRODUCT', 'SHAREPRODUCT', 'DELETE_DIVIDEND', 0),
+	(722, 'SHAREPRODUCT', 'DELETE_DIVIDEND_SHAREPRODUCT_CHECKER', 'SHAREPRODUCT', 'DELETE_DIVIDEND_CHECKER', 0),
+	(723, 'SHAREPRODUCT', 'READ_DIVIDEND_SHAREPRODUCT', 'SHAREPRODUCT', 'READ_DIVIDEND', 0),
+	(724, 'SHAREACCOUNT', 'APPROVE_SHAREACCOUNT', 'SHAREACCOUNT', 'APPROVE', 0),
+	(725, 'SHAREACCOUNT', 'ACTIVATE_SHAREACCOUNT', 'SHAREACCOUNT', 'ACTIVATE', 0),
+	(726, 'SHAREACCOUNT', 'UNDOAPPROVAL_SHAREACCOUNT', 'SHAREACCOUNT', 'UNDOAPPROVAL', 0),
+	(727, 'SHAREACCOUNT', 'REJECT_SHAREACCOUNT', 'SHAREACCOUNT', 'REJECT', 0),
+	(728, 'SHAREACCOUNT', 'APPLYADDITIONALSHARES_SHAREACCOUNT', 'SHAREACCOUNT', 'APPLYADDITIONALSHARES', 0),
+	(729, 'SHAREACCOUNT', 'APPROVEADDITIONALSHARES_SHAREACCOUNT', 'SHAREACCOUNT', 'APPROVEADDITIONALSHARES', 0),
+	(730, 'SHAREACCOUNT', 'REJECTADDITIONALSHARES_SHAREACCOUNT', 'SHAREACCOUNT', 'REJECTADDITIONALSHARES', 0),
+	(731, 'SHAREACCOUNT', 'REDEEMSHARES_SHAREACCOUNT', 'SHAREACCOUNT', 'REDEEMSHARES', 0),
+	(732, 'SHAREACCOUNT', 'CLOSE_SHAREACCOUNT', 'SHAREACCOUNT', 'CLOSE', 0);
 /*!40000 ALTER TABLE `m_permission` ENABLE KEYS */;
 
 
@@ -4027,6 +4064,7 @@ CREATE TABLE IF NOT EXISTS `m_savings_account` (
   `total_interest_earned_derived` decimal(19,6) DEFAULT NULL,
   `total_interest_posted_derived` decimal(19,6) DEFAULT NULL,
   `total_overdraft_interest_derived` decimal(19,6) DEFAULT '0.000000',
+  `total_withhold_tax_derived` decimal(19,6) DEFAULT NULL,
   `account_balance_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `min_required_balance` decimal(19,6) DEFAULT NULL,
   `enforce_min_required_balance` tinyint(1) NOT NULL DEFAULT '0',
@@ -4034,12 +4072,16 @@ CREATE TABLE IF NOT EXISTS `m_savings_account` (
   `start_interest_calculation_date` date DEFAULT NULL,
   `on_hold_funds_derived` decimal(19,6) DEFAULT NULL,
   `version` int(15) NOT NULL DEFAULT '1',
+  `withhold_tax` tinyint(4) NOT NULL DEFAULT '0',
+  `tax_group_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `sa_account_no_UNIQUE` (`account_no`),
   UNIQUE KEY `sa_externalid_UNIQUE` (`external_id`),
   KEY `FKSA00000000000001` (`client_id`),
   KEY `FKSA00000000000002` (`group_id`),
   KEY `FKSA00000000000003` (`product_id`),
+  KEY `FK_savings_account_tax_group` (`tax_group_id`),
+  CONSTRAINT `FK_savings_account_tax_group` FOREIGN KEY (`tax_group_id`) REFERENCES `m_tax_group` (`id`),
   CONSTRAINT `FKSA00000000000001` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
   CONSTRAINT `FKSA00000000000002` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`),
   CONSTRAINT `FKSA00000000000003` FOREIGN KEY (`product_id`) REFERENCES `m_savings_product` (`id`)
@@ -4180,6 +4222,25 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_transaction` (
 /*!40000 ALTER TABLE `m_savings_account_transaction` ENABLE KEYS */;
 
 
+-- Dumping structure for table mifostenant-default.m_savings_account_transaction_tax_details
+DROP TABLE IF EXISTS `m_savings_account_transaction_tax_details`;
+CREATE TABLE IF NOT EXISTS `m_savings_account_transaction_tax_details` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `savings_transaction_id` bigint(20) NOT NULL,
+  `tax_component_id` bigint(20) NOT NULL,
+  `amount` decimal(19,6) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_savings_account_transaction_tax_details_savings_transaction` (`savings_transaction_id`),
+  KEY `FK_savings_account_transaction_tax_details_tax_component` (`tax_component_id`),
+  CONSTRAINT `FK_savings_account_transaction_tax_details_savings_transaction` FOREIGN KEY (`savings_transaction_id`) REFERENCES `m_savings_account_transaction` (`id`),
+  CONSTRAINT `FK_savings_account_transaction_tax_details_tax_component` FOREIGN KEY (`tax_component_id`) REFERENCES `m_tax_component` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_savings_account_transaction_tax_details: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_savings_account_transaction_tax_details` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_savings_account_transaction_tax_details` ENABLE KEYS */;
+
+
 -- Dumping structure for table mifostenant-default.m_savings_interest_incentives
 DROP TABLE IF EXISTS `m_savings_interest_incentives`;
 CREATE TABLE IF NOT EXISTS `m_savings_interest_incentives` (
@@ -4255,9 +4316,13 @@ CREATE TABLE IF NOT EXISTS `m_savings_product` (
   `min_required_balance` decimal(19,6) DEFAULT NULL,
   `enforce_min_required_balance` tinyint(1) NOT NULL DEFAULT '0',
   `min_balance_for_interest_calculation` decimal(19,6) DEFAULT NULL,
+  `withhold_tax` tinyint(4) NOT NULL DEFAULT '0',
+  `tax_group_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `sp_unq_name` (`name`),
-  UNIQUE KEY `sp_unq_short_name` (`short_name`)
+  UNIQUE KEY `sp_unq_short_name` (`short_name`),
+  KEY `FK_savings_product_tax_group` (`tax_group_id`),
+  CONSTRAINT `FK_savings_product_tax_group` FOREIGN KEY (`tax_group_id`) REFERENCES `m_tax_group` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Dumping data for table mifostenant-default.m_savings_product: ~0 rows (approximately)
@@ -4297,6 +4362,265 @@ CREATE TABLE IF NOT EXISTS `m_selfservice_user_client_mapping` (
 -- Dumping data for table mifostenant-default.m_selfservice_user_client_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_selfservice_user_client_mapping` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_selfservice_user_client_mapping` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-default.m_share_account
+DROP TABLE IF EXISTS `m_share_account`;
+CREATE TABLE IF NOT EXISTS `m_share_account` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `account_no` varchar(50) NOT NULL,
+  `product_id` bigint(20) NOT NULL,
+  `client_id` bigint(20) NOT NULL,
+  `external_id` varchar(100) DEFAULT NULL,
+  `status_enum` smallint(5) NOT NULL DEFAULT '300',
+  `total_approved_shares` bigint(20) DEFAULT NULL,
+  `total_pending_shares` bigint(20) DEFAULT NULL,
+  `submitted_date` date NOT NULL,
+  `submitted_userid` bigint(20) DEFAULT NULL,
+  `approved_date` date DEFAULT NULL,
+  `approved_userid` bigint(20) DEFAULT NULL,
+  `rejected_date` date DEFAULT NULL,
+  `rejected_userid` bigint(20) DEFAULT NULL,
+  `activated_date` date DEFAULT NULL,
+  `activated_userid` bigint(20) DEFAULT NULL,
+  `closed_date` date DEFAULT NULL,
+  `closed_userid` bigint(20) DEFAULT NULL,
+  `currency_code` varchar(3) NOT NULL,
+  `currency_digits` smallint(5) NOT NULL,
+  `currency_multiplesof` smallint(5) DEFAULT NULL,
+  `savings_account_id` bigint(20) NOT NULL,
+  `minimum_active_period_frequency` decimal(19,6) DEFAULT NULL,
+  `minimum_active_period_frequency_enum` smallint(5) DEFAULT NULL,
+  `lockin_period_frequency` decimal(19,6) DEFAULT NULL,
+  `lockin_period_frequency_enum` smallint(5) DEFAULT NULL,
+  `allow_dividends_inactive_clients` smallint(1) DEFAULT '0',
+  `created_date` datetime DEFAULT NULL,
+  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodified_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `m_share_account_ibfk_1` (`product_id`),
+  KEY `m_share_account_ibfk_2` (`savings_account_id`),
+  KEY `m_share_account_ibfk_3` (`submitted_userid`),
+  KEY `m_share_account_ibfk_4` (`approved_userid`),
+  KEY `m_share_account_ibfk_5` (`rejected_userid`),
+  KEY `m_share_account_ibfk_6` (`activated_userid`),
+  KEY `m_share_account_ibfk_7` (`closed_userid`),
+  KEY `m_share_account_ibfk_8` (`lastmodifiedby_id`),
+  KEY `m_share_account_ibfk_9` (`client_id`),
+  CONSTRAINT `m_share_account_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `m_share_product` (`id`),
+  CONSTRAINT `m_share_account_ibfk_2` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`),
+  CONSTRAINT `m_share_account_ibfk_3` FOREIGN KEY (`submitted_userid`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `m_share_account_ibfk_4` FOREIGN KEY (`approved_userid`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `m_share_account_ibfk_5` FOREIGN KEY (`rejected_userid`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `m_share_account_ibfk_6` FOREIGN KEY (`activated_userid`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `m_share_account_ibfk_7` FOREIGN KEY (`closed_userid`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `m_share_account_ibfk_8` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `m_share_account_ibfk_9` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_share_account: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_share_account` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_share_account` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-default.m_share_account_charge
+DROP TABLE IF EXISTS `m_share_account_charge`;
+CREATE TABLE IF NOT EXISTS `m_share_account_charge` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `account_id` bigint(20) NOT NULL,
+  `charge_id` bigint(20) NOT NULL,
+  `charge_time_enum` smallint(5) NOT NULL,
+  `charge_calculation_enum` smallint(5) NOT NULL,
+  `charge_payment_mode_enum` smallint(5) NOT NULL DEFAULT '0',
+  `calculation_percentage` decimal(19,6) DEFAULT NULL,
+  `calculation_on_amount` decimal(19,6) DEFAULT NULL,
+  `charge_amount_or_percentage` decimal(19,6) DEFAULT NULL,
+  `amount` decimal(19,6) NOT NULL,
+  `amount_paid_derived` decimal(19,6) DEFAULT NULL,
+  `amount_waived_derived` decimal(19,6) DEFAULT NULL,
+  `amount_writtenoff_derived` decimal(19,6) DEFAULT NULL,
+  `amount_outstanding_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
+  `is_paid_derived` tinyint(1) NOT NULL DEFAULT '0',
+  `waived` tinyint(1) NOT NULL DEFAULT '0',
+  `min_cap` decimal(19,6) DEFAULT NULL,
+  `max_cap` decimal(19,6) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`),
+  KEY `charge_id` (`charge_id`),
+  KEY `m_share_account_charge_ibfk_2` (`account_id`),
+  CONSTRAINT `m_share_account_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
+  CONSTRAINT `m_share_account_charge_ibfk_2` FOREIGN KEY (`account_id`) REFERENCES `m_share_account` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_share_account_charge: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_share_account_charge` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_share_account_charge` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-default.m_share_account_charge_paid_by
+DROP TABLE IF EXISTS `m_share_account_charge_paid_by`;
+CREATE TABLE IF NOT EXISTS `m_share_account_charge_paid_by` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `share_transaction_id` bigint(20) NOT NULL,
+  `charge_transaction_id` bigint(20) NOT NULL,
+  `amount` decimal(20,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `m_share_account_transactions_charge_mapping_ibfk1` (`share_transaction_id`),
+  KEY `m_share_account_transactions_charge_mapping_ibfk2` (`charge_transaction_id`),
+  CONSTRAINT `m_share_account_transactions_charge_mapping_ibfk1` FOREIGN KEY (`share_transaction_id`) REFERENCES `m_share_account_transactions` (`id`),
+  CONSTRAINT `m_share_account_transactions_charge_mapping_ibfk2` FOREIGN KEY (`charge_transaction_id`) REFERENCES `m_share_account_charge` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_share_account_charge_paid_by: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_share_account_charge_paid_by` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_share_account_charge_paid_by` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-default.m_share_account_dividend_details
+DROP TABLE IF EXISTS `m_share_account_dividend_details`;
+CREATE TABLE IF NOT EXISTS `m_share_account_dividend_details` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `dividend_pay_out_id` bigint(20) NOT NULL,
+  `account_id` bigint(20) NOT NULL,
+  `amount` decimal(19,6) NOT NULL,
+  `status` smallint(3) NOT NULL,
+  `savings_transaction_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_m_share_account_dividend_details_dividend_pay_out_id` (`dividend_pay_out_id`),
+  KEY `FK_m_share_account_dividend_details_account_id` (`account_id`),
+  CONSTRAINT `FK_m_share_account_dividend_details_dividend_pay_out_id` FOREIGN KEY (`dividend_pay_out_id`) REFERENCES `m_share_product_dividend_pay_out` (`id`),
+  CONSTRAINT `FK_m_share_account_dividend_details_account_id` FOREIGN KEY (`account_id`) REFERENCES `m_share_account` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_share_account_dividend_details: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_share_account_dividend_details` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_share_account_dividend_details` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-default.m_share_account_transactions
+DROP TABLE IF EXISTS `m_share_account_transactions`;
+CREATE TABLE IF NOT EXISTS `m_share_account_transactions` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `account_id` bigint(20) NOT NULL,
+  `transaction_date` date DEFAULT NULL,
+  `total_shares` bigint(20) DEFAULT NULL,
+  `unit_price` decimal(10,2) DEFAULT NULL,
+  `amount` decimal(20,2) DEFAULT NULL,
+  `charge_amount` decimal(20,2) DEFAULT NULL,
+  `status_enum` smallint(5) NOT NULL DEFAULT '300',
+  `type_enum` smallint(5) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `m_share_account_purchased_shares_ibfk_1` (`account_id`),
+  CONSTRAINT `m_share_account_purchased_shares_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `m_share_account` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_share_account_transactions: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_share_account_transactions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_share_account_transactions` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-default.m_share_product
+DROP TABLE IF EXISTS `m_share_product`;
+CREATE TABLE IF NOT EXISTS `m_share_product` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(200) NOT NULL,
+  `short_name` varchar(4) NOT NULL,
+  `external_id` varchar(100) DEFAULT NULL,
+  `description` varchar(500) NOT NULL,
+  `start_date` datetime DEFAULT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `currency_code` varchar(3) NOT NULL,
+  `currency_digits` smallint(5) NOT NULL,
+  `currency_multiplesof` smallint(5) DEFAULT NULL,
+  `total_shares` bigint(20) NOT NULL,
+  `issued_shares` bigint(20) DEFAULT NULL,
+  `totalsubscribed_shares` bigint(20) DEFAULT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `capital_amount` decimal(20,2) NOT NULL,
+  `minimum_client_shares` bigint(20) DEFAULT NULL,
+  `nominal_client_shares` bigint(20) NOT NULL,
+  `maximum_client_shares` bigint(20) DEFAULT NULL,
+  `minimum_active_period_frequency` decimal(19,6) DEFAULT NULL,
+  `minimum_active_period_frequency_enum` smallint(5) DEFAULT NULL,
+  `lockin_period_frequency` decimal(19,6) DEFAULT NULL,
+  `lockin_period_frequency_enum` smallint(5) DEFAULT NULL,
+  `allow_dividends_inactive_clients` smallint(1) DEFAULT '0',
+  `createdby_id` bigint(20) DEFAULT NULL,
+  `created_date` datetime DEFAULT NULL,
+  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodified_date` datetime DEFAULT NULL,
+  `accounting_type` smallint(2) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  KEY `m_share_product_ibfk_1` (`createdby_id`),
+  KEY `m_share_product_ibfk_2` (`lastmodifiedby_id`),
+  CONSTRAINT `m_share_product_ibfk_1` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `m_share_product_ibfk_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_share_product: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_share_product` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_share_product` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-default.m_share_product_charge
+DROP TABLE IF EXISTS `m_share_product_charge`;
+CREATE TABLE IF NOT EXISTS `m_share_product_charge` (
+  `product_id` bigint(20) NOT NULL,
+  `charge_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`product_id`,`charge_id`),
+  KEY `m_share_product_charge_ibfk_1` (`charge_id`),
+  CONSTRAINT `m_share_product_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
+  CONSTRAINT `m_share_product_charge_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `m_share_product` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_share_product_charge: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_share_product_charge` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_share_product_charge` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-default.m_share_product_dividend_pay_out
+DROP TABLE IF EXISTS `m_share_product_dividend_pay_out`;
+CREATE TABLE IF NOT EXISTS `m_share_product_dividend_pay_out` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `product_id` bigint(20) NOT NULL,
+  `amount` decimal(19,6) NOT NULL,
+  `dividend_period_start_date` date NOT NULL,
+  `dividend_period_end_date` date NOT NULL,
+  `status` smallint(3) NOT NULL,
+  `createdby_id` bigint(20) DEFAULT NULL,
+  `created_date` datetime DEFAULT NULL,
+  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  `lastmodified_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_m_share_product_dividend_pay_out_product_id` (`product_id`),
+  KEY `FK_m_share_product_dividend_pay_out_createdby_id` (`createdby_id`),
+  KEY `FK_m_share_product_dividend_pay_out_lastmodifiedby_id` (`lastmodifiedby_id`),
+  CONSTRAINT `FK_m_share_product_dividend_pay_out_product_id` FOREIGN KEY (`product_id`) REFERENCES `m_share_product` (`id`),
+  CONSTRAINT `FK_m_share_product_dividend_pay_out_createdby_id` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_m_share_product_dividend_pay_out_lastmodifiedby_id` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_share_product_dividend_pay_out: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_share_product_dividend_pay_out` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_share_product_dividend_pay_out` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-default.m_share_product_market_price
+DROP TABLE IF EXISTS `m_share_product_market_price`;
+CREATE TABLE IF NOT EXISTS `m_share_product_market_price` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `product_id` bigint(20) NOT NULL,
+  `from_date` date DEFAULT NULL,
+  `share_value` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `m_share_product_market_price_ibfk_1` (`product_id`),
+  CONSTRAINT `m_share_product_market_price_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `m_share_product` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_share_product_market_price: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_share_product_market_price` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_share_product_market_price` ENABLE KEYS */;
 
 
 -- Dumping structure for table mifostenant-default.m_staff
@@ -4476,6 +4800,112 @@ CREATE TABLE IF NOT EXISTS `m_survey_scorecards` (
 -- Dumping data for table mifostenant-default.m_survey_scorecards: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_survey_scorecards` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_survey_scorecards` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-default.m_tax_component
+DROP TABLE IF EXISTS `m_tax_component`;
+CREATE TABLE IF NOT EXISTS `m_tax_component` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `percentage` decimal(19,6) NOT NULL,
+  `debit_account_type_enum` smallint(2) DEFAULT NULL,
+  `debit_account_id` bigint(20) DEFAULT NULL,
+  `credit_account_type_enum` smallint(2) DEFAULT NULL,
+  `credit_account_id` bigint(20) DEFAULT NULL,
+  `start_date` date NOT NULL,
+  `createdby_id` bigint(20) NOT NULL,
+  `created_date` datetime NOT NULL,
+  `lastmodifiedby_id` bigint(20) NOT NULL,
+  `lastmodified_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_tax_component_debit_gl_account` (`debit_account_id`),
+  KEY `FK_tax_component_credit_gl_account` (`credit_account_id`),
+  KEY `FK_tax_component_createdby` (`createdby_id`),
+  KEY `FK_tax_component_lastmodifiedby` (`lastmodifiedby_id`),
+  CONSTRAINT `FK_tax_component_createdby` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_tax_component_credit_gl_account` FOREIGN KEY (`credit_account_id`) REFERENCES `acc_gl_account` (`id`),
+  CONSTRAINT `FK_tax_component_debit_gl_account` FOREIGN KEY (`debit_account_id`) REFERENCES `acc_gl_account` (`id`),
+  CONSTRAINT `FK_tax_component_lastmodifiedby` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_tax_component: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_tax_component` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_tax_component` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-default.m_tax_component_history
+DROP TABLE IF EXISTS `m_tax_component_history`;
+CREATE TABLE IF NOT EXISTS `m_tax_component_history` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `tax_component_id` bigint(20) NOT NULL,
+  `percentage` decimal(19,6) NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date NOT NULL,
+  `createdby_id` bigint(20) NOT NULL,
+  `created_date` datetime NOT NULL,
+  `lastmodifiedby_id` bigint(20) NOT NULL,
+  `lastmodified_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_tax_component_history_tax_component_id` (`tax_component_id`),
+  KEY `FK_tax_component_history_createdby` (`createdby_id`),
+  KEY `FK_tax_component_history_lastmodifiedby` (`lastmodifiedby_id`),
+  CONSTRAINT `FK_tax_component_history_createdby` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_tax_component_history_lastmodifiedby` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_tax_component_history_tax_component_id` FOREIGN KEY (`tax_component_id`) REFERENCES `m_tax_component` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_tax_component_history: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_tax_component_history` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_tax_component_history` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-default.m_tax_group
+DROP TABLE IF EXISTS `m_tax_group`;
+CREATE TABLE IF NOT EXISTS `m_tax_group` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `createdby_id` bigint(20) NOT NULL,
+  `created_date` datetime NOT NULL,
+  `lastmodifiedby_id` bigint(20) NOT NULL,
+  `lastmodified_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_tax_group_createdby` (`createdby_id`),
+  KEY `FK_tax_group_lastmodifiedby` (`lastmodifiedby_id`),
+  CONSTRAINT `FK_tax_group_createdby` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_tax_group_lastmodifiedby` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_tax_group: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_tax_group` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_tax_group` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-default.m_tax_group_mappings
+DROP TABLE IF EXISTS `m_tax_group_mappings`;
+CREATE TABLE IF NOT EXISTS `m_tax_group_mappings` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `tax_group_id` bigint(20) NOT NULL,
+  `tax_component_id` bigint(20) NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date DEFAULT NULL,
+  `createdby_id` bigint(20) NOT NULL,
+  `created_date` datetime NOT NULL,
+  `lastmodifiedby_id` bigint(20) NOT NULL,
+  `lastmodified_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_tax_group_mappings_tax_group` (`tax_group_id`),
+  KEY `FK_tax_group_mappings_tax_component` (`tax_component_id`),
+  KEY `FK_tax_group_mappings_createdby` (`createdby_id`),
+  KEY `FK_tax_group_mappings_lastmodifiedby` (`lastmodifiedby_id`),
+  CONSTRAINT `FK_tax_group_mappings_createdby` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_tax_group_mappings_lastmodifiedby` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_tax_group_mappings_tax_component` FOREIGN KEY (`tax_component_id`) REFERENCES `m_tax_component` (`id`),
+  CONSTRAINT `FK_tax_group_mappings_tax_group` FOREIGN KEY (`tax_group_id`) REFERENCES `m_tax_group` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_tax_group_mappings: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_tax_group_mappings` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_tax_group_mappings` ENABLE KEYS */;
 
 
 -- Dumping structure for table mifostenant-default.m_tellers
@@ -4843,7 +5273,7 @@ CREATE TABLE IF NOT EXISTS `schema_version` (
   KEY `schema_version_s_idx` (`success`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-default.schema_version: ~233 rows (approximately)
+-- Dumping data for table mifostenant-default.schema_version: ~231 rows (approximately)
 /*!40000 ALTER TABLE `schema_version` DISABLE KEYS */;
 INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `description`, `type`, `script`, `checksum`, `installed_by`, `installed_on`, `execution_time`, `success`) VALUES
 	(1, 1, '1', 'mifosplatform-core-ddl-latest', 'SQL', 'V1__mifosplatform-core-ddl-latest.sql', 1800446512, 'root', '2015-06-03 15:26:50', 919, 1),
@@ -5077,6 +5507,10 @@ INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `desc
 	(306, 306, '293', 'interest rate chart support for amounts', 'SQL', 'V293__interest_rate_chart_support_for_amounts.sql', -1134261995, 'root', '2016-03-09 21:33:14', 2333, 1),
 	(307, 307, '294', 'configuration for paymnettype application forDisbursement charge', 'SQL', 'V294__configuration_for_paymnettype_application_forDisbursement_charge.sql', -1369433752, 'root', '2016-03-09 21:33:14', 56, 1),
 	(308, 308, '295', 'configuration for interest charged date same as disbursal date', 'SQL', 'V295__configuration_for_interest_charged_date_same_as_disbursal_date.sql', 772901568, 'root', '2016-03-23 15:15:04', 73, 1),
+	(309, 309, '296', 'skip repayment on first-day of month', 'SQL', 'V296__skip_repayment_on first-day_of_month.sql', 1675224847, 'root', '2016-04-13 20:19:10', 56, 1),
+	(310, 310, '297', 'Adding Meeting Time column', 'SQL', 'V297__Adding_Meeting_Time_column.sql', -173690634, 'root', '2016-04-13 20:19:10', 235, 1),
+	(311, 311, '298', 'savings interest tax', 'SQL', 'V298__savings_interest_tax.sql', 1441298172, 'root', '2016-04-13 20:19:12', 1324, 1),
+	(312, 312, '299', 'share products', 'SQL', 'V299__share_products.sql', -985543868, 'root', '2016-04-13 20:19:14', 1991, 1),
 	(3, 3, '3', 'mifosx-permissions-and-authorisation-utf8', 'SQL', 'V3__mifosx-permissions-and-authorisation-utf8.sql', 914436650, 'root', '2015-06-03 15:26:50', 14, 1),
 	(30, 30, '30', 'add-referenceNumber-to-acc gl journal entry', 'SQL', 'V30__add-referenceNumber-to-acc_gl_journal_entry.sql', 255130282, 'root', '2015-06-03 15:26:53', 59, 1),
 	(31, 31, '31', 'drop-autopostings', 'SQL', 'V31__drop-autopostings.sql', -2072166818, 'root', '2015-06-03 15:26:53', 5, 1),
