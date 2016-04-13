@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.accounts.api;
 
 import java.util.Collection;
-import java.util.HashSet;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -44,7 +43,6 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.portfolio.accounts.constants.AccountsApiConstants;
 import org.apache.fineract.portfolio.accounts.data.AccountData;
 import org.apache.fineract.portfolio.accounts.service.AccountReadPlatformService;
-import org.apache.fineract.portfolio.accounts.service.AccountsCommandsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
@@ -79,15 +77,30 @@ public class AccountsApiResource {
     }
     
     @GET
+    @Path("template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String template(@PathParam("type") final String accountType, @QueryParam("clientId") final Long clientId, 
+    		@QueryParam("productId") final Long productId,
+            @Context final UriInfo uriInfo) {
+        this.platformSecurityContext.authenticatedUser() ;
+        String serviceName = accountType+AccountsApiConstants.READPLATFORM_NAME ;
+        AccountReadPlatformService service = (AccountReadPlatformService) this.applicationContext.getBean(serviceName) ;
+        final AccountData accountData = service.retrieveTemplate(clientId, productId);
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, accountData, service.getResponseDataParams());
+    }
+    
+    @GET
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAccount(@PathParam("accountId") final Long accountId, @PathParam("type") final String accountType,
             @Context final UriInfo uriInfo) {
         String serviceName = accountType+AccountsApiConstants.READPLATFORM_NAME ;
-        AccountReadPlatformService service = (AccountReadPlatformService) this.applicationContext.getBean(serviceName) ;
-        AccountData data = service.retrieveOne(accountId) ;
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        AccountReadPlatformService service = (AccountReadPlatformService) this.applicationContext.getBean(serviceName) ;
+        AccountData data = service.retrieveOne(accountId, settings.isTemplate()) ;
         return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());
     }
     
@@ -118,12 +131,12 @@ public class AccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String handleCommands(@PathParam("type") final String accountType, @PathParam("accountId") final Long accountId, @QueryParam("command") final String commandParam,
-            @Context final UriInfo uriInfo, final String apiRequestBodyAsJson) {
-        String serviceName = accountType.toUpperCase()+AccountsApiConstants.ACCOUNT_COMMANDSERVICE ;
-        AccountsCommandsService service = (AccountsCommandsService) this.applicationContext.getBean(serviceName) ;
-        final Object obj = service.handleCommand(accountId, commandParam, apiRequestBodyAsJson) ;
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiObjectJsonSerializer.serialize(settings, obj, new HashSet<String>());
+            final String apiRequestBodyAsJson) {
+        CommandWrapper commandWrapper = null;
+        this.platformSecurityContext.authenticatedUser();
+        commandWrapper = new CommandWrapperBuilder().createAccountCommand(accountType, accountId, commandParam).withJson(apiRequestBodyAsJson).build();
+        final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
+        return this.toApiJsonSerializer.serialize(commandProcessingResult);
     }
     
     @PUT

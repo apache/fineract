@@ -135,6 +135,14 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
                 createdDate, amount, isReversed, appUser);
     }
 
+    public static SavingsAccountTransaction deposit(final SavingsAccount savingsAccount, final Office office,
+            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser,
+            final SavingsAccountTransactionType savingsAccountTransactionType) {
+        final boolean isReversed = false;
+        return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, savingsAccountTransactionType.getValue(), date,
+                createdDate, amount, isReversed, appUser);
+    }
+
     public static SavingsAccountTransaction withdrawal(final SavingsAccount savingsAccount, final Office office,
             final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser) {
         final boolean isReversed = false;
@@ -283,12 +291,20 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isDeposit() && isNotReversed();
     }
 
+    public boolean isDividendPayout() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isDividendPayout();
+    }
+
+    public boolean isDividendPayoutAndNotReversed() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isDividendPayout() && isNotReversed();
+    }
+
     public boolean isWithdrawal() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isWithdrawal();
     }
 
     public boolean isPostInterestCalculationRequired() {
-        return this.isDeposit() || this.isChargeTransaction();
+        return this.isDeposit() || this.isChargeTransaction() || this.isDividendPayout();
     }
 
     public boolean isInterestPostingAndNotReversed() {
@@ -470,7 +486,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
         final MonetaryCurrency currency = openingBalance.getCurrency();
         Money endOfDayBalance = openingBalance.copy();
-        if (isDeposit()) {
+        if (isDeposit() || isDividendPayoutAndNotReversed()) {
             endOfDayBalance = openingBalance.plus(getAmount(currency));
         } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
             endOfDayBalance = openingBalance.minus(getAmount(currency));
@@ -486,7 +502,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     public EndOfDayBalance toEndOfDayBalance(final Money openingBalance) {
         final MonetaryCurrency currency = openingBalance.getCurrency();
         Money endOfDayBalance = openingBalance.copy();
-        if (isDeposit()) {
+        if (isDeposit() || isDividendPayoutAndNotReversed()) {
             endOfDayBalance = openingBalance.plus(getAmount(currency));
         } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
 
@@ -515,7 +531,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
             final LocalDateInterval spanOfBalance = LocalDateInterval.create(balanceStartDate, balanceEndDate);
             numberOfDaysOfBalance = spanOfBalance.daysInPeriodInclusiveOfEndDate();
         } else {
-            if (isDeposit()) {
+            if (isDeposit() || isDividendPayoutAndNotReversed()) {
                 // endOfDayBalance = openingBalance.plus(getAmount(currency));
                 // if (endOfDayBalance.isLessThanZero()) {
                 endOfDayBalance = endOfDayBalance.plus(getAmount(currency));
@@ -558,7 +574,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     }
 
     public boolean isCredit() {
-        return isDeposit() || isInterestPostingAndNotReversed();
+        return isDeposit() || isInterestPostingAndNotReversed() || isDividendPayoutAndNotReversed();
     }
 
     public boolean isDebit() {

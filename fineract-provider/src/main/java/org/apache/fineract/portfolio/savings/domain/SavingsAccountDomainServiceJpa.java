@@ -26,6 +26,7 @@ import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.apache.fineract.portfolio.savings.exception.DepositAccountTransactionNotAllowedException;
@@ -102,10 +103,12 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
                     isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
         }
         List<DepositAccountOnHoldTransaction> depositAccountOnHoldTransactions = null;
-        if(account.getOnHoldFunds().compareTo(BigDecimal.ZERO) == 1){
-            depositAccountOnHoldTransactions = this.depositAccountOnHoldTransactionRepository.findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);
+        if (account.getOnHoldFunds().compareTo(BigDecimal.ZERO) == 1) {
+            depositAccountOnHoldTransactions = this.depositAccountOnHoldTransactionRepository
+                    .findBySavingsAccountAndReversedFalseOrderByCreatedDateAsc(account);
         }
-        account.validateAccountBalanceDoesNotBecomeNegative(transactionAmount, transactionBooleanValues.isExceptionForBalanceCheck(), depositAccountOnHoldTransactions);
+        account.validateAccountBalanceDoesNotBecomeNegative(transactionAmount, transactionBooleanValues.isExceptionForBalanceCheck(),
+                depositAccountOnHoldTransactions);
         saveTransactionToGenerateTransactionId(withdrawal);
         this.savingsAccountRepository.save(account);
 
@@ -127,7 +130,15 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
     public SavingsAccountTransaction handleDeposit(final SavingsAccount account, final DateTimeFormatter fmt,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
             final boolean isAccountTransfer, final boolean isRegularTransaction) {
+        final SavingsAccountTransactionType savingsAccountTransactionType = SavingsAccountTransactionType.DEPOSIT;
+        return handleDeposit(account, fmt, transactionDate, transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction,
+                savingsAccountTransactionType);
+    }
 
+    private SavingsAccountTransaction handleDeposit(final SavingsAccount account, final DateTimeFormatter fmt,
+            final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
+            final boolean isAccountTransfer, final boolean isRegularTransaction,
+            final SavingsAccountTransactionType savingsAccountTransactionType) {
         AppUser user = getAppUserIfPresent();
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
@@ -142,7 +153,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
                 paymentDetail, new Date(), user);
-        final SavingsAccountTransaction deposit = account.deposit(transactionDTO);
+        final SavingsAccountTransaction deposit = account.deposit(transactionDTO, savingsAccountTransactionType);
 
         final MathContext mc = MathContext.DECIMAL64;
         if (account.isBeforeLastPostingPeriod(transactionDate)) {
@@ -161,6 +172,18 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
 
         return deposit;
+    }
+
+    @Override
+    public SavingsAccountTransaction handleDividendPayout(final SavingsAccount account, final LocalDate transactionDate,
+            final BigDecimal transactionAmount) {
+        final DateTimeFormatter fmt = null;
+        final PaymentDetail paymentDetail = null;
+        final boolean isAccountTransfer = false;
+        final boolean isRegularTransaction = true;
+        final SavingsAccountTransactionType savingsAccountTransactionType = SavingsAccountTransactionType.DIVIDEND_PAYOUT;
+        return handleDeposit(account, fmt, transactionDate, transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction,
+                savingsAccountTransactionType);
     }
 
     private Long saveTransactionToGenerateTransactionId(final SavingsAccountTransaction transaction) {

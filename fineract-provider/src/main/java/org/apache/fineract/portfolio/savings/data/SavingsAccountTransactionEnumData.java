@@ -31,6 +31,7 @@ public class SavingsAccountTransactionEnumData {
     private final String value;
 
     private final boolean deposit;
+    private final boolean dividendPayout;
     private final boolean withdrawal;
     private final boolean interestPosting;
     private final boolean feeDeduction;
@@ -48,6 +49,7 @@ public class SavingsAccountTransactionEnumData {
         this.code = code;
         this.value = value;
         this.deposit = Long.valueOf(SavingsAccountTransactionType.DEPOSIT.getValue()).equals(this.id);
+        this.dividendPayout = Long.valueOf(SavingsAccountTransactionType.DIVIDEND_PAYOUT.getValue()).equals(this.id);
         this.withdrawal = Long.valueOf(SavingsAccountTransactionType.WITHDRAWAL.getValue()).equals(this.id);
         this.interestPosting = Long.valueOf(SavingsAccountTransactionType.INTEREST_POSTING.getValue()).equals(this.id);
         this.feeDeduction = Long.valueOf(SavingsAccountTransactionType.ANNUAL_FEE.getValue()).equals(this.id)
@@ -126,6 +128,10 @@ public class SavingsAccountTransactionEnumData {
 
     public boolean isWithholdTax() {
         return this.withholdTax;
+    }
+    
+    public boolean isDividendPayout() {
+        return this.dividendPayout;
     }
 
 }

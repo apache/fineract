@@ -157,12 +157,13 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
         final List<EnumOptionData> feeFrequencyOptions = this.dropdownReadPlatformService.retrievePeriodFrequencyTypeOptions();
         // this field is applicable only for client charges
         final Map<String, List<GLAccountData>> incomeOrLiabilityAccountOptions = null;
+        final List<EnumOptionData> shareChargeCalculationTypeOptions = null ;
+        final List<EnumOptionData> shareChargeTimeTypeOptions = null ;
         final Collection<TaxGroupData> taxGroupOptions = null;
-
         return ChargeData.template(null, allowedChargeCalculationTypeOptions, null, allowedChargeTimeOptions, null,
                 loansChargeCalculationTypeOptions, loansChargeTimeTypeOptions, savingsChargeCalculationTypeOptions,
                 savingsChargeTimeTypeOptions, clientChargeCalculationTypeOptions, clientChargeTimeTypeOptions, feeFrequencyOptions,
-                incomeOrLiabilityAccountOptions, taxGroupOptions);
+                incomeOrLiabilityAccountOptions, taxGroupOptions, shareChargeCalculationTypeOptions, shareChargeTimeTypeOptions);
     }
 
     @Override

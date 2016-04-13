@@ -18,60 +18,97 @@
  */
 package org.apache.fineract.portfolio.accounts.constants;
 
-
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public interface ShareAccountApiConstants {
 
-    //Command Strings
-    String APPROVE_COMMAND = "approve" ;
-    String REJECT_COMMAND = "reject" ;
-    String APPLY_ADDITIONALSHARES_COMMAND = "applyadditionalshares" ;
-    String APPROVE_ADDITIONSHARES_COMMAND = "approveadditionalshares" ;
-    String REJECT_ADDITIONSHARES_COMMAND = "rejectadditionalshares" ;
-    
-    //
-    String id_paramname = "id" ;
-    
-    String clientid_paramname = "clientId" ;
-    
-    String productid_paramname = "productId" ;
-    
-    String submitteddate_paramname = "submittedDate" ;
-    
-    String approveddate_paramname = "approvedDate" ;
-    
-    String fieldofferid_paramname = "fieldOfficerId" ;
-    
-    String externalid_paramname = "externalId" ;
-    
-    String currency_paramname = "currencyCode" ;
-    
-    String digitsafterdecimal_paramname = "digitsAfterDecimal" ;
-    
-    String inmultiplesof_paramname = "inMultiplesOf" ;
-    
-    String purchasedshares_paramname = "purchasedShares" ;
-    
-    String additionalshares_paramname = "additionalShares" ;
-    
-    String suspenseaccount_paramname = "suspenseAccount" ;
-    
-    String equityaccount_paramname = "equityAccount" ;
-    
-    String savingsaccountid_paramname = "savingsAccountId" ;
-    
-    String lockperiod_paramname = "lockPeriod" ;
-    
-    String minimumactiveperiodfordividends_paramname = "minimumActivePeriodForDividends" ;
-    
-    String allowdividendcalculationforinactiveclients_paramname = "allowDividendCalculationForInactiveClients" ;
-    
-    String charges_paramname = "charges" ; 
-    
-    String purchaseddate_paramname = "purchasedDate" ;
-    
-    String numberofshares_paramname = "numberOfShares" ;
-    
-    String purchasedprice_paramname = "purchasedPrice" ;
-    
+	public static final String amountParamName = "amount";
+	public static final String dateFormatParamName = "dateFormat";
+	public static final String dueAsOfDateParamName = "dueDate";
+	public static final String feeIntervalParamName = "feeInterval";
+	public static final String feeOnMonthDayParamName = "feeOnMonthDay";
+	public static final String localeParamName = "locale";
+
+	// Command Strings
+	String APPROVE_COMMAND = "approve";
+	String REJECT_COMMAND = "reject";
+	String APPLY_ADDITIONALSHARES_COMMAND = "applyadditionalshares";
+	String APPROVE_ADDITIONSHARES_COMMAND = "approveadditionalshares";
+	String REJECT_ADDITIONSHARES_COMMAND = "rejectadditionalshares";
+
+	//
+	String locale_paramname = "locale" ;
+	
+	String dateformat_paramname = "dateFormat" ;
+	
+	String id_paramname = "id";
+
+	String clientid_paramname = "clientId";
+
+	String productid_paramname = "productId";
+
+	String submitteddate_paramname = "submittedDate";
+
+	String approveddate_paramname = "approvedDate";
+
+	String activatedate_paramname = "activatedDate" ;
+	
+	String fieldofferid_paramname = "fieldOfficerId";
+
+	String externalid_paramname = "externalId";
+
+	String currency_paramname = "currencyCode";
+
+	String digitsafterdecimal_paramname = "digitsAfterDecimal";
+
+	String inmultiplesof_paramname = "inMultiplesOf";
+
+	String requestedshares_paramname = "requestedShares";
+
+	String savingsaccountid_paramname = "savingsAccountId";
+
+	String lockinperiod_paramname = "lockinPeriodFrequency";
+
+	String lockperiodfrequencytype_paramname = "lockinPeriodFrequencyType";
+
+	String minimumactiveperiod_paramname = "minimumActivePeriod";
+
+	String minimumactiveperiodfrequencytype_paramname = "minimumActivePeriodFrequencyType";
+
+	String allowdividendcalculationforinactiveclients_paramname = "allowDividendCalculationForInactiveClients";
+
+	String charges_paramname = "charges";
+
+	String applicationdate_param = "applicationDate";
+
+	String purchaseddate_paramname = "purchasedDate";
+
+	String numberofshares_paramname = "numberOfShares";
+
+	String purchasedprice_paramname = "unitPrice";
+	
+	String note_paramname = "note" ;
+	
+	public String requesteddate_paramname = "requestedDate" ;
+	
+	public String additionalshares_paramname = "additionalshares" ;
+	
+	public String closeddate_paramname = "closedDate" ;
+	
+	Set<String> supportedParameters = new HashSet<>(Arrays.asList(locale_paramname, dateformat_paramname, id_paramname,clientid_paramname, productid_paramname,
+	        submitteddate_paramname,approveddate_paramname, externalid_paramname, currency_paramname, digitsafterdecimal_paramname,
+	        inmultiplesof_paramname, requestedshares_paramname,savingsaccountid_paramname,lockinperiod_paramname,
+	        lockperiodfrequencytype_paramname,minimumactiveperiod_paramname, minimumactiveperiodfrequencytype_paramname,
+	        allowdividendcalculationforinactiveclients_paramname, charges_paramname, applicationdate_param,
+	        purchaseddate_paramname,numberofshares_paramname,purchasedprice_paramname));
+
+	Set<String> approvalParameters = new HashSet<>(Arrays.asList(locale_paramname, dateformat_paramname, approveddate_paramname, note_paramname));
+	
+	Set<String> activateParameters = new HashSet<>(Arrays.asList(locale_paramname, dateformat_paramname, activatedate_paramname));
+	
+	Set<String> closeParameters = new HashSet<>(Arrays.asList(locale_paramname, dateformat_paramname, closeddate_paramname, note_paramname));
+	
+	Set<String> addtionalSharesParameters = new HashSet<>(Arrays.asList(locale_paramname, requesteddate_paramname, requestedshares_paramname, purchasedprice_paramname, dateformat_paramname));
 }

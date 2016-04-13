@@ -183,6 +183,10 @@ public class SavingsEnumerations {
                 optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.WITHHOLD_TAX.getValue().longValue(),
                         SavingsAccountTransactionType.WITHHOLD_TAX.getCode(), "Withhold Tax");
             break;
+            case DIVIDEND_PAYOUT:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.DIVIDEND_PAYOUT.getValue().longValue(),
+                        SavingsAccountTransactionType.DIVIDEND_PAYOUT.getCode(), "Dividend Payout");
+                break;
         }
         return optionData;
     }

@@ -176,6 +176,25 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
                         .longGreaterThanZero();
             }
 
+        }else if(appliesTo.isSharesCharge()) {
+            final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeTimeType", element);
+            baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull();
+            if (chargeTimeType != null) {
+                baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType)
+                        .isOneOfTheseValues(ChargeTimeType.validShareValues());
+            }
+            
+            if (chargeCalculationType != null) {
+                baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
+                        .isOneOfTheseValues(ChargeCalculationType.validValuesForShares());
+            }
+            
+            if(chargeTimeType != null && chargeTimeType.equals(ChargeTimeType.SHAREACCOUNT_ACTIVATION.getValue())) {
+                if(chargeCalculationType != null) {
+                    baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
+                    .isOneOfTheseValues(ChargeCalculationType.validValuesForShareAccountActivation());
+                }
+            }
         }
 
         final String name = this.fromApiJsonHelper.extractStringNamed("name", element);
@@ -263,11 +282,11 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             final Collection<Object> validLoanValues = Arrays.asList(ChargeTimeType.validLoanValues());
             final Collection<Object> validSavingsValues = Arrays.asList(ChargeTimeType.validSavingsValues());
             final Collection<Object> validClientValues = Arrays.asList(ChargeTimeType.validClientValues());
-
+            final Collection<Object> validShareValues = Arrays.asList(ChargeTimeType.validShareValues()) ;
             final Collection<Object> allValidValues = new ArrayList<>(validLoanValues);
             allValidValues.addAll(validSavingsValues);
             allValidValues.addAll(validClientValues);
-
+            allValidValues.addAll(validShareValues) ;
             baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull()
                     .isOneOfTheseValues(allValidValues.toArray(new Object[allValidValues.size()]));
         }
@@ -281,13 +300,13 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             final Integer feeInterval = this.fromApiJsonHelper.extractIntegerNamed("feeInterval", element, Locale.getDefault());
             baseDataValidator.reset().parameter("feeInterval").value(feeInterval).integerGreaterThanZero();
         }
-
+        
         if (this.fromApiJsonHelper.parameterExists("chargeCalculationType", element)) {
             final Integer chargeCalculationType = this.fromApiJsonHelper.extractIntegerNamed("chargeCalculationType", element,
                     Locale.getDefault());
             baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).notNull().inMinMaxRange(1, 5);
         }
-
+        
         if (this.fromApiJsonHelper.parameterExists("chargePaymentMode", element)) {
             final Integer chargePaymentMode = this.fromApiJsonHelper.extractIntegerNamed("chargePaymentMode", element, Locale.getDefault());
             baseDataValidator.reset().parameter("chargePaymentMode").value(chargePaymentMode).notNull().inMinMaxRange(0, 1);
@@ -338,6 +357,11 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
 
     private void performChargeTimeNCalculationTypeValidation(DataValidatorBuilder baseDataValidator, final Integer chargeTimeType,
             final Integer chargeCalculationType) {
+        if(chargeTimeType.equals(ChargeTimeType.SHAREACCOUNT_ACTIVATION.getValue())){
+            baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
+            .isOneOfTheseValues(ChargeCalculationType.validValuesForShareAccountActivation());
+        }
+        
         if (chargeTimeType.equals(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue())) {
             baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
                     .isOneOfTheseValues(ChargeCalculationType.validValuesForTrancheDisbursement());

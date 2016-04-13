@@ -88,6 +88,7 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
+import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
@@ -844,6 +845,15 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public SavingsAccountTransaction deposit(final SavingsAccountTransactionDTO transactionDTO) {
+        return deposit(transactionDTO, SavingsAccountTransactionType.DEPOSIT);
+    }
+
+    public SavingsAccountTransaction dividendPayout(final SavingsAccountTransactionDTO transactionDTO) {
+        return deposit(transactionDTO, SavingsAccountTransactionType.DIVIDEND_PAYOUT);
+    }
+
+    public SavingsAccountTransaction deposit(final SavingsAccountTransactionDTO transactionDTO,
+            final SavingsAccountTransactionType savingsAccountTransactionType) {
         final String resourceTypeName = depositAccountType().resourceName();
         if (isNotActive()) {
             final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
@@ -886,7 +896,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final Money amount = Money.of(this.currency, transactionDTO.getTransactionAmount());
 
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(this, office(), transactionDTO.getPaymentDetail(),
-                transactionDTO.getTransactionDate(), amount, transactionDTO.getCreatedDate(), transactionDTO.getAppUser());
+                transactionDTO.getTransactionDate(), amount, transactionDTO.getCreatedDate(), transactionDTO.getAppUser(),
+                savingsAccountTransactionType);
         this.transactions.add(transaction);
 
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);

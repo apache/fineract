@@ -147,11 +147,15 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         final List<EnumOptionData> feeFrequencyOptions = this.dropdownReadPlatformService.retrievePeriodFrequencyTypeOptions();
         final Map<String, List<GLAccountData>> incomeOrLiabilityAccountOptions = this.accountingDropdownReadPlatformService
                 .retrieveAccountMappingOptionsForCharges();
+        final List<EnumOptionData> shareChargeCalculationTypeOptions = this.chargeDropdownReadPlatformService
+                .retrieveSharesCalculationTypes();
+        final List<EnumOptionData> shareChargeTimeTypeOptions = this.chargeDropdownReadPlatformService.retrieveSharesCollectionTimeTypes();
         final Collection<TaxGroupData> taxGroupOptions = this.taxReadPlatformService.retrieveTaxGroupsForLookUp();
         return ChargeData.template(currencyOptions, allowedChargeCalculationTypeOptions, allowedChargeAppliesToOptions,
                 allowedChargeTimeOptions, chargePaymentOptions, loansChargeCalculationTypeOptions, loansChargeTimeTypeOptions,
                 savingsChargeCalculationTypeOptions, savingsChargeTimeTypeOptions, clientChargeCalculationTypeOptions,
-                clientChargeTimeTypeOptions, feeFrequencyOptions, incomeOrLiabilityAccountOptions, taxGroupOptions);
+                clientChargeTimeTypeOptions, feeFrequencyOptions, incomeOrLiabilityAccountOptions, taxGroupOptions,
+                shareChargeCalculationTypeOptions, shareChargeTimeTypeOptions);
     }
 
     @Override
@@ -292,6 +296,10 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             return chargeSchema() + " join m_savings_product_charge spc on spc.charge_id = c.id";
         }
 
+        public String shareProductChargeSchema() {
+            return chargeSchema() + " join m_share_product_charge mspc on mspc.charge_id = c.id";
+        }
+
         @Override
         public ChargeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
@@ -397,6 +405,16 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
+    public Collection<ChargeData> retrieveShareProductCharges(final Long shareProductId) {
+        final ChargeMapper rm = new ChargeMapper();
+
+        String sql = "select " + rm.shareProductChargeSchema() + " where c.is_deleted=0 and c.is_active=1 and mspc.product_id=? ";
+        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { shareProductId });
+    }
+
+    @Override
     public Collection<ChargeData> retrieveSavingsAccountApplicableCharges(Long savingsAccountId) {
 
         final ChargeMapper rm = new ChargeMapper();
@@ -419,4 +437,13 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.CLIENT.getValue() });
     }
 
+    @Override
+    public Collection<ChargeData> retrieveSharesApplicableCharges() {
+        final ChargeMapper rm = new ChargeMapper();
+        String sql = "select " + rm.chargeSchema() + " where c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=? ";
+        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
+        sql += " order by c.name ";
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SHARES.getValue() });
+    }
 }
