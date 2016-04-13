@@ -35,4 +35,9 @@ public interface ProductToGLAccountMappingWritePlatformService {
     Map<String, Object> updateSavingsProductToGLAccountMapping(Long savingsProductId, JsonCommand command, boolean accountingRuleChanged,
             int accountingRuleTypeId, DepositAccountType accountType);
 
+    void createShareProductToGLAccountMapping(Long shareProductId, JsonCommand command);
+
+    Map<String, Object> updateShareProductToGLAccountMapping(Long shareProductId, JsonCommand command, boolean accountingRuleChanged,
+            int accountingRuleTypeId);
+
 }

@@ -43,6 +43,8 @@ import org.apache.fineract.portfolio.charge.exception.ChargeNotFoundException;
 import org.apache.fineract.portfolio.charge.serialization.ChargeDefinitionCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
+import org.apache.fineract.portfolio.tax.domain.TaxGroup;
+import org.apache.fineract.portfolio.tax.domain.TaxGroupRepositoryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,12 +66,14 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
     private final LoanProductRepository loanProductRepository;
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
     private final GLAccountRepositoryWrapper gLAccountRepository;
+    private final TaxGroupRepositoryWrapper taxGroupRepository;
 
     @Autowired
     public ChargeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer, final ChargeRepository chargeRepository,
             final LoanProductRepository loanProductRepository, final RoutingDataSource dataSource,
-            final FineractEntityAccessUtil fineractEntityAccessUtil, final GLAccountRepositoryWrapper glAccountRepository) {
+            final FineractEntityAccessUtil fineractEntityAccessUtil, final GLAccountRepositoryWrapper glAccountRepository,
+            final TaxGroupRepositoryWrapper taxGroupRepository) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.dataSource = dataSource;
@@ -78,6 +82,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         this.loanProductRepository = loanProductRepository;
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
         this.gLAccountRepository = glAccountRepository;
+        this.taxGroupRepository = taxGroupRepository;
     }
 
     @Transactional
@@ -96,14 +101,20 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
                 glAccount = this.gLAccountRepository.findOneWithNotFoundDetection(glAccountId);
             }
 
-            final Charge charge = Charge.fromJson(command, glAccount);
+            final Long taxGroupId = command.longValueOfParameterNamed(ChargesApiConstants.taxGroupIdParamName);
+            TaxGroup taxGroup = null;
+            if (taxGroupId != null) {
+                taxGroup = this.taxGroupRepository.findOneWithNotFoundDetection(taxGroupId);
+            }
+
+            final Charge charge = Charge.fromJson(command, glAccount, taxGroup);
             this.chargeRepository.save(charge);
 
             // check if the office specific products are enabled. If yes, then
             // save this savings product against a specific office
             // i.e. this savings product is specific for this office.
-            fineractEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES,
-                    FineractEntityType.CHARGE, charge.getId());
+            fineractEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
+                    FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES, FineractEntityType.CHARGE, charge.getId());
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(charge.getId()).build();
         } catch (final DataIntegrityViolationException dve) {
@@ -126,7 +137,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
             final Map<String, Object> changes = chargeForUpdate.update(command);
 
             this.fromApiJsonDeserializer.validateChargeTimeNCalculationType(chargeForUpdate.getChargeTimeType(),
-            																	chargeForUpdate.getChargeCalculation());
+                    chargeForUpdate.getChargeCalculation());
 
             // MIFOSX-900: Check if the Charge has been active before and now is
             // deactivated:
@@ -146,7 +157,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
                 if (isChargeExistWithLoans) { throw new ChargeCannotBeUpdatedException(
                         "error.msg.charge.frequency.cannot.be.updated.it.is.used.in.loan",
                         "This charge frequency cannot be updated, it is used in loan"); }
-            } 
+            }
 
             // Has account Id been changed ?
             if (changes.containsKey(ChargesApiConstants.glAccountIdParamName)) {
@@ -156,6 +167,15 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
                     newIncomeAccount = this.gLAccountRepository.findOneWithNotFoundDetection(newValue);
                 }
                 chargeForUpdate.setAccount(newIncomeAccount);
+            }
+
+            if (changes.containsKey(ChargesApiConstants.taxGroupIdParamName)) {
+                final Long newValue = command.longValueOfParameterNamed(ChargesApiConstants.taxGroupIdParamName);
+                TaxGroup taxGroup = null;
+                if (newValue != null) {
+                    taxGroup = this.taxGroupRepository.findOneWithNotFoundDetection(newValue);
+                }
+                chargeForUpdate.setTaxGroup(taxGroup);
             }
 
             if (!changes.isEmpty()) {
@@ -182,10 +202,9 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         final Boolean isChargeExistWithSavings = isAnySavingsAssociateWithThisCharge(chargeId);
 
         // TODO: Change error messages around:
-        if (!loanProducts.isEmpty() || isChargeExistWithLoans
-                || isChargeExistWithSavings) { throw new ChargeCannotBeDeletedException(
-                        "error.msg.charge.cannot.be.deleted.it.is.already.used.in.loan",
-                        "This charge cannot be deleted, it is already used in loan"); }
+        if (!loanProducts.isEmpty() || isChargeExistWithLoans || isChargeExistWithSavings) { throw new ChargeCannotBeDeletedException(
+                "error.msg.charge.cannot.be.deleted.it.is.already.used.in.loan",
+                "This charge cannot be deleted, it is already used in loan"); }
 
         chargeForDelete.delete();
 

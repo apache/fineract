@@ -34,6 +34,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
+import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -51,7 +52,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
     @Autowired
     public SavingsProductReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-    		final FineractEntityAccessUtil fineractEntityAccessUtil) {
+            final FineractEntityAccessUtil fineractEntityAccessUtil) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
@@ -63,14 +64,14 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         this.context.authenticatedUser();
 
         String sql = "select " + this.savingsProductRowMapper.schema() + "where sp.deposit_type_enum = ?";
-        
-		// Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
-		String inClause = fineractEntityAccessUtil.
-				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
-						FineractEntityType.SAVINGS_PRODUCT);
-		if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
-			sql += " and sp.id in ( " + inClause + " ) ";
-		}
+
+        // Check if branch specific products are enabled. If yes, fetch only
+        // products mapped to current user's office
+        String inClause = fineractEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
+        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+            sql += " and sp.id in ( " + inClause + " ) ";
+        }
 
         return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
     }
@@ -79,15 +80,14 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
     public Collection<SavingsProductData> retrieveAllForLookup() {
 
         String sql = "select " + this.savingsProductLookupsRowMapper.schema() + " where sp.deposit_type_enum = ? ";
-        
-        // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
- 		String inClause = fineractEntityAccessUtil.
- 				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
-						FineractEntityType.SAVINGS_PRODUCT);
-    	if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
-    		sql += " and id in ( " + inClause + " ) ";
-    	}
-    
+
+        // Check if branch specific products are enabled. If yes, fetch only
+        // products mapped to current user's office
+        String inClause = fineractEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
+        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+            sql += " and id in ( " + inClause + " ) ";
+        }
 
         return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper,
                 new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
@@ -132,9 +132,12 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sqlBuilder.append("sp.min_required_balance as minRequiredBalance, ");
             sqlBuilder.append("sp.enforce_min_required_balance as enforceMinRequiredBalance, ");
             sqlBuilder.append("sp.min_balance_for_interest_calculation as minBalanceForInterestCalculation,");
-            sqlBuilder.append("sp.accounting_type as accountingType ");
+            sqlBuilder.append("sp.accounting_type as accountingType, ");
+            sqlBuilder.append("sp.withhold_tax as withHoldTax,");
+            sqlBuilder.append("tg.id as taxGroupId, tg.name as taxGroupName ");
             sqlBuilder.append("from m_savings_product sp ");
             sqlBuilder.append("join m_currency curr on curr.code = sp.currency_code ");
+            sqlBuilder.append("left join m_tax_group tg on tg.id = sp.tax_group_id  ");
 
             this.schemaSql = sqlBuilder.toString();
         }
@@ -200,11 +203,20 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             final boolean enforceMinRequiredBalance = rs.getBoolean("enforceMinRequiredBalance");
             final BigDecimal minBalanceForInterestCalculation = rs.getBigDecimal("minBalanceForInterestCalculation");
 
+            final boolean withHoldTax = rs.getBoolean("withHoldTax");
+            final Long taxGroupId = JdbcSupport.getLong(rs, "taxGroupId");
+            final String taxGroupName = rs.getString("taxGroupName");
+            TaxGroupData taxGroupData = null;
+            if (taxGroupId != null) {
+                taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
+            }
+
             return SavingsProductData.instance(id, name, shortName, description, currency, nominalAnnualInterestRate,
                     compoundingInterestPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers,
                     accountingRuleType, allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance,
-                    minBalanceForInterestCalculation, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation);
+                    minBalanceForInterestCalculation, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax,
+                    taxGroupData);
         }
     }
 
@@ -229,22 +241,22 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         String sql = "select " + this.savingsProductLookupsRowMapper.schema();
 
         boolean inClauseAdded = false;
-        
-        // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
-  		String inClause = fineractEntityAccessUtil.
-  				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
-						FineractEntityType.SAVINGS_PRODUCT);
-    	if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
-    		sql += " where id in ( " + inClause + " ) ";
-    		inClauseAdded = true;
-    	}
-        
+
+        // Check if branch specific products are enabled. If yes, fetch only
+        // products mapped to current user's office
+        String inClause = fineractEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
+        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+            sql += " where id in ( " + inClause + " ) ";
+            inClauseAdded = true;
+        }
+
         if (isOverdraftType != null) {
-        	if (inClauseAdded) {
-        		sql += " and sp.allow_overdraft=?";
-        	} else {
-        		sql += " where sp.allow_overdraft=?";
-        	}
+            if (inClauseAdded) {
+                sql += " and sp.allow_overdraft=?";
+            } else {
+                sql += " where sp.allow_overdraft=?";
+            }
             return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, isOverdraftType);
         }
 
@@ -258,14 +270,14 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         this.context.authenticatedUser();
 
         String sql = "select " + this.savingsProductRowMapper.schema() + " where sp.currency_code='" + currencyCode + "'";
-        
-        // Check if branch specific products are enabled. If yes, fetch only products mapped to current user's office
-  		String inClause = fineractEntityAccessUtil.
-  				getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(
-						FineractEntityType.SAVINGS_PRODUCT);
-    	if ( (inClause != null) && (!(inClause.trim().isEmpty())) ) {
-    		sql += " and id in ( " + inClause + " ) ";
-    	}
+
+        // Check if branch specific products are enabled. If yes, fetch only
+        // products mapped to current user's office
+        String inClause = fineractEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
+        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+            sql += " and id in ( " + inClause + " ) ";
+        }
 
         return this.jdbcTemplate.query(sql, this.savingsProductRowMapper);
     }

@@ -830,7 +830,7 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId;
         return this;
     }
-    
+
     public CommandWrapperBuilder undoLastDisbursalLoanApplication(final Long loanId) {
         this.actionName = "DISBURSALLASTUNDO";
         this.entityName = "LOAN";
@@ -2584,36 +2584,122 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId + "/schedule";
         return this;
     }
-    
+
     public CommandWrapperBuilder createProduct(String productType) {
-        this.entityName = productType.toUpperCase()+"PRODUCT" ; //To Support different type of products
+        this.entityName = productType.toUpperCase() + "PRODUCT"; // To Support
+                                                                 // different
+                                                                 // type of
+                                                                 // products
         this.actionName = "CREATE";
         this.entityId = null;
-        this.href = "/products/"+productType;
+        this.href = "/products/" + productType;
         return this;
     }
-    
+
     public CommandWrapperBuilder updateProduct(String productType, final Long productId) {
-        this.entityName = productType.toUpperCase()+"PRODUCT" ;
+        this.entityName = productType.toUpperCase() + "PRODUCT";
         this.actionName = "UPDATE";
         this.entityId = productId;
-        this.href = "/products/" + productType+"/"+productId;
+        this.href = "/products/" + productType + "/" + productId;
         return this;
     }
-    
+
     public CommandWrapperBuilder createAccount(String accountType) {
-        this.entityName = accountType.toUpperCase()+"ACCOUNT" ; //To Support different type of Accounts
+        this.entityName = accountType.toUpperCase() + "ACCOUNT"; // To Support
+                                                                 // different
+                                                                 // type of
+                                                                 // Accounts
         this.actionName = "CREATE";
         this.entityId = null;
-        this.href = "/accounts/"+accountType;
+        this.href = "/accounts/" + accountType;
+        return this;
+    }
+
+    public CommandWrapperBuilder updateAccount(String accountType, final Long accountId) {
+        this.entityName = accountType.toUpperCase() + "ACCOUNT";
+        this.actionName = "UPDATE";
+        this.entityId = accountId;
+        this.href = "/accounts/" + accountType + "/" + accountId;
+        return this;
+    }
+
+    public CommandWrapperBuilder createProductCommand(String productType, String command, final Long productId) {
+        this.entityName = productType.toUpperCase() + "PRODUCT";
+        this.actionName = "CREATE" + "_" + command.toUpperCase();
+        this.entityId = productId;
+        this.href = "/products/" + productType + "/" + productId + "?command=" + command;
+        return this;
+    }
+
+    public CommandWrapperBuilder createShareProductDividendPayoutCommand(final Long productId) {
+        this.entityName = "SHAREPRODUCT";
+        this.actionName = "CREATE_DIVIDEND";
+        this.entityId = productId;
+        this.href = "/shareproduct/" + productId + "/dividend";
+        return this;
+    }
+
+    public CommandWrapperBuilder approveShareProductDividendPayoutCommand(final Long productId, final Long dividendId) {
+        this.entityName = "SHAREPRODUCT";
+        this.actionName = "APPROVE_DIVIDEND";
+        this.entityId = dividendId;
+        this.href = "/shareproduct/" + productId + "/dividend/" + dividendId;
         return this;
     }
     
-    public CommandWrapperBuilder updateAccount(String accountType, final Long accountId) {
+    public CommandWrapperBuilder deleteShareProductDividendPayoutCommand(final Long productId, final Long dividendId) {
+        this.entityName = "SHAREPRODUCT";
+        this.actionName = "DELETE_DIVIDEND";
+        this.entityId = dividendId;
+        this.href = "/shareproduct/" + productId + "/dividend/" + dividendId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder createAccountCommand(String accountType, final Long accountId, String command) {
         this.entityName = accountType.toUpperCase()+"ACCOUNT" ;
-        this.actionName = "UPDATE";
+        this.actionName = command.toUpperCase();
         this.entityId = accountId;
-        this.href = "/accounts/" + accountType+"/"+accountId;
+        this.href = "/accounts/" + accountType+"/"+accountId+"?command="+command;
+        return this;
+    }
+    
+    public CommandWrapperBuilder createTaxComponent() {
+        this.actionName = "CREATE";
+        this.entityName = "TAXCOMPONENT";
+        this.entityId = null;
+        this.href = "/taxes/component";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateTaxComponent(final Long taxComponentId) {
+        this.actionName = "UPDATE";
+        this.entityName = "TAXCOMPONENT";
+        this.entityId = taxComponentId;
+        this.href = "/taxes/component/" + taxComponentId;
+        return this;
+    }
+
+    public CommandWrapperBuilder createTaxGroup() {
+        this.actionName = "CREATE";
+        this.entityName = "TAXGROUP";
+        this.entityId = null;
+        this.href = "/taxes/group";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateTaxGroup(final Long taxGroupId) {
+        this.actionName = "UPDATE";
+        this.entityName = "TAXGROUP";
+        this.entityId = taxGroupId;
+        this.href = "/taxes/group/" + taxGroupId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder updateWithHoldTax(final Long accountId) {
+        this.actionName = "UPDATEWITHHOLDTAX";
+        this.entityName = "SAVINGSACCOUNT";
+        this.entityId = accountId;
+        this.href = "/savingsaccounts/" + accountId + "?commad=updateTaxWithHoldTax";
         return this;
     }
 }

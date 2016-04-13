@@ -29,6 +29,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minOverd
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minRequiredBalanceParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateOverdraftParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
 import java.math.BigDecimal;
@@ -87,6 +88,7 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
+import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
@@ -102,6 +104,9 @@ import org.apache.fineract.portfolio.savings.exception.SavingsOfficerAssignmentD
 import org.apache.fineract.portfolio.savings.exception.SavingsOfficerUnassignmentDateException;
 import org.apache.fineract.portfolio.savings.exception.SavingsTransferTransactionsCannotBeUndoneException;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
+import org.apache.fineract.portfolio.tax.domain.TaxComponent;
+import org.apache.fineract.portfolio.tax.domain.TaxGroup;
+import org.apache.fineract.portfolio.tax.service.TaxUtils;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -310,6 +315,13 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "min_balance_for_interest_calculation", scale = 6, precision = 19, nullable = true)
     private BigDecimal minBalanceForInterestCalculation;
 
+    @Column(name = "withhold_tax", nullable = false)
+    protected boolean withHoldTax;
+
+    @ManyToOne
+    @JoinColumn(name = "tax_group_id")
+    private TaxGroup taxGroup;
+
     protected SavingsAccount() {
         //
     }
@@ -324,14 +336,14 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
             final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean enforceMinRequiredBalance,
             final BigDecimal minRequiredBalance, final BigDecimal nominalAnnualInterestRateOverdraft,
-            final BigDecimal minOverdraftForInterestCalculation) {
+            final BigDecimal minOverdraftForInterestCalculation, final boolean withHoldTax) {
 
         final SavingsAccountStatusType status = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
         return new SavingsAccount(client, group, product, fieldOfficer, accountNo, externalId, status, accountType, submittedOnDate,
                 submittedBy, interestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
                 interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
                 withdrawalFeeApplicableForTransfer, savingsAccountCharges, allowOverdraft, overdraftLimit, enforceMinRequiredBalance,
-                minRequiredBalance, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation);
+                minRequiredBalance, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax);
     }
 
     protected SavingsAccount(final Client client, final Group group, final SavingsProduct product, final Staff fieldOfficer,
@@ -342,11 +354,12 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
-            final boolean allowOverdraft, final BigDecimal overdraftLimit) {
+            final boolean allowOverdraft, final BigDecimal overdraftLimit, boolean withHoldTax) {
         this(client, group, product, fieldOfficer, accountNo, externalId, status, accountType, submittedOnDate, submittedBy,
                 nominalAnnualInterestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
                 interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
-                withdrawalFeeApplicableForTransfer, savingsAccountCharges, allowOverdraft, overdraftLimit, false, null, null, null);
+                withdrawalFeeApplicableForTransfer, savingsAccountCharges, allowOverdraft, overdraftLimit, false, null, null, null,
+                withHoldTax);
     }
 
     protected SavingsAccount(final Client client, final Group group, final SavingsProduct product, final Staff savingsOfficer,
@@ -359,7 +372,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
             final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean enforceMinRequiredBalance,
             final BigDecimal minRequiredBalance, final BigDecimal nominalAnnualInterestRateOverdraft,
-            final BigDecimal minOverdraftForInterestCalculation) {
+            final BigDecimal minOverdraftForInterestCalculation, boolean withHoldTax) {
         this.client = client;
         this.group = group;
         this.product = product;
@@ -404,6 +417,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.minRequiredBalance = minRequiredBalance;
         this.minBalanceForInterestCalculation = product.minBalanceForInterestCalculation();
         this.savingsOfficerHistory = null;
+        this.withHoldTax = withHoldTax;
+        this.taxGroup = product.getTaxGroup();
     }
 
     /**
@@ -458,6 +473,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         Money interestPostedToDate = Money.zero(this.currency);
 
         boolean recalucateDailyBalanceDetails = false;
+        boolean applyWithHoldTax = isWithHoldTaxApplicableForInterestPosting();
+        final List<SavingsAccountTransaction> withholdTransactions = new ArrayList<>();
+        withholdTransactions.addAll(findWithHoldTransactions());
 
         for (final PostingPeriod interestPostingPeriod : postingPeriods) {
 
@@ -479,6 +497,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                                 interestEarnedToBePostedForPeriod.negated());
                     }
                     this.transactions.add(newPostingTransaction);
+                    if (applyWithHoldTax) {
+                        createWithHoldTransaction(interestEarnedToBePostedForPeriod.getAmount(), interestPostingTransactionDate);
+                    }
                     recalucateDailyBalanceDetails = true;
                 } else {
                     boolean correctionRequired = false;
@@ -488,7 +509,14 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                         correctionRequired = postingTransaction.hasNotAmount(interestEarnedToBePostedForPeriod.negated());
                     }
                     if (correctionRequired) {
+                        boolean applyWithHoldTaxForOldTransaction = false;
                         postingTransaction.reverse();
+                        final SavingsAccountTransaction withholdTransaction = findTransactionFor(interestPostingTransactionDate,
+                                withholdTransactions);
+                        if (withholdTransaction != null) {
+                            withholdTransaction.reverse();
+                            applyWithHoldTaxForOldTransaction = true;
+                        }
                         SavingsAccountTransaction newPostingTransaction;
                         if (interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(currency))) {
                             newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
@@ -498,6 +526,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                                     interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated());
                         }
                         this.transactions.add(newPostingTransaction);
+                        if (applyWithHoldTaxForOldTransaction) {
+                            createWithHoldTransaction(interestEarnedToBePostedForPeriod.getAmount(), interestPostingTransactionDate);
+                        }
                         recalucateDailyBalanceDetails = true;
                     }
                 }
@@ -518,10 +549,22 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
     }
 
+    protected List<SavingsAccountTransaction> findWithHoldTransactions() {
+        final List<SavingsAccountTransaction> withholdTransactions = new ArrayList<>();
+        for (final SavingsAccountTransaction transaction : this.transactions) {
+            if ((transaction.isWithHoldTaxAndNotReversed())) {
+                withholdTransactions.add(transaction);
+            }
+        }
+        return withholdTransactions;
+    }
+
+    private boolean isWithHoldTaxApplicableForInterestPosting() {
+        return this.withHoldTax() && this.depositAccountType().isSavingsDeposit();
+    }
+
     protected SavingsAccountTransaction findInterestPostingTransactionFor(final LocalDate postingDate) {
-
         SavingsAccountTransaction postingTransation = null;
-
         for (final SavingsAccountTransaction transaction : this.transactions) {
             if ((transaction.isInterestPostingAndNotReversed() || transaction.isOverdraftInterestAndNotReversed())
                     && transaction.occursOn(postingDate)) {
@@ -529,8 +572,57 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 break;
             }
         }
-
         return postingTransation;
+    }
+
+    protected SavingsAccountTransaction findTransactionFor(final LocalDate postingDate, final List<SavingsAccountTransaction> transactions) {
+        SavingsAccountTransaction transaction = null;
+        for (final SavingsAccountTransaction savingsAccountTransaction : transactions) {
+            if (savingsAccountTransaction.occursOn(postingDate)) {
+                transaction = savingsAccountTransaction;
+                break;
+            }
+        }
+        return transaction;
+    }
+
+    protected boolean createWithHoldTransaction(final BigDecimal amount, final LocalDate date) {
+        boolean isTaxAdded = false;
+        if (this.taxGroup != null && amount.compareTo(BigDecimal.ZERO) == 1) {
+            Map<TaxComponent, BigDecimal> taxSplit = TaxUtils.splitTax(amount, date, this.taxGroup.getTaxGroupMappings(), amount.scale());
+            BigDecimal totalTax = TaxUtils.totalTaxAmount(taxSplit);
+            if (totalTax.compareTo(BigDecimal.ZERO) == 1) {
+                SavingsAccountTransaction withholdTransaction = SavingsAccountTransaction.withHoldTax(this, office(), date,
+                        Money.of(currency, totalTax), taxSplit);
+                this.transactions.add(withholdTransaction);
+                isTaxAdded = true;
+            }
+        }
+        return isTaxAdded;
+    }
+
+    protected boolean updateWithHoldTransaction(final BigDecimal amount, final SavingsAccountTransaction withholdTransaction) {
+        boolean isTaxAdded = false;
+        if (this.taxGroup != null && amount.compareTo(BigDecimal.ZERO) == 1) {
+            Map<TaxComponent, BigDecimal> taxSplit = TaxUtils.splitTax(amount, withholdTransaction.transactionLocalDate(),
+                    this.taxGroup.getTaxGroupMappings(), amount.scale());
+            BigDecimal totalTax = TaxUtils.totalTaxAmount(taxSplit);
+            if (totalTax.compareTo(BigDecimal.ZERO) == 1) {
+                if (withholdTransaction.getId() == null) {
+                    withholdTransaction.updateAmount(Money.of(currency, totalTax));
+                    withholdTransaction.getTaxDetails().clear();
+                    SavingsAccountTransaction.updateTaxDetails(taxSplit, withholdTransaction);
+                    isTaxAdded = true;
+                } else if (totalTax.compareTo(withholdTransaction.getAmount()) != 0) {
+                    withholdTransaction.reverse();
+                    SavingsAccountTransaction newWithholdTransaction = SavingsAccountTransaction.withHoldTax(this, office(),
+                            withholdTransaction.transactionLocalDate(), Money.of(currency, totalTax), taxSplit);
+                    this.transactions.add(newWithholdTransaction);
+                    isTaxAdded = true;
+                }
+            }
+        }
+        return isTaxAdded;
     }
 
     // Determine the last transaction for given day
@@ -753,6 +845,15 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public SavingsAccountTransaction deposit(final SavingsAccountTransactionDTO transactionDTO) {
+        return deposit(transactionDTO, SavingsAccountTransactionType.DEPOSIT);
+    }
+
+    public SavingsAccountTransaction dividendPayout(final SavingsAccountTransactionDTO transactionDTO) {
+        return deposit(transactionDTO, SavingsAccountTransactionType.DIVIDEND_PAYOUT);
+    }
+
+    public SavingsAccountTransaction deposit(final SavingsAccountTransactionDTO transactionDTO,
+            final SavingsAccountTransactionType savingsAccountTransactionType) {
         final String resourceTypeName = depositAccountType().resourceName();
         if (isNotActive()) {
             final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
@@ -795,7 +896,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final Money amount = Money.of(this.currency, transactionDTO.getTransactionAmount());
 
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(this, office(), transactionDTO.getPaymentDetail(),
-                transactionDTO.getTransactionDate(), amount, transactionDTO.getCreatedDate(), transactionDTO.getAppUser());
+                transactionDTO.getTransactionDate(), amount, transactionDTO.getCreatedDate(), transactionDTO.getAppUser(),
+                savingsAccountTransactionType);
         this.transactions.add(transaction);
 
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
@@ -1229,6 +1331,15 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             actualChanges.put(minRequiredBalanceParamName, newValue);
             actualChanges.put(localeParamName, localeAsInput);
             this.minRequiredBalance = newValue;
+        }
+
+        if (command.isChangeInBooleanParameterNamed(withHoldTaxParamName, this.withHoldTax)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(withHoldTaxParamName);
+            actualChanges.put(withHoldTaxParamName, newValue);
+            this.withHoldTax = newValue;
+            if (this.withHoldTax && this.taxGroup == null) {
+                baseDataValidator.reset().parameter(withHoldTaxParamName).failWithCode("not.supported.for.this.account");
+            }
         }
 
         validateLockinDetails(baseDataValidator);
@@ -2604,5 +2715,33 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     public BigDecimal getWithdrawableBalance() {
         return getAccountBalance().subtract(minRequiredBalanceDerived(getCurrency()).getAmount()).subtract(this.getOnHoldFunds());
+    }
+
+    public TaxGroup getTaxGroup() {
+        return this.taxGroup;
+    }
+
+    public boolean withHoldTax() {
+        return this.withHoldTax;
+    }
+
+    public void setWithHoldTax(boolean withHoldTax) {
+        this.withHoldTax = withHoldTax;
+    }
+
+    protected boolean applyWithholdTaxForDepositAccounts(final LocalDate interestPostingUpToDate, boolean recalucateDailyBalance) {
+        final List<SavingsAccountTransaction> withholdTransactions = findWithHoldTransactions();
+        SavingsAccountTransaction withholdTransaction = findTransactionFor(interestPostingUpToDate, withholdTransactions);
+        final BigDecimal totalInterestPosted = this.savingsAccountTransactionSummaryWrapper.calculateTotalInterestPosted(this.currency,
+                this.transactions);
+        if (withholdTransaction == null && this.withHoldTax()) {
+            boolean isWithholdTaxAdded = createWithHoldTransaction(totalInterestPosted, interestPostingUpToDate);
+            recalucateDailyBalance = recalucateDailyBalance || isWithholdTaxAdded;
+        } else {
+            boolean isWithholdTaxAdded = updateWithHoldTransaction(totalInterestPosted, withholdTransaction);
+            recalucateDailyBalance = recalucateDailyBalance || isWithholdTaxAdded;
+        }
+
+        return recalucateDailyBalance;
     }
 }

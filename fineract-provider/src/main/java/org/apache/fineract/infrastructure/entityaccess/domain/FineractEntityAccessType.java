@@ -25,7 +25,7 @@ public class FineractEntityAccessType {
 	public static final FineractEntityAccessType OFFICE_ACCESS_TO_LOAN_PRODUCTS = new FineractEntityAccessType("Office Access to Loan Products");
 	public static final FineractEntityAccessType OFFICE_ACCESS_TO_SAVINGS_PRODUCTS = new FineractEntityAccessType("Office Access to Savings Products");
 	public static final FineractEntityAccessType OFFICE_ACCESS_TO_CHARGES = new FineractEntityAccessType("Office Access to Fees/Charges");
-    
+     
     private FineractEntityAccessType (String str) {
     	this.str = str;
     }

@@ -74,6 +74,7 @@ public class FixedDepositProductHelper {
     private static final String ACCRUAL_UPFRONT = "4";
     private static final String WHOLE_TERM = "1";
     private static final String TILL_PREMATURE_WITHDRAWAL = "2";
+    
 
     private String name = Utils.randomNameGenerator("FIXED_DEPOSIT_PRODUCT_", 6);
     private String shortName = Utils.randomNameGenerator("", 4);
@@ -99,6 +100,8 @@ public class FixedDepositProductHelper {
     private Account[] accountList = null;
     private List<HashMap<String, String>> chartSlabs = null;
     private boolean isPrimaryGroupingByAmount = false;
+    private Boolean withHoldTax = false;
+    private String taxGroupId = null;
 
     public String build(final String validFrom, final String validTo) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -139,6 +142,11 @@ public class FixedDepositProductHelper {
         map.put("inMultiplesOfDepositTermTypeId", this.inMultiplesOfDepositTermTypeId);
         map.put("preClosurePenalInterest", this.preClosurePenalInterest);
         map.put("preClosurePenalInterestOnTypeId", this.preClosurePenalInterestOnTypeId);
+        map.put("withHoldTax", this.withHoldTax.toString());
+        if (withHoldTax) {
+            map.put("taxGroupId", taxGroupId);
+        }
+
         
 
         if (this.accountingRule.equals(CASH_BASED)) {
@@ -381,6 +389,15 @@ public class FixedDepositProductHelper {
         this.chartSlabs = constructChartSlabWithAmountAndPeriodRange();
         return this;
     }
+    
+    public FixedDepositProductHelper withWithHoldTax(final String taxGroupId) {
+        if (taxGroupId != null) {
+            this.withHoldTax = true;
+            this.taxGroupId = taxGroupId;
+        }
+        return this;
+    }
+
 
     private Map<String, String> getAccountMappingForCashBased() {
         final Map<String, String> map = new HashMap<>();

@@ -49,6 +49,8 @@ import org.apache.fineract.portfolio.charge.exception.ChargeMustBePenaltyExcepti
 import org.apache.fineract.portfolio.charge.exception.ChargeParameterUpdateNotSupportedException;
 import org.apache.fineract.portfolio.charge.service.ChargeEnumerations;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.tax.data.TaxGroupData;
+import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.joda.time.MonthDay;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
@@ -108,7 +110,11 @@ public class Charge extends AbstractPersistable<Long> {
     @JoinColumn(name = "income_or_liability_account_id")
     private GLAccount account;
 
-    public static Charge fromJson(final JsonCommand command, final GLAccount account) {
+    @ManyToOne
+    @JoinColumn(name = "tax_group_id")
+    private TaxGroup taxGroup;
+
+    public static Charge fromJson(final JsonCommand command, final GLAccount account, final TaxGroup taxGroup) {
 
         final String name = command.stringValueOfParameterNamed("name");
         final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
@@ -116,8 +122,8 @@ public class Charge extends AbstractPersistable<Long> {
 
         final ChargeAppliesTo chargeAppliesTo = ChargeAppliesTo.fromInt(command.integerValueOfParameterNamed("chargeAppliesTo"));
         final ChargeTimeType chargeTimeType = ChargeTimeType.fromInt(command.integerValueOfParameterNamed("chargeTimeType"));
-        final ChargeCalculationType chargeCalculationType = ChargeCalculationType
-                .fromInt(command.integerValueOfParameterNamed("chargeCalculationType"));
+        final ChargeCalculationType chargeCalculationType = ChargeCalculationType.fromInt(command
+                .integerValueOfParameterNamed("chargeCalculationType"));
         final Integer chargePaymentMode = command.integerValueOfParameterNamed("chargePaymentMode");
 
         final ChargePaymentMode paymentMode = chargePaymentMode == null ? null : ChargePaymentMode.fromInt(chargePaymentMode);
@@ -131,7 +137,7 @@ public class Charge extends AbstractPersistable<Long> {
         final Integer feeFrequency = command.integerValueOfParameterNamed("feeFrequency");
 
         return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculationType, penalty, active, paymentMode,
-                feeOnMonthDay, feeInterval, minCap, maxCap, feeFrequency, account);
+                feeOnMonthDay, feeInterval, minCap, maxCap, feeFrequency, account, taxGroup);
     }
 
     protected Charge() {
@@ -139,9 +145,9 @@ public class Charge extends AbstractPersistable<Long> {
     }
 
     private Charge(final String name, final BigDecimal amount, final String currencyCode, final ChargeAppliesTo chargeAppliesTo,
-            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType, final boolean penalty, final boolean active,
-            final ChargePaymentMode paymentMode, final MonthDay feeOnMonthDay, final Integer feeInterval, final BigDecimal minCap,
-            final BigDecimal maxCap, final Integer feeFrequency, final GLAccount account) {
+            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType, final boolean penalty,
+            final boolean active, final ChargePaymentMode paymentMode, final MonthDay feeOnMonthDay, final Integer feeInterval,
+            final BigDecimal minCap, final BigDecimal maxCap, final Integer feeFrequency, final GLAccount account, final TaxGroup taxGroup) {
         this.name = name;
         this.amount = amount;
         this.currencyCode = currencyCode;
@@ -151,6 +157,7 @@ public class Charge extends AbstractPersistable<Long> {
         this.penalty = penalty;
         this.active = active;
         this.account = account;
+        this.taxGroup = taxGroup;
         this.chargePaymentMode = paymentMode == null ? null : paymentMode.getValue();
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -185,8 +192,8 @@ public class Charge extends AbstractPersistable<Long> {
 
         } else if (isLoanCharge()) {
 
-            if (penalty && (chargeTime.isTimeOfDisbursement()
-                    || chargeTime.isTrancheDisbursement())) { throw new ChargeDueAtDisbursementCannotBePenaltyException(name); }
+            if (penalty && (chargeTime.isTimeOfDisbursement() || chargeTime.isTrancheDisbursement())) { throw new ChargeDueAtDisbursementCannotBePenaltyException(
+                    name); }
             if (!penalty && chargeTime.isOverdueInstallment()) { throw new ChargeMustBePenaltyException(name); }
             // TODO vishwas, this validation seems unnecessary as identical
             // validation is performed in the write service
@@ -487,14 +494,21 @@ public class Charge extends AbstractPersistable<Long> {
 
         }
 
-        if (this.penalty && ChargeTimeType.fromInt(this.chargeTimeType)
-                .isTimeOfDisbursement()) { throw new ChargeDueAtDisbursementCannotBePenaltyException(this.name); }
-        if (!penalty
-                && ChargeTimeType.fromInt(this.chargeTimeType).isOverdueInstallment()) { throw new ChargeMustBePenaltyException(name); }
+        if (this.penalty && ChargeTimeType.fromInt(this.chargeTimeType).isTimeOfDisbursement()) { throw new ChargeDueAtDisbursementCannotBePenaltyException(
+                this.name); }
+        if (!penalty && ChargeTimeType.fromInt(this.chargeTimeType).isOverdueInstallment()) { throw new ChargeMustBePenaltyException(name); }
 
         if (command.isChangeInLongParameterNamed(ChargesApiConstants.glAccountIdParamName, getIncomeAccountId())) {
             final Long newValue = command.longValueOfParameterNamed(ChargesApiConstants.glAccountIdParamName);
             actualChanges.put(ChargesApiConstants.glAccountIdParamName, newValue);
+        }
+
+        if (command.isChangeInLongParameterNamed(ChargesApiConstants.taxGroupIdParamName, getTaxGroupId())) {
+            final Long newValue = command.longValueOfParameterNamed(ChargesApiConstants.taxGroupIdParamName);
+            actualChanges.put(ChargesApiConstants.taxGroupIdParamName, newValue);
+            if(taxGroup != null){
+                baseDataValidator.reset().parameter(ChargesApiConstants.taxGroupIdParamName).failWithCode("modification.not.supported");
+            }
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
@@ -524,10 +538,15 @@ public class Charge extends AbstractPersistable<Long> {
         if (account != null) {
             accountData = new GLAccountData(account.getId(), account.getName(), account.getGlCode());
         }
+        TaxGroupData taxGroupData = null;
+        if (this.taxGroup != null) {
+            taxGroupData = TaxGroupData.lookup(taxGroup.getId(), taxGroup.getName());
+        }
+
         final CurrencyData currency = new CurrencyData(this.currencyCode, null, 0, 0, null, null);
         return ChargeData.instance(getId(), this.name, this.amount, currency, chargeTimeType, chargeAppliesTo, chargeCalculationType,
                 chargePaymentmode, getFeeOnMonthDay(), this.feeInterval, this.penalty, this.active, this.minCap, this.maxCap,
-                feeFrequencyType, accountData);
+                feeFrequencyType, accountData, taxGroupData);
     }
 
     public Integer getChargePaymentMode() {
@@ -582,8 +601,24 @@ public class Charge extends AbstractPersistable<Long> {
         return incomeAccountId;
     }
 
+    private Long getTaxGroupId() {
+        Long taxGroupId = null;
+        if (this.taxGroup != null) {
+            taxGroupId = this.taxGroup.getId();
+        }
+        return taxGroupId;
+    }
+
     public boolean isDisbursementCharge() {
         return ChargeTimeType.fromInt(this.chargeTimeType).equals(ChargeTimeType.DISBURSEMENT)
                 || ChargeTimeType.fromInt(this.chargeTimeType).equals(ChargeTimeType.TRANCHE_DISBURSEMENT);
+    }
+
+    public TaxGroup getTaxGroup() {
+        return this.taxGroup;
+    }
+
+    public void setTaxGroup(TaxGroup taxGroup) {
+        this.taxGroup = taxGroup;
     }
 }

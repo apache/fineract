@@ -27,7 +27,8 @@ public class FineractEntityType {
 	public static FineractEntityType LOAN_PRODUCT = new FineractEntityType ("loan_product", "Loan Products", "m_product_loan");
 	public static FineractEntityType SAVINGS_PRODUCT = new FineractEntityType ("savings_product", "Savings Products", "m_savings_product");
 	public static FineractEntityType CHARGE = new FineractEntityType ("charge", "Fees/Charges", "m_charge");
-		
+	public static FineractEntityType SHARE_PRODUCT = new FineractEntityType("shares_product", "Shares Products", "m_share_product") ;
+	
 	private FineractEntityType (String type, String description, String table_name) {
 		this.type = type;
 		this.description = description;
@@ -56,9 +57,11 @@ public class FineractEntityType {
     			retType = LOAN_PRODUCT;
     	} else if (type.equals(SAVINGS_PRODUCT)) { 
     			retType = SAVINGS_PRODUCT;
-    	} else if (type.equals(CHARGE)) 
-    			retType = CHARGE;
-    	
+    	} else if (type.equals(CHARGE)) {
+    		retType = CHARGE;
+    	}else if(type.equals(SHARE_PRODUCT)) {
+    		retType = SHARE_PRODUCT ;
+    	}
     	return retType;
 	}
 

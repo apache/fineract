@@ -40,12 +40,15 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalA
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.productIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Set;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -240,16 +243,18 @@ public class SavingsAccountAssembler {
 
         BigDecimal nominalAnnualInterestRateOverdraft = BigDecimal.ZERO;
         if (command.parameterExists(nominalAnnualInterestRateOverdraftParamName)) {
-        	nominalAnnualInterestRateOverdraft = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(nominalAnnualInterestRateOverdraftParamName);
+            nominalAnnualInterestRateOverdraft = command
+                    .bigDecimalValueOfParameterNamedDefaultToNullIfZero(nominalAnnualInterestRateOverdraftParamName);
         } else {
-        	nominalAnnualInterestRateOverdraft = product.nominalAnnualInterestRateOverdraft();
+            nominalAnnualInterestRateOverdraft = product.nominalAnnualInterestRateOverdraft();
         }
 
         BigDecimal minOverdraftForInterestCalculation = BigDecimal.ZERO;
         if (command.parameterExists(minOverdraftForInterestCalculationParamName)) {
-        	minOverdraftForInterestCalculation = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(minOverdraftForInterestCalculationParamName);
+            minOverdraftForInterestCalculation = command
+                    .bigDecimalValueOfParameterNamedDefaultToNullIfZero(minOverdraftForInterestCalculationParamName);
         } else {
-        	minOverdraftForInterestCalculation = product.minOverdraftForInterestCalculation();
+            minOverdraftForInterestCalculation = product.minOverdraftForInterestCalculation();
         }
 
         boolean enforceMinRequiredBalance = false;
@@ -266,12 +271,20 @@ public class SavingsAccountAssembler {
             minRequiredBalance = product.minRequiredBalance();
         }
 
+        boolean withHoldTax = product.withHoldTax();
+        if (command.parameterExists(withHoldTaxParamName)) {
+            withHoldTax = command.booleanPrimitiveValueOfParameterNamed(withHoldTaxParamName);
+            if(withHoldTax && product.getTaxGroup()  == null){
+                throw new UnsupportedParameterException(Arrays.asList(withHoldTaxParamName));
+            }
+        }
+
         final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer, accountNo,
                 externalId, accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, charges, allowOverdraft,
-                overdraftLimit, enforceMinRequiredBalance, minRequiredBalance, 
-                nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation);
+                overdraftLimit, enforceMinRequiredBalance, minRequiredBalance, nominalAnnualInterestRateOverdraft,
+                minOverdraftForInterestCalculation, withHoldTax);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
 
         account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), SAVINGS_ACCOUNT_RESOURCE_NAME);
@@ -319,14 +332,13 @@ public class SavingsAccountAssembler {
         }
 
         final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromSavingsProduct(product);
-
         final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, null, null, null,
                 accountType, appliedonDate, appliedBy, product.nominalAnnualInterestRate(), product.interestCompoundingPeriodType(),
                 product.interestPostingPeriodType(), product.interestCalculationType(), product.interestCalculationDaysInYearType(),
                 product.minRequiredOpeningBalance(), product.lockinPeriodFrequency(), product.lockinPeriodFrequencyType(),
                 product.isWithdrawalFeeApplicableForTransfer(), charges, product.isAllowOverdraft(), product.overdraftLimit(),
                 product.isMinRequiredBalanceEnforced(), product.minRequiredBalance(), product.nominalAnnualInterestRateOverdraft(),
-                product.minOverdraftForInterestCalculation());
+                product.minOverdraftForInterestCalculation(), product.withHoldTax());
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
 
         account.validateNewApplicationState(DateUtils.getLocalDateOfTenant(), SAVINGS_ACCOUNT_RESOURCE_NAME);

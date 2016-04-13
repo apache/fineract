@@ -41,6 +41,8 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.ChargeNotFoundException;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
+import org.apache.fineract.portfolio.tax.data.TaxGroupData;
+import org.apache.fineract.portfolio.tax.service.TaxReadPlatformService;
 import org.joda.time.MonthDay;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -64,12 +66,14 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final TaxReadPlatformService taxReadPlatformService;
 
     @Autowired
     public ChargeReadPlatformServiceImpl(final CurrencyReadPlatformService currencyReadPlatformService,
             final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService, final RoutingDataSource dataSource,
             final DropdownReadPlatformService dropdownReadPlatformService, final FineractEntityAccessUtil fineractEntityAccessUtil,
-            final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService) {
+            final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
+            final TaxReadPlatformService taxReadPlatformService) {
         this.chargeDropdownReadPlatformService = chargeDropdownReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.currencyReadPlatformService = currencyReadPlatformService;
@@ -77,6 +81,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
         this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        this.taxReadPlatformService = taxReadPlatformService;
     }
 
     @Override
@@ -142,11 +147,15 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         final List<EnumOptionData> feeFrequencyOptions = this.dropdownReadPlatformService.retrievePeriodFrequencyTypeOptions();
         final Map<String, List<GLAccountData>> incomeOrLiabilityAccountOptions = this.accountingDropdownReadPlatformService
                 .retrieveAccountMappingOptionsForCharges();
-
+        final List<EnumOptionData> shareChargeCalculationTypeOptions = this.chargeDropdownReadPlatformService
+                .retrieveSharesCalculationTypes();
+        final List<EnumOptionData> shareChargeTimeTypeOptions = this.chargeDropdownReadPlatformService.retrieveSharesCollectionTimeTypes();
+        final Collection<TaxGroupData> taxGroupOptions = this.taxReadPlatformService.retrieveTaxGroupsForLookUp();
         return ChargeData.template(currencyOptions, allowedChargeCalculationTypeOptions, allowedChargeAppliesToOptions,
                 allowedChargeTimeOptions, chargePaymentOptions, loansChargeCalculationTypeOptions, loansChargeTimeTypeOptions,
                 savingsChargeCalculationTypeOptions, savingsChargeTimeTypeOptions, clientChargeCalculationTypeOptions,
-                clientChargeTimeTypeOptions, feeFrequencyOptions, incomeOrLiabilityAccountOptions);
+                clientChargeTimeTypeOptions, feeFrequencyOptions, incomeOrLiabilityAccountOptions, taxGroupOptions,
+                shareChargeCalculationTypeOptions, shareChargeTimeTypeOptions);
     }
 
     @Override
@@ -252,7 +261,8 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         // Check if branch specific products are enabled. If yes, fetch only
         // charges mapped to current user's office
-        String inClause = fineractEntityAccessUtil.getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.CHARGE);
+        String inClause = fineractEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.CHARGE);
         if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
             sql += " and c.id in ( " + inClause + " ) ";
         }
@@ -271,9 +281,11 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                     + "oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
                     + "oc.internationalized_name_code as currencyNameCode, c.fee_on_day as feeOnDay, c.fee_on_month as feeOnMonth, "
                     + "c.fee_interval as feeInterval, c.fee_frequency as feeFrequency,c.min_cap as minCap,c.max_cap as maxCap, "
-                    + "c.income_or_liability_account_id as glAccountId , acc.name as glAccountName, acc.gl_code as glCode "
-                    + "from m_charge c " + "join m_organisation_currency oc on c.currency_code = oc.code "
-                    + " LEFT JOIN acc_gl_account acc on acc.id = c.income_or_liability_account_id ";
+                    + "c.income_or_liability_account_id as glAccountId , acc.name as glAccountName, acc.gl_code as glCode, "
+                    + "tg.id as taxGroupId, tg.name as taxGroupName " + "from m_charge c "
+                    + "join m_organisation_currency oc on c.currency_code = oc.code "
+                    + " LEFT JOIN acc_gl_account acc on acc.id = c.income_or_liability_account_id "
+                    + " LEFT JOIN m_tax_group tg on tg.id = c.tax_group_id ";
         }
 
         public String loanProductChargeSchema() {
@@ -282,6 +294,10 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         public String savingsProductChargeSchema() {
             return chargeSchema() + " join m_savings_product_charge spc on spc.charge_id = c.id";
+        }
+
+        public String shareProductChargeSchema() {
+            return chargeSchema() + " join m_share_product_charge mspc on mspc.charge_id = c.id";
         }
 
         @Override
@@ -339,8 +355,16 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 glAccountData = new GLAccountData(glAccountId, glAccountName, glCode);
             }
 
+            final Long taxGroupId = JdbcSupport.getLong(rs, "taxGroupId");
+            final String taxGroupName = rs.getString("taxGroupName");
+            TaxGroupData taxGroupData = null;
+            if (taxGroupId != null) {
+                taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
+            }
+
             return ChargeData.instance(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType,
-                    chargePaymentMode, feeOnMonthDay, feeInterval, penalty, active, minCap, maxCap, feeFrequencyType, glAccountData);
+                    chargePaymentMode, feeOnMonthDay, feeInterval, penalty, active, minCap, maxCap, feeFrequencyType, glAccountData,
+                    taxGroupData);
         }
     }
 
@@ -381,6 +405,16 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
+    public Collection<ChargeData> retrieveShareProductCharges(final Long shareProductId) {
+        final ChargeMapper rm = new ChargeMapper();
+
+        String sql = "select " + rm.shareProductChargeSchema() + " where c.is_deleted=0 and c.is_active=1 and mspc.product_id=? ";
+        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { shareProductId });
+    }
+
+    @Override
     public Collection<ChargeData> retrieveSavingsAccountApplicableCharges(Long savingsAccountId) {
 
         final ChargeMapper rm = new ChargeMapper();
@@ -403,4 +437,13 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.CLIENT.getValue() });
     }
 
+    @Override
+    public Collection<ChargeData> retrieveSharesApplicableCharges() {
+        final ChargeMapper rm = new ChargeMapper();
+        String sql = "select " + rm.chargeSchema() + " where c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=? ";
+        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
+        sql += " order by c.name ";
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SHARES.getValue() });
+    }
 }
