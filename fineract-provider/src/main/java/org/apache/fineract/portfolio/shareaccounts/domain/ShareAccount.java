@@ -354,10 +354,10 @@ public class ShareAccount extends AbstractPersistable<Long> {
     }
 
     public void updateRequestedShares(ShareAccountTransaction purchased) {
-        if (!this.shareAccountTransactions.isEmpty()) {
-            Iterator<ShareAccountTransaction> iter = this.shareAccountTransactions.iterator();
-            ShareAccountTransaction existing = iter.next();
-            existing.update(purchased.getPurchasedDate(), purchased.getTotalShares(), purchased.getPurchasePrice());
+    	for(ShareAccountTransaction transaction: this.shareAccountTransactions) {
+            if(!transaction.isChargeTransaction() && transaction.getId().equals(purchased.getId())) {
+                transaction.update(purchased.getPurchasedDate(), purchased.getTotalShares(), purchased.getPurchasePrice());    
+            }
         }
     }
 
