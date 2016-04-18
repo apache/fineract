@@ -497,7 +497,11 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             if (loanTransaction.isRepayment() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
                 loanTransaction.resetDerivedComponents();
             }
-            unProcessed = processTransaction(loanTransaction, currency, installments, amountToProcess);
+            if (loanTransaction.isInterestWaiver()) {
+                processTransaction(loanTransaction, currency, installments, amountToProcess);
+            } else {
+                unProcessed = processTransaction(loanTransaction, currency, installments, amountToProcess);
+            }
         }
         return unProcessed;
     }
