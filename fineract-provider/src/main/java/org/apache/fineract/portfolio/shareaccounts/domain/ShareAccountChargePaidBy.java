@@ -74,4 +74,9 @@ public class ShareAccountChargePaidBy extends AbstractPersistable<Long>{
     public Long getShareChargeId() {
         return this.shareAccountCharge.getId() ;
     }
+    
+    public void reset() {
+        this.shareAccountTransaction = null ;
+        this.shareAccountCharge = null ;
+    }
 }

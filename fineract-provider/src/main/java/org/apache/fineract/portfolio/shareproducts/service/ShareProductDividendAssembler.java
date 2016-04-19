@@ -26,13 +26,14 @@ import java.util.Map;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.products.service.ProductReadPlatformService;
-import org.apache.fineract.portfolio.shareaccounts.data.PurchasedSharesData;
+import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountData;
 import org.apache.fineract.portfolio.shareaccounts.domain.PurchasedSharesStatusType;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountDividendDetails;
 import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountReadPlatformService;
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductData;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProductDividendPayOutDetails;
+import org.apache.fineract.portfolio.shareproducts.exception.ShareAccountsNotFoundException;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,8 +60,15 @@ public class ShareProductDividendAssembler {
                 .getCurrency().currencyInMultiplesOf());
         Collection<ShareAccountData> shareAccountDatas = this.ShareAccountReadPlatformService.retrieveAllShareAccountDataForDividends(
                 productId, product.getAllowDividendCalculationForInactiveClients(), dividendPeriodStartDate);
+        if(shareAccountDatas == null || shareAccountDatas.isEmpty()) {
+            throw new ShareAccountsNotFoundException(product.getId()) ;
+        }
+        
         ShareProductDividendPayOutDetails productDividendPayOutDetails = null;
-        final int minimumActivePeriod = product.getMinimumActivePeriod();
+        int minimumActivePeriod = 0 ;
+        if(product.getMinimumActivePeriod() != null) { //minimum active period may be null 
+            minimumActivePeriod = product.getMinimumActivePeriod();
+        }
         final Map<Long, Long> numberOfSharesdaysPerAccount = new HashMap<>();
         long numberOfShareDays = calculateNumberOfShareDays(dividendPeriodEndDate, dividendPeriodStartDate, minimumActivePeriod,
                 shareAccountDatas, numberOfSharesdaysPerAccount);
@@ -88,10 +96,10 @@ public class ShareProductDividendAssembler {
         long numberOfShareDays = 0;
         for (ShareAccountData accountData : shareAccountDatas) {
             long numberOfShareDaysPerAccount = 0;
-            Collection<PurchasedSharesData> purchasedShares = accountData.getPurchasedShares();
+            Collection<ShareAccountTransactionData> purchasedShares = accountData.getPurchasedShares();
             long numberOfShares = 0;
             LocalDate lastDividendAppliedDate = null;
-            for (PurchasedSharesData purchasedSharesData : purchasedShares) {
+            for (ShareAccountTransactionData purchasedSharesData : purchasedShares) {
                 final PurchasedSharesStatusType status = PurchasedSharesStatusType.fromInt(purchasedSharesData.getStatus().getId()
                         .intValue());
                 final PurchasedSharesStatusType type = PurchasedSharesStatusType.fromInt(purchasedSharesData.getType().getId()

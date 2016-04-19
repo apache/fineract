@@ -290,9 +290,11 @@ public class ChargeData implements Comparable<ChargeData>, Serializable {
         final BigDecimal amountPercentageAppliedTo = BigDecimal.ZERO;
         final Collection<ChargeData> chargeOptions = null;
         final Boolean isActive = null;
+        final BigDecimal chargeAmountOrPercentage = BigDecimal.ZERO ;
+        
         return new ShareAccountChargeData(shareChargeId, this.id, shareAccountId, this.name, this.currency, this.amount, amountPaid,
                 amountWaived, amountWrittenOff, amountOutstanding, this.chargeTimeType, this.chargeCalculationType, percentage,
-                amountPercentageAppliedTo, chargeOptions, isActive);
+                amountPercentageAppliedTo, chargeOptions, isActive, chargeAmountOrPercentage);
     }
 
     public boolean isPenalty() {

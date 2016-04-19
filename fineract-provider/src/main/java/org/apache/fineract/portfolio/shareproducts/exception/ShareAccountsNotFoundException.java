@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.shareaccounts.service;
+package org.apache.fineract.portfolio.shareproducts.exception;
 
-import java.util.Collection;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionData;
 
-public interface PurchasedSharesReadPlatformService {
+public class ShareAccountsNotFoundException extends AbstractPlatformResourceNotFoundException{
 
-	public Collection<ShareAccountTransactionData> retrievePurchasedShares(final Long accountId) ;
+    public ShareAccountsNotFoundException(final Long productId) {
+        super("error.msg.shareproduct.shareaccounts.not.defined", " No Share Accounts found for this prodct " + productId, productId);
+    }
 }

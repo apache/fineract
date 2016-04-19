@@ -61,7 +61,7 @@ public class ShareAccountData implements AccountData {
 
     private ShareAccountSummaryData summary;
 
-    private Collection<PurchasedSharesData> purchasedShares;
+    private Collection<ShareAccountTransactionData> purchasedShares;
 
     private Long savingsAccountId;
 
@@ -92,7 +92,7 @@ public class ShareAccountData implements AccountData {
             final String savingsAccountNumber, final Long clientId, final String clientName, final Long productId,
             final String productName, final ShareAccountStatusEnumData status, final ShareAccountApplicationTimelineData timeline,
             final CurrencyData currency, final ShareAccountSummaryData summaryData, final Collection<ShareAccountChargeData> charges,
-            final Collection<PurchasedSharesData> purchasedSharesData, final Integer lockinPeriod, final EnumOptionData lockPeriodTypeEnum,
+            final Collection<ShareAccountTransactionData> purchasedSharesData, final Integer lockinPeriod, final EnumOptionData lockPeriodTypeEnum,
             final Integer minimumActivePeriod, final EnumOptionData minimumActivePeriodTypeEnum, Boolean allowdividendsforinactiveclients) {
         this.id = id;
         this.accountNo = accountNo;
@@ -145,7 +145,7 @@ public class ShareAccountData implements AccountData {
             final String savingsAccountNumber, final Long clientId, final String clientName, final Long productId,
             final String productName, final ShareAccountStatusEnumData status, final ShareAccountApplicationTimelineData timeline,
             final CurrencyData currency, final ShareAccountSummaryData summaryData, final Collection<ShareAccountChargeData> charges,
-            final Collection<PurchasedSharesData> purchasedSharesData, final Integer lockinPeriod, final EnumOptionData lockPeriodTypeEnum,
+            final Collection<ShareAccountTransactionData> purchasedSharesData, final Integer lockinPeriod, final EnumOptionData lockPeriodTypeEnum,
             final Integer minimumActivePeriod, final EnumOptionData minimumActivePeriodTypeEnum,
             final Boolean allowDividendCalculationForInactiveClients, final Collection<ProductData> productOptions,
             final Collection<ChargeData> chargeOptions, final Collection<SavingsAccountData> clientSavingsAccounts,
@@ -200,7 +200,7 @@ public class ShareAccountData implements AccountData {
     public static ShareAccountData lookup(final Long id, final String accountNo, final Long clientId, final String clientName) {
         String externalId = null;
         ShareAccountSummaryData summaryData = null;
-        Collection<PurchasedSharesData> purchasedSharesData = null;
+        Collection<ShareAccountTransactionData> purchasedSharesData = null;
         GLAccountData suspenseAccount = null;
         Integer lockinPeriod = null;
         EnumOptionData lockPeriodTypeEnum = null;
@@ -233,7 +233,7 @@ public class ShareAccountData implements AccountData {
         return this.id;
     }
 
-    public Collection<PurchasedSharesData> getPurchasedShares() {
+    public Collection<ShareAccountTransactionData> getPurchasedShares() {
         return this.purchasedShares;
     }
 

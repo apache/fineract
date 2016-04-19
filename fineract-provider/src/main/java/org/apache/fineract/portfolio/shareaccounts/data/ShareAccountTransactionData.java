@@ -23,7 +23,8 @@ import java.math.BigDecimal;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.joda.time.LocalDate;
 
-public class PurchasedSharesData {
+@SuppressWarnings("unused")
+public class ShareAccountTransactionData {
 
     private final Long id;
 
@@ -43,8 +44,11 @@ public class PurchasedSharesData {
     
     private final BigDecimal chargeAmount ;
     
-    public PurchasedSharesData(final Long id, final Long accountId, final LocalDate purchasedDate, final Long numberOfShares,
-            final BigDecimal purchasedPrice, final EnumOptionData status, final EnumOptionData type, final BigDecimal amount, final BigDecimal chargeAmount) {
+    private final BigDecimal amountPaid ;
+    
+    public ShareAccountTransactionData(final Long id, final Long accountId, final LocalDate purchasedDate, final Long numberOfShares,
+            final BigDecimal purchasedPrice, final EnumOptionData status, final EnumOptionData type, final BigDecimal amount, final BigDecimal chargeAmount,
+            final BigDecimal amountPaid) {
         this.id = id;
         this.accountId = accountId;
         this.purchasedDate = purchasedDate;
@@ -54,6 +58,7 @@ public class PurchasedSharesData {
         this.type = type;
         this.amount = amount ;
         this.chargeAmount = chargeAmount ;
+        this.amountPaid = amountPaid ;
     }
 
     public LocalDate getPurchasedDate() {

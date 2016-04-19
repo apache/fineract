@@ -226,7 +226,10 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
 
     public boolean setTotalIssuedShares(Long totalSharesIssued) {
         boolean returnValue = false;
-        if (!this.totalSharesIssued.equals(totalSharesIssued)) {
+        if(this.totalSharesIssued == null) {
+            this.totalSharesIssued = totalSharesIssued ;
+            returnValue = true ;
+        }else if (!this.totalSharesIssued.equals(totalSharesIssued)) {
             this.totalSharesIssued = totalSharesIssued;
             returnValue = true;
         }
@@ -430,5 +433,16 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
     public Long getSubscribedShares() {
         return this.totalSubscribedShares ;
     }
+ 
+    public Long getMinimumClientShares() {
+        return this.minimumShares ;
+    }
     
+    public Long getMaximumClientShares() {
+        return this.maximumShares ;
+    }
+    
+    public Long getDefaultClientShares() {
+        return this.nominalShares ;
+    }
 }

@@ -26,7 +26,7 @@ import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
-import org.apache.fineract.portfolio.shareaccounts.data.PurchasedSharesData;
+import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionData;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -44,26 +44,27 @@ public class PurchasedSharesReadPlatformServiceImpl implements
 		this.jdbcTemplate = new JdbcTemplate(dataSource) ;
 	}
 	@Override
-	public Collection<PurchasedSharesData> retrievePurchasedShares(
+	public Collection<ShareAccountTransactionData> retrievePurchasedShares(
 			Long accountId) {
 		PurchasedSharesDataRowMapper mapper = new PurchasedSharesDataRowMapper() ;
-		final String sql = "select " + mapper.schema() + " where saps.account_id=?";
+		final String sql = "select " + mapper.schema() + " where saps.account_id=? and saps.is_active = 1";
 		return this.jdbcTemplate.query(sql, mapper, new Object[] { accountId});
 	}
 
-	private final static class PurchasedSharesDataRowMapper implements RowMapper<PurchasedSharesData> {
+	private final static class PurchasedSharesDataRowMapper implements RowMapper<ShareAccountTransactionData> {
 
 		private final String schema ;
 		
 		public PurchasedSharesDataRowMapper() {
 			StringBuffer buff = new StringBuffer()
 			.append("saps.id, saps.account_id, saps.transaction_date, saps.total_shares, saps.unit_price, ")
-			.append("saps.status_enum, saps.type_enum, saps.amount, saps.charge_amount as chargeamount ")
+			.append("saps.status_enum, saps.type_enum, saps.amount, saps.charge_amount as chargeamount, ")
+			.append("saps.amount_paid as amountPaid")
 			.append(" from m_share_account_transactions saps ");
 			schema = buff.toString() ;
 		}
 		@Override
-		public PurchasedSharesData mapRow(ResultSet rs, int rowNum)
+		public ShareAccountTransactionData mapRow(ResultSet rs, int rowNum)
 				throws SQLException {
 			final Long id = rs.getLong("id") ;
 			final Long accountId = rs.getLong("account_id") ;
@@ -76,7 +77,9 @@ public class PurchasedSharesReadPlatformServiceImpl implements
 			final EnumOptionData typeEnum = SharesEnumerations.purchasedSharesEnum(type) ;
 			final BigDecimal amount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amount") ;
 			final BigDecimal chargeAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "chargeamount") ;
-			return new PurchasedSharesData(id,accountId, purchasedDate, numberOfShares, purchasedPrice, statusEnum, typeEnum, amount, chargeAmount);
+			final BigDecimal amountPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountPaid") ;
+			
+			return new ShareAccountTransactionData(id,accountId, purchasedDate, numberOfShares, purchasedPrice, statusEnum, typeEnum, amount, chargeAmount, amountPaid);
 		}
 		
 		public String schema() {

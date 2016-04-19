@@ -83,7 +83,7 @@ public class ShareAccountCharge extends AbstractPersistable<Long> {
     private boolean waived = false;
 
     @Column(name = "is_active", nullable = false)
-    private boolean status = true;
+    private boolean active = true;
 
     @Column(name = "charge_amount_or_percentage")
     private BigDecimal amountOrPercentage;
@@ -118,13 +118,13 @@ public class ShareAccountCharge extends AbstractPersistable<Long> {
 
         populateDerivedFields(transactionAmount, chargeAmount);
         this.paid = determineIfFullyPaid();
-        this.status = status;
+        this.active = status;
     }
 
-    public void populateDerivedFields(final BigDecimal transactionAmount, final BigDecimal chargeAmount) {
+    private void populateDerivedFields(final BigDecimal transactionAmount, final BigDecimal chargeAmount) {
+        this.amountOrPercentage = chargeAmount ;
         if (this.chargeCalculation.equals(ChargeCalculationType.FLAT.getValue())) {
             this.percentage = null;
-            this.amountOrPercentage = chargeAmount ;
             this.amount = BigDecimal.ZERO;
             this.amountPercentageAppliedTo = null;
             this.amountPaid = null;
@@ -149,6 +149,7 @@ public class ShareAccountCharge extends AbstractPersistable<Long> {
     }
 
     public void resetToOriginal(final MonetaryCurrency currency) {
+        this.amount = BigDecimal.ZERO ;
         this.amountPaid = BigDecimal.ZERO;
         this.amountWaived = BigDecimal.ZERO;
         this.amountWrittenOff = BigDecimal.ZERO;
@@ -163,7 +164,7 @@ public class ShareAccountCharge extends AbstractPersistable<Long> {
         this.amountPaid = amountPaid.getAmount();
         this.amountOutstanding = calculateAmountOutstanding(currency);
         this.paid = false;
-        this.status = true;
+        this.active = true;
     }
 
     public Money waive(final MonetaryCurrency currency) {
@@ -181,7 +182,7 @@ public class ShareAccountCharge extends AbstractPersistable<Long> {
         this.amountWaived = amountWaived.getAmount();
         this.amountOutstanding = calculateAmountOutstanding(currency);
         this.waived = false;
-        this.status = true;
+        this.active = true;
     }
 
     public Money pay(final MonetaryCurrency currency, final Money amountPaid) {
@@ -203,17 +204,8 @@ public class ShareAccountCharge extends AbstractPersistable<Long> {
         this.shareAccount = shareAccount;
     }
 
-    public void update(final BigDecimal amount) {
-        final BigDecimal transactionAmount = BigDecimal.ZERO;
-        if (this.chargeCalculation.equals(ChargeCalculationType.FLAT.getValue())) {
-            this.amountOrPercentage = amount;
-            this.amountOutstanding = calculateOutstanding();
-        } else if (this.chargeCalculation.equals(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue())) {
-            this.percentage = amount;
-            this.amountPercentageAppliedTo = transactionAmount;
-            this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
-            this.amountOutstanding = calculateOutstanding();
-        }
+    public void update(final BigDecimal transactionAmount, final BigDecimal amount) {
+       populateDerivedFields(transactionAmount, amount);
     }
 
     private boolean isGreaterThanZero(final BigDecimal value) {
@@ -360,7 +352,7 @@ public class ShareAccountCharge extends AbstractPersistable<Long> {
     }
 
     public boolean isActive() {
-        return this.status;
+        return this.active;
     }
 
     public boolean isNotActive() {
@@ -420,6 +412,10 @@ public class ShareAccountCharge extends AbstractPersistable<Long> {
         return toReturnAmount;
     }
 
+    public void setActive(boolean active) {
+        this.active = active ;
+    }
+    
     @Override
     public boolean equals(final Object obj) {
         if (obj == null) { return false; }
