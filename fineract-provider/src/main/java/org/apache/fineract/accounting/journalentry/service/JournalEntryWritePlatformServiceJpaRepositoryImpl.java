@@ -53,6 +53,7 @@ import org.apache.fineract.accounting.journalentry.exception.JournalEntriesNotFo
 import org.apache.fineract.accounting.journalentry.exception.JournalEntryInvalidException;
 import org.apache.fineract.accounting.journalentry.exception.JournalEntryInvalidException.GL_JOURNAL_ENTRY_INVALID_REASON;
 import org.apache.fineract.accounting.journalentry.serialization.JournalEntryCommandFromApiJsonDeserializer;
+import org.apache.fineract.accounting.producttoaccountmapping.domain.PortfolioProductType;
 import org.apache.fineract.accounting.provisioning.domain.LoanProductProvisioningEntry;
 import org.apache.fineract.accounting.provisioning.domain.ProvisioningEntry;
 import org.apache.fineract.accounting.rule.domain.AccountingRule;
@@ -383,6 +384,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             // save the reversal entry
             this.glJournalEntryRepository.save(reversalJournalEntry);
             journalEntry.setReversalJournalEntry(reversalJournalEntry);
+            journalEntry.setReversed(true);
             // save the updated journal entry
             this.glJournalEntryRepository.save(journalEntry);
         }
@@ -516,6 +518,44 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
     }
 
+    @Override
+    public void revertShareAccountJournalEntries(final ArrayList<Long> transactionIds, final Date transactionDate) {
+        for (Long shareTransactionId : transactionIds) {
+            String transactionId = AccountingProcessorHelper.SHARE_TRANSACTION_IDENTIFIER + shareTransactionId.longValue();
+            List<JournalEntry> journalEntries = this.glJournalEntryRepository.findJournalEntries(transactionId,
+                    PortfolioProductType.SHARES.getValue());
+            if (journalEntries == null || journalEntries.isEmpty()) continue;
+            final Long officeId = journalEntries.get(0).getOffice().getId();
+            final String reversalTransactionId = generateTransactionId(officeId);
+            for (final JournalEntry journalEntry : journalEntries) {
+                JournalEntry reversalJournalEntry;
+                String reversalComment = "Reversal entry for Journal Entry with id  :" + journalEntry.getId() + " and transaction Id "
+                        + journalEntry.getTransactionId();
+                if (journalEntry.isDebitEntry()) {
+                    reversalJournalEntry = JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getPaymentDetails(),
+                            journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), reversalTransactionId, Boolean.FALSE,
+                            transactionDate, JournalEntryType.CREDIT, journalEntry.getAmount(), reversalComment,
+                            journalEntry.getEntityType(), journalEntry.getEntityId(), journalEntry.getReferenceNumber(),
+                            journalEntry.getLoanTransaction(), journalEntry.getSavingsTransaction(), journalEntry.getClientTransaction(),
+                            journalEntry.getShareTransactionId());
+                } else {
+                    reversalJournalEntry = JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getPaymentDetails(),
+                            journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), reversalTransactionId, Boolean.FALSE,
+                            transactionDate, JournalEntryType.DEBIT, journalEntry.getAmount(), reversalComment,
+                            journalEntry.getEntityType(), journalEntry.getEntityId(), journalEntry.getReferenceNumber(),
+                            journalEntry.getLoanTransaction(), journalEntry.getSavingsTransaction(), journalEntry.getClientTransaction(),
+                            journalEntry.getShareTransactionId());
+                }
+                // save the reversal entry
+                this.glJournalEntryRepository.save(reversalJournalEntry);
+                journalEntry.setReversalJournalEntry(reversalJournalEntry);
+                journalEntry.setReversed(true);
+                // save the updated journal entry
+                this.glJournalEntryRepository.save(journalEntry);
+            }
+        }
+    }
+    
     private void validateBusinessRulesForJournalEntries(final JournalEntryCommand command) {
         /** check if date of Journal entry is valid ***/
         final LocalDate entryLocalDate = command.getTransactionDate();

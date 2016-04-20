@@ -129,16 +129,18 @@ CREATE TABLE `m_share_account_transactions` (
 `unit_price` DECIMAL(10,2) NULL DEFAULT NULL,
 `amount` DECIMAL(20,2) NULL DEFAULT NULL,
 `charge_amount` DECIMAL(20,2) NULL DEFAULT NULL,
+`amount_paid` DECIMAL(20,2) NULL DEFAULT NULL,
 `status_enum` SMALLINT(5) NOT NULL DEFAULT '300',
 `type_enum` SMALLINT(5) NULL DEFAULT NULL,
+`is_active` TINYINT(1) NOT NULL DEFAULT '1',
 PRIMARY KEY (`id`),
 CONSTRAINT `m_share_account_purchased_shares_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `m_share_account` (`id`)
 ) ;
 
 CREATE TABLE `m_share_account_charge_paid_by` (
 `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-`share_transaction_id` BIGINT(20) NOT NULL,
-`charge_transaction_id` BIGINT(20) NOT NULL,
+`share_transaction_id` BIGINT(20) NULL DEFAULT NULL,
+`charge_transaction_id` BIGINT(20) NULL DEFAULT NULL,
 `amount` DECIMAL(20,2) NOT NULL,
 PRIMARY KEY (`id`),
 CONSTRAINT `m_share_account_transactions_charge_mapping_ibfk1` FOREIGN KEY (`share_transaction_id`) REFERENCES `m_share_account_transactions` (`id`),

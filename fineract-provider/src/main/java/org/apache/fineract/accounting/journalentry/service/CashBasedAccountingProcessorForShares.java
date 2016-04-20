@@ -119,6 +119,8 @@ public class CashBasedAccountingProcessorForShares implements AccountingProcesso
             BigDecimal amountForJE = amount;
             if (chargeAmount != null && chargeAmount.compareTo(BigDecimal.ZERO) == 1) {
                 amountForJE = amount.subtract(chargeAmount);
+                /*this.helper.revertCashBasedJournalEntryForSharesCharges(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.INCOME_FROM_FEES,
+                        shareProductId, shareAccountId, transactionId, transactionDate, chargeAmount, feePayments);*/
             }
             this.helper.createJournalEntriesForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_SUSPENSE.getValue(),
                     CASH_ACCOUNTS_FOR_SHARES.SHARES_REFERENCE.getValue(), shareProductId, paymentTypeId, shareAccountId, transactionId,

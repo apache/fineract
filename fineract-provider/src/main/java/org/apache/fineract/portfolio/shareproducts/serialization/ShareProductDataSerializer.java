@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
@@ -102,14 +103,18 @@ public class ShareProductDataSerializer {
         Long totalNumberOfShares = this.fromApiJsonHelper.extractLongNamed(ShareProductApiConstants.totalshares_paramname, element);
         baseDataValidator.reset().parameter(ShareProductApiConstants.totalshares_paramname).value(totalNumberOfShares).notNull()
                 .longGreaterThanZero();
-
+        final Long sharesIssued = this.fromApiJsonHelper.extractLongNamed(ShareProductApiConstants.totalsharesissued_paramname, element);
+        if(sharesIssued != null && totalNumberOfShares != null && sharesIssued > totalNumberOfShares) {
+            baseDataValidator.reset().parameter(ShareProductApiConstants.totalsharesissued_paramname).value(sharesIssued)
+            .failWithCodeNoParameterAddedToErrorCode("sharesIssued.cannot.be.greater.than.totalNumberOfShares");
+        }
         final String currencyCode = this.fromApiJsonHelper.extractStringNamed(ShareProductApiConstants.currency_paramname, element);
         final Integer digitsAfterDecimal = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
                 ShareProductApiConstants.digitsafterdecimal_paramname, element);
         final Integer inMultiplesOf = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
                 ShareProductApiConstants.inmultiplesof_paramname, element);
         final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
-        final Long sharesIssued = this.fromApiJsonHelper.extractLongNamed(ShareProductApiConstants.totalsharesissued_paramname, element);
+      
         final BigDecimal unitPrice = this.fromApiJsonHelper.extractBigDecimalNamed(ShareProductApiConstants.unitprice_paramname, element,
                 locale);
         baseDataValidator.reset().parameter(ShareProductApiConstants.unitprice_paramname).value(unitPrice).notNull().positiveAmount();
@@ -132,12 +137,12 @@ public class ShareProductDataSerializer {
         Long nominalClientShares = this.fromApiJsonHelper.extractLongNamed(ShareProductApiConstants.nominaltshares_paramname, element);
         baseDataValidator.reset().parameter(ShareProductApiConstants.nominaltshares_paramname).value(nominalClientShares).notNull()
                 .longGreaterThanZero();
-        if (minimumClientShares != null && nominalClientShares != null) {
+        if (minimumClientShares != null && nominalClientShares != null && !minimumClientShares.equals(nominalClientShares)) {
             baseDataValidator.reset().parameter(ShareProductApiConstants.nominaltshares_paramname).value(nominalClientShares)
                     .longGreaterThanNumber(minimumClientShares);
         }
         Long maximumClientShares = this.fromApiJsonHelper.extractLongNamed(ShareProductApiConstants.maximumshares_paramname, element);
-        if (maximumClientShares != null && nominalClientShares != null) {
+        if (maximumClientShares != null && nominalClientShares != null && !maximumClientShares.equals(nominalClientShares)) {
             baseDataValidator.reset().parameter(ShareProductApiConstants.maximumshares_paramname).value(maximumClientShares)
                     .longGreaterThanNumber(nominalClientShares);
         }
@@ -294,8 +299,16 @@ public class ShareProductDataSerializer {
             if (product.setTotalIssuedShares(sharesIssued)) {
                 actualChanges.put(ShareProductApiConstants.totalsharesissued_paramname, sharesIssued);
             }
+        }else {
+            product.setTotalIssuedShares(sharesIssued) ;
         }
-
+        
+        if(sharesIssued != null && product.getSubscribedShares() != null && sharesIssued < product.getSubscribedShares()) {
+            baseDataValidator.reset().parameter(ShareProductApiConstants.totalsharesissued_paramname).value(sharesIssued)
+            .failWithCodeNoParameterAddedToErrorCode("sharesissued.can.not.be.lessthan.accounts.subscribed.shares");
+        }
+        
+        
         if (this.fromApiJsonHelper.parameterExists(ShareProductApiConstants.currency_paramname, element)
                 && this.fromApiJsonHelper.parameterExists(ShareProductApiConstants.digitsafterdecimal_paramname, element)
                 && this.fromApiJsonHelper.parameterExists(ShareProductApiConstants.inmultiplesof_paramname, element)) {
@@ -416,17 +429,17 @@ public class ShareProductDataSerializer {
             }
         }
 
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        
         BigDecimal shareCapitalValue;
         if (sharesIssued != null || unitPrice != null) {
-            if (sharesIssued == null) sharesIssued = product.getSharesIssued();
+            if (sharesIssued == null) sharesIssued = product.getTotalShares();
             if (unitPrice == null) unitPrice = product.getUnitPrice();
             shareCapitalValue = BigDecimal.valueOf(sharesIssued).multiply(unitPrice);
             if (product.setshareCapitalValue(shareCapitalValue)) {
                 actualChanges.put(ShareProductApiConstants.sharecapital_paramname, shareCapitalValue);
             }
         }
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         return actualChanges;
     }
 
@@ -455,6 +468,7 @@ public class ShareProductDataSerializer {
                 ShareProductApiConstants.dividendAmountParamName, element);
         baseDataValidator.reset().parameter(ShareProductApiConstants.dividendAmountParamName).value(dividendAmount).notBlank()
                 .positiveAmount();
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
 }

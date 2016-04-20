@@ -18,10 +18,8 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.domain;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -261,6 +259,17 @@ public class ShareAccount extends AbstractPersistable<Long> {
         return true;
     }
 
+    public void addTransaction(final ShareAccountTransaction transaction) {
+        transaction.setShareAccount(this);
+        if(transaction.isPendingForApprovalTransaction()) {
+            this.totalSharesPending += transaction.getTotalShares() ;
+        }else if(transaction.isPurchasTransaction()) {
+            this.totalSharesApproved += transaction.getTotalShares() ;
+        }
+        
+        this.shareAccountTransactions.add(transaction);
+    }
+    
     public boolean setAllowDividendCalculationForInactiveClients(Boolean allowDividendCalculationForInactiveClients) {
         boolean returnValue = false;
         if (this.allowDividendCalculationForInactiveClients == null) {
@@ -346,7 +355,7 @@ public class ShareAccount extends AbstractPersistable<Long> {
     public Set<ShareAccountTransaction> getChargeTransactions() {
         Set<ShareAccountTransaction> chargeTransactions = new HashSet<>();
         for (ShareAccountTransaction transaction : this.shareAccountTransactions) {
-            if (transaction.isChargeTransaction()) {
+            if (transaction.isActive() && transaction.isChargeTransaction()) {
                 chargeTransactions.add(transaction);
             }
         }
@@ -380,18 +389,6 @@ public class ShareAccount extends AbstractPersistable<Long> {
         this.charges.add(charge);
     }
 
-    public ShareAccountCharge updateShareCharge(final Long id, final Long chargeId, final BigDecimal amount) {
-        ShareAccountCharge updatedCharge = null;
-        for (ShareAccountCharge charge : this.charges) {
-            if (charge.getId() == id && charge.getChargeId() == chargeId) {
-                updatedCharge = charge;
-                charge.update(amount);
-                break;
-            }
-        }
-        return updatedCharge;
-    }
-
     public void approve(final Date approvedDate, final AppUser approvedUser) {
         this.approvedDate = approvedDate;
         this.approvedBy = approvedUser;
@@ -418,10 +415,14 @@ public class ShareAccount extends AbstractPersistable<Long> {
         this.closedDate = null;
         this.closedBy = null;
         this.totalSharesApproved = null;
-        Iterator<ShareAccountTransaction> iter = this.shareAccountTransactions.iterator();
-        ShareAccountTransaction share = iter.next();
-        share.undoApprove();
-        this.totalSharesPending = share.getTotalShares();
+        Long tempTotalShares = new Long(0);
+        for (ShareAccountTransaction transaction : this.shareAccountTransactions) {
+            if(transaction.isPurchasTransaction()) {
+                transaction.undoApprove();
+                tempTotalShares += transaction.getTotalShares() ;
+            }
+        }
+        this.totalSharesPending = tempTotalShares;
     }
 
     public void reject(final Date rejectedDate, final AppUser rejectedUser) {
@@ -430,9 +431,11 @@ public class ShareAccount extends AbstractPersistable<Long> {
         this.status = ShareAccountStatusType.REJECTED.getValue();
         this.totalSharesPending = null;
         this.totalSharesApproved = null;
-        Iterator<ShareAccountTransaction> iter = this.shareAccountTransactions.iterator();
-        ShareAccountTransaction share = iter.next();
-        share.reject();
+        for (ShareAccountTransaction transaction : this.shareAccountTransactions) {
+            if(transaction.isPurchasTransaction()) {
+                transaction.reject();
+            }
+        }
     }
 
     public void close(final Date closedDate, final AppUser closedBy) {
@@ -469,7 +472,7 @@ public class ShareAccount extends AbstractPersistable<Long> {
     public Set<ShareAccountTransaction> getPendingForApprovalSharePurchaseTransactions() {
         Set<ShareAccountTransaction> purchaseTransactions = new HashSet<>();
         for (ShareAccountTransaction transaction : this.shareAccountTransactions) {
-            if (transaction.isPendingForApprovalTransaction()) {
+            if (transaction.isActive() && transaction.isPendingForApprovalTransaction()) {
                 purchaseTransactions.add(transaction);
             }
         }
@@ -522,5 +525,31 @@ public class ShareAccount extends AbstractPersistable<Long> {
     
     public Date getApprovedDate() {
         return this.approvedDate ;
+    }
+
+    public void removeTransactions() {
+        for(ShareAccountTransaction transaction: this.shareAccountTransactions) {
+            transaction.setActive(false);
+        }
+        this.totalSharesApproved = new Long(0) ;
+        this.totalSharesPending = new Long(0) ;
+    }
+
+    public void removeCharges() {
+        for(ShareAccountCharge charge: this.charges) {
+            charge.setActive(false);
+        }
+    }
+
+    public void addCharges(Set<ShareAccountCharge> charges) {
+        this.charges.addAll(charges) ;
+    }
+    
+    public Integer getLockinPeriodFrequency() {
+        return this.lockinPeriodFrequency ;
+    }
+    
+    public  PeriodFrequencyType getLockinPeriodFrequencyType() {
+        return this.lockinPeriodFrequencyType ;
     }
 }

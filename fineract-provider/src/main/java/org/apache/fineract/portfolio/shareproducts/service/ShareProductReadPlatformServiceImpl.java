@@ -243,7 +243,7 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
                     currencyDisplaySymbol, currencyNameCode);
 
             final Long totalShares = rs.getLong("total_shares");
-            final Long issuedShares = rs.getLong("issued_shares");
+            final Long issuedShares = JdbcSupport.getLongDefaultToNullIfZero(rs, "issued_shares");
             final BigDecimal unitPrice = rs.getBigDecimal("unit_price");
             final BigDecimal capitalAmount = rs.getBigDecimal("capital_amount");
             final Long minimumClientShares = JdbcSupport.getLong(rs, "minimum_client_shares");

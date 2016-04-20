@@ -42,9 +42,10 @@ import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.products.constants.ProductsApiConstants;
 import org.apache.fineract.portfolio.products.data.ProductData;
 import org.apache.fineract.portfolio.products.service.ProductReadPlatformService;
+import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
-import org.apache.fineract.portfolio.shareaccounts.data.PurchasedSharesData;
+import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountApplicationTimelineData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountDividendData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountStatusEnumData;
@@ -114,7 +115,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             final Collection<EnumOptionData> minimumActivePeriodFrequencyTypeOptions = this.shareProductDropdownReadPlatformService
                     .retrieveMinimumActivePeriodFrequencyTypeOptions();
             final Collection<SavingsAccountData> clientSavingsAccounts = this.savingsAccountReadPlatformService
-                    .retrieveAllForLookup(clientId);
+                    .retrieveActiveForLookup(clientId, DepositAccountType.SAVINGS_DEPOSIT, productData.getCurrency().code());
             toReturn = new ShareAccountData(client.id(), client.displayName(), productData.getCurrency(), charges, marketPrice,
                     minimumActivePeriodFrequencyTypeOptions, lockinPeriodFrequencyTypeOptions, clientSavingsAccounts, productData.getNominaltShares());
         } else {
@@ -143,7 +144,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     @Override
     public ShareAccountData retrieveOne(final Long id, final boolean includeTemplate) {
         Collection<ShareAccountChargeData> charges = this.shareAccountChargeReadPlatformService.retrieveAccountCharges(id, "active");
-        Collection<PurchasedSharesData> purchasedShares = this.purchasedSharesReadPlatformService.retrievePurchasedShares(id);
+        Collection<ShareAccountTransactionData> purchasedShares = this.purchasedSharesReadPlatformService.retrievePurchasedShares(id);
         
         ShareAccountMapper mapper = new ShareAccountMapper(charges, purchasedShares);
         String query = "select " + mapper.schema() + "where sa.id=?";
@@ -161,8 +162,8 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = this.shareProductDropdownReadPlatformService
                     .retrieveLockinPeriodFrequencyTypeOptions();
             final Collection<EnumOptionData> minimumActivePeriodFrequencyTypeOptions = lockinPeriodFrequencyTypeOptions;
-            final Collection<SavingsAccountData> clientSavingsAccounts = this.savingsAccountReadPlatformService.retrieveAllForLookup(data
-                    .getClientId());
+            final Collection<SavingsAccountData> clientSavingsAccounts = this.savingsAccountReadPlatformService
+                    .retrieveActiveForLookup(data.getClientId(), DepositAccountType.SAVINGS_DEPOSIT, productData.getCurrency().code());
             Collection<ProductData> productOptions = service.retrieveAllForLookup();
             final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSharesApplicableCharges();
             data = ShareAccountData.template(data, productOptions, chargeOptions, clientSavingsAccounts, lockinPeriodFrequencyTypeOptions,
@@ -224,11 +225,11 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     private final static class ShareAccountMapper implements RowMapper<ShareAccountData> {
 
         private final Collection<ShareAccountChargeData> charges;
-        private final Collection<PurchasedSharesData> purchasedShares;
+        private final Collection<ShareAccountTransactionData> purchasedShares;
 
         private final String schema;
 
-        public ShareAccountMapper(final Collection<ShareAccountChargeData> charges, final Collection<PurchasedSharesData> purchasedShares) {
+        public ShareAccountMapper(final Collection<ShareAccountChargeData> charges, final Collection<ShareAccountTransactionData> purchasedShares) {
             this.charges = charges;
             this.purchasedShares = purchasedShares;
             StringBuffer buff = new StringBuffer()
@@ -392,7 +393,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             final Boolean allowdividendsforinactiveclients = null;
 
             final Collection<ShareAccountChargeData> charges = null;
-            final Collection<PurchasedSharesData> purchasedSharesData = new ArrayList<>();
+            final Collection<ShareAccountTransactionData> purchasedSharesData = new ArrayList<>();
             final Integer lockinPeriod = null;
             final EnumOptionData lockPeriodTypeEnum = null;
             final Integer minimumActivePeriod = null;
@@ -418,19 +419,21 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         }
     }
 
-    private final static class PurchasedSharesDataRowMapper implements RowMapper<PurchasedSharesData> {
+    private final static class PurchasedSharesDataRowMapper implements RowMapper<ShareAccountTransactionData> {
 
         private final String schema;
 
         public PurchasedSharesDataRowMapper() {
             StringBuffer buff = new StringBuffer()
                     .append("saps.id as purchasedId, saps.account_id as accountId, saps.transaction_date as transactionDate, saps.total_shares as purchasedShares, saps.unit_price as unitPrice, ")
-                    .append("saps.status_enum as purchaseStatus, saps.type_enum as purchaseType, saps.amount as amount, saps.charge_amount as chargeamount ");
+                    .append("saps.status_enum as purchaseStatus, saps.type_enum as purchaseType, saps.amount as amount, saps.charge_amount as chargeamount, ")
+                    .append("saps.amount_paid as amountPaid ");
+            
             schema = buff.toString();
         }
 
         @Override
-        public PurchasedSharesData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+        public ShareAccountTransactionData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
             final Long id = rs.getLong("purchasedId");
             final Long accountId = rs.getLong("accountId");
             final LocalDate transactionDate = new LocalDate(rs.getDate("transactionDate"));
@@ -442,8 +445,9 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             final EnumOptionData typeEnum = SharesEnumerations.purchasedSharesEnum(type);
             final BigDecimal amount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "amount");
             final BigDecimal chargeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "chargeamount");
-            return new PurchasedSharesData(id, accountId, transactionDate, numberOfShares, purchasedPrice, statusEnum, typeEnum, amount,
-                    chargeAmount);
+            final BigDecimal amountPaid = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "amountPaid");
+            return new ShareAccountTransactionData(id, accountId, transactionDate, numberOfShares, purchasedPrice, statusEnum, typeEnum, amount,
+                    chargeAmount, amountPaid);
         }
 
         public String schema() {

@@ -34,6 +34,8 @@ public interface SavingsAccountReadPlatformService {
 
     Collection<SavingsAccountData> retrieveActiveForLookup(Long clientId, DepositAccountType depositAccountType);
 
+    public Collection<SavingsAccountData> retrieveActiveForLookup(final Long clientId, DepositAccountType depositAccountType, String currencyCode) ;
+    
     SavingsAccountData retrieveOne(Long savingsId);
 
     SavingsAccountData retrieveTemplate(Long clientId, Long groupId, Long productId, boolean staffInSelectedOfficeOnly);

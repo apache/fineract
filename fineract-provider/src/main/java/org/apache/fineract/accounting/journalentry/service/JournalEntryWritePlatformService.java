@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.accounting.journalentry.service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
@@ -44,4 +45,6 @@ public interface JournalEntryWritePlatformService {
     public String createProvisioningJournalEntries(ProvisioningEntry entry) ;
 
     void createJournalEntriesForShares(Map<String, Object> accountingBridgeData);
+    
+    void revertShareAccountJournalEntries(final ArrayList<Long> transactionId, final Date transactionDate);
 }

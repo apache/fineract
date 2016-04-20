@@ -80,6 +80,7 @@ public class ShareAccountChargeReadPlatformServiceImpl implements
 					.append("sc.charge_calculation_enum as chargeCalculation, c.is_active as isActive, ")
 					.append("c.currency_code as currencyCode, oc.name as currencyName, ")
 					.append("oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, ")
+					.append("sc.charge_amount_or_percentage, ")
 					.append("oc.internationalized_name_code as currencyNameCode from m_charge c ")
 					.append("join m_organisation_currency oc on c.currency_code = oc.code ")
 					.append("join m_share_account_charge sc on sc.charge_id = c.id ");
@@ -132,13 +133,14 @@ public class ShareAccountChargeReadPlatformServiceImpl implements
 			final EnumOptionData chargeCalculationType = ChargeEnumerations
 					.chargeCalculationType(chargeCalculation);
 			final Boolean isActive = rs.getBoolean("isActive");
-
+			final BigDecimal chargeamountorpercentage = rs.getBigDecimal("charge_amount_or_percentage") ;
+			
 			final Collection<ChargeData> chargeOptions = null;
 			return new ShareAccountChargeData(id, chargeId, accountId, name,
 					currency, amount, amountPaid, amountWaived,
 					amountWrittenOff, amountOutstanding, chargeTimeType,
 					chargeCalculationType, percentageOf,
-					amountPercentageAppliedTo, chargeOptions, isActive);
+					amountPercentageAppliedTo, chargeOptions, isActive, chargeamountorpercentage);
 		}
 
 		public String schema() {
