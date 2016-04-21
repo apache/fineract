@@ -33,6 +33,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -100,6 +101,7 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "maximum_client_shares")
     private Long maximumShares;
 
+    @OrderBy(value = "fromDate,id")
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "product", orphanRemoval = true)
     Set<ShareProductMarketPrice> marketPrice;
@@ -415,7 +417,7 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
         if (this.marketPrice != null && !this.marketPrice.isEmpty()) {
             for (ShareProductMarketPrice data : this.marketPrice) {
                 Date futureDate = data.getStartDate();
-                if (currentDate.after(futureDate)) {
+                if (currentDate.equals(futureDate) || currentDate.after(futureDate)) {
                     marketValue = data.getPrice();
                 }
             }
@@ -428,6 +430,10 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
             this.totalSubscribedShares = new Long(0) ;
         }
         this.totalSubscribedShares += subscribedShares ;
+    }
+    
+    public void removeSubscribedShares(final Long subscribedShares) {
+        this.totalSubscribedShares -= subscribedShares ;
     }
     
     public Long getSubscribedShares() {
