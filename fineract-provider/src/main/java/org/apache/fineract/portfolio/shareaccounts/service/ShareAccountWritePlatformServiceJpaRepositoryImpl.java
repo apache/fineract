@@ -273,6 +273,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                     journalTransactions.add(transaction);
                 }
             }
+            
             this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account, journalTransactions));
             return new CommandProcessingResultBuilder() //
                     .withCommandId(jsonCommand.commandId()) //
@@ -413,21 +414,14 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                 this.shareAccountRepository.save(account);
                 ShareAccountTransaction transaction = (ShareAccountTransaction) changes
                         .get(ShareAccountApiConstants.requestedshares_paramname);
-                transaction = account.getShareAccountTransaction(transaction); // after
-                                                                               // saving,
-                                                                               // entity
-                                                                               // will
-                                                                               // have
-                                                                               // different
-                                                                               // object.
-                                                                               // So
-                                                                               // need
-                                                                               // to
-                                                                               // retrieve
-                                                                               // to
-                                                                               // get
-                                                                               // the
-                                                                               // id
+             // after saving, entity will have different object. So need to retrieve the entity object
+                transaction = account.getShareAccountTransaction(transaction); 
+                Long redeemShares = transaction.getTotalShares() ;
+                ShareProduct shareProduct = account.getShareProduct() ;
+                //remove the redeem shares from total subscribed shares 
+                shareProduct.removeSubscribedShares(redeemShares); 
+                this.shareProductRepository.save(shareProduct);
+                
                 Set<ShareAccountTransaction> transactions = new HashSet<>();
                 transactions.add(transaction);
                 this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account, transactions));

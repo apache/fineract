@@ -203,7 +203,7 @@ public class ShareAccountDataSerializer {
         Date currentDate = DateUtils.getLocalDateOfTenant().toDate();
         for (ShareAccountCharge charge : charges) {
             if (charge.isActive() && charge.isShareAccountActivation()) {
-                charge.deriveChargeAmount(totalChargeAmount);
+                charge.deriveChargeAmount(totalChargeAmount, account.getCurrency());
                 ShareAccountTransaction chargeTransaction = ShareAccountTransaction.createChargeTransaction(currentDate, charge);
                 ShareAccountChargePaidBy paidBy = new ShareAccountChargePaidBy(chargeTransaction, charge, charge.percentageOrAmount());
                 chargeTransaction.addShareAccountChargePaidBy(paidBy);
@@ -215,7 +215,7 @@ public class ShareAccountDataSerializer {
         for (ShareAccountTransaction pending : pendingApprovalTransaction) {
             for (ShareAccountCharge charge : charges) {
                 if (charge.isActive() && charge.isSharesPurchaseCharge()) {
-                    BigDecimal amount = charge.deriveChargeAmount(pending.amount());
+                    BigDecimal amount = charge.deriveChargeAmount(pending.amount(), account.getCurrency());
                     ShareAccountChargePaidBy paidBy = new ShareAccountChargePaidBy(pending, charge, amount);
                     pending.addShareAccountChargePaidBy(paidBy);
                     totalChargeAmount = totalChargeAmount.add(amount);
@@ -481,7 +481,7 @@ public class ShareAccountDataSerializer {
          for(ShareAccountCharge charge: charges) {
              if(charge.isActive() && charge.isSharesPurchaseCharge()) {
                  charge.update(transactionAmount, charge.percentageOrAmount()) ;
-                 charge.deriveChargeAmount(transactionAmount);
+                 charge.deriveChargeAmount(transactionAmount, shareAccount.getCurrency());
              }
          }
         Set<ShareAccountTransaction> transactions = shareAccount.getShareAccountTransactions();
@@ -632,7 +632,7 @@ public class ShareAccountDataSerializer {
         BigDecimal totalChargeAmount = BigDecimal.ZERO;
         for (ShareAccountCharge charge : charges) {
             if (charge.isActive() && charge.isSharesPurchaseCharge()) {
-                BigDecimal amount = charge.updateChargeDetailsForAdditionalSharesRequest(purchaseTransaction.amount());
+                BigDecimal amount = charge.updateChargeDetailsForAdditionalSharesRequest(purchaseTransaction.amount(), account.getCurrency());
                 ShareAccountChargePaidBy paidBy = new ShareAccountChargePaidBy(purchaseTransaction, charge, amount);
                 purchaseTransaction.addShareAccountChargePaidBy(paidBy);
                 totalChargeAmount = totalChargeAmount.add(amount);
@@ -758,7 +758,7 @@ public class ShareAccountDataSerializer {
         boolean isTransactionBeforeExistingTransactions = false ;
         Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions() ;
         for(ShareAccountTransaction transaction: transactions) {
-            if(!transaction.isChargeTransaction()) {
+            if(!transaction.isChargeTransaction() && transaction.isActive()) {
                 LocalDate transactionDate = new LocalDate(transaction.getPurchasedDate()) ;
                 if(requestedDate.isBefore(transactionDate)) {
                     isTransactionBeforeExistingTransactions = true ;
@@ -772,12 +772,12 @@ public class ShareAccountDataSerializer {
             .failWithCodeNoParameterAddedToErrorCode("redeem.transaction.date.cannot.be.before.existing.transactions");
         }
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-        
         ShareAccountTransaction transaction = ShareAccountTransaction.createRedeemTransaction(requestedDate.toDate(), sharesRequested,
                 unitPrice);
+        validateRedeemRequest(account, transaction, baseDataValidator, dataValidationErrors) ;
         account.addAdditionalPurchasedShares(transaction);
         actualChanges.put(ShareAccountApiConstants.requestedshares_paramname, transaction);
-        validateRedeemRequest(account, transaction, baseDataValidator, dataValidationErrors) ;
+        
         handleRedeemSharesChargeTransactions(account, transaction);
         return actualChanges;
     }
@@ -840,22 +840,24 @@ public class ShareAccountDataSerializer {
     }
     
     private LocalDate deriveLockinPeriodDuration(final Integer lockinPeriod, final PeriodFrequencyType periodType, LocalDate purchaseDate) {
-        LocalDate lockinDate = null ;
-        switch(periodType) {
-            case INVALID: //It never comes in to this state.
-                break ;
-            case DAYS:
-                lockinDate = purchaseDate.plusDays(lockinPeriod) ;
-                break ;
-            case WEEKS:
-                lockinDate = purchaseDate.plusWeeks(lockinPeriod) ;
-                break ;
-            case MONTHS:
-                lockinDate = purchaseDate.plusMonths(lockinPeriod) ;
-                break ;
-            case YEARS:
-                lockinDate = purchaseDate.plusYears(lockinPeriod) ;
-                break ;
+        LocalDate lockinDate = purchaseDate ;
+        if(periodType != null) {
+            switch(periodType) {
+                case INVALID: //It never comes in to this state.
+                    break ;
+                case DAYS:
+                    lockinDate = purchaseDate.plusDays(lockinPeriod) ;
+                    break ;
+                case WEEKS:
+                    lockinDate = purchaseDate.plusWeeks(lockinPeriod) ;
+                    break ;
+                case MONTHS:
+                    lockinDate = purchaseDate.plusMonths(lockinPeriod) ;
+                    break ;
+                case YEARS:
+                    lockinDate = purchaseDate.plusYears(lockinPeriod) ;
+                    break ;
+            }    
         }
         return lockinDate ;
     }
@@ -865,7 +867,7 @@ public class ShareAccountDataSerializer {
         BigDecimal totalChargeAmount = BigDecimal.ZERO;
         for (ShareAccountCharge charge : charges) {
             if (charge.isActive() && charge.isSharesRedeemCharge()) {
-                BigDecimal amount = charge.updateChargeDetailsForAdditionalSharesRequest(transaction.amount());
+                BigDecimal amount = charge.updateChargeDetailsForAdditionalSharesRequest(transaction.amount(), account.getCurrency());
                 ShareAccountChargePaidBy paidBy = new ShareAccountChargePaidBy(transaction, charge, amount);
                 transaction.addShareAccountChargePaidBy(paidBy);
                 totalChargeAmount = totalChargeAmount.add(amount);

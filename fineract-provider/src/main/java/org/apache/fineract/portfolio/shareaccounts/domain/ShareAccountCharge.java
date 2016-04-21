@@ -375,12 +375,12 @@ public class ShareAccountCharge extends AbstractPersistable<Long> {
         return this.chargeTime;
     }
 
-    public BigDecimal deriveChargeAmount(BigDecimal transactionAmount) {
+    public BigDecimal deriveChargeAmount(BigDecimal transactionAmount, final MonetaryCurrency currency) {
         BigDecimal toReturnAmount = amountOrPercentage;
         if (ChargeCalculationType.fromInt(this.chargeCalculation) == ChargeCalculationType.PERCENT_OF_AMOUNT) {
-            toReturnAmount = percentageOf(transactionAmount, this.percentage);
+            toReturnAmount = Money.of(currency, percentageOf(transactionAmount, this.percentage)).getAmount() ;
             this.amountPercentageAppliedTo = transactionAmount;
-            this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
+            this.amount = Money.of(currency, percentageOf(this.amountPercentageAppliedTo, this.percentage)).getAmount() ;
             this.amountPaid = null;
             this.amountOutstanding = calculateOutstanding();
             this.amountWaived = null;
@@ -394,12 +394,12 @@ public class ShareAccountCharge extends AbstractPersistable<Long> {
         return toReturnAmount;
     }
 
-    public BigDecimal updateChargeDetailsForAdditionalSharesRequest(final BigDecimal transactionAmount) {
+    public BigDecimal updateChargeDetailsForAdditionalSharesRequest(final BigDecimal transactionAmount, final MonetaryCurrency currency) {
         BigDecimal toReturnAmount = amountOrPercentage;
         if (ChargeCalculationType.fromInt(this.chargeCalculation) == ChargeCalculationType.PERCENT_OF_AMOUNT) {
-            toReturnAmount = percentageOf(transactionAmount, this.percentage);
+            toReturnAmount = Money.of(currency, percentageOf(transactionAmount, this.percentage)).getAmount() ;
             this.amountPercentageAppliedTo = this.amountPercentageAppliedTo.add(transactionAmount);
-            this.amount = percentageOf(this.amountPercentageAppliedTo, this.percentage);
+            this.amount = Money.of(currency, percentageOf(this.amountPercentageAppliedTo, this.percentage)).getAmount() ;
             this.amountOutstanding = calculateOutstanding();
             this.amountWaived = null;
             this.amountWrittenOff = null;
