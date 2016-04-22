@@ -2364,7 +2364,7 @@ public class Loan extends AbstractPersistable<Long> {
             this.loanTermVariations.add(loanVariationTerms);
         }
 
-        if (isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate) || recalculateSchedule || isEmiAmountChanged) {
+        if (isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate) || recalculateSchedule || isEmiAmountChanged || rescheduledRepaymentDate != null) {
             regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
         }
     }
