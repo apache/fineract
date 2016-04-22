@@ -55,26 +55,34 @@ public class LoanTermVariationsDataWrapper {
         dueDateIterator = this.dueDateVariation.listIterator();
     }
 
-    public boolean hasVariation(final LocalDate date) {
+    public boolean hasVariation(final LocalDate date, final Boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled) {
         ListIterator<LoanTermVariationsData> iterator = this.iterator;
-        return hasNext(date, iterator);
+        return hasNext(date, iterator, isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled);
     }
 
-    private boolean hasNext(final LocalDate date, ListIterator<LoanTermVariationsData> iterator) {
+    private boolean hasNext(final LocalDate date, ListIterator<LoanTermVariationsData> iterator, 
+            final Boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled) {
         boolean hasVariation = false;
         if (iterator.hasNext()) {
             LoanTermVariationsData loanTermVariationsData = iterator.next();
-            if (!loanTermVariationsData.getTermApplicableFrom().isAfter(date)) {
-                hasVariation = true;
+            if (!isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled) {
+                if (!loanTermVariationsData.getTermApplicableFrom().isAfter(date) && !loanTermVariationsData.getTermApplicableFrom().equals(date)) {
+                    hasVariation = true;
+                }
+            } else {
+                if (!loanTermVariationsData.getTermApplicableFrom().isAfter(date)) {
+                    hasVariation = true;
+                }
             }
+            
             iterator.previous();
         }
         return hasVariation;
     }
 
-    public boolean hasDueDateVariation(final LocalDate date) {
+    public boolean hasDueDateVariation(final LocalDate date, final Boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled) {
         ListIterator<LoanTermVariationsData> iterator = this.dueDateIterator;
-        return hasNext(date, iterator);
+        return hasNext(date, iterator, isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled);
     }
 
     public LoanTermVariationsData nextVariation() {

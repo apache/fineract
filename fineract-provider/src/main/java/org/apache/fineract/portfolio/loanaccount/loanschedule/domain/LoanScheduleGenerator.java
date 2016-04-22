@@ -55,5 +55,5 @@ public interface LoanScheduleGenerator {
     LoanRescheduleModel reschedule(final MathContext mathContext, final LoanRescheduleRequest loanRescheduleRequest,
             final ApplicationCurrency applicationCurrency, final HolidayDetailDTO holidayDetailDTO, CalendarInstance restCalendarInstance,
             CalendarInstance compoundingCalendarInstance, final Calendar loanCalendar, FloatingRateDTO floatingRateDTO,
-            final boolean isSkipRepaymentonmonthFirst, final Integer numberofdays);
+            final boolean isSkipRepaymentonmonthFirst, final Integer numberofdays, final Boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled);
 }

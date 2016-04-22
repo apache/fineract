@@ -33,5 +33,5 @@ public interface LoanReschedulerFactory {
             final LoanRescheduleRequest loanRescheduleRequest, final ApplicationCurrency applicationCurrency,
             final HolidayDetailDTO holidayDetailDTO, CalendarInstance restCalendarInstance, CalendarInstance compoundingCalendarInstance,
             final Calendar loanCalendar, FloatingRateDTO floatingRateDTO, final boolean isSkipRepaymentonmonthFirst,
-            final Integer numberofdays);
+            final Integer numberofdays, final Boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled);
 }
