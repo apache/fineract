@@ -95,7 +95,7 @@ public class AccountNumberGenerator {
 
                 case OFFICE_AND_LOAN_PRODUCT_NAME:
                 	prefix = propertyMap.get(OFFICE_AND_LOAN_PRODUCT_NAME);
-                	break;
+                break;
 
                 case SAVINGS_PRODUCT_SHORT_NAME:
                     prefix = propertyMap.get(SAVINGS_PRODUCT_SHORT_NAME);
