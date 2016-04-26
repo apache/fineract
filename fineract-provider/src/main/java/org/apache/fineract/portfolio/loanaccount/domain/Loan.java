@@ -2359,8 +2359,13 @@ public class Loan extends AbstractPersistable<Long> {
             if (this.loanProduct.isMultiDisburseLoan()) {
                 final Date dateValue = null;
                 final boolean isSpecificToInstallment = false;
+                final Boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled = scheduleGeneratorDTO.isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled();
+                Date effectiveDateFrom = actualDisbursementDate.toDate();
+                if(!isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled && actualDisbursementDate.equals(nextPossibleRepaymentDate)){
+                    effectiveDateFrom = nextPossibleRepaymentDate.plusDays(1).toDate();
+                }
                 LoanTermVariations loanVariationTerms = new LoanTermVariations(LoanTermVariationType.EMI_AMOUNT.getValue(),
-                        actualDisbursementDate.toDate(), emiAmount, dateValue, isSpecificToInstallment, this, LoanStatus.ACTIVE.getValue());
+                        effectiveDateFrom, emiAmount, dateValue, isSpecificToInstallment, this, LoanStatus.ACTIVE.getValue());
                 this.loanTermVariations.add(loanVariationTerms);
             } else {
                 this.fixedEmiAmount = emiAmount;
@@ -5082,7 +5087,7 @@ public class Loan extends AbstractPersistable<Long> {
                 this.loanProduct.getInstallmentAmountInMultiplesOf(), recalculationFrequencyType, restCalendarInstance, compoundingMethod,
                 compoundingCalendarInstance, compoundingFrequencyType, this.loanProduct.preCloseInterestCalculationStrategy(),
                 rescheduleStrategyMethod, calendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations, calendarHistoryDataWrapper,
-				scheduleGeneratorDTO.getNumberOfdays(), scheduleGeneratorDTO.isSkipRepaymentOnFirstDayofMonth());
+		scheduleGeneratorDTO.getNumberOfdays(), scheduleGeneratorDTO.isSkipRepaymentOnFirstDayofMonth());
         return loanApplicationTerms;
     }
 
@@ -5239,6 +5244,7 @@ public class Loan extends AbstractPersistable<Long> {
      *            TODO
      * @param floatingRateDTO
      *            TODO
+     * @param isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled 
      * @param loanCalendarInstance
      *            Used for accessing the loan's calendar object
      * @return application terms of the Loan object
