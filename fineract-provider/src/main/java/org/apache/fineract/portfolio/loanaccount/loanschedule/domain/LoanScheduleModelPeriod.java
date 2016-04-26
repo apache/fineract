@@ -19,8 +19,10 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalcualtionAdditionalDetails;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.joda.time.LocalDate;
 
@@ -51,4 +53,5 @@ public interface LoanScheduleModelPeriod {
     void addPrincipalAmount(Money principalDue);
     
     void addInterestAmount(Money interestDue);
+    List<LoanInterestRecalcualtionAdditionalDetails> getLoanCompoundingDetails();
 }

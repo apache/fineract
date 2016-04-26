@@ -45,6 +45,7 @@ import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalcualtionAdditionalDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
@@ -124,7 +125,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         LocalDate firstRepaymentdate = this.scheduledDateGenerator.generateNextRepaymentDate(
                 loanApplicationTerms.getExpectedDisbursementDate(), loanApplicationTerms, isFirstRepayment, holidayDetailDTO);
         final LocalDate idealDisbursementDate = this.scheduledDateGenerator.idealDisbursementDateBasedOnFirstRepaymentDate(
-                loanApplicationTerms.getLoanTermPeriodFrequencyType(), loanApplicationTerms.getRepaymentEvery(), firstRepaymentdate);
+                loanApplicationTerms.getLoanTermPeriodFrequencyType(), loanApplicationTerms.getRepaymentEvery(), firstRepaymentdate,
+                loanApplicationTerms.getLoanCalendar(), loanApplicationTerms.getHolidayDetailDTO(), loanApplicationTerms);
 
         if (!scheduleParams.isPartialUpdate()) {
             // Set Fixed Principal Amount
@@ -203,13 +205,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             if (scheduleParams.getPeriodStartDate().isAfter(scheduledDueDate)) { throw new ScheduleDateException(
                     "Due date can't be before period start date", scheduledDueDate); }
 
-            if (!scheduleParams.getLatePaymentMap().isEmpty()) {
-                populateCompoundingDatesInPeriod(scheduleParams.getPeriodStartDate(), scheduledDueDate, currentDate, loanApplicationTerms,
-                        holidayDetailDTO, scheduleParams.getCompoundingMap(), loanCharges, currency);
-                scheduleParams.getCompoundingDateVariations().put(scheduleParams.getPeriodStartDate(),
-                        new TreeMap<>(scheduleParams.getCompoundingMap()));
-            }
-
             if (extendTermForDailyRepayments) {
                 scheduleParams.setActualRepaymentDate(scheduledDueDate);
             }
@@ -219,6 +214,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             if (scheduleParams.getScheduleTillDate() != null && !scheduledDueDate.isBefore(scheduleParams.getScheduleTillDate())) {
                 scheduledDueDate = scheduleParams.getScheduleTillDate();
                 isNextRepaymentAvailable = false;
+            }
+            if (loanApplicationTerms.isInterestRecalculationEnabled()) {
+                populateCompoundingDatesInPeriod(scheduleParams.getPeriodStartDate(), scheduledDueDate, loanApplicationTerms,
+                        holidayDetailDTO, scheduleParams, loanCharges, currency);
             }
 
             // populates the collection with transactions till the due date of
@@ -316,6 +315,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     currentPeriodParams.getFeeChargesForInstallment(), currentPeriodParams.getPenaltyChargesForInstallment(),
                     totalInstallmentDue, false);
 
+            addLoanRepaymentScheduleInstallment(scheduleParams.getInstallments(), installment);
             // apply loan transactions on installments to identify early/late
             // payments for interest recalculation
             installment = handleRecalculationForTransactions(mc, loanApplicationTerms, holidayDetailDTO, currency, scheduleParams,
@@ -327,7 +327,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             // Updates principal paid map with efective date for reducing
             // the amount from outstanding balance(interest calculation)
             updateAmountsWithEffectiveDate(loanApplicationTerms, holidayDetailDTO, scheduleParams, scheduledDueDate, currentPeriodParams,
-                    installment);
+                    installment, lastRestDate);
 
             // handle cumulative fields
 
@@ -337,7 +337,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             scheduleParams.setPeriodStartDate(scheduledDueDate);
             scheduleParams.incrementInstalmentNumber();
             scheduleParams.incrementPeriodNumber();
-            scheduleParams.getCompoundingDateVariations().clear();
             if (termVariationParams.isRecalculateAmounts()) {
                 loanApplicationTerms.setCurrentPeriodFixedEmiAmount(null);
                 loanApplicationTerms.setCurrentPeriodFixedPrincipalAmount(null);
@@ -377,11 +376,36 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         final BigDecimal totalPrincipalPaid = BigDecimal.ZERO;
         final BigDecimal totalOutstanding = BigDecimal.ZERO;
 
+        updateCompoundingDetails(periods, scheduleParams, loanApplicationTerms);
         return LoanScheduleModel.from(periods, applicationCurrency, scheduleParams.getLoanTermInDays(),
                 scheduleParams.getPrincipalToBeScheduled(), scheduleParams.getTotalCumulativePrincipal().getAmount(), totalPrincipalPaid,
                 scheduleParams.getTotalCumulativeInterest().getAmount(), scheduleParams.getTotalFeeChargesCharged().getAmount(),
                 scheduleParams.getTotalPenaltyChargesCharged().getAmount(), scheduleParams.getTotalRepaymentExpected().getAmount(),
                 totalOutstanding);
+    }
+
+    private void updateCompoundingDetails(final Collection<LoanScheduleModelPeriod> periods, final LoanScheduleParams params,
+            final LoanApplicationTerms loanApplicationTerms) {
+        final Map<LocalDate, Map<LocalDate, Money>> compoundingDetails = params.getCompoundingDateVariations();
+        if (compoundingDetails.isEmpty()) { return; }
+        for (LoanScheduleModelPeriod loanScheduleModelPeriod : periods) {
+            if (loanScheduleModelPeriod.isRepaymentPeriod() && loanScheduleModelPeriod.getLoanCompoundingDetails().isEmpty()) {
+                Map<LocalDate, Money> periodCompoundingDetails = compoundingDetails.get(loanScheduleModelPeriod.periodFromDate());
+                if (periodCompoundingDetails != null) {
+                    for (Map.Entry<LocalDate, Money> entry : periodCompoundingDetails.entrySet()) {
+                        if (entry.getValue().isGreaterThanZero() && !entry.getKey().isAfter(loanScheduleModelPeriod.periodDueDate())) {
+                            LocalDate effectiveDate = entry.getKey();
+                            if (loanApplicationTerms.allowCompoundingOnEod()) {
+                                effectiveDate = effectiveDate.minusDays(1);
+                            }
+                            LoanInterestRecalcualtionAdditionalDetails additionalDetails = new LoanInterestRecalcualtionAdditionalDetails(
+                                    effectiveDate, entry.getValue().getAmount());
+                            loanScheduleModelPeriod.getLoanCompoundingDetails().add(additionalDetails);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void applyChargesForCurrentPeriod(final Set<LoanCharge> loanCharges, final MonetaryCurrency currency,
@@ -422,13 +446,14 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
     private void updateAmountsWithEffectiveDate(final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO,
             LoanScheduleParams scheduleParams, LocalDate scheduledDueDate, ScheduleCurrentPeriodParams currentPeriodParams,
-            LoanScheduleModelPeriod installment) {
+            LoanScheduleModelPeriod installment, LocalDate lastRestDate) {
         LocalDate amountApplicableDate = installment.periodDueDate();
         if (loanApplicationTerms.isInterestRecalculationEnabled()) {
             amountApplicableDate = getNextRestScheduleDate(installment.periodDueDate().minusDays(1), loanApplicationTerms, holidayDetailDTO);
         }
         updateMapWithAmount(scheduleParams.getPrincipalPortionMap(),
                 currentPeriodParams.getPrincipalForThisPeriod().minus(currentPeriodParams.getReducedBalance()), amountApplicableDate);
+        updateCompoundingMap(loanApplicationTerms, holidayDetailDTO, scheduleParams, lastRestDate, scheduledDueDate);
 
         // update outstanding balance for interest calculation
         updateOutstandingBalanceAsPerRest(scheduleParams, scheduledDueDate);
@@ -445,7 +470,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         LoanScheduleModelPeriod modifiedInstallment = installment;
         if (scheduleParams.applyInterestRecalculation() && loanRepaymentScheduleTransactionProcessor != null) {
             Money principalProcessed = Money.zero(currency);
-            addLoanRepaymentScheduleInstallment(scheduleParams.getInstallments(), modifiedInstallment);
             for (RecalculationDetail detail : applicableTransactions) {
                 if (!detail.isProcessed()) {
                     LocalDate transactionDate = detail.getTransactionDate();
@@ -489,10 +513,12 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         }
 
                     }
+                    adjustCompoundedAmountWithPaidDetail(scheduleParams, lastRestDate, currentTransactions, loanApplicationTerms,
+                            holidayDetailDTO);
                 }
             }
             updateLatePaymentsToMap(loanApplicationTerms, holidayDetailDTO, currency, scheduleParams.getLatePaymentMap(), scheduledDueDate,
-                    scheduleParams.getInstallments(), true, lastRestDate, scheduleParams.getCompoundingMap());
+                    scheduleParams.getInstallments(), true, lastRestDate);
             currentPeriodParams.minusPrincipalForThisPeriod(principalProcessed);
         }
         return modifiedInstallment;
@@ -600,9 +626,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             scheduleParams.getCompoundingMap().clear();
             scheduleParams.getCompoundingMap().putAll(
                     scheduleParams.getCompoundingDateVariations().get(periodStartDateApplicableForInterest));
-        } else {
-            scheduleParams.getCompoundingDateVariations().put(periodStartDateApplicableForInterest,
-                    new TreeMap<>(scheduleParams.getCompoundingMap()));
         }
     }
 
@@ -656,10 +679,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                             if (daysInPeriodApplicable > 0) {
                                 // 5 determine interest till the transaction
                                 // date
-                                if (!scheduleParams.getCompoundingDateVariations().containsKey(periodStartDateApplicableForInterest)) {
-                                    scheduleParams.getCompoundingDateVariations().put(periodStartDateApplicableForInterest,
-                                            new TreeMap<>(scheduleParams.getCompoundingMap()));
-                                }
                                 PrincipalInterest principalInterestForThisPeriod = calculatePrincipalInterestComponentsForPeriod(
                                         this.paymentPeriodsInOneYearCalculator,
                                         currentPeriodParams.getInterestCalculationGraceOnRepaymentPeriodFraction(), scheduleParams
@@ -700,6 +719,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                     scheduleParams.getOutstandingBalance(), interestForThisinstallment, feeChargesForInstallment,
                                     penaltyChargesForInstallment, totalInstallmentDue, true);
                             periods.add(installment);
+                            addLoanRepaymentScheduleInstallment(scheduleParams.getInstallments(), installment);
+                            updateCompoundingMap(loanApplicationTerms, holidayDetailDTO, scheduleParams, lastRestDate, scheduledDueDate);
 
                             // update outstanding balance for interest
                             // calculation as per the rest
@@ -716,10 +737,12 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                             periodStartDateApplicableForInterest = scheduleParams.getPeriodStartDate();
                             updateLatePaymentMap = true;
                             scheduleParams.incrementInstalmentNumber();
+                            populateCompoundingDatesInPeriod(scheduleParams.getPeriodStartDate(), scheduledDueDate, loanApplicationTerms,
+                                    holidayDetailDTO, scheduleParams, loanCharges, currency);
                             // creates and insert Loan repayment schedule
                             // for
                             // the period
-                            addLoanRepaymentScheduleInstallment(scheduleParams.getInstallments(), installment);
+
                         } else if (installment == null) {
                             installment = ((List<LoanScheduleModelPeriod>) periods).get(periods.size() - 1);
                         }
@@ -762,12 +785,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         // identify late payments and add compounding
                         // details to
                         // map for interest calculation
-                        handleLatePayments(loanApplicationTerms, holidayDetailDTO, currency, scheduleParams, lastRestDate,
-                                periodStartDateApplicableForInterest, detail);
+                        handleLatePayments(loanApplicationTerms, holidayDetailDTO, currency, scheduleParams, lastRestDate, detail);
                         if (updateLatePaymentMap) {
                             updateLatePaymentsToMap(loanApplicationTerms, holidayDetailDTO, currency, scheduleParams.getLatePaymentMap(),
-                                    scheduledDueDate, scheduleParams.getInstallments(), true, lastRestDate,
-                                    scheduleParams.getCompoundingMap());
+                                    scheduledDueDate, scheduleParams.getInstallments(), true, lastRestDate);
                         }
                     } else if (scheduleParams.getLoanRepaymentScheduleTransactionProcessor() != null) {
                         LocalDate applicableDate = getNextRestScheduleDate(transactionDate.minusDays(1), loanApplicationTerms,
@@ -776,9 +797,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                             List<LoanTransaction> currentTransactions = createCurrentTransactionList(detail);
                             Money unprocessed = scheduleParams.getLoanRepaymentScheduleTransactionProcessor().handleRepaymentSchedule(
                                     currentTransactions, currency, scheduleParams.getInstallments());
-                            Money arrears = fetchCompoundedArrears(loanApplicationTerms, currency, detail.getTransaction());
+                            Money arrears = fetchArrears(loanApplicationTerms, currency, detail.getTransaction());
                             if (unprocessed.isGreaterThanZero()) {
-                                arrears = getTotalAmount(scheduleParams.getLatePaymentMap(), currency);
                                 updateMapWithAmount(scheduleParams.getPrincipalPortionMap(), unprocessed, applicableDate);
                                 currentPeriodParams.plusEarlyPaidAmount(unprocessed);
 
@@ -790,10 +810,6 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                                                 .calculateTillRestFrequencyEnabled()) {
 
                                     LocalDate calculateTill = transactionDate;
-                                    if (!scheduleParams.getCompoundingDateVariations().containsKey(periodStartDateApplicableForInterest)) {
-                                        scheduleParams.getCompoundingDateVariations().put(periodStartDateApplicableForInterest,
-                                                new TreeMap<>(scheduleParams.getCompoundingMap()));
-                                    }
                                     PrincipalInterest principalInterestForThisPeriod = calculatePrincipalInterestComponentsForPeriod(
                                             this.paymentPeriodsInOneYearCalculator,
                                             currentPeriodParams.getInterestCalculationGraceOnRepaymentPeriodFraction(), scheduleParams
@@ -836,8 +852,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
                             }
                             if (arrears.isGreaterThanZero() && applicableDate.isBefore(lastRestDate)) {
-                                handleLatePayments(loanApplicationTerms, holidayDetailDTO, currency, scheduleParams, lastRestDate,
-                                        periodStartDateApplicableForInterest, detail);
+                                handleLatePayments(loanApplicationTerms, holidayDetailDTO, currency, scheduleParams, lastRestDate, detail);
                             }
                         }
 
@@ -862,12 +877,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
      * @param detail
      */
     private void handleLatePayments(final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO,
-            final MonetaryCurrency currency, LoanScheduleParams scheduleParams, LocalDate lastRestDate,
-            LocalDate periodStartDateApplicableForInterest, RecalculationDetail detail) {
+            final MonetaryCurrency currency, LoanScheduleParams scheduleParams, LocalDate lastRestDate, RecalculationDetail detail) {
         updateLatePaidAmountsToPrincipalMap(detail.getTransaction(), loanApplicationTerms, currency, holidayDetailDTO, lastRestDate,
                 scheduleParams);
-        scheduleParams.getCompoundingDateVariations().put(periodStartDateApplicableForInterest,
-                new TreeMap<>(scheduleParams.getCompoundingMap()));
     }
 
     private void updateAmountsBasedOnEarlyPayment(final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO,
@@ -1064,9 +1076,16 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         return isAmountChanged;
     }
 
-    private Money fetchCompoundedArrears(final LoanApplicationTerms loanApplicationTerms, final MonetaryCurrency currency,
+    private Money fetchArrears(final LoanApplicationTerms loanApplicationTerms, final MonetaryCurrency currency,
             final LoanTransaction transaction) {
         Money arrears = transaction.getPrincipalPortion(currency);
+        arrears = arrears.plus(fetchCompoundedArrears(loanApplicationTerms, currency, transaction));
+        return arrears;
+    }
+
+    private Money fetchCompoundedArrears(final LoanApplicationTerms loanApplicationTerms, final MonetaryCurrency currency,
+            final LoanTransaction transaction) {
+        Money arrears = Money.zero(currency);
         if (loanApplicationTerms.getInterestRecalculationCompoundingMethod().isInterestCompoundingEnabled()) {
             arrears = arrears.plus(transaction.getInterestPortion(currency));
         }
@@ -1096,7 +1115,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             final Collection<RecalculationDetail> transactions, final Set<LoanCharge> loanCharges, final LoanScheduleParams params) {
         boolean isFirstRepayment = false;
         LocalDate startDate = params.getPeriodStartDate();
-        Money outstanding = Money.zero(currency);
+        Money outstanding = params.getOutstandingBalanceAsPerRest();
         Money totalInterest = Money.zero(currency);
         Money totalCumulativeInterest = Money.zero(currency);
         double interestCalculationGraceOnRepaymentPeriodFraction = Double.valueOf(0);
@@ -1111,15 +1130,12 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             if (params.getActualRepaymentDate().isAfter(currentDate)) {
                 params.setActualRepaymentDate(currentDate);
             }
-            outstanding = updateOutstandingFromLatePayment(params.getPeriodStartDate(), params.getLatePaymentMap(), outstanding);
 
             Collection<RecalculationDetail> applicableTransactions = getApplicableTransactionsForPeriod(
                     params.applyInterestRecalculation(), params.getActualRepaymentDate(), transactions);
 
-            if (!params.getLatePaymentMap().isEmpty()) {
-                populateCompoundingDatesInPeriod(params.getPeriodStartDate(), params.getActualRepaymentDate(), currentDate,
-                        loanApplicationTerms, holidayDetailDTO, params.getCompoundingMap(), loanCharges, currency);
-            }
+            populateCompoundingDatesInPeriod(params.getPeriodStartDate(), params.getActualRepaymentDate(), loanApplicationTerms,
+                    holidayDetailDTO, params, loanCharges, currency);
 
             for (RecalculationDetail detail : applicableTransactions) {
                 if (detail.isProcessed()) {
@@ -1146,22 +1162,29 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     totalCumulativeInterest = totalCumulativeInterest.plus(totalInterest);
                     totalInterest = totalInterest.zero();
                     addLoanRepaymentScheduleInstallment(params.getInstallments(), installment);
+                    updateCompoundingMap(loanApplicationTerms, holidayDetailDTO, params, lastRestDate, transactionDate);
+                    populateCompoundingDatesInPeriod(installment.periodDueDate(), params.getActualRepaymentDate(), loanApplicationTerms,
+                            holidayDetailDTO, params, loanCharges, currency);
                     params.setPeriodStartDate(transactionDate);
                     startDate = transactionDate;
                 }
                 loanRepaymentScheduleTransactionProcessor.handleRepaymentSchedule(currentTransactions, currency, params.getInstallments());
+                updateLatePaidAmountsToPrincipalMap(detail.getTransaction(), loanApplicationTerms, currency, holidayDetailDTO,
+                        lastRestDate, params);
                 updateLatePaymentsToMap(loanApplicationTerms, holidayDetailDTO, currency, params.getLatePaymentMap(), currentDate,
-                        params.getInstallments(), false, lastRestDate, params.getCompoundingMap());
-                outstanding = outstanding.zero();
-                outstanding = updateOutstandingFromLatePayment(params.getPeriodStartDate(), params.getLatePaymentMap(), outstanding);
-                outstanding = updateBalanceForInterestCalculation(params.getPrincipalPortionMap(), params.getPeriodStartDate(),
-                        outstanding, false);
-                if (params.getLatePaymentMap().isEmpty() && !outstanding.isGreaterThanZero()) {
+                        params.getInstallments(), false, lastRestDate);
+                if (params.getLatePaymentMap().isEmpty() && isCompleted(params.getInstallments())) {
+                    outstanding = outstanding.zero();
+                } else {
+                    outstanding = updateBalanceForInterestCalculation(params.getPrincipalPortionMap(), params.getPeriodStartDate(),
+                            outstanding, false);
+                }
+                if (params.getLatePaymentMap().isEmpty() && outstanding.isZero()) {
                     break;
                 }
             }
 
-            if (outstanding.isGreaterThanZero()) {
+            if (!outstanding.isZero()) {
                 PrincipalInterest principalInterestForThisPeriod = calculatePrincipalInterestComponentsForPeriod(
                         this.paymentPeriodsInOneYearCalculator, interestCalculationGraceOnRepaymentPeriodFraction, totalInterest.zero(),
                         totalInterest.zero(), totalInterest.zero(), totalInterest.zero(), outstanding, loanApplicationTerms,
@@ -1169,15 +1192,21 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         params.getActualRepaymentDate(), applicableVariations);
                 Money interest = principalInterestForThisPeriod.interest();
                 totalInterest = totalInterest.plus(interest);
-                if (loanApplicationTerms.getInterestRecalculationCompoundingMethod().isInterestCompoundingEnabled()) {
-                    LocalDate compoundingEffectiveDate = getNextCompoundScheduleDate(params.getActualRepaymentDate().minusDays(1),
-                            loanApplicationTerms, holidayDetailDTO);
-                    params.getLatePaymentMap().put(compoundingEffectiveDate, interest);
 
+                Money uncompounded = params.getUnCompoundedAmount();
+                Money compounded = uncompounded.zero();
+                for (Map.Entry<LocalDate, Money> mapEntry : params.getCompoundingMap().entrySet()) {
+                    if (mapEntry.getKey().isAfter(params.getPeriodStartDate())) {
+                        compounded = compounded.plus(mapEntry.getValue());
+                    }
                 }
+                Money compoundedForThisPeriod = compounded.minus(uncompounded);
+                Money uncompoundedForThisPeriod = interest.minus(compoundedForThisPeriod);
+                params.setUnCompoundedAmount(uncompoundedForThisPeriod);
+
             }
             params.setPeriodStartDate(params.getActualRepaymentDate());
-        } while (params.getActualRepaymentDate().isBefore(currentDate) && outstanding.isGreaterThanZero());
+        } while (params.getActualRepaymentDate().isBefore(currentDate) && !outstanding.isZero());
 
         if (totalInterest.isGreaterThanZero()) {
             LoanScheduleModelRepaymentPeriod installment = LoanScheduleModelRepaymentPeriod.repayment(params.getInstalmentNumber(),
@@ -1185,9 +1214,21 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     totalInterest.zero(), totalInterest.zero(), totalInterest, true);
             params.incrementInstalmentNumber();
             periods.add(installment);
+            params.getCompoundingDateVariations().put(startDate, new TreeMap<>(params.getCompoundingMap()));
             totalCumulativeInterest = totalCumulativeInterest.plus(totalInterest);
         }
         return totalCumulativeInterest;
+    }
+
+    private boolean isCompleted(List<LoanRepaymentScheduleInstallment> installments) {
+        boolean isCompleted = true;
+        for (LoanRepaymentScheduleInstallment installment : installments) {
+            if (installment.isNotFullyPaidOff()) {
+                isCompleted = false;
+                break;
+            }
+        }
+        return isCompleted;
     }
 
     private Collection<RecalculationDetail> getApplicableTransactionsForPeriod(final boolean applyInterestRecalculation,
@@ -1221,21 +1262,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         currentTransactions.add(detail.getTransaction());
         detail.setProcessed(true);
         return currentTransactions;
-    }
 
-    private Money updateOutstandingFromLatePayment(LocalDate periodStartDate, Map<LocalDate, Money> latePaymentMap, Money outstanding) {
-        Map<LocalDate, Money> retainEntries = new HashMap<>();
-        for (Map.Entry<LocalDate, Money> mapEntry : latePaymentMap.entrySet()) {
-            if (!mapEntry.getKey().isAfter(periodStartDate)) {
-                outstanding = outstanding.plus(mapEntry.getValue());
-            } else {
-                retainEntries.put(mapEntry.getKey(), mapEntry.getValue());
-            }
-        }
-        latePaymentMap.clear();
-        latePaymentMap.putAll(retainEntries);
-        retainEntries.clear();
-        return outstanding;
     }
 
     /**
@@ -1315,22 +1342,13 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 holidayDetailDTO);
 
         Money principalPortion = loanTransaction.getPrincipalPortion(currency);
-        Money compoundedLatePayments = Money.zero(currency);
-        if (applicationTerms.getInterestRecalculationCompoundingMethod().isInterestCompoundingEnabled()) {
-            compoundedLatePayments = compoundedLatePayments.plus(loanTransaction.getInterestPortion(currency));
-        }
-        if (applicationTerms.getInterestRecalculationCompoundingMethod().isFeeCompoundingEnabled()) {
-            compoundedLatePayments = compoundedLatePayments.plus(loanTransaction.getFeeChargesPortion(currency)).plus(
-                    loanTransaction.getPenaltyChargesPortion(currency));
-        }
 
-        updateCompoundingAmount(params.getPrincipalPortionMap(), params.getLatePaymentMap(), currency, lastRestDate, principalPortion,
-                applicableDate);
-        updateCompoundingAmount(params.getPrincipalPortionMap(), params.getCompoundingMap(), currency, lastRestDate,
-                compoundedLatePayments, applicableDate);
+        updateLatePaymentCompoundingAmount(params.getPrincipalPortionMap(), params.getLatePaymentMap(), currency, lastRestDate,
+                principalPortion, applicableDate);
+        adjustCompoundedAmountWithPaidDetail(params, lastRestDate, applicableDate, loanTransaction, applicationTerms);
     }
 
-    private void updateCompoundingAmount(final Map<LocalDate, Money> principalVariationMap,
+    private void updateLatePaymentCompoundingAmount(final Map<LocalDate, Money> principalVariationMap,
             final Map<LocalDate, Money> latePaymentCompoundingMap, final MonetaryCurrency currency, final LocalDate lastRestDate,
             Money compoundedPortion, final LocalDate applicableDate) {
         Money appliedOnPrincipalVariationMap = Money.zero(currency);
@@ -1368,17 +1386,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
      */
     private void updateLatePaymentsToMap(final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO,
             final MonetaryCurrency currency, final Map<LocalDate, Money> latePaymentMap, final LocalDate scheduledDueDate,
-            List<LoanRepaymentScheduleInstallment> installments, boolean applyRestFrequencyForPrincipal, final LocalDate lastRestDate,
-            final TreeMap<LocalDate, Money> compoundingMap) {
+            List<LoanRepaymentScheduleInstallment> installments, boolean applyRestFrequencyForPrincipal, final LocalDate lastRestDate) {
         latePaymentMap.clear();
         LocalDate currentDate = DateUtils.getLocalDateOfTenant();
 
         Money totalCompoundingAmount = Money.zero(currency);
-        Money compoundedMoney = Money.zero(currency);
-        if (!compoundingMap.isEmpty()) {
-            compoundedMoney = compoundingMap.get(lastRestDate);
-        }
-        boolean clearCompoundingMap = true;
         for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : installments) {
             if (loanRepaymentScheduleInstallment.isNotFullyPaidOff()
                     && !loanRepaymentScheduleInstallment.getDueDate().isAfter(scheduledDueDate)
@@ -1395,104 +1407,175 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                             .plus(loanRepaymentScheduleInstallment.getPrincipalOutstanding(currency));
                 }
 
-                final Money changedCompoundedMoney = updateMapWithCompoundingDetails(loanApplicationTerms, holidayDetailDTO, currency,
-                        compoundingMap, loanRepaymentScheduleInstallment, lastRestDate, compoundedMoney, scheduledDueDate);
-                if (compoundedMoney.isZero() || !compoundedMoney.isEqualTo(changedCompoundedMoney)) {
-                    compoundedMoney = changedCompoundedMoney;
-                    clearCompoundingMap = false;
-                }
             }
         }
         if (totalCompoundingAmount.isGreaterThanZero()) {
             updateMapWithAmount(latePaymentMap, totalCompoundingAmount.negated(), lastRestDate);
         }
-        if (clearCompoundingMap) {
-            compoundingMap.clear();
-        }
     }
 
-    private Money updateMapWithCompoundingDetails(final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO,
-            final MonetaryCurrency currency, final TreeMap<LocalDate, Money> compoundingMap,
-            final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment, final LocalDate lastRestDate,
-            final Money compoundedMoney, final LocalDate scheduledDueDate) {
-        Money ignoreMoney = compoundedMoney;
-        if (loanApplicationTerms.getInterestRecalculationCompoundingMethod().isCompoundingEnabled()) {
-            LocalDate compoundingEffectiveDate = getNextCompoundScheduleDate(loanRepaymentScheduleInstallment.getDueDate().minusDays(1),
-                    loanApplicationTerms, holidayDetailDTO);
-
-            if (compoundingEffectiveDate.isBefore(DateUtils.getLocalDateOfTenant())) {
-                Money amount = Money.zero(currency);
-                switch (loanApplicationTerms.getInterestRecalculationCompoundingMethod()) {
-                    case INTEREST:
-                        amount = amount.plus(loanRepaymentScheduleInstallment.getInterestOutstanding(currency));
-                    break;
-                    case FEE:
-                        amount = amount.plus(loanRepaymentScheduleInstallment.getFeeChargesOutstanding(currency));
-                        amount = amount.plus(loanRepaymentScheduleInstallment.getPenaltyChargesOutstanding(currency));
-                    break;
-                    case INTEREST_AND_FEE:
-                        amount = amount.plus(loanRepaymentScheduleInstallment.getInterestOutstanding(currency));
-                        amount = amount.plus(loanRepaymentScheduleInstallment.getFeeChargesOutstanding(currency));
-                        amount = amount.plus(loanRepaymentScheduleInstallment.getPenaltyChargesOutstanding(currency));
-                    break;
-                    default:
-                    break;
-                }
-                if (compoundingEffectiveDate.isBefore(scheduledDueDate)) {
-                    ignoreMoney = ignoreMoney.plus(amount);
-                    if (ignoreMoney.isGreaterThanZero()) {
-                        updateMapWithAmount(compoundingMap, ignoreMoney, compoundingEffectiveDate);
-                        updateMapWithAmount(compoundingMap, ignoreMoney.negated(), lastRestDate);
-                        ignoreMoney = ignoreMoney.zero();
-                    }
+    private void updateCompoundingMap(final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO,
+            final LoanScheduleParams params, final LocalDate lastRestDate, final LocalDate scheduledDueDate) {
+        if (loanApplicationTerms.isInterestRecalculationEnabled()
+                && loanApplicationTerms.getInterestRecalculationCompoundingMethod().isCompoundingEnabled()) {
+            final MonetaryCurrency currency = params.getCurrency();
+            Money totalCompoundedAmount = Money.zero(currency);
+            boolean lastInstallmentIsPastDate = false;
+            for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : params.getInstallments()) {
+                if (params.getCompoundingDateVariations().containsKey(loanRepaymentScheduleInstallment.getFromDate())) {
+                    lastInstallmentIsPastDate = params.applyInterestRecalculation()
+                            && loanRepaymentScheduleInstallment.getDueDate().isBefore(DateUtils.getLocalDateOfTenant());
                 } else {
-                    if (ignoreMoney.isLessThanZero()) {
-                        LocalDate firstKey = compoundingMap.firstKey();
-                        updateMapWithAmount(compoundingMap, ignoreMoney, firstKey);
-                        updateMapWithAmount(compoundingMap, ignoreMoney.negated(), lastRestDate);
-                        ignoreMoney = ignoreMoney.zero();
+                    final boolean isPastDate = params.applyInterestRecalculation()
+                            && loanRepaymentScheduleInstallment.getDueDate().isBefore(DateUtils.getLocalDateOfTenant());
+                    boolean periodHasCompoundingDate = false;
+                    Money amountCharged = getIncomeForCompounding(loanApplicationTerms, currency, loanRepaymentScheduleInstallment);
+                    final Map<LocalDate, Money> compoundingMap = params.getCompoundingMap();
+                    LocalDate effectiveStartDate = loanRepaymentScheduleInstallment.getFromDate();
+                    if (loanApplicationTerms.allowCompoundingOnEod()) {
+                        effectiveStartDate = loanRepaymentScheduleInstallment.getFromDate().minusDays(1);
                     }
-                    updateMapWithAmount(compoundingMap, amount, compoundingEffectiveDate);
-                    updateMapWithAmount(compoundingMap, amount.negated(), lastRestDate);
+                    LocalDate compoundingEffectiveDate = getNextCompoundScheduleDate(effectiveStartDate, loanApplicationTerms,
+                            holidayDetailDTO);
+                    final LocalDate restDate = getNextRestScheduleDate(scheduledDueDate.minusDays(1), loanApplicationTerms,
+                            holidayDetailDTO);
+                    if (!compoundingEffectiveDate.isAfter(loanRepaymentScheduleInstallment.getDueDate())) {
+                        totalCompoundedAmount = totalCompoundedAmount.minus(params.getUnCompoundedAmount());
+                        periodHasCompoundingDate = true;
+                    }
+                    while (!compoundingEffectiveDate.isAfter(loanRepaymentScheduleInstallment.getDueDate())) {
+                        if (compoundingEffectiveDate.isEqual(loanRepaymentScheduleInstallment.getDueDate())) {
+                            Money amountToBeCompounding = amountCharged.minus(totalCompoundedAmount);
+                            updateMapWithAmount(compoundingMap, amountToBeCompounding, compoundingEffectiveDate);
+                            totalCompoundedAmount = totalCompoundedAmount.plus(amountToBeCompounding);
+
+                        } else if (compoundingMap.containsKey(compoundingEffectiveDate)) {
+                            Money compounedAmount = compoundingMap.get(compoundingEffectiveDate);
+                            totalCompoundedAmount = totalCompoundedAmount.plus(compounedAmount);
+                        }
+
+                        if (!loanApplicationTerms.allowCompoundingOnEod()) {
+                            compoundingEffectiveDate = compoundingEffectiveDate.plusDays(1);
+                        }
+                        compoundingEffectiveDate = getNextCompoundScheduleDate(compoundingEffectiveDate, loanApplicationTerms,
+                                holidayDetailDTO);
+                    }
+                    if (periodHasCompoundingDate) {
+                        if (isPastDate) {
+                            updateMapWithAmount(params.getPrincipalPortionMap(),
+                                    totalCompoundedAmount.plus(params.getUnCompoundedAmount()), lastRestDate);
+                        } else {
+                            Money amountToBeEffected = amountCharged;
+                            if (lastInstallmentIsPastDate) {
+                                amountToBeEffected = amountToBeEffected.plus(params.getUnCompoundedAmount());
+                            }
+                            updateMapWithAmount(params.getPrincipalPortionMap(), amountToBeEffected, restDate);
+                        }
+                    }
+                    if (totalCompoundedAmount.isGreaterThanZero()) {
+                        params.minusUnCompoundedAmount(params.getUnCompoundedAmount());
+                        params.getCompoundingDateVariations().put(loanRepaymentScheduleInstallment.getFromDate(),
+                                new TreeMap<>(params.getCompoundingMap()));
+                        for (Map.Entry<LocalDate, Money> mapEntry : params.getCompoundingMap().entrySet()) {
+                            updateMapWithAmount(params.getPrincipalPortionMap(), mapEntry.getValue().negated(), mapEntry.getKey());
+                        }
+                        params.getCompoundingMap().clear();
+                    } else {
+                        params.getCompoundingMap().clear();
+                        params.getCompoundingDateVariations().put(loanRepaymentScheduleInstallment.getFromDate(),
+                                new TreeMap<>(params.getCompoundingMap()));
+                    }
+                    params.addUnCompoundedAmount(amountCharged.minus(totalCompoundedAmount));
+                    lastInstallmentIsPastDate = isPastDate;
                 }
+
             }
         }
-        return ignoreMoney;
+
     }
 
-    private void populateCompoundingDatesInPeriod(final LocalDate startDate, final LocalDate endDate, final LocalDate currentDate,
+    private Money getIncomeForCompounding(final LoanApplicationTerms loanApplicationTerms, final MonetaryCurrency currency,
+            LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment) {
+        Money interestCharged = Money.zero(currency);
+        Money feeCharged = Money.zero(currency);
+        Money penaltyCharged = Money.zero(currency);
+        Money amountCharged = Money.zero(currency);
+        switch (loanApplicationTerms.getInterestRecalculationCompoundingMethod()) {
+            case INTEREST:
+                interestCharged = interestCharged.plus(loanRepaymentScheduleInstallment.getInterestCharged(currency));
+            break;
+            case FEE:
+                feeCharged = feeCharged.plus(loanRepaymentScheduleInstallment.getFeeChargesCharged(currency));
+                penaltyCharged = penaltyCharged.plus(loanRepaymentScheduleInstallment.getPenaltyChargesCharged(currency));
+            break;
+            case INTEREST_AND_FEE:
+                interestCharged = interestCharged.plus(loanRepaymentScheduleInstallment.getInterestCharged(currency));
+                feeCharged = feeCharged.plus(loanRepaymentScheduleInstallment.getFeeChargesCharged(currency));
+                penaltyCharged = penaltyCharged.plus(loanRepaymentScheduleInstallment.getPenaltyChargesCharged(currency));
+            break;
+            default:
+            break;
+        }
+        amountCharged = interestCharged.plus(feeCharged).plus(penaltyCharged);
+        return amountCharged;
+    }
+
+    private void adjustCompoundedAmountWithPaidDetail(final LoanScheduleParams params, final LocalDate lastRestDate,
+            final Collection<LoanTransaction> transactions, final LoanApplicationTerms loanApplicationTerms,
+            HolidayDetailDTO holidayDetailDTO) {
+        for (LoanTransaction loanTransaction : transactions) {
+            final LocalDate amountApplicableDate = getNextRestScheduleDate(loanTransaction.getTransactionDate().minusDays(1),
+                    loanApplicationTerms, holidayDetailDTO);
+            adjustCompoundedAmountWithPaidDetail(params, lastRestDate, amountApplicableDate, loanTransaction, loanApplicationTerms);
+        }
+    }
+
+    private void adjustCompoundedAmountWithPaidDetail(final LoanScheduleParams params, final LocalDate lastRestDate,
+            final LocalDate amountApplicableDate, final LoanTransaction transaction, final LoanApplicationTerms loanApplicationTerms) {
+        adjustCompoundedAmountWithPaidDetail(params.getPrincipalPortionMap(), lastRestDate, amountApplicableDate, transaction,
+                loanApplicationTerms, params.getCurrency());
+    }
+
+    private void adjustCompoundedAmountWithPaidDetail(final Map<LocalDate, Money> principalPortionMap, final LocalDate lastRestDate,
+            final LocalDate amountApplicableDate, final LoanTransaction transaction, final LoanApplicationTerms loanApplicationTerms,
+            final MonetaryCurrency currency) {
+        if (!amountApplicableDate.isEqual(lastRestDate)) {
+            Money compoundedIncome = fetchCompoundedArrears(loanApplicationTerms, currency, transaction);
+            updateMapWithAmount(principalPortionMap, compoundedIncome, amountApplicableDate);
+            updateMapWithAmount(principalPortionMap, compoundedIncome.negated(), lastRestDate);
+        }
+    }
+
+    private void populateCompoundingDatesInPeriod(final LocalDate startDate, final LocalDate endDate,
             final LoanApplicationTerms loanApplicationTerms, final HolidayDetailDTO holidayDetailDTO,
-            final Map<LocalDate, Money> compoundingMap, final Set<LoanCharge> charges, MonetaryCurrency currency) {
+            final LoanScheduleParams scheduleParams, final Set<LoanCharge> charges, MonetaryCurrency currency) {
         if (loanApplicationTerms.getInterestRecalculationCompoundingMethod().isCompoundingEnabled()) {
+            final Map<LocalDate, Money> compoundingMap = scheduleParams.getCompoundingMap();
             LocalDate lastCompoundingDate = startDate;
             LocalDate compoundingDate = startDate;
-            while (compoundingDate.isBefore(endDate) && compoundingDate.isBefore(currentDate)) {
+            boolean addUncompounded = true;
+            while (compoundingDate.isBefore(endDate)) {
+                if (loanApplicationTerms.allowCompoundingOnEod()) {
+                    compoundingDate = compoundingDate.minusDays(1);
+                }
                 compoundingDate = getNextCompoundScheduleDate(compoundingDate, loanApplicationTerms, holidayDetailDTO);
-                if (!compoundingDate.isBefore(currentDate)) {
-                    break;
-                } else if (compoundingDate.isAfter(endDate)) {
-                    updateMapWithAmount(compoundingMap, Money.zero(currency), compoundingDate);
-                } else {
+
+                if (compoundingDate.isBefore(endDate)) {
                     Money feeChargesForInstallment = cumulativeFeeChargesDueWithin(lastCompoundingDate, compoundingDate, charges, currency,
                             null, loanApplicationTerms.getPrincipal(), null, false);
                     Money penaltyChargesForInstallment = cumulativePenaltyChargesDueWithin(lastCompoundingDate, compoundingDate, charges,
                             currency, null, loanApplicationTerms.getPrincipal(), null, false);
-                    updateMapWithAmount(compoundingMap, feeChargesForInstallment.plus(penaltyChargesForInstallment), compoundingDate);
+                    Money compoundAmount = feeChargesForInstallment.plus(penaltyChargesForInstallment);
+                    if (addUncompounded) {
+                        compoundAmount = compoundAmount.plus(scheduleParams.getUnCompoundedAmount());
+                        addUncompounded = false;
+                    }
+                    updateMapWithAmount(compoundingMap, compoundAmount, compoundingDate);
                 }
+
                 lastCompoundingDate = compoundingDate;
             }
         }
-    }
-
-    protected void clearMapDetails(final LocalDate startDate, final Map<LocalDate, Money> compoundingMap) {
-        Map<LocalDate, Money> temp = new HashMap<>();
-        for (LocalDate date : compoundingMap.keySet()) {
-            if (!date.isBefore(startDate)) {
-                temp.put(date, compoundingMap.get(date));
-            }
-        }
-        compoundingMap.clear();
-        compoundingMap.putAll(temp);
     }
 
     /**
@@ -1580,16 +1663,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             principalPaid = map.get(amountApplicableDate).plus(principalPaid);
         }
         map.put(amountApplicableDate, principalPaid);
-    }
 
-    private Money getTotalAmount(final Map<LocalDate, Money> map, final MonetaryCurrency currency) {
-        Money total = Money.zero(currency);
-        for (Map.Entry<LocalDate, Money> mapEntry : map.entrySet()) {
-            if (mapEntry.getKey().isBefore(DateUtils.getLocalDateOfTenant())) {
-                total = total.plus(mapEntry.getValue());
-            }
-        }
-        return total;
     }
 
     @Override
@@ -1737,8 +1811,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             }
 
             // get the loan application terms from the Loan object
-            final LoanApplicationTerms loanApplicationTerms = loan.getLoanApplicationTerms(applicationCurrency, restCalendarInstance,
-                    compoundingCalendarInstance, loanCalendar, floatingRateDTO, isSkipRepaymentonmonthFirst, numberofdays);
+            final LoanApplicationTerms loanApplicationTerms = loan
+                    .getLoanApplicationTerms(applicationCurrency, restCalendarInstance, compoundingCalendarInstance, loanCalendar,
+                            floatingRateDTO, isSkipRepaymentonmonthFirst, numberofdays, holidayDetailDTO);
 
             // for applying variations
             Collection<LoanTermVariationsData> loanTermVariations = loanApplicationTerms.getLoanTermVariations().getInterestRateChanges();
@@ -2117,6 +2192,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             // action will be performed on this value
             Money reducePrincipal = outstandingBalanceAsPerRest.zero();
 
+            Money uncompoundedAmount = outstandingBalanceAsPerRest.zero();
             // principal changes will be added along with date(after applying
             // rest)
             // from when these amounts will effect the outstanding balance for
@@ -2133,6 +2209,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             // from when these amounts will effect the outstanding balance for
             // interest calculation
             final TreeMap<LocalDate, Money> compoundingMap = new TreeMap<>();
+            final Map<LocalDate, Map<LocalDate, Money>> compoundingDateVariations = new HashMap<>();
             LocalDate currentDate = DateUtils.getLocalDateOfTenant();
             LocalDate lastRestDate = currentDate;
             if (loanApplicationTerms.getRestCalendarInstance() != null) {
@@ -2179,6 +2256,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 // process the installment only if recalculate from date is
                 // greater than due date
                 if (installment.getDueDate().isAfter(lastInstallmentDate)) {
+                    if (totalCumulativePrincipal.isGreaterThanOrEqualTo(loanApplicationTerms.getTotalDisbursedAmount())) {
+                        break;
+                    }
                     LocalDate previousRepaymentDate = actualRepaymentDate;
                     actualRepaymentDate = this.scheduledDateGenerator.generateNextRepaymentDate(actualRepaymentDate, loanApplicationTerms,
                             isFirstRepayment, holidayDetailDTO);
@@ -2272,6 +2352,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 // updates map with the installment principal amount excluding
                 // unprocessed amount since this amount is already accounted.
                 updateMapWithAmount(principalPortionMap, installment.getPrincipal(currency).minus(unprocessed), amountApplicableDate);
+                uncompoundedAmount = updateCompoundingDetailsForPartialScheduleGeneration(installment, loanApplicationTerms,
+                        principalPortionMap, compoundingDateVariations, uncompoundedAmount, applicableTransactions, lastRestDate,
+                        holidayDetailDTO);
                 // update outstanding balance for interest calculation
                 outstandingBalanceAsPerRest = updateBalanceForInterestCalculation(principalPortionMap, installment.getDueDate(),
                         outstandingBalanceAsPerRest, false);
@@ -2284,7 +2367,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             // updates the map with over due amounts
             updateLatePaymentsToMap(loanApplicationTerms, holidayDetailDTO, currency, latePaymentMap, lastInstallmentDate,
-                    newRepaymentScheduleInstallments, true, lastRestDate, compoundingMap);
+                    newRepaymentScheduleInstallments, true, lastRestDate);
 
             // for partial schedule generation
             if (!newRepaymentScheduleInstallments.isEmpty() && totalCumulativeInterest.isGreaterThanZero()) {
@@ -2293,10 +2376,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         loanTermInDays, periodStartDate, actualRepaymentDate, totalCumulativePrincipal, totalCumulativeInterest,
                         totalFeeChargesCharged, totalPenaltyChargesCharged, totalRepaymentExpected,
                         totalOutstandingInterestPaymentDueToGrace, reducePrincipal, principalPortionMap, latePaymentMap, compoundingMap,
-                        disburseDetailMap, principalToBeScheduled, outstandingBalance, outstandingBalanceAsPerRest,
+                        uncompoundedAmount, disburseDetailMap, principalToBeScheduled, outstandingBalance, outstandingBalanceAsPerRest,
                         newRepaymentScheduleInstallments, recalculationDetails, loanRepaymentScheduleTransactionProcessor,
                         scheduleTillDate, currency, applyInterestRecalculation);
                 retainedInstallments.addAll(newRepaymentScheduleInstallments);
+                loanScheduleParams.getCompoundingDateVariations().putAll(compoundingDateVariations);
             }
 
         }
@@ -2328,6 +2412,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             final Map<LocalDate, Money> principalPortionMap, LoanRepaymentScheduleInstallment installment,
             Collection<RecalculationDetail> applicableTransactions, Money actualPrincipalPortion) {
         Money unprocessed = Money.zero(currency);
+        Money totalUnprocessed = Money.zero(currency);
         for (RecalculationDetail detail : applicableTransactions) {
             if (!detail.isProcessed()) {
                 Money principalProcessed = installment.getPrincipalCompleted(currency);
@@ -2357,10 +2442,53 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 LocalDate applicableDate = getNextRestScheduleDate(detail.getTransactionDate().minusDays(1), loanApplicationTerms,
                         holidayDetailDTO);
                 updateMapWithAmount(principalPortionMap, unprocessed, applicableDate);
+                totalUnprocessed = totalUnprocessed.plus(unprocessed);
 
             }
         }
-        return unprocessed;
+        return totalUnprocessed;
+    }
+
+    private Money updateCompoundingDetailsForPartialScheduleGeneration(final LoanRepaymentScheduleInstallment installment,
+            LoanApplicationTerms loanApplicationTerms, Map<LocalDate, Money> principalMap,
+            final Map<LocalDate, Map<LocalDate, Money>> compoundingDateVariations, final Money uncompoundedAmount,
+            final Collection<RecalculationDetail> applicableTransactions, LocalDate lastRestDate, HolidayDetailDTO holidayDetailDTO) {
+        Money uncompounded = uncompoundedAmount;
+        MonetaryCurrency currency = uncompoundedAmount.getCurrency();
+        for (RecalculationDetail detail : applicableTransactions) {
+            LocalDate applicableDate = getNextRestScheduleDate(detail.getTransactionDate().minusDays(1), loanApplicationTerms,
+                    holidayDetailDTO);
+            adjustCompoundedAmountWithPaidDetail(principalMap, lastRestDate, applicableDate, detail.getTransaction(), loanApplicationTerms,
+                    currency);
+        }
+        Money amountCharged = getIncomeForCompounding(loanApplicationTerms, currency, installment);
+        final List<LoanInterestRecalcualtionAdditionalDetails> details = installment.getLoanCompoundingDetails();
+        Money totalCompounded = Money.zero(currency);
+        Map<LocalDate, Money> compoundingMap = new TreeMap<>();
+        for (LoanInterestRecalcualtionAdditionalDetails additionalDetails : details) {
+            LocalDate effectiveDate = additionalDetails.getEffectiveDate();
+            if (loanApplicationTerms.allowCompoundingOnEod()) {
+                effectiveDate = effectiveDate.plusDays(1);
+            }
+            compoundingMap.put(effectiveDate, Money.of(currency, additionalDetails.getAmount()));
+            totalCompounded = totalCompounded.plus(additionalDetails.getAmount());
+            updateMapWithAmount(principalMap, Money.of(currency, additionalDetails.getAmount()).negated(), effectiveDate);
+        }
+        compoundingDateVariations.put(installment.getFromDate(), compoundingMap);
+        if (totalCompounded.isGreaterThanZero()) {
+            final boolean isPastDate = installment.getDueDate().isBefore(DateUtils.getLocalDateOfTenant());
+            final LocalDate restDate = getNextRestScheduleDate(installment.getDueDate().minusDays(1), loanApplicationTerms,
+                    holidayDetailDTO);
+            if (isPastDate) {
+                updateMapWithAmount(principalMap, totalCompounded, lastRestDate);
+            } else {
+                updateMapWithAmount(principalMap, totalCompounded, restDate);
+            }
+            uncompounded = amountCharged.plus(uncompounded).minus(totalCompounded);
+        } else {
+            uncompounded = uncompounded.plus(amountCharged);
+        }
+        return uncompounded;
     }
 
     private void updateAmortization(final MathContext mc, final LoanApplicationTerms loanApplicationTerms, int periodNumber,
@@ -2432,7 +2560,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     scheduledLoanInstallment.periodFromDate(), scheduledLoanInstallment.periodDueDate(),
                     scheduledLoanInstallment.principalDue(), scheduledLoanInstallment.interestDue(),
                     scheduledLoanInstallment.feeChargesDue(), scheduledLoanInstallment.penaltyChargesDue(),
-                    scheduledLoanInstallment.isRecalculatedInterestComponent());
+                    scheduledLoanInstallment.isRecalculatedInterestComponent(), scheduledLoanInstallment.getLoanCompoundingDetails());
             installments.add(installment);
         }
         return installment;
@@ -2473,6 +2601,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         } else {
             CalendarInstance calendarInstance = loanApplicationTerms.getCompoundingCalendarInstance();
             nextScheduleDate = CalendarUtils.getNextScheduleDate(calendarInstance.getCalendar(), startDate);
+            if (loanApplicationTerms.allowCompoundingOnEod()) {
+                nextScheduleDate = nextScheduleDate.plusDays(1);
+            }
         }
 
         return nextScheduleDate;
@@ -2510,9 +2641,9 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 penaltyCharges = penaltyCharges.plus(currentInstallment.getPenaltyChargesOutstanding(currency));
             }
         }
-
+        final List<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails = null;
         return new LoanRepaymentScheduleInstallment(null, 0, onDate, onDate, totalPrincipal.getAmount(), totalInterest.getAmount(),
-                feeCharges.getAmount(), penaltyCharges.getAmount(), false);
+                feeCharges.getAmount(), penaltyCharges.getAmount(), false, compoundingDetails);
     }
 
     /**

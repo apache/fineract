@@ -86,12 +86,17 @@ public interface LoanProductConstants {
     public static final String rescheduleStrategyMethodParameterName = "rescheduleStrategyMethod";
     public static final String recalculationRestFrequencyTypeParameterName = "recalculationRestFrequencyType";
     public static final String recalculationRestFrequencyIntervalParameterName = "recalculationRestFrequencyInterval";
-    public static final String recalculationRestFrequencyDateParamName = "recalculationRestFrequencyDate";
+    public static final String recalculationRestFrequencyWeekdayParamName = "recalculationRestFrequencyDayOfWeekType";
+    public static final String recalculationRestFrequencyNthDayParamName = "recalculationRestFrequencyNthDayType";
+    public static final String recalculationRestFrequencyOnDayParamName = "recalculationRestFrequencyOnDayType";
     public static final String isArrearsBasedOnOriginalScheduleParamName = "isArrearsBasedOnOriginalSchedule";
     public static final String preClosureInterestCalculationStrategyParamName = "preClosureInterestCalculationStrategy";
     public static final String recalculationCompoundingFrequencyTypeParameterName = "recalculationCompoundingFrequencyType";
     public static final String recalculationCompoundingFrequencyIntervalParameterName = "recalculationCompoundingFrequencyInterval";
-    public static final String recalculationCompoundingFrequencyDateParamName = "recalculationCompoundingFrequencyDate";
+    public static final String recalculationCompoundingFrequencyWeekdayParamName = "recalculationCompoundingFrequencyDayOfWeekType";
+    public static final String recalculationCompoundingFrequencyNthDayParamName = "recalculationCompoundingFrequencyNthDayType";
+    public static final String recalculationCompoundingFrequencyOnDayParamName = "recalculationCompoundingFrequencyOnDayType";
+    public static final String isCompoundingToBePostedAsTransactionParamName = "isCompoundingToBePostedAsTransaction";
 
     // Guarantee related
     public static final String holdGuaranteeFundsParamName = "holdGuaranteeFunds";
@@ -115,6 +120,7 @@ public interface LoanProductConstants {
     public static final String inArrearsToleranceParamName = "inArrearsTolerance";
     public static final String repaymentEveryParamName = "repaymentEvery";
     public static final String graceOnPrincipalAndInterestPaymentParamName = "graceOnPrincipalAndInterestPayment";
+    public static final String allowCompoundingOnEodParamName = "allowCompoundingOnEod";
     
     //Variable Installments Settings
     public static final String allowVariableInstallmentsParamName = "allowVariableInstallments" ;

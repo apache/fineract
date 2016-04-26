@@ -159,6 +159,10 @@ public class LoanProductData {
     @SuppressWarnings("unused")
     private final List<EnumOptionData> interestRecalculationCompoundingTypeOptions;
     @SuppressWarnings("unused")
+    private final List<EnumOptionData> interestRecalculationNthDayTypeOptions;
+    @SuppressWarnings("unused")
+    private final List<EnumOptionData> interestRecalculationDayOfWeekTypeOptions;
+    @SuppressWarnings("unused")
     private final List<EnumOptionData> rescheduleStrategyTypeOptions;
     @SuppressWarnings("unused")
     private final List<EnumOptionData> preClosureInterestCalculationStrategyOptions;
@@ -585,6 +589,8 @@ public class LoanProductData {
         this.interestRecalculationCompoundingTypeOptions = null;
         this.rescheduleStrategyTypeOptions = null;
         this.interestRecalculationFrequencyTypeOptions = null;
+        this.interestRecalculationNthDayTypeOptions = null;
+        this.interestRecalculationDayOfWeekTypeOptions = null;
 
         this.canDefineInstallmentAmount = canDefineInstallmentAmount;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
@@ -602,7 +608,9 @@ public class LoanProductData {
             final List<EnumOptionData> valueConditionTypeOptions, final List<EnumOptionData> daysInMonthTypeOptions,
             final List<EnumOptionData> daysInYearTypeOptions, final List<EnumOptionData> interestRecalculationCompoundingTypeOptions,
             final List<EnumOptionData> rescheduleStrategyTypeOptions, final List<EnumOptionData> interestRecalculationFrequencyTypeOptions,
-            final List<EnumOptionData> preCloseInterestCalculationStrategyOptions, final List<FloatingRateData> floatingRateOptions) {
+            final List<EnumOptionData> preCloseInterestCalculationStrategyOptions, final List<FloatingRateData> floatingRateOptions,
+            final List<EnumOptionData> interestRecalculationNthDayTypeOptions,
+            final List<EnumOptionData> interestRecalculationDayOfWeekTypeOptions) {
         this.id = productData.id;
         this.name = productData.name;
         this.shortName = productData.shortName;
@@ -686,6 +694,8 @@ public class LoanProductData {
         this.amortizationTypeOptions = amortizationTypeOptions;
         this.interestTypeOptions = interestTypeOptions;
         this.interestCalculationPeriodTypeOptions = interestCalculationPeriodTypeOptions;
+        this.interestRecalculationNthDayTypeOptions = interestRecalculationNthDayTypeOptions;
+        this.interestRecalculationDayOfWeekTypeOptions = interestRecalculationDayOfWeekTypeOptions;
         this.repaymentFrequencyTypeOptions = repaymentFrequencyTypeOptions;
         this.interestRateFrequencyTypeOptions = interestRateFrequencyTypeOptions;
 
@@ -946,8 +956,11 @@ public class LoanProductData {
         final CalendarData compoundingCalendarData = null;
         return new LoanInterestRecalculationData(id, loanId, getInterestRecalculationCompoundingType(), getRescheduleStrategyType(),
                 calendarData, getRecalculationRestFrequencyType(), getRecalculationRestFrequencyInterval(),
-                getRecalculationRestFrequencyDate(), compoundingCalendarData, getRecalculationCompoundingFrequencyType(),
-                getRecalculationCompoundingFrequencyInterval(), getRecalculationCompoundingFrequencyDate());
+                getInterestRecalculationRestNthDayType(), getInterestRecalculationRestWeekDayType(),
+                getInterestRecalculationRestOnDayType(), compoundingCalendarData, getRecalculationCompoundingFrequencyType(),
+                getRecalculationCompoundingFrequencyInterval(), getInterestRecalculationCompoundingNthDayType(),
+                getInterestRecalculationCompoundingWeekDayType(), getInterestRecalculationCompoundingOnDayType(),
+                isCompoundingToBePostedAsTransaction(), allowCompoundingOnEod());
     }
 
     private EnumOptionData getRescheduleStrategyType() {
@@ -960,8 +973,16 @@ public class LoanProductData {
         return null;
     }
 
-    private LocalDate getRecalculationRestFrequencyDate() {
-        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationRestFrequencyDate(); }
+    private EnumOptionData getInterestRecalculationCompoundingNthDayType() {
+        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationCompoundingFrequencyNthDay(); }
+        return null;
+    }
+    private EnumOptionData getInterestRecalculationCompoundingWeekDayType() {
+        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationCompoundingFrequencyWeekday(); }
+        return null;
+    }
+    private Integer getInterestRecalculationCompoundingOnDayType() {
+        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationCompoundingFrequencyOnDay(); }
         return null;
     }
 
@@ -975,8 +996,18 @@ public class LoanProductData {
         return null;
     }
 
-    private LocalDate getRecalculationCompoundingFrequencyDate() {
-        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationCompoundingFrequencyDate(); }
+    private EnumOptionData getInterestRecalculationRestNthDayType() {
+        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationRestFrequencyNthDay(); }
+        return null;
+    }
+
+    private EnumOptionData getInterestRecalculationRestWeekDayType() {
+        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationRestFrequencyWeekday(); }
+        return null;
+    }
+
+    private Integer getInterestRecalculationRestOnDayType() {
+        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationRestFrequencyOnDay(); }
         return null;
     }
 
@@ -987,6 +1018,14 @@ public class LoanProductData {
 
     private Integer getRecalculationCompoundingFrequencyInterval() {
         if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.getRecalculationCompoundingFrequencyInterval(); }
+        return null;
+    }
+    public Boolean isCompoundingToBePostedAsTransaction() {
+        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.isCompoundingToBePostedAsTransaction(); }
+        return null;
+    }
+    public Boolean allowCompoundingOnEod() {
+        if (isInterestRecalculationEnabled()) { return this.interestRecalculationData.allowCompoundingOnEod(); }
         return null;
     }
 
