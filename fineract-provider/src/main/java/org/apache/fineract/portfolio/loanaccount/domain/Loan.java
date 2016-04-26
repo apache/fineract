@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -2006,7 +2007,16 @@ public class Loan extends AbstractPersistable<Long> {
 
     private LocalDate determineExpectedMaturityDate() {
         final int numberOfInstallments = this.repaymentScheduleInstallments.size();
-        return this.repaymentScheduleInstallments.get(numberOfInstallments - 1).getDueDate();
+        LocalDate maturityDate = this.repaymentScheduleInstallments.get(numberOfInstallments - 1).getDueDate();
+        ListIterator<LoanRepaymentScheduleInstallment> iterator = this.repaymentScheduleInstallments.listIterator(numberOfInstallments);
+        while(iterator.hasPrevious()){
+            LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = iterator.previous();
+            if(!loanRepaymentScheduleInstallment.isRecalculatedInterestComponent()){
+                maturityDate = loanRepaymentScheduleInstallment.getDueDate();
+                break;
+            }
+        }
+        return maturityDate;
     }
 
     public Map<String, Object> loanApplicationRejection(final AppUser currentUser, final JsonCommand command,
