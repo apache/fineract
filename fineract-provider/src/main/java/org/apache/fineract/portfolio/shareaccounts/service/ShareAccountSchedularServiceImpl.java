@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.service;
 
-import javax.transaction.Transactional;
-
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
@@ -30,6 +28,7 @@ import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountDividendRe
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountDividendStatusType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ShareAccountSchedularServiceImpl implements ShareAccountSchedularService {
