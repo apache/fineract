@@ -67,6 +67,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             "interestCalculationPeriodType", LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName,
             "interestRateFrequencyType", "expectedDisbursementDate", "repaymentsStartingFromDate",
             "graceOnPrincipalPayment",
+            "recurringMoratoriumOnPrincipalPeriods",
             "graceOnInterestPayment",
             "graceOnInterestCharged",
             "interestChargedFromDate",
