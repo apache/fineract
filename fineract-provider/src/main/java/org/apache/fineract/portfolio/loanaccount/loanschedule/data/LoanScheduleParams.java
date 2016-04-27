@@ -69,8 +69,9 @@ public class LoanScheduleParams {
     // date(after applying compounding frequency)
     // from when these amounts will effect the outstanding balance for
     // interest calculation
-    private final TreeMap<LocalDate, Money> compoundingMap;
-    private final Map<LocalDate, TreeMap<LocalDate, Money>> compoundingDateVariations = new HashMap<>();
+    private final Map<LocalDate, Money> compoundingMap;
+    private final Map<LocalDate, Map<LocalDate, Money>> compoundingDateVariations = new HashMap<>();
+    private Money unCompoundedAmount;
 
     // disbursement map for tranche details(will added to outstanding
     // balance as per the start date)
@@ -94,7 +95,7 @@ public class LoanScheduleParams {
             final LocalDate actualRepaymentDate, final Money totalCumulativePrincipal, final Money totalCumulativeInterest,
             final Money totalFeeChargesCharged, final Money totalPenaltyChargesCharged, final Money totalRepaymentExpected,
             Money totalOutstandingInterestPaymentDueToGrace, final Money reducePrincipal, final Map<LocalDate, Money> principalPortionMap,
-            final Map<LocalDate, Money> latePaymentMap, final TreeMap<LocalDate, Money> compoundingMap,
+            final Map<LocalDate, Money> latePaymentMap, final Map<LocalDate, Money> compoundingMap, final Money unCompoundedAmount,
             final Map<LocalDate, Money> disburseDetailMap, Money principalToBeScheduled, final Money outstandingBalance,
             final Money outstandingBalanceAsPerRest, final List<LoanRepaymentScheduleInstallment> installments,
             final Collection<RecalculationDetail> recalculationDetails,
@@ -115,6 +116,7 @@ public class LoanScheduleParams {
         this.principalPortionMap = principalPortionMap;
         this.latePaymentMap = latePaymentMap;
         this.compoundingMap = compoundingMap;
+        this.unCompoundedAmount = unCompoundedAmount;
         this.disburseDetailMap = disburseDetailMap;
         this.principalToBeScheduled = principalToBeScheduled;
         this.outstandingBalance = outstandingBalance;
@@ -133,8 +135,8 @@ public class LoanScheduleParams {
             final Money totalCumulativeInterest, final Money totalFeeChargesCharged, final Money totalPenaltyChargesCharged,
             final Money totalRepaymentExpected, Money totalOutstandingInterestPaymentDueToGrace, final Money reducePrincipal,
             final Map<LocalDate, Money> principalPortionMap, final Map<LocalDate, Money> latePaymentMap,
-            final TreeMap<LocalDate, Money> compoundingMap, final Map<LocalDate, Money> disburseDetailMap, Money principalToBeScheduled,
-            final Money outstandingBalance, final Money outstandingBalanceAsPerRest,
+            final Map<LocalDate, Money> compoundingMap, Money unCompoundedAmount, final Map<LocalDate, Money> disburseDetailMap,
+            final Money principalToBeScheduled, final Money outstandingBalance, final Money outstandingBalanceAsPerRest,
             final List<LoanRepaymentScheduleInstallment> installments, final Collection<RecalculationDetail> recalculationDetails,
             final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor, final LocalDate scheduleTillDate,
             final MonetaryCurrency currency, final boolean applyInterestRecalculation) {
@@ -142,9 +144,9 @@ public class LoanScheduleParams {
         return new LoanScheduleParams(periodNumber, instalmentNumber, loanTermInDays, periodStartDate, actualRepaymentDate,
                 totalCumulativePrincipal, totalCumulativeInterest, totalFeeChargesCharged, totalPenaltyChargesCharged,
                 totalRepaymentExpected, totalOutstandingInterestPaymentDueToGrace, reducePrincipal, principalPortionMap, latePaymentMap,
-                compoundingMap, disburseDetailMap, principalToBeScheduled, outstandingBalance, outstandingBalanceAsPerRest, installments,
-                recalculationDetails, loanRepaymentScheduleTransactionProcessor, scheduleTillDate, partialUpdate, currency,
-                applyInterestRecalculation);
+                compoundingMap, unCompoundedAmount, disburseDetailMap, principalToBeScheduled, outstandingBalance,
+                outstandingBalanceAsPerRest, installments, recalculationDetails, loanRepaymentScheduleTransactionProcessor,
+                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation);
     }
 
     public static LoanScheduleParams createLoanScheduleParamsForCompleteUpdate(final Collection<RecalculationDetail> recalculationDetails,
@@ -162,7 +164,7 @@ public class LoanScheduleParams {
         final Money reducePrincipal = null;
         final Map<LocalDate, Money> principalPortionMap = null;
         final Map<LocalDate, Money> latePaymentMap = null;
-        final TreeMap<LocalDate, Money> compoundingMap = null;
+        final Map<LocalDate, Money> compoundingMap = null;
         final Map<LocalDate, Money> disburseDetailMap = null;
         final Money principalToBeScheduled = null;
         final Money outstandingBalance = null;
@@ -172,12 +174,13 @@ public class LoanScheduleParams {
         final int loanTermInDays = 0;
         final Money totalOutstandingInterestPaymentDueToGrace = null;
         final MonetaryCurrency currency = null;
+        final Money unCompoundedAmount = null;
         return new LoanScheduleParams(periodNumber, instalmentNumber, loanTermInDays, periodStartDate, actualRepaymentDate,
                 totalCumulativePrincipal, totalCumulativeInterest, totalFeeChargesCharged, totalPenaltyChargesCharged,
                 totalRepaymentExpected, totalOutstandingInterestPaymentDueToGrace, reducePrincipal, principalPortionMap, latePaymentMap,
-                compoundingMap, disburseDetailMap, principalToBeScheduled, outstandingBalance, outstandingBalanceAsPerRest, installments,
-                recalculationDetails, loanRepaymentScheduleTransactionProcessor, scheduleTillDate, partialUpdate, currency,
-                applyInterestRecalculation);
+                compoundingMap, unCompoundedAmount, disburseDetailMap, principalToBeScheduled, outstandingBalance,
+                outstandingBalanceAsPerRest, installments, recalculationDetails, loanRepaymentScheduleTransactionProcessor,
+                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation);
     }
 
     public static LoanScheduleParams createLoanScheduleParams(final MonetaryCurrency currency, final Money chargesDueAtTimeOfDisbursement,
@@ -195,7 +198,7 @@ public class LoanScheduleParams {
         final Money reducePrincipal = Money.zero(currency);
         final Map<LocalDate, Money> principalPortionMap = new HashMap<>();
         final Map<LocalDate, Money> latePaymentMap = new HashMap<>();
-        final TreeMap<LocalDate, Money> compoundingMap = new TreeMap<>();
+        final Map<LocalDate, Money> compoundingMap = new TreeMap<>();
         final Map<LocalDate, Money> disburseDetailMap = new TreeMap<>();
         final Money outstandingBalance = principalToBeScheduled;
         final Money outstandingBalanceAsPerRest = principalToBeScheduled;
@@ -205,12 +208,13 @@ public class LoanScheduleParams {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = null;
         final LocalDate scheduleTillDate = null;
         final boolean applyInterestRecalculation = false;
+        final Money unCompoundedAmount = Money.zero(currency);
         return new LoanScheduleParams(periodNumber, instalmentNumber, loanTermInDays, periodStartDate, actualRepaymentDate,
                 totalCumulativePrincipal, totalCumulativeInterest, totalFeeChargesCharged, totalPenaltyChargesCharged,
                 totalRepaymentExpected, totalOutstandingInterestPaymentDueToGrace, reducePrincipal, principalPortionMap, latePaymentMap,
-                compoundingMap, disburseDetailMap, principalToBeScheduled, outstandingBalance, outstandingBalanceAsPerRest, installments,
-                recalculationDetails, loanRepaymentScheduleTransactionProcessor, scheduleTillDate, partialUpdate, currency,
-                applyInterestRecalculation);
+                compoundingMap, unCompoundedAmount, disburseDetailMap, principalToBeScheduled, outstandingBalance,
+                outstandingBalanceAsPerRest, installments, recalculationDetails, loanRepaymentScheduleTransactionProcessor,
+                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation);
     }
 
     public static LoanScheduleParams createLoanScheduleParams(final MonetaryCurrency currency, final Money chargesDueAtTimeOfDisbursement,
@@ -228,7 +232,7 @@ public class LoanScheduleParams {
         final Money reducePrincipal = Money.zero(currency);
         final Map<LocalDate, Money> principalPortionMap = new HashMap<>();
         final Map<LocalDate, Money> latePaymentMap = new HashMap<>();
-        final TreeMap<LocalDate, Money> compoundingMap = new TreeMap<>();
+        final Map<LocalDate, Money> compoundingMap = new TreeMap<>();
         final Map<LocalDate, Money> disburseDetailMap = new TreeMap<>();
         final Money outstandingBalance = principalToBeScheduled;
         final Money outstandingBalanceAsPerRest = principalToBeScheduled;
@@ -238,12 +242,13 @@ public class LoanScheduleParams {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanScheduleParams.loanRepaymentScheduleTransactionProcessor;
         final LocalDate scheduleTillDate = loanScheduleParams.scheduleTillDate;
         final boolean applyInterestRecalculation = loanScheduleParams.applyInterestRecalculation;
+        final Money unCompoundedAmount = Money.zero(currency);
         return new LoanScheduleParams(periodNumber, instalmentNumber, loanTermInDays, periodStartDate, actualRepaymentDate,
                 totalCumulativePrincipal, totalCumulativeInterest, totalFeeChargesCharged, totalPenaltyChargesCharged,
                 totalRepaymentExpected, totalOutstandingInterestPaymentDueToGrace, reducePrincipal, principalPortionMap, latePaymentMap,
-                compoundingMap, disburseDetailMap, principalToBeScheduled, outstandingBalance, outstandingBalanceAsPerRest, installments,
-                recalculationDetails, loanRepaymentScheduleTransactionProcessor, scheduleTillDate, partialUpdate, currency,
-                applyInterestRecalculation);
+                compoundingMap, unCompoundedAmount, disburseDetailMap, principalToBeScheduled, outstandingBalance,
+                outstandingBalanceAsPerRest, installments, recalculationDetails, loanRepaymentScheduleTransactionProcessor,
+                scheduleTillDate, partialUpdate, currency, applyInterestRecalculation);
     }
 
     public int getPeriodNumber() {
@@ -310,7 +315,7 @@ public class LoanScheduleParams {
         return this.latePaymentMap;
     }
 
-    public TreeMap<LocalDate, Money> getCompoundingMap() {
+    public Map<LocalDate, Money> getCompoundingMap() {
         return this.compoundingMap;
     }
 
@@ -434,7 +439,7 @@ public class LoanScheduleParams {
         this.totalOutstandingInterestPaymentDueToGrace = totalOutstandingInterestPaymentDueToGrace;
     }
 
-    public Map<LocalDate, TreeMap<LocalDate, Money>> getCompoundingDateVariations() {
+    public Map<LocalDate, Map<LocalDate, Money>> getCompoundingDateVariations() {
         return this.compoundingDateVariations;
     }
 
@@ -446,4 +451,18 @@ public class LoanScheduleParams {
         return this.applyInterestRecalculation;
     }
 
+    public Money getUnCompoundedAmount() {
+        return this.unCompoundedAmount;
+    }
+    public void addUnCompoundedAmount(Money unCompoundedAmount) {
+        this.unCompoundedAmount = this.unCompoundedAmount.plus(unCompoundedAmount);
+    }
+
+    public void minusUnCompoundedAmount(Money unCompoundedAmount) {
+        this.unCompoundedAmount = this.unCompoundedAmount.minus(unCompoundedAmount);
+    }
+
+    public void setUnCompoundedAmount(Money unCompoundedAmount) {
+        this.unCompoundedAmount = unCompoundedAmount;
+    }
 }

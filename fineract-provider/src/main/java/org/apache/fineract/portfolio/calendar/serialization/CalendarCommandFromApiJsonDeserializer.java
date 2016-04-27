@@ -37,6 +37,7 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarRemindBy;
 import org.apache.fineract.portfolio.calendar.domain.CalendarWeekDaysType;
+import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -173,6 +174,10 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
                             CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue(), element);
                     baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue()).value(repeatsOnDay)
                             .notBlank().inMinMaxRange(CalendarWeekDaysType.getMinValue(), CalendarWeekDaysType.getMaxValue());
+                } else if (CalendarFrequencyType.fromInt(frequency).isMonthly()) {
+                    CalendarUtils.validateNthDayOfMonthFrequency(baseDataValidator,
+                            CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_NTH_DAY_OF_MONTH.getValue(),
+                            CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_LAST_WEEKDAY_OF_MONTH.getValue(), element, this.fromApiJsonHelper);
                 }
             }
         }
@@ -305,11 +310,17 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
                             .integerGreaterThanZero();
                 }
 
+                if (CalendarFrequencyType.fromInt(frequency).isWeekly()) {
                 if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue(), element)) {
                     final Integer repeatsOnDay = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
                             CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue(), element);
                     baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue()).value(repeatsOnDay)
                             .notBlank().inMinMaxRange(CalendarWeekDaysType.getMinValue(), CalendarWeekDaysType.getMaxValue());
+                    }
+                } else if (CalendarFrequencyType.fromInt(frequency).isMonthly()) {
+                    CalendarUtils.validateNthDayOfMonthFrequency(baseDataValidator,
+                            CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_NTH_DAY_OF_MONTH.getValue(),
+                            CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_LAST_WEEKDAY_OF_MONTH.getValue(), element, this.fromApiJsonHelper);
                 }
             }
         }
