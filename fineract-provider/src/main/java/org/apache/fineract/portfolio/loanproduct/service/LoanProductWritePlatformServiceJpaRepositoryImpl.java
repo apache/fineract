@@ -136,7 +136,6 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             // i.e. this savings product is specific for this office.
             fineractEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
             		FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS, 
-            		FineractEntityType.LOAN_PRODUCT, 
             		loanproduct.getId());
             
             return new CommandProcessingResultBuilder() //
