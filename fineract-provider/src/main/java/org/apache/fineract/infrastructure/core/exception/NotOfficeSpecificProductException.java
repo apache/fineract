@@ -16,15 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.entityaccess.domain;
+package org.apache.fineract.infrastructure.core.exception;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-
-public interface FineractEntityToEntityMappingRepository extends JpaRepository<FineractEntityToEntityMapping, Long>{
-   
-	@Query("from FineractEntityToEntityMapping feem where feem.fromId= :fromId and feem.toId= :toId and feem.relationId= :relId")
-	FineractEntityToEntityMapping findListByProductId(@Param("relId")FineractEntityRelation relId, @Param("toId")Long toId, @Param("fromId")Long fromId );
+public class NotOfficeSpecificProductException extends AbstractPlatformDomainRuleException {
+  
+    	public NotOfficeSpecificProductException(final Long productId, final Long officeId) {
+    		      super("error.msg.office.product.not.found", "Product with productId " + productId + " not office Specific Product in offfice with officeId", officeId);
+    		   }
+    
 }
