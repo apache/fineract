@@ -104,10 +104,8 @@ public class LoanProductTestBuilder {
     private String rescheduleStrategyMethod = "1";
     private String recalculationRestFrequencyType = "1";
     private String recalculationRestFrequencyInterval = "0";
-    private String recalculationRestFrequencyDate = null;
     private String recalculationCompoundingFrequencyType = null;
     private String recalculationCompoundingFrequencyInterval = null;
-    private String recalculationCompoundingFrequencyDate = null;
     private String minimumDaysBetweenDisbursalAndFirstRepayment = null;
     private Boolean holdGuaranteeFunds = null;
     private String mandatoryGuarantee = null;
@@ -122,6 +120,10 @@ public class LoanProductTestBuilder {
     private Boolean allowVariableInstallments = Boolean.FALSE;
     private Integer minimumGap;
     private Integer maximumGap;
+    private Integer recalculationCompoundingFrequencyOnDayType = null;
+    private Integer recalculationRestFrequencyOnDayType = null;
+    private Integer recalculationCompoundingFrequencyDayOfWeekType = null;
+    private Integer recalculationRestFrequencyDayOfWeekType = null;
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -177,16 +179,18 @@ public class LoanProductTestBuilder {
             map.put("rescheduleStrategyMethod", this.rescheduleStrategyMethod);
             map.put("recalculationRestFrequencyType", recalculationRestFrequencyType);
             map.put("recalculationRestFrequencyInterval", recalculationRestFrequencyInterval);
-            map.put("recalculationRestFrequencyDate", recalculationRestFrequencyDate);
             if (!RECALCULATION_COMPOUNDING_METHOD_NONE.equals(this.interestRecalculationCompoundingMethod)) {
                 map.put("recalculationCompoundingFrequencyType", recalculationCompoundingFrequencyType);
                 map.put("recalculationCompoundingFrequencyInterval", recalculationCompoundingFrequencyInterval);
-                map.put("recalculationCompoundingFrequencyDate", recalculationCompoundingFrequencyDate);
             }
             map.put("preClosureInterestCalculationStrategy", preCloseInterestCalculationStrategy);
             if (isArrearsBasedOnOriginalSchedule != null) {
                 map.put("isArrearsBasedOnOriginalSchedule", isArrearsBasedOnOriginalSchedule);
             }
+            map.put("recalculationCompoundingFrequencyOnDayType", this.recalculationCompoundingFrequencyOnDayType);
+            map.put("recalculationCompoundingFrequencyDayOfWeekType", this.recalculationCompoundingFrequencyDayOfWeekType);
+            map.put("recalculationRestFrequencyOnDayType", this.recalculationRestFrequencyOnDayType);
+            map.put("recalculationRestFrequencyDayOfWeekType", this.recalculationRestFrequencyDayOfWeekType);
         }
         if (holdGuaranteeFunds != null) {
             map.put("holdGuaranteeFunds", this.holdGuaranteeFunds);
@@ -437,20 +441,24 @@ public class LoanProductTestBuilder {
     }
 
     public LoanProductTestBuilder withInterestRecalculationRestFrequencyDetails(final String recalculationRestFrequencyType,
-            final String recalculationRestFrequencyInterval, final String recalculationRestFrequencyDate) {
+            final String recalculationRestFrequencyInterval, final Integer recalculationRestFrequencyOnDayType,
+            final Integer recalculationRestFrequencyDayOfWeekType) {
         this.isInterestRecalculationEnabled = true;
         this.recalculationRestFrequencyType = recalculationRestFrequencyType;
         this.recalculationRestFrequencyInterval = recalculationRestFrequencyInterval;
-        this.recalculationRestFrequencyDate = recalculationRestFrequencyDate;
+        this.recalculationRestFrequencyOnDayType = recalculationRestFrequencyOnDayType;
+        this.recalculationRestFrequencyDayOfWeekType = recalculationRestFrequencyDayOfWeekType;
         return this;
     }
 
     public LoanProductTestBuilder withInterestRecalculationCompoundingFrequencyDetails(final String recalculationCompoundingFrequencyType,
-            final String recalculationCompoundingFrequencyInterval, final String recalculationCompoundingFrequencyDate) {
+            final String recalculationCompoundingFrequencyInterval, final Integer recalculationCompoundingFrequencyOnDayType,
+            final Integer recalculationCompoundingFrequencyDayOfWeekType) {
         this.isInterestRecalculationEnabled = true;
         this.recalculationCompoundingFrequencyType = recalculationCompoundingFrequencyType;
         this.recalculationCompoundingFrequencyInterval = recalculationCompoundingFrequencyInterval;
-        this.recalculationCompoundingFrequencyDate = recalculationCompoundingFrequencyDate;
+        this.recalculationCompoundingFrequencyOnDayType = recalculationCompoundingFrequencyOnDayType;
+        this.recalculationCompoundingFrequencyDayOfWeekType = recalculationCompoundingFrequencyDayOfWeekType;
         return this;
     }
 

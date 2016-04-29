@@ -342,7 +342,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final String title = "recurring_savings_" + account.getId();
             
             final Calendar calendar = Calendar.createRepeatingCalendar(title, calendarStartDate, CalendarType.COLLECTION.getValue(),
-                    CalendarFrequencyType.from(periodFrequencyType), frequency, repeatsOnDay);
+                    CalendarFrequencyType.from(periodFrequencyType), frequency, repeatsOnDay, null);
             calendarInstance = CalendarInstance.from(calendar, account.getId(), CalendarEntityType.SAVINGS.getValue());
         }
         if (calendarInstance == null) {
@@ -488,7 +488,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                         accountId, CalendarEntityType.SAVINGS.getValue(), CalendarType.COLLECTION.getValue());
                 Calendar calendar = calendarInstance.getCalendar();
                 calendar.updateRepeatingCalendar(calendarStartDate, CalendarFrequencyType.from(periodFrequencyType), frequency,
-                        repeatsOnDay);
+                        repeatsOnDay, null);
                 this.calendarInstanceRepository.save(calendarInstance);
             }
 

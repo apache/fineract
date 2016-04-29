@@ -33,7 +33,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.CalendarConstants.CALENDAR_SUPPORTED_PARAMETERS;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
@@ -291,8 +290,10 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
             if (reschedulebasedOnMeetingDates == null){
             presentMeetingDate = command.localDateValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.START_DATE.getValue());
             }
-            final Date endDate = presentMeetingDate.minusDays(1).toDate();
-            calendarHistory.updateEndDate(endDate);
+            if (null != newMeetingDate) {
+                final Date endDate = presentMeetingDate.minusDays(1).toDate();
+                calendarHistory.updateEndDate(endDate);
+            }
             this.calendarHistoryRepository.save(calendarHistory);
             Set<CalendarHistory> history = calendarForUpdate.getCalendarHistory();
             history.add(calendarHistory);

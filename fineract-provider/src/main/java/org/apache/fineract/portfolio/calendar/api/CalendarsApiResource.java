@@ -230,8 +230,9 @@ public class CalendarsApiResource {
         final List<EnumOptionData> remindByOptions = this.dropdownReadPlatformService.retrieveCalendarRemindByOptions();
         final List<EnumOptionData> frequencyOptions = this.dropdownReadPlatformService.retrieveCalendarFrequencyTypeOptions();
         final List<EnumOptionData> repeatsOnDayOptions = this.dropdownReadPlatformService.retrieveCalendarWeekDaysTypeOptions();
+        final List<EnumOptionData> frequencyNthDayTypeOptions = this.dropdownReadPlatformService.retrieveCalendarFrequencyNthDayTypeOptions();
         return CalendarData.withTemplateOptions(calendarData, entityTypeOptions, calendarTypeOptions, remindByOptions, frequencyOptions,
-                repeatsOnDayOptions);
+                repeatsOnDayOptions, frequencyNthDayTypeOptions);
     }
 
     private CommandWrapper getResourceDetails(final CalendarEntityType type, final Long entityId) {
