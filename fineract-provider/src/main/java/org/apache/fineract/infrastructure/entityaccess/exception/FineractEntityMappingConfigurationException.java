@@ -22,15 +22,11 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 
-public class FineractEntityAccessConfigurationException extends AbstractPlatformDomainRuleException {
+public class FineractEntityMappingConfigurationException extends AbstractPlatformDomainRuleException {
 
-    public FineractEntityAccessConfigurationException(final Long firstEntityId,
-    		final FineractEntityType entityType1,
-    		final FineractEntityAccessType accessType,
-    		final FineractEntityType entityType2) {
+    public FineractEntityMappingConfigurationException() {
         super("error.msg.entityaccess.config",
-                "Error while getting entity access configuration for " + entityType1.getType() + ":" + firstEntityId + 
-                " with type " + accessType.toStr() + " against " + entityType2.getType());
+                "Error while getting entity access configuration for  with type    against  ");
     }
 
 }
