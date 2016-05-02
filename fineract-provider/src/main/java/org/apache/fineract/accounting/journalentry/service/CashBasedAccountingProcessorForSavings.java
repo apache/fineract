@@ -143,6 +143,11 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                 }
             }
 
+            else if (savingsTransactionDTO.getTransactionType().isEscheat()) {
+                this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
+                		CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL.getValue(), CASH_ACCOUNTS_FOR_SAVINGS.ESCHEAT_LIABILITY.getValue(),
+                        savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
+            }
             /**
              * Handle Interest Applications and reversals of Interest
              * Applications

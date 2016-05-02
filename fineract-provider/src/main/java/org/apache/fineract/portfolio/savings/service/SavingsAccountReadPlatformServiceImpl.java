@@ -24,6 +24,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -38,6 +40,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
+import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.client.data.ClientData;
@@ -56,15 +59,22 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountApplicationTimel
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountStatusEnumData;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountSubStatusEnumData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountSummaryData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountSubStatusEnum;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.joda.time.Days;
 import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -82,6 +92,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     private final StaffReadPlatformService staffReadPlatformService;
     private final SavingsDropdownReadPlatformService dropdownReadPlatformService;
     private final ChargeReadPlatformService chargeReadPlatformService;
+	private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     // mappers
     private final SavingsAccountTransactionTemplateMapper transactionTemplateMapper;
@@ -217,7 +228,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sp.id as productId, sp.name as productName, ");
             sqlBuilder.append("s.id fieldOfficerId, s.display_name as fieldOfficerName, ");
             sqlBuilder.append("sa.status_enum as statusEnum, ");
-
+            sqlBuilder.append("sa.sub_status_enum as subStatusEnum, ");
             sqlBuilder.append("sa.submittedon_date as submittedOnDate,");
             sqlBuilder.append("sbu.username as submittedByUsername,");
             sqlBuilder.append("sbu.firstname as submittedByFirstname, sbu.lastname as submittedByLastname,");
@@ -282,8 +293,16 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.on_hold_funds_derived as onHoldFunds, ");
             sqlBuilder.append("sa.withhold_tax as withHoldTax,");
             sqlBuilder.append("sa.total_withhold_tax_derived as totalWithholdTax,");
-            sqlBuilder.append("tg.id as taxGroupId, tg.name as taxGroupName ");
-
+            sqlBuilder.append("tg.id as taxGroupId, tg.name as taxGroupName, ");
+            sqlBuilder.append("(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
+            sqlBuilder.append("from m_savings_account_transaction as sat ");
+            sqlBuilder.append("where sat.is_reversed = 0 ");
+            sqlBuilder.append("and sat.transaction_type_enum in (1,2) ");
+            sqlBuilder.append("and sat.savings_account_id = sa.id) as lastActiveTransactionDate, ");
+            sqlBuilder.append("sp.is_dormancy_tracking_active as isDormancyTrackingActive, ");
+            sqlBuilder.append("sp.days_to_inactive as daysToInactive, ");
+            sqlBuilder.append("sp.days_to_dormancy as daysToDormancy, ");
+            sqlBuilder.append("sp.days_to_escheat as daysToEscheat ");
             sqlBuilder.append("from m_savings_account sa ");
             sqlBuilder.append("join m_savings_product sp ON sa.product_id = sp.id ");
             sqlBuilder.append("join m_currency curr on curr.code = sa.currency_code ");
@@ -327,6 +346,31 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             final Integer statusEnum = JdbcSupport.getInteger(rs, "statusEnum");
             final SavingsAccountStatusEnumData status = SavingsEnumerations.status(statusEnum);
+
+            final Integer subStatusEnum = JdbcSupport.getInteger(rs, "subStatusEnum");
+            final SavingsAccountSubStatusEnumData subStatus = SavingsEnumerations.subStatus(subStatusEnum);
+            
+            final LocalDate lastActiveTransactionDate = JdbcSupport.getLocalDate(rs, "lastActiveTransactionDate");
+            final boolean isDormancyTrackingActive = rs.getBoolean("isDormancyTrackingActive");
+            final Integer numDaysToInactive = JdbcSupport.getInteger(rs, "daysToInactive");
+            final Integer numDaysToDormancy = JdbcSupport.getInteger(rs, "daysToDormancy");
+            final Integer numDaysToEscheat = JdbcSupport.getInteger(rs, "daysToEscheat");
+            Integer daysToInactive = null;
+            Integer daysToDormancy = null;
+            Integer daysToEscheat = null;
+
+        	LocalDate localTenantDate = DateUtils.getLocalDateOfTenant();
+            if(isDormancyTrackingActive && statusEnum.equals(SavingsAccountStatusType.ACTIVE.getValue())){
+            	if(subStatusEnum < SavingsAccountSubStatusEnum.ESCHEAT.getValue()){
+                    daysToEscheat = Days.daysBetween(localTenantDate,lastActiveTransactionDate.plusDays(numDaysToEscheat)).getDays();
+            	}
+            	if(subStatusEnum < SavingsAccountSubStatusEnum.DORMANT.getValue()){
+                    daysToDormancy = Days.daysBetween(localTenantDate,lastActiveTransactionDate.plusDays(numDaysToDormancy)).getDays();
+            	}
+            	if(subStatusEnum < SavingsAccountSubStatusEnum.INACTIVE.getValue()){
+                    daysToInactive = Days.daysBetween(localTenantDate,lastActiveTransactionDate.plusDays(numDaysToInactive)).getDays(); 
+            	}
+            }
 
             final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
             final String submittedByUsername = rs.getString("submittedByUsername");
@@ -469,11 +513,12 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             }
 
             return SavingsAccountData.instance(id, accountNo, depositType, externalId, groupId, groupName, clientId, clientName, productId,
-                    productName, fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate,
-                    interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
-                    minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary,
-                    allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance, minBalanceForInterestCalculation,
-                    onHoldFunds, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroupData);
+                    productName, fieldOfficerId, fieldOfficerName, status, subStatus, timeline, currency,
+                    nominalAnnualInterestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
+                    interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers,
+                    summary, allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance,
+                    minBalanceForInterestCalculation, onHoldFunds, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, 
+                    taxGroupData, lastActiveTransactionDate, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat);
         }
     }
 
@@ -996,15 +1041,23 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             // final LocalDate annualFeeNextDueDate = null;
             final SavingsAccountSummaryData summary = null;
             final BigDecimal onHoldFunds = null;
+            
+            final SavingsAccountSubStatusEnumData subStatus = null;
+            final LocalDate lastActiveTransactionDate = null;
+            final boolean isDormancyTrackingActive = false;
+            final Integer daysToInactive = null;
+            final Integer daysToDormancy = null;
+            final Integer daysToEscheat = null;
 
             final SavingsAccountApplicationTimelineData timeline = SavingsAccountApplicationTimelineData.templateDefault();
             final EnumOptionData depositType = null;
             return SavingsAccountData.instance(null, null, depositType, null, groupId, groupName, clientId, clientName, productId,
-                    productName, fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualIterestRate,
-                    interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
-                    minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary,
-                    allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance, minBalanceForInterestCalculation,
-                    onHoldFunds, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroupData);
+                    productName, fieldOfficerId, fieldOfficerName, status, subStatus, timeline, currency,
+                    nominalAnnualIterestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
+                    interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers,
+                    summary, allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance,
+                    minBalanceForInterestCalculation, onHoldFunds, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, 
+                    taxGroupData, lastActiveTransactionDate, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat);
         }
     }
 
@@ -1024,6 +1077,84 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         return this.jdbcTemplate.query(sqlBuilder.toString(), accountMapperForLookup, queryParameters);
 
     }
+
+	@Override
+	public List<Long> retrieveSavingsIdsPendingInactive(
+			LocalDate tenantLocalDate) {
+		List<Long> ret = null;
+		StringBuilder sql = new StringBuilder("select sa.id ");
+		sql.append(" from m_savings_account as sa ");
+		sql.append(" inner join m_savings_product as sp on (sa.product_id = sp.id and sp.is_dormancy_tracking_active = 1) ");
+		sql.append(" where sa.status_enum = 300 ");
+		sql.append(" and sa.sub_status_enum = 0 ");
+		sql.append(" and DATEDIFF(?,(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
+		sql.append(" from m_savings_account_transaction as sat ");
+		sql.append(" where sat.is_reversed = 0 ");
+		sql.append(" and sat.transaction_type_enum in (1,2) ");
+		sql.append(" and sat.savings_account_id = sa.id)) >= sp.days_to_inactive "); 
+		
+		try {
+			ret =  this.jdbcTemplate.queryForList(sql.toString(), Long.class, new Object[] {formatter.print(tenantLocalDate)});
+		} catch (EmptyResultDataAccessException e) {
+			// ignore empty result scenario
+		} catch (DataAccessException e) {
+			throw e;
+		}
+		
+		return ret;
+	}
+
+	@Override
+	public List<Long> retrieveSavingsIdsPendingDormant(
+			LocalDate tenantLocalDate) {
+		List<Long> ret = null;
+		StringBuilder sql = new StringBuilder("select sa.id ");
+		sql.append(" from m_savings_account as sa ");
+		sql.append(" inner join m_savings_product as sp on (sa.product_id = sp.id and sp.is_dormancy_tracking_active = 1) ");
+		sql.append(" where sa.status_enum = 300 ");
+		sql.append(" and sa.sub_status_enum = 100 ");
+		sql.append(" and DATEDIFF(?,(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
+		sql.append(" from m_savings_account_transaction as sat ");
+		sql.append(" where sat.is_reversed = 0 ");
+		sql.append(" and sat.transaction_type_enum in (1,2) ");
+		sql.append(" and sat.savings_account_id = sa.id)) >= sp.days_to_dormancy "); 
+		
+		try {
+			ret =  this.jdbcTemplate.queryForList(sql.toString(), Long.class, new Object[] {formatter.print(tenantLocalDate)});
+		} catch (EmptyResultDataAccessException e) {
+			// ignore empty result scenario
+		} catch (DataAccessException e) {
+			throw e;
+		}
+		
+		return ret;
+	}
+
+	@Override
+	public List<Long> retrieveSavingsIdsPendingEscheat(
+			LocalDate tenantLocalDate) {
+		List<Long> ret = null;
+		StringBuilder sql = new StringBuilder("select sa.id ");
+		sql.append(" from m_savings_account as sa ");
+		sql.append(" inner join m_savings_product as sp on (sa.product_id = sp.id and sp.is_dormancy_tracking_active = 1) ");
+		sql.append(" where sa.status_enum = 300 ");
+		sql.append(" and sa.sub_status_enum = 200 ");
+		sql.append(" and DATEDIFF(?,(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
+		sql.append(" from m_savings_account_transaction as sat ");
+		sql.append(" where sat.is_reversed = 0 ");
+		sql.append(" and sat.transaction_type_enum in (1,2) ");
+		sql.append(" and sat.savings_account_id = sa.id)) >= sp.days_to_escheat "); 
+		
+		try {
+			ret =  this.jdbcTemplate.queryForList(sql.toString(), Long.class, new Object[] {formatter.print(tenantLocalDate)});
+		} catch (EmptyResultDataAccessException e) {
+			// ignore empty result scenario
+		} catch (DataAccessException e) {
+			throw e;
+		}
+		
+		return ret;
+	}
 
     /*
      * private static final class SavingsAccountAnnualFeeMapper implements

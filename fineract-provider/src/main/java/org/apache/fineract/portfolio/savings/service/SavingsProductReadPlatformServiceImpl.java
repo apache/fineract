@@ -134,7 +134,11 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sqlBuilder.append("sp.min_balance_for_interest_calculation as minBalanceForInterestCalculation,");
             sqlBuilder.append("sp.accounting_type as accountingType, ");
             sqlBuilder.append("sp.withhold_tax as withHoldTax,");
-            sqlBuilder.append("tg.id as taxGroupId, tg.name as taxGroupName ");
+            sqlBuilder.append("tg.id as taxGroupId, tg.name as taxGroupName, ");
+            sqlBuilder.append("sp.is_dormancy_tracking_active as isDormancyTrackingActive,");
+            sqlBuilder.append("sp.days_to_inactive as daysToInactive,");
+            sqlBuilder.append("sp.days_to_dormancy as daysToDormancy,");
+            sqlBuilder.append("sp.days_to_escheat as daysToEscheat ");
             sqlBuilder.append("from m_savings_product sp ");
             sqlBuilder.append("join m_currency curr on curr.code = sp.currency_code ");
             sqlBuilder.append("left join m_tax_group tg on tg.id = sp.tax_group_id  ");
@@ -210,13 +214,18 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             if (taxGroupId != null) {
                 taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
             }
-
+            
+            final Boolean isDormancyTrackingActive = rs.getBoolean("isDormancyTrackingActive");
+            final Long daysToInactive = JdbcSupport.getLong(rs, "daysToInactive");
+            final Long daysToDormancy = JdbcSupport.getLong(rs, "daysToDormancy");
+            final Long daysToEscheat = JdbcSupport.getLong(rs, "daysToEscheat");
+            
             return SavingsProductData.instance(id, name, shortName, description, currency, nominalAnnualInterestRate,
                     compoundingInterestPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers,
                     accountingRuleType, allowOverdraft, overdraftLimit, minRequiredBalance, enforceMinRequiredBalance,
                     minBalanceForInterestCalculation, nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax,
-                    taxGroupData);
+                    taxGroupData, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat);
         }
     }
 
