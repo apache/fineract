@@ -242,6 +242,7 @@ buildscript {
 
 flyway {
     url = "jdbc:mysql:thin://localhost:3306/mifostenant-default"
+	driver = "org.drizzle.jdbc.DrizzleDriver"
     user = mysqlUser
     password = mysqlPassword
 }
@@ -256,6 +257,7 @@ task migrateTenantDB<<{
 	}
 	
     flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantDbName"
+	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
     /**We use ${ as the prefix for strecthy reporting, do not want them to be interpreted by Flyway**/
     flyway.placeholderPrefix = "\$\${"
@@ -272,6 +274,7 @@ task showTenantDBInfo<<{
 	}
 	
     flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantDbName"
+	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
     flywayInfo.execute()
 }
@@ -287,6 +290,7 @@ task migrateTenantListDB<<{
 	}
 	
     flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
+	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
 
     flywayMigrate.execute()
@@ -302,6 +306,7 @@ task showTenantListDBInfo<<{
 	}
     
     flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
+	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
     flywayInfo.execute()
 }
@@ -316,6 +321,7 @@ task repairTenantDB<<{
     }
     
     flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
+	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
     flywayRepair.execute()
 }
