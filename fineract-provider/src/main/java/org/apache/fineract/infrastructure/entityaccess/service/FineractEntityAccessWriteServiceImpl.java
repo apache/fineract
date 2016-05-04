@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.entityaccess.service;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
@@ -31,11 +32,14 @@ import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityDataVa
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccess;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessRepository;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelation;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepository;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepositoryWrapper;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMapping;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMappingRepository;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMappingRepositoryWrapper;
 import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityToEntityMappingDateException;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,18 +56,24 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
     private final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository;
     private final FineractEntityToEntityMappingRepositoryWrapper fineractEntityToEntityMappingRepositoryWrapper;
     private final FineractEntityDataValidator fromApiJsonDeserializer;
+    private final FineractEntityRelationRepository fineractEntityRelationRepository;
+    private final LoanProductRepository loanProductRepository;
 
     @Autowired
     public FineractEntityAccessWriteServiceImpl(final FineractEntityAccessRepository entityAccessRepository,
             final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepositoryWrapper,
             final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository,
             final FineractEntityToEntityMappingRepositoryWrapper fineractEntityToEntityMappingRepositoryWrapper,
-            FineractEntityDataValidator fromApiJsonDeserializer) {
+            FineractEntityDataValidator fromApiJsonDeserializer,
+            FineractEntityRelationRepository fineractEntityRelationRepository,
+            final LoanProductRepository loanProductRepository) {
         this.entityAccessRepository = entityAccessRepository;
         this.fineractEntityToEntityMappingRepository = fineractEntityToEntityMappingRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.fineractEntityRelationRepositoryWrapper = fineractEntityRelationRepositoryWrapper;
         this.fineractEntityToEntityMappingRepositoryWrapper = fineractEntityToEntityMappingRepositoryWrapper;
+        this.fineractEntityRelationRepository = fineractEntityRelationRepository;
+        this.loanProductRepository =  loanProductRepository;
     }
 
     @Override
@@ -89,7 +99,6 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
             final FineractEntityRelation mapId = this.fineractEntityRelationRepositoryWrapper.findOneWithNotFoundDetection(relId);
-
             final Long fromId = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.fromEnityType);
             final Long toId = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.toEntityType);
             final Date startDate = command.DateValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
@@ -101,6 +110,8 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
                         .before(startDate)) { throw new FineractEntityToEntityMappingDateException(startDate.toString(), endDate.toString()); }
             }
 
+            validationForAllMapping(relId,fromId, toId);
+            
             final FineractEntityToEntityMapping newMap = FineractEntityToEntityMapping.newMap(mapId, fromId, toId, startDate, endDate);
 
             this.fineractEntityToEntityMappingRepository.save(newMap);
@@ -173,6 +184,23 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
         logger.error(dve.getMessage(), dve);
     }
 
+    private void validationForAllMapping(final Long relId,  final Long fromId, final Long toId){
+    	boolean isOfficeAccessLoanProduct = false;
+    	if(relId ==fineractEntityRelationRepository.findOneByCodeName("office_access_to_loan_products").getId()){
+			Collection<LoanProduct> accessAllowedtoAllOfficeproduct = this.loanProductRepository.retrieveAllOfficeAccessAllowedProducts();
+			for(LoanProduct officeSpecificLoanProduct : accessAllowedtoAllOfficeproduct){
+				if(toId.equals(officeSpecificLoanProduct.getId())){
+					isOfficeAccessLoanProduct = true;
+					break;
+				}
+			}
+        }
+    	if(isOfficeAccessLoanProduct){
+    		throw new PlatformDataIntegrityException("error.msg.duplicate.entity.mapping",
+                    "EntityMapping from " + fromId + " to " + toId + " already exist");
+    	}
+    	
+    }
     /*
      * @Override public CommandProcessingResult updateEntityAccess(Long
      * entityAccessId, JsonCommand command) { // TODO Auto-generated method stub
