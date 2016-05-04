@@ -26,7 +26,6 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCalculationStrategy;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
-import org.joda.time.LocalDate;
 
 public class LoanProductInterestRecalculationData {
 
@@ -38,33 +37,48 @@ public class LoanProductInterestRecalculationData {
     private final EnumOptionData rescheduleStrategyType;
     private final EnumOptionData recalculationRestFrequencyType;
     private final Integer recalculationRestFrequencyInterval;
-    private final LocalDate recalculationRestFrequencyDate;
+    private final EnumOptionData recalculationRestFrequencyNthDay;
+    private final EnumOptionData recalculationRestFrequencyWeekday;
+    private final Integer recalculationRestFrequencyOnDay;
     private final EnumOptionData recalculationCompoundingFrequencyType;
     private final Integer recalculationCompoundingFrequencyInterval;
-    private final LocalDate recalculationCompoundingFrequencyDate;
+    private final EnumOptionData recalculationCompoundingFrequencyNthDay;
+    private final EnumOptionData recalculationCompoundingFrequencyWeekday;
+    private final Integer recalculationCompoundingFrequencyOnDay;
     @SuppressWarnings("unused")
     private final boolean isArrearsBasedOnOriginalSchedule;
+    private final boolean isCompoundingToBePostedAsTransaction;
     @SuppressWarnings("unused")
     private final EnumOptionData preClosureInterestCalculationStrategy;
+    private final boolean allowCompoundingOnEod;
 
     public LoanProductInterestRecalculationData(final Long id, final Long productId,
             final EnumOptionData interestRecalculationCompoundingType, final EnumOptionData rescheduleStrategyType,
             final EnumOptionData recalculationRestFrequencyType, final Integer recalculationRestFrequencyInterval,
-            final LocalDate recalculationRestFrequencyDate, final EnumOptionData recalculationCompoundingFrequencyType,
-            final Integer recalculationCompoundingFrequencyInterval, final LocalDate recalculationCompoundingFrequencyDate,
-            final boolean isArrearsBasedOnOriginalSchedule, final EnumOptionData preCloseInterestCalculationStrategy) {
+            final EnumOptionData recalculationRestFrequencyNthDay, final EnumOptionData recalculationRestFrequencyWeekday,
+            final Integer recalculationRestFrequencyOnDay, final EnumOptionData recalculationCompoundingFrequencyType,
+            final Integer recalculationCompoundingFrequencyInterval, final EnumOptionData recalculationCompoundingFrequencyNthDay,
+            final EnumOptionData recalculationCompoundingFrequencyWeekday, final Integer recalculationCompoundingFrequencyOnDay,
+            final boolean isArrearsBasedOnOriginalSchedule, boolean isCompoundingToBePostedAsTransaction,
+            final EnumOptionData preCloseInterestCalculationStrategy, final boolean allowCompoundingOnEod) {
         this.id = id;
         this.productId = productId;
         this.interestRecalculationCompoundingType = interestRecalculationCompoundingType;
         this.rescheduleStrategyType = rescheduleStrategyType;
         this.recalculationRestFrequencyType = recalculationRestFrequencyType;
         this.recalculationRestFrequencyInterval = recalculationRestFrequencyInterval;
-        this.recalculationRestFrequencyDate = recalculationRestFrequencyDate;
+        this.recalculationRestFrequencyNthDay = recalculationRestFrequencyNthDay;
+        this.recalculationRestFrequencyOnDay = recalculationRestFrequencyOnDay;
+        this.recalculationRestFrequencyWeekday = recalculationRestFrequencyWeekday;
         this.recalculationCompoundingFrequencyType = recalculationCompoundingFrequencyType;
         this.recalculationCompoundingFrequencyInterval = recalculationCompoundingFrequencyInterval;
-        this.recalculationCompoundingFrequencyDate = recalculationCompoundingFrequencyDate;
+        this.recalculationCompoundingFrequencyNthDay = recalculationCompoundingFrequencyNthDay;
+        this.recalculationCompoundingFrequencyOnDay = recalculationCompoundingFrequencyOnDay;
+        this.recalculationCompoundingFrequencyWeekday = recalculationCompoundingFrequencyWeekday;
         this.isArrearsBasedOnOriginalSchedule = isArrearsBasedOnOriginalSchedule;
         this.preClosureInterestCalculationStrategy = preCloseInterestCalculationStrategy;
+        this.isCompoundingToBePostedAsTransaction = isCompoundingToBePostedAsTransaction;
+        this.allowCompoundingOnEod = allowCompoundingOnEod;
     }
 
     public static LoanProductInterestRecalculationData sensibleDefaultsForNewLoanProductCreation() {
@@ -74,16 +88,24 @@ public class LoanProductInterestRecalculationData {
         final EnumOptionData rescheduleStrategyType = rescheduleStrategyType(LoanRescheduleStrategyMethod.REDUCE_EMI_AMOUNT);
         final EnumOptionData recalculationRestFrequencyType = null;
         final Integer recalculationRestFrequencyInterval = null;
-        final LocalDate recalculationRestFrequencyDate = null;
+        final EnumOptionData recalculationRestFrequencyNthDay = null;
+        final EnumOptionData recalculationRestFrequencyWeekday = null;
+        final Integer recalculationRestFrequencyOnDay = null;
         final EnumOptionData recalculationCompoundingFrequencyType = null;
         final Integer recalculationCompoundingFrequencyInterval = null;
-        final LocalDate recalculationCompoundingFrequencyDate = null;
+        final EnumOptionData recalculationCompoundingFrequencyNthDay = null;
+        final EnumOptionData recalculationCompoundingFrequencyWeekday = null;
+        final Integer recalculationCompoundingFrequencyOnDay = null;
         final boolean isArrearsBasedOnOriginalSchedule = false;
+        final boolean isCompoundingToBePostedAsTransaction = false;
         final EnumOptionData preCloseInterestCalculationStrategy = preCloseInterestCalculationStrategy(LoanPreClosureInterestCalculationStrategy.TILL_PRE_CLOSURE_DATE);
+        final boolean allowCompoundingOnEod = false;
         return new LoanProductInterestRecalculationData(id, productId, interestRecalculationCompoundingType, rescheduleStrategyType,
-                recalculationRestFrequencyType, recalculationRestFrequencyInterval, recalculationRestFrequencyDate,
-                recalculationCompoundingFrequencyType, recalculationCompoundingFrequencyInterval, recalculationCompoundingFrequencyDate,
-                isArrearsBasedOnOriginalSchedule, preCloseInterestCalculationStrategy);
+                recalculationRestFrequencyType, recalculationRestFrequencyInterval, recalculationRestFrequencyNthDay,
+                recalculationRestFrequencyWeekday, recalculationRestFrequencyOnDay, recalculationCompoundingFrequencyType,
+                recalculationCompoundingFrequencyInterval, recalculationCompoundingFrequencyNthDay,
+                recalculationCompoundingFrequencyWeekday, recalculationCompoundingFrequencyOnDay, isArrearsBasedOnOriginalSchedule,
+                isCompoundingToBePostedAsTransaction, preCloseInterestCalculationStrategy, allowCompoundingOnEod);
     }
 
     public EnumOptionData getInterestRecalculationCompoundingType() {
@@ -92,10 +114,7 @@ public class LoanProductInterestRecalculationData {
 
     public EnumOptionData getRescheduleStrategyType() {
         return this.rescheduleStrategyType;
-    }
 
-    public LocalDate getRecalculationRestFrequencyDate() {
-        return this.recalculationRestFrequencyDate;
     }
 
     public EnumOptionData getRecalculationRestFrequencyType() {
@@ -114,8 +133,29 @@ public class LoanProductInterestRecalculationData {
         return this.recalculationCompoundingFrequencyInterval;
     }
 
-    public LocalDate getRecalculationCompoundingFrequencyDate() {
-        return this.recalculationCompoundingFrequencyDate;
+    public EnumOptionData getRecalculationRestFrequencyNthDay() {
+        return this.recalculationRestFrequencyNthDay;
+    }
+    public EnumOptionData getRecalculationRestFrequencyWeekday() {
+        return this.recalculationRestFrequencyWeekday;
+    }
+    public Integer getRecalculationRestFrequencyOnDay() {
+        return this.recalculationRestFrequencyOnDay;
+    }
+    public EnumOptionData getRecalculationCompoundingFrequencyNthDay() {
+        return this.recalculationCompoundingFrequencyNthDay;
     }
 
+    public EnumOptionData getRecalculationCompoundingFrequencyWeekday() {
+        return this.recalculationCompoundingFrequencyWeekday;
+    }
+    public Integer getRecalculationCompoundingFrequencyOnDay() {
+        return this.recalculationCompoundingFrequencyOnDay;
+    }
+    public boolean isCompoundingToBePostedAsTransaction() {
+        return this.isCompoundingToBePostedAsTransaction;
+    }
+    public boolean allowCompoundingOnEod() {
+        return this.allowCompoundingOnEod;
+    }
 }
