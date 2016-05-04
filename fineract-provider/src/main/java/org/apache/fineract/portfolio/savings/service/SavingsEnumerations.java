@@ -36,8 +36,10 @@ import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsWithdrawalFeesType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountStatusEnumData;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountSubStatusEnumData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountSubStatusEnum;
 
 public class SavingsEnumerations {
 
@@ -187,6 +189,10 @@ public class SavingsEnumerations {
                 optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.DIVIDEND_PAYOUT.getValue().longValue(),
                         SavingsAccountTransactionType.DIVIDEND_PAYOUT.getCode(), "Dividend Payout");
                 break;
+            case ESCHEAT:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.ESCHEAT.getValue().longValue(),
+                        SavingsAccountTransactionType.ESCHEAT.getCode(), "Escheat");
+                break;
         }
         return optionData;
     }
@@ -271,6 +277,39 @@ public class SavingsEnumerations {
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.MATURED.getValue().longValue(),
                         SavingsAccountStatusType.MATURED.getCode(), "Matured", submittedAndPendingApproval, isApproved, isRejected,
                         isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold, matured);
+            break;
+            default:
+            break;
+        }
+        return optionData;
+    }
+
+    public static SavingsAccountSubStatusEnumData subStatus(final Integer subStatusEnum) {
+        return subStatus(SavingsAccountSubStatusEnum.fromInt(subStatusEnum));
+    }
+
+    public static SavingsAccountSubStatusEnumData subStatus(final SavingsAccountSubStatusEnum type) {
+
+        final boolean none = type.isSubStatusNone();
+        final boolean inactive = type.isSubStatusInactive();
+        final boolean dormant = type.isSubStatusDormant();
+        final boolean escheat = type.isSubStatusEscheat();
+
+        SavingsAccountSubStatusEnumData optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.NONE.getValue().longValue(),
+        		SavingsAccountSubStatusEnum.NONE.getCode(), "None", true, inactive, dormant, escheat);
+
+        switch (type) {
+            case INACTIVE:
+                optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.INACTIVE.getValue().longValue(),
+                		SavingsAccountSubStatusEnum.INACTIVE.getCode(), "Inactive", none, inactive, dormant, escheat);
+            break;
+            case DORMANT:
+                optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.DORMANT.getValue().longValue(),
+                		SavingsAccountSubStatusEnum.DORMANT.getCode(), "Dormant", none, inactive, dormant, escheat);
+            break;
+            case ESCHEAT:
+                optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.ESCHEAT.getValue().longValue(),
+                		SavingsAccountSubStatusEnum.ESCHEAT.getCode(), "Escheat", none, inactive, dormant, escheat);
             break;
             default:
             break;

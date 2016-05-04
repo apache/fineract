@@ -228,6 +228,15 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         return accountTransaction;
     }
 
+    public static SavingsAccountTransaction escheat(final SavingsAccount savingsAccount, final LocalDate date,
+            final AppUser appUser) {
+        final boolean isReversed = false;
+        final PaymentDetail paymentDetail = null;
+        return new SavingsAccountTransaction(savingsAccount, savingsAccount.office(), paymentDetail,
+                SavingsAccountTransactionType.ESCHEAT.getValue(), date, new Date(), savingsAccount.getSummary()
+                        .getAccountBalance(), isReversed, appUser);
+    }
+
     public static void updateTaxDetails(final Map<TaxComponent, BigDecimal> taxDetails, final SavingsAccountTransaction accountTransaction) {
         if (taxDetails != null) {
             for (Map.Entry<TaxComponent, BigDecimal> mapEntry : taxDetails.entrySet()) {

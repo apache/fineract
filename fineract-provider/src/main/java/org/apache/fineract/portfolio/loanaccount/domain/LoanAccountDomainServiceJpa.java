@@ -461,6 +461,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         Set<LoanCharge> loanCharges = loan.charges();
 
         for (LoanRepaymentScheduleInstallment installment : installments) {
+            if (installment.getDueDate().isAfter(loan.getMaturityDate())) {
+                accruedTill = DateUtils.getLocalDateOfTenant();
+            }
             if(!isOrganisationDateEnabled || new LocalDate(organisationStartDate).isBefore(installment.getDueDate())){
                 generateLoanScheduleAccrualData(accruedTill, loanScheduleAccrualDatas, loanId, officeId, accrualStartDate, repaymentFrequency, 
                         repayEvery, interestCalculatedFrom, loanProductId, currency, currencyData, loanCharges, installment);

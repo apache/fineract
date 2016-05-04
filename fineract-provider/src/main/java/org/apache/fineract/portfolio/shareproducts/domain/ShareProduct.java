@@ -196,7 +196,7 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
 
     public boolean setDescription(String description) {
         boolean returnValue = false;
-        if (!this.description.equals(description)) {
+        if (this.description == null || !this.description.equals(description)) {
             this.description = description;
             returnValue = true;
         }
@@ -205,7 +205,7 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
 
     public boolean setExternalId(String externalId) {
         boolean returnValue = false;
-        if (!this.externalId.equals(externalId)) {
+        if (this.externalId == null || !this.externalId.equals(externalId)) {
             this.externalId = externalId;
             returnValue = true;
         }
@@ -228,10 +228,7 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
 
     public boolean setTotalIssuedShares(Long totalSharesIssued) {
         boolean returnValue = false;
-        if(this.totalSharesIssued == null) {
-            this.totalSharesIssued = totalSharesIssued ;
-            returnValue = true ;
-        }else if (!this.totalSharesIssued.equals(totalSharesIssued)) {
+        if (this.totalSharesIssued == null || !this.totalSharesIssued.equals(totalSharesIssued)) {
             this.totalSharesIssued = totalSharesIssued;
             returnValue = true;
         }
@@ -262,7 +259,7 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
 
     public boolean setMinimumShares(final Long minimumShares) {
         boolean returnValue = false;
-        if (!this.minimumShares.equals(minimumShares)) {
+        if (this.minimumShares == null || !this.minimumShares.equals(minimumShares)) {
             this.minimumShares = minimumShares;
             returnValue = true;
         }
@@ -280,7 +277,7 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
 
     public boolean setMaximumShares(final Long maximumShares) {
         boolean returnValue = false;
-        if (!this.maximumShares.equals(maximumShares)) {
+        if (this.maximumShares == null || !this.maximumShares.equals(maximumShares)) {
             this.maximumShares = maximumShares;
             returnValue = true;
         }
@@ -316,7 +313,7 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
 
     public boolean setAllowDividendCalculationForInactiveClients(Boolean allowDividendCalculationForInactiveClients) {
         boolean returnValue = false;
-        if (!this.allowDividendCalculationForInactiveClients.equals(allowDividendCalculationForInactiveClients)) {
+        if (this.allowDividendCalculationForInactiveClients == null || !this.allowDividendCalculationForInactiveClients.equals(allowDividendCalculationForInactiveClients)) {
             this.allowDividendCalculationForInactiveClients = allowDividendCalculationForInactiveClients;
             returnValue = true;
         }
@@ -325,10 +322,7 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
 
     public boolean setLockinPeriod(final Integer lockinPeriod) {
         boolean returnValue = false;
-        if (this.lockinPeriod == null) {
-            this.lockinPeriod = lockinPeriod;
-            returnValue = true;
-        } else if (!this.lockinPeriod.equals(lockinPeriod)) {
+        if (this.lockinPeriod == null || !this.lockinPeriod.equals(lockinPeriod)) {
             this.lockinPeriod = lockinPeriod;
             returnValue = true;
         }
@@ -337,7 +331,7 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
 
     public boolean setLockPeriodFrequencyType(final PeriodFrequencyType lockPeriod) {
         boolean returnValue = false;
-        if (!this.lockPeriodType.equals(lockPeriod)) {
+        if (this.lockPeriodType == null || !this.lockPeriodType.equals(lockPeriod)) {
             this.lockPeriodType = lockPeriod;
             returnValue = true;
         }
@@ -346,10 +340,7 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
 
     public boolean setminimumActivePeriod(final Integer minimumActivePeriod) {
         boolean returnValue = false;
-        if (this.minimumActivePeriod == null) {
-            this.minimumActivePeriod = minimumActivePeriod;
-            returnValue = true;
-        } else if (!this.minimumActivePeriod.equals(minimumActivePeriod)) {
+        if (this.minimumActivePeriod == null || !this.minimumActivePeriod.equals(minimumActivePeriod)) {
             this.minimumActivePeriod = minimumActivePeriod;
             returnValue = true;
         }
@@ -358,7 +349,7 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
 
     public boolean setminimumActivePeriodFrequencyType(final PeriodFrequencyType minimumActivePeriodForDividends) {
         boolean returnValue = false;
-        if (!this.minimumActivePeriodType.equals(minimumActivePeriodForDividends)) {
+        if (this.minimumActivePeriodType == null || !this.minimumActivePeriodType.equals(minimumActivePeriodForDividends)) {
             this.minimumActivePeriodType = minimumActivePeriodForDividends;
             returnValue = true;
         }
@@ -371,10 +362,7 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
 
     public boolean setshareCapitalValue(BigDecimal shareCapitalValue) {
         boolean updated = false;
-        if (this.shareCapital == null) {
-            this.shareCapital = shareCapitalValue;
-            updated = true;
-        } else if (!this.shareCapital.equals(shareCapitalValue)) {
+        if (this.shareCapital == null || !this.shareCapital.equals(shareCapitalValue)) {
             this.shareCapital = shareCapitalValue;
             updated = true;
         }

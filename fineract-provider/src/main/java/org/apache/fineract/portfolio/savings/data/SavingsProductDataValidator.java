@@ -44,6 +44,10 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNam
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isDormancyTrackingActiveParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToInactiveParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToDormancyParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToEscheatParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -64,6 +68,7 @@ import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodTyp
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
 import org.joda.time.MonthDay;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -232,6 +237,27 @@ public class SavingsProductDataValidator {
                 baseDataValidator.reset().parameter(feeAmountParamName).value(annualFeeAmount).notNull().zeroOrPositiveAmount();
             }
         }
+        
+        //dormancy
+        final Boolean isDormancyActive = this.fromApiJsonHelper.extractBooleanNamed(isDormancyTrackingActiveParamName, element);
+        
+        if(null != isDormancyActive && isDormancyActive){
+        	final Long daysToInact = this.fromApiJsonHelper.extractLongNamed(daysToInactiveParamName, element);
+        	baseDataValidator.reset().parameter(daysToInactiveParamName).value(daysToInact).notNull().longGreaterThanZero();
+
+        	final Long daysToDor = this.fromApiJsonHelper.extractLongNamed(daysToDormancyParamName, element);
+        	baseDataValidator.reset().parameter(daysToDormancyParamName).value(daysToDor).notNull().longGreaterThanZero();
+
+        	final Long daysToEsc = this.fromApiJsonHelper.extractLongNamed(daysToEscheatParamName, element);
+        	baseDataValidator.reset().parameter(daysToEscheatParamName).value(daysToEsc).notNull().longGreaterThanZero();
+
+        	if(null != daysToInact
+        			&& null != daysToDor
+        			&& null != daysToEsc){
+        		baseDataValidator.reset().parameter(daysToDormancyParamName).value(daysToDor).longGreaterThanNumber(daysToInact);
+        		baseDataValidator.reset().parameter(daysToEscheatParamName).value(daysToEsc).longGreaterThanNumber(daysToDor);
+        	}
+        }
 
         // accounting related data validation
         final Integer accountingRuleType = this.fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());
@@ -283,6 +309,13 @@ public class SavingsProductDataValidator {
                     SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), element);
             baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue()).value(writtenoff)
                     .notNull().integerGreaterThanZero();
+            
+            if(null != isDormancyActive && isDormancyActive){
+            	final Long escheatLiabilityAccountId = this.fromApiJsonHelper.extractLongNamed(
+                        SAVINGS_PRODUCT_ACCOUNTING_PARAMS.ESCHEAT_LIABILITY.getValue(), element);
+                baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.ESCHEAT_LIABILITY.getValue())
+                        .value(escheatLiabilityAccountId).notNull().integerGreaterThanZero();
+            }
 
             validatePaymentChannelFundSourceMappings(baseDataValidator, element);
             validateChargeToIncomeAccountMappings(baseDataValidator, element);
@@ -302,7 +335,7 @@ public class SavingsProductDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateForUpdate(final String json) {
+    public void validateForUpdate(final String json, final SavingsProduct product) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
@@ -452,6 +485,42 @@ public class SavingsProductDataValidator {
                 element);
         baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue()).value(writtenoff)
                 .ignoreIfNull().integerGreaterThanZero();
+
+        //dormancy
+        final Boolean isDormancyActive = this.fromApiJsonHelper.parameterExists(isDormancyTrackingActiveParamName, element)?
+        		this.fromApiJsonHelper.extractBooleanNamed(isDormancyTrackingActiveParamName, element):
+        			product.isDormancyTrackingActive();
+        
+        if(null != isDormancyActive && isDormancyActive){
+        	final Long daysToInact = this.fromApiJsonHelper.parameterExists(daysToInactiveParamName, element)?
+        			this.fromApiJsonHelper.extractLongNamed(daysToInactiveParamName, element):
+        				product.getDaysToInactive();
+        	baseDataValidator.reset().parameter(daysToInactiveParamName).value(daysToInact).notNull().longGreaterThanZero();
+
+        	final Long daysToDor = this.fromApiJsonHelper.parameterExists(daysToDormancyParamName, element)?
+        			this.fromApiJsonHelper.extractLongNamed(daysToDormancyParamName, element):
+        				product.getDaysToDormancy();
+        	baseDataValidator.reset().parameter(daysToDormancyParamName).value(daysToDor).notNull().longGreaterThanZero();
+
+        	final Long daysToEsc = this.fromApiJsonHelper.parameterExists(daysToEscheatParamName, element)?
+        			this.fromApiJsonHelper.extractLongNamed(daysToEscheatParamName, element):
+        				product.getDaysToEscheat();
+        	baseDataValidator.reset().parameter(daysToEscheatParamName).value(daysToEsc).notNull().longGreaterThanZero();
+
+        	if(null != daysToInact
+        			&& null != daysToDor
+        			&& null != daysToEsc){
+        		baseDataValidator.reset().parameter(daysToDormancyParamName).value(daysToDor).longGreaterThanNumber(daysToInact);
+        		baseDataValidator.reset().parameter(daysToEscheatParamName).value(daysToEsc).longGreaterThanNumber(daysToDor);
+        	}
+
+        	if(this.fromApiJsonHelper.parameterExists(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.ESCHEAT_LIABILITY.getValue(), element)){
+            	final Long escheatLiabilityAccountId = this.fromApiJsonHelper.extractLongNamed(
+                        SAVINGS_PRODUCT_ACCOUNTING_PARAMS.ESCHEAT_LIABILITY.getValue(), element);
+                baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.ESCHEAT_LIABILITY.getValue())
+                        .value(escheatLiabilityAccountId).notNull().integerGreaterThanZero();
+        	}
+        }
 
         validatePaymentChannelFundSourceMappings(baseDataValidator, element);
         validateChargeToIncomeAccountMappings(baseDataValidator, element);

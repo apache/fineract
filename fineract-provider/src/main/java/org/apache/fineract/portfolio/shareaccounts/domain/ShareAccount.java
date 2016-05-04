@@ -238,7 +238,7 @@ public class ShareAccount extends AbstractPersistable<Long> {
 
     public boolean setExternalId(final String externalId) {
         boolean toReturn = false;
-        if (!this.externalId.equals(externalId)) {
+        if (this.externalId == null || !this.externalId.equals(externalId)) {
             this.externalId = externalId;
             toReturn = true;
         }
@@ -272,10 +272,7 @@ public class ShareAccount extends AbstractPersistable<Long> {
     
     public boolean setAllowDividendCalculationForInactiveClients(Boolean allowDividendCalculationForInactiveClients) {
         boolean returnValue = false;
-        if (this.allowDividendCalculationForInactiveClients == null) {
-            this.allowDividendCalculationForInactiveClients = allowDividendCalculationForInactiveClients;
-            returnValue = true;
-        } else if (!this.allowDividendCalculationForInactiveClients.equals(allowDividendCalculationForInactiveClients)) {
+        if (this.allowDividendCalculationForInactiveClients == null || !this.allowDividendCalculationForInactiveClients.equals(allowDividendCalculationForInactiveClients)) {
             this.allowDividendCalculationForInactiveClients = allowDividendCalculationForInactiveClients;
             returnValue = true;
         }
@@ -293,7 +290,7 @@ public class ShareAccount extends AbstractPersistable<Long> {
 
     public boolean setLockPeriodFrequencyEnum(final PeriodFrequencyType lockinPeriodFrequencyType) {
         boolean returnValue = false;
-        if (!this.lockinPeriodFrequencyType.getValue().equals(lockinPeriodFrequencyType.getValue())) {
+        if (this.lockinPeriodFrequencyType == null || !this.lockinPeriodFrequencyType.getValue().equals(lockinPeriodFrequencyType.getValue())) {
             this.lockinPeriodFrequencyType = lockinPeriodFrequencyType;
             returnValue = true;
         }
@@ -311,7 +308,7 @@ public class ShareAccount extends AbstractPersistable<Long> {
 
     public boolean setminimumActivePeriodTypeEnum(final PeriodFrequencyType minimumActivePeriodForDividends) {
         boolean returnValue = false;
-        if (!this.minimumActivePeriodFrequencyType.getValue().equals(minimumActivePeriodForDividends.getValue())) {
+        if (this.minimumActivePeriodFrequencyType == null || !this.minimumActivePeriodFrequencyType.getValue().equals(minimumActivePeriodForDividends.getValue())) {
             this.minimumActivePeriodFrequencyType = minimumActivePeriodForDividends;
             returnValue = true;
         }

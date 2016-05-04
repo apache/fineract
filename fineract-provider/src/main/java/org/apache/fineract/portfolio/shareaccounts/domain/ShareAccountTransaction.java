@@ -243,5 +243,7 @@ public class ShareAccountTransaction extends AbstractPersistable<Long> {
         return this.active ;
     }
     
-    
+    public BigDecimal shareValue() {
+        return this.shareValue ;
+    }
 }

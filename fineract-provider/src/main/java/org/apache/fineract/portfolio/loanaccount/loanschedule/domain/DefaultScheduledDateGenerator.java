@@ -62,8 +62,8 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         } else {
             Calendar currentCalendar = loanApplicationTerms.getLoanCalendar();
             dueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
-                    loanApplicationTerms.getRepaymentEvery(), lastRepaymentDate, loanApplicationTerms.getNthDay(),
-                    loanApplicationTerms.getWeekDayType());
+                    loanApplicationTerms.getRepaymentEvery(), lastRepaymentDate, null,
+                    null);
             dueRepaymentPeriodDate = CalendarUtils.adjustDate(dueRepaymentPeriodDate, loanApplicationTerms.getSeedDate(),
                     loanApplicationTerms.getRepaymentPeriodFrequencyType());
             if (currentCalendar != null) {
@@ -219,7 +219,8 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
 
     @Override
     public LocalDate idealDisbursementDateBasedOnFirstRepaymentDate(final PeriodFrequencyType repaymentPeriodFrequencyType,
-            final int repaidEvery, final LocalDate firstRepaymentDate) {
+            final int repaidEvery, final LocalDate firstRepaymentDate, final Calendar loanCalendar, final HolidayDetailDTO holidayDetailDTO, 
+            final LoanApplicationTerms loanApplicationTerms) {
 
         LocalDate idealDisbursementDate = null;
 
@@ -231,7 +232,15 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                 idealDisbursementDate = firstRepaymentDate.minusWeeks(repaidEvery);
             break;
             case MONTHS:
-                idealDisbursementDate = firstRepaymentDate.minusMonths(repaidEvery);
+                if (loanCalendar == null) {
+                    idealDisbursementDate = firstRepaymentDate.minusMonths(repaidEvery);
+                } else {
+                    idealDisbursementDate = CalendarUtils.getNewRepaymentMeetingDate(loanCalendar.getRecurrence(),
+                            firstRepaymentDate.minusMonths(repaidEvery), firstRepaymentDate.minusMonths(repaidEvery), repaidEvery,
+                            CalendarUtils.getMeetingFrequencyFromPeriodFrequencyType(repaymentPeriodFrequencyType),
+                            holidayDetailDTO.getWorkingDays(), loanApplicationTerms.isSkipRepaymentOnFirstDayofMonth(),
+                            loanApplicationTerms.getNumberOfdays());
+                }
             break;
             case YEARS:
                 idealDisbursementDate = firstRepaymentDate.minusYears(repaidEvery);

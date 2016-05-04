@@ -98,6 +98,9 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Column(name = "grace_on_principal_periods", nullable = true)
     private Integer graceOnPrincipalPayment;
 
+    @Column(name = "recurring_moratorium_principal_periods", nullable = true)
+    private Integer recurringMoratoriumOnPrincipalPeriods;
+
     @Column(name = "grace_on_interest_periods", nullable = true)
     private Integer graceOnInterestPayment;
 
@@ -130,13 +133,13 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
             final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final boolean allowPartialPeriodInterestCalcualtion,
             final Integer repaymentEvery, final PeriodFrequencyType repaymentPeriodFrequencyType, final Integer numberOfRepayments,
-            final Integer graceOnPrincipalPayment, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
+            final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
             final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAgeing,
             final Integer daysInMonthType, final Integer daysInYearType, final boolean isInterestRecalculationEnabled) {
 
         return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
                 nominalAnnualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion,
-                repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment,
+                repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment,
                 graceOnInterestCharged, amortizationMethod, inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType,
                 isInterestRecalculationEnabled);
     }
@@ -150,7 +153,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final BigDecimal defaultAnnualNominalInterestRate, final InterestMethod interestMethod,
             final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final boolean allowPartialPeriodInterestCalcualtion,
             final Integer repayEvery, final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfRepayments,
-            final Integer graceOnPrincipalPayment, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
+            final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
             final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance, final Integer graceOnArrearsAgeing,
             final Integer daysInMonthType, final Integer daysInYearType, final boolean isInterestRecalculationEnabled) {
         this.currency = currency;
@@ -165,6 +168,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         this.repaymentPeriodFrequencyType = repaymentFrequencyType;
         this.numberOfRepayments = defaultNumberOfRepayments;
         this.graceOnPrincipalPayment = defaultToNullIfZero(graceOnPrincipalPayment);
+        this.recurringMoratoriumOnPrincipalPeriods = recurringMoratoriumOnPrincipalPeriods;
         this.graceOnInterestPayment = defaultToNullIfZero(graceOnInterestPayment);
         this.graceOnInterestCharged = defaultToNullIfZero(graceOnInterestCharged);
         this.amortizationMethod = amortizationMethod;
@@ -216,6 +220,11 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         return this.graceOnPrincipalPayment;
     }
 
+    @Override
+    public Integer recurringMoratoriumOnPrincipalPeriods() {
+        return this.recurringMoratoriumOnPrincipalPeriods;
+    }
+    
     @Override
     public Money getInArrearsTolerance() {
         return Money.of(this.currency, this.inArrearsTolerance);
@@ -337,8 +346,9 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             actualChanges.put(repaymentFrequencyTypeParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             this.repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(newValue);
-
+        }
             if (this.repaymentPeriodFrequencyType == PeriodFrequencyType.MONTHS) {
+        	Integer newValue = null;
                 final String repaymentFrequencyNthDayTypeParamName = "repaymentFrequencyNthDayType";
                 newValue = command.integerValueOfParameterNamed(repaymentFrequencyNthDayTypeParamName);
                 actualChanges.put(repaymentFrequencyNthDayTypeParamName, newValue);
@@ -348,7 +358,6 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
                 actualChanges.put(repaymentFrequencyDayOfWeekTypeParamName, newValue);
 
                 actualChanges.put("locale", localeAsInput);
-            }
         }
 
         final String numberOfRepaymentsParamName = "numberOfRepayments";
@@ -431,6 +440,14 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             actualChanges.put("locale", localeAsInput);
             this.graceOnPrincipalPayment = newValue;
         }
+        
+        final String recurringMoratoriumOnPrincipalPeriodsParamName = "recurringMoratoriumOnPrincipalPeriods";
+        if (command.isChangeInIntegerParameterNamed(recurringMoratoriumOnPrincipalPeriodsParamName, this.recurringMoratoriumOnPrincipalPeriods)) {
+            final Integer newValue = command.integerValueOfParameterNamed(recurringMoratoriumOnPrincipalPeriodsParamName);
+            actualChanges.put(recurringMoratoriumOnPrincipalPeriodsParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.recurringMoratoriumOnPrincipalPeriods = newValue;
+        }
 
         final String graceOnInterestPaymentParamName = "graceOnInterestPayment";
         if (command.isChangeInIntegerParameterNamed(graceOnInterestPaymentParamName, this.graceOnInterestPayment)) {
@@ -499,6 +516,23 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         if (this.numberOfRepayments < defaultToZeroIfNull(this.graceOnInterestCharged)) {
             baseDataValidator.reset().parameter("graceOnInterestCharged").value(this.graceOnInterestCharged)
                     .failWithCode(".mustBeLessThan.numberOfRepayments");
+        }
+        
+        int graceOnPrincipal = 0;
+        if (this.getGraceOnPrincipalPayment() != null) {
+        	graceOnPrincipal = this.getGraceOnPrincipalPayment().intValue();
+        }
+        int recurMoratoriumOnPrincipal = 0;
+        if (this.recurringMoratoriumOnPrincipalPeriods() != null) {
+        	recurMoratoriumOnPrincipal = this.recurringMoratoriumOnPrincipalPeriods().intValue();
+        }
+        
+        if (  ( recurMoratoriumOnPrincipal > 0 ) 
+        	&& ( (this.numberOfRepayments - graceOnPrincipal) % ( recurMoratoriumOnPrincipal + 1) != 1) ) {
+            baseDataValidator.reset().parameter("graceOnPrincipalPayments.and.recurringMoratoriumOnPrincipalPeriods")
+	            	.value(graceOnPrincipal)
+	            	.value(recurMoratoriumOnPrincipal)
+	                .failWithCode("causes.principal.moratorium.for.last.installment");
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }

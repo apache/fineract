@@ -3312,6 +3312,38 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr>
+								<td><a href="#selfbentemplate">Beneficiary for Third Party Transfer</a></td>
+								<td>/self/beneficiaries/tpt/template</td>
+								<td></td>
+								<td><a href="#selfbentemplate">Beneficiary TPT Template</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>/self/beneficiaries/tpt</td>
+								<td><a href="#selfaddtpt">Add TPT Beneficiary</a></td>
+								<td><a href="#selfgettpt">Get TPT Beneficiary List</a></td>
+								<td><a href="#selfputtpt">Update TPT Beneficiary</a></td>
+								<td><a href="#selfdeletetpt">Delete TPT Beneficiary</a></td>
+							</tr>
+							<tr>
+								<td><a href="#selftpttransfertemplate">Third Party Account Transfers</a></td>
+								<td>self/accounttransfers/template?type="tpt"</td>
+								<td></td>
+								<td><a href="#selftpttransfertemplate">Third Party Account Transfer Template</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/accounttransfers?type="tpt"</td>
+								<td><a href="#selftpttransfer">Third Party Account Transfer</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -42193,7 +42225,35 @@ GET https://DomainName/api/v1/self/savingsaccounts/{accountId}/charges/{savingsA
 	        </code>
 			<code class="method-response">
 {
-  "accountOptions": [
+  "fromAccountOptions": [
+	{
+		"accountId": 1,
+		"accountNo": "00000001",
+		"accountType": {
+			"id": 2,
+			"code": "accountType.savings",
+			"value": "Savings Account"
+		},
+		"clientId": 1,
+		"clientName": "ABC",
+		"officeId": 1,
+		"officeName": "HEAD OFFICE"
+	},
+	{
+		"accountId": 5,
+		"accountNo": "00000005",
+		"accountType": {
+			"id": 1,
+			"code": "accountType.loan",
+			"value": "Loan Account"
+		},
+		"clientId": 2,
+		"clientName": "XYZ",
+		"officeId": 3,
+		"officeName": "REGIONAL OFFICE"
+	}
+  ],
+ "toAccountOptions": [
 	{
 		"accountId": 1,
 		"accountNo": "00000001",
@@ -42221,6 +42281,7 @@ GET https://DomainName/api/v1/self/savingsaccounts/{accountId}/charges/{savingsA
 		"officeName": "REGIONAL OFFICE"
 	}
   ]
+
 }
 			</code>
 	    </div>
@@ -42262,6 +42323,322 @@ No Request Body:
 	    </div>
 	</div>
 
+	<a id="selfbentemplate" name="selfbentemplate" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Beneficiary Third Party Transfer Template</h2>
+	        <p>Returns Account Type enumerations. Self User is expected to know office name and account number to be able to add beneficiary.</p>
+	        <p>Example Requests:</p>
+	        <div class=apiClick>/self/beneficiaries/tpt/template</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://DomainName/api/v1/self/beneficiaries/tpt/template
+	        </code>
+			<code class="method-response">
+    {
+        "accountTypeOptions":
+        [
+            {
+                "id": 2,
+                "code": "accountType.savings",
+                "value": "Savings Account"
+            },
+            {
+                "id": 1,
+                "code": "accountType.loan",
+                "value": "Loan Account"
+            }
+        ]
+    }
+			</code>
+	    </div>
+	</div>
+
+	<a id="selfaddtpt" name="selfaddtpt" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Add TPT Beneficiary</h2>
+	        <p>Api to add third party beneficiary linked to current user.</p>
+	        <p>Parameter Definitions</p>
+	        <p>name : Nick name for beneficiary, should be unique for an self service user</p>
+	        <p>officeName : Office Name of beneficiary(not id)</p>
+	        <p>accountNumber : Account Number of beneficiary(not id)</p>
+	        <p>transferLimit : Each transfer initiated to this account will not exceed this amount</p>
+	        <p>Example Requests:</p>
+	        <div class=apiClick>/self/beneficiaries/tpt</div>
+			<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>name, officeName, accountNumber, accountType</td>
+						</tr>
+					</table>
+					<br/>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>transferLimit
+							</td>
+						</tr>
+					</table>
+	    </div>
+		
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://DomainName/api/v1/self/beneficiaries/tpt
+	        </code>
+					<code class="method-request">
+POST self/beneficiaries/tpt
+Content-Type: application/json
+Request Body:
+{
+    "locale": "en_GB",
+	"name": "beneficiary nick name",
+	"officeName": "HEAD OFFICE",
+	"accountNumber": "0000001",
+	"accountType": 1,
+	"transferLimit": 1000
+    
+}
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 5
+}
+			</code>
+	    </div>
+	</div>
+
+	<a id="selfgettpt" name="selfgettpt" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Get All TPT Beneficiary</h2>
+	        <p>Api to get all third party beneficiary linked to current user.</p>
+	        <p>Example Requests:</p>
+	        <div class=apiClick>/self/beneficiaries/tpt</div>
+	    </div>
+		
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://DomainName/api/v1/self/beneficiaries/tpt
+	        </code>
+					<code class="method-request">
+GET self/beneficiaries/tpt
+Content-Type: application/json
+					</code>
+					<code class="method-response">
+{
+[
+  {
+    "id": 1,
+    "name": "Client2Savings",
+    "officeName": "Test Office",
+    "clientName": "FN2 LN2",
+    "accountType": {
+      "id": 2,
+      "code": "accountType.savings",
+      "value": "Savings Account"
+    },
+    "accountNumber": "000000002",
+    "transferLimit": 0
+  },
+  {
+    "id": 4,
+    "name": "Client2Loan",
+    "officeName": "Test Office",
+    "clientName": "FN2 LN2",
+    "accountType": {
+      "id": 1,
+      "code": "accountType.loan",
+      "value": "Loan Account"
+    },
+    "accountNumber": "000000002",
+    "transferLimit": 1000
+  }]
+}
+			</code>
+	    </div>
+	</div>
+
+	<a id="selfputtpt" name="selfputtpt" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Update TPT Beneficiary</h2>
+	        <p>Api to update third party beneficiary linked to current user.</p>
+	        <p>Example Requests:</p>
+	        <div class=apiClick>/self/beneficiaries/tpt/{beneficiaryId}</div>
+					<br/>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>name, transferLimit
+							</td>
+						</tr>
+					</table>
+	    </div>
+		
+	    <div class="method-example">
+	        <code class="method-declaration">PUT https://DomainName/api/v1/self/beneficiaries/tpt/{beneficiaryId}
+	        </code>
+					<code class="method-request">
+PUT self/beneficiaries/tpt/5
+Content-Type: application/json
+Request Body:
+{
+	"name": "beneficiary nick name",
+	"transferLimit": 1000
+    
+}
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 5,
+  "changes": {
+    "transferLimit": 1000,
+    "name": "Client22"
+  }
+}
+			</code>
+	    </div>
+	</div>
+
+	<a id="selfdeletetpt" name="selfdeletetpt" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Delete TPT Beneficiary</h2>
+	        <p>Api to delete third party beneficiary linked to current user.</p>
+	        <p>Example Requests:</p>
+	        <div class=apiClick>/self/beneficiaries/tpt/{beneficiaryId}</div>
+	    </div>
+		
+	    <div class="method-example">
+	        <code class="method-declaration">DELETE https://DomainName/api/v1/self/beneficiaries/tpt/{beneficiaryId}
+	        </code>
+					<code class="method-request">
+DELETE self/beneficiaries/tpt/5
+Content-Type: application/json
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 5
+}
+			</code>
+	    </div>
+	</div>
+
+	<a id="selftpttransfertemplate" name="selftpttransfertemplate" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Third Party Account Transfer Template</h2>
+	        <p>Returns list of loan/savings accounts that can be used for third party account transfer</p>
+	        <p>Example Requests:</p>
+	        <div class=apiClick>self/accounttransfers/template?type="tpt"</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://DomainName/api/v1/self/accounttransfers/template?type="tpt"
+	        </code>
+			<code class="method-response">
+{
+  "fromAccountOptions": [
+	{
+		"accountId": 1,
+		"accountNo": "00000001",
+		"accountType": {
+			"id": 2,
+			"code": "accountType.savings",
+			"value": "Savings Account"
+		},
+		"clientId": 1,
+		"clientName": "ABC",
+		"officeId": 1,
+		"officeName": "HEAD OFFICE"
+	},
+	{
+		"accountId": 5,
+		"accountNo": "00000005",
+		"accountType": {
+			"id": 1,
+			"code": "accountType.loan",
+			"value": "Loan Account"
+		},
+		"clientId": 2,
+		"clientName": "XYZ",
+		"officeId": 3,
+		"officeName": "REGIONAL OFFICE"
+	}
+  ],
+ "toAccountOptions": [
+	{
+		"accountId": 2,
+		"accountNo": "00000002",
+		"accountType": {
+			"id": 2,
+			"code": "accountType.savings",
+			"value": "Savings Account"
+		},
+		"clientId": 2,
+		"clientName": "ABC",
+		"officeId": 1,
+		"officeName": "HEAD OFFICE"
+	},
+	{
+		"accountId": 6,
+		"accountNo": "00000006",
+		"accountType": {
+			"id": 1,
+			"code": "accountType.loan",
+			"value": "Loan Account"
+		},
+		"clientId": 3,
+		"clientName": "XYZ",
+		"officeId": 4,
+		"officeName": "REGIONAL OFFICE"
+	}
+  ]
+
+}
+			</code>
+	    </div>
+	</div>
+
+	<a id="selftpttransfer" name="selftpttransfer" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Third Party Account Transfer</h2>
+	        <p>Ability to create new third party transfer of monetary funds from one account to another.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://DomainName/api/v1/self/accounttransfers?type="tpt"</code>
+	        <code class="method-request">POST self/accounttransfers?type="tpt"
+Content-Type: application/json
+No Request Body:
+{
+"fromOfficeId": 1,
+"fromClientId": 1,
+"fromAccountType": 2,
+"fromAccountId": 1,
+"toOfficeId": 1,
+"toClientId": 2,
+"toAccountType": 2,
+"toAccountId": 2,
+"dateFormat": "dd MMMM yyyy",
+"locale": "en",
+"transferDate": "01 August 2011",
+"transferAmount": "112.45",
+"transferDescription": "A description of the transfer"
+}
+	        </code>
+	        <code class="method-response">
+{
+  "savingsId": 1,
+  "resourceId": 1
+}
+	        </code>
+	    </div>
+	</div>
 			<!-- end of Customer Self Service APIs-->
         </div>
 		<!-- main-content-wrapper -->

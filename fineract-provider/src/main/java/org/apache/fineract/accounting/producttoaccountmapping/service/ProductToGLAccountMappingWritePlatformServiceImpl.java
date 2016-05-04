@@ -19,6 +19,7 @@
 package org.apache.fineract.accounting.producttoaccountmapping.service;
 
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isDormancyTrackingActiveParamName;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -224,6 +225,13 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 this.savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.TRANSFERS_SUSPENSE.getValue());
+                
+                final Boolean isDormancyTrackingActive = this.fromApiJsonHelper.extractBooleanNamed(isDormancyTrackingActiveParamName, element);
+                if(null != isDormancyTrackingActive && isDormancyTrackingActive){
+                    this.savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,
+                            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.ESCHEAT_LIABILITY.getValue(), savingProductId,
+                            CASH_ACCOUNTS_FOR_SAVINGS.ESCHEAT_LIABILITY.getValue());
+                }
 
                 // advanced accounting mappings
                 this.savingsProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, savingProductId, null);

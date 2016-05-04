@@ -23,11 +23,14 @@ import java.util.Collection;
 @SuppressWarnings("unused")
 public class SelfAccountTransferData {
 
-	private final Collection<SelfAccountTemplateData> accountOptions;
+	private final Collection<SelfAccountTemplateData> fromAccountOptions;
+	private final Collection<SelfAccountTemplateData> toAccountOptions;
 
 	public SelfAccountTransferData(
-			final Collection<SelfAccountTemplateData> accountOptions) {
-		this.accountOptions = accountOptions;
+			final Collection<SelfAccountTemplateData> fromAccountOptions,
+			Collection<SelfAccountTemplateData> toAccountOptions) {
+		this.fromAccountOptions = fromAccountOptions;
+		this.toAccountOptions = toAccountOptions;
 	}
 
 }

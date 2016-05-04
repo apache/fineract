@@ -145,10 +145,10 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
 
         try {
             this.context.authenticatedUser();
-            this.fromApiJsonDataValidator.validateForUpdate(command.json());
-
             final SavingsProduct product = this.savingProductRepository.findOne(productId);
             if (product == null) { throw new SavingsProductNotFoundException(productId); }
+
+            this.fromApiJsonDataValidator.validateForUpdate(command.json(), product);
 
             final Map<String, Object> changes = product.update(command);
 

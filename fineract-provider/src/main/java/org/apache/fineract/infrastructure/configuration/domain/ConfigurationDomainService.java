@@ -77,4 +77,10 @@ public interface ConfigurationDomainService {
     
     Long retreivePeroidInNumberOfDaysForSkipMeetingDate();
     
+    boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled();
+    
+    boolean isDailyTPTLimitEnabled();
+    
+    Long getDailyTPTLimit();
+    
 }

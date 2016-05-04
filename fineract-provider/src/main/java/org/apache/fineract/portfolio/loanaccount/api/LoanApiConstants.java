@@ -40,12 +40,49 @@ public interface LoanApiConstants {
     public static final String rejectedOnDateParameterName = "rejectedOnDate";
     public static final String withdrawnOnDateParameterName = "withdrawnOnDate";
 
-    // Interest recalculation related
-    public static final String isInterestRecalculationEnabledParameterName = "isInterestRecalculationEnabled";
+    public static final String transactionProcessingStrategyIdParameterName = "transactionProcessingStrategyId";
+    public static final String loanPurposeIdParameterName = "loanPurposeId";
+    public static final String loanOfficerIdParameterName = "loanOfficerId";
+    public static final String fundIdParameterName = "fundId";
+    public static final String externalIdParameterName = "externalId";
+    public static final String accountNoParameterName = "accountNo";
+    public static final String productIdParameterName = "productId";
+    public static final String calendarIdParameterName = "calendarId";
+    public static final String loanTypeParameterName = "loanType";
+    public static final String groupIdParameterName = "groupId";
+    public static final String clientIdParameterName = "clientId";
+    public static final String idParameterName = "id";
+    public static final String graceOnInterestChargedParameterName = "graceOnInterestCharged";
+    public static final String graceOnInterestPaymentParameterName = "graceOnInterestPayment";
+    public static final String graceOnPrincipalPaymentParameterName = "graceOnPrincipalPayment";
+    public static final String repaymentsStartingFromDateParameterName = "repaymentsStartingFromDate";
+    public static final String interestRateFrequencyTypeParameterName = "interestRateFrequencyType";
+    public static final String interestCalculationPeriodTypeParameterName = "interestCalculationPeriodType";
+    public static final String interestTypeParameterName = "interestType";
+    public static final String amortizationTypeParameterName = "amortizationType";
+    public static final String repaymentFrequencyTypeParameterName = "repaymentFrequencyType";
+    public static final String loanTermFrequencyTypeParameterName = "loanTermFrequencyType";
+    public static final String loanTermFrequencyParameterName = "loanTermFrequency";
+    public static final String numberOfRepaymentsParameterName = "numberOfRepayments";
+    public static final String repaymentEveryParameterName = "repaymentEvery";
+    public static final String interestRatePerPeriodParameterName = "interestRatePerPeriod";
+    public static final String inArrearsToleranceParameterName = "inArrearsTolerance";
+    public static final String interestChargedFromDateParameterName = "interestChargedFromDate";
+    public static final String submittedOnDateParameterName = "submittedOnDate";
+    public static final String submittedOnNoteParameterName = "interestChargedFromDate";
+    public static final String collateralParameterName = "collateral";
+    public static final String syncDisbursementWithMeetingParameterName = "syncDisbursementWithMeeting";
+    public static final String linkAccountIdParameterName = "linkAccountId";
+    public static final String createStandingInstructionAtDisbursementParameterName = "createStandingInstructionAtDisbursement";
     public static final String daysInYearTypeParameterName = "daysInYearType";
     public static final String daysInMonthTypeParameterName = "daysInMonthType";
+
+    // Interest recalculation related
+    public static final String isInterestRecalculationEnabledParameterName = "isInterestRecalculationEnabled";
     public static final String interestRecalculationCompoundingMethodParameterName = "interestRecalculationCompoundingMethod";
     public static final String rescheduleStrategyMethodParameterName = "rescheduleStrategyMethod";
+    public static final String repaymentFrequencyNthDayTypeParameterName = "repaymentFrequencyNthDayType";
+    public static final String repaymentFrequencyDayOfWeekTypeParameterName = "repaymentFrequencyDayOfWeekType";
 
     // Floating interest rate related
     public static final String interestRateDifferentialParameterName = "interestRateDifferential";

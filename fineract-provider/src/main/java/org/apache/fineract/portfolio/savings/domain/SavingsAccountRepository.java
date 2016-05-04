@@ -45,4 +45,7 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
     @Query("from SavingsAccount sa where sa.id = :accountId and sa.depositType = :depositAccountTypeId")
     SavingsAccount findByIdAndDepositAccountType(@Param("accountId") Long accountId,
             @Param("depositAccountTypeId") Integer depositAccountTypeId);
+
+    @Query("from SavingsAccount sa where sa.accountNumber = :accountNumber and sa.status in (100, 200, 300, 303, 304) ")
+    SavingsAccount findNonClosedAccountByAccountNumber(@Param("accountNumber") String accountNumber);
 }

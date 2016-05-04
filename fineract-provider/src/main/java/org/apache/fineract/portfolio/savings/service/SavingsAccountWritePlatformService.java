@@ -81,4 +81,10 @@ public interface SavingsAccountWritePlatformService {
     void postInterest(SavingsAccount account);
 
     CommandProcessingResult modifyWithHoldTax(Long savingsAccountId, JsonCommand command);
+
+	void setSubStatusInactive(Long savingsId);
+
+	void setSubStatusDormant(Long savingsId);
+
+	void escheat(Long savingsId);
 }

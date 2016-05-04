@@ -114,6 +114,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.google.gson.JsonArray;
@@ -153,6 +154,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     @Column(name = "status_enum", nullable = false)
     protected Integer status;
+
+    @Column(name = "sub_status_enum", nullable = false)
+    protected Integer sub_status = 0;
 
     @Column(name = "account_type_enum", nullable = false)
     protected Integer accountType;
@@ -901,6 +905,11 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.transactions.add(transaction);
 
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
+        
+        if(this.sub_status.equals(SavingsAccountSubStatusEnum.INACTIVE.getValue())
+        		|| this.sub_status.equals(SavingsAccountSubStatusEnum.DORMANT.getValue())){
+        	this.sub_status = SavingsAccountSubStatusEnum.NONE.getValue();
+        }
 
         return transaction;
     }
@@ -986,6 +995,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         if (applyWithdrawFee) {
             // auto pay withdrawal fee
             payWithdrawalFee(transactionDTO.getTransactionAmount(), transactionDTO.getTransactionDate(), transactionDTO.getAppUser());
+        }
+        if(this.sub_status.equals(SavingsAccountSubStatusEnum.INACTIVE.getValue())
+        		|| this.sub_status.equals(SavingsAccountSubStatusEnum.DORMANT.getValue())){
+        	this.sub_status = SavingsAccountSubStatusEnum.NONE.getValue();
         }
         return transaction;
     }
@@ -2744,4 +2757,37 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         return recalucateDailyBalance;
     }
+
+	public void setSubStatusInactive(AppUser appUser) {
+		this.sub_status = SavingsAccountSubStatusEnum.INACTIVE.getValue();
+    	LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+        for (SavingsAccountCharge charge : this.charges()) {
+            if (charge.isSavingsNoActivity() && charge.isActive()) {
+                charge.updateWithdralFeeAmount(this.getAccountBalance());
+                this.payCharge(charge, charge.getAmountOutstanding(this.getCurrency()), transactionDate, appUser);
+            }
+        }
+        recalculateDailyBalances(Money.zero(this.currency), transactionDate);
+        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
+	}
+	
+
+	public void setSubStatusDormant() {
+		this.sub_status = SavingsAccountSubStatusEnum.DORMANT.getValue();
+	}
+
+	public void escheat(AppUser appUser) {
+		this.status = SavingsAccountStatusType.CLOSED.getValue();
+		this.sub_status = SavingsAccountSubStatusEnum.ESCHEAT.getValue();
+		this.closedOnDate = DateUtils.getDateOfTenant();
+		this.closedBy = appUser;
+		
+    	LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
+		if(this.getSummary().getAccountBalance(this.getCurrency()).isGreaterThanZero()){
+			SavingsAccountTransaction transaction = SavingsAccountTransaction.escheat(this, transactionDate, appUser);
+			this.transactions.add(transaction);
+		}
+        recalculateDailyBalances(Money.zero(this.currency), transactionDate);
+		this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
+	}
 }

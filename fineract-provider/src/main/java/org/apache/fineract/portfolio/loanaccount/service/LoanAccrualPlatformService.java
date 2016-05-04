@@ -33,5 +33,6 @@ public interface LoanAccrualPlatformService {
     void addAccrualAccounting() throws JobExecutionException;
 
     void addPeriodicAccruals() throws JobExecutionException;
+    void addPeriodicAccrualsForLoansWithIncomePostedAsTransactions() throws JobExecutionException;
 
 }

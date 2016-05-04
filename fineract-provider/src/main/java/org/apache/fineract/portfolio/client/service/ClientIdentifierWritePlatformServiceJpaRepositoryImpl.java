@@ -98,6 +98,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
                     .build();
         } catch (final DataIntegrityViolationException dve) {
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve);
+            
             return CommandProcessingResult.empty();
         }
     }
@@ -181,7 +182,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
     private void handleClientIdentifierDataIntegrityViolation(final String documentTypeLabel, final Long documentTypeId,
             final String documentKey, final DataIntegrityViolationException dve) {
 
-        if (dve.getMostSpecificCause().getMessage().contains("unique_client_identifier")) {
+        if (dve.getMostSpecificCause().getMessage().contains("unique_active_client_identifier")) {
             throw new DuplicateClientIdentifierException(documentTypeLabel);
         } else if (dve.getMostSpecificCause().getMessage().contains("unique_identifier_key")) { throw new DuplicateClientIdentifierException(
                 documentTypeId, documentTypeLabel, documentKey); }
