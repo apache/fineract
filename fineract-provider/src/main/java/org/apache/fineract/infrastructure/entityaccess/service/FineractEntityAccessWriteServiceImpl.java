@@ -89,7 +89,6 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
             final FineractEntityRelation mapId = this.fineractEntityRelationRepositoryWrapper.findOneWithNotFoundDetection(relId);
-
             final Long fromId = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.fromEnityType);
             final Long toId = command.longValueOfParameterNamed(FineractEntityApiResourceConstants.toEntityType);
             final Date startDate = command.DateValueOfParameterNamed(FineractEntityApiResourceConstants.startDate);
