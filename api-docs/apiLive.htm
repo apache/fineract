@@ -10,7 +10,7 @@
 	QueryParameters = (function() {
 		var result = {};
 		if (window.location.search) {
-			// split up the query string and store in an associative array
+			// split up the query string and store in an associaative array
 			var params = window.location.search.slice(1).split("&");
 			for ( var i = 0; i < params.length; i++) {
 				var tmp = params[i].split("=");
@@ -939,6 +939,149 @@
 			</div>
 
 			<div class="flybar-nav">
+				<h2 class="flybar-button">Shares</h2>
+				<div id="toc-menu-client" class="flybar-menu">
+					<div class="tocMatrix">
+						<table class=matrixHeading>
+							<tr class="matrixHeadingBG">
+								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
+										<table>
+											<tr>
+												<td>RESOURCES</td>
+											</tr>
+										</table>
+									</div></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">POST</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>create/complex
+													update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">GET</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>read</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">PUT</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">DELETE</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>delete</div></td>
+										</tr>
+									</table></td>
+							</tr>
+							<tr>
+								<td><a href="#shareaccounts">Share Accounts</a></td>
+								<td>shareaccounts</td>
+								<td><a href="#shareaccount_create">Submit new share application</a></td>
+								<td><a href="#shareaccount_list">List share application/accounts</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>accounts/share/{accountId}</td>
+								<td></td>
+								<td><a href="#shareaccount_retrieve">Retrieve a share application/account</a></td>
+								<td><a href="#shareaccount_update">Modify a share application</a></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>accounts/share/{accountId}?command=approve</td>
+								<td><a href="#shareaccount_approve">Approve a share application</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>accounts/share/{accountId}?command=undoApproval</td>
+								<td><a href="#shareaccount_undoapproval">Undo share application approval</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>accounts/share/{accountId}?command=reject</td>
+								<td><a href="#shareaccount_reject">Reject a share application</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							
+							<tr>
+								<td></td>
+								<td>accounts/share/{accountId}?command=activate</td>
+								<td><a href="#shareaccount_activate">Activate a share account</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>accounts/share/{accountId}?command=close</td>
+								<td><a href="#shareaccount_close">Close a share account</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>accounts/share/{accountId}?command=applyadditionalshares</td>
+								<td><a href="#shareaccount_applyadditionalshares">Apply additional shares on a share account</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>accounts/share/{accountId}?command=approveadditionalshares</td>
+								<td><a href="#shareaccount_approveadditionalshares">Approve additional shares request on a share account</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							
+							<tr>
+								<td></td>
+								<td>accounts/share/{accountId}?command=rejectadditionalshares</td>
+								<td><a href="#shareaccount_rejectadditionalshares">Reject additional shares request on a share account</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							
+							<tr>
+								<td></td>
+								<td>accounts/share/{accountId}?command=redeemshares</td>
+								<td><a href="#shareaccount_redeem">Redeem shares on a share account</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							
+						</table>
+					</div>
+				</div>
+			</div>
+			
+			<div class="flybar-nav">
 				<h2 class="flybar-button">Loan</h2>
 				<div id="toc-menu-loan" class="flybar-menu">
 					<div class="tocMatrix">
@@ -1825,6 +1968,7 @@
 								<td></td>
 								<td></td>
 							</tr>
+														
 							<tr>
 								<td></td>
 								<td>savingsproducts/{productId}</td>
@@ -1865,6 +2009,22 @@
 								<td><a href="#rdproducts_update">Update a Recurring Deposit product</a></td>
 								<td><a href="#rdproducts_delete">Delete a Recurring Deposit product</a></td>
 							</tr>
+							<tr>
+								<td><a href="#shareproducts">Share Product</a></td>
+								<td>shareproducts</td>
+								<td><a href="#shareproducts_create">Create a Share product</a></td>
+								<td><a href="#shareproducts_list">List Share products</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>shareproducts/{productId}</td>
+								<td></td>
+								<td><a href="#shareproducts_retrieve">Retrieve a Share product</a></td>
+								<td><a href="#shareproducts_update">Update a Share product</a></td>
+							</tr>
+							
 							<tr>
 								<td><a href="#configs">Currency</a></td>
 								<td>currencies</td>
@@ -20088,6 +20248,499 @@ Content-Type: application/json
         </div>
     </div>
 
+	<a id="shareproducts_create" name="shareproducts_create" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Create a Share Product</h4>
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields</div></td></tr>
+                <tr class=alt>
+                	<td>name, shortName, description, currencyCode, digitsAfterDecimal,inMultiplesOf, locale,
+                		totalShares, unitPrice, nominalShares,allowDividendCalculationForInactiveClients,accountingRule</td>
+                </tr>
+            </table>
+            <br/>
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields for Cash based accounting (accountingRule = 2)</div></td></tr>
+                <tr class=alt>
+                	<td>shareReferenceId, shareSuspenseId, shareEquityId, incomeFromFeeAccountId</td>
+                </tr>
+            </table>
+            <br/>
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Optional Fields</div></td></tr>
+                <tr class=alt><td>sharesIssued, minimumShares, maximumShares, minimumActivePeriodForDividends, minimumactiveperiodFrequencyType, 
+				lockinPeriodFrequency, lockinPeriodFrequencyType, marketPricePeriods, chargesSelected</tr>
+            </table>
+        </div>
+        <div class="method-example">
+		
+            <code class="method-declaration">POST https://Domain Name/api/v1/products/share</code>
+			<code class="method-request">POST shareproducts
+Content-Type: application/json
+Request Body:
+{
+"name": "Share Product",
+"shortName": "SP",
+"description": "Description",
+"currencyCode": "USD",
+"digitsAfterDecimal": 2,
+"inMultiplesOf": "1",
+"locale": "en",
+"totalShares": "1000",
+"sharesIssued": "1000",
+"unitPrice": "1",
+"minimumShares": "10",
+"nominalShares": "20",
+"maximumShares": "30",
+"minimumActivePeriodForDividends": "1",
+"minimumactiveperiodFrequencyType": 0,
+"lockinPeriodFrequency": "1",
+"lockinPeriodFrequencyType": 1,
+"allowDividendCalculationForInactiveClients": "true",
+"marketPricePeriods": [{
+	"locale": "en",
+	"dateFormat": "dd MMMM yyyy",
+	"fromDate": "04 May 2016",
+	"shareValue": "2"
+}],
+"chargesSelected": [{
+	"id": 20
+}],
+"accountingRule": "1"	
+}
+
+			</code>
+			<code class="method-response">
+{
+  "resourceId": 1
+}
+			</code>
+			<code class="method-request">POST shareproducts
+Content-Type: application/json
+Request Body:
+{
+"name": "Share Product",
+"shortName": "SP",
+"description": "Description",
+"currencyCode": "USD",
+"digitsAfterDecimal": 2,
+"inMultiplesOf": "1",
+"locale": "en",
+"totalShares": "100000",
+"sharesIssued": "100000",
+"unitPrice": "1",
+"minimumShares": "1000",
+"nominalShares": "2000",
+"maximumShares": "5000",
+"minimumActivePeriodForDividends": "1",
+"minimumactiveperiodFrequencyType": 0,
+"lockinPeriodFrequency": "1",
+"lockinPeriodFrequencyType": 1,
+"allowDividendCalculationForInactiveClients": "true",
+"marketPricePeriods": [{
+	"locale": "en",
+	"dateFormat": "dd MMMM yyyy",
+	"fromDate": "04 May 2016",
+	"shareValue": "2"
+}],
+"chargesSelected": [{
+	"id": 20
+}],
+"accountingRule": "2",
+"shareReferenceId": 5,
+"shareSuspenseId": 8,
+"shareEquityId": 66,
+"incomeFromFeeAccountId": 2	
+}
+			</code>
+			<code class="method-response">
+{
+  "resourceId": 1
+}
+			</code>
+        </div>
+    </div>
+
+<a id="shareproducts_retrieve" name="shareproducts_retrieve" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Retrieve a Share Product</h4>
+            <p>Example Requests: </p>
+            <div class=apiClick>products/share/1</div>
+            <br><br>
+            <div class=apiClick>products/share/1?template=true</div>
+        </div>
+        <div class="method-example">
+			<code class="method-declaration">GET https://Domain Name/api/v1/products/share/1</code>
+			<code class="method-response">
+{
+	"id": 1,
+	"name": "Share Product",
+	"shortName": "SP",
+	"description": "SP",
+	"currency": {
+		"code": "USD",
+		"name": "US Dollar",
+		"decimalPlaces": 2,
+		"inMultiplesOf": 100,
+		"displaySymbol": "$",
+		"nameCode": "currency.USD",
+		"displayLabel": "US Dollar ($)"
+	},
+	"totalShares": 100,
+	"totalSharesIssued": 50,
+	"unitPrice": 1.00,
+	"shareCapital": 50.00,
+	"minimumShares": 1,
+	"nominalShares": 10,
+	"maximumShares": 50,
+	"marketPrice": [
+	{
+		"id": 4,
+		"fromDate": "Feb 1, 2016",
+		"shareValue": 1.00
+	},
+	{
+		"id": 5,
+		"fromDate": "May 3, 2016",
+		"shareValue": 5.00
+	}],
+	"charges": [{
+		"id": 20,
+		"name": "Share Account Activation Flat",
+		"active": true,
+		"penalty": false,
+		"currency": {
+			"code": "USD",
+			"name": "US Dollar",
+			"decimalPlaces": 2,
+			"displaySymbol": "$",
+			"nameCode": "currency.USD",
+			"displayLabel": "US Dollar ($)"
+		},
+		"amount": 1.000000,
+		"chargeTimeType": {
+			"id": 13,
+			"code": "chargeTimeType.activation",
+			"value": "Share Account Activate"
+		},
+		"chargeAppliesTo": {
+			"id": 4,
+			"code": "chargeAppliesTo.shares",
+			"value": "Shares"
+		},
+		"chargeCalculationType": {
+			"id": 1,
+			"code": "chargeCalculationType.flat",
+			"value": "Flat"
+		},
+		"chargePaymentMode": {
+			"id": 0,
+			"code": "chargepaymentmode.regular",
+			"value": "Regular"
+		}
+	}],
+	"allowDividendCalculationForInactiveClients": true,
+	"lockinPeriod": 1,
+	"lockPeriodTypeEnum": {
+		"id": 0,
+		"value": "Days"
+	},
+	"minimumActivePeriod": 1,
+	"minimumActivePeriodForDividendsTypeEnum": {
+		"id": 0,
+		"value": "Days"
+	},
+	"accountingRule": {
+		"id": 2,
+		"code": "accountingRuleType.cash",
+		"value": "CASH BASED"
+	},
+	"accountingMappings": {
+		"shareReferenceId": {
+			"id": 1,
+			"name": "ACCOUNT_NAME_1FJBQ",
+			"glCode": "ASSET_ED1461237837829"
+		},
+		"incomeFromFeeAccountId": {
+			"id": 14,
+			"name": "ACCOUNT_NAME_1FJBQ",
+			"glCode": "INCOME_OY1461237869836"
+		},
+		"shareEquityId": {
+			"id": 66,
+			"name": "Equity Account",
+			"glCode": "EQUITY1"
+		},
+		"shareSuspenseId": {
+			"id": 8,
+			"name": "ACCOUNT_NAME_1FJBQ",
+			"glCode": "LIABILITY_MA1461237860198"
+		}
+	},
+	"currencyOptions": [{
+		"code": "USD",
+		"name": "US Dollar",
+		"decimalPlaces": 2,
+		"displaySymbol": "$",
+		"nameCode": "currency.USD",
+		"displayLabel": "US Dollar ($)"
+	}],
+	"chargeOptions": [{
+		"id": 20,
+		"name": "Share Account Activation Flat",
+		"active": true,
+		"penalty": false,
+		"currency": {
+			"code": "USD",
+			"name": "US Dollar",
+			"decimalPlaces": 2,
+			"displaySymbol": "$",
+			"nameCode": "currency.USD",
+			"displayLabel": "US Dollar ($)"
+		},
+		"amount": 1.000000,
+		"chargeTimeType": {
+			"id": 13,
+			"code": "chargeTimeType.activation",
+			"value": "Share Account Activate"
+		},
+		"chargeAppliesTo": {
+			"id": 4,
+			"code": "chargeAppliesTo.shares",
+			"value": "Shares"
+		},
+		"chargeCalculationType": {
+			"id": 1,
+			"code": "chargeCalculationType.flat",
+			"value": "Flat"
+		},
+		"chargePaymentMode": {
+			"id": 0,
+			"code": "chargepaymentmode.regular",
+			"value": "Regular"
+		}
+	},
+	{
+		"id": 21,
+		"name": "Share Purchase %",
+		"active": true,
+		"penalty": false,
+		"currency": {
+			"code": "USD",
+			"name": "US Dollar",
+			"decimalPlaces": 2,
+			"displaySymbol": "$",
+			"nameCode": "currency.USD",
+			"displayLabel": "US Dollar ($)"
+		},
+		"amount": 0.500000,
+		"chargeTimeType": {
+			"id": 14,
+			"code": "chargeTimeType.sharespurchase",
+			"value": "Share Purchase"
+		},
+		"chargeAppliesTo": {
+			"id": 4,
+			"code": "chargeAppliesTo.shares",
+			"value": "Shares"
+		},
+		"chargeCalculationType": {
+			"id": 2,
+			"code": "chargeCalculationType.percent.of.amount",
+			"value": "% Amount"
+		},
+		"chargePaymentMode": {
+			"id": 0,
+			"code": "chargepaymentmode.regular",
+			"value": "Regular"
+		}
+	}
+	],
+	"minimumActivePeriodFrequencyTypeOptions": [{
+		"id": 0,
+		"code": "savings.lockin.sharePeriodFrequencyType.days",
+		"value": "Days"
+	}],
+	"lockinPeriodFrequencyTypeOptions": [{
+		"id": 0,
+		"code": "savings.lockin.sharePeriodFrequencyType.days",
+		"value": "Days"
+	},
+	{
+		"id": 1,
+		"code": "savings.lockin.sharePeriodFrequencyType.weeks",
+		"value": "Weeks"
+	},
+	{
+		"id": 2,
+		"code": "savings.lockin.sharePeriodFrequencyType.months",
+		"value": "Months"
+	},
+	{
+		"id": 3,
+		"code": "savings.lockin.sharePeriodFrequencyType.years",
+		"value": "Years"
+	}],
+	"accountingMappingOptions": {
+		"liabilityAccountOptions": [{
+			"id": 4,
+			"name": "ACCOUNT_NAME_1FJBQ",
+			"glCode": "LIABILITY_2T1461237838897",
+			"disabled": false,
+			"manualEntriesAllowed": true,
+			"type": {
+				"id": 2,
+				"code": "accountType.liability",
+				"value": "LIABILITY"
+			},
+			"usage": {
+				"id": 1,
+				"code": "accountUsage.detail",
+				"value": "DETAIL"
+			},
+			"description": "DEFAULT_DESCRIPTION",
+			"nameDecorated": "ACCOUNT_NAME_1FJBQ",
+			"tagId": {
+				"id": 0,
+				"isActive": false
+			}
+		}],
+		"assetAccountOptions": [{
+			"id": 1,
+			"name": "ACCOUNT_NAME_1FJBQ",
+			"glCode": "ASSET_ED1461237837829",
+			"disabled": false,
+			"manualEntriesAllowed": true,
+			"type": {
+				"id": 1,
+				"code": "accountType.asset",
+				"value": "ASSET"
+			},
+			"usage": {
+				"id": 1,
+				"code": "accountUsage.detail",
+				"value": "DETAIL"
+			},
+			"description": "DEFAULT_DESCRIPTION",
+			"nameDecorated": "ACCOUNT_NAME_1FJBQ",
+			"tagId": {
+				"id": 0,
+				"isActive": false
+			}
+		}],
+		"incomeAccountOptions": [{
+			"id": 2,
+			"name": "ACCOUNT_NAME_1FJBQ",
+			"glCode": "INCOME_9O1461237838422",
+			"disabled": false,
+			"manualEntriesAllowed": true,
+			"type": {
+				"id": 4,
+				"code": "accountType.income",
+				"value": "INCOME"
+			},
+			"usage": {
+				"id": 1,
+				"code": "accountUsage.detail",
+				"value": "DETAIL"
+			},
+			"description": "DEFAULT_DESCRIPTION",
+			"nameDecorated": "ACCOUNT_NAME_1FJBQ",
+			"tagId": {
+				"id": 0,
+				"isActive": false
+			}
+		}],
+		"equityAccountOptions": [{
+			"id": 66,
+			"name": "Equity Account",
+			"glCode": "EQUITY1",
+			"disabled": false,
+			"manualEntriesAllowed": true,
+			"type": {
+				"id": 3,
+				"code": "accountType.equity",
+				"value": "EQUITY"
+			},
+			"usage": {
+				"id": 1,
+				"code": "accountUsage.detail",
+				"value": "DETAIL"
+			},
+			"nameDecorated": "Equity Account",
+			"tagId": {
+				"id": 0,
+				"isActive": false
+			}
+		}]
+	}
+}
+			</code>
+        </div>
+</div>
+
+<a id="shareproducts_update" name="shareproducts_update" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Update a Share Product</h4>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">PUT https://Domain Name/api/v1/products/share/{productId}</code>
+			<code class="method-request">POST shareproducts/1
+Content-Type: application/json
+Request Body:
+{
+  "description": "Share Product Description.",
+  "locale": "en",
+  "unitPrice": "5.0"
+}
+			</code>
+			<code class="method-response">
+{
+  "resourceId": 1,
+  "changes": {
+    "description": "Share Product Description.",
+    "unitPrice": 5.0,
+    "locale": "en"
+  }
+}
+			</code>
+        </div>
+</div>
+
+<a id="shareproducts_list" name="shareproducts_list" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>List Share Products</h4>
+			<table class=matrixHeading>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields</div></td></tr>
+                <tr class=alt>
+                	<td>limit, offset</td>
+                </tr>
+            </table>
+            <p>Example Requests:</p>
+            <div class=apiClick>shareproducts</div>
+        </div>
+        <div class="method-example">
+		
+            <code class="method-declaration">GET https://Domain Name/api/v1/products/share?limit=10&offset=0</code>
+            <code class="method-response">
+			
+{
+	"totalFilteredRecords": 1,
+	"pageItems": [{
+		"id": 1,
+		"name": "Share Product",
+		"shortName": "Share Product Description",
+		"totalShares": 100
+	}]
+}
+</code>
+       </div>
+</div>
+	
     <a id="savingsproducts_create" name="savingsproducts_create" class="old-syle-anchor">&nbsp;</a>
     <div class="method-section">
         <div class="method-description">
@@ -21468,7 +22121,1119 @@ Content-Type: application/json
         </div>
     </div>
 <!-- end of fixed deposit products api docs -->
+<!-- start of share accounts api doc-->
 
+<a id="shareaccounts" name="shareaccounts" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Share Account:</h2>
+	        <p>Share accounts are instances of a praticular share product created for an individual. 
+			An application process around the creation of accounts is also supported.</p>
+
+	        <table class=matrixHeading>
+	        	<thead>
+	        		<tr class="matrixHeadingBG">
+	        			<td class="fineractHeading2">Starting State</td>
+	        			<td class="fineractHeading2">Action</td>
+	        			<td class="fineractHeading2">Resultant State</td>
+	        		</tr>
+	        	</thead>
+	        	<tbody>
+	        		<tr>
+	        			<td>-</td>
+	        			<td>Submit</td>
+	        			<td>Submitted and pending approval</td>
+	        		</tr>
+	        		<tr>
+	        			<td>Submitted and pending approval</td>
+	        			<td>Reject</td>
+	        			<td>Closed - Rejected</td>
+	        		</tr>
+	        		<tr>
+	        			<td>Submitted and pending approval</td>
+	        			<td>Approve</td>
+	        			<td>Approved</td>
+	        		</tr>
+	        		<tr>
+	        			<td>Approved</td>
+	        			<td>Undo Approval</td>
+	        			<td>Submitted and pending approval</td>
+	        		</tr>
+	        		<tr>
+	        			<td>Approved</td>
+	        			<td>Activate</td>
+	        			<td>Active</td>
+	        		</tr>
+	        	</tbody>
+	        </table>
+	        <br/>
+	      	<table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Field Descriptions</div></td></tr>
+
+				<tr class=alt><td>clientId</td></tr>
+				<tr><td class=fielddesc>The client you are creating the share account for. <i>clientId</i> must be provided.</td></tr>
+
+				<tr class=alt><td>productId</td></tr>
+				<tr><td class=fielddesc>The id of the product used for this share account. The share account <b>inherits the selected currency</b> of the product and <b>possibly other details if not overridden</b> in the share account creation request.</td></tr>
+
+        		<tr class=alt><td>accountNo</td></tr>
+				<tr><td class=fielddesc>The account no. associated with this account. Is auto generated if not provided at creation time.</td></tr>
+
+				<tr class=alt><td>externalId</td></tr>
+				<tr><td class=fielddesc>A place to put an external reference for this share account useful in migrations e.g. The ID another system uses. If provided, it must be unique.</td></tr>
+
+				<tr class=alt><td>submittedOnDate</td></tr>
+				<tr><td class=fielddesc><i>submittedOnDate</i> must be provided when initially creating share account application. <i>locale</i> and <i>dateFormat</i> parameters must be provided with this.</td></tr>
+
+				<tr class=alt><td>savingsAccountId</td></tr>
+	            <tr><td class=fielddesc>The saving account id in which dividend amount should be posted. </td></tr>
+
+	            <tr class=alt><td>minimumActivePeriod</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>minimumActivePeriodFrequencyType</i> to indicate the length of time that the share account for considering dividends. e.g. <b>60</b> Days</td></tr>
+
+	            <tr class=alt><td>minimumActivePeriodFrequencyType</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>minimumActivePeriod</i> to indicate the length of time that the share account for considering dividends. 0=Days
+	            e.g. 60 <b>Days</b></td></tr>
+
+	            <tr class=alt><td>lockinPeriodFrequency</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>lockinPeriodFrequencyType</i> to indicate the length of time that the shares is 'locked in' and redeems are not allowed. e.g. <b>6</b> Months</td></tr>
+
+	            <tr class=alt><td>lockinPeriodFrequencyType</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>lockinPeriodFrequency</i> to indicate the length of time that the shares is 'locked in' and redeems are not allowed. 0=Days, 1=Weeks, 2=Months, 3=Years
+	            e.g. 6 <b>Months</b></td></tr>
+
+	            <tr class=alt><td>applicationDate</td></tr>
+	            <tr><td class=fielddesc>Application date on which the first shares purchase should be considerd.</td></tr>
+
+	            <tr class=alt><td>requestedShares</td></tr>
+	        </table>
+	    </div>
+	</div>
+	
+<a id="shareaccount_template" name="shareaccount_template" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve Share Account Template:</h2>
+	            <p>This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+	                <ul>
+	                <li class=normalli>Field Defaults</li>
+	                <li class=normalli>Allowed Value Lists</li>
+	                </ul>
+	            </p>
+	        <h4>Arguments</h4>
+	        <dl class="argument-list">
+	            <dt>clientId</dt>
+	            <dd>Integer <span>mandatory</span></dd>
+	            <dt>productId</dt>
+	            <dd>Integer <span>optional</span></dd>
+	            <dd>If entered, productId, productName and selectedProduct fields are returned.</dd>
+	        </dl>
+	        <p>Example Requests: </p>
+	        <div class=apiClick>accounts/share/template?clientId=1</div>
+	        <br><br>
+	        <div class=apiClick>accounts/share/template?clientId=1&productId=1</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/accounts/share/template?clientId={clientId}</code>
+			<code class="method-response">
+{
+	"clientId": 7,
+	"clientName": "Client Name",
+	"productOptions": [{
+		"id": 1,
+		"name": "Share Product",
+		"shortName": "SP",
+		"totalShares": 100
+	}]
+}
+			</code>
+	    </div>
+
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/accounts/share/template?clientId={clientId}&productId={productId}</code>
+			<code class="method-response">
+{
+	"clientId": 7,
+	"clientName": "Client Name",
+	"defaultShares": 100,
+	"currency": {
+		"code": "USD",
+		"name": "US Dollar",
+		"decimalPlaces": 2,
+		"inMultiplesOf": 100,
+		"displaySymbol": "$",
+		"nameCode": "currency.USD",
+		"displayLabel": "US Dollar ($)"
+	},
+	"currentMarketPrice": 5.00,
+	"charges": [{
+		"chargeId": 20,
+		"name": "Share Account Activation Flat",
+		"chargeTimeType": {
+			"id": 13,
+			"code": "chargeTimeType.activation",
+			"value": "Share Account Activate"
+		},
+		"chargeCalculationType": {
+			"id": 1,
+			"code": "chargeCalculationType.flat",
+			"value": "Flat"
+		},
+		"amount": 1.000000,
+		
+	}],
+	"lockinPeriodFrequencyTypeOptions": [{
+		"id": 0,
+		"code": "savings.lockin.sharePeriodFrequencyType.days",
+		"value": "Days"
+	},
+	{
+		"id": 1,
+		"code": "savings.lockin.sharePeriodFrequencyType.weeks",
+		"value": "Weeks"
+	},
+	{
+		"id": 2,
+		"code": "savings.lockin.sharePeriodFrequencyType.months",
+		"value": "Months"
+	},
+	{
+		"id": 3,
+		"code": "savings.lockin.sharePeriodFrequencyType.years",
+		"value": "Years"
+	}],
+	"minimumActivePeriodFrequencyTypeOptions": [{
+		"id": 0,
+		"code": "savings.lockin.sharePeriodFrequencyType.days",
+		"value": "Days"
+	}],
+	"clientSavingsAccounts": [{
+		"id": 13,
+		"accountNo": "000000013",
+		"depositType": {
+			"id": 100,
+			"code": "depositAccountType.savingsDeposit",
+			"value": "Savings"
+		}
+	}]
+}
+			</code>
+	    </div>
+</div>
+
+<a id="shareaccount_create" name="shareaccount_create" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Submit new share application</h2>
+	        <br/>
+	        <table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields</div></td></tr>
+	            <tr class=alt><td>clientId, productId, submittedDate, savingsAccountId, requestedShares, applicationDate</td></tr>
+	        </table>
+	        <br/>
+	        <table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Optional Fields</div></td></tr>
+	            <tr class=alt><td>accountNo, externalId</td></tr>
+	        </table>
+	        <br/>
+	        <table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Inherited from Product (if not provided)</div></td></tr>
+	            <tr class=alt><td> minimumActivePeriod, minimumActivePeriodFrequencyType, lockinPeriodFrequency, lockinPeriodFrequencyType</td>
+	       		</tr>
+	        </table>
+	    </div>
+	    <div class="method-example">
+	    	<p>Minimal request: accountNo auto generated, remaining details inherited from savings product.</p>
+	        <code class="method-declaration">POST https://Domain Name/api/v1/accounts/share</code>
+	        <code class="method-request">POST savingsaccount
+Content-Type: application/json
+Request Body:
+{
+	"clientId": "7",
+	"productId": 1,
+	
+	"requestedShares": 100,
+	"externalId": "1",
+	"submittedDate": "01 May 2016",
+	"minimumActivePeriod": "1",
+	"minimumActivePeriodFrequencyType": 0,
+	"lockinPeriodFrequency": "1",
+	"lockinPeriodFrequencyType": 0,
+	"applicationDate": "01 May 2016",
+	"allowDividendCalculationForInactiveClients": true,
+	"locale": "en",
+	"dateFormat": "dd MMMM yyyy",
+	"charges": [{
+		"chargeId": 20,
+		"amount": 1
+	},
+	{
+		"chargeId": 21,
+		"amount": 0.5
+	},
+	{
+		"chargeId": 23,
+		"amount": 2
+	}],
+	
+	"savingsAccountId": 13
+}
+			</code>
+	        <code class="method-response">
+{
+  "resourceId": 1
+}
+	        </code>
+	    </div>
+</div>
+	
+<a id="shareaccount_approve" name="shareaccount_approve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Approve share application</h2>
+	        <p>Approves share application so long as its in 'Submitted and pending approval' state.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/accounts/share/{shareAccountId}?command=approve</code>
+	        <code class="method-request">POST shareaccount/1?command=approve
+Content-Type: application/json
+Request Body:
+{
+"note":"notes",
+"approvedDate":"01 May 2016",
+"locale":"en",
+"dateFormat":"dd MMMM yyyy"
+}
+			</code>
+	        <code class="method-response">
+{
+  
+  "resourceId": 1,
+  "changes": {
+    "status": {
+      "id": 200,
+      "code": "shareAccountStatusType.approved",
+      "value": "Approved",
+      "submittedAndPendingApproval": false,
+      "approved": true,
+      "rejected": false,
+      "active": false,
+      "closed": false
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "approvedDate": "01 May 2016"
+  }
+}
+	        </code>
+	    </div>
+</div>
+
+<a id="shareaccount_undoapproval" name="shareaccount_undoapproval" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Undo approval share application</h2>
+	        <p>Will move 'approved' share application back to 'Submitted and pending approval' state.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/accounts/share/{shareAccountId}?command=undoApproval</code>
+	        <code class="method-request">POST shareaccount/1?command=undoApproval
+Content-Type: application/json
+Request Body:
+{
+}
+			</code>
+	        <code class="method-response">
+{
+  
+  "resourceId": 1,
+  "changes": {
+    "status": {
+      "id": 100,
+      "code": "shareAccountStatusType.submitted.and.pending.approval",
+      "value": "Submitted and pending approval",
+      "submittedAndPendingApproval": true,
+      "approved": false,
+      "rejected": false,
+      "active": false,
+      "closed": false
+    },
+    "approvedOnDate": ""
+  }
+}
+	        </code>
+	    </div>
+</div>
+	
+<a id="shareaccount_reject" name="shareaccount_reject" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Reject share application</h2>
+	        <p>Rejects share application so long as its in 'Submitted and pending approval' state.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/accounts/share/{shareAccountId}?command=reject</code>
+	        <code class="method-request">POST shareaccount/1?command=reject
+Content-Type: application/json
+Request Body:
+{
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "rejectedDate": "03 March 2013"
+}
+			</code>
+	        <code class="method-response">
+{
+  
+  "resourceId": 1,
+  "changes": {
+    "status": {
+      "id": 500,
+      "code": "shareAccountStatusType.rejected",
+      "value": "Rejected",
+      "submittedAndPendingApproval": false,
+      "approved": false,
+      "rejected": true,
+      "active": false,
+      "closed": true
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "rejectedDate": "03 March 2013",
+    "closedDate": "03 March 2013"
+  }
+}
+	        </code>
+	    </div>
+</div>
+
+<a id="shareaccount_activate" name="shareaccount_activate" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Activate a share account</h2>
+	        <p>Results in an approved share application being converted into an 'active' share account.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/accounts/share/{shareAccountId}?command=activate</code>
+	        <code class="method-request">POST shareaccount/1?command=activate
+Content-Type: application/json
+Request Body:
+{
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "activatedDate": "01 March 2013"
+}
+			</code>
+	        <code class="method-response">
+{
+  "resourceId": 1,
+  "changes": {
+    "status": {
+      "id": 300,
+      "code": "shareAccountStatusType.active",
+      "value": "Active",
+      "submittedAndPendingApproval": false,
+      "approved": false,
+      "rejected": false,
+      "active": true,
+      "closed": false
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "activatedDate": "01 March 2013"
+  }
+}
+	        </code>
+	    </div>
+</div>
+
+<a id="shareaccount_close" name="shareaccount_close" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Close a share account</h2>
+	        <p>Results in an Activated share application being converted into an 'closed' share account.</p>
+            <p><i>closedDate</i> is closure date of share account</p>
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG">
+                    <td><div class="fineractHeading2">Mandatory Fields</div></td>
+                </tr>
+                <tr class=alt>
+                    <td>dateFormat,locale,closedDate</td>
+                </tr>
+            </table>
+            <br />
+           
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/accounts/share/{shareAccountId}?command=close</code>
+	        <code class="method-request">POST shareaccount/5?command=close
+Content-Type: application/json
+Request Body:
+{
+  "dateFormat":"dd MMMM yyyy",
+  "locale":"en",
+  "closedDate":"26 August 2013",
+  "note":"close note"
+}
+			</code>
+	        <code class="method-response">
+{
+  
+  "resourceId":5,
+  "changes":{
+   "status":{
+    "id":600,
+    "code":"shareAccountStatusType.closed",
+    "value":"Closed",
+    "submittedAndPendingApproval":false,
+    "approved":false,
+    "rejected":false,
+    "active":false,
+    "closed":true
+    },
+  "locale":"en",
+  "dateFormat":"dd MMMM yyyy",
+  "closedOnDate":"26 August 2013",
+  "note":"close note"
+  }
+}
+	        
+	        </code>
+	    </div>
+</div>
+
+<a id="shareaccount_applyadditionalshares" name="shareaccount_applyadditionalshares" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Apply additional shares on a share account</h2>
+	          <p><i>requestedDate</i> is requsted date of share purchase</p>
+			<p><i>requestedShares</i> is number of shares to be purchase</p>
+            
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG">
+                    <td><div class="fineractHeading2">Mandatory Fields</div></td>
+                </tr>
+                <tr class=alt>
+                    <td>dateFormat,locale,requestedDate, requestedShares</td>
+                </tr>
+            </table>
+            <br />
+           
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/accounts/share/{shareAccountId}?command=applyadditionalshares</code>
+	        <code class="method-request">POST shareaccount/5?command=applyadditionalshares
+Content-Type: application/json
+Request Body:
+{
+	"requestedDate": "04 May 2016",
+	"requestedShares": "10",
+	"locale": "en",
+	"dateFormat": "dd MMMM yyyy"
+}
+			</code>
+	        <code class="method-response">
+{
+  
+  "resourceId":5,
+}
+	        
+	        </code>
+	    </div>
+</div>
+
+<a id="shareaccount_approveadditionalshares" name="shareaccount_approveadditionalshares" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Approve additional shares request on a share account</h2>
+	         <p><i>requestedShares</i> is Share purchase transaction ids</p>
+            
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG">
+                    <td><div class="fineractHeading2">Mandatory Fields</div></td>
+                </tr>
+                <tr class=alt>
+                    <td>requestedShares</td>
+                </tr>
+            </table>
+            <br />
+           
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/accounts/share/{shareAccountId}?command=approveadditionalshares</code>
+	        <code class="method-request">POST shareaccount/5?command=approveadditionalshares
+Content-Type: application/json
+Request Body:
+{
+	"requestedShares": [{
+		"id": 34
+	}]
+}
+			</code>
+	        <code class="method-response">
+{
+  
+  "resourceId":5,
+}
+	        
+	        </code>
+	    </div>
+</div>
+
+<a id="shareaccount_rejectadditionalshares" name="shareaccount_rejectadditionalshares" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Reject additional shares request on a share account</h2>
+	         <p><i>requestedShares</i> is Share purchase transaction ids</p>
+            
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG">
+                    <td><div class="fineractHeading2">Mandatory Fields</div></td>
+                </tr>
+                <tr class=alt>
+                    <td>requestedShares</td>
+                </tr>
+            </table>
+            <br />
+           
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/accounts/share/{shareAccountId}?command=rejectadditionalshares</code>
+	        <code class="method-request">POST shareaccount/5?command=rejectadditionalshares
+Content-Type: application/json
+Request Body:
+{
+	"requestedShares":[{"id":35}]
+}
+			</code>
+	        <code class="method-response">
+{
+  
+  "resourceId":5,
+}
+	        
+	        </code>
+	    </div>
+</div>
+
+<a id="shareaccount_redeem" name="shareaccount_redeem" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Redeem shares on a share account</h2>
+	        <p>Results redeem some/all shares from share account.</p>
+            <p><i>requestedDate</i> is requsted date of shares redeem</p>
+			<p><i>requestedShares</i> is number of shares to be redeemed</p>
+			
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG">
+                    <td><div class="fineractHeading2">Mandatory Fields</div></td>
+                </tr>
+                <tr class=alt>
+                    <td>dateFormat,locale,requestedDate,requestedShares</td>
+                </tr>
+            </table>
+            <br />
+           
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/accounts/share/{shareAccountId}?command=redeemshares</code>
+	        <code class="method-request">POST shareaccount/5?command=redeemshares
+Content-Type: application/json
+Request Body:
+{
+	"requestedDate": "04 May 2016",
+	"requestedShares": "4",
+	"locale": "en",
+	"dateFormat": "dd MMMM yyyy"
+}
+			</code>
+	        <code class="method-response">
+{
+  
+  "resourceId":5,
+}
+	        
+	        </code>
+	    </div>
+</div>
+
+<a id="shareaccount_list" name="shareaccount_list" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h2>List share applications/accounts</h2>
+            <p>Example Requests:</p>
+            <div class=apiClick>shareaccount</div>
+            
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">GET https://Domain Name/api/v1/accounts/share</code>
+            <code class="method-response">
+{
+  "totalFilteredRecords": 1,
+  "pageItems": [
+    {
+      "id": 1,
+      "accountNo": "000000001",
+      "clientId": 1,
+      "clientName": "Client Name",
+      "productId": 1,
+      "productName": "Share Product Name",
+      
+      "status": {
+        "id": 100,
+        "code": "shareAccountStatusType.submitted.and.pending.approval",
+        "value": "Submitted and pending approval",
+        "submittedAndPendingApproval": true,
+        "approved": false,
+        "rejected": false,
+        "active": false,
+        "closed": false
+      },
+      "timeline": {
+        "submittedOnDate": [
+          2013,
+          3,
+          1
+        ]
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+	  "purchasedShares" : [
+	  {"id":1,
+	  "purchasedDate":"01 May 2013",
+	  "numberOfShares": 10,
+	  "purchasedPrice": 5
+	  }
+	  ],
+     
+      "summary": {
+        "currency": {
+          "code": "USD",
+          "name": "US Dollar",
+          "decimalPlaces": 2,
+          "displaySymbol": "$",
+          "nameCode": "currency.USD",
+          "displayLabel": "US Dollar ($)"
+        },
+        }
+    }
+  ]
+}
+			</code>
+        </div>
+</div>
+
+<a id="shareaccount_retrieve" name="shareaccount_retrieve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve a share application/account:</h2>
+	        
+	        <p>Example Requests : </p>
+	        <div class=apiClick>shareaccount/1</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://DomainName/api/v1/accounts/share/{accountId}</code>
+	        <code class="method-response">
+{
+	"id": 2,
+	"accountNo": "000000002",
+	"savingsAccountNumber": "000000013",
+	"clientId": 7,
+	"clientName": "Client_FirstName_2KX8C Client_LastName_NWNG",
+	"productId": 1,
+	"productName": "Share Product",
+	"status": {
+		"id": 300,
+		"code": "shareAccountStatusType.active",
+		"value": "Active",
+		"submittedAndPendingApproval": false,
+		"approved": false,
+		"rejected": false,
+		"active": true,
+		"closed": false
+	},
+	"timeline": {
+		"submittedOnDate": [2016,
+		4,
+		1],
+		"submittedByUsername": "mifos",
+		"submittedByFirstname": "App",
+		"submittedByLastname": "Administrator",
+		"approvedDate": [2016,
+		4,
+		1],
+		"approvedByUsername": "mifos",
+		"approvedByFirstname": "App",
+		"approvedByLastname": "Administrator",
+		"activatedDate": [2016,
+		4,
+		1]
+	},
+	"currency": {
+		"code": "USD",
+		"name": "US Dollar",
+		"decimalPlaces": 2,
+		"inMultiplesOf": 100,
+		"displaySymbol": "$",
+		"nameCode": "currency.USD",
+		"displayLabel": "US Dollar ($)"
+	},
+	"summary": {
+		"id": 2,
+		"accountNo": "000000002",
+		"totalApprovedShares": 1,
+		"totalPendingForApprovalShares": 0,
+		"productId": 1,
+		"productName": "Conflux Share Product",
+		"status": {
+			"id": 300,
+			"code": "shareAccountStatusType.active",
+			"value": "Active",
+			"submittedAndPendingApproval": false,
+			"approved": false,
+			"rejected": false,
+			"active": true,
+			"closed": false
+		},
+		"currency": {
+			"code": "USD",
+			"name": "US Dollar",
+			"decimalPlaces": 2,
+			"inMultiplesOf": 100,
+			"displaySymbol": "$",
+			"nameCode": "currency.USD",
+			"displayLabel": "US Dollar ($)"
+		},
+		"timeline": {
+			"submittedOnDate": [2016,
+			4,
+			1],
+			"submittedByUsername": "mifos",
+			"submittedByFirstname": "App",
+			"submittedByLastname": "Administrator",
+			"approvedDate": [2016,
+			4,
+			1],
+			"approvedByUsername": "mifos",
+			"approvedByFirstname": "App",
+			"approvedByLastname": "Administrator",
+			"activatedDate": [2016,
+			4,
+			1]
+		}
+	},
+	"purchasedShares": [{
+		"id": 6,
+		"accountId": 2,
+		"purchasedDate": [2016,
+		4,
+		1],
+		"numberOfShares": 10,
+		"purchasedPrice": 0.50,
+		"status": {
+			"id": 300,
+			"code": "purchasedSharesStatusType.approved",
+			"value": "Approved"
+		},
+		"type": {
+			"id": 500,
+			"code": "purchasedSharesType.purchased",
+			"value": "Purchase"
+		},
+		"amount": 5.05,
+		"chargeAmount": 0.05,
+		"amountPaid": 5.05
+	},
+	{
+		"id": 7,
+		"accountId": 2,
+		"purchasedDate": [2016,
+		4,
+		21],
+		"status": {
+			"id": 300,
+			"code": "purchasedSharesStatusType.approved",
+			"value": "Approved"
+		},
+		"type": {
+			"id": 700,
+			"code": "charge.payment",
+			"value": "Charge Payment"
+		},
+		"amount": 1.00,
+		"chargeAmount": 0,
+		"amountPaid": 1.00
+	},
+	{
+		"id": 8,
+		"accountId": 2,
+		"purchasedDate": [2016,
+		4,
+		2],
+		"numberOfShares": 5,
+		"purchasedPrice": 0.50,
+		"status": {
+			"id": 300,
+			"code": "purchasedSharesStatusType.approved",
+			"value": "Approved"
+		},
+		"type": {
+			"id": 600,
+			"code": "purchasedSharesType.redeemed",
+			"value": "Redeem"
+		},
+		"amount": 2.45,
+		"chargeAmount": 0.05,
+		"amountPaid": 2.45
+	},
+	{
+		"id": 9,
+		"accountId": 2,
+		"purchasedDate": [2016,
+		4,
+		3],
+		"numberOfShares": 10,
+		"purchasedPrice": 0.50,
+		"status": {
+			"id": 300,
+			"code": "purchasedSharesStatusType.approved",
+			"value": "Approved"
+		},
+		"type": {
+			"id": 500,
+			"code": "purchasedSharesType.purchased",
+			"value": "Purchase"
+		},
+		"amount": 5.05,
+		"chargeAmount": 0.05,
+		"amountPaid": 5.05
+	},
+	{
+		"id": 10,
+		"accountId": 2,
+		"purchasedDate": [2016,
+		4,
+		4],
+		"numberOfShares": 5,
+		"purchasedPrice": 0.50,
+		"status": {
+			"id": 300,
+			"code": "purchasedSharesStatusType.approved",
+			"value": "Approved"
+		},
+		"type": {
+			"id": 500,
+			"code": "purchasedSharesType.purchased",
+			"value": "Purchase"
+		},
+		"amount": 2.52,
+		"chargeAmount": 0.02,
+		"amountPaid": 2.52
+	},
+	{
+		"id": 11,
+		"accountId": 2,
+		"purchasedDate": [2016,
+		4,
+		5],
+		"numberOfShares": 15,
+		"purchasedPrice": 0.50,
+		"status": {
+			"id": 300,
+			"code": "purchasedSharesStatusType.approved",
+			"value": "Approved"
+		},
+		"type": {
+			"id": 600,
+			"code": "purchasedSharesType.redeemed",
+			"value": "Redeem"
+		},
+		"amount": 7.35,
+		"chargeAmount": 0.15,
+		"amountPaid": 7.35
+	},
+	{
+		"id": 31,
+		"accountId": 2,
+		"purchasedDate": [2016,
+		5,
+		4],
+		"numberOfShares": 4,
+		"purchasedPrice": 5.00,
+		"status": {
+			"id": 300,
+			"code": "purchasedSharesStatusType.approved",
+			"value": "Approved"
+		},
+		"type": {
+			"id": 600,
+			"code": "purchasedSharesType.redeemed",
+			"value": "Redeem"
+		},
+		"amount": 19.60,
+		"chargeAmount": 0.40,
+		"amountPaid": 19.60
+	}],
+	"savingsAccountId": 13,
+	"currentMarketPrice": 5.00,
+	"lockinPeriod": 1,
+	"lockPeriodTypeEnum": {
+		"id": 0,
+		"code": "savings.lockin.sharePeriodFrequencyType.days",
+		"value": "Days"
+	},
+	"minimumActivePeriod": 1,
+	"minimumActivePeriodTypeEnum": {
+		"id": 0,
+		"code": "savings.lockin.sharePeriodFrequencyType.days",
+		"value": "Days"
+	},
+	"allowDividendCalculationForInactiveClients": true,
+	"charges": [{
+		"id": 9,
+		"chargeId": 20,
+		"accountId": 2,
+		"name": "Share Account Activation Flat",
+		"chargeTimeType": {
+			"id": 13,
+			"code": "chargeTimeType.activation",
+			"value": "Share Account Activate"
+		},
+		"chargeCalculationType": {
+			"id": 1,
+			"code": "chargeCalculationType.flat",
+			"value": "Flat"
+		},
+		"percentage": 0,
+		"amountPercentageAppliedTo": 0,
+		"currency": {
+			"code": "USD",
+			"name": "US Dollar",
+			"decimalPlaces": 2,
+			"displaySymbol": "$",
+			"nameCode": "currency.USD",
+			"displayLabel": "US Dollar ($)"
+		},
+		"amount": 1.000000,
+		"amountPaid": 1.000000,
+		"amountWaived": 0,
+		"amountWrittenOff": 0,
+		"amountOutstanding": 0.000000,
+		"amountOrPercentage": 1.000000,
+		"isActive": true
+	},
+	{
+		"id": 7,
+		"chargeId": 21,
+		"accountId": 2,
+		"name": "Share Purchase %",
+		"chargeTimeType": {
+			"id": 14,
+			"code": "chargeTimeType.sharespurchase",
+			"value": "Share Purchase"
+		},
+		"chargeCalculationType": {
+			"id": 2,
+			"code": "chargeCalculationType.percent.of.amount",
+			"value": "% Amount"
+		},
+		"percentage": 1.000000,
+		"amountPercentageAppliedTo": 12.500000,
+		"currency": {
+			"code": "USD",
+			"name": "US Dollar",
+			"decimalPlaces": 2,
+			"displaySymbol": "$",
+			"nameCode": "currency.USD",
+			"displayLabel": "US Dollar ($)"
+		},
+		"amount": 0.120000,
+		"amountPaid": 0.120000,
+		"amountWaived": 0,
+		"amountWrittenOff": 0,
+		"amountOutstanding": 0.000000,
+		"amountOrPercentage": 1.000000,
+		"isActive": true
+	},
+	{
+		"id": 8,
+		"chargeId": 23,
+		"accountId": 2,
+		"name": "Share Redeem %",
+		"chargeTimeType": {
+			"id": 15,
+			"code": "chargeTimeType.sharesredeem",
+			"value": "Share Redeem"
+		},
+		"chargeCalculationType": {
+			"id": 2,
+			"code": "chargeCalculationType.percent.of.amount",
+			"value": "% Amount"
+		},
+		"percentage": 2.000000,
+		"amountPercentageAppliedTo": 30.000000,
+		"currency": {
+			"code": "USD",
+			"name": "US Dollar",
+			"decimalPlaces": 2,
+			"displaySymbol": "$",
+			"nameCode": "currency.USD",
+			"displayLabel": "US Dollar ($)"
+		},
+		"amount": 0.600000,
+		"amountPaid": 0.600000,
+		"amountWaived": 0,
+		"amountWrittenOff": 0,
+		"amountOutstanding": 0.000000,
+		"amountOrPercentage": 2.000000,
+		"isActive": true
+	}],
+	"dividends": []
+}
+	        </code>
+	    </div>
+</div>
+
+<a id="shareaccount_update" name="shareaccount_update" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Modify a share application</h2>
+	        <p>Share application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">PUT https://Domain Name/api/v1/accounts/share/{accountsId}</code>
+	        <code class="method-request">PUT shareaccount/1
+Content-Type: application/json
+No Request Body:
+{
+	"locale": "en",
+	"dateFormat": "dd MMMM yyyy",
+	"applicationDate": "01 April 2016",
+	"requestedShares": "20",
+}
+	        </code>
+	        <code class="method-response">
+{
+  
+  "resourceId": 1,
+  "changes": {
+  "dateFormat": "dd MMMM yyyy",
+    "applicationDate": "01 April 2016",
+	"requestedShares": "20",
+    "locale": "en"
+  }
+}
+	        </code>
+	    </div>
+	</div>
+	
+<!-- end of share accounts api doc
 <!-- start of savings accounts api -->
 	<a id="savingsaccounts" name="savingsaccounts" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
@@ -22009,7 +23774,7 @@ Request Body:
 	    </div>
 	</div>
 
-	<a id="savingsaccounts_approve" name="savingsaccounts_approve" class="old-syle-anchor">&nbsp;</a>
+<a id="savingsaccounts_approve" name="savingsaccounts_approve" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
 	        <h2>Approve savings application</h2>
@@ -44473,6 +46238,30 @@ No Request Body:
 					<td><a href="#recurringdepositaccounts_transaction">Retrieve Deposit account transaction</a></td>
 					<td></td>
 					<td></td>
+				</tr>
+				<tr>
+					<td><a href="#shareproducts">Share Product</a></td>
+					<td>shareproducts</td>
+					<td><a href="#shareproducts_create">Create a Share product</a></td>
+					<td><a href="#shareproducts_list">List Share products</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				
+				<tr>
+					<td></td>
+					<td>shareproducts/template</td>
+					<td></td>
+					<td><a href="#shareproducts_template">Retrieve Share Product Template</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>shareproducts/{productId}</td>
+					<td></td>
+					<td><a href="#shareproducts_retrieve">Retrieve a share product</a></td>
+					<td><a href="#shareproducts_update">Update a share product</a></td>
 				</tr>
 			</table>
 		</div>
