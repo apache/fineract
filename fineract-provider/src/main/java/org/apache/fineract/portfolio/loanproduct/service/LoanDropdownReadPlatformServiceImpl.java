@@ -31,6 +31,8 @@ import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.repaymentFrequencyNthDayType;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.repaymentFrequencyType;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.rescheduleStrategyType;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestRecalculationCompoundingNthDayType;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestRecalculationCompoundingDayOfWeekType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -112,7 +114,7 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
     public List<EnumOptionData> retrieveRepaymentFrequencyOptionsForNthDayOfMonth() {
         final List<EnumOptionData> repaymentFrequencyOptions = Arrays.asList(repaymentFrequencyNthDayType(NthDayType.ONE),
                 repaymentFrequencyNthDayType(NthDayType.TWO), repaymentFrequencyNthDayType(NthDayType.THREE),
-                repaymentFrequencyNthDayType(NthDayType.FOUR));
+                repaymentFrequencyNthDayType(NthDayType.FOUR), repaymentFrequencyNthDayType(NthDayType.LAST));
         return repaymentFrequencyOptions;
     }
 
@@ -138,7 +140,7 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
     public Collection<TransactionProcessingStrategyData> retreiveTransactionProcessingStrategies() {
 
         final Collection<TransactionProcessingStrategyData> strategyOptions = new ArrayList<>();
-        Sort sort = new Sort("sortOrder") ;
+        Sort sort = new Sort("sortOrder");
         final List<LoanTransactionProcessingStrategy> strategies = this.loanTransactionProcessingStrategyRepository.findAll(sort);
         for (final LoanTransactionProcessingStrategy strategy : strategies) {
             strategyOptions.add(strategy.toData());
@@ -165,6 +167,28 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
                 interestRecalculationCompoundingType(InterestRecalculationCompoundingMethod.INTEREST),
                 interestRecalculationCompoundingType(InterestRecalculationCompoundingMethod.INTEREST_AND_FEE));
         return interestRecalculationCompoundingTypeOptions;
+    }
+
+    @Override
+    public List<EnumOptionData> retrieveInterestRecalculationNthDayTypeOptions() {
+        final List<EnumOptionData> interestRecalculationCompoundingNthDayTypeOptions = Arrays.asList(
+                interestRecalculationCompoundingNthDayType(NthDayType.ONE), interestRecalculationCompoundingNthDayType(NthDayType.TWO),
+                interestRecalculationCompoundingNthDayType(NthDayType.THREE), interestRecalculationCompoundingNthDayType(NthDayType.FOUR),
+                interestRecalculationCompoundingNthDayType(NthDayType.LAST));
+        return interestRecalculationCompoundingNthDayTypeOptions;
+    }
+
+    @Override
+    public List<EnumOptionData> retrieveInterestRecalculationDayOfWeekTypeOptions() {
+        final List<EnumOptionData> interestRecalculationCompoundingNthDayTypeOptions = Arrays.asList(
+                interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.SUNDAY),
+                interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.MONDAY),
+                interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.TUESDAY),
+                interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.WEDNESDAY),
+                interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.THURSDAY),
+                interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.FRIDAY),
+                interestRecalculationCompoundingDayOfWeekType(DayOfWeekType.SATURDAY));
+        return interestRecalculationCompoundingNthDayTypeOptions;
     }
 
     @Override

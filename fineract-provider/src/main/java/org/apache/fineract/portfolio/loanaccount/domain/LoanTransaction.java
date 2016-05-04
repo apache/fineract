@@ -146,6 +146,19 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         this.appUser = null;
     }
 
+    public static LoanTransaction incomePosting(final Loan loan, final Office office, final Date dateOf, 
+    		final BigDecimal amount, final BigDecimal interestPortion, final BigDecimal feeChargesPortion, 
+    		final BigDecimal penaltyChargesPortion, final AppUser appUser){
+    	final Integer typeOf = LoanTransactionType.INCOME_POSTING.getValue();
+    	final BigDecimal principalPortion = BigDecimal.ZERO;
+    	final BigDecimal overPaymentPortion = BigDecimal.ZERO;
+    	final boolean reversed = false;
+    	final PaymentDetail paymentDetail = null;
+    	final String externalId = null;
+    	final LocalDateTime createdDate = DateUtils.getLocalDateTimeOfTenant();
+    	return new LoanTransaction(loan, office, typeOf, dateOf, amount, principalPortion, interestPortion, feeChargesPortion,
+                penaltyChargesPortion, overPaymentPortion, reversed, paymentDetail, externalId, createdDate, appUser);
+    }
     public static LoanTransaction disbursement(final Office office, final Money amount, final PaymentDetail paymentDetail,
             final LocalDate disbursementDate, final String externalId, final LocalDateTime createdDate, final AppUser appUser) {
         return new LoanTransaction(null, office, LoanTransactionType.DISBURSEMENT, paymentDetail, amount.getAmount(), disbursementDate,
@@ -197,6 +210,19 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         String externalId = null;
         return new LoanTransaction(loan, office, LoanTransactionType.ACCRUAL.getValue(), interestAppliedDate.toDate(), interestPortion,
                 principalPortion, interestPortion, feesPortion, penaltiesPortion, overPaymentPortion, reversed, paymentDetail, externalId,
+                createdDate, appUser);
+    }
+    public static LoanTransaction accrueTransaction(final Loan loan, final Office office, final LocalDate dateOf, final BigDecimal amount,
+            final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
+            final BigDecimal penaltyChargesPortion, final AppUser appUser) {
+        BigDecimal principalPortion = null;
+        BigDecimal overPaymentPortion = null;
+        boolean reversed = false;
+        PaymentDetail paymentDetail = null;
+        String externalId = null;
+        LocalDateTime createdDate = DateUtils.getLocalDateTimeOfTenant();
+        return new LoanTransaction(loan, office, LoanTransactionType.ACCRUAL.getValue(), dateOf.toDate(), amount,
+                principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion, overPaymentPortion, reversed, paymentDetail, externalId,
                 createdDate, appUser);
     }
 
@@ -461,6 +487,9 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return !isRepayment();
     }
 
+    public boolean isIncomePosting() {
+        return LoanTransactionType.INCOME_POSTING.equals(getTypeOf()) && isNotReversed();
+    }
     public boolean isDisbursement() {
         return LoanTransactionType.DISBURSEMENT.equals(getTypeOf()) && isNotReversed();
     }

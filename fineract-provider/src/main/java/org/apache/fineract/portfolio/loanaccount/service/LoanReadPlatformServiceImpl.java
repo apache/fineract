@@ -550,7 +550,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.principal_amount_proposed as proposedPrincipal, l.principal_amount as principal, l.approved_principal as approvedPrincipal, l.arrearstolerance_amount as inArrearsTolerance, l.number_of_repayments as numberOfRepayments, l.repay_every as repaymentEvery,"
                     + " l.grace_on_principal_periods as graceOnPrincipalPayment, l.recurring_moratorium_principal_periods as recurringMoratoriumOnPrincipalPeriods, l.grace_on_interest_periods as graceOnInterestPayment, l.grace_interest_free_periods as graceOnInterestCharged,l.grace_on_arrears_ageing as graceOnArrearsAgeing,"
                     + " l.nominal_interest_rate_per_period as interestRatePerPeriod, l.annual_nominal_interest_rate as annualInterestRate, "
-                    + " l.repayment_period_frequency_enum as repaymentFrequencyType, l.repayment_frequency_nth_day_enum as repaymentFrequencyNthDayType, l.repayment_frequency_day_of_week_enum as repaymentFrequencyDayOfWeekType, l.interest_period_frequency_enum as interestRateFrequencyType, "
+                    + " l.repayment_period_frequency_enum as repaymentFrequencyType, l.interest_period_frequency_enum as interestRateFrequencyType, "
                     + " l.term_frequency as termFrequency, l.term_period_frequency_enum as termPeriodFrequencyType, "
                     + " l.amortization_method_enum as amortizationType, l.interest_method_enum as interestType, l.interest_calculated_in_period_enum as interestCalculationPeriodType,"
                     + " l.allow_partial_period_interest_calcualtion as allowPartialPeriodInterestCalcualtion,"
@@ -600,9 +600,15 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.interest_recalculation_enabled as isInterestRecalculationEnabled, "
                     + " lir.id as lirId, lir.loan_id as loanId, lir.compound_type_enum as compoundType, lir.reschedule_strategy_enum as rescheduleStrategy, "
                     + " lir.rest_frequency_type_enum as restFrequencyEnum, lir.rest_frequency_interval as restFrequencyInterval, "
-                    + " lir.rest_freqency_date as restFrequencyDate, "
+                    + " lir.rest_frequency_nth_day_enum as restFrequencyNthDayEnum, "
+                    + " lir.rest_frequency_weekday_enum as restFrequencyWeekDayEnum, "
+                    + " lir.rest_frequency_on_day as restFrequencyOnDay, "
                     + " lir.compounding_frequency_type_enum as compoundingFrequencyEnum, lir.compounding_frequency_interval as compoundingInterval, "
-                    + " lir.compounding_freqency_date as compoundingFrequencyDate, "
+                    + " lir.compounding_frequency_nth_day_enum as compoundingFrequencyNthDayEnum, "
+                    + " lir.compounding_frequency_weekday_enum as compoundingFrequencyWeekDayEnum, "
+                    + " lir.compounding_frequency_on_day as compoundingFrequencyOnDay, "
+                    + " lir.is_compounding_to_be_posted_as_transaction as isCompoundingToBePostedAsTransaction, "
+                    + " lir.allow_compounding_on_eod as allowCompoundingOnEod, "
                     + " l.is_floating_interest_rate as isFloatingInterestRate, "
                     + " l.interest_rate_differential as interestRateDifferential, "
                     + " l.create_standing_instruction_at_disbursement as createStandingInstructionAtDisbursement, "
@@ -752,14 +758,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final int repaymentFrequencyTypeInt = JdbcSupport.getInteger(rs, "repaymentFrequencyType");
             final EnumOptionData repaymentFrequencyType = LoanEnumerations.repaymentFrequencyType(repaymentFrequencyTypeInt);
 
-            final Integer repaymentFrequencyNthDayTypeInt = JdbcSupport.getInteger(rs, "repaymentFrequencyNthDayType");
-            final EnumOptionData repaymentFrequencyNthDayType = LoanEnumerations
-                    .repaymentFrequencyNthDayType(repaymentFrequencyNthDayTypeInt);
-
-            final Integer repaymentFrequencyDayOfWeekTypeInt = JdbcSupport.getInteger(rs, "repaymentFrequencyDayOfWeekType");
-            final EnumOptionData repaymentFrequencyDayOfWeekType = LoanEnumerations
-                    .repaymentFrequencyDayOfWeekType(repaymentFrequencyDayOfWeekTypeInt);
-
             final int interestRateFrequencyTypeInt = JdbcSupport.getInteger(rs, "interestRateFrequencyType");
             final EnumOptionData interestRateFrequencyType = LoanEnumerations.interestRateFrequencyType(interestRateFrequencyTypeInt);
 
@@ -877,7 +875,18 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 final int restFrequencyEnumValue = JdbcSupport.getInteger(rs, "restFrequencyEnum");
                 final EnumOptionData restFrequencyType = LoanEnumerations.interestRecalculationFrequencyType(restFrequencyEnumValue);
                 final int restFrequencyInterval = JdbcSupport.getInteger(rs, "restFrequencyInterval");
-                final LocalDate restFrequencyDate = JdbcSupport.getLocalDate(rs, "restFrequencyDate");
+                final Integer restFrequencyNthDayEnumValue = JdbcSupport.getInteger(rs, "restFrequencyNthDayEnum");
+                EnumOptionData restFrequencyNthDayEnum = null;
+                if (restFrequencyNthDayEnumValue != null) {
+                    restFrequencyNthDayEnum = LoanEnumerations.interestRecalculationCompoundingNthDayType(restFrequencyNthDayEnumValue);
+                }
+                final Integer restFrequencyWeekDayEnumValue = JdbcSupport.getInteger(rs, "restFrequencyWeekDayEnum");
+                EnumOptionData restFrequencyWeekDayEnum = null;
+                if (restFrequencyWeekDayEnumValue != null) {
+                    restFrequencyWeekDayEnum = LoanEnumerations
+                            .interestRecalculationCompoundingDayOfWeekType(restFrequencyWeekDayEnumValue);
+                }
+                final Integer restFrequencyOnDay = JdbcSupport.getInteger(rs, "restFrequencyOnDay");
                 final CalendarData compoundingCalendarData = null;
                 final Integer compoundingFrequencyEnumValue = JdbcSupport.getInteger(rs, "compoundingFrequencyEnum");
                 EnumOptionData compoundingFrequencyType = null;
@@ -885,25 +894,41 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     compoundingFrequencyType = LoanEnumerations.interestRecalculationFrequencyType(compoundingFrequencyEnumValue);
                 }
                 final Integer compoundingInterval = JdbcSupport.getInteger(rs, "compoundingInterval");
-                final LocalDate compoundingFrequencyDate = JdbcSupport.getLocalDate(rs, "compoundingFrequencyDate");
+                final Integer compoundingFrequencyNthDayEnumValue = JdbcSupport.getInteger(rs, "compoundingFrequencyNthDayEnum");
+                EnumOptionData compoundingFrequencyNthDayEnum = null;
+                if (compoundingFrequencyNthDayEnumValue != null) {
+                    compoundingFrequencyNthDayEnum = LoanEnumerations
+                            .interestRecalculationCompoundingNthDayType(compoundingFrequencyNthDayEnumValue);
+                }
+                final Integer compoundingFrequencyWeekDayEnumValue = JdbcSupport.getInteger(rs, "compoundingFrequencyWeekDayEnum");
+                EnumOptionData compoundingFrequencyWeekDayEnum = null;
+                if (compoundingFrequencyWeekDayEnumValue != null) {
+                    compoundingFrequencyWeekDayEnum = LoanEnumerations
+                            .interestRecalculationCompoundingDayOfWeekType(compoundingFrequencyWeekDayEnumValue);
+                }
+                final Integer compoundingFrequencyOnDay = JdbcSupport.getInteger(rs, "compoundingFrequencyOnDay");
 
+                final Boolean isCompoundingToBePostedAsTransaction = rs.getBoolean("isCompoundingToBePostedAsTransaction");
+                final Boolean allowCompoundingOnEod = rs.getBoolean("allowCompoundingOnEod");
                 interestRecalculationData = new LoanInterestRecalculationData(lprId, productId, interestRecalculationCompoundingType,
-                        rescheduleStrategyType, calendarData, restFrequencyType, restFrequencyInterval, restFrequencyDate,
-                        compoundingCalendarData, compoundingFrequencyType, compoundingInterval, compoundingFrequencyDate);
+                        rescheduleStrategyType, calendarData, restFrequencyType, restFrequencyInterval, restFrequencyNthDayEnum,
+                        restFrequencyWeekDayEnum, restFrequencyOnDay, compoundingCalendarData, compoundingFrequencyType,
+                        compoundingInterval, compoundingFrequencyNthDayEnum, compoundingFrequencyWeekDayEnum, compoundingFrequencyOnDay,
+                        isCompoundingToBePostedAsTransaction, allowCompoundingOnEod);
             }
 
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientAccountNo, clientName,
                     clientOfficeId, groupData, loanType, loanProductId, loanProductName, loanProductDescription,
                     isLoanProductLinkedToFloatingRate, fundId, fundName, loanPurposeId, loanPurposeName, loanOfficerId, loanOfficerName,
                     currencyData, proposedPrincipal, principal, approvedPrincipal, totalOverpaid, inArrearsTolerance, termFrequency,
-                    termPeriodFrequencyType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, repaymentFrequencyNthDayType,
-                    repaymentFrequencyDayOfWeekType, transactionStrategyId, transactionStrategyName, amortizationType,
-                    interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType, isFloatingInterestRate,
-                    interestRateDifferential, interestCalculationPeriodType, allowPartialPeriodInterestCalcualtion,
-                    expectedFirstRepaymentOnDate, graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged,
-                    interestChargedFromDate, timeline, loanSummary, feeChargesDueAtDisbursementCharged, syncDisbursementWithMeeting,
-                    loanCounter, loanProductCounter, multiDisburseLoan, canDefineInstallmentAmount, fixedEmiAmount, outstandingLoanBalance,
-                    inArrears, graceOnArrearsAgeing, isNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
+                    termPeriodFrequencyType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, null, null, transactionStrategyId,
+                    transactionStrategyName, amortizationType, interestRatePerPeriod, interestRateFrequencyType, annualInterestRate,
+                    interestType, isFloatingInterestRate, interestRateDifferential, interestCalculationPeriodType,
+                    allowPartialPeriodInterestCalcualtion, expectedFirstRepaymentOnDate, graceOnPrincipalPayment,
+                    recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate,
+                    timeline, loanSummary, feeChargesDueAtDisbursementCharged, syncDisbursementWithMeeting, loanCounter,
+                    loanProductCounter, multiDisburseLoan, canDefineInstallmentAmount, fixedEmiAmount, outstandingLoanBalance, inArrears,
+                    graceOnArrearsAgeing, isNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                     interestRecalculationData, createStandingInstructionAtDisbursement, isvariableInstallmentsAllowed, minimumGap,
                     maximumGap);
         }
@@ -1569,10 +1594,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         sqlBuilder
                 .append("select ")
                 .append(mapper.schema())
-                .append(" where ((ls.fee_charges_amount <> if(ls.accrual_fee_charges_derived is null,0, ls.accrual_fee_charges_derived))")
+                .append(" where (recaldet.is_compounding_to_be_posted_as_transaction is null or recaldet.is_compounding_to_be_posted_as_transaction = 0) ")
+                .append(" and (((ls.fee_charges_amount <> if(ls.accrual_fee_charges_derived is null,0, ls.accrual_fee_charges_derived))")
                 .append(" or ( ls.penalty_charges_amount <> if(ls.accrual_penalty_charges_derived is null,0,ls.accrual_penalty_charges_derived))")
                 .append(" or ( ls.interest_amount <> if(ls.accrual_interest_derived is null,0,ls.accrual_interest_derived)))")
-                .append(" and loan.loan_status_id=:active and mpl.accounting_type=:type and loan.is_npa=0 and ls.duedate <= CURDATE() ");
+                .append(" and loan.loan_status_id=:active and mpl.accounting_type=:type and loan.is_npa=0 and ls.duedate <= CURDATE()) ");
         if(organisationStartDate != null){
             sqlBuilder.append(" and ls.duedate > :organisationstartdate ");
         }
@@ -1594,11 +1620,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         sqlBuilder
                 .append("select ")
                 .append(mapper.schema())
-                .append(" where ((ls.fee_charges_amount <> if(ls.accrual_fee_charges_derived is null,0, ls.accrual_fee_charges_derived))")
+                .append(" where  (recaldet.is_compounding_to_be_posted_as_transaction is null or recaldet.is_compounding_to_be_posted_as_transaction = 0) ")
+                .append(" and (((ls.fee_charges_amount <> if(ls.accrual_fee_charges_derived is null,0, ls.accrual_fee_charges_derived))")
                 .append(" or (ls.penalty_charges_amount <> if(ls.accrual_penalty_charges_derived is null,0,ls.accrual_penalty_charges_derived))")
                 .append(" or (ls.interest_amount <> if(ls.accrual_interest_derived is null,0,ls.accrual_interest_derived)))")
                 .append(" and loan.loan_status_id=:active and mpl.accounting_type=:type and (loan.closedon_date <= :tilldate or loan.closedon_date is null)")
-                .append(" and loan.is_npa=0 and (ls.duedate <= :tilldate or (ls.duedate > :tilldate and ls.fromdate < :tilldate)) ");
+                .append(" and loan.is_npa=0 and (ls.duedate <= :tilldate or (ls.duedate > :tilldate and ls.fromdate < :tilldate))) ");
         if(organisationStartDate != null){
             sqlBuilder.append(" and ls.duedate > :organisationstartdate ");
         }
@@ -1632,7 +1659,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     .append(" from m_loan_repayment_schedule ls ").append(" left join m_loan loan on loan.id=ls.loan_id ")
                     .append(" left join m_product_loan mpl on mpl.id = loan.product_id")
                     .append(" left join m_client mc on mc.id = loan.client_id ").append(" left join m_group mg on mg.id = loan.group_id")
-                    .append(" left join m_currency curr on curr.code = loan.currency_code");
+                    .append(" left join m_currency curr on curr.code = loan.currency_code")
+                    .append(" left join m_loan_recalculation_details as recaldet on loan.id = recaldet.loan_id ");
             return sqlBuilder.toString();
         }
 
@@ -1693,7 +1721,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     .append(" from m_loan_repayment_schedule ls ").append(" left join m_loan loan on loan.id=ls.loan_id ")
                     .append(" left join m_product_loan mpl on mpl.id = loan.product_id")
                     .append(" left join m_client mc on mc.id = loan.client_id ").append(" left join m_group mg on mg.id = loan.group_id")
-                    .append(" left join m_currency curr on curr.code = loan.currency_code");
+                    .append(" left join m_currency curr on curr.code = loan.currency_code")
+                    .append(" left join m_loan_recalculation_details as recaldet on loan.id = recaldet.loan_id ");
             return sqlBuilder.toString();
         }
 
@@ -2034,4 +2063,24 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
     }
 
+    @Override
+    public Collection<Long> retrieveLoanIdsWithPendingIncomePostingTransactions() {
+        StringBuilder sqlBuilder = new StringBuilder()
+            .append(" select distinct loan.id ")
+            .append(" from m_loan as loan ")
+            .append(" inner join m_loan_recalculation_details as recdet on (recdet.loan_id = loan.id and recdet.is_compounding_to_be_posted_as_transaction is not null and recdet.is_compounding_to_be_posted_as_transaction = 1) ")
+            .append(" inner join m_loan_repayment_schedule as repsch on repsch.loan_id = loan.id ")
+            .append(" inner join m_loan_interest_recalculation_additional_details as adddet on adddet.loan_repayment_schedule_id = repsch.id ")
+            .append(" left join m_loan_transaction as trans on (trans.is_reversed <> 1 and trans.transaction_type_enum = 19 and trans.loan_id = loan.id and trans.transaction_date = adddet.effective_date) ")
+            .append(" where loan.loan_status_id = 300 ")
+            .append(" and adddet.effective_date is not null ")
+            .append(" and trans.transaction_date is null ")
+            .append(" and adddet.effective_date < ? ");
+        try {
+            String currentdate = formatter.print(DateUtils.getLocalDateOfTenant());
+            return this.jdbcTemplate.queryForList(sqlBuilder.toString(), Long.class, new Object[] { currentdate });
+        } catch (final EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
 }

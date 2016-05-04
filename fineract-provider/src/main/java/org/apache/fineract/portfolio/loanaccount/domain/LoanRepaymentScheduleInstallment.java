@@ -19,13 +19,17 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -34,6 +38,8 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 
 @Entity
@@ -125,6 +131,10 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     @Column(name = "recalculated_interest_component", nullable = false)
     private boolean recalculatedInterestComponent;
 
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "loan_repayment_schedule_id", referencedColumnName = "id", nullable = false)
+    private List<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails = new ArrayList<>();
     protected LoanRepaymentScheduleInstallment() {
         this.installmentNumber = null;
         this.fromDate = null;
@@ -134,7 +144,8 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
     public LoanRepaymentScheduleInstallment(final Loan loan, final Integer installmentNumber, final LocalDate fromDate,
             final LocalDate dueDate, final BigDecimal principal, final BigDecimal interest, final BigDecimal feeCharges,
-            final BigDecimal penaltyCharges, boolean recalculatedInterestComponent) {
+            final BigDecimal penaltyCharges, final boolean recalculatedInterestComponent,
+            final List<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails) {
         this.loan = loan;
         this.installmentNumber = installmentNumber;
         this.fromDate = fromDate.toDateTimeAtStartOfDay().toDate();
@@ -145,6 +156,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.penaltyCharges = defaultToNullIfZero(penaltyCharges);
         this.obligationsMet = false;
         this.recalculatedInterestComponent = recalculatedInterestComponent;
+        this.loanCompoundingDetails = compoundingDetails;
     }
 
     public LoanRepaymentScheduleInstallment(final Loan loan) {
@@ -769,5 +781,8 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     
     public Money getDue(MonetaryCurrency currency) {
         return getPrincipal(currency).plus(getInterestCharged(currency)).plus(getFeeChargesCharged(currency)).plus(getPenaltyChargesCharged(currency));
+    }
+    public List<LoanInterestRecalcualtionAdditionalDetails> getLoanCompoundingDetails() {
+        return this.loanCompoundingDetails;
     }
 }
