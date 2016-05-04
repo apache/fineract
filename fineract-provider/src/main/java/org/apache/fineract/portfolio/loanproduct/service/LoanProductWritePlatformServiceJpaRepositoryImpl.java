@@ -134,11 +134,11 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             this.accountMappingWritePlatformService.createLoanProductToGLAccountMapping(loanproduct.getId(), command);
             // check if the office specific products are enabled. If yes, then save this savings product against a specific office
             // i.e. this savings product is specific for this office.
+            if(!command.booleanPrimitiveValueOfParameterNamed("accessAllowedForAllOffices")){
             fineractEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
             		FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS, 
-            		FineractEntityType.LOAN_PRODUCT, 
             		loanproduct.getId());
-            
+            }
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withEntityId(loanproduct.getId()) //
