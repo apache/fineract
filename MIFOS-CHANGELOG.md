@@ -4,6 +4,7 @@ Changelog
 Releases
 ===============
 
+1. 04 May 2016 - 16.05.01.RELEASE
 1. 13 Apr 2016 - 16.04.01.RELEASE
 1. 23 Mar 2016 - 16.03.03.RELEASE
 1. 16 Mar 2016 - 16.03.02.RELEASE
@@ -86,6 +87,43 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+16.05.01.RELEASE
+=============
+
+This release contains following improvements and bug fixes
+ 
+Platform & API
+New Features & Improvements
+
+ - [FINERACT-94] - Allow a recurring gap/moratorium for principal between repayments
+ - [MIFOSX-2405] - Add ability to mark Client Identifier as Active or Inactive 
+ - In tranche loans, if repayment date is same as tranche disbursement date then allow to change the emi amount
+ - [FINERACT-144] - Performance improvement for accrual job 
+ - [FINERACT-32] - Dormant Savings Accounts Feature
+ - Added MIFOS-INSTALL.md
+ - Customer Self Service : APIs for Third Party Beneficiary management and Third Party Account Transfers
+ - [FINERACT-60] - Improvements to Interest Compounding, nth day rest frequency and meeting calendar date changes
+ 
+Bugs
+ 
+ - [MIFOSX-2497] - Waive specified due date penalty should not create additional row in repayment schedule for Overdue/Due Fee/Int,Principal repayment strategy 
+ - [MIFOSX-2505] - Waived specified due date penalty/charges are not adding entries in waved column after prepay.
+ - Repayment schedule not regenerating when frp is changed at the time of disbursal
+ - Edit disbursement causes the full amount to be shown - in repayment schedule
+ - accrual exception while doing repayment
+ - adding driver property for flyway tasks in gradle, fixes migrateDB tasks in gradle
+ - Shares And Dividends: Adding validation to check whether savings account is his own account
+ 
+Community-app
+New Features & Improvements
+
+ - [FINERACT-32] - Dormant Savings Accounts Feature
+ - [MIFOSX-2705] - Fix some translation issue 'locale-zh_CN.json' 
+
+ Bugs
+ 
+ - [MIFOSX-2639] - While creating the client if "Legal Form" is modified from Client to Entity then not able save the page 
 
 16.04.01.RELEASE
 =============
