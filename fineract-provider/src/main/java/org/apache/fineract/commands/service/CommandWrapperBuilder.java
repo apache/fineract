@@ -2702,4 +2702,29 @@ public class CommandWrapperBuilder {
         this.href = "/savingsaccounts/" + accountId + "?commad=updateTaxWithHoldTax";
         return this;
     }
+
+	public CommandWrapperBuilder addSelfServiceBeneficiaryTPT() {
+        this.actionName = "CREATE";
+        this.entityName = "SSBENEFICIARYTPT";
+        this.entityId = null;
+        this.href = "/self/beneficiaries/tpt";
+        return this;
+	}
+
+	public CommandWrapperBuilder updateSelfServiceBeneficiaryTPT(final Long beneficiaryId) {
+        this.actionName = "UPDATE";
+        this.entityName = "SSBENEFICIARYTPT";
+        this.entityId = beneficiaryId;
+        this.href = "/self/beneficiaries/tpt/"+beneficiaryId;
+        return this;
+	}
+
+	public CommandWrapperBuilder deleteSelfServiceBeneficiaryTPT(final Long beneficiaryId) {
+        this.actionName = "DELETE";
+        this.entityName = "SSBENEFICIARYTPT";
+        this.entityId = beneficiaryId;
+        this.href = "/self/beneficiaries/tpt/"+beneficiaryId;
+        return this;
+	}
+
 }

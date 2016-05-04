@@ -16,21 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.self.account.data;
+package org.apache.fineract.portfolio.self.account.exception;
 
-import java.util.Collection;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-@SuppressWarnings("unused")
-public class SelfAccountTransferData {
+public class DailyTPTTransactionAmountLimitExceededException extends AbstractPlatformDomainRuleException {
 
-	private final Collection<SelfAccountTemplateData> fromAccountOptions;
-	private final Collection<SelfAccountTemplateData> toAccountOptions;
-
-	public SelfAccountTransferData(
-			final Collection<SelfAccountTemplateData> fromAccountOptions,
-			Collection<SelfAccountTemplateData> toAccountOptions) {
-		this.fromAccountOptions = fromAccountOptions;
-		this.toAccountOptions = toAccountOptions;
+	public DailyTPTTransactionAmountLimitExceededException(Long accountId,
+			Integer accountType) {
+		super("error.msg.beneficiary.daily.tpt.transfer.limit.for.fromaccountid."+accountId+".fromaccounttype."+accountType+".exceeded",
+				"Daily third party transfer limit for the source account excceeded");
 	}
 
 }

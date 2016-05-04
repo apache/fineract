@@ -16,21 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.self.account.data;
+package org.apache.fineract.portfolio.self.account.exception;
 
-import java.util.Collection;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-@SuppressWarnings("unused")
-public class SelfAccountTransferData {
+public class BeneficiaryTransferLimitExceededException extends AbstractPlatformDomainRuleException {
 
-	private final Collection<SelfAccountTemplateData> fromAccountOptions;
-	private final Collection<SelfAccountTemplateData> toAccountOptions;
-
-	public SelfAccountTransferData(
-			final Collection<SelfAccountTemplateData> fromAccountOptions,
-			Collection<SelfAccountTemplateData> toAccountOptions) {
-		this.fromAccountOptions = fromAccountOptions;
-		this.toAccountOptions = toAccountOptions;
+	public BeneficiaryTransferLimitExceededException() {
+		super("error.msg.beneficiary.transfer.amount.limit.for.beneficiary.exceeded",
+				"Transfer amount limit for beneficiary exceeded");
 	}
 
 }

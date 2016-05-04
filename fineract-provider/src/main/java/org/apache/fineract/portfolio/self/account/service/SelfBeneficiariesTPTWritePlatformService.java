@@ -16,21 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.self.account.data;
+package org.apache.fineract.portfolio.self.account.service;
 
-import java.util.Collection;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
-@SuppressWarnings("unused")
-public class SelfAccountTransferData {
+public interface SelfBeneficiariesTPTWritePlatformService {
 
-	private final Collection<SelfAccountTemplateData> fromAccountOptions;
-	private final Collection<SelfAccountTemplateData> toAccountOptions;
+	CommandProcessingResult add(JsonCommand command);
 
-	public SelfAccountTransferData(
-			final Collection<SelfAccountTemplateData> fromAccountOptions,
-			Collection<SelfAccountTemplateData> toAccountOptions) {
-		this.fromAccountOptions = fromAccountOptions;
-		this.toAccountOptions = toAccountOptions;
-	}
+	CommandProcessingResult update(JsonCommand command);
+
+	CommandProcessingResult delete(JsonCommand command);
 
 }

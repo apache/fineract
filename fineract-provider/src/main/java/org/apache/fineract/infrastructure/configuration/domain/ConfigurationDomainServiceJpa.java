@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.configuration.domain;
 
 import java.util.Date;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 import org.apache.fineract.infrastructure.cache.domain.PlatformCache;
@@ -209,6 +210,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         return defaultValue;
     }
 
+    @Override
     public boolean isBackdatePenaltiesEnabled() {
         final String propertyName = "backdate-penalties-enabled";
         final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
@@ -262,6 +264,20 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
         return property.isEnabled();
     }
+
+	@Override
+	public boolean isDailyTPTLimitEnabled() {
+        final String propertyName = "daily-tpt-limit";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
+        return property.isEnabled();
+	}
+
+	@Override
+	public Long getDailyTPTLimit() {
+        final String propertyName = "daily-tpt-limit";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByNameWithNotFoundDetection(propertyName);
+        return property.getValue();
+	}
 
   
 }

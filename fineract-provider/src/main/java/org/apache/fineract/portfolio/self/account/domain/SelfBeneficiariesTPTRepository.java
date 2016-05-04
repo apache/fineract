@@ -16,21 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.self.account.data;
+package org.apache.fineract.portfolio.self.account.domain;
 
-import java.util.Collection;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-@SuppressWarnings("unused")
-public class SelfAccountTransferData {
-
-	private final Collection<SelfAccountTemplateData> fromAccountOptions;
-	private final Collection<SelfAccountTemplateData> toAccountOptions;
-
-	public SelfAccountTransferData(
-			final Collection<SelfAccountTemplateData> fromAccountOptions,
-			Collection<SelfAccountTemplateData> toAccountOptions) {
-		this.fromAccountOptions = fromAccountOptions;
-		this.toAccountOptions = toAccountOptions;
-	}
+public interface SelfBeneficiariesTPTRepository extends
+		JpaRepository<SelfBeneficiariesTPT, Long>,
+		JpaSpecificationExecutor<SelfBeneficiariesTPT> {
 
 }

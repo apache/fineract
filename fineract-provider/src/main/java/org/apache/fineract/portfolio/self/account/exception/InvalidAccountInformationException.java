@@ -16,21 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.self.account.data;
+package org.apache.fineract.portfolio.self.account.exception;
 
-import java.util.Collection;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-@SuppressWarnings("unused")
-public class SelfAccountTransferData {
-
-	private final Collection<SelfAccountTemplateData> fromAccountOptions;
-	private final Collection<SelfAccountTemplateData> toAccountOptions;
-
-	public SelfAccountTransferData(
-			final Collection<SelfAccountTemplateData> fromAccountOptions,
-			Collection<SelfAccountTemplateData> toAccountOptions) {
-		this.fromAccountOptions = fromAccountOptions;
-		this.toAccountOptions = toAccountOptions;
+public class InvalidAccountInformationException extends
+		AbstractPlatformDomainRuleException {
+	public InvalidAccountInformationException(final String officeName,
+			final String accountNumber, final String accountType) {
+		super("error.msg.beneficiary.invalid.account.details.with.officeName."
+				+ officeName + ".accountNumber." + accountNumber
+				+ ".accountType." + accountType,
+				"Invalid Office Name, Account Number, Account Type combination");
 	}
-
 }

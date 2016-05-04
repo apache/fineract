@@ -16,21 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.self.account.data;
+package org.apache.fineract.portfolio.self.account.service;
 
 import java.util.Collection;
 
-@SuppressWarnings("unused")
-public class SelfAccountTransferData {
+import org.apache.fineract.portfolio.self.account.data.SelfAccountTemplateData;
+import org.apache.fineract.portfolio.self.account.data.SelfBeneficiariesTPTData;
+import org.apache.fineract.useradministration.domain.AppUser;
 
-	private final Collection<SelfAccountTemplateData> fromAccountOptions;
-	private final Collection<SelfAccountTemplateData> toAccountOptions;
+public interface SelfBeneficiariesTPTReadPlatformService {
 
-	public SelfAccountTransferData(
-			final Collection<SelfAccountTemplateData> fromAccountOptions,
-			Collection<SelfAccountTemplateData> toAccountOptions) {
-		this.fromAccountOptions = fromAccountOptions;
-		this.toAccountOptions = toAccountOptions;
-	}
+	Collection<SelfBeneficiariesTPTData> retrieveAll();
+
+	Collection<SelfAccountTemplateData> retrieveTPTSelfAccountTemplateData(
+			AppUser user);
+
+	Long getTransferLimit(Long id, Long accountId, Integer accountType);
 
 }
