@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.entityaccess.domain;
 
 import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityAccessNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -39,4 +40,9 @@ public class FineractEntityRelationRepositoryWrapper {
         return fineractEntityRelation;
     }
 
+   public FineractEntityRelation findOneByCodeName(final String codeName) {
+    	 final FineractEntityRelation fineractEntityRelation = this.fineractEntityRelationRepository.findOneByCodeName(codeName) ;
+    	 if (fineractEntityRelation == null) { throw new FineractEntityAccessNotFoundException(codeName); }
+         return fineractEntityRelation;
+    }
 }
