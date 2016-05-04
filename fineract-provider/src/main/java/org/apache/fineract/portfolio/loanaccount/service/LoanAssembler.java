@@ -70,7 +70,6 @@ import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementData
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
-import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
@@ -82,6 +81,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.google.gson.JsonElement;
 
 @Service
@@ -282,10 +282,6 @@ public class LoanAssembler {
             }
         }
 
-        final LocalDate recalculationRestFrequencyDate = this.fromApiJsonHelper.extractLocalDateNamed(
-                LoanProductConstants.recalculationRestFrequencyDateParamName, element);
-        final LocalDate recalculationCompoundingFrequencyDate = this.fromApiJsonHelper.extractLocalDateNamed(
-                LoanProductConstants.recalculationCompoundingFrequencyDateParamName, element);
 
         final LoanApplicationTerms loanApplicationTerms = this.loanScheduleAssembler.assembleLoanTerms(element);
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
@@ -297,8 +293,7 @@ public class LoanAssembler {
         final LoanScheduleModel loanScheduleModel = this.loanScheduleAssembler.assembleLoanScheduleFrom(loanApplicationTerms,
                 isHolidayEnabled, holidays, workingDays, element,disbursementDetails);
         loanApplication.loanApplicationSubmittal(currentUser, loanScheduleModel, loanApplicationTerms, defaultLoanLifecycleStateMachine(),
-                submittedOnDate, externalId, allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay,
-                recalculationRestFrequencyDate, recalculationCompoundingFrequencyDate);
+                submittedOnDate, externalId, allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay);
 
         return loanApplication;
     }

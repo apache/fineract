@@ -31,7 +31,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_calendar_instance")
 public class CalendarInstance extends AbstractPersistable<Long> {
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "calendar_id", nullable = false)
     private Calendar calendar;
 
