@@ -5053,6 +5053,10 @@ public class Loan extends AbstractPersistable<Long> {
                         accrualTransaction);
                 lastCompoundingDate = compoundingDetail.getEffectiveDate();
             }
+            LoanRepaymentScheduleInstallment lastInstallment = this.repaymentScheduleInstallments.get(this.repaymentScheduleInstallments
+                    .size() - 1);
+            reverseTransactionsPostEffectiveDate(incomeTransactions, lastInstallment.getDueDate());
+            reverseTransactionsPostEffectiveDate(accrualTransactions, lastInstallment.getDueDate());
         }
     }
 
@@ -5161,6 +5165,14 @@ public class Loan extends AbstractPersistable<Long> {
             if (loanTransaction.getTransactionDate().isEqual(effectiveDate)) { return loanTransaction; }
         }
         return null;
+    }
+
+    private void reverseTransactionsPostEffectiveDate(List<LoanTransaction> transactions, LocalDate effectiveDate) {
+        for (LoanTransaction loanTransaction : transactions) {
+            if (loanTransaction.getTransactionDate().isAfter(effectiveDate)) {
+                loanTransaction.reverse();
+            }
+        }
     }
 
     private List<LoanInterestRecalcualtionAdditionalDetails> extractInterestRecalculationAdditionalDetails() {
