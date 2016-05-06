@@ -490,6 +490,11 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     public boolean isIncomePosting() {
         return LoanTransactionType.INCOME_POSTING.equals(getTypeOf()) && isNotReversed();
     }
+
+    public boolean isNotIncomePosting() {
+        return !isIncomePosting();
+    }
+
     public boolean isDisbursement() {
         return LoanTransactionType.DISBURSEMENT.equals(getTypeOf()) && isNotReversed();
     }
