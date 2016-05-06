@@ -314,9 +314,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         
         LocalDate recalculateFrom = null;
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
-        if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
-            recalculateFrom = actualDisbursementDate;
-        }
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
 
         // validate actual disbursement date against meeting date
