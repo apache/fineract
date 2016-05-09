@@ -18,15 +18,19 @@
  */
 package org.apache.fineract.portfolio.savings.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,42 +41,73 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
 
     private final SavingsAccountAssembler savingAccountAssembler;
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
-    private final SavingsAccountRepository savingAccountRepository;
     private final SavingsAccountReadPlatformService savingAccountReadPlatformService;
 
     @Autowired
     public SavingsSchedularServiceImpl(final SavingsAccountAssembler savingAccountAssembler,
             final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
-            final SavingsAccountRepository savingAccountRepository,
             final SavingsAccountReadPlatformService savingAccountReadPlatformService) {
         this.savingAccountAssembler = savingAccountAssembler;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
-        this.savingAccountRepository = savingAccountRepository;
         this.savingAccountReadPlatformService = savingAccountReadPlatformService;
     }
 
-    @CronTarget(jobName = JobName.POST_INTEREST_FOR_SAVINGS)
-    @Override
-    public void postInterestForAccounts() throws JobExecutionException {
-        final List<SavingsAccount> savingsAccounts = this.savingAccountRepository.findSavingAccountByStatus(SavingsAccountStatusType.ACTIVE
-                .getValue());
-        StringBuffer sb = new StringBuffer();
-        for (final SavingsAccount savingsAccount : savingsAccounts) {
-            try {
-                this.savingAccountAssembler.assignSavingAccountHelpers(savingsAccount);
-                this.savingsAccountWritePlatformService.postInterest(savingsAccount);
-            } catch (Exception e) {
-                Throwable realCause = e;
-                if (e.getCause() != null) {
-                    realCause = e.getCause();
-                }
-                sb.append("failed to post interest for Savings with id " + savingsAccount.getId() + " with message "
-                        + realCause.getMessage());
-            }
-        }
-        
-        if (sb.length() > 0) { throw new JobExecutionException(sb.toString()); }
-    }
+	@Transactional
+	@CronTarget(jobName = JobName.POST_INTEREST_FOR_SAVINGS)
+	@Override
+	public void postInterestForAccounts() throws JobExecutionException {
+		final int maxPazeSize = 10;
+		boolean hasErrorOccurred = false;
+		boolean tempHasErrorOccured = false;
+		int offSet = 0;
+		final Integer status = SavingsAccountStatusType.ACTIVE.getValue();
+		List<SavingsAccount> savings = new ArrayList<>();
+
+		Page<SavingsAccountData> savingsAccounts = this.savingAccountReadPlatformService
+				.retrieveActiveSavingsAccount(maxPazeSize, offSet, status);
+
+		while (savingsAccounts.getPageItems().size() < savingsAccounts.getTotalFilteredRecords()) {
+			offSet += savingsAccounts.getPageItems().size();
+			savingsAccounts = this.savingAccountReadPlatformService.retrieveActiveSavingsAccount(maxPazeSize, offSet,
+					status);
+			for (SavingsAccountData savingsAccountData : savingsAccounts.getPageItems()) {
+				SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsAccountData.id());
+				savings.add(savingsAccount);
+			}
+			postInterestInBatch(savings);
+			tempHasErrorOccured = postInterestInBatch(savings);
+
+			if (tempHasErrorOccured == Boolean.TRUE)
+				hasErrorOccurred = tempHasErrorOccured;
+
+		}
+
+		if (hasErrorOccurred)
+			throw new JobExecutionException("One or more steps in the job failed."
+					+ "Please check your database for the table job_error_log" + "for more details.");
+	}
+
+	public boolean postInterestInBatch(final List<SavingsAccount> accounts) throws JobExecutionException {
+		StringBuffer sb = new StringBuffer();
+		boolean hasExceptionOccurred = false;
+		for (final SavingsAccount savingsAccount : accounts) {
+			try {
+				this.savingAccountAssembler.assignSavingAccountHelpers(savingsAccount);
+				this.savingsAccountWritePlatformService.postInterest(savingsAccount);
+			} catch (Exception e) {
+				Throwable realCause = e;
+				if (e.getCause() != null) {
+					realCause = e.getCause();
+				}
+				sb.append("failed to post interest for Savings with id " + savingsAccount.getId() + " with message "
+						+ realCause.getMessage());
+			}
+		}
+		if (sb.length() > 0) {
+			throw new JobExecutionException(sb.toString());
+		}
+		return hasExceptionOccurred;
+	}
 
     @CronTarget(jobName = JobName.UPDATE_SAVINGS_DORMANT_ACCOUNTS)
     @Override
