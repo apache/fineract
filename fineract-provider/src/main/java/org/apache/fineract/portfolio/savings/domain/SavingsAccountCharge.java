@@ -225,7 +225,11 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
         populateDerivedFields(transactionAmount, chargeAmount);
 
-        if (this.isWithdrawalFee()) {
+        if (this.isWithdrawalFee()
+        		|| this.isOverdraftFee()
+        		|| this.isSavingsActivation()
+        		|| this.isSavingsClosure()
+        		|| this.isSavingsNoActivity()) {
             this.amountOutstanding = BigDecimal.ZERO;
         }
 

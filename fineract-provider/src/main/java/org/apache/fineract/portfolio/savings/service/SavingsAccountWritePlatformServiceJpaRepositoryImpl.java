@@ -45,6 +45,7 @@ import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlat
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.group.domain.Group;
@@ -785,6 +786,17 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final Long chargeDefinitionId = command.longValueOfParameterNamed(chargeIdParamName);
         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeDefinitionId);
 
+        Integer chargeTimeType = chargeDefinition.getChargeTimeType();
+        LocalDate dueAsOfDateParam = command.localDateValueOfParameterNamed(dueAsOfDateParamName);
+        if((chargeTimeType.equals(ChargeTimeType.WITHDRAWAL_FEE.getValue())
+        		|| chargeTimeType.equals(ChargeTimeType.OVERDRAFT_FEE.getValue())
+        		|| chargeTimeType.equals(ChargeTimeType.SAVINGS_ACTIVATION.getValue())
+        		|| chargeTimeType.equals(ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getValue())
+        		|| chargeTimeType.equals(ChargeTimeType.SAVINGS_CLOSURE.getValue()))
+        		&& dueAsOfDateParam != null){
+            baseDataValidator.reset().parameter(dueAsOfDateParamName).value(dueAsOfDateParam.toString(fmt))
+            .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.invalid.for." + ChargeTimeType.fromInt(chargeTimeType).getCode());
+        }
         final SavingsAccountCharge savingsAccountCharge = SavingsAccountCharge.createNewFromJson(savingsAccount, chargeDefinition, command);
 
         if (savingsAccountCharge.getDueLocalDate() != null) {
@@ -793,16 +805,15 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                     && this.holidayRepository.isHoliday(savingsAccount.officeId(), savingsAccountCharge.getDueLocalDate())) {
                 baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().toString(fmt))
                         .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.on.holiday");
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
             }
 
             if (!this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled()
                     && !this.workingDaysRepository.isWorkingDay(savingsAccountCharge.getDueLocalDate())) {
                 baseDataValidator.reset().parameter(dueAsOfDateParamName).value(savingsAccountCharge.getDueLocalDate().toString(fmt))
                         .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.a.nonworking.day");
-                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
             }
         }
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
 
         savingsAccount.addCharge(fmt, savingsAccountCharge, chargeDefinition);
 
