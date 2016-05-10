@@ -27,6 +27,8 @@ public class SavingsApplicationTestBuilder {
     private static final String LOCALE = "en_GB";
 
     private String submittedOnDate = "";
+    
+    private HashMap<String, String> addParams = null;
 
     public String build(final String ID, final String savingsProductId, final String accountType) {
 
@@ -40,6 +42,9 @@ public class SavingsApplicationTestBuilder {
         map.put("productId", savingsProductId);
         map.put("locale", LOCALE);
         map.put("submittedOnDate", this.submittedOnDate);
+        if(addParams!=null && addParams.size() > 0){
+        	map.putAll(addParams);
+        }
         String savingsApplicationJSON = new Gson().toJson(map);
         System.out.println(savingsApplicationJSON);
         return savingsApplicationJSON;
@@ -49,4 +54,10 @@ public class SavingsApplicationTestBuilder {
         this.submittedOnDate = savingsApplicationSubmittedDate;
         return this;
     }
+
+	public SavingsApplicationTestBuilder withParams(
+			HashMap<String, String> params) {
+		this.addParams = params;
+		return this;
+	}
 }

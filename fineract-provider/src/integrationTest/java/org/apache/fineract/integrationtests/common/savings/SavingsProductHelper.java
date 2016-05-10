@@ -88,6 +88,10 @@ public class SavingsProductHelper {
     private String enforceMinRequiredBalance = "false";
     private Boolean withHoldTax = false;
     private String taxGroupId = null;
+    private boolean isDormancyTrackingActive = false;
+    private String daysToInactive = null;
+    private String daysToDormancy = null;
+    private String daysToEscheat = null;
 
     public String build() {
         final HashMap<String, String> map = new HashMap<>();
@@ -129,6 +133,13 @@ public class SavingsProductHelper {
         }
         if (this.accountingRule.equals(CASH_BASED)) {
             map.putAll(getAccountMappingForCashBased());
+        }
+        if(this.isDormancyTrackingActive){
+        	map.put("isDormancyTrackingActive", Boolean.toString(this.isDormancyTrackingActive));
+        	map.put("daysToInactive", this.daysToInactive);
+        	map.put("daysToDormancy", this.daysToDormancy);
+        	map.put("daysToEscheat", this.daysToEscheat);
+
         }
         String savingsProductCreateJson = new Gson().toJson(map);
         System.out.println(savingsProductCreateJson);
@@ -262,5 +273,14 @@ public class SavingsProductHelper {
         final Integer responseSavingsProductID = Utils.performServerGet(requestSpec, responseSpec, GET_SAVINGS_PRODUCT_URL, "id");
         assertEquals("ERROR IN CREATING THE Savings Product", generatedProductID, responseSavingsProductID);
     }
+
+	public SavingsProductHelper withDormancy() {
+	    this.isDormancyTrackingActive = true;
+	    this.daysToInactive = "30";
+	    this.daysToDormancy = "60";
+	    this.daysToEscheat = "90";
+
+		return this;
+	}
 
 }
