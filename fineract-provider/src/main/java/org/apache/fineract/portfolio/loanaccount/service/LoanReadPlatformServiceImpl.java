@@ -1027,12 +1027,18 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final MonetaryCurrency monCurrency = new MonetaryCurrency(this.currency.code(), this.currency.decimalPlaces(),
                     this.currency.currencyInMultiplesOf());
             BigDecimal totalPrincipalDisbursed = BigDecimal.ZERO;
+            BigDecimal disbursementChargeAmount = this.totalFeeChargesDueAtDisbursement;
             if (disbursementData == null || disbursementData.isEmpty()) {
                 periods.add(disbursementPeriod);
                 totalPrincipalDisbursed = Money.of(monCurrency, this.disbursement.amount()).getAmount();
             } else {
                 if (!this.disbursement.isDisbursed()) {
                     excludePastUndisbursed = false;
+                }
+                for(DisbursementData disbursementData : disbursementData){
+                    if(disbursementData.getChargeAmount() != null){
+                        disbursementChargeAmount = disbursementChargeAmount.subtract(disbursementData.getChargeAmount());
+                    }
                 }
                 this.outstandingLoanPrincipalBalance = BigDecimal.ZERO;
             }
@@ -1072,11 +1078,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                             principal = principal.add(data.amount());
                             if (data.getChargeAmount() == null) {
                                 final LoanSchedulePeriodData periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(
-                                        data.disbursementDate(), data.amount(), BigDecimal.ZERO, data.isDisbursed());
+                                        data.disbursementDate(), data.amount(), disbursementChargeAmount, data.isDisbursed());
                                 periods.add(periodData);
                             } else {
                                 final LoanSchedulePeriodData periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(
-                                        data.disbursementDate(), data.amount(), data.getChargeAmount(), data.isDisbursed());
+                                        data.disbursementDate(), data.amount(), disbursementChargeAmount.add(data.getChargeAmount()), data.isDisbursed());
                                 periods.add(periodData);
                             }
                             this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.add(data.amount());
@@ -2073,6 +2079,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             .append(" inner join m_loan_interest_recalculation_additional_details as adddet on adddet.loan_repayment_schedule_id = repsch.id ")
             .append(" left join m_loan_transaction as trans on (trans.is_reversed <> 1 and trans.transaction_type_enum = 19 and trans.loan_id = loan.id and trans.transaction_date = adddet.effective_date) ")
             .append(" where loan.loan_status_id = 300 ")
+            .append(" and loan.is_npa = 0 ")
             .append(" and adddet.effective_date is not null ")
             .append(" and trans.transaction_date is null ")
             .append(" and adddet.effective_date < ? ");

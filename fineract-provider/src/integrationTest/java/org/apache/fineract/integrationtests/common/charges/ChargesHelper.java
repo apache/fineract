@@ -48,6 +48,7 @@ public class ChargesHelper {
     private static final Integer CHARGE_OVERDUE_INSTALLMENT_FEE = 9;
     private static final Integer CHARGE_OVERDRAFT_FEE = 10;
     private static final Integer WEEKLY_FEE = 11;
+    private static final Integer CHARGE_SAVINGS_NO_ACTIVITY_FEE = 16;
     
     private static final Integer CHARGE_CLIENT_SPECIFIED_DUE_DATE = 1;
 
@@ -83,6 +84,14 @@ public class ChargesHelper {
     public static String getSavingsActivationFeeJSON() {
         final HashMap<String, Object> map = populateDefaultsForSavings();
         map.put("chargeTimeType", CHARGE_SAVINGS_ACTIVATION_FEE);
+        String chargesCreateJson = new Gson().toJson(map);
+        System.out.println(chargesCreateJson);
+        return chargesCreateJson;
+    }
+
+    public static String getSavingsNoActivityFeeJSON() {
+        final HashMap<String, Object> map = populateDefaultsForSavings();
+        map.put("chargeTimeType", CHARGE_SAVINGS_NO_ACTIVITY_FEE);
         String chargesCreateJson = new Gson().toJson(map);
         System.out.println(chargesCreateJson);
         return chargesCreateJson;
