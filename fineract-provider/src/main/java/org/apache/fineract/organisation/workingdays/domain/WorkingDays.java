@@ -41,15 +41,19 @@ public class WorkingDays extends AbstractPersistable<Long> {
 
     @Column(name = "extend_term_daily_repayments", nullable = false)
     private Boolean extendTermForDailyRepayments;
+
+    @Column(name = "extend_term_holiday_repayment", nullable = false)
+    private Boolean extendTermForRepaymentsOnHolidays;
     
     protected WorkingDays() {
 
     }
 
-    protected WorkingDays(final String recurrence, final Integer repaymentReschedulingType, final Boolean extendTermForDailyRepayments ) {
+    protected WorkingDays(final String recurrence, final Integer repaymentReschedulingType, final Boolean extendTermForDailyRepayments, final Boolean extendTermForRepaymentsOnHolidays) {
         this.recurrence = recurrence;
         this.repaymentReschedulingType = repaymentReschedulingType;
         this.extendTermForDailyRepayments = extendTermForDailyRepayments;
+        this.extendTermForRepaymentsOnHolidays = extendTermForRepaymentsOnHolidays;
     }
 
     /**
@@ -73,6 +77,8 @@ public class WorkingDays extends AbstractPersistable<Long> {
     public Boolean getExtendTermForDailyRepayments(){
         return this.extendTermForDailyRepayments;
     }
+
+    public Boolean getExtendTermForRepaymentsOnHolidays() { return this.extendTermForRepaymentsOnHolidays; }
 
     public Map<String, Object> update(final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
