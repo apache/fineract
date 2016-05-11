@@ -547,12 +547,24 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 updateFixedInstallmentAmount(mc, loanApplicationTerms, scheduleParams.getPeriodNumber(), loanApplicationTerms
                         .getPrincipal().minus(scheduleParams.getTotalCumulativePrincipal()));
             }
+            
+            // this is to make sure we are recalculating using correct interest rate 
+            // once calculation is done system will set the actual interest rate
+            BigDecimal currentInterestRate = loanApplicationTerms.getAnnualNominalInterestRate();
+            for(LoanTermVariationsData interestRate : interestRates){
+                if(interestRate.isApplicable(periodStartDateApplicableForInterest)){
+                    loanApplicationTerms.updateAnnualNominalInterestRate(interestRate.getDecimalValue());
+                }
+            }
+            
             PrincipalInterest interestTillDate = calculatePrincipalInterestComponentsForPeriod(this.paymentPeriodsInOneYearCalculator,
                     interestCalculationGraceOnRepaymentPeriodFraction, scheduleParams.getTotalCumulativePrincipal(),
                     scheduleParams.getTotalCumulativeInterest(), totalInterestChargedForFullLoanTerm,
                     lastTotalOutstandingInterestPaymentDueToGrace, scheduleParams.getOutstandingBalanceAsPerRest(), loanApplicationTerms,
                     scheduleParams.getPeriodNumber(), mc, mergeVariationsToMap(scheduleParams), scheduleParams.getCompoundingMap(),
                     periodStartDateApplicableForInterest, calculateTill, interestRates);
+            loanApplicationTerms.updateAnnualNominalInterestRate(currentInterestRate);
+            
             // applies charges for the period
             final ScheduleCurrentPeriodParams tempPeriod = new ScheduleCurrentPeriodParams(
                     totalInterestChargedForFullLoanTerm.getCurrency(), interestCalculationGraceOnRepaymentPeriodFraction);
