@@ -789,10 +789,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         Integer chargeTimeType = chargeDefinition.getChargeTimeType();
         LocalDate dueAsOfDateParam = command.localDateValueOfParameterNamed(dueAsOfDateParamName);
         if((chargeTimeType.equals(ChargeTimeType.WITHDRAWAL_FEE.getValue())
-        		|| chargeTimeType.equals(ChargeTimeType.OVERDRAFT_FEE.getValue())
-        		|| chargeTimeType.equals(ChargeTimeType.SAVINGS_ACTIVATION.getValue())
-        		|| chargeTimeType.equals(ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getValue())
-        		|| chargeTimeType.equals(ChargeTimeType.SAVINGS_CLOSURE.getValue()))
+        		|| chargeTimeType.equals(ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getValue()))
         		&& dueAsOfDateParam != null){
             baseDataValidator.reset().parameter(dueAsOfDateParamName).value(dueAsOfDateParam.toString(fmt))
             .failWithCodeNoParameterAddedToErrorCode("charge.due.date.is.invalid.for." + ChargeTimeType.fromInt(chargeTimeType).getCode());

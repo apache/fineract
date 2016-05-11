@@ -314,7 +314,7 @@ public class AccountingScenarioIntegrationTest {
                 ChargesHelper.getSavingsWithdrawalFeeJSON());
         Assert.assertNotNull(withdrawalChargeId);
 
-        this.savingsAccountHelper.addChargesForSavings(savingsID, withdrawalChargeId);
+        this.savingsAccountHelper.addChargesForSavings(savingsID, withdrawalChargeId, false);
         ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsID);
         Assert.assertEquals(1, chargesPendingState.size());
         HashMap savingsChargeForPay = chargesPendingState.get(0);
