@@ -154,6 +154,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.ScheduledDateGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleHistoryWritePlatformService;
+import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationCommandFromApiJsonHelper;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanEventApiJsonValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanUpdateCommandFromApiJsonDeserializer;
@@ -362,8 +363,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             regenerateScheduleOnDisbursement(command, loan, recalculateSchedule, scheduleGeneratorDTO, nextPossibleRepaymentDate, rescheduledRepaymentDate);
             if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
-                this.loanScheduleHistoryWritePlatformService.createAndSaveLoanScheduleArchive(loan.fetchRepaymentScheduleInstallments(),
-                        loan, null);
+            	createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
             }
             if (isPaymnetypeApplicableforDisbursementCharge) {
                 changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO, paymentDetail);
@@ -432,6 +432,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .with(changes) //
                 .build();
     }
+
+	private void createAndSaveLoanScheduleArchive(final Loan loan, ScheduleGeneratorDTO scheduleGeneratorDTO) {
+		LoanRescheduleRequest loanRescheduleRequest = null;
+		LoanScheduleModel loanScheduleModel = loan.regenerateScheduleModel(scheduleGeneratorDTO);
+		List<LoanRepaymentScheduleInstallment> installments = retrieveRepaymentScheduleFromModel(loanScheduleModel);
+		this.loanScheduleHistoryWritePlatformService.createAndSaveLoanScheduleArchive(installments,
+		        loan, loanRescheduleRequest);
+	}
 
     /**
      * create standing instruction for disbursed loan
@@ -599,8 +607,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 regenerateScheduleOnDisbursement(command, loan, recalculateSchedule, scheduleGeneratorDTO, nextPossibleRepaymentDate,
                         rescheduledRepaymentDate);
                 if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
-                    this.loanScheduleHistoryWritePlatformService.createAndSaveLoanScheduleArchive(
-                            loan.fetchRepaymentScheduleInstallments(), loan, null);
+                	createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
                 }
                 if (configurationDomainService.isPaymnetypeApplicableforDisbursementCharge()) {
                     changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO, paymentDetail);
@@ -2011,8 +2018,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     loan.setHelpers(null, this.loanSummaryWrapper, this.transactionProcessingStrategy);
                     loan.recalculateScheduleFromLastTransaction(scheduleGeneratorDTO, existingTransactionIds,
                             existingReversedTransactionIds, currentUser);
-                    this.loanScheduleHistoryWritePlatformService.createAndSaveLoanScheduleArchive(
-                            loan.fetchRepaymentScheduleInstallments(), loan, null);
+                    createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
                 } else if (reschedulebasedOnMeetingDates != null && reschedulebasedOnMeetingDates) {
                     loan.updateLoanRepaymentScheduleDates(calendar.getStartDateLocalDate(), calendar.getRecurrence(), isHolidayEnabled,
                             holidays, workingDays, reschedulebasedOnMeetingDates, presentMeetingDate, newMeetingDate,
@@ -2724,9 +2730,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private void createLoanScheduleArchive(final Loan loan, final ScheduleGeneratorDTO scheduleGeneratorDTO) {
-        LoanScheduleModel loanScheduleModel = loan.regenerateScheduleModel(scheduleGeneratorDTO);
-        List<LoanRepaymentScheduleInstallment> installments = retrieveRepaymentScheduleFromModel(loanScheduleModel);
-        this.loanScheduleHistoryWritePlatformService.createAndSaveLoanScheduleArchive(installments, loan, null);
+        createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
 
     }
 
