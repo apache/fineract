@@ -200,6 +200,30 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), finalObjectArray,
                 this.savingAccountMapper);
     }
+    
+    //Pagination Read service for Active Savings Account Post Interest Job
+    @Override
+    public Page<SavingsAccountData> retrieveActiveSavingsAccount(final Integer maxPazeSize,final Integer pageNumber, final Integer status) {
+
+            final AppUser currentUser = this.context.authenticatedUser();
+
+            final StringBuilder sqlBuilder = new StringBuilder(200);
+            sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+            sqlBuilder.append(this.savingAccountMapper.schema());
+            
+            sqlBuilder.append(" where sa.status_enum = ").append(status);
+
+            Object[] finalArrayObject = new Object[] { };
+
+            sqlBuilder.append(" order by sa.id ");
+            
+            sqlBuilder.append(" limit ").append(maxPazeSize);
+            sqlBuilder.append(" offset ").append(pageNumber);
+                    
+            final String sqlCountRows = "SELECT FOUND_ROWS()";
+            return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), finalArrayObject,
+                            this.savingAccountMapper);
+    }
 
     @Override
     public SavingsAccountData retrieveOne(final Long accountId) {
