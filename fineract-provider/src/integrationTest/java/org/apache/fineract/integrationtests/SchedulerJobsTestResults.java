@@ -126,7 +126,7 @@ public class SchedulerJobsTestResults {
                 ChargesHelper.getSavingsAnnualFeeJSON());
         Assert.assertNotNull(annualFeeChargeId);
 
-        this.savingsAccountHelper.addChargesForSavings(savingsId, annualFeeChargeId);
+        this.savingsAccountHelper.addChargesForSavings(savingsId, annualFeeChargeId, true);
         ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsId);
         Assert.assertEquals(1, chargesPendingState.size());
 
@@ -347,7 +347,7 @@ public class SchedulerJobsTestResults {
                 ChargesHelper.getSavingsSpecifiedDueDateJSON());
         Assert.assertNotNull(specifiedDueDateChargeId);
 
-        this.savingsAccountHelper.addChargesForSavings(savingsId, specifiedDueDateChargeId);
+        this.savingsAccountHelper.addChargesForSavings(savingsId, specifiedDueDateChargeId, true);
         ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsId);
         Assert.assertEquals(1, chargesPendingState.size());
 
