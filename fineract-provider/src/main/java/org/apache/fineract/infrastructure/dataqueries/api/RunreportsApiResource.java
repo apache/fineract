@@ -166,8 +166,15 @@ public class RunreportsApiResource {
         for (final String k : keys) {
 
             if (k.startsWith("R_")) {
-                pKey = "${" + k.substring(2) + "}";
+                pKey = "${" + k.substring(2) + "}";                
                 pValue = queryParams.get(k).get(0);
+                queryParams.get(k).remove(0);
+                if(queryParams.get(k).size() > 1){
+                	for(String queryParamValue: queryParams.get(k)){
+                		pValue = pValue+",";
+                		pValue = pValue+queryParamValue;
+                	}
+                }
                 reportParams.put(pKey, pValue);
             }
         }
