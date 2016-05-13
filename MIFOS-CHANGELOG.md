@@ -4,7 +4,7 @@ Changelog
 Releases
 ===============
 
-1. 04 May 2016 - 16.05.01.RELEASE
+1. 13 May 2016 - 16.05.01.RELEASE
 1. 13 Apr 2016 - 16.04.01.RELEASE
 1. 23 Mar 2016 - 16.03.03.RELEASE
 1. 16 Mar 2016 - 16.03.02.RELEASE
@@ -114,17 +114,35 @@ Bugs
  - accrual exception while doing repayment
  - adding driver property for flyway tasks in gradle, fixes migrateDB tasks in gradle
  - Shares And Dividends: Adding validation to check whether savings account is his own account
+ - Stop interest posting once the loan has moved to overpaid state (Related to FINERACT-60)
+ - Fixed issue with loan pre-closure (Related to FINERACT-60)
+ - Stop interest calculation as well as posting income transaction, once the loan has moved to NPA state (Related to FINERACT-60)
+ - [Fineract-151] - If the disbursement date is modified during loan disbursement the first repayment schedule generated is not proper
+ - adding new supported parameter recurringMoratoriumOnPrincipalPeriods on loanProduct (Related to FINERACT-94) 
+ - [FINERACT-152] - Should not allowed to add date field for the "Savings no activity fee" if the fee/penalty is added after submitting the savings application.
+ - [FINERACT-153] - Should not allowed to pay "Savings no activity charge" if the savings account is in active state
+ - [FINERACT-154] - If "Post Interest For Savings" and "Update Savings Dormant Accounts" scheduler jobs are executed together then post interest scheduler job fails
+ - [FINERACT-108] - Disbursement charge applied to tranche loan is not getting displayed in repayment schedule after submission of loan application, approval and disbursement of the loan
+ - [FINERACT-155] - Original schedule is getting modified if the advance repayment is done and after second tranche is disbursed?
+ - [MIFOSX-2565] - In Penalties, Fees, Interest, Principal order with floating interest rate attached, prepay of loan will move the loan account to closed state
+ - [MIFOSX-2676] - Balance outstanding report not working 
+ - [MIFOSX-2652] - In Variable installments if the repayment is deleted, then the repayment schedule generated after loan repayment is not proper
  
 Community-app
 New Features & Improvements
 
  - [FINERACT-32] - Dormant Savings Accounts Feature
  - [MIFOSX-2705] - Fix some translation issue 'locale-zh_CN.json' 
+ - [MIFOSX-2405] - Add ability to mark Client Identifier as Active or Inactive 
 
  Bugs
  
  - [MIFOSX-2639] - While creating the client if "Legal Form" is modified from Client to Entity then not able save the page 
-
+ - [FINERACT-152] - Should not allowed to add date field for the "Savings no activity fee" if the fee/penalty is added after submitting the savings application.
+ - [FINERACT-153] - Should not allowed to pay "Savings no activity charge" if the savings account is in active state
+ - [MIFOSX-2707] - While creating the account closure the date picker is not same as other date pickers in the community app
+ - [MIFOSX-2712] - After enabling maker checker tasks, Client awaiting for activation is not getting displayed under Pending approval in checker in box and tasks
+ 
 16.04.01.RELEASE
 =============
 
