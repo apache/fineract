@@ -120,4 +120,9 @@ public class LoanTermVariationsDataWrapper {
         return data;
     }
 
+    public boolean hasExceptionVariation(final LocalDate date, ListIterator<LoanTermVariationsData> exceptionDataListIterator) {
+        ListIterator<LoanTermVariationsData> iterator = exceptionDataListIterator;
+        return hasNext(date, iterator);
+    }
+
 }
