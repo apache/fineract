@@ -157,20 +157,34 @@ public class RunreportsApiResource {
         }
     }
 
-    private Map<String, String> getReportParams(final MultivaluedMap<String, String> queryParams) {
+   
+	@SuppressWarnings("null")
+	private Map<String, String> getReportParams(final MultivaluedMap<String, String> queryParams) {
 
         final Map<String, String> reportParams = new HashMap<>();
         final Set<String> keys = queryParams.keySet();
         String pKey;
         String pValue;
-        for (final String k : keys) {
-
-            if (k.startsWith("R_")) {
-                pKey = "${" + k.substring(2) + "}";
-                pValue = queryParams.get(k).get(0);
-                reportParams.put(pKey, pValue);
-            }
-        }
-        return reportParams;
+		for (final String k : keys) {
+			if (k.startsWith("R_")) {
+				pKey = "${" + k.substring(2) + "}";
+				if (queryParams.get(k).size() > 1) {
+					pValue = null;
+					for (String queryParamValue : queryParams.get(k)) {
+						if (pValue == null) {
+							pValue = new String();
+						} else {
+							pValue = pValue + ",";
+						}
+						pValue = pValue + queryParamValue;
+					}
+					reportParams.put(pKey, pValue);
+				} else {
+					pValue = queryParams.get(k).get(0);
+					reportParams.put(pKey, pValue);
+				}
+			}
+		}
+		return reportParams;
     }
 }
