@@ -762,8 +762,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     repaymentsStartingFromDateParameterName, element);
             baseDataValidator.reset().parameter(repaymentsStartingFromDateParameterName).value(repaymentsStartingFromDate).ignoreIfNull();
             if (!existingLoanApplication.getLoanTermVariations().isEmpty()) {
-                baseDataValidator.reset().parameter(repaymentsStartingFromDateParameterName).value(repaymentsStartingFromDate)
-                        .failWithCode("invalid.due.to.variable.installments");
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("cannot.modify.application.due.to.variable.installments");
             }
         }
 
