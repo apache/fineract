@@ -30,10 +30,13 @@ import java.util.Set;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.Page;
+import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.accountdetails.data.ShareAccountSummaryData;
 import org.apache.fineract.portfolio.accounts.constants.AccountsApiConstants;
+import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
 import org.apache.fineract.portfolio.accounts.data.AccountData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
@@ -45,17 +48,16 @@ import org.apache.fineract.portfolio.products.service.ProductReadPlatformService
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
-import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountApplicationTimelineData;
-import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountDividendData;
-import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountStatusEnumData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountChargeData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountData;
+import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountDividendData;
+import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountStatusEnumData;
+import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionData;
 import org.apache.fineract.portfolio.shareaccounts.domain.PurchasedSharesStatusType;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountStatusType;
-import org.apache.fineract.portfolio.shareproducts.SharePeriodFrequencyType;
-import org.apache.fineract.portfolio.shareproducts.data.ShareProductMarketPriceData;
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductData;
+import org.apache.fineract.portfolio.shareproducts.data.ShareProductMarketPriceData;
 import org.apache.fineract.portfolio.shareproducts.service.ShareProductDropdownReadPlatformService;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -78,7 +80,8 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     private final PurchasedSharesReadPlatformService purchasedSharesReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
     private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
-
+    private final PaginationHelper<AccountData> shareAccountDataPaginationHelper = new PaginationHelper<>();
+    
     @Autowired
     public ShareAccountReadPlatformServiceImpl(final RoutingDataSource dataSource, final ApplicationContext applicationContext,
             final ChargeReadPlatformService chargeReadPlatformService,
@@ -148,7 +151,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         
         ShareAccountMapper mapper = new ShareAccountMapper(charges, purchasedShares);
         String query = "select " + mapper.schema() + "where sa.id=?";
-        ShareAccountData data = this.jdbcTemplate.queryForObject(query, mapper, new Object[] { id });
+        ShareAccountData data = (ShareAccountData)this.jdbcTemplate.queryForObject(query, mapper, new Object[] { id });
         String serviceName = "share" + ProductsApiConstants.READPLATFORM_NAME;
         ProductReadPlatformService service = (ProductReadPlatformService) this.applicationContext.getBean(serviceName);
         final ShareProductData productData = (ShareProductData) service.retrieveOne(data.getProductId(), false);
@@ -179,13 +182,30 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     }
 
     @Override
-    public Collection<AccountData> retrieveAll() {
-        return null;
+    public Page<AccountData> retrieveAll(final Integer offSet, final Integer limit) {
+        final Collection<ShareAccountChargeData> charges = null ;
+        final Collection<ShareAccountTransactionData> purchasedShares = null ;
+        ShareAccountMapper mapper = new ShareAccountMapper(charges, purchasedShares) ;
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append(mapper.schema());
+        sqlBuilder.append(" where sa.status_enum = ? ");
+        if (limit != null) {
+            sqlBuilder.append(" limit ").append(limit);
+        }
+        if (offSet != null) {
+            sqlBuilder.append(" offset ").append(offSet);
+        }
+
+        final String sqlCountRows = "SELECT FOUND_ROWS()";
+        Object[] whereClauseItemsitems = new Object[] {ShareAccountStatusType.ACTIVE.getValue()};
+        return this.shareAccountDataPaginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
+                whereClauseItemsitems, mapper);
     }
 
     @Override
     public Set<String> getResponseDataParams() {
-        return null;
+        return ShareAccountApiConstants.supportedParameters;
     }
 
     @Override
@@ -222,7 +242,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         return savingsCharges;
     }
 
-    private final static class ShareAccountMapper implements RowMapper<ShareAccountData> {
+    private final static class ShareAccountMapper implements RowMapper<AccountData> {
 
         private final Collection<ShareAccountChargeData> charges;
         private final Collection<ShareAccountTransactionData> purchasedShares;
@@ -328,16 +348,14 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
 
             final Integer lockinPeriodFrequencyTypeValue = JdbcSupport.getInteger(rs, "lockinPeriodEnum");
             if (lockinPeriodFrequencyTypeValue != null) {
-                final SharePeriodFrequencyType lockinPeriodType = SharePeriodFrequencyType.fromInt(lockinPeriodFrequencyTypeValue);
-                lockinPeriodFrequencyType = SharesEnumerations.lockinPeriodFrequencyType(lockinPeriodType);
+                lockinPeriodFrequencyType = SharesEnumerations.lockinPeriodFrequencyType(lockinPeriodFrequencyTypeValue);
             }
 
             final Integer minimumActivePeriod = JdbcSupport.getInteger(rs, "minimumactivePeriod");
             EnumOptionData minimumActivePeriodType = null;
             final Integer minimumActivePeriodTypeValue = JdbcSupport.getInteger(rs, "minimumactivePeriodEnum");
             if (minimumActivePeriodTypeValue != null) {
-                final SharePeriodFrequencyType minmumPeriodType = SharePeriodFrequencyType.fromInt(minimumActivePeriodTypeValue);
-                minimumActivePeriodType = SharesEnumerations.lockinPeriodFrequencyType(minmumPeriodType);
+                minimumActivePeriodType = SharesEnumerations.minimumActivePeriodFrequencyType(minimumActivePeriodTypeValue);
             }
 
             final String shortProductName = null;
@@ -467,6 +485,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             schema = buff.toString();
         }
 
+        @SuppressWarnings("unused")
         @Override
         public ShareAccountDividendData mapRow(ResultSet rs, int rowNum) throws SQLException {
             final Long id = rs.getLong("id");

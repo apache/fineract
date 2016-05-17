@@ -16,21 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.accounts.service;
+package org.apache.fineract.portfolio.products.exception;
 
-import java.util.Set;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.portfolio.accounts.data.AccountData;
 
-public interface AccountReadPlatformService {
+public class ResourceNotFoundException extends AbstractPlatformResourceNotFoundException{
 
-    public AccountData retrieveTemplate(final Long clientId, final Long productId);
+    public ResourceNotFoundException(String globalisationMessageCode, String defaultUserMessage, Object[] defaultUserMessageArgs) {
+        super(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
+    }
 
-    public AccountData retrieveOne(Long id, boolean includeTemplate);
-
-    public Page<AccountData> retrieveAll(final Integer offSet, final Integer limit);
-
-    public Set<String> getResponseDataParams();
-
+    public ResourceNotFoundException() {
+        super("","","") ;
+    }
 }

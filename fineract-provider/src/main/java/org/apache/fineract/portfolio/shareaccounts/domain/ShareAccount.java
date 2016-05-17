@@ -262,9 +262,18 @@ public class ShareAccount extends AbstractPersistable<Long> {
     public void addTransaction(final ShareAccountTransaction transaction) {
         transaction.setShareAccount(this);
         if(transaction.isPendingForApprovalTransaction()) {
-            this.totalSharesPending += transaction.getTotalShares() ;
+            if(this.totalSharesPending == null) {
+                this.totalSharesPending = transaction.getTotalShares() ;
+            }else {
+                this.totalSharesPending += transaction.getTotalShares() ;    
+            }
+            
         }else if(transaction.isPurchasTransaction()) {
-            this.totalSharesApproved += transaction.getTotalShares() ;
+            if(this.totalSharesApproved == null) {
+                this.totalSharesApproved = transaction.getTotalShares() ; 
+            }else {
+                this.totalSharesApproved += transaction.getTotalShares() ;
+            }
         }
         
         this.shareAccountTransactions.add(transaction);
@@ -337,6 +346,10 @@ public class ShareAccount extends AbstractPersistable<Long> {
         return this.client.getDisplayName();
     }
 
+    public Client getClient() {
+        return this.client ;
+    }
+    
     public String getSavingsAccountNo() {
         return this.savingsAccount.getAccountNumber();
     }
@@ -501,6 +514,10 @@ public class ShareAccount extends AbstractPersistable<Long> {
         return this.client.getOffice().getId();
     }
 
+    public void setTotalPendingShares(final Long shares) {
+        this.totalSharesPending = shares ;
+    }
+    
     public ShareAccountTransaction getShareAccountTransaction(final ShareAccountTransaction transaction) {
         ShareAccountTransaction returnTrans = null;
         for (ShareAccountTransaction tran : this.shareAccountTransactions) {
@@ -548,5 +565,13 @@ public class ShareAccount extends AbstractPersistable<Long> {
     
     public  PeriodFrequencyType getLockinPeriodFrequencyType() {
         return this.lockinPeriodFrequencyType ;
+    }
+    
+    public Date getActivatedDate() {
+        return this.activatedDate ;
+    }
+    
+    public Integer status() {
+        return this.status ;
     }
 }

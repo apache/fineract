@@ -35,6 +35,7 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
@@ -67,6 +68,11 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
     @JoinColumn(name = "savings_account_id", nullable = true)
     private SavingsAccount savingsAccount;
 
+    @ManyToOne
+    @JoinColumn(name = "share_account_id", nullable = true)
+    private ShareAccount shareAccount;
+    
+    
     public static Note clientNoteFromJson(final Client client, final JsonCommand command) {
         final String note = command.stringValueOfParameterNamed("note");
         return new Note(client, note);
@@ -89,6 +95,10 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         return new Note(account, note);
     }
 
+    public static Note shareNote(final ShareAccount account, final String note) {
+        return new Note(account, note);
+    }
+    
     public Note(final Client client, final String note) {
         this.client = client;
         this.note = note;
@@ -133,6 +143,13 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         this.noteTypeId = NoteType.SAVING_ACCOUNT.getValue();
     }
 
+    public Note(final ShareAccount account, final String note) {
+        this.shareAccount = account;
+        this.client = account.getClient();
+        this.note = note;
+        this.noteTypeId = NoteType.SHARE_ACCOUNT.getValue();
+    }
+    
     public Map<String, Object> update(final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 

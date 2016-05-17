@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
@@ -39,6 +40,8 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
 import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
+import org.apache.fineract.portfolio.note.domain.Note;
+import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionEnumData;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountChargePaidBy;
@@ -67,19 +70,23 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
 
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
 
+    private final NoteRepository noteRepository;
+    
     @Autowired
     public ShareAccountWritePlatformServiceJpaRepositoryImpl(final ShareAccountDataSerializer accountDataSerializer,
             final ShareAccountRepositoryWrapper shareAccountRepository, 
             final ShareProductRepositoryWrapper shareProductRepository,
             final AccountNumberGenerator accountNumberGenerator,
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService) {
+            final JournalEntryWritePlatformService journalEntryWritePlatformService,
+            final NoteRepository noteRepository) {
         this.accountDataSerializer = accountDataSerializer;
         this.shareAccountRepository = shareAccountRepository;
         this.shareProductRepository = shareProductRepository ;
         this.accountNumberGenerator = accountNumberGenerator;
         this.accountNumberFormatRepository = accountNumberFormatRepository;
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
+        this.noteRepository = noteRepository ;
     }
 
     @Override
@@ -181,6 +188,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                 this.journalEntryWritePlatformService.revertShareAccountJournalEntries(reversalIds, transactionDate);
                 journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account,
                         account.getPendingForApprovalSharePurchaseTransactions()));
+                changes.remove("reversalIds") ;
             }
             return new CommandProcessingResultBuilder() //
                     .withCommandId(jsonCommand.commandId()) //
@@ -231,6 +239,12 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             Map<String, Object> changes = this.accountDataSerializer.validateAndApprove(jsonCommand, account);
             if (!changes.isEmpty()) {
                 this.shareAccountRepository.save(account);
+                final String noteText = jsonCommand.stringValueOfParameterNamed("note");
+                if (StringUtils.isNotBlank(noteText)) {
+                    final Note note = Note.shareNote(account, noteText);
+                    changes.put("note", noteText);
+                    this.noteRepository.save(note);
+                }
             }
             Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions();
             Set<ShareAccountTransaction> journalTransactions = new HashSet<>();
@@ -265,6 +279,12 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             Map<String, Object> changes = this.accountDataSerializer.validateAndReject(jsonCommand, account);
             if (!changes.isEmpty()) {
                 this.shareAccountRepository.save(account);
+                final String noteText = jsonCommand.stringValueOfParameterNamed("note");
+                if (StringUtils.isNotBlank(noteText)) {
+                    final Note note = Note.shareNote(account, noteText);
+                    changes.put("note", noteText);
+                    this.noteRepository.save(note);
+                }
             }
             Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions();
             Set<ShareAccountTransaction> journalTransactions = new HashSet<>();
@@ -293,6 +313,12 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             Map<String, Object> changes = this.accountDataSerializer.validateAndUndoApprove(jsonCommand, account);
             if (!changes.isEmpty()) {
                 this.shareAccountRepository.save(account);
+                final String noteText = jsonCommand.stringValueOfParameterNamed("note");
+                if (StringUtils.isNotBlank(noteText)) {
+                    final Note note = Note.shareNote(account, noteText);
+                    changes.put("note", noteText);
+                    this.noteRepository.save(note);
+                }
             }
             
             Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions() ;
@@ -447,6 +473,12 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             Map<String, Object> changes = this.accountDataSerializer.validateAndClose(jsonCommand, account);
             if (!changes.isEmpty()) {
                 this.shareAccountRepository.save(account);
+                final String noteText = jsonCommand.stringValueOfParameterNamed("note");
+                if (StringUtils.isNotBlank(noteText)) {
+                    final Note note = Note.shareNote(account, noteText);
+                    changes.put("note", noteText);
+                    this.noteRepository.save(note);
+                }
                 ShareAccountTransaction transaction = (ShareAccountTransaction) changes
                         .get(ShareAccountApiConstants.requestedshares_paramname);
                 transaction = account.getShareAccountTransaction(transaction);
