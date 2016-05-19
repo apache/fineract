@@ -205,6 +205,8 @@ public class LoanAccountData {
     private final Boolean isVariableInstallmentsAllowed;
     private final Integer minimumGap;
     private final Integer maximumGap;
+    
+    private final Long writeoffReasonId = null;
 
     /**
      * Used to produce a {@link LoanAccountData} with only collateral options
