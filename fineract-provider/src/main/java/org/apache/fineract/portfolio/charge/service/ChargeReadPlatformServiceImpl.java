@@ -420,7 +420,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         final ChargeMapper rm = new ChargeMapper();
 
         String sql = "select " + rm.chargeSchema() + " join m_savings_account sa on sa.currency_code = c.currency_code"
-                + " where c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=? " + " and sa.account_no = ?";
+                + " where c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=? " + " and sa.id = ?";
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SAVINGS.getValue(), savingsAccountId });
