@@ -2286,7 +2286,8 @@ public class Loan extends AbstractPersistable<Long> {
          * selected
          **/
 
-        if (isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()) {
+        if (isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()
+        		&& ((isMultiDisburmentLoan() && getDisbursedLoanDisbursementDetails().size() == 1) || !isMultiDisburmentLoan())) {
             final LoanTransaction interestAppliedTransaction = LoanTransaction.accrueInterest(getOffice(), this, interestApplied,
                     actualDisbursementDate, createdDate, currentUser);
             this.loanTransactions.add(interestAppliedTransaction);
@@ -2296,7 +2297,19 @@ public class Loan extends AbstractPersistable<Long> {
 
     }
 
-    public void regenerateScheduleOnDisbursement(final ScheduleGeneratorDTO scheduleGeneratorDTO, final boolean recalculateSchedule,
+    private List<LoanDisbursementDetails> getDisbursedLoanDisbursementDetails() {
+    	List<LoanDisbursementDetails> ret = new ArrayList<>();
+    	if(this.disbursementDetails != null && this.disbursementDetails.size() > 0){
+            for (LoanDisbursementDetails disbursementDetail : this.disbursementDetails) {
+                if (disbursementDetail.actualDisbursementDate() != null) {
+                    ret.add(disbursementDetail);
+                }
+            }
+    	}
+		return ret;
+	}
+
+	public void regenerateScheduleOnDisbursement(final ScheduleGeneratorDTO scheduleGeneratorDTO, final boolean recalculateSchedule,
             final LocalDate actualDisbursementDate, BigDecimal emiAmount, final AppUser currentUser, LocalDate nextPossibleRepaymentDate,
             Date rescheduledRepaymentDate) {
         boolean isEmiAmountChanged = false;
