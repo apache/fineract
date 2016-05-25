@@ -98,5 +98,5 @@ public enum GLAccountType {
     public boolean isExpenseType() {
         return this.value.equals(GLAccountType.EXPENSE.getValue());
     }
-
+    
 }

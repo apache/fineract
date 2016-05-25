@@ -189,6 +189,12 @@ public class LoanTransactionsApiResource {
         } else if (is(commandParam, "refundByCash")) {
             final CommandWrapper commandRequest = builder.refundLoanTransactionByCash(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        }else if (is(commandParam, "addsubsidy")) {
+            final CommandWrapper commandRequest = builder.loanSubsidyAddTransaction(loanId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        }else if (is(commandParam, "revokesubsidy")) {
+            final CommandWrapper commandRequest = builder.loanSubsidyRevokeTransaction(loanId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam); }

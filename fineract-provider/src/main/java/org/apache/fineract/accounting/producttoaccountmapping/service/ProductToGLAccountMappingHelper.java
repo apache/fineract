@@ -429,4 +429,11 @@ public class ProductToGLAccountMappingHelper {
             this.accountMappingRepository.deleteInBatch(productToGLAccountMappings);
         }
     }
+    
+    public void deleteProductToGLAccountSubsidyMapping(final Long loanProductId, final PortfolioProductType portfolioProductType) {
+        final List<ProductToGLAccountMapping> productToGLAccountMappings = this.accountMappingRepository.findByProductIdProductTypeAndFinancialAccountType(loanProductId, portfolioProductType.getValue());
+        if (productToGLAccountMappings != null && productToGLAccountMappings.size() > 0) {
+            this.accountMappingRepository.deleteInBatch(productToGLAccountMappings);
+        }
+    }
 }

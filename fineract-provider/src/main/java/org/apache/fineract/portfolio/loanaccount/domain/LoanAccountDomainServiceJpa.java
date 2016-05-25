@@ -131,7 +131,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     public LoanTransaction makeRepayment(final Loan loan, final CommandProcessingResultBuilder builderResult,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText,
             final String txnExternalId, final boolean isRecoveryRepayment, boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto,
-            Boolean isHolidayValidationDone) {
+            Boolean isHolidayValidationDone, final boolean isSubsidyRealization) {
         AppUser currentUser = getAppUserIfPresent();
         checkClientOrGroupActive(loan);
         this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.LOAN_MAKE_REPAYMENT,
@@ -160,8 +160,14 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             newRepaymentTransaction = LoanTransaction.recoveryRepayment(loan.getOffice(), repaymentAmount, paymentDetail, transactionDate,
                     txnExternalId, currentDateTime, currentUser);
         } else {
-            newRepaymentTransaction = LoanTransaction.repayment(loan.getOffice(), repaymentAmount, paymentDetail, transactionDate,
+        	if(isSubsidyRealization){
+        		 newRepaymentTransaction = LoanTransaction.realizationLoanSubsidy(loan.getOffice(), repaymentAmount, paymentDetail, transactionDate,
+                         txnExternalId, currentDateTime.plusMinutes(1), currentUser);
+        	}else{
+        		 newRepaymentTransaction = LoanTransaction.repayment(loan.getOffice(), repaymentAmount, paymentDetail, transactionDate,
                     txnExternalId, currentDateTime, currentUser);
+        	}
+           
         }
 
         LocalDate recalculateFrom = null;
@@ -184,7 +190,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
          * only in edge cases (when a payment is made before the latest payment
          * recorded against the loan)
          ***/
-
+        
         saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
         if (changedTransactionDetail != null) {
@@ -215,7 +221,73 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         return newRepaymentTransaction;
     }
+    
+    @Transactional
+    @Override
+    public LoanTransaction addOrRevokeLoanSubsidy(final Loan loan, final CommandProcessingResultBuilder builderResult,
+            final LocalDate transactionDate, final Money transactionAmount, final PaymentDetail paymentDetail,
+            final String txnExternalId, boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto, LoanTransactionType loanTransactionType) {
+        AppUser currentUser = getAppUserIfPresent();
+        checkClientOrGroupActive(loan);
+        BUSINESS_EVENTS businessEvent = null;
+        LoanEvent loanEvent = null;
+        if(loanTransactionType.isAddSubsidy()){
+        	businessEvent = BUSINESS_EVENTS.LOAN_ADD_SUBSIDY;
+        	loanEvent = LoanEvent.LOAN_ADD_SUBSIDY;
+        }else {
+        	businessEvent = BUSINESS_EVENTS.LOAN_REVOKE_SUBSIDY;
+        	loanEvent = LoanEvent.LOAN_REVOKE_SUBSIDY;
+        }
+        this.businessEventNotifierService.notifyBusinessEventToBeExecuted(businessEvent,
+                constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
 
+        final List<Long> existingTransactionIds = new ArrayList<>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<>();
+
+        existingTransactionIds.addAll(loan.findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
+        
+        final LocalDateTime currentDateTime = DateUtils.getLocalDateTimeOfTenant();
+        LoanTransaction newSubsidyTransaction = LoanTransaction.addOrRevokeLoanSubsidy(loan.getOffice(), transactionAmount, paymentDetail, transactionDate,
+                    txnExternalId, currentDateTime, currentUser, loanTransactionType);
+        
+        LocalDate recalculateFrom = null;
+        if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
+            recalculateFrom = transactionDate;
+        }
+        final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom,
+                holidayDetailDto);
+        
+        final ChangedTransactionDetail changedTransactionDetail = loan.addOrRevokeSubsidyTransaction(newSubsidyTransaction,
+        		scheduleGeneratorDTO, currentUser, loanEvent);    
+
+        newSubsidyTransaction.updateLoan(loan);
+        saveLoanTransactionWithDataIntegrityViolationChecks(newSubsidyTransaction);
+
+        saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+        
+        if (changedTransactionDetail != null) {
+            for (Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+                saveLoanTransactionWithDataIntegrityViolationChecks(mapEntry.getValue());
+                // update loan with references to the newly created transactions
+                loan.getLoanTransactions().add(mapEntry.getValue());
+                updateLoanTransaction(mapEntry.getKey(), mapEntry.getValue());
+            }
+        }
+        
+        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
+
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(businessEvent,
+                constructEntityMap(BUSINESS_ENTITY.LOAN_TRANSACTION, newSubsidyTransaction));
+
+        builderResult.withEntityId(newSubsidyTransaction.getId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()); //
+
+        return newSubsidyTransaction;
+    }
+    
     private void saveLoanTransactionWithDataIntegrityViolationChecks(LoanTransaction newRepaymentTransaction) {
         try {
             this.loanTransactionRepository.save(newRepaymentTransaction);

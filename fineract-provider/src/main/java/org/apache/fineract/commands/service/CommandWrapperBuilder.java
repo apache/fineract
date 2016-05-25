@@ -650,6 +650,24 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId + "/transactions/template?command=repayment";
         return this;
     }
+    
+    public CommandWrapperBuilder loanSubsidyAddTransaction(final Long loanId) {
+        this.actionName = "SUBSIDYADD";
+        this.entityName = "LOAN";
+        this.entityId = null;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions/template?command=subsidyadd";
+        return this;
+    }
+    
+    public CommandWrapperBuilder loanSubsidyRevokeTransaction(final Long loanId) {
+        this.actionName = "SUBSIDYREVOKE";
+        this.entityName = "LOAN";
+        this.entityId = null;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions/template?command=revokesubsidy";
+        return this;
+    }
 
     public CommandWrapperBuilder loanRecoveryPaymentTransaction(final Long loanId) {
         this.actionName = "RECOVERYPAYMENT";

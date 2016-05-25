@@ -182,8 +182,11 @@ public class LoanProduct extends AbstractPersistable<Long> {
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
     private LoanProductVariableInstallmentConfig variableInstallmentConfig;
+    
+    @Column(name = "is_subsidy_applicable")
+    private Boolean isSubsidyApplicable;
 
-    public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
+	public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate) {
 
         final String name = command.stringValueOfParameterNamed("name");
@@ -324,6 +327,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
         final boolean canDefineEmiAmount = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.canDefineEmiAmountParamName);
         final Integer installmentAmountInMultiplesOf = command
                 .integerValueOfParameterNamed(LoanProductConstants.installmentAmountInMultiplesOfParamName);
+        
+        final Boolean isSubsidyApplicable = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.isSubsidyApplicableParamName);
 
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
@@ -338,7 +343,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
                 installmentAmountInMultiplesOf, loanConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRate,
                 interestRateDifferential, minDifferentialLendingRate, maxDifferentialLendingRate, defaultDifferentialLendingRate,
                 isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGapBetweenInstallments,
-                maximumGapBetweenInstallments);
+                maximumGapBetweenInstallments, isSubsidyApplicable);
 
     }
 
@@ -569,7 +574,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             Boolean isLinkedToFloatingInterestRates, FloatingRate floatingRate, BigDecimal interestRateDifferential,
             BigDecimal minDifferentialLendingRate, BigDecimal maxDifferentialLendingRate, BigDecimal defaultDifferentialLendingRate,
             Boolean isFloatingInterestRateCalculationAllowed, final Boolean isVariableInstallmentsAllowed,
-            final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments) {
+            final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments, final Boolean isSubsidyApplicable) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -643,6 +648,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         this.accountMovesOutOfNPAOnlyOnArrearsCompletion = accountMovesOutOfNPAOnlyOnArrearsCompletion;
         this.canDefineInstallmentAmount = canDefineEmiAmount;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
+        this.isSubsidyApplicable = isSubsidyApplicable;
     }
 
     public MonetaryCurrency getCurrency() {
@@ -1014,6 +1020,12 @@ public class LoanProduct extends AbstractPersistable<Long> {
             actualChanges.put("locale", localeAsInput);
             this.installmentAmountInMultiplesOf = newValue;
         }
+        
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.isSubsidyApplicableParamName, this.isSubsidyApplicable)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.isSubsidyApplicableParamName);
+            actualChanges.put(LoanProductConstants.isSubsidyApplicableParamName, newValue);
+            this.isSubsidyApplicable = newValue;
+        }
 
         return actualChanges;
     }
@@ -1330,5 +1342,9 @@ public class LoanProduct extends AbstractPersistable<Long> {
     public boolean allowVariabeInstallments() {
         return this.allowVariabeInstallments;
     }
+
+    public Boolean isSubsidyApplicable() {
+		return isSubsidyApplicable;
+	}
 
 }

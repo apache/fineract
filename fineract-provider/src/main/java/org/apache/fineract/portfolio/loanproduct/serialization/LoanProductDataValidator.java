@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanproduct.serialization;
 
-import java.lang.reflect.Type;
+import java.lang.reflect.Type; 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,12 +102,15 @@ public final class LoanProductDataValidator {
             LoanProductConstants.installmentAmountInMultiplesOfParamName,
             LoanProductConstants.preClosureInterestCalculationStrategyParamName, LoanProductConstants.allowAttributeOverridesParamName,
             LoanProductConstants.allowVariableInstallmentsParamName, LoanProductConstants.minimumGapBetweenInstallments,
-            LoanProductConstants.maximumGapBetweenInstallments, LoanProductConstants.recalculationCompoundingFrequencyWeekdayParamName,
+            LoanProductConstants.recalculationCompoundingFrequencyWeekdayParamName,
             LoanProductConstants.recalculationCompoundingFrequencyNthDayParamName,
             LoanProductConstants.recalculationCompoundingFrequencyOnDayParamName,
             LoanProductConstants.recalculationRestFrequencyWeekdayParamName,
             LoanProductConstants.recalculationRestFrequencyNthDayParamName, LoanProductConstants.recalculationRestFrequencyOnDayParamName,
-            LoanProductConstants.isCompoundingToBePostedAsTransactionParamName, LoanProductConstants.allowCompoundingOnEodParamName));
+            LoanProductConstants.isCompoundingToBePostedAsTransactionParamName, LoanProductConstants.allowCompoundingOnEodParamName,
+            LoanProductConstants.isSubsidyApplicableParamName,
+            LoanProductConstants.subsidyFundSourceParamName, LoanProductConstants.subsidyAccountParamName, 
+            LoanProductConstants.createSubsidyAccountMappingsParamName, LoanProductConstants.maximumGapBetweenInstallments));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -580,6 +583,17 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(LOAN_PRODUCT_ACCOUNTING_PARAMS.OVERPAYMENT.getValue()).value(overpaymentAccountId)
                     .notNull().integerGreaterThanZero();
 
+            if(this.fromApiJsonHelper.parameterExists(LoanProductConstants.isSubsidyApplicableParamName, element) &&
+            		this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.isSubsidyApplicableParamName, element) == true) {
+    	        final Long subsidyFundSourceId = this.fromApiJsonHelper.extractLongNamed(LoanProductConstants.subsidyFundSourceParamName, element);
+    	        baseDataValidator.reset().parameter(LoanProductConstants.subsidyFundSourceParamName)
+    	                .value(subsidyFundSourceId).notNull().integerGreaterThanZero();
+            	
+    		        final Long subsidyAccountId = this.fromApiJsonHelper.extractLongNamed(LoanProductConstants.subsidyAccountParamName, element);
+    		        baseDataValidator.reset().parameter(LoanProductConstants.subsidyAccountParamName)
+    		                .value(subsidyAccountId).notNull().integerGreaterThanZero();
+            }
+            
             validatePaymentChannelFundSourceMappings(baseDataValidator, element);
             validateChargeToIncomeAccountMappings(baseDataValidator, element);
 
@@ -613,6 +627,12 @@ public final class LoanProductDataValidator {
             }
         }
 
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.isSubsidyApplicableParamName, element)) {
+	        final Boolean isSubsidyApplicable = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.isSubsidyApplicableParamName, element);
+	        baseDataValidator.reset().parameter(LoanProductConstants.isSubsidyApplicableParamName).value(isSubsidyApplicable).ignoreIfNull()
+	                .validateForBooleanValue();
+        }
+        
         validateMultiDisburseLoanData(baseDataValidator, element);
 
         validateLoanConfigurableAttributes(baseDataValidator, element);
@@ -1432,6 +1452,21 @@ public final class LoanProductDataValidator {
             }
         }
 
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.isSubsidyApplicableParamName, element)) {
+	        final Boolean isSubsidyApplicable = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.isSubsidyApplicableParamName, element);
+	        baseDataValidator.reset().parameter(LoanProductConstants.isSubsidyApplicableParamName).value(isSubsidyApplicable).ignoreIfNull()
+	                .validateForBooleanValue();
+	        if(this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.isSubsidyApplicableParamName, element) == true){
+		        final Long subsidyFundSourceId = this.fromApiJsonHelper.extractLongNamed(LoanProductConstants.subsidyFundSourceParamName, element);
+		        baseDataValidator.reset().parameter(LoanProductConstants.subsidyFundSourceParamName)
+		                .value(subsidyFundSourceId).notNull().integerGreaterThanZero();
+	        
+		        final Long subsidyAccountId = this.fromApiJsonHelper.extractLongNamed(LoanProductConstants.subsidyAccountParamName, element);
+		        baseDataValidator.reset().parameter(LoanProductConstants.subsidyAccountParamName)
+		                .value(subsidyAccountId).notNull().integerGreaterThanZero();
+	        }
+        }
+        
         validateMultiDisburseLoanData(baseDataValidator, element);
 
         // validateLoanConfigurableAttributes(baseDataValidator,element);

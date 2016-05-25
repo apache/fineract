@@ -92,6 +92,7 @@ public class AccountingDropdownReadPlatformServiceImpl implements AccountingDrop
         boolean includeExpenseAccounts = true;
         boolean includeLiabilityAccounts = true;
         boolean includeEquityAccounts = true;
+        
         return retrieveAccountMappingOptions(includeAssetAccounts, includeIncomeAccounts, includeExpenseAccounts, includeLiabilityAccounts,
                 includeEquityAccounts);
     }
@@ -144,6 +145,7 @@ public class AccountingDropdownReadPlatformServiceImpl implements AccountingDrop
             }
             accountOptions.put("equityAccountOptions", equityAccountOptions);
         }
+        
         return accountOptions;
     }
 

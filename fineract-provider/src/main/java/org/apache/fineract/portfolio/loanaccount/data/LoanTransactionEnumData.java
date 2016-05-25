@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionSubType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+
 /**
  * Immutable data object represent loan status enumerations.
  */
@@ -44,6 +47,9 @@ public class LoanTransactionEnumData {
     private final boolean chargePayment;
     private final boolean refund;
     private final boolean refundForActiveLoans;
+    private final boolean addSubsidy;
+    private final boolean revokeSubsidy;
+    private final boolean realizationSubsidy;
 
     public LoanTransactionEnumData(final Long id, final String code, final String value) {
         this.id = id;
@@ -52,7 +58,9 @@ public class LoanTransactionEnumData {
         this.disbursement = Long.valueOf(1).equals(this.id);
         this.repaymentAtDisbursement = Long.valueOf(5).equals(this.id);
         this.repayment = Long.valueOf(2).equals(this.id);
-        this.contra = Long.valueOf(3).equals(this.id);
+		this.contra = Long.valueOf(3).equals(this.id)
+				|| Long.valueOf(LoanTransactionType.ADD_SUBSIDY.getValue())
+						.equals(this.id) || Long.valueOf(LoanTransactionType.REVOKE_SUBSIDY.getValue()).equals(this.id);
         this.waiveInterest = Long.valueOf(4).equals(this.id);
         this.waiveCharges = Long.valueOf(9).equals(this.id);
         this.accrual = Long.valueOf(10).equals(this.id);
@@ -65,6 +73,9 @@ public class LoanTransactionEnumData {
         this.refund = Long.valueOf(16).equals(this.id);
         this.chargePayment = Long.valueOf(17).equals(this.id);
         this.refundForActiveLoans = Long.valueOf(18).equals(this.id);
+        this.addSubsidy = Long.valueOf(LoanTransactionType.ADD_SUBSIDY.getValue()).equals(this.id);
+        this.revokeSubsidy = Long.valueOf(LoanTransactionType.REVOKE_SUBSIDY.getValue()).equals(this.id);
+        this.realizationSubsidy = Long.valueOf(LoanTransactionSubType.REALIZATION_SUBSIDY.getValue()).equals(this.id);
     }
 
     public Long id() {
@@ -150,4 +161,16 @@ public class LoanTransactionEnumData {
         return this.refundForActiveLoans;
     }
 
+	public boolean isAddSubsidy() {
+		return this.addSubsidy;
+	}
+
+	public boolean isRevokeSubsidy() {
+		return this.revokeSubsidy;
+	}
+
+	public boolean isRealizationSubsidy() {
+		return this.realizationSubsidy;
+	}
+    
 }

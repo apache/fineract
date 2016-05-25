@@ -119,6 +119,7 @@ import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
@@ -150,6 +151,8 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerAssignment
 import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerUnassignmentException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
+import org.apache.fineract.portfolio.loanaccount.exception.SubsidyAmountExceedsPrincipalOutstandingException;
+import org.apache.fineract.portfolio.loanaccount.exception.SubsidyNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorDomainService;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
@@ -752,14 +755,86 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         boolean isAccountTransfer = false;
         final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
         this.loanAccountDomainService.makeRepayment(loan, commandProcessingResultBuilder, transactionDate, transactionAmount,
-                paymentDetail, noteText, txnExternalId, isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
-
+                paymentDetail, noteText, txnExternalId, isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone, false);
+        
+        if(!isRecoveryRepayment && loan.isSubsidyApplicable() && loan.getSummary().getTotalOutstanding(loan.getCurrency()).
+    			minus(loan.getTotalSubsidyAmount()).isLessThanZero()){
+        	this.loanAccountDomainService.makeRepayment(loan, commandProcessingResultBuilder, transactionDate, loan.getTotalSubsidyAmount().getAmount(),
+        			paymentDetail, noteText, txnExternalId, isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone, true);
+        }
+        
         return commandProcessingResultBuilder.withCommandId(command.commandId()) //
                 .withLoanId(loanId) //
                 .with(changes) //
                 .build();
     }
 
+    @Transactional
+    @Override
+    public CommandProcessingResult addLoanSubsidy(final Long loanId, final JsonCommand command) {
+
+        this.loanEventApiJsonValidator.validateNewAddSubsidyTransaction(command.json());
+
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed("subsidyReleaseDate");
+        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("subsidyAmountReleased");
+        final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
+
+        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        if(!loan.isSubsidyApplicable()){
+        	throw new SubsidyNotFoundException(loan.getId());
+        }
+        final PaymentDetail paymentDetail = null;
+        final HolidayDetailDTO holidayDetailDto = null;
+        boolean isAccountTransfer = false;
+        final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
+        
+        Money subsidyAmount = loan.getTotalSubsidyAmount().plus(transactionAmount);
+        if(Money.of(loan.getCurrency(), loan.getLoanSummary().getTotalOutstanding()).compareTo(subsidyAmount) == 1){
+    		this.loanAccountDomainService.addOrRevokeLoanSubsidy(loan, commandProcessingResultBuilder, transactionDate, Money.of(loan.getCurrency(), transactionAmount),
+                    paymentDetail, txnExternalId, isAccountTransfer, holidayDetailDto, LoanTransactionType.ADD_SUBSIDY);
+    	}else{
+    		throw new SubsidyAmountExceedsPrincipalOutstandingException(loanId, loan.getCurrency().getCode(),
+    				subsidyAmount.minus(loan.getLoanSummary().getTotalOutstanding()).getAmount());
+    	}
+        
+        return commandProcessingResultBuilder.withCommandId(command.commandId()) //
+                .withLoanId(loanId) //
+                .build();
+    }
+    
+    @Transactional
+    @Override
+    public CommandProcessingResult revokeLoanSubsidy(final Long loanId, final JsonCommand command) {
+
+        this.loanEventApiJsonValidator.validateNewRevokeSubsidyTransaction(command.json());
+
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed("subsidyRevokeDate");
+        final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
+
+        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        
+        if(!loan.isSubsidyApplicable()){
+        	throw new SubsidyNotFoundException(loan.getId());
+        }
+        
+        final PaymentDetail paymentDetail = null;
+        final HolidayDetailDTO holidayDetailDto = null;
+        boolean isAccountTransfer = false;
+        final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
+        
+        Money subsidyAmount = loan.getTotalSubsidyAmount();
+        if(subsidyAmount.compareTo(Money.zero(loan.getCurrency())) > 0){
+        	this.loanAccountDomainService.addOrRevokeLoanSubsidy(loan, commandProcessingResultBuilder, transactionDate, subsidyAmount,
+        		paymentDetail, txnExternalId, isAccountTransfer, holidayDetailDto, LoanTransactionType.REVOKE_SUBSIDY);
+    	}else{
+    		throw new SubsidyNotFoundException(loanId);
+    	}
+        
+        return commandProcessingResultBuilder.withCommandId(command.commandId()) //
+                .withLoanId(loanId) //
+                .build();
+    }
+    
     @Transactional
     @Override
     public Map<String, Object> makeLoanBulkRepayment(final CollectionSheetBulkRepaymentCommand bulkRepaymentCommand) {
@@ -805,7 +880,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 LoanTransaction loanTransaction = this.loanAccountDomainService.makeRepayment(loan, commandProcessingResultBuilder,
                         bulkRepaymentCommand.getTransactionDate(), singleLoanRepaymentCommand.getTransactionAmount(), paymentDetail,
                         bulkRepaymentCommand.getNote(), null, isRecoveryRepayment, isAccountTransfer, holidayDetailDTO,
-                        isHolidayValidationDone);
+                        isHolidayValidationDone, false);
                 transactionIds.add(loanTransaction.getId());
             }
         }

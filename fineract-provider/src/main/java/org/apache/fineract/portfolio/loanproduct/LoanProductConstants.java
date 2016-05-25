@@ -130,5 +130,11 @@ public interface LoanProductConstants {
     
     public static final String allowPartialPeriodInterestCalcualtionParamName = "allowPartialPeriodInterestCalcualtion";
     
+    //Subsidy related constants
+    public static final String isSubsidyApplicableParamName = "isSubsidyApplicable";
+    public static final String subsidyFundSourceParamName = "subsidyFundSourceId";
+    public static final String subsidyAccountParamName = "subsidyAccountId";
+    public static final String createSubsidyAccountMappingsParamName = "createSubsidyAccountMappings";
+    
 
 }

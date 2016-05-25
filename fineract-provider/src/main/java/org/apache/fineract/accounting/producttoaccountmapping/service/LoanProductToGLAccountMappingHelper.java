@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.accounting.producttoaccountmapping.service;
 
-import java.util.HashMap;
+import java.util.HashMap; 
 import java.util.Map;
 
 import org.apache.fineract.accounting.common.AccountingRuleType;
@@ -33,6 +33,7 @@ import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGL
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -50,7 +51,7 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
         super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, chargeRepositoryWrapper, accountRepositoryWrapper,
                 paymentTypeRepositoryWrapper);
     }
-
+  
     /*** Set of abstractions for saving Loan Products to GL Account Mappings ***/
 
     public void saveLoanToAssetAccountMapping(final JsonElement element, final String paramName, final Long productId,
@@ -72,7 +73,12 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
             final int placeHolderTypeId) {
         saveProductToAccountMapping(element, paramName, productId, placeHolderTypeId, GLAccountType.LIABILITY, PortfolioProductType.LOAN);
     }
-
+    
+    public void saveLoanToSubsidyAccountMapping(final JsonElement element, final String paramName, final Long productId,
+            final int placeHolderTypeId) {
+        saveProductToAccountMapping(element, paramName, productId, placeHolderTypeId, GLAccountType.ASSET, PortfolioProductType.LOAN);
+    }
+    
     /*** Set of abstractions for merging Savings Products to GL Account Mappings ***/
     public void mergeLoanToAssetAccountMappingChanges(final JsonElement element, final String paramName, final Long productId,
             final int accountTypeId, final String accountTypeName, final Map<String, Object> changes) {
@@ -96,6 +102,12 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
             final int accountTypeId, final String accountTypeName, final Map<String, Object> changes) {
         mergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, accountTypeName, changes,
                 GLAccountType.LIABILITY, PortfolioProductType.LOAN);
+    }
+    
+    public void mergeLoanToSubsidyAccountMappingChanges(final JsonElement element, final String paramName, final Long productId,
+            final int accountTypeId, final String accountTypeName, final Map<String, Object> changes) {
+        mergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, accountTypeName, changes, GLAccountType.ASSET,
+                PortfolioProductType.LOAN);
     }
 
     /*** Abstractions for payments channel related to loan products ***/
@@ -295,8 +307,30 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
                 // liabilities
                 mergeLoanToLiabilityAccountMappingChanges(element, LOAN_PRODUCT_ACCOUNTING_PARAMS.OVERPAYMENT.getValue(), loanProductId,
                         CASH_ACCOUNTS_FOR_LOAN.OVERPAYMENT.getValue(), CASH_ACCOUNTS_FOR_LOAN.OVERPAYMENT.toString(), changes);
+                
+                // subsidy
+                if(this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.isSubsidyApplicableParamName, element) == true){
+                	if(!this.fromApiJsonHelper.parameterExists("createSubsidyAccountMappings", element)){
+                		mergeLoanToAssetAccountMappingChanges(element, LOAN_PRODUCT_ACCOUNTING_PARAMS.SUBSIDY_ACCOUNT.getValue(), loanProductId,
+                			ACCRUAL_ACCOUNTS_FOR_LOAN.SUBSIDY_ACCOUNT.getValue(), ACCRUAL_ACCOUNTS_FOR_LOAN.SUBSIDY_ACCOUNT.toString(), changes);
+                		mergeLoanToLiabilityAccountMappingChanges(element, LOAN_PRODUCT_ACCOUNTING_PARAMS.SUBSIDY_FUND_SOURCE.getValue(), loanProductId,
+                			ACCRUAL_ACCOUNTS_FOR_LOAN.SUBSIDY_FUND_SOURCE.getValue(), ACCRUAL_ACCOUNTS_FOR_LOAN.SUBSIDY_FUND_SOURCE.toString(), changes);
+                	}else{
+                		this.saveLoanToAssetAccountMapping(element, LOAN_PRODUCT_ACCOUNTING_PARAMS.SUBSIDY_ACCOUNT.getValue(), loanProductId,
+                            ACCRUAL_ACCOUNTS_FOR_LOAN.SUBSIDY_ACCOUNT.getValue());
+                    	this.saveLoanToLiabilityAccountMapping(element, LOAN_PRODUCT_ACCOUNTING_PARAMS.SUBSIDY_FUND_SOURCE.getValue(), loanProductId,
+                            ACCRUAL_ACCOUNTS_FOR_LOAN.SUBSIDY_FUND_SOURCE.getValue());
+                	}
+                }else{
+                	this.deleteLoanProductToGLAccountSubsidyMapping(loanProductId);
+                }
+                
             break;
         }
+    }
+    
+    public void deleteLoanProductToGLAccountSubsidyMapping(final Long loanProductId) {
+        deleteProductToGLAccountSubsidyMapping(loanProductId, PortfolioProductType.LOAN);
     }
 
     public void deleteLoanProductToGLAccountMapping(final Long loanProductId) {

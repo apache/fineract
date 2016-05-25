@@ -231,4 +231,9 @@ public class LoanTransactionData {
     public void setWriteOffReasonOptions(Collection<CodeValueData> writeOffReasonOptions){
     	this.writeOffReasonOptions =writeOffReasonOptions;
     }
+
+	public LoanTransactionEnumData getType() {
+		return type;
+	}
+    
 }

@@ -32,6 +32,7 @@ public class LoanTransactionDTO {
     private final Date transactionDate;
     private final Long paymentTypeId;
     private final LoanTransactionEnumData transactionType;
+    private final LoanTransactionEnumData transactionSubType;
 
     private final BigDecimal amount;
 
@@ -54,7 +55,8 @@ public class LoanTransactionDTO {
     public LoanTransactionDTO(final Long officeId, final Long paymentTypeId, final String transactionId, final Date transactionDate,
             final LoanTransactionEnumData transactionType, final BigDecimal amount, final BigDecimal principal, final BigDecimal interest,
             final BigDecimal fees, final BigDecimal penalties, final BigDecimal overPayment, final boolean reversed,
-            final List<ChargePaymentDTO> feePayments, final List<ChargePaymentDTO> penaltyPayments, boolean isAccountTransfer) {
+            final List<ChargePaymentDTO> feePayments, final List<ChargePaymentDTO> penaltyPayments, boolean isAccountTransfer,
+            LoanTransactionEnumData transactionSubType) {
         this.paymentTypeId = paymentTypeId;
         this.transactionId = transactionId;
         this.transactionDate = transactionDate;
@@ -70,6 +72,7 @@ public class LoanTransactionDTO {
         this.overPayment = overPayment;
         this.officeId = officeId;
         this.isAccountTransfer = isAccountTransfer;
+        this.transactionSubType = transactionSubType;
     }
 
     public Long getOfficeId() {
@@ -131,5 +134,9 @@ public class LoanTransactionDTO {
     public boolean isAccountTransfer() {
         return this.isAccountTransfer;
     }
+
+	public LoanTransactionEnumData getTransactionSubType() {
+		return this.transactionSubType;
+	}
 
 }

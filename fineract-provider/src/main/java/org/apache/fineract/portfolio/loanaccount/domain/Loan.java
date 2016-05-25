@@ -118,6 +118,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplica
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
+import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
@@ -394,6 +395,9 @@ public class Loan extends AbstractPersistable<Long> {
     @ManyToOne
     @JoinColumn(name = "writeoff_reason_cv_id", nullable = true)
     private CodeValue writeOffReason;
+    
+    @Column(name = "is_subsidy_applicable")
+    private Boolean isSubsidyApplicable;
 
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
@@ -401,14 +405,14 @@ public class Loan extends AbstractPersistable<Long> {
             final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges,
             final Set<LoanCollateral> collateral, final BigDecimal fixedEmiAmount, final Set<LoanDisbursementDetails> disbursementDetails,
             final BigDecimal maxOutstandingLoanBalance, final Boolean createStandingInstructionAtDisbursement,
-            final Boolean isFloatingInterestRate, final BigDecimal interestRateDifferential) {
+            final Boolean isFloatingInterestRate, final BigDecimal interestRateDifferential, final Boolean isSubsidyApplicable) {
         final LoanStatus status = null;
         final Group group = null;
         final Boolean syncDisbursementWithMeeting = null;
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting, fixedEmiAmount,
                 disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate,
-                interestRateDifferential);
+                interestRateDifferential, isSubsidyApplicable);
     }
 
     public static Loan newGroupLoanApplication(final String accountNo, final Group group, final Integer loanType,
@@ -418,13 +422,13 @@ public class Loan extends AbstractPersistable<Long> {
             final Set<LoanCollateral> collateral, final Boolean syncDisbursementWithMeeting, final BigDecimal fixedEmiAmount,
             final Set<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance,
             final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,
-            final BigDecimal interestRateDifferential) {
+            final BigDecimal interestRateDifferential, final Boolean isSubsidyApplicable) {
         final LoanStatus status = null;
         final Client client = null;
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting, fixedEmiAmount,
                 disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate,
-                interestRateDifferential);
+                interestRateDifferential, isSubsidyApplicable);
     }
 
     public static Loan newIndividualLoanApplicationFromGroup(final String accountNo, final Client client, final Group group,
@@ -434,12 +438,12 @@ public class Loan extends AbstractPersistable<Long> {
             final Set<LoanCollateral> collateral, final Boolean syncDisbursementWithMeeting, final BigDecimal fixedEmiAmount,
             final Set<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance,
             final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,
-            final BigDecimal interestRateDifferential) {
+            final BigDecimal interestRateDifferential, final Boolean isSubsidyApplicable) {
         final LoanStatus status = null;
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting, fixedEmiAmount,
                 disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate,
-                interestRateDifferential);
+                interestRateDifferential, isSubsidyApplicable);
     }
 
     protected Loan() {
@@ -452,7 +456,7 @@ public class Loan extends AbstractPersistable<Long> {
             final Set<LoanCharge> loanCharges, final Set<LoanCollateral> collateral, final Boolean syncDisbursementWithMeeting,
             final BigDecimal fixedEmiAmount, final Set<LoanDisbursementDetails> disbursementDetails,
             final BigDecimal maxOutstandingLoanBalance, final Boolean createStandingInstructionAtDisbursement,
-            final Boolean isFloatingInterestRate, final BigDecimal interestRateDifferential) {
+            final Boolean isFloatingInterestRate, final BigDecimal interestRateDifferential, final Boolean isSubsidyApplicable) {
 
         this.loanRepaymentScheduleDetail = loanRepaymentScheduleDetail;
         this.loanRepaymentScheduleDetail.validateRepaymentPeriodWithGraceSettings();
@@ -509,7 +513,7 @@ public class Loan extends AbstractPersistable<Long> {
          */
 
         this.proposedPrincipal = this.loanRepaymentScheduleDetail.getPrincipal().getAmount();
-
+        this.isSubsidyApplicable = isSubsidyApplicable;
     }
 
     private LoanSummary updateSummaryWithTotalFeeChargesDueAtDisbursement(final BigDecimal feeChargesDueAtDisbursement) {
@@ -1534,6 +1538,12 @@ public class Loan extends AbstractPersistable<Long> {
             }
         } else {
             this.fixedEmiAmount = null;
+        }
+        
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.isSubsidyApplicableParamName, this.isSubsidyApplicable)) {
+        	final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.isSubsidyApplicableParamName);
+        	actualChanges.put(LoanProductConstants.isSubsidyApplicableParamName, newValue);
+        	this.isSubsidyApplicable = newValue;
         }
 
         return actualChanges;
@@ -2843,6 +2853,22 @@ public class Loan extends AbstractPersistable<Long> {
 
         return changedTransactionDetail;
     }
+    
+    public ChangedTransactionDetail addOrRevokeSubsidyTransaction(final LoanTransaction subsidyTransaction, final ScheduleGeneratorDTO scheduleGeneratorDTO, 
+    		final AppUser currentUser, LoanEvent event) {
+    	
+        validateActivityNotBeforeLastTransactionDate(event, subsidyTransaction.getTransactionDate());
+    	loanTransactions.add(subsidyTransaction);
+    	
+    	final List<Long> existingTransactionIds = new ArrayList<>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<>();
+        
+    	ChangedTransactionDetail changedTransactionDetail = recalculateScheduleFromLastTransaction(scheduleGeneratorDTO,
+    			existingTransactionIds, existingReversedTransactionIds, currentUser);
+    	
+    	return changedTransactionDetail;
+    	
+    }
 
     public void makeChargePayment(final Long chargeId, final LoanLifecycleStateMachine loanLifecycleStateMachine,
             final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
@@ -3047,7 +3073,7 @@ public class Loan extends AbstractPersistable<Long> {
         }
         return changedTransactionDetail;
     }
-
+    
     private LoanRepaymentScheduleInstallment fetchLoanRepaymentScheduleInstallment(LocalDate dueDate) {
         LoanRepaymentScheduleInstallment installment = null;
         for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : this.repaymentScheduleInstallments) {
@@ -3100,7 +3126,8 @@ public class Loan extends AbstractPersistable<Long> {
     private List<LoanTransaction> retreiveListOfTransactionsExcludeAccruals() {
         final List<LoanTransaction> repaymentsOrWaivers = new ArrayList<>();
         for (final LoanTransaction transaction : this.loanTransactions) {
-            if (transaction.isNotReversed() && !(transaction.isAccrual() || transaction.isNonMonetaryTransaction())) {
+            if (transaction.isNotReversed() && !(transaction.isAccrual() || transaction.isNonMonetaryTransaction() 
+            		|| transaction.isAddSubsidy() || transaction.isRevokeSubsidy())) {
                 repaymentsOrWaivers.add(transaction);
             }
         }
@@ -3126,9 +3153,23 @@ public class Loan extends AbstractPersistable<Long> {
         if (isOverPaid()) {
             // FIXME - kw - update account balance to negative amount.
             handleLoanOverpayment(loanLifecycleStateMachine);
-        } else if (this.summary.isRepaidInFull(loanCurrency())) {
+        }else if (this.summary.isRepaidInFull(loanCurrency())) {
             handleLoanRepaymentInFull(transactionDate, loanLifecycleStateMachine);
         }
+    }
+    
+    public Money getTotalSubsidyAmount(){
+    	Money subsidyAmount = Money.zero(loanCurrency());
+    	for (LoanTransaction transaction : this.loanTransactions) {
+    		if(transaction.getTypeOf().equals(LoanTransactionType.ADD_SUBSIDY)){
+            	subsidyAmount = subsidyAmount.plus(transaction.getAmount(loanCurrency()));
+            }else if(transaction.getTypeOf().equals(LoanTransactionType.REVOKE_SUBSIDY)){
+            	if(subsidyAmount.isGreaterThan(Money.zero(loanCurrency()))){
+            		subsidyAmount = subsidyAmount.minus(transaction.getAmount(loanCurrency()));
+            	}
+            }
+		}
+    	return subsidyAmount;
     }
 
     private void handleLoanRepaymentInFull(final LocalDate transactionDate, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
@@ -3426,6 +3467,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     private boolean isOverPaid() {
+    	
         return calculateTotalOverpayment().isGreaterThanZero();
     }
 
@@ -3451,9 +3493,9 @@ public class Loan extends AbstractPersistable<Long> {
                 totalPaidInRepayments = totalPaidInRepayments.minus(loanTransaction.getAmount(currency));
             }
         }
-
-        // if total paid in transactions doesnt match repayment schedule then
-        // theres an overpayment.
+        
+     // if total paid in transactions doesnt match repayment schedule then
+     // theres an overpayment.
         return totalPaidInRepayments.minus(cumulativeTotalPaidOnInstallments);
     }
 
@@ -4605,6 +4647,16 @@ public class Loan extends AbstractPersistable<Long> {
                     action = "charge.payment";
                     postfix = "cannot.be.made.before.last.transaction.date";
                 break;
+                case LOAN_ADD_SUBSIDY:
+                    errorMessage = "The date on which a subsidy payment is made cannot be earlier than last transaction date";
+                    action = "add.subsidy";
+                    postfix = "cannot.be.made.before.last.transaction.date";
+                break;
+                case LOAN_REVOKE_SUBSIDY:
+                    errorMessage = "The date on which a subsidy is revoked cannot be earlier than last transaction date";
+                    action = "revoke.subsidy";
+                    postfix = "cannot.be.made.before.last.transaction.date";
+                break;
                 default:
                 break;
             }
@@ -4814,6 +4866,14 @@ public class Loan extends AbstractPersistable<Long> {
                     dataValidationErrors.add(error);
                 }
             break;
+            /*case LOAN_ADD_SUBSIDY:
+                if (!isOpen()) {
+                    final String defaultUserMessage = "Loan Add Subsidy is not allowed. Loan Account is not active.";
+                    final ApiParameterError error = ApiParameterError.generalError(
+                            "error.msg.loan.add.subsidy.account.is.not.active", defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;*/
             default:
             break;
         }
@@ -5329,7 +5389,8 @@ public class Loan extends AbstractPersistable<Long> {
                 this.loanProduct.getInstallmentAmountInMultiplesOf(), recalculationFrequencyType, restCalendarInstance, compoundingMethod,
                 compoundingCalendarInstance, compoundingFrequencyType, this.loanProduct.preCloseInterestCalculationStrategy(),
                 rescheduleStrategyMethod, calendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations, calendarHistoryDataWrapper,
-		scheduleGeneratorDTO.getNumberOfdays(), scheduleGeneratorDTO.isSkipRepaymentOnFirstDayofMonth(), holidayDetailDTO, allowCompoundingOnEod);
+				scheduleGeneratorDTO.getNumberOfdays(), scheduleGeneratorDTO.isSkipRepaymentOnFirstDayofMonth(), holidayDetailDTO, allowCompoundingOnEod,
+				isSubsidyApplicable());
         return loanApplicationTerms;
     }
 
@@ -5591,7 +5652,7 @@ public class Loan extends AbstractPersistable<Long> {
                 this.loanProduct.getInstallmentAmountInMultiplesOf(), recalculationFrequencyType, restCalendarInstance, compoundingMethod,
                 compoundingCalendarInstance, compoundingFrequencyType, this.loanProduct.preCloseInterestCalculationStrategy(),
                 rescheduleStrategyMethod, loanCalendar, getApprovedPrincipal(), annualNominalInterestRate, loanTermVariations, 
-                calendarHistoryDataWrapper, numberofdays, isSkipRepaymentonmonthFirst, holidayDetailDTO, allowCompoundingOnEod);
+                calendarHistoryDataWrapper, numberofdays, isSkipRepaymentonmonthFirst, holidayDetailDTO, allowCompoundingOnEod, isSubsidyApplicable());
     }
 
     /**
@@ -5990,4 +6051,10 @@ public class Loan extends AbstractPersistable<Long> {
 		return loanProduct;
 	}
 	
+    public Boolean isSubsidyApplicable() {
+    	if(isSubsidyApplicable == null){
+    		return false;
+    	}
+    	return isSubsidyApplicable;
+   	}
 }

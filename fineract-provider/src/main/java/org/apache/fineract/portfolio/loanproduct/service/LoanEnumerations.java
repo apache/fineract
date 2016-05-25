@@ -28,6 +28,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionSubType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
@@ -396,6 +397,34 @@ public class LoanEnumerations {
             case INCOME_POSTING:
                 optionData = new LoanTransactionEnumData(LoanTransactionType.INCOME_POSTING.getValue().longValue(),
                         LoanTransactionType.INCOME_POSTING.getCode(), "Income Posting");
+            break;    
+            case ADD_SUBSIDY:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.ADD_SUBSIDY.getValue().longValue(),
+                        LoanTransactionType.ADD_SUBSIDY.getCode(), "Add Subsidy");
+            break;
+            case REVOKE_SUBSIDY:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.REVOKE_SUBSIDY.getValue().longValue(),
+                        LoanTransactionType.REVOKE_SUBSIDY.getCode(), "Revoke Subsidy");
+            break;
+            default:
+            break;
+        }
+        return optionData;
+    }
+    
+    public static LoanTransactionEnumData transactionSubType(final Integer id) {
+        return transactionSubType(LoanTransactionSubType.fromInt(id));
+    }
+    public static LoanTransactionEnumData transactionSubType(final LoanTransactionSubType subType) {
+        LoanTransactionEnumData optionData = null;
+        switch (subType) {
+            case INVALID:
+                optionData = new LoanTransactionEnumData(LoanTransactionSubType.INVALID.getValue().longValue(),
+                        LoanTransactionSubType.INVALID.getCode(), "Invalid");
+            break;
+            case REALIZATION_SUBSIDY:
+                optionData = new LoanTransactionEnumData(LoanTransactionSubType.REALIZATION_SUBSIDY.getValue().longValue(),
+                		LoanTransactionSubType.REALIZATION_SUBSIDY.getCode(), "Disbursement");
             break;
             default:
             break;

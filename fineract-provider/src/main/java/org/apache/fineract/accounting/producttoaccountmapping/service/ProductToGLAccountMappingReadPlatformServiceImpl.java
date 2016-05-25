@@ -180,6 +180,10 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
                     accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_DATA_PARAMS.PENALTIES_RECEIVABLE.getValue(), gLAccountData);
                 } else if ((glAccountForLoan.equals(ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_RECOVERY))) {
                     accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_DATA_PARAMS.INCOME_FROM_RECOVERY.getValue(), gLAccountData);
+                }else if ((glAccountForLoan.equals(ACCRUAL_ACCOUNTS_FOR_LOAN.SUBSIDY_FUND_SOURCE))) {
+                    accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_DATA_PARAMS.SUBSIDY_FUND_SOURCE.getValue(), gLAccountData);
+                }else if ((glAccountForLoan.equals(ACCRUAL_ACCOUNTS_FOR_LOAN.SUBSIDY_ACCOUNT))) {
+                    accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_DATA_PARAMS.SUBSIDY_ACCOUNT.getValue(), gLAccountData);
                 }
             }
 
