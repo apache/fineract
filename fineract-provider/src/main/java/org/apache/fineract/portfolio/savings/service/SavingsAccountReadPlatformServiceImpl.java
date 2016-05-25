@@ -289,8 +289,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.min_required_balance as minRequiredBalance, ");
             sqlBuilder.append("sa.enforce_min_required_balance as enforceMinRequiredBalance, ");
             sqlBuilder.append("sa.on_hold_funds_derived as onHoldFunds, ");
-            sqlBuilder.append("sa.withhold_tax as withHoldTax,");
-            sqlBuilder.append("sa.total_withhold_tax_derived as totalWithholdTax,");
+            sqlBuilder.append("sa.withhold_tax as withHoldTax, ");
+            sqlBuilder.append("sa.total_withhold_tax_derived as totalWithholdTax, ");
+            sqlBuilder.append("sa.last_interest_calculation_date as lastInterestCalculationDate, ");
             sqlBuilder.append("tg.id as taxGroupId, tg.name as taxGroupName, ");
             sqlBuilder.append("(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
             sqlBuilder.append("from m_savings_account_transaction as sat ");
@@ -497,10 +498,17 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final BigDecimal minBalanceForInterestCalculation = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs,
                     "minBalanceForInterestCalculation");
             final BigDecimal onHoldFunds = rs.getBigDecimal("onHoldFunds");
+            
+            BigDecimal interestNotPosted = BigDecimal.ZERO;
+            if (totalInterestEarned != null) {
+                 interestNotPosted = totalInterestEarned.subtract(totalInterestPosted).add(totalOverdraftInterestDerived);
+            }
+            
+            LocalDate lastInterestCalculationDate = JdbcSupport.getLocalDate(rs, "lastInterestCalculationDate");
 
             final SavingsAccountSummaryData summary = new SavingsAccountSummaryData(currency, totalDeposits, totalWithdrawals,
                     totalWithdrawalFees, totalAnnualFees, totalInterestEarned, totalInterestPosted, accountBalance, totalFeeCharge,
-                    totalPenaltyCharge, totalOverdraftInterestDerived, totalWithholdTax);
+                    totalPenaltyCharge, totalOverdraftInterestDerived, totalWithholdTax, interestNotPosted, lastInterestCalculationDate);
 
             final boolean withHoldTax = rs.getBoolean("withHoldTax");
             final Long taxGroupId = JdbcSupport.getLong(rs, "taxGroupId");
