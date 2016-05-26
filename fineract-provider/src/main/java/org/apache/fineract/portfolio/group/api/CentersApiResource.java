@@ -66,6 +66,7 @@ import org.apache.fineract.portfolio.group.data.CenterData;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.group.data.StaffCenterData;
 import org.apache.fineract.portfolio.group.service.CenterReadPlatformService;
+import org.apache.fineract.portfolio.group.service.CenterReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.meeting.data.MeetingData;
 import org.apache.fineract.portfolio.meeting.service.MeetingReadPlatformService;
 import org.joda.time.LocalDate;
@@ -155,6 +156,8 @@ public class CentersApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (meetingDateParam != null && officeId != null) {
             Date meetingDate = meetingDateParam.getDate("meetingDate", dateFormat, locale);
+			LocalDate date = new LocalDate(meetingDate);
+			CenterReadPlatformServiceImpl.datePassed = date;
             Collection<StaffCenterData> staffCenterDataArray = this.centerReadPlatformService.retriveAllCentersByMeetingDate(officeId,
                     meetingDate, staffId);
             return this.toApiJsonSerializer.serialize(settings, staffCenterDataArray,
