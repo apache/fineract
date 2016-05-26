@@ -56,10 +56,12 @@ import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ActionDetailsContants;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
 import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.service.HolidayUtil;
@@ -666,7 +668,7 @@ public class Loan extends AbstractPersistable<Long> {
         }
 
         final LoanTransaction applyLoanChargeTransaction = LoanTransaction.accrueLoanCharge(this, getOffice(), chargeAmount,
-                transactionDate, feeCharges, penaltyCharges, DateUtils.getLocalDateTimeOfTenant(), currentUser);
+                transactionDate, feeCharges, penaltyCharges);
         Integer installmentNumber = null;
         final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(applyLoanChargeTransaction, loanCharge, loanCharge.getAmount(
                 getCurrency()).getAmount(), installmentNumber);
@@ -973,8 +975,7 @@ public class Loan extends AbstractPersistable<Long> {
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         final LoanTransaction waiveLoanChargeTransaction = LoanTransaction.waiveLoanCharge(this, getOffice(), amountWaived,
-                transactionDate, feeChargesWaived, penaltyChargesWaived, unrecognizedIncome, DateUtils.getLocalDateTimeOfTenant(),
-                currentUser);
+                transactionDate, feeChargesWaived, penaltyChargesWaived, unrecognizedIncome);
         final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(waiveLoanChargeTransaction, loanCharge, waiveLoanChargeTransaction
                 .getAmount(getCurrency()).getAmount(), loanInstallmentNumber);
         waiveLoanChargeTransaction.getLoanChargesPaid().add(loanChargePaidBy);
@@ -1208,7 +1209,7 @@ public class Loan extends AbstractPersistable<Long> {
                     loanTransaction.reverse();
                     final LocalDateTime currentDateTime = DateUtils.getLocalDateTimeOfTenant();
                     final LoanTransaction interestAppliedTransaction = LoanTransaction.accrueInterest(getOffice(), this, interestApplied,
-                            getDisbursementDate(), currentDateTime, currentUser);
+                            getDisbursementDate());
                     this.loanTransactions.add(interestAppliedTransaction);
                 }
             } else {
@@ -2066,6 +2067,8 @@ public class Loan extends AbstractPersistable<Long> {
             final JsonArray disbursementDataArray, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
         validateAccountStatus(LoanEvent.LOAN_APPROVED);
+        
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.ApproveLoanApplication);
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
@@ -2289,7 +2292,7 @@ public class Loan extends AbstractPersistable<Long> {
         if (isNoneOrCashOrUpfrontAccrualAccountingEnabledOnLoanProduct()
         		&& ((isMultiDisburmentLoan() && getDisbursedLoanDisbursementDetails().size() == 1) || !isMultiDisburmentLoan())) {
             final LoanTransaction interestAppliedTransaction = LoanTransaction.accrueInterest(getOffice(), this, interestApplied,
-                    actualDisbursementDate, createdDate, currentUser);
+                    actualDisbursementDate);
             this.loanTransactions.add(interestAppliedTransaction);
         }
 
@@ -2616,8 +2619,10 @@ public class Loan extends AbstractPersistable<Long> {
          **/
 
         Money disbursentMoney = Money.zero(getCurrency());
+
         final LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(getOffice(), disbursentMoney, paymentDetail,
-                disbursedOn, null, createdDate, currentUser);
+                disbursedOn, null);
+
         final Integer installmentNumber = null;
         for (final LoanCharge charge : charges()) {
             Date actualDisbursementDate = getActualDisbursementDate(charge);
@@ -3508,7 +3513,7 @@ public class Loan extends AbstractPersistable<Long> {
             }
 
             LocalDateTime createdDate = DateUtils.getLocalDateTimeOfTenant();
-            loanTransaction = LoanTransaction.writeoff(this, getOffice(), writtenOffOnLocalDate, txnExternalId, createdDate, currentUser);
+            loanTransaction = LoanTransaction.writeoff(this, getOffice(), writtenOffOnLocalDate, txnExternalId);
             LocalDate lastTransactionDate = getLastUserTransactionDate();
             if (lastTransactionDate.isAfter(writtenOffOnLocalDate)) {
                 final String errorMessage = "The date of the writeoff transaction must occur on or before previous transactions.";
@@ -3608,8 +3613,7 @@ public class Loan extends AbstractPersistable<Long> {
                     changes.put("status", LoanEnumerations.status(this.loanStatus));
                 }
                 this.closedOnDate = closureDate.toDate();
-                loanTransaction = LoanTransaction.writeoff(this, getOffice(), closureDate, txnExternalId,
-                        DateUtils.getLocalDateTimeOfTenant(), currentUser);
+                loanTransaction = LoanTransaction.writeoff(this, getOffice(), closureDate, txnExternalId);
                 final boolean isLastTransaction = isChronologicallyLatestTransaction(loanTransaction, this.loanTransactions);
                 if (!isLastTransaction) {
                     final String errorMessage = "The closing date of the loan must be on or after latest transaction date.";

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.service;
 
+import org.apache.fineract.infrastructure.core.data.ActionDetailsContants;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.springframework.util.Assert;
 
@@ -33,6 +34,8 @@ public class ThreadLocalContextUtil {
     private static final ThreadLocal<FineractPlatformTenant> tenantcontext = new ThreadLocal<>();
     
     private static final ThreadLocal<String> authTokenContext = new ThreadLocal<>();
+    
+    private static final ThreadLocal<String> action = new ThreadLocal<>();
     
     public static void setTenant(final FineractPlatformTenant tenant) {
         Assert.notNull(tenant, "tenant cannot be null");
@@ -65,6 +68,14 @@ public class ThreadLocalContextUtil {
 
     public static String getAuthToken() {
         return authTokenContext.get();
+    }
+    
+    public static void setAction(final ActionDetailsContants actionDetailsContants) {
+    	action.set(actionDetailsContants.getValue());
+    }
+
+    public static String getAction() {
+        return action.get();
     }
 
 }

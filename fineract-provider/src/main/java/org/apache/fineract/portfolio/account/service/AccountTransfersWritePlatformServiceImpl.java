@@ -31,8 +31,10 @@ import java.util.List;
 import java.util.Locale;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ActionDetailsContants;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.data.AccountTransfersDataValidator;
@@ -102,7 +104,8 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     @Override
     public CommandProcessingResult create(final JsonCommand command) {
         boolean isRegularTransaction = true;
-
+        
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.CreateAccountTransaction);
         this.accountTransfersDataValidator.validate(command);
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed(transferDateParamName);
@@ -441,6 +444,8 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     public CommandProcessingResult refundByTransfer(JsonCommand command) {
         // TODO Auto-generated method stub
         this.accountTransfersDataValidator.validate(command);
+        
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.RefundBytransfer);
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed(transferDateParamName);
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed(transferAmountParamName);

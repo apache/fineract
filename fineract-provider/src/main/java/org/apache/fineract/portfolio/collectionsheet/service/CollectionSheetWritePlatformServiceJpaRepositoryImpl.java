@@ -26,8 +26,10 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ActionDetailsContants;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
 import org.apache.fineract.portfolio.collectionsheet.data.CollectionSheetTransactionDataValidator;
@@ -81,6 +83,8 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
 
         this.transactionDataValidator.validateTransaction(command);
 
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.UpadteCollectionSheet);
+        
         final Map<String, Object> changes = new HashMap<>();
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
@@ -111,6 +115,8 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
 
         this.transactionDataValidator.validateIndividualCollectionSheet(command);
 
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.SaveIndividualCollectioSheet);
+        
         final Map<String, Object> changes = new HashMap<>();
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());

@@ -28,11 +28,13 @@ import java.util.Set;
 
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ActionDetailsContants;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.calendar.CalendarConstants.CALENDAR_SUPPORTED_PARAMETERS;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
@@ -215,6 +217,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
          * Validate all the data for updating the calendar
          */
         this.fromApiJsonDeserializer.validateForUpdate(command.json());
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.UpadteCalender);
         
         Boolean areActiveEntitiesSynced = false;
         final Long calendarId = command.entityId();
