@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
@@ -487,11 +488,11 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final BigDecimal totalAnnualFees = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalAnnualFees");
 
             final BigDecimal totalInterestEarned = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalInterestEarned");
-            final BigDecimal totalInterestPosted = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalInterestPosted");
+            final BigDecimal totalInterestPosted = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalInterestPosted");
             final BigDecimal accountBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "accountBalance");
             final BigDecimal totalFeeCharge = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalFeeCharge");
             final BigDecimal totalPenaltyCharge = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalPenaltyCharge");
-            final BigDecimal totalOverdraftInterestDerived = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs,
+            final BigDecimal totalOverdraftInterestDerived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs,
                     "totalOverdraftInterestDerived");
             final BigDecimal totalWithholdTax = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalWithholdTax");
 
@@ -500,12 +501,12 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final BigDecimal onHoldFunds = rs.getBigDecimal("onHoldFunds");
             
             BigDecimal interestNotPosted = BigDecimal.ZERO;
-            if (totalInterestEarned != null) {
-                 interestNotPosted = totalInterestEarned.subtract(totalInterestPosted).add(totalOverdraftInterestDerived);
+            LocalDate lastInterestCalculationDate = null;
+            if(totalInterestEarned != null){
+            	interestNotPosted = totalInterestEarned.subtract(totalInterestPosted).add(totalOverdraftInterestDerived);
+            	lastInterestCalculationDate = JdbcSupport.getLocalDate(rs, "lastInterestCalculationDate");
             }
             
-            LocalDate lastInterestCalculationDate = JdbcSupport.getLocalDate(rs, "lastInterestCalculationDate");
-
             final SavingsAccountSummaryData summary = new SavingsAccountSummaryData(currency, totalDeposits, totalWithdrawals,
                     totalWithdrawalFees, totalAnnualFees, totalInterestEarned, totalInterestPosted, accountBalance, totalFeeCharge,
                     totalPenaltyCharge, totalOverdraftInterestDerived, totalWithholdTax, interestNotPosted, lastInterestCalculationDate);
