@@ -35,6 +35,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ActionDetailsContants;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -43,6 +44,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
@@ -302,6 +304,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final AppUser currentUser = getAppUserIfPresent();
 
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.DisburseLoan);
+        
         this.loanEventApiJsonValidator.validateDisbursement(command.json(), isAccountTransfer);
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
@@ -356,7 +360,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 existingTransactionIds.addAll(loan.findExistingTransactionIds());
                 existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
                 LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan.getOffice(), disburseAmount, paymentDetail,
-                        actualDisbursementDate, txnExternalId, DateUtils.getLocalDateTimeOfTenant(), currentUser);
+                        actualDisbursementDate, txnExternalId);
                 disbursementTransaction.updateLoan(loan);
                 loan.getLoanTransactions().add(disbursementTransaction);
             }
@@ -598,7 +602,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     existingTransactionIds.addAll(loan.findExistingTransactionIds());
                     existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
                     LoanTransaction disbursementTransaction = LoanTransaction.disbursement(loan.getOffice(), disburseAmount, paymentDetail,
-                            actualDisbursementDate, txnExternalId, DateUtils.getLocalDateTimeOfTenant(), currentUser);
+                            actualDisbursementDate, txnExternalId);
                     disbursementTransaction.updateLoan(loan);
                     loan.getLoanTransactions().add(disbursementTransaction);
                 }
@@ -669,7 +673,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult undoLoanDisbursal(final Long loanId, final JsonCommand command) {
 
         final AppUser currentUser = getAppUserIfPresent();
-
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.UndoDisbursal);
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
         this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.LOAN_UNDO_DISBURSAL,
@@ -812,6 +816,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult adjustLoanTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
 
         AppUser currentUser = getAppUserIfPresent();
+        
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.UndoTransaction);
 
         this.loanEventApiJsonValidator.validateTransaction(command.json());
 
@@ -844,7 +850,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Money transactionAmountAsMoney = Money.of(loan.getCurrency(), transactionAmount);
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createPaymentDetail(command, changes);
         LoanTransaction newTransactionDetail = LoanTransaction.repayment(loan.getOffice(), transactionAmountAsMoney, paymentDetail,
-                transactionDate, txnExternalId, DateUtils.getLocalDateTimeOfTenant(), currentUser);
+                transactionDate, txnExternalId);
         if (transactionToAdjust.isInterestWaiver()) {
             Money unrecognizedIncome = transactionAmountAsMoney.zero();
             Money interestComponent = transactionAmountAsMoney;
@@ -950,6 +956,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult waiveInterestOnLoan(final Long loanId, final JsonCommand command) {
 
         AppUser currentUser = getAppUserIfPresent();
+        
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.WaiveInterestOnLoan);
 
         this.loanEventApiJsonValidator.validateTransaction(command.json());
 
@@ -1036,7 +1044,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     public CommandProcessingResult writeOff(final Long loanId, final JsonCommand command) {
         final AppUser currentUser = getAppUserIfPresent();
-
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.LoanWriteOff);
         this.loanEventApiJsonValidator.validateTransactionWithNoAmount(command.json());
 
         final Map<String, Object> changes = new LinkedHashMap<>();
@@ -1098,7 +1106,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult closeLoan(final Long loanId, final JsonCommand command) {
 
         AppUser currentUser = getAppUserIfPresent();
-
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.CloseLoan);
+        
         this.loanEventApiJsonValidator.validateTransactionWithNoAmount(command.json());
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
@@ -1232,7 +1241,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult addLoanCharge(final Long loanId, final JsonCommand command) {
 
         this.loanEventApiJsonValidator.validateAddLoanCharge(command.json());
-
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.AddLoanCharge);
+        
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
 
@@ -1425,6 +1435,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult updateLoanCharge(final Long loanId, final Long loanChargeId, final JsonCommand command) {
 
         this.loanEventApiJsonValidator.validateUpdateOfLoanCharge(command.json());
+        
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.UpdateLoanCharge);
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
@@ -1460,6 +1472,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         AppUser currentUser = getAppUserIfPresent();
 
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.WaiveLoanCharge);
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
         this.loanEventApiJsonValidator.validateInstallmentChargeTransaction(command.json());
@@ -1543,6 +1556,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult deleteLoanCharge(final Long loanId, final Long loanChargeId, final JsonCommand command) {
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.DeleteLoanCharge);
         checkClientOrGroupActive(loan);
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
 
@@ -1573,6 +1587,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final boolean isChargeIdIncludedInJson) {
 
         this.loanEventApiJsonValidator.validateChargePaymentTransaction(command.json(), isChargeIdIncludedInJson);
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.PayLoanCharge);
         if (isChargeIdIncludedInJson) {
             loanChargeId = command.longValueOfParameterNamed("chargeId");
         }
@@ -1674,6 +1689,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public void transferFeeCharges() throws JobExecutionException {
         final Collection<LoanChargeData> chargeDatas = this.loanChargeReadPlatformService.retrieveLoanChargesForFeePayment(
                 ChargePaymentMode.ACCOUNT_TRANSFER.getValue(), LoanStatus.ACTIVE.getValue());
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.TRANSFERFEECHARGEFORLOANSJob);
         final boolean isRegularTransaction = true;
         final StringBuilder sb = new StringBuilder();
         if (chargeDatas != null) {
@@ -1756,8 +1772,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
         final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
 
-        final LoanTransaction newTransferTransaction = LoanTransaction.initiateTransfer(loan.getOffice(), loan, transferDate,
-                DateUtils.getLocalDateTimeOfTenant(), currentUser);
+        final LoanTransaction newTransferTransaction = LoanTransaction.initiateTransfer(loan.getOffice(), loan, transferDate);
         loan.getLoanTransactions().add(newTransferTransaction);
         loan.setLoanStatus(LoanStatus.TRANSFER_IN_PROGRESS.getValue());
 
@@ -1783,8 +1798,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
         final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
 
-        final LoanTransaction newTransferAcceptanceTransaction = LoanTransaction.approveTransfer(acceptedInOffice, loan, transferDate,
-                DateUtils.getLocalDateTimeOfTenant(), currentUser);
+        final LoanTransaction newTransferAcceptanceTransaction = LoanTransaction.approveTransfer(acceptedInOffice, loan, transferDate);
         loan.getLoanTransactions().add(newTransferAcceptanceTransaction);
         if (loan.getTotalOverpaid() != null) {
             loan.setLoanStatus(LoanStatus.OVERPAID.getValue());
@@ -1818,8 +1832,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
         final List<Long> existingReversedTransactionIds = new ArrayList<>(loan.findExistingReversedTransactionIds());
 
-        final LoanTransaction newTransferAcceptanceTransaction = LoanTransaction.withdrawTransfer(loan.getOffice(), loan, transferDate,
-                DateUtils.getLocalDateTimeOfTenant(), currentUser);
+        final LoanTransaction newTransferAcceptanceTransaction = LoanTransaction.withdrawTransfer(loan.getOffice(), loan, transferDate);
         loan.getLoanTransactions().add(newTransferAcceptanceTransaction);
         loan.setLoanStatus(LoanStatus.ACTIVE.getValue());
 
@@ -2264,6 +2277,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Transactional
     public void applyOverdueChargesForLoan(final Long loanId, Collection<OverdueLoanScheduleData> overdueLoanScheduleDatas) {
 
+    	ThreadLocalContextUtil.setAction(ActionDetailsContants.ApplyOverdueChargesForLoan);
         Loan loan = null;
         final List<Long> existingTransactionIds = new ArrayList<>();
         final List<Long> existingReversedTransactionIds = new ArrayList<>();
@@ -2430,6 +2444,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult undoWriteOff(Long loanId) {
         final AppUser currentUser = getAppUserIfPresent();
 
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.UndoLoanWriteOff);
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
         final List<Long> existingTransactionIds = new ArrayList<>();
@@ -2504,7 +2519,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     @Transactional
     public CommandProcessingResult addAndDeleteLoanDisburseDetails(Long loanId, JsonCommand command) {
-
+    	ThreadLocalContextUtil.setAction(ActionDetailsContants.AddAndDeleteLoanDisburseDetails);
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
@@ -2601,6 +2616,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult updateDisbursementDateAndAmountForTranche(final Long loanId, final Long disbursementId,
             final JsonCommand command) {
 
+    	ThreadLocalContextUtil.setAction(ActionDetailsContants.UpdateDisbursementDateAndAmountForTranche);
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
         LoanDisbursementDetails loanDisbursementDetails = loan.fetchLoanDisbursementsById(disbursementId);
@@ -2765,7 +2781,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         // TODO Auto-generated method stub
 
         this.loanEventApiJsonValidator.validateNewRefundTransaction(command.json());
-
+        
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.MakeLoanRefund);
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
 
         // checkRefundDateIsAfterAtLeastOneRepayment(loanId, transactionDate);
@@ -2825,7 +2842,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Transactional
     public CommandProcessingResult undoLastLoanDisbursal(Long loanId, JsonCommand command) {
         final AppUser currentUser = getAppUserIfPresent();
-
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.UndoLastDisbursal);
+        
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         final LocalDate recalculateFromDate = loan.getLastRepaymentDate();
         validateIsMultiDisbursalLoanAndDisbursedMoreThanOneTranche(loan);

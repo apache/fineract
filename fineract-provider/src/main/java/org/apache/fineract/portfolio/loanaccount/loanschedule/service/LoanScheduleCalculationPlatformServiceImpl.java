@@ -28,11 +28,13 @@ import java.util.Set;
 
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
+import org.apache.fineract.infrastructure.core.data.ActionDetailsContants;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -145,6 +147,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
 
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.UpdateFutureSchedule);
         LocalDate today = DateUtils.getLocalDateOfTenant();
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = loanRepaymentScheduleTransactionProcessorFactory
                 .determineProcessor(loan.transactionProcessingStrategy());
@@ -187,8 +190,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
             modifiedTransactions.add(LoanTransaction.copyTransactionProperties(loanTransaction));
         }
         if (isNewPaymentRequired) {
-            LoanTransaction ondayPaymentTransaction = LoanTransaction.repayment(null, totalAmount, null, today, null,
-                    DateUtils.getLocalDateTimeOfTenant(), null);
+            LoanTransaction ondayPaymentTransaction = LoanTransaction.repayment(null, totalAmount, null, today, null);
             modifiedTransactions.add(ondayPaymentTransaction);
         }
 
@@ -217,6 +219,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
 
     @Override
     public LoanScheduleData generateLoanScheduleForVariableInstallmentRequest(Long loanId, final String json) {
+    	ThreadLocalContextUtil.setAction(ActionDetailsContants.GenrateLoanScheduleForVariableInsatllment);
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         this.loanScheduleAssembler.assempleVariableScheduleFrom(loan, json);
         return constructLoanScheduleData(loan);

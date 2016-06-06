@@ -24,8 +24,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ActionDetailsContants;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
@@ -62,6 +64,7 @@ public class LoanScheduleWritePlatformServiceImpl implements LoanScheduleWritePl
     @Override
     public CommandProcessingResult addLoanScheduleVariations(final Long loanId, final JsonCommand command) {
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        ThreadLocalContextUtil.setAction(ActionDetailsContants.AddLoanShceduleVariations);
         Map<Long, LoanTermVariations> loanTermVariations = new HashMap<>();
         for (LoanTermVariations termVariations : loan.getLoanTermVariations()) {
             loanTermVariations.put(termVariations.getId(), termVariations);

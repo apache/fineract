@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Random;
 
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.data.ActionDetailsContants;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -61,6 +62,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
     @CronTarget(jobName = JobName.APPLY_CHARGE_TO_OVERDUE_LOAN_INSTALLMENT)
     public void applyChargeForOverdueLoans() throws JobExecutionException {
 
+    	ThreadLocalContextUtil.setAction(ActionDetailsContants.ApplyChargeToOverdueLoanInstallmentJob);
         final Long penaltyWaitPeriodValue = this.configurationDomainService.retrievePenaltyWaitPeriod();
         final Boolean backdatePenalties = this.configurationDomainService.isBackdatePenaltiesEnabled();
         final Collection<OverdueLoanScheduleData> overdueLoanScheduledInstallments = this.loanReadPlatformService
@@ -114,6 +116,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
 	@Override
 	@CronTarget(jobName = JobName.RECALCULATE_INTEREST_FOR_LOAN)
 	public void recalculateInterest() throws JobExecutionException {
+		ThreadLocalContextUtil.setAction(ActionDetailsContants.RECALCULATEINTERESTFORLOANJob);
 		Integer maxNumberOfRetries = ThreadLocalContextUtil.getTenant()
 				.getConnection().getMaxRetriesOnDeadlock();
 		Integer maxIntervalBetweenRetries = ThreadLocalContextUtil.getTenant()
