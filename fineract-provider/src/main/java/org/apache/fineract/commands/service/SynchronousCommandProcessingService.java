@@ -193,6 +193,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
+        } else if (wrapper.isLoanForeclosure()) {
+            handler = this.applicationContext.getBean("foreClosureCommandHandler", NewCommandSourceHandler.class);
         } else {
             handler = this.commandHandlerProvider.getHandler(wrapper.entityName(), wrapper.actionName());
         }

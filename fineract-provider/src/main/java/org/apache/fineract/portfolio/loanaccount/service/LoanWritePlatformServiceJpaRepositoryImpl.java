@@ -115,6 +115,7 @@ import org.apache.fineract.portfolio.loanaccount.command.LoanUpdateCommand;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanForeClosureDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
@@ -2867,6 +2868,33 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
                 .withLoanId(loanId) //
+                .with(changes) //
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public CommandProcessingResult forecloseLoan(final Long loanId, final JsonCommand command) {
+        final String json = command.json();
+        final JsonElement element = fromApiJsonHelper.parse(json);
+        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.transactionDateParamName, element);
+        this.loanEventApiJsonValidator.validateLoanForeclosure(command.json());
+        loan.validateForForeclosure(transactionDate);
+        final Map<String, Object> changes = new LinkedHashMap<>();
+        changes.put("transactionDate", transactionDate);
+
+        String noteText = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.noteParamName, element);
+
+        loan.updateInstallmentsPostDate(transactionDate);
+
+        LoanForeClosureDetailDTO closureDetailDTO = new LoanForeClosureDetailDTO(loan, transactionDate, noteText);
+
+        final Map<String, Object> modifications = this.loanAccountDomainService.foreCloseLoan(closureDetailDTO);
+        changes.putAll(modifications);
+
+        final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
+        return commandProcessingResultBuilder.withLoanId(loanId) //
                 .with(changes) //
                 .build();
     }

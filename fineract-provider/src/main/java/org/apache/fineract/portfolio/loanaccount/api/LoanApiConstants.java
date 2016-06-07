@@ -111,4 +111,8 @@ public interface LoanApiConstants {
     public static final String principalParamName = "principal";
     public static final String installmentAmountParamName = "installmentAmount";
 
+    // fore closure constants
+    public static final String transactionDateParamName = "transactionDate";
+    public static final String noteParamName = "note";
+
 }
