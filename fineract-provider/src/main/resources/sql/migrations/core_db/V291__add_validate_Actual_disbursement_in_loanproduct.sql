@@ -1,0 +1,1 @@
+ALTER TABLE `m_product_loan`ADD COLUMN `is_validate_actual_disbursement_date_against_expected` TINYINT NULL  DEFAULT '0'  AFTER `instalment_amount_in_multiples_of`;
