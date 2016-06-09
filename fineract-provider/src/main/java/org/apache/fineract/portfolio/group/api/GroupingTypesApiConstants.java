@@ -75,6 +75,10 @@ public class GroupingTypesApiConstants {
     public static final String collectionMeetingCalendar = "collectionMeetingCalendar";
     public static final String timeLine = "timeline";
     public static final String closureReasons = "closureReasons";
+    public static final String totalCollected = "totalCollected";
+    public static final String totalOverdue = "totalOverdue";
+    public static final String totaldue = "totaldue";
+    public static final String installmentDue = "installmentDue";
 
     // group close parameters
     public static final String closureDateParamName = "closureDate";
@@ -123,5 +127,5 @@ public class GroupingTypesApiConstants {
             dateFormatParamName, closureDateParamName, closureReasonIdParamName));
 
     public static final Set<String> STAFF_CENTER_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(staffIdParamName,
-            staffNameParamName, meetingFallCenters));
+            staffNameParamName, meetingFallCenters, totalCollected, totalOverdue, totaldue, installmentDue));
 }
