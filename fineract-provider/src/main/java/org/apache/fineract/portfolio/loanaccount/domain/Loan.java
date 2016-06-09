@@ -624,6 +624,7 @@ public class Loan extends AbstractPersistable<Long> {
         }
         this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
         updateLoanSummaryDerivedFields();
+        this.loanTransactions.removeAll(changedTransactionDetail.getNewTransactionMappings().values());
         return changedTransactionDetail;
     }
 
