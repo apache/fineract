@@ -124,6 +124,7 @@ public class LoanProductTestBuilder {
     private Integer recalculationRestFrequencyOnDayType = null;
     private Integer recalculationCompoundingFrequencyDayOfWeekType = null;
     private Integer recalculationRestFrequencyDayOfWeekType = null;
+    private boolean syncExpectedWithDisbursementDate = false;
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -211,6 +212,8 @@ public class LoanProductTestBuilder {
             map.put("minimumGap", minimumGap) ;
             map.put("maximumGap", maximumGap) ;
         }
+        map.put("syncExpectedWithDisbursementDate", 
+        		this.syncExpectedWithDisbursementDate);
         return new Gson().toJson(map);
     }
 
@@ -496,6 +499,12 @@ public class LoanProductTestBuilder {
         this.allowVariableInstallments = allowVariableInstallments ;
         this.minimumGap = minimumGap;
         this.maximumGap = maximumGap;
+        return this ;
+    }
+    
+    public LoanProductTestBuilder withSyncExpectedWithDisbursementDate(Boolean syncExpectedWithDisbursementDate) {
+        this.syncExpectedWithDisbursementDate = 
+        		syncExpectedWithDisbursementDate ;
         return this ;
     }
 }
