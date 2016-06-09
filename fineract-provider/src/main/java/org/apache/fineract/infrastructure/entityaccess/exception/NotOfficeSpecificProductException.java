@@ -18,18 +18,16 @@
  */
 package org.apache.fineract.infrastructure.entityaccess.exception;
 
-import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * A {@link RuntimeException} thrown when office resources are not found.
+ * A {@link RuntimeException} thrown when valid api request end up violating
+ * some domain rule.
  */
-public class FineractEntityAccessNotFoundException extends AbstractPlatformResourceNotFoundException {
-
-    public FineractEntityAccessNotFoundException(final Long id) {
-        super("error.msg.entityaccess.id.invalid", "FineractEntityAccess with identifier " + id + " does not exist", id);
-    }
-    
-    public FineractEntityAccessNotFoundException(final String codeName) {
-    	       super("error.msg.entityaccess.id.invalid", "FineractEntityAccess with identifier " + codeName + " does not exist");
-    	    }
-}
+public  class NotOfficeSpecificProductException extends AbstractPlatformDomainRuleException {
+		
+	public NotOfficeSpecificProductException(final Long productId, final Long officeId) {
+			super("error.msg.office.product.not.found", "Product with productId " + productId +
+					" not office Specific Product in offfice with officeId", officeId);
+		}
+	}

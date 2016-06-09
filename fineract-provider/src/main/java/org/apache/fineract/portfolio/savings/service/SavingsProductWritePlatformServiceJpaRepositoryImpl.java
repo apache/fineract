@@ -128,7 +128,7 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
             // save this savings product against a specific office
             // i.e. this savings product is specific for this office.
             fineractEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
-                    FineractEntityAccessType.OFFICE_ACCESS_TO_SAVINGS_PRODUCTS, FineractEntityType.SAVINGS_PRODUCT, product.getId());
+                    FineractEntityAccessType.OFFICE_ACCESS_TO_SAVINGS_PRODUCTS, product.getId());
 
             return new CommandProcessingResultBuilder() //
                     .withEntityId(product.getId()) //

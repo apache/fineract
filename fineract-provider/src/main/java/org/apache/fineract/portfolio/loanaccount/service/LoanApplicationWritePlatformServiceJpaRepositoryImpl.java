@@ -32,15 +32,24 @@ import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumb
 import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
+import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.entityaccess.exception.NotOfficeSpecificProductException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.entityaccess.FineractEntityAccessConstants;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelation;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepository;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMapping;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMappingRepository;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
@@ -156,6 +165,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanScheduleAssembler loanScheduleAssembler;
     private final LoanUtilService loanUtilService;
     private final CalendarReadPlatformService calendarReadPlatformService;
+    private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
+    private final FineractEntityToEntityMappingRepository repository;
+    private final FineractEntityRelationRepository fineractEntityRelationRepository;
 
     @Autowired
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
@@ -175,7 +187,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
             final BusinessEventNotifierService businessEventNotifierService, final ConfigurationDomainService configurationDomainService,
             final LoanScheduleAssembler loanScheduleAssembler, final LoanUtilService loanUtilService, 
-            final CalendarReadPlatformService calendarReadPlatformService) {
+            final CalendarReadPlatformService calendarReadPlatformService, final GlobalConfigurationRepositoryWrapper globalConfigurationRepository,
+            final FineractEntityToEntityMappingRepository repository, final FineractEntityRelationRepository fineractEntityRelationRepository) {
         this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
@@ -206,6 +219,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.loanScheduleAssembler = loanScheduleAssembler;
         this.loanUtilService = loanUtilService;
         this.calendarReadPlatformService = calendarReadPlatformService;
+        this.globalConfigurationRepository = globalConfigurationRepository;
+        this.repository = repository;
+        this.fineractEntityRelationRepository = fineractEntityRelationRepository;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -224,14 +240,23 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final LoanProduct loanProduct = this.loanProductRepository.findOne(productId);
             if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
 
+            final Long clientId = this.fromJsonHelper.extractLongNamed("clientId", command.parsedJson());
+                        if(clientId !=null){
+                        Client client= this.clientRepository.findOneWithNotFoundDetection(clientId);
+                        officeSpecificLoanProductValidation( productId,client.getOffice().getId());
+                        }
+                        final Long groupId = this.fromJsonHelper.extractLongNamed("groupId", command.parsedJson());
+                        if(groupId != null){
+                        	Group group= this.groupRepository.findOneWithNotFoundDetection(groupId);
+                            officeSpecificLoanProductValidation( productId,group.getOffice().getId());
+                        }
+            
             this.fromApiJsonDeserializer.validateForCreate(command.json(), isMeetingMandatoryForJLGLoans, loanProduct);
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
 
             if (loanProduct.useBorrowerCycle()) {
-                final Long clientId = this.fromJsonHelper.extractLongNamed("clientId", command.parsedJson());
-                final Long groupId = this.fromJsonHelper.extractLongNamed("groupId", command.parsedJson());
                 Integer cycleNumber = 0;
                 if (clientId != null) {
                     cycleNumber = this.loanReadPlatformService.retriveLoanCounter(clientId, loanProduct.getId());
@@ -802,6 +827,18 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     }
                 }
             }
+            
+            if ((command.longValueOfParameterNamed(productIdParamName) != null)
+            							|| (command.longValueOfParameterNamed(clientIdParamName) != null) || (command.longValueOfParameterNamed(groupIdParamName) != null)) { 
+            						Long OfficeId = null;
+            						if(existingLoanApplication.getClient() != null){
+            							OfficeId = existingLoanApplication.getClient().getOffice().getId();
+            						}
+            						else if(existingLoanApplication.getGroup() != null){
+            							OfficeId = existingLoanApplication.getGroup().getOffice().getId();
+            						}
+            						officeSpecificLoanProductValidation( existingLoanApplication.getLoanProduct().getId(),OfficeId);
+            							}
 
             // updating loan interest recalculation details throwing null
             // pointer exception after saveAndFlush
@@ -1160,4 +1197,20 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         return map;
     }
 
+    private void officeSpecificLoanProductValidation(final Long productId, final Long officeId) {
+    			final GlobalConfigurationProperty restrictToUserOfficeProperty = this.globalConfigurationRepository
+    					.findOneByNameWithNotFoundDetection(
+    							FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_OFFICE_SPECIFIC_PRODUCTS);
+    			if (restrictToUserOfficeProperty.isEnabled()) {
+    				FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
+    						                               .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.toStr());
+    				FineractEntityToEntityMapping officeToLoanProductMappingList = this.repository.findListByProductId(fineractEntityRelation, productId,
+    						officeId);
+    				if (officeToLoanProductMappingList == null) {
+    					throw new NotOfficeSpecificProductException(productId, officeId);
+    				}
+    
+    			}
+    		}
+    
 }

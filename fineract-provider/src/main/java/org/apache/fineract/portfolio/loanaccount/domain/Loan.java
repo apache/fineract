@@ -5982,4 +5982,12 @@ public class Loan extends AbstractPersistable<Long> {
         this.writeOffReason = writeOffReason;
     }
 
+	public Group getGroup() {
+		return group;
+	}
+
+	public LoanProduct getLoanProduct() {
+		return loanProduct;
+	}
+	
 }

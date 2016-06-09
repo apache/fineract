@@ -20,19 +20,17 @@ package org.apache.fineract.infrastructure.entityaccess.service;
 
 import java.util.Collection;
 
-import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityAccessData;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelationData;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityToEntityMappingData;
-import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 
 public interface FineractEntityAccessReadService {
 
-    Collection<FineractEntityAccessData> retrieveEntityAccessFor(Long entityId, FineractEntityType type, FineractEntityAccessType accessType,
-            FineractEntityType secondType, boolean includeAllOffices);
+	Collection<FineractEntityToEntityMappingData> retrieveEntityAccessFor(FineractEntityType firstEntityType,
+			   		final Long relId, final  Long fromEntityId,boolean includeAllSubOffices);
 
-    String getSQLQueryInClause_WithListOfIDsForEntityAccess(Long entityId, FineractEntityType firstEntityType,
-            FineractEntityAccessType accessType, FineractEntityType secondEntityType, boolean includeAllOffices);
+	String getSQLQueryInClause_WithListOfIDsForEntityAccess( FineractEntityType firstEntityType,
+			             final Long relId,final Long fromEntityId ,boolean includeAllOffices);
 
     String getSQLQueryInClauseIDList_ForLoanProductsForOffice(Long loanProductId, boolean includeAllOffices);
 
