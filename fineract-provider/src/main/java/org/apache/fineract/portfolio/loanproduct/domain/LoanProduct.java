@@ -182,6 +182,9 @@ public class LoanProduct extends AbstractPersistable<Long> {
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
     private LoanProductVariableInstallmentConfig variableInstallmentConfig;
+    
+    @Column(name = "sync_expected_with_disbursement_date")
+    private boolean syncExpectedWithDisbursementDate;
 
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate) {
@@ -325,6 +328,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
         final Integer installmentAmountInMultiplesOf = command
                 .integerValueOfParameterNamed(LoanProductConstants.installmentAmountInMultiplesOfParamName);
 
+        final boolean syncExpectedWithDisbursementDate = command.booleanPrimitiveValueOfParameterNamed("syncExpectedWithDisbursementDate");
+        
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
                 annualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion, repaymentEvery,
@@ -338,7 +343,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
                 installmentAmountInMultiplesOf, loanConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRate,
                 interestRateDifferential, minDifferentialLendingRate, maxDifferentialLendingRate, defaultDifferentialLendingRate,
                 isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGapBetweenInstallments,
-                maximumGapBetweenInstallments);
+                maximumGapBetweenInstallments, syncExpectedWithDisbursementDate);
 
     }
 
@@ -569,7 +574,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
             Boolean isLinkedToFloatingInterestRates, FloatingRate floatingRate, BigDecimal interestRateDifferential,
             BigDecimal minDifferentialLendingRate, BigDecimal maxDifferentialLendingRate, BigDecimal defaultDifferentialLendingRate,
             Boolean isFloatingInterestRateCalculationAllowed, final Boolean isVariableInstallmentsAllowed,
-            final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments) {
+            final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments,
+            final boolean syncExpectedWithDisbursementDate) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -643,6 +649,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
         this.accountMovesOutOfNPAOnlyOnArrearsCompletion = accountMovesOutOfNPAOnlyOnArrearsCompletion;
         this.canDefineInstallmentAmount = canDefineEmiAmount;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
+        this.syncExpectedWithDisbursementDate = 
+        		syncExpectedWithDisbursementDate;
     }
 
     public MonetaryCurrency getCurrency() {
@@ -864,6 +872,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
             actualChanges.put(LoanProductConstants.minimumDaysBetweenDisbursalAndFirstRepayment, newValue);
             actualChanges.put("locale", localeAsInput);
             this.minimumDaysBetweenDisbursalAndFirstRepayment = newValue;
+        }
+        
+        if(command.isChangeInBooleanParameterNamed("syncExpectedWithDisbursementDate"
+        		, this.syncExpectedWithDisbursementDate)){
+        	final boolean newValue = command.booleanPrimitiveValueOfParameterNamed("syncExpectedWithDisbursementDate");
+        	actualChanges.put("syncExpectedWithDisbursementDate", newValue);
+        	this.syncExpectedWithDisbursementDate = newValue;
         }
 
         /**
@@ -1161,8 +1176,16 @@ public class LoanProduct extends AbstractPersistable<Long> {
         }
         return borrowerCycleVariation;
     }
+    
+    public boolean syncExpectedWithDisbursementDate() {
+		return syncExpectedWithDisbursementDate;
+	}
 
-    public Map<String, BigDecimal> fetchBorrowerCycleVariationsForCycleNumber(final Integer cycleNumber) {
+	public void setSyncExpectedWithDisbursementDate(boolean syncExpectedWithDisbursementDate) {
+		this.syncExpectedWithDisbursementDate = syncExpectedWithDisbursementDate;
+	}
+
+	public Map<String, BigDecimal> fetchBorrowerCycleVariationsForCycleNumber(final Integer cycleNumber) {
         Map<String, BigDecimal> borrowerCycleVariations = new HashMap<>();
         borrowerCycleVariations.put(LoanProductConstants.principal, this.loanProductRelatedDetail.getPrincipal().getAmount());
         borrowerCycleVariations.put(LoanProductConstants.interestRatePerPeriod,
