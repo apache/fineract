@@ -5973,4 +5973,12 @@ public class Loan extends AbstractPersistable<Long> {
         return amount;
     }
 
+	public Group getGroup() {
+		return group;
+	}
+
+	public LoanProduct getLoanProduct() {
+		return loanProduct;
+	}
+	
 }
