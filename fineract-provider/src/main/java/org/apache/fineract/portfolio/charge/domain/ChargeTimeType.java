@@ -131,7 +131,7 @@ public enum ChargeTimeType {
                     chargeTimeType = SHARE_REDEEM;
                 break;
                 case 16:
-                	chargeTimeType = SAVINGS_NOACTIVITY_FEE;
+                       chargeTimeType = SAVINGS_NOACTIVITY_FEE;
                 break;
                 default:
                     chargeTimeType = INVALID;

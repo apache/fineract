@@ -319,4 +319,8 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("DISBURSEMENTDETAIL")
                 && this.entityId == null;
     }
+
+    public boolean isLoanForeclosure() {
+        return this.entityName.equalsIgnoreCase("LOAN") && this.actionName.equalsIgnoreCase("FORECLOSURE");
+    }
 }

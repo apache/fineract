@@ -113,4 +113,8 @@ public interface LoanApiConstants {
     //loan write off
     public static final String WRITEOFFREASONS = "WriteOffReasons";
 
+    // fore closure constants
+    public static final String transactionDateParamName = "transactionDate";
+    public static final String noteParamName = "note";
+
 }
