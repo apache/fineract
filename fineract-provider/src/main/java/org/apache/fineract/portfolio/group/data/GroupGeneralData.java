@@ -54,7 +54,7 @@ public class GroupGeneralData {
     private final String groupLevel;
 
     // associations
-    private final Collection<ClientData> clientMembers;
+    private Collection<ClientData> clientMembers;
     private final Collection<ClientData> activeClientMembers;
     private final Collection<GroupRoleData> groupRoles;
     private final Collection<CalendarData> calendarsData;
@@ -255,5 +255,9 @@ public class GroupGeneralData {
 
     public Collection<ClientData> clientMembers() {
         return this.clientMembers;
+    }
+    
+    public void updateClientMembers(Collection<ClientData> clientMembers) {
+    	this.clientMembers = clientMembers;
     }
 }

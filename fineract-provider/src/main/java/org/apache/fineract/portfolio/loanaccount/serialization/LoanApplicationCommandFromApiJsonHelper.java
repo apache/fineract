@@ -91,7 +91,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.syncDisbursementWithMeetingParameterName,// optional
             LoanApiConstants.linkAccountIdParameterName, LoanApiConstants.disbursementDataParameterName,
             LoanApiConstants.emiAmountParameterName, LoanApiConstants.maxOutstandingBalanceParameterName,
-            LoanProductConstants.graceOnArrearsAgeingParameterName, LoanApiConstants.createStandingInstructionAtDisbursementParameterName));
+            LoanProductConstants.graceOnArrearsAgeingParameterName, LoanApiConstants.createStandingInstructionAtDisbursementParameterName,LoanApiConstants.clientMembersParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
