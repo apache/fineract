@@ -1439,6 +1439,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     public LoanAccountData retrieveGroupDetailsTemplate(final Long groupId) {
         this.context.authenticatedUser();
         final GroupGeneralData groupAccount = this.groupReadPlatformService.retrieveOne(groupId);
+        List<ClientData> clientMember = (List<ClientData>) this.clientReadPlatformService.retrieveActiveClientMembersOfGroup(groupId);
+        groupAccount.updateClientMembers(clientMember);
         final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
         return LoanAccountData.groupDefaults(groupAccount, expectedDisbursementDate);
     }

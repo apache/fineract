@@ -112,5 +112,14 @@ public interface LoanApiConstants {
     public static final String installmentAmountParamName = "installmentAmount";
     //loan write off
     public static final String WRITEOFFREASONS = "WriteOffReasons";
+    
+    // glim constants
+    public static final String clientMembersParamName = "clientMembers";
+	public static final String loanPurposeIdParamName = "loanPurposeId";
+	public static final String proposedAmountParamName = "proposedAmount";
+	public static final String amountParamName = "amount";
+	public static final String idParamName = "id";
+	public static final String glimIdParamName = "glimId";
+	public static final String isSelectedParamName = "isSelected";
 
 }
