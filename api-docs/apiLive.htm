@@ -1304,6 +1304,14 @@
                                 <td></td>
                                 <td></td>
                             </tr>
+                            <tr>
+                                <td></td>
+                                <td>loans/{loanId}/transactions?command=foreclosure</td>
+                                <td><a href="#loans_transaction_foreclosure">Foreclose an Active Loan</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
 							<tr>
 								<td><a href="#loans_charges">Loan Charges</a></td>
 								<td>loans/{loanId}/charges</td>
@@ -10141,6 +10149,13 @@ No Request Body:
 							"total" "amount" is set
 							to the total amount paid in advance.
 						</dd>
+						<dd>
+							<b>'foreclosure'</b><br> "transaction date" is set to the current date by default<br>
+							"transaction amount" is set
+							to the sum of total loan outstanding principal 
+							and total Interest/ Fee/ Charges / Penalties 
+							till foreclosure date.
+						</dd>
 					</dl>
 					<p>Example Request:</p>
 					<div class=apiClick>loans/1/transactions/template?command=repayment</div>
@@ -10261,6 +10276,42 @@ Request Body:
     "locale": "en",
     "dateFormat": "dd MMMM yyyy
   }
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="loans_transaction_foreclosure" name="loans_transaction_foreclosure" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Foreclosure of an Active Loan</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans/{loanId}/transactions?command=foreclosure
+					</code>
+					<code class="method-request">
+POST loans/5/transactions?command=foreclosure
+Content-Type: application/json
+Request Body:
+{
+  "dateFormat": "dd MMMM yyyy",
+  "locale": "en",
+  "transactionDate": "10 December 2012",
+  "note": "Customer Death"
+}
+					</code>
+					<code class="method-response">
+{
+	"changes": {
+		"note": "Foreclosure Made!!!",
+		"eventAmount": 7573.76,
+		"transactionDate": [2012,
+		12,
+		10],
+		"transactions": [15818]
+	},
+	"loanId": 5
 }
 					</code>
 				</div>
