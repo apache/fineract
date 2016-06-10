@@ -117,6 +117,10 @@ public class ClientSavingsIntegrationTest {
         this.savingsAccountHelper.postInterestForSavings(savingsId);
         summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
         Assert.assertFalse(summaryBefore.equals(summary));
+        
+        this.savingsAccountHelper.postInterestAsOnSavings(savingsId);
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        Assert.assertFalse(summaryBefore.equals(summary));
 
         final Object savingsInterest = this.savingsAccountHelper.getSavingsInterest(savingsId);
         // verifySavingsInterest(savingsInterest);

@@ -92,11 +92,12 @@ public class SavingsAccountTransactionsApiResource {
     public String retrieveTemplate(@PathParam("savingsId") final Long savingsId,
     // @QueryParam("command") final String commandParam,
             @Context final UriInfo uriInfo) {
-
+       
         this.context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         // FIXME - KW - for now just send back generic default information for
         // both deposit/withdrawal templates
+        
         SavingsAccountTransactionData savingsAccount = this.savingsAccountReadPlatformService.retrieveDepositTransactionTemplate(savingsId,
                 DepositAccountType.SAVINGS_DEPOSIT);
         final Collection<PaymentTypeData> paymentTypeOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
@@ -105,6 +106,7 @@ public class SavingsAccountTransactionsApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, savingsAccount,
                 SavingsApiConstants.SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS);
+        
     }
 
     @GET
@@ -141,6 +143,9 @@ public class SavingsAccountTransactionsApiResource {
                 result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             } else if (is(commandParam, "withdrawal")) {
                 final CommandWrapper commandRequest = builder.savingsAccountWithdrawal(savingsId).build();
+                result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            } else if (is(commandParam, "postInterestAsOn")) {
+                final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(savingsId).build();
                 result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             }
 

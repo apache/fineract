@@ -69,6 +69,7 @@ import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformServiceJpaRepositoryImpl;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,6 +89,7 @@ public class SavingsAccountAssembler {
     private final SavingsAccountRepositoryWrapper savingsAccountRepository;
     private final SavingsAccountChargeAssembler savingsAccountChargeAssembler;
     private final FromJsonHelper fromApiJsonHelper;
+    private final SavingsAccountRepository savingsAccountrepo;
 
     @Autowired
     public SavingsAccountAssembler(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
@@ -95,7 +97,7 @@ public class SavingsAccountAssembler {
             final StaffRepositoryWrapper staffRepository, final SavingsProductRepository savingProductRepository,
             final SavingsAccountRepositoryWrapper savingsAccountRepository,
             final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final FromJsonHelper fromApiJsonHelper,
-            final AccountTransfersReadPlatformService accountTransfersReadPlatformService) {
+            final AccountTransfersReadPlatformService accountTransfersReadPlatformService,SavingsAccountRepository savingsAccountrepo) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
@@ -104,6 +106,7 @@ public class SavingsAccountAssembler {
         this.savingsAccountRepository = savingsAccountRepository;
         this.savingsAccountChargeAssembler = savingsAccountChargeAssembler;
         this.fromApiJsonHelper = fromApiJsonHelper;
+        this.savingsAccountrepo=savingsAccountrepo;
         savingsHelper = new SavingsHelper(accountTransfersReadPlatformService);
     }
 

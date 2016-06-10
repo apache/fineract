@@ -18,12 +18,18 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
+import java.util.Date;
 import java.util.List;
 
+
+
+import org.joda.time.LocalDate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, Long>, JpaSpecificationExecutor<SavingsAccount> {
 
@@ -48,4 +54,7 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
 
     @Query("from SavingsAccount sa where sa.accountNumber = :accountNumber and sa.status in (100, 200, 300, 303, 304) ")
     SavingsAccount findNonClosedAccountByAccountNumber(@Param("accountNumber") String accountNumber);
+    
+  
+    
 }

@@ -64,4 +64,5 @@ public class SavingsAccountSummaryData {
         this.interestNotPosted = interestNotPosted;
         this.lastInterestCalculationDate = lastInterestCalculationDate;
     }
+  
 }
