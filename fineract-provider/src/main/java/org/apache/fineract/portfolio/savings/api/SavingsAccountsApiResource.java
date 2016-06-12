@@ -87,7 +87,6 @@ public class SavingsAccountsApiResource {
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
     }
-
     @GET
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -151,7 +150,6 @@ public class SavingsAccountsApiResource {
                 "status", chargeStatus, new Object[] { "all", "active", "inactive" }); }
 
         final SavingsAccountData savingsAccount = this.savingsAccountReadPlatformService.retrieveOne(accountId);
-
         final Set<String> mandatoryResponseParameters = new HashSet<>();
         final SavingsAccountData savingsAccountTemplate = populateTemplateAndAssociations(accountId, savingsAccount,
                 staffInSelectedOfficeOnly, chargeStatus, uriInfo, mandatoryResponseParameters);
@@ -277,7 +275,7 @@ public class SavingsAccountsApiResource {
             final CommandWrapper commandRequest = builder.unassignSavingsOfficer(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return this.toApiJsonSerializer.serialize(result);
-        }
+        } 
 
         if (result == null) {
             //

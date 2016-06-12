@@ -410,4 +410,9 @@ public class PostingPeriod {
     public boolean isInterestTransfered() {
         return this.interestTransfered;
     }
+
+    
+    public LocalDateInterval getPeriodInterval() {
+        return this.periodInterval;
+    }
 }

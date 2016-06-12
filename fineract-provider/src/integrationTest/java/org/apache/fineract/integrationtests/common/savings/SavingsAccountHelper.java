@@ -47,6 +47,8 @@ public class SavingsAccountHelper {
     private static final String WITHDRAWN_BY_CLIENT_SAVINGS_COMMAND = "withdrawnByApplicant";
     private static final String CALCULATE_INTEREST_SAVINGS_COMMAND = "calculateInterest";
     private static final String POST_INTEREST_SAVINGS_COMMAND = "postInterest";
+    private static final String POST_INTEREST_AS_ON_SAVINGS_COMMAND = "postInterestAsOn";
+
     private static final String CLOSE_SAVINGS_COMMAND = "close";
     private static final String UPDATE_WITHHOLD_TAX_STATUS = "updateWithHoldTax";
 
@@ -193,6 +195,12 @@ public class SavingsAccountHelper {
     public void postInterestForSavings(final Integer savingsId) {
         System.out.println("--------------------------------- POST INTEREST FOR SAVINGS --------------------------------");
         performSavingActions(createSavingsCalculateInterestURL(POST_INTEREST_SAVINGS_COMMAND, savingsId),
+                getCalculatedInterestForSavingsApplicationAsJSON(), "");
+    }
+    
+    public void postInterestAsOnSavings(final Integer savingsId) {
+        System.out.println("--------------------------------- POST INTEREST AS ON FOR SAVINGS --------------------------------");
+        performSavingActions(createSavingsCalculateInterestURL(POST_INTEREST_AS_ON_SAVINGS_COMMAND, savingsId),
                 getCalculatedInterestForSavingsApplicationAsJSON(), "");
     }
 
@@ -493,5 +501,7 @@ public class SavingsAccountHelper {
                 .withMinimumOpenningBalance(minOpenningBalance).build();
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
     }
+
+ 
 
 }

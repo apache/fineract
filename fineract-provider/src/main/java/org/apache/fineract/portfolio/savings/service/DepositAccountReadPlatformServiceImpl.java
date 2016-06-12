@@ -1051,7 +1051,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             }
 
             return SavingsAccountTransactionData.create(id, transactionType, paymentDetailData, savingsId, accountNo, date, currency,
-                    amount, runningBalance, reversed, transfer);
+                    amount, runningBalance, reversed, transfer,false);
         }
     }
 
@@ -1439,7 +1439,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final BigDecimal runningBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "runningBalance");
             ;
             return SavingsAccountTransactionData.create(savingsId, transactionType, paymentDetailData, savingsId, accountNo, duedate,
-                    currency, dueamount, runningBalance, false, transfer);
+                    currency, dueamount, runningBalance, false, transfer,false);
         }
     }
 

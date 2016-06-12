@@ -2204,6 +2204,15 @@ public class CommandWrapperBuilder {
         this.href = "/savingsaccounts/" + accountId + "?commad=unassignSavingsOfficer";
         return this;
     }
+    
+    public CommandWrapperBuilder InterestPostingAsOnDate(final Long accountId) {
+        this.actionName = "POSTINTERESTASONDATE";
+        this.entityName = "SAVINGSACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = null;
+        this.href = "/savingsaccounts/" + accountId + "?command=postInterestAsOn";
+        return this;
+    }
 
     public CommandWrapperBuilder createLoanRescheduleRequest(final String entityName) {
         this.actionName = "CREATE";

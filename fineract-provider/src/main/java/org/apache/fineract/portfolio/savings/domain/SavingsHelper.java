@@ -21,21 +21,30 @@ package org.apache.fineract.portfolio.savings.domain;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.domain.interest.CompoundInterestHelper;
 import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformServiceJpaRepositoryImpl;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.Months;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 public final class SavingsHelper {
-
+    
     AccountTransfersReadPlatformService accountTransfersReadPlatformService = null;
-
+    
     public SavingsHelper(AccountTransfersReadPlatformService accountTransfersReadPlatformService) {
         this.accountTransfersReadPlatformService = accountTransfersReadPlatformService;
     }
@@ -44,21 +53,26 @@ public final class SavingsHelper {
 
     public List<LocalDateInterval> determineInterestPostingPeriods(final LocalDate startInterestCalculationLocalDate,
             final LocalDate interestPostingUpToDate, final SavingsPostingInterestPeriodType postingPeriodType,
-            final Integer financialYearBeginningMonth) {
+            final Integer financialYearBeginningMonth,List<Date> date,final boolean ispostedInterest) {
 
         final List<LocalDateInterval> postingPeriods = new ArrayList<>();
-
+        LocalDate today = DateUtils.getLocalDateOfTenant();
         LocalDate periodStartDate = startInterestCalculationLocalDate;
         LocalDate periodEndDate = periodStartDate;
 
         while (!periodStartDate.isAfter(interestPostingUpToDate) && !periodEndDate.isAfter(interestPostingUpToDate)) {
-
-            final LocalDate interestPostingLocalDate = determineInterestPostingPeriodEndDateFrom(periodStartDate, postingPeriodType,
-                    interestPostingUpToDate, financialYearBeginningMonth);
+           
+          final  LocalDate  interestPostingLocalDate = determineInterestPostingPeriodEndDateFrom(periodStartDate, postingPeriodType,
+                    interestPostingUpToDate, financialYearBeginningMonth,date);
+           
             periodEndDate = interestPostingLocalDate.minusDays(1);
-
+            
+            if(!periodEndDate.isAfter(today)){
             postingPeriods.add(LocalDateInterval.create(periodStartDate, periodEndDate));
-
+            }
+            if (periodEndDate.isAfter(today) && ispostedInterest) {
+                postingPeriods.add(LocalDateInterval.create(periodStartDate, interestPostingUpToDate.minusDays(1)));
+            }
             periodEndDate = interestPostingLocalDate;
             periodStartDate = interestPostingLocalDate;
         }
@@ -68,7 +82,7 @@ public final class SavingsHelper {
 
     private LocalDate determineInterestPostingPeriodEndDateFrom(final LocalDate periodStartDate,
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final LocalDate interestPostingUpToDate,
-            Integer financialYearBeginningMonth) {
+            Integer financialYearBeginningMonth,List<Date> date ) {
 
         LocalDate periodEndDate = interestPostingUpToDate;
         final Integer monthOfYear = periodStartDate.getMonthOfYear();
@@ -90,7 +104,7 @@ public final class SavingsHelper {
         biannualDates.add(periodStartDate.withMonthOfYear(financialYearBeginningMonth).plusMonths(6).withYear(periodStartDate.getYear())
                 .dayOfMonth().withMaximumValue());
         Collections.sort(biannualDates);
-
+        Collections.sort(date);
         boolean isEndDateSet = false;
 
         switch (interestPostingPeriodType) {
@@ -98,15 +112,44 @@ public final class SavingsHelper {
             break;
             case MONTHLY:
                 // produce period end date on last day of current month
-                periodEndDate = periodStartDate.dayOfMonth().withMaximumValue();
+                if (!date.isEmpty()) {
+                    for (Date transactiondate : date) {
+                        if (periodStartDate.toDate().before(transactiondate)
+                                && periodStartDate.dayOfMonth().withMaximumValue().toDate().after(transactiondate)) {
+                            periodEndDate = new LocalDate(transactiondate).minusDays(1);
+                            break;
+                        } else {
+                            periodEndDate = periodStartDate.dayOfMonth().withMaximumValue();
+                        }
+                    }
+                } else {
+                    periodEndDate = periodStartDate.dayOfMonth().withMaximumValue();
+                }
+
             break;
             case QUATERLY:
                 for (LocalDate quarterlyDate : quarterlyDates) {
                     if (quarterlyDate.isAfter(periodStartDate)) {
-                        periodEndDate = quarterlyDate;
-                        isEndDateSet = true;
-                        break;
+                        if (!date.isEmpty()) {
+                            for (Date transactiondate : date) {
+                                if (periodStartDate.toDate().before(transactiondate) && transactiondate.before(quarterlyDate.toDate())) {
+                                    periodEndDate = new LocalDate(transactiondate).minusDays(1);
+                                    isEndDateSet = true;
+                                    break;
+                                } else {
+                                    periodEndDate = quarterlyDate;
+                                    isEndDateSet = true;
+                                    break;
+                                }
+                            }
+                        } else {
+                            periodEndDate = quarterlyDate;
+                            isEndDateSet = true;
+                            break;
+                        }
+
                     }
+                    if (isEndDateSet == true) break;
                 }
 
                 if (!isEndDateSet) periodEndDate = quarterlyDates.get(0).plusYears(1).dayOfMonth().withMaximumValue();
@@ -114,23 +157,59 @@ public final class SavingsHelper {
             case BIANNUAL:
                 for (LocalDate biannualDate : biannualDates) {
                     if (biannualDate.isAfter(periodStartDate)) {
-                        periodEndDate = biannualDate;
-                        isEndDateSet = true;
-                        break;
+                        if (!date.isEmpty()) {
+                            for (Date transactiondate : date) {
+                                if (periodStartDate.toDate().before(transactiondate) && transactiondate.before(biannualDate.toDate())) {
+                                    periodEndDate = new LocalDate(transactiondate).minusDays(1);
+                                    isEndDateSet = true;
+                                    break;
+                                } else {
+                                    periodEndDate = biannualDate;
+                                    isEndDateSet = true;
+                                    break;
+                                }
+                            }
+
+                        } else {
+                            periodEndDate = biannualDate;
+                            isEndDateSet = true;
+                            break;
+                        }
                     }
+                    if (isEndDateSet == true) break;
                 }
 
                 if (!isEndDateSet) periodEndDate = biannualDates.get(0).plusYears(1).dayOfMonth().withMaximumValue();
             break;
             case ANNUAL:
-                if (financialYearBeginningMonth < monthOfYear) {
-                    periodEndDate = periodStartDate.withMonthOfYear(financialYearBeginningMonth);
-                    periodEndDate = periodEndDate.plusYears(1);
+                if (!date.isEmpty()) {
+                    for (Date transactiondate : date) {
+                        if (financialYearBeginningMonth < monthOfYear) {
+                            periodEndDate = periodStartDate.withMonthOfYear(financialYearBeginningMonth);
+                            periodEndDate = periodEndDate.plusYears(1);
+                            if (transactiondate.after(periodStartDate.toDate()) && transactiondate.before(periodEndDate.toDate())) {
+                                periodEndDate = new LocalDate(transactiondate).minusDays(1);
+                                break;
+                            }
+                        } else {
+                            periodEndDate = periodStartDate.withMonthOfYear(financialYearBeginningMonth);
+                            if (transactiondate.after(periodStartDate.toDate()) && transactiondate.before(periodEndDate.toDate())) {
+                                periodEndDate = new LocalDate(transactiondate).minusDays(1);
+                                break;
+                            }
+                        }
+                        periodEndDate = periodEndDate.dayOfMonth().withMaximumValue();
+                        break;
+                    }
                 } else {
-                    periodEndDate = periodStartDate.withMonthOfYear(financialYearBeginningMonth);
+                    if (financialYearBeginningMonth < monthOfYear) {
+                        periodEndDate = periodStartDate.withMonthOfYear(financialYearBeginningMonth);
+                        periodEndDate = periodEndDate.plusYears(1);
+                    } else {
+                        periodEndDate = periodStartDate.withMonthOfYear(financialYearBeginningMonth);
+                    }
+                    periodEndDate = periodEndDate.dayOfMonth().withMaximumValue();
                 }
-                periodEndDate = periodEndDate.dayOfMonth().withMaximumValue();
-            break;
         }
 
         // interest posting always occurs on next day after the period end date.
