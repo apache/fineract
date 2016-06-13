@@ -239,6 +239,10 @@ public class ShareAccountTransaction extends AbstractPersistable<Long> {
         }
     }
     
+    public void updateTransactionDate(final Date transactionDate) {
+        this.transactionDate = transactionDate ;
+    }
+    
     public boolean isActive() {
         return this.active ;
     }

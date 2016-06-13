@@ -723,6 +723,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder loanForeclosure(final Long loanId) {
+        this.actionName = "FORECLOSURE";
+        this.entityName = "LOAN";
+        this.entityId = null;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/transactions?command=foreclosure";
+        return this;
+    }
+
     public CommandWrapperBuilder createLoanApplication() {
         this.actionName = "CREATE";
         this.entityName = "LOAN";

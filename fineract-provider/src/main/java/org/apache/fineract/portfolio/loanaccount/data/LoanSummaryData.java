@@ -63,6 +63,8 @@ public class LoanSummaryData {
     private final BigDecimal totalOutstanding;
     private final BigDecimal totalOverdue;
     private final LocalDate overdueSinceDate;
+    private final Long writeoffReasonId;
+    private final String writeoffReason;
 
     public LoanSummaryData(final CurrencyData currency, final BigDecimal principalDisbursed, final BigDecimal principalPaid,
             final BigDecimal principalWrittenOff, final BigDecimal principalOutstanding, final BigDecimal principalOverdue,
@@ -75,7 +77,7 @@ public class LoanSummaryData {
             final BigDecimal penaltyChargesOverdue, final BigDecimal totalExpectedRepayment, final BigDecimal totalRepayment,
             final BigDecimal totalExpectedCostOfLoan, final BigDecimal totalCostOfLoan, final BigDecimal totalWaived,
             final BigDecimal totalWrittenOff, final BigDecimal totalOutstanding, final BigDecimal totalOverdue,
-            final LocalDate overdueSinceDate) {
+            final LocalDate overdueSinceDate,final Long writeoffReasonId,final String writeoffReason) {
         this.currency = currency;
         this.principalDisbursed = principalDisbursed;
         this.principalPaid = principalPaid;
@@ -110,6 +112,8 @@ public class LoanSummaryData {
         this.totalOutstanding = totalOutstanding;
         this.totalOverdue = totalOverdue;
         this.overdueSinceDate = overdueSinceDate;
+        this.writeoffReasonId = writeoffReasonId;
+        this.writeoffReason = writeoffReason;
     }
 
     public BigDecimal getTotalOutstanding() {

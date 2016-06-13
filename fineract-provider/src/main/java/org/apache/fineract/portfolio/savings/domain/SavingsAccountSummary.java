@@ -19,15 +19,20 @@
 package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
+import org.joda.time.LocalDate;
 
 /**
  * {@link SavingsAccountSummary} encapsulates all the summary details of a
@@ -75,6 +80,10 @@ public final class SavingsAccountSummary {
 
     @Column(name = "total_withhold_tax_derived", scale = 6, precision = 19)
     private BigDecimal totalWithholdTax;
+    
+    @Temporal(TemporalType.DATE)
+    @Column(name = "last_interest_calculation_date")
+    private Date lastInterestCalculationDate;
 
     protected SavingsAccountSummary() {
         //
@@ -104,13 +113,13 @@ public final class SavingsAccountSummary {
     public void updateFromInterestPeriodSummaries(final MonetaryCurrency currency, final List<PostingPeriod> allPostingPeriods) {
 
         Money totalEarned = Money.zero(currency);
-
+        LocalDate interestCalculationDate = DateUtils.getLocalDateOfTenant();
         for (final PostingPeriod period : allPostingPeriods) {
             Money interestEarned = period.interest();
             interestEarned = interestEarned == null ? Money.zero(currency) : interestEarned;
             totalEarned = totalEarned.plus(interestEarned);
         }
-
+        this.lastInterestCalculationDate = interestCalculationDate.toDate();
         this.totalInterestEarned = totalEarned.getAmount();
     }
 

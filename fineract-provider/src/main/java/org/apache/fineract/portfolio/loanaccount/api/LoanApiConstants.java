@@ -110,5 +110,11 @@ public interface LoanApiConstants {
     public static final String modifiedDueDateParamName = "modifiedDueDate";
     public static final String principalParamName = "principal";
     public static final String installmentAmountParamName = "installmentAmount";
+    //loan write off
+    public static final String WRITEOFFREASONS = "WriteOffReasons";
+
+    // fore closure constants
+    public static final String transactionDateParamName = "transactionDate";
+    public static final String noteParamName = "note";
 
 }

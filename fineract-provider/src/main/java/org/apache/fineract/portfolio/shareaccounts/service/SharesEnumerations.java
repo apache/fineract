@@ -121,8 +121,39 @@ public class SharesEnumerations {
         return lockinPeriodFrequencyType(SharePeriodFrequencyType.fromInt(id));
     }
 
+    public static EnumOptionData minimumActivePeriodFrequencyType(final int id) {
+        return minimumActivePeriodFrequencyType(SharePeriodFrequencyType.fromInt(id));
+    }
+    
+    public static EnumOptionData minimumActivePeriodFrequencyType(final SharePeriodFrequencyType type) {
+        final String codePrefix = "shares.minimumactive." ;
+        EnumOptionData optionData = new EnumOptionData(SharePeriodFrequencyType.INVALID.getValue().longValue(),
+                SharePeriodFrequencyType.INVALID.getCode(), "Invalid");
+        switch (type) {
+            case INVALID:
+            break;
+            case DAYS:
+                optionData = new EnumOptionData(SharePeriodFrequencyType.DAYS.getValue().longValue(), codePrefix
+                        + SharePeriodFrequencyType.DAYS.getCode(), "Days");
+            break;
+            case WEEKS:
+                optionData = new EnumOptionData(SharePeriodFrequencyType.WEEKS.getValue().longValue(), codePrefix
+                        + SharePeriodFrequencyType.WEEKS.getCode(), "Weeks");
+            break;
+            case MONTHS:
+                optionData = new EnumOptionData(SharePeriodFrequencyType.MONTHS.getValue().longValue(), codePrefix
+                        + SharePeriodFrequencyType.MONTHS.getCode(), "Months");
+            break;
+            case YEARS:
+                optionData = new EnumOptionData(SharePeriodFrequencyType.YEARS.getValue().longValue(), codePrefix
+                        + SharePeriodFrequencyType.YEARS.getCode(), "Years");
+            break;
+        }
+        return optionData;
+    }
+    
     public static EnumOptionData lockinPeriodFrequencyType(final SharePeriodFrequencyType type) {
-        final String codePrefix = "savings.lockin.";
+        final String codePrefix = "shares.lockin." ;
         EnumOptionData optionData = new EnumOptionData(SharePeriodFrequencyType.INVALID.getValue().longValue(),
                 SharePeriodFrequencyType.INVALID.getCode(), "Invalid");
         switch (type) {

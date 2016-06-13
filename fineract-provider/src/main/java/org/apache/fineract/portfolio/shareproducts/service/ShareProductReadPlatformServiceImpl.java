@@ -45,9 +45,9 @@ import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.products.data.ProductData;
 import org.apache.fineract.portfolio.products.exception.ProductNotFoundException;
 import org.apache.fineract.portfolio.products.service.ProductReadPlatformService;
-import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
-import org.apache.fineract.portfolio.shareproducts.data.ShareProductMarketPriceData;
+import org.apache.fineract.portfolio.shareaccounts.service.SharesEnumerations;
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductData;
+import org.apache.fineract.portfolio.shareproducts.data.ShareProductMarketPriceData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -63,7 +63,7 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
     private final ShareProductDropdownReadPlatformService shareProductDropdownReadPlatformService;
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
     private final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService;
-    private final PaginationHelper<ProductData> provisioningEntryDataPaginationHelper = new PaginationHelper<>();
+    private final PaginationHelper<ProductData> shareProductDataPaginationHelper = new PaginationHelper<>();
 
     @Autowired
     public ShareProductReadPlatformServiceImpl(final RoutingDataSource dataSource,
@@ -81,7 +81,9 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
 
     @Override
     public Page<ProductData> retrieveAllProducts(Integer offSet, Integer limit) {
-        AllShareProductRowMapper mapper = new AllShareProductRowMapper();
+        final Collection<ShareProductMarketPriceData> shareMarketCollection = null ;
+        final Collection<ChargeData> charges = null ;
+        ShareProductRowMapper mapper = new ShareProductRowMapper(shareMarketCollection, charges);
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(mapper.schema());
@@ -94,7 +96,7 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         Object[] whereClauseItemsitems = new Object[] {};
-        return this.provisioningEntryDataPaginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
+        return this.shareProductDataPaginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
                 whereClauseItemsitems, mapper);
     }
 
@@ -168,6 +170,7 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
 
     private static final class AllShareProductRowMapper implements RowMapper<ProductData> {
 
+        @SuppressWarnings("unused")
         @Override
         public ShareProductData mapRow(ResultSet rs, int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
@@ -184,6 +187,7 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
 
     private static final class MarketPriceRowMapper implements RowMapper<ShareProductMarketPriceData> {
 
+        @SuppressWarnings("unused")
         @Override
         public ShareProductMarketPriceData mapRow(ResultSet rs, int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
@@ -226,6 +230,7 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
 
         }
 
+        @SuppressWarnings("unused")
         @Override
         public ShareProductData mapRow(ResultSet rs, int rowNum) throws SQLException {
             final Long id = rs.getLong("id");
@@ -258,14 +263,14 @@ public class ShareProductReadPlatformServiceImpl implements ProductReadPlatformS
             final Integer minimumActviePeriodEnumValue = JdbcSupport.getInteger(rs, "minimum_active_period_frequency_enum");
             EnumOptionData minimumActivePeriodType = null;
             if (minimumActviePeriodEnumValue != null) {
-                minimumActivePeriodType = SavingsEnumerations.lockinPeriodFrequencyType(minimumActviePeriodEnumValue);
+                minimumActivePeriodType = SharesEnumerations.minimumActivePeriodFrequencyType(minimumActviePeriodEnumValue);
             }
 
             final Integer lockinPeriodFrequency = JdbcSupport.getInteger(rs, "lockin_period_frequency");
             EnumOptionData lockinPeriodFrequencyType = null;
             final Integer lockinPeriodFrequencyTypeValue = JdbcSupport.getInteger(rs, "lockin_period_frequency_enum");
             if (lockinPeriodFrequencyTypeValue != null) {
-                lockinPeriodFrequencyType = SavingsEnumerations.lockinPeriodFrequencyType(lockinPeriodFrequencyTypeValue);
+                lockinPeriodFrequencyType = SharesEnumerations.lockinPeriodFrequencyType(lockinPeriodFrequencyTypeValue);
             }
             final Integer accountingRuleId = JdbcSupport.getInteger(rs, "accountingType");
             final EnumOptionData accountingRuleType = AccountingEnumerations.accountingRuleType(accountingRuleId);

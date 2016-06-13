@@ -172,6 +172,7 @@ public class ShareProductDataSerializer {
                 sharesIssued, unitPrice, shareCapitalValue, minimumClientShares, nominalClientShares, maximumClientShares, marketPriceSet,
                 charges, allowdividendsForInactiveClients, lockinPeriod, lockPeriodType, minimumActivePeriod, minimumActivePeriodType,
                 createdBy, createdDate, modifiedBy, modifiedOn, accountingRuleType);
+       
         for (ShareProductMarketPrice data : marketPriceSet) {
             data.setShareProduct(product);
         }
@@ -204,7 +205,7 @@ public class ShareProductDataSerializer {
     }
 
     private Set<ShareProductMarketPrice> asembleShareMarketPrice(final JsonElement element) {
-        Set<ShareProductMarketPrice> set = null;
+        Set<ShareProductMarketPrice> set = new HashSet<>();
         if (this.fromApiJsonHelper.parameterExists(ShareProductApiConstants.marketprice_paramname, element)) {
             set = new HashSet<>();
             JsonArray array = this.fromApiJsonHelper.extractJsonArrayNamed(ShareProductApiConstants.marketprice_paramname, element);

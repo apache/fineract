@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests.common.loans;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 
@@ -59,14 +60,27 @@ public class LoanStatusChecker {
         assertTrue(getStatus(loanStatusHashMap, "overpaid"));
     }
 
+    public static void verifyLoanAccountForeclosed(final HashMap loanSubStatusHashMap) {
+        assertEquals("Foreclosed", getSubStatus(loanSubStatusHashMap, "value"));
+    }
+
     public static HashMap<String, Object> getStatusOfLoan(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer loanID) {
         final String url = "/fineract-provider/api/v1/loans/" + loanID + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, url, "status");
     }
 
+    public static HashMap<String, Object> getSubStatusOfLoan(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final Integer loanID) {
+        final String url = "/fineract-provider/api/v1/loans/" + loanID + "?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerGet(requestSpec, responseSpec, url, "subStatus");
+    }
+
     private static boolean getStatus(final HashMap loanStatusMap, final String nameOfLoanStatusString) {
         return (Boolean) loanStatusMap.get(nameOfLoanStatusString);
     }
 
+    private static String getSubStatus(final HashMap loanStatusMap, final String nameOfLoanStatusString) {
+        return (String) loanStatusMap.get(nameOfLoanStatusString);
+    }
 }
