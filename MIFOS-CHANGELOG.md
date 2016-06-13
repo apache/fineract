@@ -4,6 +4,7 @@ Changelog
 Releases
 ===============
 
+1. 13 Jun 2016 - 16.06.01.RELEASE
 1. 13 May 2016 - 16.05.01.RELEASE
 1. 13 Apr 2016 - 16.04.01.RELEASE
 1. 23 Mar 2016 - 16.03.03.RELEASE
@@ -87,6 +88,43 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+16.06.01.RELEASE
+=============
+
+This release contains following improvements and bug fixes
+ 
+Platform & API
+New Features & Improvements
+
+ - [FINERACT-162] - show Interest Earnings/Overdraft Interest not yet posted 
+ - [FINERACT-167] - Loan foreclosure implementation and integration test cases for the same
+ - Show Interest Earnings/Overdraft Interest not yet posted
+ - Fineract collection sheet (total collected, total over due, total due, instalment due)
+ - Changing dependency of m_entity_to_entity_access to m_entity_mapping and adding validation for new loan application
+ - Reasons for loan write off added
+
+Bugs
+ - [FINERACT-145] - Switching back to MySQL(Connector/J) JDBC driver
+ - Shares Integration Tests and other fixes
+ - [FINERACT-145] - Some of the scheduler jobs in demo version is not getting executed as scheduled
+ - [FINERACT-160] - Not able to add any charges after the savings application is submitted
+ - [MIFOSX-2656] - Accrual transaction should be added only on the first tranche disbursal
+ - Adding charges to loan was creating duplicate gl entries
+ - Checking null values before computing the interest not posted
+ 
+Community-app
+New Features & Improvements
+
+ - [FINERACT-167] - UX changes for loan foreclosure
+ - Localisation updates from https://translatewiki.net.
+ - [FINERACT-162] - Show Interest Earnings/Overdraft Interest not yet posted
+ - [MIFOSX-2511] - Support loading of per-tenant logos for Community App
+
+ Bugs
+ 
+ - [MIFOSX-2494] - Mentioned features should get translated with respect to selected language 
+ - [MIFOSX-2744] - Support localization of report names in Community App
 
 16.05.01.RELEASE
 =============
