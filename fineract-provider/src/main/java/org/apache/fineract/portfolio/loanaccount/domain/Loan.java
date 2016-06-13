@@ -107,6 +107,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTransactio
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidRefundDateException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanDisbursalException;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanForeclosureException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerAssignmentDateException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerUnassignmentDateException;
@@ -132,6 +133,7 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -394,6 +396,9 @@ public class Loan extends AbstractPersistable<Long> {
     @ManyToOne
     @JoinColumn(name = "writeoff_reason_cv_id", nullable = true)
     private CodeValue writeOffReason;
+
+    @Column(name = "loan_sub_status_id", nullable = true)
+    private Integer loanSubStatus;
 
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
@@ -4814,6 +4819,14 @@ public class Loan extends AbstractPersistable<Long> {
                     dataValidationErrors.add(error);
                 }
             break;
+            case LOAN_FORECLOSURE:
+                if (!isOpen()) {
+                    final String defaultUserMessage = "Loan foreclosure is not allowed. Loan Account is not active.";
+                    final ApiParameterError error = ApiParameterError.generalError(
+                            "error.msg.loan.foreclosure.account.is.not.active", defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
+            break;
             default:
             break;
         }
@@ -5982,12 +5995,246 @@ public class Loan extends AbstractPersistable<Long> {
         this.writeOffReason = writeOffReason;
     }
 
-	public Group getGroup() {
-		return group;
-	}
 
-	public LoanProduct getLoanProduct() {
-		return loanProduct;
-	}
+    public Group getGroup() {
+        return group;
+    }
+
+    public LoanProduct getLoanProduct() {
+        return loanProduct;
+    }
 	
+    public LoanRepaymentScheduleInstallment fetchLoanForeclosureDetail(final LocalDate closureDate) {
+        Money totalPrincipal = Money.of(getCurrency(), this.getSummary().getTotalPrincipalOutstanding());
+        Money[] receivables = retriveIncomeOutstandingTillDate(closureDate);
+        final List<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails = null;
+        final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
+        return new LoanRepaymentScheduleInstallment(null, 0, currentDate, currentDate, totalPrincipal.getAmount(),
+                receivables[0].getAmount(), receivables[1].getAmount(), receivables[2].getAmount(), false, compoundingDetails);
+    }
+
+    public Money[] retriveIncomeOutstandingTillDate(final LocalDate paymentDate) {
+        Money[] balances = new Money[3];
+        final MonetaryCurrency currency = getCurrency();
+        Money interest = Money.zero(currency);
+        Money fee = Money.zero(currency);
+        Money penalty = Money.zero(currency);
+        boolean isArrearsPresent = false;
+        for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
+            if (installment.isNotFullyPaidOff()) {
+                if (!isArrearsPresent || !installment.getDueDate().isAfter(paymentDate)) {
+                    interest = interest.plus(installment.getInterestOutstanding(currency));
+                    fee = fee.plus(installment.getFeeChargesOutstanding(currency));
+                    penalty = penalty.plus(installment.getPenaltyChargesOutstanding(currency));
+                    isArrearsPresent = true;
+                } else if (installment.getFromDate().isBefore(paymentDate)) {
+                    Money[]  balancesForCurrentPeroid = fetchInterestFeeAndPenalty(paymentDate, currency, installment);
+                    interest = interest.plus(balancesForCurrentPeroid[0]);
+                    fee = fee.plus(balancesForCurrentPeroid[1]);
+                    penalty = penalty.plus(balancesForCurrentPeroid[2]);
+                }
+            }
+        }
+        balances[0] = interest;
+        balances[1] = fee;
+        balances[2] = penalty;
+        return balances;
+    }
+
+    private Money[] fetchInterestFeeAndPenalty(final LocalDate paymentDate, final MonetaryCurrency currency, final LoanRepaymentScheduleInstallment installment) {
+        Money penaltyForCurrentPeriod = Money.zero(getCurrency());
+        Money feeForCurrentPeriod = Money.zero(getCurrency());
+        int totalPeriodDays = Days.daysBetween(installment.getFromDate(), installment.getDueDate()).getDays();
+        int tillDays = Days.daysBetween(installment.getFromDate(), paymentDate).getDays();
+        Money interestForCurrentPeriod = Money.of(getCurrency(),BigDecimal.valueOf(calculateInterestForDays(totalPeriodDays, installment.getInterestOutstanding(getCurrency())
+                .getAmount(), tillDays)));
+        for (LoanCharge loanCharge : this.charges) {
+            if (loanCharge.isActive()
+                    && loanCharge.isDueForCollectionFromAndUpToAndIncluding(installment.getFromDate(), paymentDate)) {
+                if (loanCharge.isPenaltyCharge()) {
+                    penaltyForCurrentPeriod = loanCharge.getAmountOutstanding(getCurrency());
+                } else {
+                    feeForCurrentPeriod = loanCharge.getAmountOutstanding(currency);
+                }
+            }
+        }
+        
+        Money[] balances = new Money[3];
+        balances[0] = interestForCurrentPeriod;
+        balances[1] = feeForCurrentPeriod;
+        balances[2] = penaltyForCurrentPeriod;
+        
+        return balances;
+    }
+    
+    
+    public Money[] retriveIncomeForOverlappingPeriod(final LocalDate paymentDate) {
+        Money[] balances = new Money[3];
+        final MonetaryCurrency currency = getCurrency();
+        for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
+            if (installment.getDueDate().isEqual(paymentDate)){
+                Money interest = installment.getInterestOutstanding(currency);
+                Money fee = installment.getFeeChargesOutstanding(currency);
+                Money penalty = installment.getPenaltyChargesOutstanding(currency);
+                balances[0] = interest;
+                balances[1] = fee;
+                balances[2] = penalty;
+                break;
+            }else if(installment.getDueDate().isAfter(paymentDate) && installment.getFromDate().isBefore(paymentDate)){
+                balances = fetchInterestFeeAndPenalty(paymentDate, currency, installment);
+                break;
+            }
+        }
+       
+        return balances;
+    }
+    private double calculateInterestForDays(int daysInPeriod, BigDecimal interest, int days) {
+        if (interest.doubleValue() == 0) { return 0; }
+        return ((interest.doubleValue()) / daysInPeriod) * days;
+    }
+
+    public Money[] getReceivableIncome(final LocalDate tillDate) {
+        MonetaryCurrency currency = getCurrency();
+        Money receivableInterest = Money.zero(currency);
+        Money receivableFee = Money.zero(currency);
+        Money receivablePenalty = Money.zero(currency);
+        Money[] receivables = new Money[3];
+        for (final LoanTransaction transaction : this.loanTransactions) {
+            if (transaction.isNotReversed() && !transaction.isRepaymentAtDisbursement() && !transaction.isDisbursement()
+                    && !transaction.getTransactionDate().isAfter(tillDate)) {
+                if (transaction.isAccrual()) {
+                    receivableInterest = receivableInterest.plus(transaction.getInterestPortion(currency));
+                    receivableFee = receivableFee.plus(transaction.getFeeChargesPortion(currency));
+                    receivablePenalty = receivablePenalty.plus(transaction.getPenaltyChargesPortion(currency));
+                } else if (transaction.isRepayment() || transaction.isChargePayment()) {
+                    receivableInterest = receivableInterest.minus(transaction.getInterestPortion(currency));
+                    receivableFee = receivableFee.minus(transaction.getFeeChargesPortion(currency));
+                    receivablePenalty = receivablePenalty.minus(transaction.getPenaltyChargesPortion(currency));
+                }
+            }
+            if (receivableInterest.isLessThanZero()) {
+                receivableInterest = receivableInterest.zero();
+            }
+            if (receivableFee.isLessThanZero()) {
+                receivableFee = receivableFee.zero();
+            }
+            if (receivablePenalty.isLessThanZero()) {
+                receivablePenalty = receivablePenalty.zero();
+            }
+        }
+        receivables[0] = receivableInterest;
+        receivables[1] = receivableFee;
+        receivables[2] = receivablePenalty;
+        return receivables;
+    }
+
+    public void handleForeClosureTransactions(final List<LoanTransaction> repaymentTransaction,
+            final LocalDate foreClosureDate, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+
+        LoanEvent event = LoanEvent.LOAN_FORECLOSURE;
+
+        validateAccountStatus(event);
+
+        MonetaryCurrency currency = getCurrency();
+
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
+                .determineProcessor(this.transactionProcessingStrategy);
+
+        loanRepaymentScheduleTransactionProcessor.processTransactionsFromDerivedFields(repaymentTransaction, currency,
+                this.repaymentScheduleInstallments, charges());
+        this.loanTransactions.addAll(repaymentTransaction);
+        this.loanSubStatus = LoanSubStatus.FORECLOSED.getValue();
+        updateLoanSummaryDerivedFields();
+        doPostLoanTransactionChecks(foreClosureDate, loanLifecycleStateMachine);
+    }
+
+    public Money retrieveAccruedAmountAfterDate(final LocalDate tillDate) {
+        Money totalAmountAccrued = Money.zero(getCurrency());
+        Money actualAmountTobeAccrued = Money.zero(getCurrency());
+        for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
+            totalAmountAccrued = totalAmountAccrued.plus(installment.getInterestAccrued(getCurrency()));
+
+            if (tillDate.isAfter(installment.getFromDate()) && tillDate.isBefore(installment.getDueDate())) {
+                int daysInPeriod = Days.daysBetween(installment.getFromDate(), installment.getDueDate()).getDays();
+                int tillDays = Days.daysBetween(installment.getFromDate(), tillDate).getDays();
+                double interest = calculateInterestForDays(daysInPeriod, installment.getInterestCharged(getCurrency()).getAmount(),
+                        tillDays);
+                actualAmountTobeAccrued = actualAmountTobeAccrued.plus(interest);
+            } else if ((tillDate.isAfter(installment.getFromDate()) && tillDate.isEqual(installment.getDueDate()))
+                    || (tillDate.isEqual(installment.getFromDate()) && tillDate.isEqual(installment.getDueDate()))
+                    || (tillDate.isAfter(installment.getFromDate()) && tillDate.isAfter(installment.getDueDate()))) {
+                actualAmountTobeAccrued = actualAmountTobeAccrued.plus(installment.getInterestAccrued(getCurrency()));
+            }
+        }
+        Money accredAmountAfterDate = totalAmountAccrued.minus(actualAmountTobeAccrued);
+        if (accredAmountAfterDate.isLessThanZero()) {
+            accredAmountAfterDate = Money.zero(getCurrency());
+        }
+        return accredAmountAfterDate;
+    }
+
+    public void validateForForeclosure(final LocalDate transactionDate) {
+
+        if (isInterestRecalculationEnabledForProduct()) {
+            final String defaultUserMessage = "The loan with interest recalculation enabled cannot be foreclosed.";
+            throw new LoanForeclosureException("loan.with.interest.recalculation.enabled.cannot.be.foreclosured", defaultUserMessage,
+                    getId());
+        }
+
+        LocalDate lastUserTransactionDate = getLastUserTransactionDate();
+
+        if (DateUtils.isDateInTheFuture(transactionDate)) {
+            final String defaultUserMessage = "The transactionDate cannot be in the future.";
+            throw new LoanForeclosureException("loan.foreclosure.transaction.date.is.in.future", defaultUserMessage, transactionDate);
+        }
+
+        if (lastUserTransactionDate.isAfter(transactionDate)) {
+            final String defaultUserMessage = "The transactionDate cannot be in the future.";
+            throw new LoanForeclosureException("loan.foreclosure.transaction.date.cannot.before.the.last.transaction.date",
+                    defaultUserMessage, transactionDate);
+        }
+    }
+
+    public void updateInstallmentsPostDate(LocalDate transactionDate) {
+        List<LoanRepaymentScheduleInstallment> newInstallments = new ArrayList<>(this.repaymentScheduleInstallments);
+        final MonetaryCurrency currency = getCurrency();
+        Money totalPrincipal = Money.zero(currency);
+        Money [] balances = retriveIncomeForOverlappingPeriod(transactionDate);
+        for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
+            if (!installment.getDueDate().isBefore(transactionDate)) {
+                totalPrincipal = totalPrincipal.plus(installment.getPrincipalOutstanding(currency));
+                newInstallments.remove(installment);
+            } 
+        }
+        
+        LoanRepaymentScheduleInstallment newInstallment = new LoanRepaymentScheduleInstallment(null, newInstallments.size() + 1,
+                newInstallments.get((newInstallments.size() - 1)).getDueDate(), transactionDate, totalPrincipal.getAmount(),
+                balances[0].getAmount(), balances[1].getAmount(), balances[2].getAmount(), true, null);
+        newInstallment.updateInstallmentNumber(newInstallments.size() + 1);
+        newInstallments.add(newInstallment);
+        updateLoanScheduleOnForeclosure(newInstallments);
+
+        Set<LoanCharge> charges = this.charges();
+        int penaltyWaitPeriod = 0;
+        for (LoanCharge loanCharge : charges) {
+            if (loanCharge.getDueLocalDate() != null
+                    && (loanCharge.getDueLocalDate().isAfter(transactionDate))) {
+                loanCharge.setActive(false);
+            } else if (loanCharge.getDueLocalDate() == null) {
+                recalculateLoanCharge(loanCharge, penaltyWaitPeriod);
+            }
+        }
+    }
+
+    public void updateLoanScheduleOnForeclosure(final Collection<LoanRepaymentScheduleInstallment> installments) {
+        this.repaymentScheduleInstallments.clear();
+        for (final LoanRepaymentScheduleInstallment installment : installments) {
+            addRepaymentScheduleInstallment(installment);
+        }
+    }
+    
+    public Integer getLoanSubStatus() {
+        return this.loanSubStatus;
+    }
+
 }

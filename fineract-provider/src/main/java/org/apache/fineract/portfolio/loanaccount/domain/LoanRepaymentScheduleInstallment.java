@@ -785,4 +785,10 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     public List<LoanInterestRecalcualtionAdditionalDetails> getLoanCompoundingDetails() {
         return this.loanCompoundingDetails;
     }
+
+    public Money getAccruedInterestOutstanding(final MonetaryCurrency currency) {
+        final Money interestAccountedFor = getInterestPaid(currency).plus(getInterestWaived(currency))
+                .plus(getInterestWrittenOff(currency));
+        return getInterestAccrued(currency).minus(interestAccountedFor);
+    }
 }
