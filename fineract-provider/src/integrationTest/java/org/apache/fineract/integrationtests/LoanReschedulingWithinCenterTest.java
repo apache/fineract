@@ -226,15 +226,19 @@ public class LoanReschedulingWithinCenterTest {
                 LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, null, isMultiTrancheLoan, 
                 null, null);
 
+        Calendar seondTrancheDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
+        seondTrancheDate.add(Calendar.MONTH, 1);
+        String secondDisbursement = dateFormat.format(seondTrancheDate.getTime()) ;
+        
         // CREATE TRANCHES
         List<HashMap> createTranches = new ArrayList<>();
         createTranches.add(this.loanApplicationApprovalTest.createTrancheDetail(disbursementDate, "5000"));
-        createTranches.add(this.loanApplicationApprovalTest.createTrancheDetail("25 June 2016", "5000"));
+        createTranches.add(this.loanApplicationApprovalTest.createTrancheDetail(secondDisbursement, "5000"));
 
         // APPROVE TRANCHES
         List<HashMap> approveTranches = new ArrayList<>();
         approveTranches.add(this.loanApplicationApprovalTest.createTrancheDetail(disbursementDate, "5000"));
-        approveTranches.add(this.loanApplicationApprovalTest.createTrancheDetail("25 June 2016", "5000"));
+        approveTranches.add(this.loanApplicationApprovalTest.createTrancheDetail(secondDisbursement, "5000"));
 
         // APPLY FOR TRANCHE LOAN WITH INTEREST RECALCULATION
         final Integer loanID = applyForLoanApplicationForInterestRecalculation(clientId, groupId, calendarId, loanProductID,
