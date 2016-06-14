@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.joda.time.LocalDate;
 
 public class CompoundInterestHelper {
@@ -39,7 +40,9 @@ public class CompoundInterestHelper {
      *            posting period as income while calculating interest
      * @return
      */
-    public Money calculateInterestForAllPostingPeriods(final MonetaryCurrency currency, final List<PostingPeriod> allPeriods,
+	
+    @SuppressWarnings("static-access")
+	public Money calculateInterestForAllPostingPeriods(final MonetaryCurrency currency, final List<PostingPeriod> allPeriods,
             LocalDate lockUntil, Boolean interestTransferEnabled) {
 
         // sum up the 'rounded' values that are posted each posting period
@@ -47,12 +50,31 @@ public class CompoundInterestHelper {
 
         // total interest earned in previous periods but not yet recognised
         BigDecimal interestEarnedButNotPosted = BigDecimal.ZERO;
+        LocalDate periodEndDate = null;
+        BigDecimal interestCompounded = BigDecimal.ZERO;
         for (final PostingPeriod postingPeriod : allPeriods) {
-
-            final BigDecimal interestEarnedThisPeriod = postingPeriod.calculateInterest(interestEarnedButNotPosted);
+        	boolean isDailyInterestPeriodType = true;
+        	boolean isAddCompoundInterest = false;
+        	final SavingsCompoundingInterestPeriodType interestPeriodType = postingPeriod.getInterestCompoundingType();
+        	if(interestPeriodType.getValue().intValue() != 1){
+        		isDailyInterestPeriodType = false;
+                final LocalDate compoundPeriodEndDate = postingPeriod.determineInterestPeriodEndDateFrom(postingPeriod.getPeriodInterval().startDate(), interestPeriodType, postingPeriod.getPeriodInterval().endDate());
+                if(periodEndDate == null){
+                	periodEndDate = compoundPeriodEndDate;
+                }else if(!periodEndDate.isEqual(compoundPeriodEndDate)){
+                	isAddCompoundInterest = true;
+                	periodEndDate = compoundPeriodEndDate;
+                	interestCompounded = interestCompounded.add(interestEarnedButNotPosted);
+                }
+        	} else {
+        		interestCompounded = interestCompounded.add(interestEarnedButNotPosted);
+        	}
+            
+            final BigDecimal interestEarnedThisPeriod = postingPeriod.calculateInterest(interestEarnedButNotPosted, isDailyInterestPeriodType, isAddCompoundInterest, interestCompounded);
 
             final Money moneyToBePostedForPeriod = Money.of(currency, interestEarnedThisPeriod);
-
+            
+            
             interestEarned = interestEarned.plus(moneyToBePostedForPeriod);
             // these checks are for fixed deposit account for not include
             // interest for accounts which has post interest to linked savings
@@ -61,6 +83,7 @@ public class CompoundInterestHelper {
             if (postingPeriod.isInterestTransfered() || !interestTransferEnabled
                     || (lockUntil != null && !postingPeriod.dateOfPostingTransaction().isAfter(lockUntil))) {
                 interestEarnedButNotPosted = interestEarnedButNotPosted.add(moneyToBePostedForPeriod.getAmount());
+                
             }
         }
 

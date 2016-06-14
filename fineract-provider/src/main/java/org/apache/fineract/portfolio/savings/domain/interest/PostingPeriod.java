@@ -34,7 +34,6 @@ import org.joda.time.LocalDate;
 
 public class PostingPeriod {
 
-    @SuppressWarnings("unused")
     private final LocalDateInterval periodInterval;
     private final MonetaryCurrency currency;
     private final SavingsCompoundingInterestPeriodType interestCompoundingType;
@@ -192,14 +191,19 @@ public class PostingPeriod {
         return this.openingBalance;
     }
 
-    public BigDecimal calculateInterest(final BigDecimal interestFromPreviousPostingPeriod) {
-        BigDecimal interestEarned = BigDecimal.ZERO;
+	public BigDecimal calculateInterest(final BigDecimal interestFromPreviousPostingPeriod,
+			final Boolean isDailyInterestPeriodType, final boolean isAddCompoundInterest, BigDecimal interestCompounded) {
+		BigDecimal interestEarned = BigDecimal.ZERO;
 
-        // for each compounding period accumulate the amount of interest
-        // to be applied to the balanced for interest calculation
-        BigDecimal interestCompounded = interestFromPreviousPostingPeriod;
-        for (final CompoundingPeriod compoundingPeriod : this.compoundingPeriods) {
-
+		// for each compounding period accumulate the amount of interest
+		// to be applied to the balanced for interest calculation
+		BigDecimal unCompoundedInterest = interestFromPreviousPostingPeriod;
+		if (!isDailyInterestPeriodType && isAddCompoundInterest) {
+			interestCompounded = unCompoundedInterest;
+			unCompoundedInterest = BigDecimal.ZERO;
+		}
+        
+       for (final CompoundingPeriod compoundingPeriod : this.compoundingPeriods) {
             final BigDecimal interestUnrounded = compoundingPeriod.calculateInterest(this.interestCompoundingType,
                     this.interestCalculationType, interestCompounded, this.interestRateAsFraction, this.daysInYear,
                     this.minBalanceForInterestCalculation.getAmount(), 	this.overdraftInterestRateAsFraction,
@@ -216,6 +220,8 @@ public class PostingPeriod {
 
     public Money getInterestEarned() {
         return this.interestEarnedRounded;
+
+
     }
 
     private static List<CompoundingPeriod> compoundingPeriodsInPostingPeriod(final LocalDateInterval postingPeriodInterval,
@@ -344,7 +350,7 @@ public class PostingPeriod {
         return compoundingPeriods;
     }
 
-    private static LocalDate determineInterestPeriodEndDateFrom(final LocalDate periodStartDate,
+    public static LocalDate determineInterestPeriodEndDateFrom(final LocalDate periodStartDate,
             final SavingsCompoundingInterestPeriodType interestPeriodType, final LocalDate upToInterestCalculationDate) {
 
         LocalDate periodEndDate = upToInterestCalculationDate;
@@ -410,4 +416,12 @@ public class PostingPeriod {
     public boolean isInterestTransfered() {
         return this.interestTransfered;
     }
+
+	public LocalDateInterval getPeriodInterval() {
+		return periodInterval;
+	}
+
+	public SavingsCompoundingInterestPeriodType getInterestCompoundingType() {
+		return interestCompoundingType;
+	}
 }
