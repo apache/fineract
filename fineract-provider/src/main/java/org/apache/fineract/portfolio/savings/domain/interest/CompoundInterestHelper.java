@@ -47,11 +47,15 @@ public class CompoundInterestHelper {
 
         // total interest earned in previous periods but not yet recognised
         BigDecimal interestEarnedButNotPosted = BigDecimal.ZERO;
+        BigDecimal interestatoBeCompounded = BigDecimal.ZERO;
+        BigDecimal unCompoundedInterest = BigDecimal.ZERO;
+        final CompoundInterestValues compoundInterestValues = new CompoundInterestValues(interestatoBeCompounded, unCompoundedInterest);
+        
         for (final PostingPeriod postingPeriod : allPeriods) {
-
-            final BigDecimal interestEarnedThisPeriod = postingPeriod.calculateInterest(interestEarnedButNotPosted);
-
-            final Money moneyToBePostedForPeriod = Money.of(currency, interestEarnedThisPeriod);
+        	
+        	final BigDecimal interestEarnedThisPeriod = postingPeriod.calculateInterest(compoundInterestValues);
+       
+        	final Money moneyToBePostedForPeriod = Money.of(currency, interestEarnedThisPeriod);
 
             interestEarned = interestEarned.plus(moneyToBePostedForPeriod);
             // these checks are for fixed deposit account for not include
