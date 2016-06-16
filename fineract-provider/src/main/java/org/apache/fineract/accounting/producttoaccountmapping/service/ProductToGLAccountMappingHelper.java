@@ -103,6 +103,29 @@ public class ProductToGLAccountMappingHelper {
         }
     }
 
+    public void createOrmergeProductToAccountMappingChanges(final JsonElement element, final String paramName, final Long productId,
+            final int accountTypeId, final Map<String, Object> changes,
+            final GLAccountType expectedAccountType, final PortfolioProductType portfolioProductType) {
+        final Long accountId = this.fromApiJsonHelper.extractLongNamed(paramName, element);
+
+        // get the existing product
+        if (accountId != null) {
+            final ProductToGLAccountMapping accountMapping = this.accountMappingRepository.findCoreProductToFinAccountMapping(productId,
+                    portfolioProductType.getValue(), accountTypeId);
+            if(accountMapping == null) {
+                final GLAccount glAccount = getAccountByIdAndType(paramName, expectedAccountType, accountId);
+                changes.put(paramName, accountId);
+                ProductToGLAccountMapping newAccountMapping  = new ProductToGLAccountMapping(glAccount, productId,
+                portfolioProductType.getValue(), accountTypeId) ;
+                this.accountMappingRepository.save(newAccountMapping);
+            }else if (accountMapping.getGlAccount().getId() != accountId) {
+                final GLAccount glAccount = getAccountByIdAndType(paramName, expectedAccountType, accountId);
+                changes.put(paramName, accountId);
+                accountMapping.setGlAccount(glAccount);
+                this.accountMappingRepository.save(accountMapping);
+            }
+        }
+    }
     /**
      * Saves the payment type to Fund source mappings for a particular
      * product/product type (also populates the changes array if passed in)
