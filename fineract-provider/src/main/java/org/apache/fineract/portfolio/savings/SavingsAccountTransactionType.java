@@ -128,6 +128,10 @@ public enum SavingsAccountTransactionType {
     public boolean isInterestPosting() {
         return this.value.equals(SavingsAccountTransactionType.INTEREST_POSTING.getValue());
     }
+    
+    public boolean isOverDraftInterestPosting() {
+        return this.value.equals(SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue());
+    }
 
     public boolean isWithHoldTax() {
         return this.value.equals(SavingsAccountTransactionType.WITHHOLD_TAX.getValue());
