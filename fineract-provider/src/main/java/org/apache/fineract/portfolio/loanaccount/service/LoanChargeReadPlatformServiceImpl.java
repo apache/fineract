@@ -69,7 +69,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
     private static final class LoanChargeMapper implements RowMapper<LoanChargeData> {
 
         public String schema() {
-            return "lc.id as id, c.id as chargeId, c.name as name, " + "lc.amount as amountDue, " + "lc.amount_paid_derived as amountPaid, "
+            return "lc.id as id, c.id as chargeId, c.name as name, c.ind_cap_for_group_loans as indCapForGroupLoans, " + "lc.amount as amountDue, " + "lc.amount_paid_derived as amountPaid, "
                     + "lc.amount_waived_derived as amountWaived, " + "lc.amount_writtenoff_derived as amountWrittenOff, "
                     + "lc.amount_outstanding_derived as amountOutstanding, "
                     + "lc.calculation_percentage as percentageOf, lc.calculation_on_amount as amountPercentageAppliedTo, "
@@ -127,6 +127,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final BigDecimal maxCap = rs.getBigDecimal("maxCap");
             final BigDecimal amountOrPercentage = rs.getBigDecimal("amountOrPercentage");
             final LocalDate disbursementDate = JdbcSupport.getLocalDate(rs, "disbursementDate");
+            final boolean indCapForGroupLoans = rs.getBoolean("indCapForGroupLoans");
 
             if (disbursementDate != null) {
                 dueAsOfDate = disbursementDate;
@@ -134,7 +135,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
             return new LoanChargeData(id, chargeId, name, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding,
                     chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo, penalty, paymentMode, paid,
-                    waived, null, minCap, maxCap, amountOrPercentage, null);
+                    waived, null, minCap, maxCap, amountOrPercentage, null, indCapForGroupLoans);
         }
     }
 

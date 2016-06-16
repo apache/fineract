@@ -114,6 +114,9 @@ public class Charge extends AbstractPersistable<Long> {
     @JoinColumn(name = "tax_group_id")
     private TaxGroup taxGroup;
 
+    @Column(name = "ind_cap_for_group_loans", nullable = false)
+    private boolean indCapForGroupLoans = false;
+
     public static Charge fromJson(final JsonCommand command, final GLAccount account, final TaxGroup taxGroup) {
 
         final String name = command.stringValueOfParameterNamed("name");
@@ -135,9 +138,10 @@ public class Charge extends AbstractPersistable<Long> {
         final BigDecimal minCap = command.bigDecimalValueOfParameterNamed("minCap");
         final BigDecimal maxCap = command.bigDecimalValueOfParameterNamed("maxCap");
         final Integer feeFrequency = command.integerValueOfParameterNamed("feeFrequency");
+        final boolean indCapForGroupLoans = command.booleanPrimitiveValueOfParameterNamed("indCapForGroupLoans");
 
         return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculationType, penalty, active, paymentMode,
-                feeOnMonthDay, feeInterval, minCap, maxCap, feeFrequency, account, taxGroup);
+                feeOnMonthDay, feeInterval, minCap, maxCap, feeFrequency, account, taxGroup, indCapForGroupLoans);
     }
 
     protected Charge() {
@@ -147,7 +151,7 @@ public class Charge extends AbstractPersistable<Long> {
     private Charge(final String name, final BigDecimal amount, final String currencyCode, final ChargeAppliesTo chargeAppliesTo,
             final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType, final boolean penalty,
             final boolean active, final ChargePaymentMode paymentMode, final MonthDay feeOnMonthDay, final Integer feeInterval,
-            final BigDecimal minCap, final BigDecimal maxCap, final Integer feeFrequency, final GLAccount account, final TaxGroup taxGroup) {
+            final BigDecimal minCap, final BigDecimal maxCap, final Integer feeFrequency, final GLAccount account, final TaxGroup taxGroup, final Boolean indCapForGroupLoans) {
         this.name = name;
         this.amount = amount;
         this.currencyCode = currencyCode;
@@ -205,6 +209,7 @@ public class Charge extends AbstractPersistable<Long> {
         if (isPercentageOfApprovedAmount()) {
             this.minCap = minCap;
             this.maxCap = maxCap;
+            this.indCapForGroupLoans = indCapForGroupLoans;
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
@@ -491,6 +496,12 @@ public class Charge extends AbstractPersistable<Long> {
                 actualChanges.put("locale", localeAsInput);
                 this.maxCap = newValue;
             }
+            if (command.isChangeInBooleanParameterNamed(ChargesApiConstants.indCapForGroupLoansParamName, this.indCapForGroupLoans)) {
+                final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(ChargesApiConstants.indCapForGroupLoansParamName);
+                actualChanges.put(ChargesApiConstants.indCapForGroupLoansParamName, newValue);
+                actualChanges.put("locale", localeAsInput);
+                this.indCapForGroupLoans = newValue;
+            }
 
         }
 
@@ -546,7 +557,7 @@ public class Charge extends AbstractPersistable<Long> {
         final CurrencyData currency = new CurrencyData(this.currencyCode, null, 0, 0, null, null);
         return ChargeData.instance(getId(), this.name, this.amount, currency, chargeTimeType, chargeAppliesTo, chargeCalculationType,
                 chargePaymentmode, getFeeOnMonthDay(), this.feeInterval, this.penalty, this.active, this.minCap, this.maxCap,
-                feeFrequencyType, accountData, taxGroupData);
+                feeFrequencyType, accountData, taxGroupData, this.indCapForGroupLoans);
     }
 
     public Integer getChargePaymentMode() {
@@ -621,4 +632,13 @@ public class Charge extends AbstractPersistable<Long> {
     public void setTaxGroup(TaxGroup taxGroup) {
         this.taxGroup = taxGroup;
     }
+
+	public boolean isIndCapForGroupLoans() {
+		return indCapForGroupLoans;
+	}
+
+	public void setIndCapForGroupLoans(boolean indCapForGroupLoans) {
+		this.indCapForGroupLoans = indCapForGroupLoans;
+	} 
+    
 }
