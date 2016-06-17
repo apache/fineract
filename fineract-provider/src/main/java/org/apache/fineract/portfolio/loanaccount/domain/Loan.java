@@ -40,7 +40,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -6018,15 +6017,13 @@ public class Loan extends AbstractPersistable<Long> {
         final MonetaryCurrency currency = getCurrency();
         Money interest = Money.zero(currency);
         Money fee = Money.zero(currency);
-        Money penalty = Money.zero(currency);
-        boolean isArrearsPresent = false;
+        Money penalty = Money.zero(currency);        
         for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
             if (installment.isNotFullyPaidOff()) {
-                if (!isArrearsPresent || !installment.getDueDate().isAfter(paymentDate)) {
+                if (!installment.getDueDate().isAfter(paymentDate)) {
                     interest = interest.plus(installment.getInterestOutstanding(currency));
                     fee = fee.plus(installment.getFeeChargesOutstanding(currency));
-                    penalty = penalty.plus(installment.getPenaltyChargesOutstanding(currency));
-                    isArrearsPresent = true;
+                    penalty = penalty.plus(installment.getPenaltyChargesOutstanding(currency));                    
                 } else if (installment.getFromDate().isBefore(paymentDate)) {
                     Money[]  balancesForCurrentPeroid = fetchInterestFeeAndPenalty(paymentDate, currency, installment);
                     interest = interest.plus(balancesForCurrentPeroid[0]);
@@ -6071,6 +6068,7 @@ public class Loan extends AbstractPersistable<Long> {
     public Money[] retriveIncomeForOverlappingPeriod(final LocalDate paymentDate) {
         Money[] balances = new Money[3];
         final MonetaryCurrency currency = getCurrency();
+        balances[0] = balances[1] = balances[2] = Money.zero(currency);        
         for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
             if (installment.getDueDate().isEqual(paymentDate)){
                 Money interest = installment.getInterestOutstanding(currency);
@@ -6202,13 +6200,22 @@ public class Loan extends AbstractPersistable<Long> {
         Money [] balances = retriveIncomeForOverlappingPeriod(transactionDate);
         for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
             if (!installment.getDueDate().isBefore(transactionDate)) {
-                totalPrincipal = totalPrincipal.plus(installment.getPrincipalOutstanding(currency));
-                newInstallments.remove(installment);
-            } 
+                if (!installment.isPartlyPaid() && !installment.isObligationsMet()) {
+                    totalPrincipal = totalPrincipal.plus(installment.getPrincipalOutstanding(currency));
+                    newInstallments.remove(installment);
+                }
+            }
         }
+
+        LocalDate installmentStartDate = getDisbursementDate();
+
+        if (newInstallments.size() > 0) {
+            installmentStartDate = newInstallments.get((newInstallments.size() - 1)).getDueDate();
+        }        
+        
         
         LoanRepaymentScheduleInstallment newInstallment = new LoanRepaymentScheduleInstallment(null, newInstallments.size() + 1,
-                newInstallments.get((newInstallments.size() - 1)).getDueDate(), transactionDate, totalPrincipal.getAmount(),
+                installmentStartDate, transactionDate, totalPrincipal.getAmount(),
                 balances[0].getAmount(), balances[1].getAmount(), balances[2].getAmount(), true, null);
         newInstallment.updateInstallmentNumber(newInstallments.size() + 1);
         newInstallments.add(newInstallment);
