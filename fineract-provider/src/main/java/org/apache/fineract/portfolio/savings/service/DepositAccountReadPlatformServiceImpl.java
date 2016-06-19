@@ -1049,9 +1049,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                 transfer = AccountTransferData.transferBasicDetails(toTransferId, currency, toTransferAmount, toTransferDate,
                         toTransferDescription, toTransferReversed);
             }
-
+            final boolean postInterestAsOn = false;
             return SavingsAccountTransactionData.create(id, transactionType, paymentDetailData, savingsId, accountNo, date, currency,
-                    amount, runningBalance, reversed, transfer);
+                    amount, runningBalance, reversed, transfer, postInterestAsOn);
         }
     }
 
@@ -1437,9 +1437,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final PaymentDetailData paymentDetailData = null;
             final AccountTransferData transfer = null;
             final BigDecimal runningBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "runningBalance");
-            ;
+            final boolean postInterestAsOn = false;
             return SavingsAccountTransactionData.create(savingsId, transactionType, paymentDetailData, savingsId, accountNo, duedate,
-                    currency, dueamount, runningBalance, false, transfer);
+                    currency, dueamount, runningBalance, false, transfer, postInterestAsOn);
         }
     }
 
