@@ -36,6 +36,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionSubType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionToRepaymentScheduleMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.CreocoreLoanRepaymentScheduleTransactionProcessor;
@@ -449,7 +450,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
      */
     protected boolean isTransactionInAdvanceOfInstallment(final int currentInstallmentIndex,
             final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate,
-            @SuppressWarnings("unused") final Money transactionAmount) {
+            final Money transactionAmount) {
 
         final LoanRepaymentScheduleInstallment currentInstallment = installments.get(currentInstallmentIndex);
 
@@ -483,7 +484,6 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
      * transaction amount is greater than the total expected principal and
      * interest of the loan.
      */
-    @SuppressWarnings("unused")
     protected void onLoanOverpayment(final LoanTransaction loanTransaction, final Money loanOverPaymentAmount) {
         // empty implementation by default.
     }

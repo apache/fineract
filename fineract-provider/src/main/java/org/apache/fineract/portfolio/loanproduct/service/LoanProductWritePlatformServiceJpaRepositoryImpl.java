@@ -218,8 +218,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final boolean accountingTypeChanged = changes.containsKey("accountingRule");
             final Map<String, Object> accountingMappingChanges = this.accountMappingWritePlatformService
                     .updateLoanProductToGLAccountMapping(product.getId(), command, accountingTypeChanged, product.getAccountingType());
-            changes.putAll(accountingMappingChanges);
-
+            changes.putAll(accountingMappingChanges);            
             if (!changes.isEmpty()) {
                 this.loanProductRepository.saveAndFlush(product);
             }

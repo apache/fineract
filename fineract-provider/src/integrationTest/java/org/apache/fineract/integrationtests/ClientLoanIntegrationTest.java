@@ -914,6 +914,22 @@ public class ClientLoanIntegrationTest {
                 .currencyDetails(digitsAfterDecimal, inMultiplesOf).build(null);
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
+    
+    private Integer createLoanProductWithOnOverpaymentCloseLoan(final String inMultiplesOf, final String digitsAfterDecimal, final String repaymentStrategy) {
+        System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+        final String loanProductJSON = new LoanProductTestBuilder() //
+                .withPrincipal("10000000.00") //
+                .withNumberOfRepayments("24") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("2") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withRepaymentStrategy(repaymentStrategy) //
+                .withAmortizationTypeAsEqualPrincipalPayment() //
+                .withInterestTypeAsDecliningBalance() //
+                .currencyDetails(digitsAfterDecimal, inMultiplesOf).withonOverPaymentCloseLoan(true).build(null);
+        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+    }
 
     private Integer createLoanProduct(final String inMultiplesOf, final String digitsAfterDecimal, final String repaymentStrategy,
             final String accountingRule, final Account... accounts) {
@@ -5098,5 +5114,27 @@ public class ClientLoanIntegrationTest {
             }
         }
         return dayOfMonth;
+    }
+    
+    @Test
+    public void testOnoverpaymentLoanClose(){
+        final String proposedAmount = "10000";
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        Integer loanProductID = createLoanProductWithOnOverpaymentCloseLoan("0", "0", LoanProductTestBuilder.DEFAULT_STRATEGY);
+        Integer loanID = applyForLoanApplicationWithProductConfigurationAsTrue(clientID, loanProductID, proposedAmount);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        System.out.println("------------------------LOAN CREATED WITH ID------------------------------" + loanID);
+        System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------");
+        loanStatusHashMap = this.loanTransactionHelper.approveLoan("1 March 2014", loanID);
+        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+        System.out.println("-------------------------------DISBURSE LOAN-------------------------------------------");
+        loanStatusHashMap = this.loanTransactionHelper.disburseLoan("1 March 2014", loanID);
+        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        System.out.println("-------------------------------Make OverPayment-------------------------------------------");
+        this.loanTransactionHelper.makeRepayment("11 March 2014", Float.valueOf("15000"), loanID);
+        loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "status");
+        LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
     }
 }
