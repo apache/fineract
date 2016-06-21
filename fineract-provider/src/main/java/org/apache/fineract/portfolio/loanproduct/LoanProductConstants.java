@@ -130,5 +130,6 @@ public interface LoanProductConstants {
     
     public static final String allowPartialPeriodInterestCalcualtionParamName = "allowPartialPeriodInterestCalcualtion";
     
+    public static final String closeLoanOnOverpayment = "closeLoanOnOverpayment";
 
 }

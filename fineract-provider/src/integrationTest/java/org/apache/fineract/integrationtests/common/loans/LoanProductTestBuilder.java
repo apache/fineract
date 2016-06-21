@@ -124,6 +124,7 @@ public class LoanProductTestBuilder {
     private Integer recalculationRestFrequencyOnDayType = null;
     private Integer recalculationCompoundingFrequencyDayOfWeekType = null;
     private Integer recalculationRestFrequencyDayOfWeekType = null;
+    private Boolean closeLoanOnOverpayment = Boolean.FALSE;
 
     public String build(final String chargeId) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -210,6 +211,9 @@ public class LoanProductTestBuilder {
         if(allowVariableInstallments) {
             map.put("minimumGap", minimumGap) ;
             map.put("maximumGap", maximumGap) ;
+        }
+        if(closeLoanOnOverpayment){
+            map.put("closeLoanOnOverpayment", closeLoanOnOverpayment);
         }
         return new Gson().toJson(map);
     }
@@ -497,5 +501,9 @@ public class LoanProductTestBuilder {
         this.minimumGap = minimumGap;
         this.maximumGap = maximumGap;
         return this ;
+    }
+    public LoanProductTestBuilder withonOverPaymentCloseLoan(Boolean closeLoanOnOverpayment) {
+        this.closeLoanOnOverpayment = closeLoanOnOverpayment;
+        return this;
     }
 }

@@ -178,6 +178,9 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     @Column(name = "allow_variabe_installments", nullable = false)
     private boolean allowVariabeInstallments;
+    
+    @Column(name = "close_loan_on_overpayment", nullable = false)
+    private boolean closeLoanOnOverpayment;
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
@@ -324,6 +327,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         final boolean canDefineEmiAmount = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.canDefineEmiAmountParamName);
         final Integer installmentAmountInMultiplesOf = command
                 .integerValueOfParameterNamed(LoanProductConstants.installmentAmountInMultiplesOfParamName);
+        final Boolean closeLoanOnOverpayment = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.closeLoanOnOverpayment);
 
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
@@ -338,7 +342,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
                 installmentAmountInMultiplesOf, loanConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRate,
                 interestRateDifferential, minDifferentialLendingRate, maxDifferentialLendingRate, defaultDifferentialLendingRate,
                 isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGapBetweenInstallments,
-                maximumGapBetweenInstallments);
+                maximumGapBetweenInstallments, closeLoanOnOverpayment);
 
     }
 
@@ -569,7 +573,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             Boolean isLinkedToFloatingInterestRates, FloatingRate floatingRate, BigDecimal interestRateDifferential,
             BigDecimal minDifferentialLendingRate, BigDecimal maxDifferentialLendingRate, BigDecimal defaultDifferentialLendingRate,
             Boolean isFloatingInterestRateCalculationAllowed, final Boolean isVariableInstallmentsAllowed,
-            final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments) {
+            final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments, final Boolean closeLoanOnOverpayment) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -643,6 +647,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         this.accountMovesOutOfNPAOnlyOnArrearsCompletion = accountMovesOutOfNPAOnlyOnArrearsCompletion;
         this.canDefineInstallmentAmount = canDefineEmiAmount;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
+        this.closeLoanOnOverpayment = closeLoanOnOverpayment;
     }
 
     public MonetaryCurrency getCurrency() {
@@ -1014,7 +1019,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
             actualChanges.put("locale", localeAsInput);
             this.installmentAmountInMultiplesOf = newValue;
         }
-
+        
+        if(command.isChangeInBooleanParameterNamed(LoanProductConstants.closeLoanOnOverpayment, this.closeLoanOnOverpayment)){
+            final Boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.closeLoanOnOverpayment);
+            actualChanges.put(LoanProductConstants.closeLoanOnOverpayment, newValue);
+            this.closeLoanOnOverpayment = newValue;
+        }
+        
         return actualChanges;
     }
 
@@ -1331,4 +1342,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         return this.allowVariabeInstallments;
     }
 
+	public boolean isCloseLoanOnOverpayment() {
+		return closeLoanOnOverpayment;
+	}
 }

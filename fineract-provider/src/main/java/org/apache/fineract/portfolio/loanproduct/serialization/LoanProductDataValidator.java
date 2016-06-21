@@ -107,7 +107,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.recalculationCompoundingFrequencyOnDayParamName,
             LoanProductConstants.recalculationRestFrequencyWeekdayParamName,
             LoanProductConstants.recalculationRestFrequencyNthDayParamName, LoanProductConstants.recalculationRestFrequencyOnDayParamName,
-            LoanProductConstants.isCompoundingToBePostedAsTransactionParamName, LoanProductConstants.allowCompoundingOnEodParamName));
+            LoanProductConstants.isCompoundingToBePostedAsTransactionParamName, LoanProductConstants.allowCompoundingOnEodParamName,
+            LoanProductConstants.closeLoanOnOverpayment));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -611,6 +612,12 @@ public final class LoanProductDataValidator {
             if (useBorrowerCycle) {
                 validateBorrowerCycleVariations(element, baseDataValidator);
             }
+        }
+        
+        if(this.fromApiJsonHelper.parameterExists(LoanProductConstants.closeLoanOnOverpayment, element)){
+        	final Boolean closeLoanOnOverpayment = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.closeLoanOnOverpayment, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.closeLoanOnOverpayment).value(closeLoanOnOverpayment).ignoreIfNull()
+                    .validateForBooleanValue();
         }
 
         validateMultiDisburseLoanData(baseDataValidator, element);
