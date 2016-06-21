@@ -30,6 +30,8 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -37,40 +39,48 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
 
     private final SavingsAccountAssembler savingAccountAssembler;
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
-    private final SavingsAccountRepository savingAccountRepository;
     private final SavingsAccountReadPlatformService savingAccountReadPlatformService;
+    private final SavingsAccountRepository savingsAccountRepository;
 
     @Autowired
     public SavingsSchedularServiceImpl(final SavingsAccountAssembler savingAccountAssembler,
             final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
-            final SavingsAccountRepository savingAccountRepository,
-            final SavingsAccountReadPlatformService savingAccountReadPlatformService) {
+            final SavingsAccountReadPlatformService savingAccountReadPlatformService,
+            final SavingsAccountRepository savingsAccountRepository) {
         this.savingAccountAssembler = savingAccountAssembler;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
-        this.savingAccountRepository = savingAccountRepository;
         this.savingAccountReadPlatformService = savingAccountReadPlatformService;
+        this.savingsAccountRepository = savingsAccountRepository;
     }
 
     @CronTarget(jobName = JobName.POST_INTEREST_FOR_SAVINGS)
     @Override
     public void postInterestForAccounts() throws JobExecutionException {
-        final List<SavingsAccount> savingsAccounts = this.savingAccountRepository.findSavingAccountByStatus(SavingsAccountStatusType.ACTIVE
-                .getValue());
+        int offSet = 0;
+        Integer initialSize = 500;
+        Integer totalPageSize = 0;
         StringBuffer sb = new StringBuffer();
-        for (final SavingsAccount savingsAccount : savingsAccounts) {
-            try {
-                this.savingAccountAssembler.assignSavingAccountHelpers(savingsAccount);
-                this.savingsAccountWritePlatformService.postInterest(savingsAccount);
-            } catch (Exception e) {
-                Throwable realCause = e;
-                if (e.getCause() != null) {
-                    realCause = e.getCause();
+        do {
+            PageRequest pageRequest = new PageRequest(offSet, initialSize);
+            Page<SavingsAccount> savingsAccounts = this.savingsAccountRepository.findByStatus(SavingsAccountStatusType.ACTIVE.getValue(),
+                    pageRequest);
+            for (SavingsAccount savingsAccount : savingsAccounts.getContent()) {
+                try {
+                    this.savingAccountAssembler.assignSavingAccountHelpers(savingsAccount);
+                    this.savingsAccountWritePlatformService.postInterest(savingsAccount);
+                } catch (Exception e) {
+                    Throwable realCause = e;
+                    if (e.getCause() != null) {
+                        realCause = e.getCause();
+                    }
+                    sb.append("failed to post interest for Savings with id " + savingsAccount.getId() + " with message "
+                            + realCause.getMessage());
                 }
-                sb.append("failed to post interest for Savings with id " + savingsAccount.getId() + " with message "
-                        + realCause.getMessage());
             }
-        }
-        
+            offSet++;
+            totalPageSize = savingsAccounts.getTotalPages();
+        } while (offSet < totalPageSize);
+
         if (sb.length() > 0) { throw new JobExecutionException(sb.toString()); }
     }
 
