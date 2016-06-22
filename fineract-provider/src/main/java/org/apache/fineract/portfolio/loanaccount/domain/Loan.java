@@ -6227,7 +6227,13 @@ public class Loan extends AbstractPersistable<Long> {
             }   
             
         }
-
+        
+        for(LoanDisbursementDetails loanDisbursementDetails : getDisbursementDetails()){
+            if(loanDisbursementDetails.actualDisbursementDate() == null){
+                 totalPrincipal = Money.of(currency, totalPrincipal.getAmount().subtract(loanDisbursementDetails.principal()));
+            }
+        }
+        
         LocalDate installmentStartDate = getDisbursementDate();
 
         if (newInstallments.size() > 0) {
