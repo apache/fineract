@@ -647,7 +647,7 @@ public class ShareAccountDataSerializer {
         ShareProduct shareProduct = account.getShareProduct();
         if (sharesRequested != null) {
             Long totalSharesAfterapproval = account.getTotalApprovedShares() + sharesRequested;
-            if(totalSharesAfterapproval > shareProduct.getMaximumClientShares()) {
+            if(shareProduct.getMaximumClientShares() != null && totalSharesAfterapproval > shareProduct.getMaximumClientShares()) {
                 baseDataValidator.reset().parameter(ShareAccountApiConstants.requestedshares_paramname).value(sharesRequested)
                 .failWithCode("exceeding.maximum.limit.defined.in.the.shareproduct", "Existing and requested shares count is more than product definition");
             }
