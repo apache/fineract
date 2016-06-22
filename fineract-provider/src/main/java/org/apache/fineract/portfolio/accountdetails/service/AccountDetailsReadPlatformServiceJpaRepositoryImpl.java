@@ -163,7 +163,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
     		.append("left join m_appuser sbu on sbu.id = sa.submitted_userid ")
     		.append("left join m_appuser rbu on rbu.id = sa.rejected_userid ")
     		.append("left join m_appuser abu on abu.id = sa.approved_userid ")
-    		.append("left join m_appuser avbu on rbu.id = sa.activated_userid ")
+    		.append("left join m_appuser avbu on avbu.id = sa.activated_userid ")
     		.append("left join m_appuser cbu on cbu.id = sa.closed_userid ") ;
     		schema = buff.toString() ;
 		}
