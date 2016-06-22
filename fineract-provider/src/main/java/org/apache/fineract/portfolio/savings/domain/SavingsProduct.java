@@ -303,7 +303,12 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         this.withHoldTax = withHoldTax;
         this.taxGroup = taxGroup;
         
-        this.isDormancyTrackingActive = isDormancyTrackingActive;
+        if(isDormancyTrackingActive == null) {
+            this.isDormancyTrackingActive = Boolean.FALSE ;
+        }else {
+            this.isDormancyTrackingActive = isDormancyTrackingActive;    
+        }
+        
         this.daysToInactive = daysToInactive;
         this.daysToDormancy = daysToDormancy;
         this.daysToEscheat = daysToEscheat;
@@ -590,7 +595,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             this.daysToEscheat = newValue;
         }
         
-        if(!this.isDormancyTrackingActive){
+        if(this.isDormancyTrackingActive == null || !this.isDormancyTrackingActive){
         	this.daysToInactive = null;
         	this.daysToDormancy = null;
         	this.daysToEscheat = null;
