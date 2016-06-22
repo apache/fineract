@@ -33,7 +33,6 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
-import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -122,6 +121,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
+import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -185,9 +185,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.apache.fineract.portfolio.loanaccount.data.GroupLoanIndividualMonitoringDataValidator;
+import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoring;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 @Service
 public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatformService {
@@ -231,6 +234,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanSummaryWrapper loanSummaryWrapper;
     private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessingStrategy;
     private final CodeValueRepositoryWrapper codeValueRepository;
+    private final GroupLoanIndividualMonitoringRepositoryWrapper groupLoanIndividualMonitoringRepository;
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -259,7 +263,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final BusinessEventNotifierService businessEventNotifierService, final GuarantorDomainService guarantorDomainService,
             final LoanUtilService loanUtilService, final LoanSummaryWrapper loanSummaryWrapper,
             final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessingStrategy,
-            final CodeValueRepositoryWrapper codeValueRepository) {
+            final CodeValueRepositoryWrapper codeValueRepository, final GroupLoanIndividualMonitoringRepositoryWrapper groupLoanIndividualMonitoringRepository) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanAssembler = loanAssembler;
@@ -297,6 +301,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanSummaryWrapper = loanSummaryWrapper;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.codeValueRepository = codeValueRepository;
+        this.groupLoanIndividualMonitoringRepository = groupLoanIndividualMonitoringRepository;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -320,6 +325,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         // check for product mix validations
         checkForProductMixRestrictions(loan);
+        
+        // validate for glim application
+        if(command.hasParameter(LoanApiConstants.clientMembersParamName)){
+        	GroupLoanIndividualMonitoringDataValidator.validateForGroupLoanIndividualMonitoring(command, LoanApiConstants.principalDisbursedParameterName);
+        }
         
         LocalDate recalculateFrom = null;
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
@@ -430,6 +440,26 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanAccountDomainService.recalculateAccruals(loan);
         this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_DISBURSAL,
                 constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
+        //update disbursed amount for each client
+        if(command.hasParameter(LoanApiConstants.clientMembersParamName)){
+        	JsonArray clientMembers = command.arrayOfParameterNamed(LoanApiConstants.clientMembersParamName);
+            for(JsonElement clientMember :clientMembers) {            	
+            	JsonObject member = clientMember.getAsJsonObject();
+            	BigDecimal amount = null;
+            	if(member.has(LoanApiConstants.amountParamName)){
+            		amount = member.get(LoanApiConstants.amountParamName).getAsBigDecimal();
+            	}
+            	if(member.has(LoanApiConstants.glimIdParamName)){
+            		Long glimId = member.get(LoanApiConstants.glimIdParamName).getAsLong();
+                	Boolean isSelected = member.has(LoanApiConstants.isSelectedParamName) && member.get(LoanApiConstants.isSelectedParamName).getAsBoolean();
+                	GroupLoanIndividualMonitoring groupLoanIndividualMonitoring = this.groupLoanIndividualMonitoringRepository.findOneWithNotFoundDetection(glimId);
+                	groupLoanIndividualMonitoring.setDisbursedAmount(amount);
+                	groupLoanIndividualMonitoring.setIsSelected(isSelected);
+                	this.groupLoanIndividualMonitoringRepository.save(groupLoanIndividualMonitoring);
+            	}
+            	
+            }	
+        }
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loan.getId()) //
