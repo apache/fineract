@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2903,6 +2904,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         String noteText = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.noteParamName, element);
         LoanRescheduleRequest loanRescheduleRequest = null;
+        for (LoanDisbursementDetails loanDisbursementDetails : loan.getDisbursementDetails()) {
+            if (!loanDisbursementDetails.expectedDisbursementDateAsLocalDate().isAfter(transactionDate)
+                    && loanDisbursementDetails.actualDisbursementDate() == null) {
+                final String defaultUserMessage = "The loan with undisbrsed tranche before foreclosure cannot be foreclosed.";
+                throw new LoanForeclosureException("loan.with.undisbursed.tranche.before.foreclosure.cannot.be.foreclosured",
+                        defaultUserMessage, transactionDate);
+            }
+        }
         this.loanScheduleHistoryWritePlatformService.createAndSaveLoanScheduleArchive(loan.getRepaymentScheduleInstallments(),
                 loan, loanRescheduleRequest);
         
