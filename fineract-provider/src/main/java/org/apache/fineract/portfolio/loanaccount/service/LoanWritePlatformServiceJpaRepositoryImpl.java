@@ -2898,7 +2898,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.transactionDateParamName, element);
         this.loanEventApiJsonValidator.validateLoanForeclosure(command.json());
-        loan.validateForForeclosure(transactionDate);
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put("transactionDate", transactionDate);
 
@@ -2906,7 +2905,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         LoanRescheduleRequest loanRescheduleRequest = null;
         this.loanScheduleHistoryWritePlatformService.createAndSaveLoanScheduleArchive(loan.getRepaymentScheduleInstallments(),
                 loan, loanRescheduleRequest);
-        loan.updateInstallmentsPostDate(transactionDate);
+        
 
         final Map<String, Object> modifications = this.loanAccountDomainService.foreCloseLoan(loan, transactionDate, noteText);
         changes.putAll(modifications);

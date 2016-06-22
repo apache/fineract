@@ -791,4 +791,9 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
                 .plus(getInterestWrittenOff(currency));
         return getInterestAccrued(currency).minus(interestAccountedFor);
     }
+    
+    public Money getTotalPaid(final MonetaryCurrency currency) {
+        return getPenaltyChargesPaid(currency).plus(getFeeChargesPaid(currency)).plus(getInterestPaid(currency))
+                .plus(getPrincipalCompleted(currency));
+    }
 }
