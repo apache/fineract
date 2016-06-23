@@ -972,9 +972,16 @@ public class Loan extends AbstractPersistable<Long> {
         }
 
         LocalDate transactionDate = getDisbursementDate();
-        if (loanCharge.isSpecifiedDueDate()) {
-            transactionDate = loanCharge.getDueLocalDate();
+        if (loanCharge.isDueDateCharge()) {
+            if (loanCharge.getDueLocalDate().isAfter(DateUtils.getLocalDateOfTenant())) {
+                transactionDate = DateUtils.getLocalDateOfTenant();
+            } else {
+                transactionDate = loanCharge.getDueLocalDate();
+            }
+        }else if(loanCharge.isInstalmentFee()){
+            transactionDate = loanCharge.getInstallmentLoanCharge(loanInstallmentNumber).getRepaymentInstallment().getDueDate();
         }
+        
         scheduleGeneratorDTO.setRecalculateFrom(transactionDate);
 
         updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
@@ -6227,7 +6234,13 @@ public class Loan extends AbstractPersistable<Long> {
             }   
             
         }
-
+        
+        for(LoanDisbursementDetails loanDisbursementDetails : getDisbursementDetails()){
+            if(loanDisbursementDetails.actualDisbursementDate() == null){
+                 totalPrincipal = Money.of(currency, totalPrincipal.getAmount().subtract(loanDisbursementDetails.principal()));
+            }
+        }
+        
         LocalDate installmentStartDate = getDisbursementDate();
 
         if (newInstallments.size() > 0) {
