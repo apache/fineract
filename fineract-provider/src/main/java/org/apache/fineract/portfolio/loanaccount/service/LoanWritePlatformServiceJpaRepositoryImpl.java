@@ -823,7 +823,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanEventApiJsonValidator.validateTransaction(command.json());
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
-        if(loan.status().isClosed() && loan.getLoanSubStatus().equals(LoanSubStatus.FORECLOSED.getValue())) {
+        if(loan.status().isClosed() && loan.getLoanSubStatus() !=null && loan.getLoanSubStatus().equals(LoanSubStatus.FORECLOSED.getValue())) {
             final String defaultUserMessage = "The loan cannot reopend as it is foreclosed.";
             throw new LoanForeclosureException("loan.cannot.be.reopened.as.it.is.foreclosured", defaultUserMessage,
                     loanId);
