@@ -4,7 +4,7 @@ Changelog
 Releases
 ===============
 
-1. 13 Jun 2016 - 16.06.01.RELEASE
+1. 27 Jun 2016 - 16.06.01.RELEASE
 1. 13 May 2016 - 16.05.01.RELEASE
 1. 13 Apr 2016 - 16.04.01.RELEASE
 1. 23 Mar 2016 - 16.03.03.RELEASE
@@ -112,6 +112,20 @@ Bugs
  - [MIFOSX-2656] - Accrual transaction should be added only on the first tranche disbursal
  - Adding charges to loan was creating duplicate gl entries
  - Checking null values before computing the interest not posted
+ - [FINERACT-195] - In loan summary page Overdue column should be with zero values after the loan is foreclosured   
+ - [Fineract-192] - Periodic accrual should not get displayed after the date of loan foreclosure
+ - [FINERACT-191] - After first tranche disbursement if the loan is foreclosed the repayment schedule    generated is not proper
+ - [FINERACT-189] - Interest calculated after foreclosure of multi tranche loan is not proper
+ - [FINERACT-185] - Repayment schedule generated after excess repayment and then forescloure is not proper
+ - [FINERACT-184] - Repayment schedule generated after excess repayment and then forescloure is not proper
+ - [FINERACT-183] - Not able to save Edit Fixed deposit product page displays Internal server error
+ - [FINERACT-182] - Loan is not going to closed state after foreclosing if the specified due date charge is applied and waived
+ - [FINERACT-181] - Not able to apply additional shares displays internal server error
+ - [FINERACT-179] - Not able to delete transaction of the prepaid loan
+ - [FINERACT-175] - In a installment if more amount is repaid and then the loan is foreclosed then it is moving to overpaid state with loan balance in last repayment as negative
+ - [FINERACT-173] - Specified due date charge applied and if the foreclosure is done before that date then the charge should not get collected
+ - [FINERACT-171] - Interest calculated is not proper if the foreclosure is done in between any period
+ - [FINERACT-170] - Not able to Foreclose the loan if the date is modified in Loan Foreclosure page displays internal server error
  
 Community-app
 New Features & Improvements
