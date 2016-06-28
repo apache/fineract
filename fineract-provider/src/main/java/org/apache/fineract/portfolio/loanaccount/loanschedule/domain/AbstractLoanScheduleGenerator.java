@@ -2575,7 +2575,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     currency);
         }
         Money amountCharged = getIncomeForCompounding(loanApplicationTerms, currency, installment);
-        final List<LoanInterestRecalcualtionAdditionalDetails> details = installment.getLoanCompoundingDetails();
+        final Set<LoanInterestRecalcualtionAdditionalDetails> details = installment.getLoanCompoundingDetails();
         Money totalCompounded = Money.zero(currency);
         Map<LocalDate, Money> compoundingMap = new TreeMap<>();
         for (LoanInterestRecalcualtionAdditionalDetails additionalDetails : details) {
@@ -2754,7 +2754,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 penaltyCharges = penaltyCharges.plus(currentInstallment.getPenaltyChargesOutstanding(currency));
             }
         }
-        final List<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails = null;
+        final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails = null;
         return new LoanRepaymentScheduleInstallment(null, 0, onDate, onDate, totalPrincipal.getAmount(), totalInterest.getAmount(),
                 feeCharges.getAmount(), penaltyCharges.getAmount(), false, compoundingDetails);
     }

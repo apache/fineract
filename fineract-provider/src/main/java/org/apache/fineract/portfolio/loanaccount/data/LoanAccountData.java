@@ -48,7 +48,6 @@ import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrat
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductConfigurableAttributes;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditionType;
 import org.apache.fineract.portfolio.note.data.NoteData;
-import org.hibernate.dialect.Sybase11Dialect;
 import org.joda.time.LocalDate;
 import org.springframework.util.CollectionUtils;
 

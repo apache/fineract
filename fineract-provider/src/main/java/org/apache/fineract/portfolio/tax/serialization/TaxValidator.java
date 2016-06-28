@@ -266,7 +266,7 @@ public class TaxValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateTaxGroupEndDateAndTaxComponent(final TaxGroup taxGroup, final List<TaxGroupMappings> groupMappings) {
+    public void validateTaxGroupEndDateAndTaxComponent(final TaxGroup taxGroup, final Set<TaxGroupMappings> groupMappings) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("tax.group");
 
@@ -293,7 +293,7 @@ public class TaxValidator {
     public void validateTaxGroup(final TaxGroup taxGroup) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("tax.group");
-        List<TaxGroupMappings> groupMappings = taxGroup.getTaxGroupMappings();
+        Set<TaxGroupMappings> groupMappings = taxGroup.getTaxGroupMappings();
         validateGroupTotal(groupMappings, baseDataValidator, "total.percentage");
         validateOverlappingComponents(groupMappings, baseDataValidator);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -318,7 +318,7 @@ public class TaxValidator {
         baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(startDate).validateDateAfter(existingStartDate);
     }
 
-    private void validateOverlappingComponents(final List<TaxGroupMappings> taxMappings, final DataValidatorBuilder baseDataValidator) {
+    private void validateOverlappingComponents(final Set<TaxGroupMappings> taxMappings, final DataValidatorBuilder baseDataValidator) {
         for (TaxGroupMappings groupMappingsOne : taxMappings) {
             final List<TaxGroupMappings> mappings = new ArrayList<>(taxMappings);
             mappings.remove(groupMappingsOne);
@@ -338,7 +338,7 @@ public class TaxValidator {
         }
     }
 
-    private void validateGroupTotal(final List<TaxGroupMappings> taxMappings, final DataValidatorBuilder baseDataValidator,
+    private void validateGroupTotal(final Set<TaxGroupMappings> taxMappings, final DataValidatorBuilder baseDataValidator,
             final String paramenter) {
         for (TaxGroupMappings groupMappingsOne : taxMappings) {
             Collection<LocalDate> dates = groupMappingsOne.getTaxComponent().allStartDates();

@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -371,7 +372,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 final Collection<LoanRescheduleModelRepaymentPeriod> periods = loanRescheduleModel.getPeriods();
                 List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();
                 Collection<LoanCharge> waiveLoanCharges = new ArrayList<>();
-                final List<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails = null;
+                final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails = null;
                 for (LoanRescheduleModelRepaymentPeriod period : periods) {
 
                     if (period.isNew()) {
@@ -379,7 +380,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                                 period.periodNumber(), period.periodFromDate(), period.periodDueDate(), period.principalDue(),
                                 period.interestDue(), BigDecimal.ZERO, BigDecimal.ZERO, false, compoundingDetails);
 
-                        repaymentScheduleInstallments.add(repaymentScheduleInstallment);
+                        loan.addLoanRepaymentScheduleInstallment(repaymentScheduleInstallment);
+                        repaymentScheduleInstallments.add(repaymentScheduleInstallment) ;
                     }
 
                     else {
@@ -423,8 +425,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 waiveLoanCharges(loan, waiveLoanCharges);
 
                 // update the Loan summary
-                loanSummary
-                        .updateSummary(currency, loan.getPrincpal(), repaymentScheduleInstallments, new LoanSummaryWrapper(), true, null);
+                loanSummary.updateSummary(currency, loan.getPrincpal(), repaymentScheduleInstallments, new LoanSummaryWrapper(), true, null);
 
                 // update the total number of schedule repayments
                 loan.updateNumberOfRepayments(periods.size());
