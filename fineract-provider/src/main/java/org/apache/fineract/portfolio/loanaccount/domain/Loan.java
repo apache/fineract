@@ -1262,6 +1262,7 @@ public class Loan extends AbstractPersistable<Long> {
             this.totalRecovered = recoveredAmount.getAmountDefaultedToNullIfZero();
 
             final Money principal = this.loanRepaymentScheduleDetail.getPrincipal();
+            if(this.loanSummaryWrapper == null) this.loanSummaryWrapper = new LoanSummaryWrapper();
             this.summary.updateSummary(loanCurrency(), principal, this.repaymentScheduleInstallments, this.loanSummaryWrapper,
                     isDisbursed(), this.charges);
             updateLoanOutstandingBalaces();
@@ -2790,13 +2791,11 @@ public class Loan extends AbstractPersistable<Long> {
         for (final LoanRepaymentScheduleInstallment currentInstallment : this.repaymentScheduleInstallments) {
             currentInstallment.resetDerivedComponents();
         }
-        final List<LoanTermVariations> removeTerms = new ArrayList<>(this.loanTermVariations.size());
         for (LoanTermVariations variations : this.loanTermVariations) {
             if (variations.getOnLoanStatus().equals(LoanStatus.ACTIVE.getValue())) {
-                removeTerms.add(variations);
+                variations.markAsInactive();
             }
         }
-        this.loanTermVariations.removeAll(removeTerms);
         final LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
         wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, charges());
 
@@ -3082,7 +3081,7 @@ public class Loan extends AbstractPersistable<Long> {
         return incomePostTransactions;
     }
 
-    private List<LoanTransaction> retreiveListOfTransactionsPostDisbursement() {
+    public List<LoanTransaction> retreiveListOfTransactionsPostDisbursement() {
         final List<LoanTransaction> repaymentsOrWaivers = new ArrayList<>();
         for (final LoanTransaction transaction : this.loanTransactions) {
             if (transaction.isNotReversed() && !(transaction.isDisbursement() || transaction.isNonMonetaryTransaction())) {
@@ -3871,7 +3870,7 @@ public class Loan extends AbstractPersistable<Long> {
         return firstRepaymentDate;
     }
 
-    private void addRepaymentScheduleInstallment(final LoanRepaymentScheduleInstallment installment) {
+    public void addRepaymentScheduleInstallment(final LoanRepaymentScheduleInstallment installment) {
         installment.updateLoan(this);
         this.repaymentScheduleInstallments.add(installment);
     }
@@ -5355,7 +5354,9 @@ public class Loan extends AbstractPersistable<Long> {
     private BigDecimal constructLoanTermVariations(FloatingRateDTO floatingRateDTO, BigDecimal annualNominalInterestRate,
             List<LoanTermVariationsData> loanTermVariations) {
         for (LoanTermVariations variationTerms : this.loanTermVariations) {
-            loanTermVariations.add(variationTerms.toData());
+            if(variationTerms.isActive()) {
+                loanTermVariations.add(variationTerms.toData());
+            }
         }
         annualNominalInterestRate = constructFloatingInterestRates(annualNominalInterestRate, floatingRateDTO, loanTermVariations);
         return annualNominalInterestRate;

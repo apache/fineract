@@ -32,11 +32,28 @@ public class FlatInterestLoanScheduleGenerator extends AbstractLoanScheduleGener
     @Override
     public PrincipalInterest calculatePrincipalInterestComponentsForPeriod(final PaymentPeriodsInOneYearCalculator calculator,
             final double interestCalculationGraceOnRepaymentPeriodFraction, final Money totalCumulativePrincipal,
-            final Money totalCumulativeInterest, final Money totalInterestDueForLoan, final Money cumulatingInterestPaymentDueToGrace,
+            Money totalCumulativeInterest, Money totalInterestDueForLoan, final Money cumulatingInterestPaymentDueToGrace,
             final Money outstandingBalance, final LoanApplicationTerms loanApplicationTerms, final int periodNumber, final MathContext mc,
             @SuppressWarnings("unused") TreeMap<LocalDate, Money> principalVariation,
             @SuppressWarnings("unused") Map<LocalDate, Money> compoundingMap, LocalDate periodStartDate, LocalDate periodEndDate,
-            @SuppressWarnings("unused") Collection<LoanTermVariationsData> termVariations) {
+            @SuppressWarnings("unused") Collection<LoanTermVariationsData> termVariations, Collection<LoanTermVariationsData> interestRatesForInstallments) {
+        
+        // Applies interest rate changes
+        for (LoanTermVariationsData variation : interestRatesForInstallments) {
+            if (variation.getTermVariationType().isInterestRateForInstallment() && variation.isApplicable(periodEndDate)
+                    && variation.getDecimalValue() != null && !variation.isProcessed()) {
+                loanApplicationTerms.updateAnnualNominalInterestRate(variation.getDecimalValue());
+                loanApplicationTerms.updateInterestChargedFromDate(periodStartDate);
+                loanApplicationTerms.updateRealTotalInterestForLoan(null);
+                totalInterestDueForLoan = loanApplicationTerms.calculateTotalInterestCharged(calculator, mc);
+                loanApplicationTerms.updateTotalInterestDue(totalInterestDueForLoan);
+                // update totalInterestDueForLoan with partialTotalCumulativeInterest for multi rescheduling
+                if (loanApplicationTerms.getPartialTotalCumulativeInterest() != null) {
+                    totalInterestDueForLoan = totalInterestDueForLoan.plus(loanApplicationTerms.getPartialTotalCumulativeInterest());
+                }
+            }
+        }
+       
         Money principalForThisInstallment = loanApplicationTerms.calculateTotalPrincipalForPeriod(calculator, outstandingBalance,
                 periodNumber, mc, null);
 

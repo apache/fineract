@@ -32,7 +32,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.service.LoanRescheduleRequestReadPlatformService;
@@ -165,15 +164,6 @@ public class LoanRescheduleRequestDataValidator {
             }
         }
 
-        if (loanId != null) {
-            List<LoanRescheduleRequestData> loanRescheduleRequestData = this.loanRescheduleRequestReadPlatformService
-                    .readLoanRescheduleRequests(loanId, LoanStatus.APPROVED.getValue());
-
-            if (loanRescheduleRequestData.size() > 0) {
-                dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode("loan.already.rescheduled",
-                        "The loan can only be rescheduled once.");
-            }
-        }
         if(loan.isMultiDisburmentLoan()) {
             dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(RescheduleLoansApiConstants.resheduleForMultiDisbursementNotSupportedErrorCode,
                     "Loan rescheduling is not supported for multidisbursement loans");
@@ -232,7 +222,6 @@ public class LoanRescheduleRequestDataValidator {
         final Loan loan = loanRescheduleRequest.getLoan();
 
         if (loan != null) {
-            Long loanId = loan.getId();
 
             if (!loan.status().isActive()) {
                 dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode("loan.is.not.active", "Loan is not active");
@@ -249,16 +238,6 @@ public class LoanRescheduleRequestDataValidator {
                 if (installment != null && installment.isObligationsMet()) {
                     dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(
                             "loan.repayment.schedule.installment." + "obligation.met", "Repayment schedule installment obligation met");
-                }
-            }
-
-            if (loanId != null) {
-                List<LoanRescheduleRequestData> loanRescheduleRequestData = this.loanRescheduleRequestReadPlatformService
-                        .readLoanRescheduleRequests(loanId, LoanStatus.APPROVED.getValue());
-
-                if (loanRescheduleRequestData.size() > 0) {
-                    dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode("loan.already.rescheduled",
-                            "The loan can only be rescheduled once.");
                 }
             }
         }
