@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -71,7 +72,7 @@ public class LoanScheduleWritePlatformServiceImpl implements LoanScheduleWritePl
         this.loanAccountDomainService.saveLoanWithDataIntegrityViolationChecks(loan);
         final Map<String, Object> changes = new HashMap<>();
         List<LoanTermVariationsData> newVariationsData = new ArrayList<>();
-        List<LoanTermVariations> modifiedVariations = loan.getLoanTermVariations();
+        Set<LoanTermVariations> modifiedVariations = loan.getLoanTermVariations();
         for (LoanTermVariations termVariations : modifiedVariations) {
             if (loanTermVariations.containsKey(termVariations.getId())) {
                 loanTermVariations.remove(termVariations.getId());
@@ -93,7 +94,7 @@ public class LoanScheduleWritePlatformServiceImpl implements LoanScheduleWritePl
     @Override
     public CommandProcessingResult deleteLoanScheduleVariations(final Long loanId) {
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
-        List<LoanTermVariations> variations = loan.getLoanTermVariations();
+        Set<LoanTermVariations> variations = loan.getLoanTermVariations();
         List<Long> deletedVariations = new ArrayList<>(variations.size());
         for (LoanTermVariations loanTermVariations : variations) {
             deletedVariations.add(loanTermVariations.getId());

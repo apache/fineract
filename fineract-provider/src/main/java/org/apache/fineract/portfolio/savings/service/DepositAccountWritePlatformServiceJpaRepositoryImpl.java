@@ -918,7 +918,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         final SavingsAccountTransaction newTransferTransaction = SavingsAccountTransaction.initiateTransfer(savingsAccount,
                 savingsAccount.office(), transferDate, user);
-        savingsAccount.getTransactions().add(newTransferTransaction);
+        savingsAccount.addTransaction(newTransferTransaction);
         savingsAccount.setStatus(SavingsAccountStatusType.TRANSFER_IN_PROGRESS.getValue());
         final MathContext mc = MathContext.DECIMAL64;
         boolean isInterestTransfer = false;
@@ -951,7 +951,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         final SavingsAccountTransaction withdrawtransferTransaction = SavingsAccountTransaction.withdrawTransfer(savingsAccount,
                 savingsAccount.office(), transferDate, user);
-        savingsAccount.getTransactions().add(withdrawtransferTransaction);
+        savingsAccount.addTransaction(withdrawtransferTransaction);
         savingsAccount.setStatus(SavingsAccountStatusType.ACTIVE.getValue());
         final MathContext mc = MathContext.DECIMAL64;
         boolean isInterestTransfer = false;
@@ -991,7 +991,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         final SavingsAccountTransaction acceptTransferTransaction = SavingsAccountTransaction.approveTransfer(savingsAccount,
                 acceptedInOffice, transferDate, user);
-        savingsAccount.getTransactions().add(acceptTransferTransaction);
+        savingsAccount.addTransaction(acceptTransferTransaction);
         savingsAccount.setStatus(SavingsAccountStatusType.ACTIVE.getValue());
         if (fieldOfficer != null) {
             savingsAccount.reassignSavingsOfficer(fieldOfficer, transferDate);

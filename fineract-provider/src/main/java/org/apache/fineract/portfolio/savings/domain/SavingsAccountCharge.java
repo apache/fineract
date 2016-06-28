@@ -27,7 +27,6 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.localePa
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -709,7 +708,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
     public int hashCode() {
         return new HashCodeBuilder(3, 5) //
                 .append(getId()) //
-                .append(this.charge.getId()) //
+                //.append(this.charge.getId()) //
                 .append(this.amount).append(getDueLocalDate()) //
                 .toHashCode();
     }

@@ -23,12 +23,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -44,8 +47,6 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.tax.api.TaxApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 
 @Entity
@@ -76,14 +77,12 @@ public class TaxComponent extends AbstractAuditableCustom<AppUser, Long> {
     @Temporal(TemporalType.DATE)
     private Date startDate;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
     @JoinColumn(name = "tax_component_id", referencedColumnName = "id", nullable = false)
-    private List<TaxComponentHistory> taxComponentHistories = new ArrayList<>();
+    private Set<TaxComponentHistory> taxComponentHistories = new HashSet<>();
 
-    @LazyCollection(LazyCollectionOption.TRUE)
-    @OneToMany(cascade = CascadeType.DETACH, mappedBy = "taxComponent", orphanRemoval = false)
-    private List<TaxGroupMappings> taxGroupMappings = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.DETACH, mappedBy = "taxComponent", orphanRemoval = false, fetch=FetchType.EAGER)
+    private Set<TaxGroupMappings> taxGroupMappings = new HashSet<>();
 
     protected TaxComponent() {
 
@@ -182,11 +181,11 @@ public class TaxComponent extends AbstractAuditableCustom<AppUser, Long> {
         return target != null && target.isAfter(startDate());
     }
 
-    public List<TaxComponentHistory> getTaxComponentHistories() {
+    public Set<TaxComponentHistory> getTaxComponentHistories() {
         return this.taxComponentHistories;
     }
 
-    public List<TaxGroupMappings> getTaxGroupMappings() {
+    public Set<TaxGroupMappings> getTaxGroupMappings() {
         return this.taxGroupMappings;
     }
 

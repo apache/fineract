@@ -54,6 +54,7 @@ import javax.persistence.DiscriminatorType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
@@ -108,13 +109,10 @@ import org.apache.fineract.portfolio.tax.domain.TaxComponent;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.apache.fineract.portfolio.tax.service.TaxUtils;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.data.jpa.domain.AbstractPersistable;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.google.gson.JsonArray;
@@ -148,7 +146,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @JoinColumn(name = "product_id", nullable = false)
     protected SavingsProduct product;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "field_officer_id", nullable = true)
     protected Staff savingsOfficer;
 
@@ -165,7 +163,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "submittedon_date", nullable = true)
     protected Date submittedOnDate;
 
-    @ManyToOne(optional = true)
+    @ManyToOne(optional = true, fetch=FetchType.LAZY)
     @JoinColumn(name = "submittedon_userid", nullable = true)
     protected AppUser submittedBy;
 
@@ -173,7 +171,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "rejectedon_date")
     protected Date rejectedOnDate;
 
-    @ManyToOne(optional = true)
+    @ManyToOne(optional = true, fetch=FetchType.LAZY)
     @JoinColumn(name = "rejectedon_userid", nullable = true)
     protected AppUser rejectedBy;
 
@@ -181,7 +179,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "withdrawnon_date")
     protected Date withdrawnOnDate;
 
-    @ManyToOne(optional = true)
+    @ManyToOne(optional = true, fetch=FetchType.LAZY)
     @JoinColumn(name = "withdrawnon_userid", nullable = true)
     protected AppUser withdrawnBy;
 
@@ -189,7 +187,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "approvedon_date")
     protected Date approvedOnDate;
 
-    @ManyToOne(optional = true)
+    @ManyToOne(optional = true, fetch=FetchType.LAZY)
     @JoinColumn(name = "approvedon_userid", nullable = true)
     protected AppUser approvedBy;
 
@@ -197,7 +195,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "activatedon_date", nullable = true)
     protected Date activatedOnDate;
 
-    @ManyToOne(optional = true)
+    @ManyToOne(optional = true, fetch=FetchType.LAZY)
     @JoinColumn(name = "activatedon_userid", nullable = true)
     protected AppUser activatedBy;
 
@@ -205,7 +203,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "closedon_date")
     protected Date closedOnDate;
 
-    @ManyToOne(optional = true)
+    @ManyToOne(optional = true, fetch=FetchType.LAZY)
     @JoinColumn(name = "closedon_userid", nullable = true)
     protected AppUser closedBy;
 
@@ -294,16 +292,17 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     protected SavingsAccountSummary summary;
 
     @OrderBy(value = "dateOf, createdDate, id")
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true)
-    protected final List<SavingsAccountTransaction> transactions = new ArrayList<>();
-
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true, fetch=FetchType.EAGER)
+    protected final Set<SavingsAccountTransaction> transactions = new HashSet<>();
+    
+    private transient List<SavingsAccountTransaction> orderedTransactions = null ;
+    
+    private transient boolean isTransactionsDirty = false ;
+    
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true, fetch=FetchType.EAGER)
     protected Set<SavingsAccountCharge> charges = new HashSet<>();
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true, fetch=FetchType.EAGER)
     private Set<SavingsOfficerAssignmentHistory> savingsOfficerHistory;
 
     @Transient
@@ -500,7 +499,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                         newPostingTransaction = SavingsAccountTransaction.overdraftInterest(this, office(), interestPostingTransactionDate,
                                 interestEarnedToBePostedForPeriod.negated());
                     }
-                    this.transactions.add(newPostingTransaction);
+                    addTransaction(newPostingTransaction);
                     if (applyWithHoldTax) {
                         createWithHoldTransaction(interestEarnedToBePostedForPeriod.getAmount(), interestPostingTransactionDate);
                     }
@@ -529,7 +528,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                             newPostingTransaction = SavingsAccountTransaction.overdraftInterest(this, office(),
                                     interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated());
                         }
-                        this.transactions.add(newPostingTransaction);
+                        addTransaction(newPostingTransaction);
                         if (applyWithHoldTaxForOldTransaction) {
                             createWithHoldTransaction(interestEarnedToBePostedForPeriod.getAmount(), interestPostingTransactionDate);
                         }
@@ -555,7 +554,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     protected List<SavingsAccountTransaction> findWithHoldTransactions() {
         final List<SavingsAccountTransaction> withholdTransactions = new ArrayList<>();
-        for (final SavingsAccountTransaction transaction : this.transactions) {
+        List<SavingsAccountTransaction> trans = getTransactions() ;
+        for (final SavingsAccountTransaction transaction : trans) {
             if ((transaction.isWithHoldTaxAndNotReversed())) {
                 withholdTransactions.add(transaction);
             }
@@ -569,7 +569,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     protected SavingsAccountTransaction findInterestPostingTransactionFor(final LocalDate postingDate) {
         SavingsAccountTransaction postingTransation = null;
-        for (final SavingsAccountTransaction transaction : this.transactions) {
+        List<SavingsAccountTransaction> trans = getTransactions() ;
+        for (final SavingsAccountTransaction transaction : trans) {
             if ((transaction.isInterestPostingAndNotReversed() || transaction.isOverdraftInterestAndNotReversed())
                     && transaction.occursOn(postingDate)) {
                 postingTransation = transaction;
@@ -598,7 +599,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             if (totalTax.compareTo(BigDecimal.ZERO) == 1) {
                 SavingsAccountTransaction withholdTransaction = SavingsAccountTransaction.withHoldTax(this, office(), date,
                         Money.of(currency, totalTax), taxSplit);
-                this.transactions.add(withholdTransaction);
+                addTransaction(withholdTransaction);
                 isTaxAdded = true;
             }
         }
@@ -621,7 +622,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                     withholdTransaction.reverse();
                     SavingsAccountTransaction newWithholdTransaction = SavingsAccountTransaction.withHoldTax(this, office(),
                             withholdTransaction.transactionLocalDate(), Money.of(currency, totalTax), taxSplit);
-                    this.transactions.add(newWithholdTransaction);
+                    addTransaction(newWithholdTransaction);
                     isTaxAdded = true;
                 }
             }
@@ -633,8 +634,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     protected SavingsAccountTransaction findLastTransaction(final LocalDate date) {
 
         SavingsAccountTransaction savingsTransaction = null;
-
-        for (final SavingsAccountTransaction transaction : this.transactions) {
+        List<SavingsAccountTransaction> trans = getTransactions() ;
+        for (final SavingsAccountTransaction transaction : trans) {
             if (transaction.isNotReversed() && transaction.occursOn(date)) {
                 savingsTransaction = transaction;
                 break;
@@ -763,7 +764,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 orderedNonInterestPostingTransactions.add(transaction);
             }
         }
-
+        orderedNonInterestPostingTransactions.sort(new SavingsAccountTransactionComparator());
         return orderedNonInterestPostingTransactions;
     }
 
@@ -819,7 +820,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                         accountTransaction.updateOverdraftAmount(overdraftAmount.getAmount());
                     }
                     accountTransaction.updateRunningBalance(runningBalance);
-                    this.transactions.add(accountTransaction);
+                    addTransaction(accountTransaction);
                     isTransactionsModified = true;
                 }
 
@@ -902,8 +903,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(this, office(), transactionDTO.getPaymentDetail(),
                 transactionDTO.getTransactionDate(), amount, transactionDTO.getCreatedDate(), transactionDTO.getAppUser(),
                 savingsAccountTransactionType);
-        this.transactions.add(transaction);
-
+        addTransaction(transaction);
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
         
         if(this.sub_status.equals(SavingsAccountSubStatusEnum.INACTIVE.getValue())
@@ -990,8 +990,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.withdrawal(this, office(),
                 transactionDTO.getPaymentDetail(), transactionDTO.getTransactionDate(), transactionAmountMoney,
                 transactionDTO.getCreatedDate(), transactionDTO.getAppUser());
-        this.transactions.add(transaction);
-
+        addTransaction(transaction);
         if (applyWithdrawFee) {
             // auto pay withdrawal fee
             payWithdrawalFee(transactionDTO.getTransactionAmount(), transactionDTO.getTransactionDate(), transactionDTO.getAppUser());
@@ -1410,7 +1409,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         accountingBridgeData.put("isAccountTransfer", isAccountTransfer);
 
         final List<Map<String, Object>> newSavingsTransactions = new ArrayList<>();
-        for (final SavingsAccountTransaction transaction : this.transactions) {
+        List<SavingsAccountTransaction> trans = getTransactions() ;
+        for (final SavingsAccountTransaction transaction : trans) {
             if (transaction.isReversed() && !existingReversedTransactionIds.contains(transaction.getId())) {
                 newSavingsTransactions.add(transaction.toMapData(currencyData));
             } else if (!existingTransactionIds.contains(transaction.getId())) {
@@ -1425,8 +1425,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     public Collection<Long> findExistingTransactionIds() {
 
         final Collection<Long> ids = new ArrayList<>();
-
-        for (final SavingsAccountTransaction transaction : this.transactions) {
+        List<SavingsAccountTransaction> trans = getTransactions() ;
+        for (final SavingsAccountTransaction transaction : trans) {
             ids.add(transaction.getId());
         }
 
@@ -1436,8 +1436,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     public Collection<Long> findExistingReversedTransactionIds() {
 
         final Collection<Long> ids = new ArrayList<>();
-
-        for (final SavingsAccountTransaction transaction : this.transactions) {
+        List<SavingsAccountTransaction> trans = getTransactions() ;
+        for (final SavingsAccountTransaction transaction : trans) {
             if (transaction.isReversed()) {
                 ids.add(transaction.getId());
             }
@@ -2266,9 +2266,19 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public List<SavingsAccountTransaction> getTransactions() {
-        return this.transactions;
+        if(this.orderedTransactions == null || isTransactionsDirty) {
+            this.orderedTransactions = new ArrayList<>(this.transactions) ;
+            this.orderedTransactions.sort(new SavingsAccountTransactionComparator());
+            this.isTransactionsDirty = false ;
+        }
+        return orderedTransactions;
     }
 
+    public void addTransaction(final SavingsAccountTransaction transaction) {
+        this.transactions.add(transaction);
+        this.isTransactionsDirty = true ;
+    }
+    
     public void setStatus(final Integer status) {
         this.status = status;
     }
@@ -2555,7 +2565,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final SavingsAccountChargePaidBy chargePaidBy = SavingsAccountChargePaidBy.instance(transaction, savingsAccountCharge, transaction
                 .getAmount(this.getCurrency()).getAmount());
         transaction.getSavingsAccountChargesPaid().add(chargePaidBy);
-        this.getTransactions().add(transaction);
+        this.transactions.add(transaction);
     }
 
     private SavingsAccountCharge getCharge(final Long savingsAccountChargeId) {
@@ -2573,7 +2583,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public Set<SavingsAccountCharge> charges() {
-        return (this.charges == null) ? new HashSet<SavingsAccountCharge>() : this.charges;
+        return (this.charges == null) ? new HashSet<>() : this.charges;
     }
 
     public void validateAccountValuesWithProduct() {

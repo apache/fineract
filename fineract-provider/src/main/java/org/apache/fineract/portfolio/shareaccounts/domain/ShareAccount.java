@@ -28,6 +28,7 @@ import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -44,8 +45,6 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProduct;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -133,8 +132,7 @@ public class ShareAccount extends AbstractPersistable<Long> {
     @JoinColumn(name = "savings_account_id", nullable = true)
     private SavingsAccount savingsAccount;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "shareAccount", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "shareAccount", orphanRemoval = true, fetch=FetchType.EAGER)
     private Set<ShareAccountTransaction> shareAccountTransactions;
 
     @Column(name = "lockin_period_frequency")
@@ -151,8 +149,7 @@ public class ShareAccount extends AbstractPersistable<Long> {
     @Column(name = "minimum_active_period_frequency_enum", nullable = true)
     private PeriodFrequencyType minimumActivePeriodFrequencyType;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "shareAccount", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "shareAccount", orphanRemoval = true, fetch=FetchType.EAGER)
     private Set<ShareAccountCharge> charges;
 
     @Transient
