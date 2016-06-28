@@ -379,8 +379,15 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         List<Map<String, Object>> dividendDetails = this.shareAccountDividendReadPlatformService.retriveDividendDetailsForPostDividents();
         StringBuilder errorMsg = new StringBuilder();
         for (Map<String, Object> dividendMap : dividendDetails) {
-            final Long id = ((BigInteger) dividendMap.get("id")).longValue();
-            final Long savingsId = ((BigInteger) dividendMap.get("savingsAccountId")).longValue();
+        	Long id = null ;
+        	Long savingsId = null ;
+        	if(dividendMap.get("id") instanceof BigInteger) { //Drizzle is returning BigInteger
+        		id = ((BigInteger)dividendMap.get("id")).longValue() ;
+        		savingsId = ((BigInteger)dividendMap.get("savingsAccountId")).longValue() ;
+        	}else { //MySQL connector is returning Long
+        		id = (Long) dividendMap.get("id") ;
+        		savingsId = (Long) dividendMap.get("savingsAccountId") ;
+        	}
             try {
                 this.shareAccountSchedularService.postDividend(id, savingsId);
             } catch (final PlatformApiDataValidationException e) {
