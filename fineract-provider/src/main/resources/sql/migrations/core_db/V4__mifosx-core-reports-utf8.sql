@@ -17,7 +17,7 @@
 -- under the License.
 --
 
-﻿truncate table stretchy_report;
+truncate table stretchy_report;
 truncate table stretchy_parameter;
 truncate table stretchy_report_parameter;
 

@@ -17,7 +17,7 @@
 -- under the License.
 --
 
-﻿-- drop tables in base-schema
+-- drop tables in base-schema
 SET foreign_key_checks = 0;
 
 -- drop accounting subsystem
