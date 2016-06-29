@@ -120,9 +120,14 @@ war {
 
 license {
     header rootProject.file('../LICENSE.md')
-    excludes(["**/*.html", "**/*.mustache", "**/*.sql", "**/package-info.java", "**/keystore.jks"])
+    excludes(["**/*.html", "**/*.mustache", "**/package-info.java", "**/keystore.jks"])
     strictCheck true
 }
+
+task licenseFormatBuildScripts (type:nl.javadude.gradle.plugins.license.License) {
+    source = fileTree(dir: '../', includes: ['**/*.bat', '**/*.sh'])
+}
+licenseFormat.dependsOn licenseFormatBuildScripts
 
 tomcatRun {
     httpPort = 8080
