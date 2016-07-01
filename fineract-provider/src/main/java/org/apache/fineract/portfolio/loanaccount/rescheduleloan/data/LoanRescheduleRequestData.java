@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.data;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
@@ -36,24 +35,18 @@ public class LoanRescheduleRequestData {
     private final String loanAccountNumber;
     private final LoanRescheduleRequestStatusEnumData statusEnum;
     private final Integer rescheduleFromInstallment;
-    private final Integer graceOnPrincipal;
-    private final Integer graceOnInterest;
     private final LocalDate rescheduleFromDate;
-    private final Integer extraTerms;
-    private final BigDecimal interestRate;
     private final Boolean recalculateInterest;
     private final CodeValueData rescheduleReasonCodeValue;
     private final LoanRescheduleRequestTimelineData timeline;
     private final String rescheduleReasonComment;
-    private final LocalDate adjustedDueDate;
     private final Collection<CodeValueData> rescheduleReasons;
     
     /**
      * LoanRescheduleRequestData constructor
      **/
     private LoanRescheduleRequestData(Long id, Long loanId, LoanRescheduleRequestStatusEnumData statusEnum,
-            Integer rescheduleFromInstallment, Integer graceOnPrincipal, Integer graceOnInterest, LocalDate rescheduleFromDate,
-            LocalDate adjustedDueDate, Integer extraTerms, BigDecimal interestRate, CodeValueData rescheduleReasonCodeValue,
+            Integer rescheduleFromInstallment, LocalDate rescheduleFromDate, CodeValueData rescheduleReasonCodeValue,
             String rescheduleReasonComment, LoanRescheduleRequestTimelineData timeline, final String clientName,
             final String loanAccountNumber, final Long clientId, final Boolean recalculateInterest, Collection<CodeValueData> rescheduleReasons) {
 
@@ -61,14 +54,9 @@ public class LoanRescheduleRequestData {
         this.loanId = loanId;
         this.statusEnum = statusEnum;
         this.rescheduleFromInstallment = rescheduleFromInstallment;
-        this.graceOnPrincipal = graceOnPrincipal;
-        this.graceOnInterest = graceOnInterest;
         this.rescheduleFromDate = rescheduleFromDate;
-        this.extraTerms = extraTerms;
-        this.interestRate = interestRate;
         this.rescheduleReasonCodeValue = rescheduleReasonCodeValue;
         this.rescheduleReasonComment = rescheduleReasonComment;
-        this.adjustedDueDate = adjustedDueDate;
         this.timeline = timeline;
         this.clientName = clientName;
         this.loanAccountNumber = loanAccountNumber;
@@ -81,14 +69,14 @@ public class LoanRescheduleRequestData {
      * @return an instance of the LoanRescheduleRequestData class
      **/
     public static LoanRescheduleRequestData instance(Long id, Long loanId, LoanRescheduleRequestStatusEnumData statusEnum,
-            Integer rescheduleFromInstallment, Integer graceOnPrincipal, Integer graceOnInterest, LocalDate rescheduleFromDate,
-            LocalDate adjustedDueDate, Integer extraTerms, BigDecimal interestRate, CodeValueData rescheduleReasonCodeValue,
+            Integer rescheduleFromInstallment, LocalDate rescheduleFromDate, CodeValueData rescheduleReasonCodeValue,
             String rescheduleReasonComment, LoanRescheduleRequestTimelineData timeline, final String clientName,
-            final String loanAccountNumber, final Long clientId, final Boolean recalculateInterest, Collection<CodeValueData> rescheduleReasons) {
+            final String loanAccountNumber, final Long clientId, final Boolean recalculateInterest,
+            Collection<CodeValueData> rescheduleReasons) {
 
-        return new LoanRescheduleRequestData(id, loanId, statusEnum, rescheduleFromInstallment, graceOnPrincipal, graceOnInterest,
-                rescheduleFromDate, adjustedDueDate, extraTerms, interestRate, rescheduleReasonCodeValue, rescheduleReasonComment,
-                timeline, clientName, loanAccountNumber, clientId, recalculateInterest, rescheduleReasons);
+        return new LoanRescheduleRequestData(id, loanId, statusEnum, rescheduleFromInstallment, rescheduleFromDate,
+                rescheduleReasonCodeValue, rescheduleReasonComment, timeline, clientName, loanAccountNumber, clientId, recalculateInterest,
+                rescheduleReasons);
     }
 
     /**
@@ -120,38 +108,10 @@ public class LoanRescheduleRequestData {
     }
 
     /**
-     * @return the graceOnPrincipal
-     */
-    public Integer getGraceOnPrincipal() {
-        return graceOnPrincipal;
-    }
-
-    /**
-     * @return the graceOnInterest
-     */
-    public Integer getGraceOnInterest() {
-        return graceOnInterest;
-    }
-
-    /**
      * @return the reschedule from date
      */
     public LocalDate getRescheduleFromDate() {
         return rescheduleFromDate;
-    }
-
-    /**
-     * @return the extraTerms
-     */
-    public Integer getExtraTerms() {
-        return extraTerms;
-    }
-
-    /**
-     * @return the interestRate
-     */
-    public BigDecimal getInterestRate() {
-        return interestRate;
     }
 
     /**
@@ -173,13 +133,6 @@ public class LoanRescheduleRequestData {
      **/
     public LoanRescheduleRequestTimelineData getTimeline() {
         return this.timeline;
-    }
-
-    /**
-     * @return the adjustedDueDate
-     */
-    public LocalDate getAdjustedDueDate() {
-        return adjustedDueDate;
     }
 
     /**
