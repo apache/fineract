@@ -205,11 +205,11 @@
 
 For API & System Architecture Documentation Apache Fineract includes following css and js packages with separate copyright notices and license terms.
 
-This product bundles normalize, copyright Nicolas Gallagher and
+This product bundles normalize v1.1.1 and v2.1.0, copyright Nicolas Gallagher and
 Jonathan Neal, which is available under a MIT license.
 For details, see licenses/normalize.MIT.
 
-This product bundles Modernizr, which is available under a MIT license.
+This product bundles Modernizr v2.6.2, which is available under a MIT license.
 For details, see licenses/modernizr.MIT.
 
 This product bundles filesaver, copyright Eli Grey,
@@ -225,11 +225,11 @@ David Duponchel, Franz Buchinger and António Afonso,
 which is available under a MIT license.
 For details, see licenses/jszip.MIT.
 
-This product bundles jQuery, copyright jQuery Foundation, Inc.
+This product bundles jQuery v1.7, v1.7.1, v1.9.1, v1.10.2, copyright jQuery Foundation, Inc.
 which is available under a MIT license.
 For details, see licenses/jQuery.MIT.
 
-This product bundles Respond, copyright Scott Jehl,
+This product bundles Respond v1.1.0, copyright Scott Jehl,
 which is available under a MIT license.
 For details, see licenses/respond.MIT.
 
@@ -237,7 +237,7 @@ This product bundles matchMedia polyfill, copyright Scott Jehl,
 which is available under a MIT license.
 For details, see licenses/polyfill.MIT.
 
-This product bundles HTML5Shiv, copyright Alexander Farkas,
+This product bundles HTML5Shiv v3.6.2pre, copyright Alexander Farkas,
 which is available under a MIT license.
 For details, see licenses/html5shiv.MIT.
 
@@ -249,23 +249,17 @@ This product bundles sizzle copyright jQuery Foundation and other contributors,
 which is available under a MIT license.
 For details, see licenses/sizzle.MIT.
 
-This product bundles some parts of es5-shim, copyright Kristopher Michael Kowal and contributors, 
-which is available under a MIT license.
+This product bundles some parts of es5-shim, copyright Kristopher Michael Kowal and contributors, which is available under a MIT license.
 For details, see licenses/es5shim.MIT.
 
-This product bundles toc, copyright Greg Allen,
+This product bundles toc v0.1.2, copyright Greg Allen,
 which is available under a MIT license.
 For details, see licenses/toc.MIT.
 
-This product bundles livejs, copyright Martin Kool and Q42,
+This product bundles livejs Version 4, copyright Martin Kool and Q42,
 which is available under a MIT license.
 For details, see licenses/livejs.MIT.
 
 This product bundles HTML5 Boilerplate, which is under a MIT license.
 For details, see licenses/h5bp.MIT.
-
-This product bundles Bootstrap, copyright Twitter, Inc.,
-which is available under a MIT license.
-For details, see licenses/bootstrap.MIT.
-
 ******************************************
