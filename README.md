@@ -15,7 +15,8 @@ Instructions to build war file
 1. Extract the archive file to your local directory
 2. Download gradle-wrapper.jar version 2.10 and place it in fineract-provider/gradle/wrapper folder
 3. Change current working directory to fineract-provider
-4. Run './gradlew clean war' to build deployable war file which will be created at fineract-provider/build/libs directory
+4. Run './gradlew clean war' or './gradlew build' to build deployable war file which will be created at fineract-provider/build/libs directory. 
+
 
 Instructions to execute Integration tests
 ============
@@ -25,7 +26,7 @@ Instructions to execute Integration tests
 4. With fineract-provider as current working directory run below commands
 4.a. ./gradlew migrateTenantListDB -PdbName=mifosplatform-tenants
 4.b. ./gradlew migrateTenantDB -PdbName=mifostenant-default
-5. Run './gradlew clean integrationTest'
+5. Run './gradlew clean integrationTest -PbuildType=TEST'
 
 
 More details of the project can be found at https://cwiki.apache.org/confluence/display/FINERACT
