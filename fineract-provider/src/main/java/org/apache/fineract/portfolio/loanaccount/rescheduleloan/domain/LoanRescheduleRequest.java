@@ -312,7 +312,7 @@ public class LoanRescheduleRequest extends AbstractPersistable<Long> {
 	 * @return the user that rejected the request 
 	 **/
 	public AppUser getRejectedByUser() {
-		return this.approvedByUser;
+		return this.rejectedByUser;
 	}
 	
 	/** 
