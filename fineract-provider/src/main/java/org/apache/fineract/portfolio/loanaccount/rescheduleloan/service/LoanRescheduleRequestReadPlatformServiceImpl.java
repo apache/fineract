@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.service;
 
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -71,13 +70,8 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             sqlBuilder.append("mc.id as clientId, ");
             sqlBuilder.append("ml.account_no as loanAccountNumber, ");
             sqlBuilder.append("lr.reschedule_from_installment as rescheduleFromInstallment, ");
-            sqlBuilder.append("lr.grace_on_principal as graceOnPrincipal, ");
-            sqlBuilder.append("lr.grace_on_interest as graceOnInterest, ");
             sqlBuilder.append("lr.reschedule_from_date as rescheduleFromDate, ");
-            sqlBuilder.append("lr.adjusted_due_date as adjustedDueDate, ");
-            sqlBuilder.append("lr.extra_terms as extraTerms, ");
             sqlBuilder.append("lr.recalculate_interest as recalculateInterest, ");
-            sqlBuilder.append("lr.interest_rate as interestRate, ");
             sqlBuilder.append("lr.reschedule_reason_cv_id as rescheduleReasonCvId, ");
             sqlBuilder.append("cv.code_value as rescheduleReasonCvValue, ");
             sqlBuilder.append("lr.reschedule_reason_comment as rescheduleReasonComment, ");
@@ -127,12 +121,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             final String loanAccountNumber = rs.getString("loanAccountNumber");
             final Long clientId = rs.getLong("clientId");
             final Integer rescheduleFromInstallment = JdbcSupport.getInteger(rs, "rescheduleFromInstallment");
-            final Integer graceOnPrincipal = JdbcSupport.getInteger(rs, "graceOnPrincipal");
-            final Integer graceOnInterest = JdbcSupport.getInteger(rs, "graceOnInterest");
             final LocalDate rescheduleFromDate = JdbcSupport.getLocalDate(rs, "rescheduleFromDate");
-            final LocalDate adjustedDueDate = JdbcSupport.getLocalDate(rs, "adjustedDueDate");
-            final Integer extraTerms = JdbcSupport.getInteger(rs, "extraTerms");
-            final BigDecimal interestRate = rs.getBigDecimal("interestRate");
             final Long rescheduleReasonCvId = JdbcSupport.getLong(rs, "rescheduleReasonCvId");
             final String rescheduleReasonCvValue = rs.getString("rescheduleReasonCvValue");
             final CodeValueData rescheduleReasonCodeValue = CodeValueData.instance(rescheduleReasonCvId, rescheduleReasonCvValue);
@@ -158,9 +147,9 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
                     submittedByFirstname, submittedByLastname, approvedOnDate, approvedByUsername, approvedByFirstname, approvedByLastname,
                     rejectedOnDate, rejectedByUsername, rejectedByFirstname, rejectedByLastname);
 
-            return LoanRescheduleRequestData.instance(id, loanId, statusEnum, rescheduleFromInstallment, graceOnPrincipal, graceOnInterest,
-                    rescheduleFromDate, adjustedDueDate, extraTerms, interestRate, rescheduleReasonCodeValue, rescheduleReasonComment,
-                    timeline, clientName, loanAccountNumber, clientId, recalculateInterest, rescheduleReasons);
+            return LoanRescheduleRequestData.instance(id, loanId, statusEnum, rescheduleFromInstallment, rescheduleFromDate,
+                    rescheduleReasonCodeValue, rescheduleReasonComment, timeline, clientName, loanAccountNumber, clientId,
+                    recalculateInterest, rescheduleReasons);
         }
 
     }
@@ -209,12 +198,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
         final Long loanId = null;
         final LoanRescheduleRequestStatusEnumData statusEnum = null;
         final Integer rescheduleFromInstallment = null;
-        final Integer graceOnPrincipal = null;
-        final Integer graceOnInterest = null;
         final LocalDate rescheduleFromDate = null;
-        final LocalDate adjustedDueDate = null;
-        final Integer extraTerms = null;
-        final BigDecimal interestRate = null;
         final CodeValueData rescheduleReasonCodeValue = null;
         final String rescheduleReasonComment = null;
         final LoanRescheduleRequestTimelineData timeline = null;
@@ -223,8 +207,8 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
         final Long clientId = null;
         final Boolean recalculateInterest = null;
 
-        return LoanRescheduleRequestData.instance(id, loanId, statusEnum, rescheduleFromInstallment, graceOnPrincipal, graceOnInterest,
-                rescheduleFromDate, adjustedDueDate, extraTerms, interestRate, rescheduleReasonCodeValue, rescheduleReasonComment,
-                timeline, clientName, loanAccountNumber, clientId, recalculateInterest, rescheduleReasons);
+        return LoanRescheduleRequestData.instance(id, loanId, statusEnum, rescheduleFromInstallment, rescheduleFromDate,
+                rescheduleReasonCodeValue, rescheduleReasonComment, timeline, clientName, loanAccountNumber, clientId, recalculateInterest,
+                rescheduleReasons);
     }
 }

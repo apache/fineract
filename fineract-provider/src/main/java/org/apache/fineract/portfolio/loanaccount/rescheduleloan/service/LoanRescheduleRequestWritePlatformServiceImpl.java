@@ -33,64 +33,51 @@ import java.util.Set;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
-import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.organisation.holiday.domain.Holiday;
-import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
-import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
-import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
-import org.apache.fineract.portfolio.calendar.domain.Calendar;
-import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
-import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
-import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
-import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
-import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
-import org.apache.fineract.portfolio.floatingrates.exception.FloatingRateNotFoundException;
-import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
-import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalcualtionAdditionalDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRescheduleRequestToTermVariationMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistory;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleHistoryRepository;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleHistoryWritePlatformService;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.data.LoanRescheduleRequestDataValidator;
-import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.DefaultLoanReschedulerFactory;
-import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleModel;
-import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleModelRepaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.exception.LoanRescheduleRequestNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
-import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -107,25 +94,22 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
     private final static Logger logger = LoggerFactory.getLogger(LoanRescheduleRequestWritePlatformServiceImpl.class);
 
-    private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
     private final PlatformSecurityContext platformSecurityContext;
     private final LoanRescheduleRequestDataValidator loanRescheduleRequestDataValidator;
     private final LoanRescheduleRequestRepository loanRescheduleRequestRepository;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
-    private final ConfigurationDomainService configurationDomainService;
-    private final HolidayRepositoryWrapper holidayRepository;
-    private final WorkingDaysRepositoryWrapper workingDaysRepository;
     private final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository;
     private final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService;
-    private final CalendarInstanceRepository calendarInstanceRepository;
     private final LoanChargeReadPlatformService loanChargeReadPlatformService;
     private final LoanTransactionRepository loanTransactionRepository;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final LoanRepository loanRepository;
     private final LoanAssembler loanAssembler;
-    private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
     private final LoanUtilService loanUtilService;
+    private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
+    private final LoanScheduleGeneratorFactory loanScheduleFactory;
+    private final LoanSummaryWrapper loanSummaryWrapper;
 
     /**
      * LoanRescheduleRequestWritePlatformServiceImpl constructor
@@ -133,38 +117,35 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
      * @return void
      **/
     @Autowired
-    public LoanRescheduleRequestWritePlatformServiceImpl(LoanRepositoryWrapper loanRepositoryWrapper,
-            CodeValueRepositoryWrapper codeValueRepositoryWrapper, PlatformSecurityContext platformSecurityContext,
-            LoanRescheduleRequestDataValidator loanRescheduleRequestDataValidator,
-            LoanRescheduleRequestRepository loanRescheduleRequestRepository,
-            ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository, ConfigurationDomainService configurationDomainService,
-            HolidayRepositoryWrapper holidayRepository, WorkingDaysRepositoryWrapper workingDaysRepository,
-            LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository,
+    public LoanRescheduleRequestWritePlatformServiceImpl(
+            final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final PlatformSecurityContext platformSecurityContext,
+            final LoanRescheduleRequestDataValidator loanRescheduleRequestDataValidator,
+            final LoanRescheduleRequestRepository loanRescheduleRequestRepository,
+            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository, 
+            final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository,
             final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService,
-            final CalendarInstanceRepository calendarInstanceRepository, final LoanChargeReadPlatformService loanChargeReadPlatformService,
+            final LoanChargeReadPlatformService loanChargeReadPlatformService,
             final LoanTransactionRepository loanTransactionRepository,
             final JournalEntryWritePlatformService journalEntryWritePlatformService, final LoanRepository loanRepository,
-            final LoanAssembler loanAssembler, final FloatingRatesReadPlatformService floatingRatesReadPlatformService,
-            final LoanUtilService loanUtilService) {
-        this.loanRepositoryWrapper = loanRepositoryWrapper;
+            final LoanAssembler loanAssembler, final LoanUtilService loanUtilService, 
+            final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
+            final LoanScheduleGeneratorFactory loanScheduleFactory, final LoanSummaryWrapper loanSummaryWrapper) {
         this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
         this.platformSecurityContext = platformSecurityContext;
         this.loanRescheduleRequestDataValidator = loanRescheduleRequestDataValidator;
         this.loanRescheduleRequestRepository = loanRescheduleRequestRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
-        this.configurationDomainService = configurationDomainService;
-        this.holidayRepository = holidayRepository;
-        this.workingDaysRepository = workingDaysRepository;
         this.loanRepaymentScheduleHistoryRepository = loanRepaymentScheduleHistoryRepository;
         this.loanScheduleHistoryWritePlatformService = loanScheduleHistoryWritePlatformService;
-        this.calendarInstanceRepository = calendarInstanceRepository;
         this.loanChargeReadPlatformService = loanChargeReadPlatformService;
         this.loanTransactionRepository = loanTransactionRepository;
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
         this.loanRepository = loanRepository;
         this.loanAssembler = loanAssembler;
-        this.floatingRatesReadPlatformService = floatingRatesReadPlatformService;
         this.loanUtilService = loanUtilService;
+        this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
+        this.loanScheduleFactory = loanScheduleFactory;
+        this.loanSummaryWrapper = loanSummaryWrapper;
     }
 
     /**
@@ -182,7 +163,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final Long loanId = jsonCommand.longValueOfParameterNamed(RescheduleLoansApiConstants.loanIdParamName);
 
             // use the loan id to get a Loan entity object
-            final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+            final Loan loan = this.loanAssembler.assembleFrom(loanId);
 
             // validate the request in the JsonCommand object passed as
             // parameter
@@ -275,12 +256,24 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             }
 
             final LoanRescheduleRequest loanRescheduleRequest = LoanRescheduleRequest.instance(loan,
-                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), rescheduleFromInstallment, graceOnPrincipal, graceOnInterest,
-                    rescheduleFromDate, adjustedDueDate, extraTerms, recalculateInterest, interestRate, rescheduleReasonCodeValue,
+                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), rescheduleFromInstallment, rescheduleFromDate, recalculateInterest, rescheduleReasonCodeValue,
                     rescheduleReasonComment, submittedOnDate, this.platformSecurityContext.authenticatedUser(), null, null, null, null);
 
+            
+            // update reschedule request to term variations mapping
+            List<LoanRescheduleRequestToTermVariationMapping> loanRescheduleRequestToTermVariationMappings = new ArrayList<>();
+            final Boolean isActive = false;
+            final boolean isSpecificToInstallment = false;
+            BigDecimal decimalValue = null;
+            Date dueDate = null;
+            // create term variations for flat and declining balance loans 
+            createLoanTermVariationsForRegularLoans(loan, graceOnPrincipal, graceOnInterest, extraTerms, interestRate, rescheduleFromDate,
+                    adjustedDueDate, loanRescheduleRequest, loanRescheduleRequestToTermVariationMappings, isActive,
+                    isSpecificToInstallment, decimalValue, dueDate);
+            
             // create a new entry in the m_loan_reschedule_request table
             this.loanRescheduleRequestRepository.save(loanRescheduleRequest);
+            this.loanRepository.save(loan);
 
             return new CommandProcessingResultBuilder().withCommandId(jsonCommand.commandId()).withEntityId(loanRescheduleRequest.getId())
                     .withLoanId(loan.getId()).build();
@@ -293,6 +286,65 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             // return an empty command processing result object
             return CommandProcessingResult.empty();
         }
+    }
+
+    private void createLoanTermVariationsForRegularLoans(final Loan loan, final Integer graceOnPrincipal, final Integer graceOnInterest,
+            final Integer extraTerms, final BigDecimal interestRate, Date rescheduleFromDate, Date adjustedDueDate,
+            final LoanRescheduleRequest loanRescheduleRequest,
+            List<LoanRescheduleRequestToTermVariationMapping> loanRescheduleRequestToTermVariationMappings, final Boolean isActive,
+            final boolean isSpecificToInstallment, BigDecimal decimalValue, Date dueDate) {
+        
+        if (rescheduleFromDate != null && adjustedDueDate != null) {
+            LoanTermVariations parent = null;
+            final Integer termType = LoanTermVariationType.DUE_DATE.getValue();
+            createLoanTermVariations(termType, loan, rescheduleFromDate, adjustedDueDate, loanRescheduleRequestToTermVariationMappings,
+                    isActive, isSpecificToInstallment, decimalValue, parent);
+        }
+
+        if (rescheduleFromDate != null && interestRate != null) {
+            LoanTermVariations parent = null;
+            final Integer termType = LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getValue();
+            createLoanTermVariations(termType, loan, rescheduleFromDate, dueDate, loanRescheduleRequestToTermVariationMappings, isActive,
+                    isSpecificToInstallment, interestRate, parent);
+        }
+
+        if (rescheduleFromDate != null && graceOnPrincipal != null) {
+            final Integer termType = LoanTermVariationType.GRACE_ON_PRINCIPAL.getValue();
+            LoanTermVariations parent = null;
+            parent = createLoanTermVariations(termType, loan, rescheduleFromDate, dueDate, loanRescheduleRequestToTermVariationMappings,
+                    isActive, isSpecificToInstallment, BigDecimal.valueOf(graceOnPrincipal), parent);
+            if (extraTerms == null) {
+                BigDecimal extraTermsBasedOnGracePeriods = BigDecimal.valueOf(graceOnPrincipal);
+                createLoanTermVariations(LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getValue(), loan, rescheduleFromDate, dueDate,
+                        loanRescheduleRequestToTermVariationMappings, isActive, isSpecificToInstallment, extraTermsBasedOnGracePeriods,
+                        parent);
+            }
+
+        }
+
+        if (rescheduleFromDate != null && graceOnInterest != null) {
+            LoanTermVariations parent = null;
+            final Integer termType = LoanTermVariationType.GRACE_ON_INTEREST.getValue();
+            createLoanTermVariations(termType, loan, rescheduleFromDate, dueDate, loanRescheduleRequestToTermVariationMappings, isActive,
+                    isSpecificToInstallment, BigDecimal.valueOf(graceOnInterest), parent);
+        }
+
+        if (rescheduleFromDate != null && extraTerms != null) {
+            LoanTermVariations parent = null;
+            final Integer termType = LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getValue();
+            createLoanTermVariations(termType, loan, rescheduleFromDate, dueDate, loanRescheduleRequestToTermVariationMappings, isActive,
+                    isSpecificToInstallment, BigDecimal.valueOf(extraTerms), parent);
+        }
+        loanRescheduleRequest.updateLoanRescheduleRequestToTermVariationMappings(loanRescheduleRequestToTermVariationMappings);
+    }
+
+    private LoanTermVariations createLoanTermVariations(final Integer termType, final Loan loan, Date rescheduleFromDate,
+            Date adjustedDueDate, List<LoanRescheduleRequestToTermVariationMapping> loanRescheduleRequestToTermVariationMappings,
+            final Boolean isActive, final boolean isSpecificToInstallment, final BigDecimal decimalValue, LoanTermVariations parent) {
+        LoanTermVariations loanTermVariation = new LoanTermVariations(termType, rescheduleFromDate, decimalValue, adjustedDueDate,
+                isSpecificToInstallment, loan, loan.status().getValue(), isActive, parent);
+        loanRescheduleRequestToTermVariationMappings.add(LoanRescheduleRequestToTermVariationMapping.createNew(loanTermVariation));
+        return loanTermVariation;
     }
 
     @Override
@@ -324,95 +376,53 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
             if (!changes.isEmpty()) {
                 Loan loan = loanRescheduleRequest.getLoan();
-                final LoanSummary loanSummary = loan.getSummary();
-
-                final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
-                final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan
-                        .getDisbursementDate().toDate());
-                final WorkingDays workingDays = this.workingDaysRepository.findOne();
-                final LoanProductMinimumRepaymentScheduleRelatedDetail loanProductRelatedDetail = loan.getLoanRepaymentScheduleDetail();
-                final MonetaryCurrency currency = loanProductRelatedDetail.getCurrency();
-                final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
-
-                final InterestMethod interestMethod = loan.getLoanRepaymentScheduleDetail().getInterestMethod();
-                final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
-                final MathContext mathContext = new MathContext(8, roundingMode);
-
-                Collection<LoanRepaymentScheduleHistory> loanRepaymentScheduleHistoryList = this.loanScheduleHistoryWritePlatformService
-                        .createLoanScheduleArchive(loan.getRepaymentScheduleInstallments(), loan, loanRescheduleRequest);
-
-                HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
-                CalendarInstance restCalendarInstance = null;
-                CalendarInstance compoundingCalendarInstance = null;
-                if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
-                    restCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(
-                            loan.loanInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_REST_DETAIL.getValue());
-                    compoundingCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(
-                            loan.loanInterestRecalculationDetailId(), CalendarEntityType.LOAN_RECALCULATION_COMPOUNDING_DETAIL.getValue());
-                }
-                final CalendarInstance loanCalendarInstance = calendarInstanceRepository.findCalendarInstaneByEntityId(loan.getId(),
-                        CalendarEntityType.LOANS.getValue());
-                Calendar loanCalendar = null;
-                if (loanCalendarInstance != null) {
-                    loanCalendar = loanCalendarInstance.getCalendar();
-                }
-                FloatingRateDTO floatingRateDTO = constructFloatingRateDTO(loan);
-                Boolean isSkipRepaymentOnFirstMonth = false;
-                Integer numberOfDays = 0;
-                boolean isSkipRepaymentOnFirstMonthEnabled = this.configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
-                if(isSkipRepaymentOnFirstMonthEnabled){
-                    isSkipRepaymentOnFirstMonth = this.loanUtilService.isLoanRepaymentsSyncWithMeeting(loan.group(), loanCalendar);
-                    if(isSkipRepaymentOnFirstMonth) { numberOfDays = configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue(); }
-                    
-                }
-                LoanRescheduleModel loanRescheduleModel = new DefaultLoanReschedulerFactory().reschedule(mathContext, interestMethod,
-                        loanRescheduleRequest, applicationCurrency, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance,
-                        loanCalendar, floatingRateDTO, isSkipRepaymentOnFirstMonth, numberOfDays);
-
-                final Collection<LoanRescheduleModelRepaymentPeriod> periods = loanRescheduleModel.getPeriods();
-                List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();
-                Collection<LoanCharge> waiveLoanCharges = new ArrayList<>();
-                final Set<LoanInterestRecalcualtionAdditionalDetails> compoundingDetails = null;
-                for (LoanRescheduleModelRepaymentPeriod period : periods) {
-
-                    if (period.isNew()) {
-                        LoanRepaymentScheduleInstallment repaymentScheduleInstallment = new LoanRepaymentScheduleInstallment(loan,
-                                period.periodNumber(), period.periodFromDate(), period.periodDueDate(), period.principalDue(),
-                                period.interestDue(), BigDecimal.ZERO, BigDecimal.ZERO, false, compoundingDetails);
-
-                        loan.addLoanRepaymentScheduleInstallment(repaymentScheduleInstallment);
-                        repaymentScheduleInstallments.add(repaymentScheduleInstallment) ;
+                LocalDate rescheduleFromDate = null;
+                for (LoanTermVariations loanTermVariation : loan.getLoanTermVariations()) {
+                    if (loanTermVariation.getTermType().isDueDateVariation()
+                            && loanTermVariation.fetchDateValue().equals(loanRescheduleRequest.getRescheduleFromDate())) {
+                        loanTermVariation.markAsInactive();
+                        rescheduleFromDate = loanTermVariation.fetchTermApplicaDate();
                     }
-
-                    else {
-                        for (LoanRepaymentScheduleInstallment repaymentScheduleInstallment : repaymentScheduleInstallments) {
-
-                            if (repaymentScheduleInstallment.getInstallmentNumber().equals(period.oldPeriodNumber())) {
-
-                                LocalDate periodDueDate = repaymentScheduleInstallment.getDueDate();
-                                Money zeroAmount = Money.of(currency, new BigDecimal(0));
-
-                                repaymentScheduleInstallment.updateInstallmentNumber(period.periodNumber());
-                                repaymentScheduleInstallment.updateFromDate(period.periodFromDate());
-                                repaymentScheduleInstallment.updateDueDate(period.periodDueDate());
-                                repaymentScheduleInstallment.updatePrincipal(period.principalDue());
-                                repaymentScheduleInstallment.updateInterestCharged(period.interestDue());
-
-                                if (Money.of(currency, period.principalDue()).isZero() && Money.of(currency, period.interestDue()).isZero()
-                                        && repaymentScheduleInstallment.isNotFullyPaidOff()) {
-
-                                    if (repaymentScheduleInstallment.getPenaltyChargesOutstanding(currency).isGreaterThan(zeroAmount)
-                                            || repaymentScheduleInstallment.getFeeChargesOutstanding(currency).isGreaterThan(zeroAmount)) {
-
-                                        waiveLoanCharges.addAll(loan.getLoanCharges(periodDueDate));
-                                    }
-                                }
-
-                                break;
-                            }
+                }
+                final Set<LoanRescheduleRequestToTermVariationMapping> loanRescheduleRequestToTermVariationMappings = loanRescheduleRequest
+                        .getLoanRescheduleRequestToTermVariationMappings();
+                if (!loanRescheduleRequestToTermVariationMappings.isEmpty()) {
+                    final Boolean isActive = true;
+                    for (LoanRescheduleRequestToTermVariationMapping loanRescheduleRequestToTermVariationMapping : loanRescheduleRequestToTermVariationMappings) {
+                        loanRescheduleRequestToTermVariationMapping.getLoanTermVariations().updateIsActive(isActive);
+                        if (loanRescheduleRequestToTermVariationMapping.getLoanTermVariations().getTermType().isDueDateVariation()
+                                && rescheduleFromDate != null) {
+                            loanRescheduleRequestToTermVariationMapping.getLoanTermVariations().setTermApplicableFrom(
+                                    rescheduleFromDate.toDate());
                         }
                     }
                 }
+                if (rescheduleFromDate == null) {
+                    rescheduleFromDate = loanRescheduleRequest.getRescheduleFromDate();
+                }
+                ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan,
+                        loanRescheduleRequest.getRescheduleFromDate());
+                
+                Collection<LoanRepaymentScheduleHistory> loanRepaymentScheduleHistoryList = this.loanScheduleHistoryWritePlatformService
+                        .createLoanScheduleArchive(loan.getRepaymentScheduleInstallments(), loan, loanRescheduleRequest);
+                
+                final LoanApplicationTerms loanApplicationTerms = loan.constructLoanApplicationTerms(scheduleGeneratorDTO);
+
+                final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
+                final MathContext mathContext = new MathContext(8, roundingMode);
+                final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.loanRepaymentScheduleTransactionProcessorFactory
+                        .determineProcessor(loan.transactionProcessingStrategy());
+                final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
+                final LoanLifecycleStateMachine loanLifecycleStateMachine = null;
+                loan.setHelpers(loanLifecycleStateMachine, this.loanSummaryWrapper, this.loanRepaymentScheduleTransactionProcessorFactory);
+                final LoanScheduleDTO loanSchedule = loanScheduleGenerator.rescheduleNextInstallments(mathContext, loanApplicationTerms,
+                        loan.charges(), loanApplicationTerms.getHolidayDetailDTO(),
+                        loan.retreiveListOfTransactionsPostDisbursementExcludeAccruals(), loanRepaymentScheduleTransactionProcessor,
+                        loan.getRepaymentScheduleInstallments(), rescheduleFromDate);
+                
+                loan.updateLoanSchedule(loanSchedule.getInstallments(), appUser);
+                loan.recalculateAllCharges();
+                loan.processTransactions();
 
                 for (LoanRepaymentScheduleHistory loanRepaymentScheduleHistory : loanRepaymentScheduleHistoryList) {
                     this.loanRepaymentScheduleHistoryRepository.save(loanRepaymentScheduleHistory);
@@ -421,30 +431,9 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 loan.updateRescheduledByUser(appUser);
                 loan.updateRescheduledOnDate(new LocalDate());
 
-                // waive all loan charges of zero instalments
-                waiveLoanCharges(loan, waiveLoanCharges);
-
-                // update the Loan summary
-                loanSummary.updateSummary(currency, loan.getPrincpal(), repaymentScheduleInstallments, new LoanSummaryWrapper(), true, null);
-
-                // update the total number of schedule repayments
-                loan.updateNumberOfRepayments(periods.size());
-
-                // update the loan term frequency (loan term frequency = number
-                // of repayments)
-                loan.updateTermFrequency(periods.size());
-
                 // update the status of the request
                 loanRescheduleRequest.approve(appUser, approvedOnDate);
-
-                // update the derived fields of each loan repayments schedule
-                // instalments
-                for (final LoanRepaymentScheduleInstallment repaymentScheduleInstallment : repaymentScheduleInstallments) {
-                    repaymentScheduleInstallment.updateDerivedFields(currency, new LocalDate());
-                }
-
-                // updates maturity date
-                loan.updateLoanScheduleDependentDerivedFields();
+                
                 // update the loan object
                 this.loanRepository.save(loan);
             }
@@ -562,6 +551,10 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
             if (!changes.isEmpty()) {
                 loanRescheduleRequest.reject(appUser, rejectedOnDate);
+                Set<LoanRescheduleRequestToTermVariationMapping> loanRescheduleRequestToTermVariationMappings = loanRescheduleRequest.getLoanRescheduleRequestToTermVariationMappings();
+                for(LoanRescheduleRequestToTermVariationMapping loanRescheduleRequestToTermVariationMapping : loanRescheduleRequestToTermVariationMappings){
+                    loanRescheduleRequestToTermVariationMapping.getLoanTermVariations().markAsInactive();
+                }
             }
 
             return new CommandProcessingResultBuilder().withCommandId(jsonCommand.commandId()).withEntityId(loanRescheduleRequestId)
@@ -593,20 +586,4 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 "Unknown data integrity issue with resource.");
     }
 
-    private FloatingRateDTO constructFloatingRateDTO(final Loan loan) {
-        FloatingRateDTO floatingRateDTO = null;
-        if (loan.loanProduct().isLinkedToFloatingInterestRate()) {
-            boolean isFloatingInterestRate = loan.getIsFloatingInterestRate();
-            BigDecimal interestRateDiff = loan.getInterestRateDifferential();
-            List<FloatingRatePeriodData> baseLendingRatePeriods = null;
-            try {
-                baseLendingRatePeriods = this.floatingRatesReadPlatformService.retrieveBaseLendingRate().getRatePeriods();
-            } catch (final FloatingRateNotFoundException ex) {
-                // Do not do anything
-            }
-            floatingRateDTO = new FloatingRateDTO(isFloatingInterestRate, loan.getDisbursementDate(), interestRateDiff,
-                    baseLendingRatePeriods);
-        }
-        return floatingRateDTO;
-    }
 }
