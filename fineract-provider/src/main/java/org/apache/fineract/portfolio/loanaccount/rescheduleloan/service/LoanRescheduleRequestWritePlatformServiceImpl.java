@@ -367,7 +367,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 }
                 LoanRescheduleModel loanRescheduleModel = new DefaultLoanReschedulerFactory().reschedule(mathContext, interestMethod,
                         loanRescheduleRequest, applicationCurrency, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance,
-                        loanCalendar, floatingRateDTO, isSkipRepaymentOnFirstMonth, numberOfDays);
+                        loanCalendar, floatingRateDTO, isSkipRepaymentOnFirstMonth, numberOfDays, loan.charges());
 
                 final Collection<LoanRescheduleModelRepaymentPeriod> periods = loanRescheduleModel.getPeriods();
                 List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = loan.getRepaymentScheduleInstallments();

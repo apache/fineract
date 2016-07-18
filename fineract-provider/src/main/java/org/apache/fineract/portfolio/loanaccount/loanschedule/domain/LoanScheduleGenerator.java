@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.MathContext;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -55,5 +56,6 @@ public interface LoanScheduleGenerator {
     LoanRescheduleModel reschedule(final MathContext mathContext, final LoanRescheduleRequest loanRescheduleRequest,
             final ApplicationCurrency applicationCurrency, final HolidayDetailDTO holidayDetailDTO, CalendarInstance restCalendarInstance,
             CalendarInstance compoundingCalendarInstance, final Calendar loanCalendar, FloatingRateDTO floatingRateDTO,
-            final boolean isSkipRepaymentonmonthFirst, final Integer numberofdays);
+            final boolean isSkipRepaymentonmonthFirst, final Integer numberofdays, 
+            final Collection<LoanCharge> loanCharges);
 }

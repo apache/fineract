@@ -19,12 +19,14 @@
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain;
 
 import java.math.MathContext;
+import java.util.Collection;
 
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 
 public interface LoanReschedulerFactory {
@@ -33,5 +35,5 @@ public interface LoanReschedulerFactory {
             final LoanRescheduleRequest loanRescheduleRequest, final ApplicationCurrency applicationCurrency,
             final HolidayDetailDTO holidayDetailDTO, CalendarInstance restCalendarInstance, CalendarInstance compoundingCalendarInstance,
             final Calendar loanCalendar, FloatingRateDTO floatingRateDTO, final boolean isSkipRepaymentonmonthFirst,
-            final Integer numberofdays);
+            final Integer numberofdays, final Collection<LoanCharge> loanCharges);
 }

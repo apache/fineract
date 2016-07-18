@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
@@ -31,7 +32,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepayme
 
 public final class LoanRescheduleModel {
 
-    private final Collection<LoanRescheduleModelRepaymentPeriod> periods;
+    private Collection<LoanRescheduleModelRepaymentPeriod> periods;
     private final Collection<LoanRepaymentScheduleHistory> oldPeriods;
     private final ApplicationCurrency applicationCurrency;
     private final int loanTermInDays;
@@ -114,5 +115,17 @@ public final class LoanRescheduleModel {
 
     public Collection<LoanRepaymentScheduleHistory> getOldPeriods() {
         return this.oldPeriods;
+    }
+
+    /**
+     * Updates the "periods" property
+     * 
+     * @param periods list of {@link LoanRescheduleModelRepaymentPeriod} objects 
+     * to be set as value of the "periods" property
+     */
+    public void updatePeriods(List<LoanRescheduleModelRepaymentPeriod> periods) {
+        if (periods != null) {
+            this.periods = periods;
+        }
     }
 }

@@ -21,6 +21,8 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.service;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -53,6 +55,9 @@ import org.apache.fineract.portfolio.loanaccount.rescheduleloan.exception.LoanRe
 import org.apache.fineract.portfolio.loanaccount.service.LoanUtilService;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleModelRepaymentPeriod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -95,6 +100,14 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
         if (loanRescheduleRequest == null) { throw new LoanRescheduleRequestNotFoundException(requestId); }
 
         Loan loan = loanRescheduleRequest.getLoan();
+        final Collection<LoanCharge> loanChargeList = loan.charges();
+        BigDecimal chargesDueAtTimeOfDisbursement = BigDecimal.ZERO;
+        
+        for (LoanCharge loanCharge : loanChargeList) {
+            if (loanCharge.isDueAtDisbursement()) {
+                chargesDueAtTimeOfDisbursement = chargesDueAtTimeOfDisbursement.add(loanCharge.amount());
+            }
+        } 
 
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan
@@ -135,7 +148,21 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
         }
         LoanRescheduleModel loanRescheduleModel = new DefaultLoanReschedulerFactory().reschedule(mathContext, interestMethod,
                 loanRescheduleRequest, applicationCurrency, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance,
-                loanCalendar, floatingRateDTO, isSkipRepaymentOnFirstMonth, numberOfDays);
+                loanCalendar, floatingRateDTO, isSkipRepaymentOnFirstMonth, numberOfDays, loanChargeList);
+        
+        List<LoanRescheduleModelRepaymentPeriod> newPeriods = new ArrayList<>(loanRescheduleModel.getPeriods());
+        
+        // create a new LoanRescheduleModelRepaymentPeriod for the disbursement period
+        LoanRescheduleModelRepaymentPeriod loanRescheduleModelRepaymentPeriod = LoanRescheduleModelRepaymentPeriod
+                .instance(0, 0, null, loan.getDisbursementDate(), loan.getPrincpal(), null, Money.zero(currency), Money.of(currency, chargesDueAtTimeOfDisbursement), 
+                        Money.zero(currency), Money.of(currency, chargesDueAtTimeOfDisbursement), false);
+        
+        // add disbursement period to the beginning of the list of new periods
+        newPeriods.add(0, loanRescheduleModelRepaymentPeriod);
+        
+        // update the "periods" property of the LoanRescheduleModel object
+        loanRescheduleModel.updatePeriods(newPeriods);
+        
         LoanRescheduleModel loanRescheduleModelWithOldPeriods = LoanRescheduleModel.createWithSchedulehistory(loanRescheduleModel,
                 oldPeriods);
         return loanRescheduleModelWithOldPeriods;

@@ -19,12 +19,14 @@
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain;
 
 import java.math.MathContext;
+import java.util.Collection;
 
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
 import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DecliningBalanceInterestLoanScheduleGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.FlatInterestLoanScheduleGenerator;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
@@ -36,7 +38,8 @@ public class DefaultLoanReschedulerFactory implements LoanReschedulerFactory {
             final LoanRescheduleRequest loanRescheduleRequest, final ApplicationCurrency applicationCurrency,
             final HolidayDetailDTO holidayDetailDTO, final CalendarInstance restCalendarInstance,
             final CalendarInstance compoundingCalendarInstance, final Calendar loanCalendar, final FloatingRateDTO floatingRateDTO,
-            final boolean isSkipRepaymentonmonthFirst, final Integer numberofdays) {
+            final boolean isSkipRepaymentonmonthFirst, final Integer numberofdays, 
+            final Collection<LoanCharge> loanCharges) {
 
         LoanRescheduleModel loanRescheduleModel = null;
 
@@ -44,13 +47,13 @@ public class DefaultLoanReschedulerFactory implements LoanReschedulerFactory {
             case DECLINING_BALANCE:
                 loanRescheduleModel = new DecliningBalanceInterestLoanScheduleGenerator().reschedule(mathContext, loanRescheduleRequest,
                         applicationCurrency, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance, loanCalendar,
-                        floatingRateDTO, isSkipRepaymentonmonthFirst, numberofdays);
+                        floatingRateDTO, isSkipRepaymentonmonthFirst, numberofdays, loanCharges);
             break;
 
             case FLAT:
                 loanRescheduleModel = new FlatInterestLoanScheduleGenerator().reschedule(mathContext, loanRescheduleRequest,
                         applicationCurrency, holidayDetailDTO, restCalendarInstance, compoundingCalendarInstance, loanCalendar,
-                        floatingRateDTO, isSkipRepaymentonmonthFirst, numberofdays);
+                        floatingRateDTO, isSkipRepaymentonmonthFirst, numberofdays, loanCharges);
             break;
 
             case INVALID:
