@@ -49,7 +49,7 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
 
         public String schema() {
             return " cv.id as id, cv.code_value as value, cv.code_id as codeId, cv.code_description as description, cv.order_position as position,"
-                    + " cv.is_active isActive from m_code_value as cv join m_code c on cv.code_id = c.id ";
+                    + " cv.is_active isActive, cv.is_mandatory as mandatory from m_code_value as cv join m_code c on cv.code_id = c.id ";
         }
 
         @Override
@@ -60,7 +60,9 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
             final Integer position = rs.getInt("position");
             final String description = rs.getString("description");
             final boolean isActive = rs.getBoolean("isActive");
-            return CodeValueData.instance(id, value, position, description, isActive);
+            final boolean mandatory = rs.getBoolean("mandatory");
+            
+            return CodeValueData.instance(id, value, position, description, isActive, mandatory);
         }
     }
 
