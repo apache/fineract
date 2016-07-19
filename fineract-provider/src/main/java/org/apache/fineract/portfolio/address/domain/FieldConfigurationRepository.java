@@ -16,17 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.configuration.service;
+package org.apache.fineract.portfolio.address.domain;
 
-import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationData;
-import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface ConfigurationReadPlatformService {
-
-    GlobalConfigurationPropertyData retrieveGlobalConfiguration(Long configId);
-    
-    GlobalConfigurationPropertyData retrieveGlobalConfiguration(String name);
-
-    GlobalConfigurationData retrieveGlobalConfiguration(boolean survey);
+public interface FieldConfigurationRepository
+		extends JpaRepository<FieldConfiguration, Long>, JpaSpecificationExecutor<FieldConfiguration> {
 
 }
