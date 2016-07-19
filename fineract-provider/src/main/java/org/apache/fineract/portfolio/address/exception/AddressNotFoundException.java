@@ -16,17 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.configuration.service;
+package org.apache.fineract.portfolio.address.exception;
 
-import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationData;
-import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-public interface ConfigurationReadPlatformService {
+public class AddressNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    GlobalConfigurationPropertyData retrieveGlobalConfiguration(Long configId);
-    
-    GlobalConfigurationPropertyData retrieveGlobalConfiguration(String name);
+	public AddressNotFoundException(final long clientId) {
+		super("error.msg.address.client.Identifier.not.found",
+				"Client with client ID `" + clientId + "` is not mapped with any address", clientId);
+	}
 
-    GlobalConfigurationData retrieveGlobalConfiguration(boolean survey);
-
+	public AddressNotFoundException(final long clientId, final long addressTypeId) {
+		super("error.msg.address.client.addresstype.not.found",
+				"Client with client ID`" + clientId + "` does not have address" + " type with id", addressTypeId);
+	}
 }

@@ -41,10 +41,37 @@ public class CommandWrapperBuilder {
     private String transactionId;
     private Long productId;
     private Long templateId;
+   
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
-                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId);
+                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId,
+                this.templateId);
+    }
+    
+    public CommandWrapperBuilder addClientAddress(final long clientId,final long addressTypeId) {
+        this.actionName = "CREATE";
+        this.entityName = "ADDRESS";
+        this.entityId = addressTypeId;
+        this.href = "/clients/addresses/template";
+        this.clientId=clientId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder updateClientAddress(final long clientId) {
+        this.actionName = "UPDATE";
+        this.entityName = "ADDRESS";
+        this.href = "/clients/addresses/template";
+        this.clientId=clientId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder addEntityFieldConfiguration(final String entityname) {
+        this.actionName = "MAP";
+        this.entityName = entityname.toUpperCase();
+        this.entityId = null;
+        this.href = "/fieldconfiguration/"+entityname;
+        return this;
     }
 
     public CommandWrapperBuilder withLoanId(final Long withLoanId) {

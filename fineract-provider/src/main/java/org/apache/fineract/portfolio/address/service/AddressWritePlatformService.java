@@ -16,17 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.configuration.service;
+package org.apache.fineract.portfolio.address.service;
 
-import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationData;
-import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.client.domain.Client;
 
-public interface ConfigurationReadPlatformService {
+public interface AddressWritePlatformService {
+	CommandProcessingResult addClientAddress(Long clientId, Long addressTypeId, JsonCommand command);
 
-    GlobalConfigurationPropertyData retrieveGlobalConfiguration(Long configId);
-    
-    GlobalConfigurationPropertyData retrieveGlobalConfiguration(String name);
+	CommandProcessingResult addNewClientAddress(Client client, JsonCommand command);
 
-    GlobalConfigurationData retrieveGlobalConfiguration(boolean survey);
-
+	CommandProcessingResult updateClientAddress(Long clientId,JsonCommand command);
 }
