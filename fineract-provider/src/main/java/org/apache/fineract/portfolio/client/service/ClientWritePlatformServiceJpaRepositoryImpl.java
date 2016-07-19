@@ -32,7 +32,9 @@ import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumb
 import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -44,6 +46,7 @@ import org.apache.fineract.organisation.office.domain.OfficeRepository;
 import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
+import org.apache.fineract.portfolio.address.service.AddressWritePlatformService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.data.ClientDataValidator;
 import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
@@ -110,6 +113,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final ConfigurationDomainService configurationDomainService;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
 	private final FromJsonHelper fromApiJsonHelper;
+	private final ConfigurationReadPlatformService configurationReadPlatformService;
+	private final AddressWritePlatformService addressWritePlatformService;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -120,7 +125,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final SavingsAccountRepository savingsRepository, final SavingsProductRepository savingsProductRepository,
             final SavingsApplicationProcessWritePlatformService savingsApplicationProcessWritePlatformService,
             final CommandProcessingService commandProcessingService, final ConfigurationDomainService configurationDomainService,
-            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final FromJsonHelper fromApiJsonHelper) {
+            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final FromJsonHelper fromApiJsonHelper,
+            final ConfigurationReadPlatformService configurationReadPlatformService,
+			final AddressWritePlatformService addressWritePlatformService) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.clientNonPersonRepository = clientNonPersonRepository;
@@ -139,6 +146,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.configurationDomainService = configurationDomainService;
         this.accountNumberFormatRepository = accountNumberFormatRepository;
         this.fromApiJsonHelper = fromApiJsonHelper;
+    	this.configurationReadPlatformService = configurationReadPlatformService;
+		this.addressWritePlatformService = addressWritePlatformService;
     }
 
     @Transactional
@@ -200,6 +209,11 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final AppUser currentUser = this.context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
+            
+			final GlobalConfigurationPropertyData configuration = this.configurationReadPlatformService
+					.retrieveGlobalConfiguration("Enable-Address");
+
+			final Boolean isAddressEnabled = configuration.isEnabled();
 
             final Long officeId = command.longValueOfParameterNamed(ClientApiConstants.officeIdParamName);
 
@@ -283,10 +297,20 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             CommandProcessingResult result = openSavingsAccount(newClient, fmt);
             if (result.getSavingsId() != null) {
                 this.clientRepository.save(newClient);
+                
             }
             
             if(isEntity)            
             	extractAndCreateClientNonPerson(newClient, command);
+            	
+			final long clientId = newClient.getId();
+
+			if (isAddressEnabled) {
+
+				this.addressWritePlatformService.addNewClientAddress(newClient, command);
+
+			}
+
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
