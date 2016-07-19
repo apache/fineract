@@ -273,12 +273,15 @@ public class LoansApiResource {
             // for JLG loan both client and group details are required
             if (templateType.equals("individual") || templateType.equals("jlg")) {
 
-                final LoanAccountData loanAccountClientDetails = this.loanReadPlatformService.retrieveClientDetailsTemplate(clientId);
+                if(clientId == null) {
+                    newLoanAccount = newLoanAccount == null ? LoanAccountData.emptyTemplate() : newLoanAccount;
+                } else {
+                    final LoanAccountData loanAccountClientDetails = this.loanReadPlatformService.retrieveClientDetailsTemplate(clientId);
 
-                officeId = loanAccountClientDetails.officeId();
-
-                newLoanAccount = newLoanAccount == null ? loanAccountClientDetails : LoanAccountData.populateClientDefaults(newLoanAccount,
-                        loanAccountClientDetails);
+                    officeId = loanAccountClientDetails.officeId();
+                    newLoanAccount = newLoanAccount == null ? loanAccountClientDetails : LoanAccountData.populateClientDefaults(newLoanAccount,
+                            loanAccountClientDetails);
+                }
 
                 // if it's JLG loan add group details
                 if (templateType.equals("jlg")) {

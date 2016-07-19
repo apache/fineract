@@ -1557,4 +1557,14 @@ public class LoanAccountData {
         return (this.repaymentFrequencyType.getId().intValue() == PeriodFrequencyType.MONTHS.getValue());
     }
 
+    /**
+     * Used to produce a {@link LoanAccountData} with only collateral options for now.
+     * 
+     * @return {@link LoanAccountData} object
+     */
+    public static LoanAccountData emptyTemplate() {
+        final Collection<CodeValueData> loanCollateralOptions = null;
+        
+        return LoanAccountData.collateralTemplate(loanCollateralOptions);
+    }
 }
