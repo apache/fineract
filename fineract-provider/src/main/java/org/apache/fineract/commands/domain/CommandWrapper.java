@@ -38,6 +38,7 @@ public class CommandWrapper {
     private final String json;
     private final String transactionId;
     private final Long productId;
+    private final Boolean status;
 
     @SuppressWarnings("unused")
     private Long templateId;
@@ -53,9 +54,10 @@ public class CommandWrapper {
 
     public static CommandWrapper fromExistingCommand(final Long commandId, final String actionName, final String entityName,
             final Long resourceId, final Long subresourceId, final String resourceGetUrl, final Long productId, final Long officeId,
-            final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId) {
+            final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId,
+            final Boolean status) {
         return new CommandWrapper(commandId, actionName, entityName, resourceId, subresourceId, resourceGetUrl, productId, officeId,
-                groupId, clientId, loanId, savingsId, transactionId);
+                groupId, clientId, loanId, savingsId, transactionId,status);
     }
 
     private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId,
@@ -75,11 +77,12 @@ public class CommandWrapper {
         this.json = null;
         this.transactionId = null;
         this.productId = productId;
+        this.status=null;
     }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
             final String actionName, final String entityName, final Long entityId, final Long subentityId, final String href,
-            final String json, final String transactionId, final Long productId, final Long templateId) {
+            final String json, final String transactionId, final Long productId, final Long templateId,final Boolean status) {
 
         this.commandId = null;
         this.officeId = officeId;
@@ -97,11 +100,12 @@ public class CommandWrapper {
         this.transactionId = transactionId;
         this.productId = productId;
         this.templateId = templateId;
+        this.status=status;
     }
 
     private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId,
             final Long subresourceId, final String resourceGetUrl, final Long productId, final Long officeId, final Long groupId,
-            final Long clientId, final Long loanId, final Long savingsId, final String transactionId) {
+            final Long clientId, final Long loanId, final Long savingsId, final String transactionId,final Boolean status) {
 
         this.commandId = commandId;
         this.officeId = officeId;
@@ -118,9 +122,15 @@ public class CommandWrapper {
         this.json = null;
         this.transactionId = transactionId;
         this.productId = productId;
+        this.status=status;
     }
+    
+    
+    public Boolean getStatus() {
+		return status;
+	}
 
-    public String getHref() {
+	public String getHref() {
         return this.href;
     }
 

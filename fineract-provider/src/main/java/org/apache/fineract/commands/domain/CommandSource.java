@@ -95,6 +95,9 @@ public class CommandSource extends AbstractPersistable<Long> {
     
     @Column(name = "transaction_id", length = 100)
     private String transactionId;
+    
+    @Column(name="status")
+    private Boolean status;
 
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker) {
         return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(), command.subentityId(),
@@ -129,8 +132,17 @@ public class CommandSource extends AbstractPersistable<Long> {
         this.checkedOnDate = checkedOnDate.toDate();
         this.processingResult = CommandProcessingResultType.REJECTED.getValue();
     }
+    
 
-    public void updateResourceId(final Long resourceId) {
+    public Boolean getStatus() {
+		return status;
+	}
+
+	public void setStatus(Boolean status) {
+		this.status = status;
+	}
+
+	public void updateResourceId(final Long resourceId) {
         this.resourceId = resourceId;
     }
 
