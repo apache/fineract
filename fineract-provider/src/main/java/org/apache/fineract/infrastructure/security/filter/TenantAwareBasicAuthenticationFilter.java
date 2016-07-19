@@ -37,12 +37,12 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.data.PlatformRequestLog;
 import org.apache.fineract.infrastructure.security.exception.InvalidTenantIdentiferException;
 import org.apache.fineract.infrastructure.security.service.BasicAuthTenantDetailsService;
+import org.apache.fineract.notification.service.NotificationReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -77,20 +77,21 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
     private final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer;
     private final ConfigurationDomainService configurationDomainService;
     private final CacheWritePlatformService cacheWritePlatformService;
-
+    private final NotificationReadPlatformService notificationReadPlatformService;
     private final String tenantRequestHeader = "Fineract-Platform-TenantId";
     private final boolean exceptionIfHeaderMissing = true;
 
     @Autowired
     public TenantAwareBasicAuthenticationFilter(final AuthenticationManager authenticationManager,
-            final AuthenticationEntryPoint authenticationEntryPoint, final BasicAuthTenantDetailsService basicAuthTenantDetailsService,
-            final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer, final ConfigurationDomainService configurationDomainService,
-            final CacheWritePlatformService cacheWritePlatformService) {
+                                                final AuthenticationEntryPoint authenticationEntryPoint, final BasicAuthTenantDetailsService basicAuthTenantDetailsService,
+                                                final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer, final ConfigurationDomainService configurationDomainService,
+                                                final CacheWritePlatformService cacheWritePlatformService, NotificationReadPlatformService notificationReadPlatformService) {
         super(authenticationManager, authenticationEntryPoint);
         this.basicAuthTenantDetailsService = basicAuthTenantDetailsService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.configurationDomainService = configurationDomainService;
         this.cacheWritePlatformService = cacheWritePlatformService;
+        this.notificationReadPlatformService = notificationReadPlatformService;
     }
 
     @Override
@@ -167,6 +168,12 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
     		throws IOException {
     	super.onSuccessfulAuthentication(request, response, authResult);
 		AppUser user = (AppUser) authResult.getPrincipal();
+
+        if (notificationReadPlatformService.hasUnreadNotifications(user.getId())) {
+            response.addHeader("X-Notification-Refresh", "true");
+        } else {
+            response.addHeader("X-Notification-Refresh", "false");
+        }
 		
 		String pathURL = request.getRequestURI();
 		boolean isSelfServiceRequest = (pathURL != null && pathURL.contains("/self/"));

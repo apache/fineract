@@ -95,10 +95,8 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
-
         final AppUserLookupMapper mapper = new AppUserLookupMapper();
         final String sql = "select " + mapper.schema();
-
         return this.jdbcTemplate.query(sql, mapper, new Object[] { hierarchySearchString });
     }
 

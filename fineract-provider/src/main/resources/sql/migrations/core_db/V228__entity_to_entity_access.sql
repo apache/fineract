@@ -56,9 +56,9 @@ CREATE TABLE `m_entity_to_entity_access` (
 
 -- Global Configurations for Entity access restrictions
 insert into c_configuration (name, value, enabled, description)
-	values ('office-specific-products-enabled', 0, 0,
-	'Whether products and fees should be office specific or not? This property should NOT be changed once Mifos is Live.');
+	values ('officeId-specific-products-enabled', 0, 0,
+	'Whether products and fees should be officeId specific or not? This property should NOT be changed once Mifos is Live.');
 
 insert into c_configuration (name, value, enabled, description)
-	values ('restrict-products-to-user-office', 0, 0,
-	'This should be enabled only if, products & fees are office specific (i.e. office-specific-products-enabled is enabled). This property specifies if the products should be auto-restricted to office of the user who created the proudct? Note: This property should NOT be changed once Mifos is Live.');
+	values ('restrict-products-to-user-officeId', 0, 0,
+	'This should be enabled only if, products & fees are officeId specific (i.e. officeId-specific-products-enabled is enabled). This property specifies if the products should be auto-restricted to officeId of the user who created the proudct? Note: This property should NOT be changed once Mifos is Live.');

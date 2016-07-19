@@ -39,5 +39,5 @@ INSERT INTO `stretchy_report_parameter` (`report_id`, `parameter_id`, `report_pa
    INSERT INTO `stretchy_report_parameter` (`report_id`, `parameter_id`, `report_parameter_name`) VALUES
  ((select sr.id from stretchy_report sr where sr.report_name='GeneralLedgerReport'), 
  (select sp.id from stretchy_parameter sp where sp.parameter_name='OfficeIdSelectOne'), 
-  'office');
+  'officeId');
   

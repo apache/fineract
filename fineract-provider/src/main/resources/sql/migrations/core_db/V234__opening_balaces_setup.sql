@@ -36,7 +36,7 @@ INSERT INTO `c_configuration`
 	)
 	VALUES 
 	(
-		'office-opening-balances-contra-account', 
+		'officeId-opening-balances-contra-account',
 		0, -- Or Example: (SELECT id FROM acc_gl_account WHERE gl_code = 'OBCA' ),
 		1);
 

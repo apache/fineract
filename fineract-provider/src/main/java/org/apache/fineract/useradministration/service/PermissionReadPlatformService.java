@@ -19,7 +19,9 @@
 package org.apache.fineract.useradministration.service;
 
 import java.util.Collection;
+import java.util.List;
 
+import org.apache.fineract.useradministration.data.AppUserData;
 import org.apache.fineract.useradministration.data.PermissionData;
 
 public interface PermissionReadPlatformService {
@@ -29,4 +31,6 @@ public interface PermissionReadPlatformService {
     Collection<PermissionData> retrieveAllMakerCheckerablePermissions();
 
     Collection<PermissionData> retrieveAllRolePermissions(Long roleId);
+
+    List<Long> retrieveUsersWithSpecificPermission(String permission);
 }

@@ -20,11 +20,18 @@ package org.apache.fineract.useradministration.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.useradministration.data.AppUserData;
 import org.apache.fineract.useradministration.data.PermissionData;
+import org.apache.fineract.useradministration.domain.AppUser;
+import org.apache.fineract.useradministration.domain.AppUserRepository;
+import org.apache.fineract.useradministration.domain.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,11 +46,14 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
+    private final AppUserRepository appUserRepository;
 
     @Autowired
-    public PermissionReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public PermissionReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+                                             final AppUserRepository appUserRepository) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.appUserRepository = appUserRepository;
     }
 
     @Override
@@ -77,6 +87,23 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
         logger.info("retrieveAllRolePermissions: " + sql);
 
         return this.jdbcTemplate.query(sql, mapper, new Object[] { roleId });
+    }
+
+    @Override
+    public List<Long> retrieveUsersWithSpecificPermission(String permission) {
+        List<AppUser> appUsers = appUserRepository.findAll();
+        List<Long> userIds = new ArrayList<>();
+        for (AppUser appUser : appUsers) {
+            Set<Role> roles = appUser.getRoles();
+            for (Role role : roles) {
+                if (role.hasPermissionTo(permission)) {
+                    if (!(userIds.contains(appUser.getId()))) {
+                        userIds.add(appUser.getId());
+                    }
+                }
+            }
+        }
+        return userIds;
     }
 
     private static final class PermissionUsageDataMapper implements RowMapper<PermissionData> {

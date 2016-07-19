@@ -28,7 +28,7 @@ public class DepositsApiConstants {
 
     // Deposit products
     public static final String FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME = "fixeddeposit";
-    public static final String RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME = "recurringdeposit";
+    public static final String RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME = "recurringdepositaccount";
 
     // Deposit accounts
     public static final String FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME = "fixeddepositaccount";

@@ -75,6 +75,15 @@ public final class SearchParameters {
                 orderBy, sortOrder, staffId, accountNo, loanId, savingsId, orphansOnly, isSelfUser);
     }
 
+    public static SearchParameters forNotifications(final Integer offset, final Integer limit,
+                                                    final String orderBy, final String sortOrder) {
+
+        final Integer maxLimitAllowed = getCheckedLimit(limit);
+
+        return new SearchParameters(null,null, null, null, null, null, null,  offset, maxLimitAllowed, orderBy, sortOrder, null,
+                null, null, null, null, null);
+    }
+
     public static SearchParameters forGroups(final String sqlSearch, final Long officeId, final Long staffId, final String externalId,
             final String name, final String hierarchy, final Integer offset, final Integer limit, final String orderBy,
             final String sortOrder, final Boolean orphansOnly) {
