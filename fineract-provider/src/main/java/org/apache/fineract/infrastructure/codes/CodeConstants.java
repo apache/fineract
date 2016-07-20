@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class CodeConstants {
+    
+    public static final String UNIQUE_CODE_VALUE_CONSTRAINT_NAME = "unique_code_value";
 
     /***
      * Enum of all parameters passed in while creating/updating a code and code

@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.codes.service;
 
 import java.util.Map;
 
+import org.apache.fineract.infrastructure.codes.CodeConstants;
 import org.apache.fineract.infrastructure.codes.domain.Code;
 import org.apache.fineract.infrastructure.codes.domain.CodeRepository;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -99,7 +100,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
      */
     private void handleCodeValueDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
         final Throwable realCause = dve.getMostSpecificCause();
-        if (realCause.getMessage().contains("code_value")) {
+        if (realCause.getMessage().contains(CodeConstants.UNIQUE_CODE_VALUE_CONSTRAINT_NAME)) {
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.code.value.duplicate.label", "A code value with lable '" + name
                     + "' already exists", "name", name);

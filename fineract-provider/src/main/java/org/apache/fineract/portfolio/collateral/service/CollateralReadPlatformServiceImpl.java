@@ -57,7 +57,8 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
     private static final class CollateralMapper implements RowMapper<CollateralData> {
 
         private final StringBuilder sqlBuilder = new StringBuilder(
-                "lc.id as id, lc.description as description, lc.value as value, cv.id as typeId, cv.code_value as typeName, oc.code as currencyCode, ")
+                "lc.id as id, lc.description as description, lc.value as value, cv.id as typeId, ")
+                .append("cv.code_value as typeName, cv.is_active as typeIsActive, oc.code as currencyCode, ")
                 .append(" oc.name as currencyName,oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, oc.internationalized_name_code as currencyNameCode")
                 .append(" FROM m_loan_collateral lc") //
                 .append(" JOIN m_code_value cv on lc.type_cv_id = cv.id")//
@@ -76,8 +77,9 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
             final Long typeId = rs.getLong("typeId");
             final BigDecimal value = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "value");
             final String typeName = rs.getString("typeName");
+            final boolean typeIsActive = rs.getBoolean("typeIsActive");
 
-            final CodeValueData type = CodeValueData.instance(typeId, typeName);
+            final CodeValueData type = CodeValueData.instance(typeId, typeName, typeIsActive);
 
             final String currencyCode = rs.getString("currencyCode");
             final String currencyName = rs.getString("currencyName");

@@ -77,6 +77,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             sqlBuilder.append("lr.recalculate_interest as recalculateInterest, ");
             sqlBuilder.append("lr.reschedule_reason_cv_id as rescheduleReasonCvId, ");
             sqlBuilder.append("cv.code_value as rescheduleReasonCvValue, ");
+            sqlBuilder.append("cv.is_active as rescheduleReasonCvIsActive, ");
             sqlBuilder.append("lr.reschedule_reason_comment as rescheduleReasonComment, ");
 
             sqlBuilder.append("lr.submitted_on_date as submittedOnDate, ");
@@ -136,7 +137,9 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             final LocalDate rescheduleFromDate = JdbcSupport.getLocalDate(rs, "rescheduleFromDate");
             final Long rescheduleReasonCvId = JdbcSupport.getLong(rs, "rescheduleReasonCvId");
             final String rescheduleReasonCvValue = rs.getString("rescheduleReasonCvValue");
-            final CodeValueData rescheduleReasonCodeValue = CodeValueData.instance(rescheduleReasonCvId, rescheduleReasonCvValue);
+            final boolean rescheduleReasonCvIsActive = rs.getBoolean("rescheduleReasonCvIsActive");
+            final CodeValueData rescheduleReasonCodeValue = CodeValueData.instance(rescheduleReasonCvId, 
+                    rescheduleReasonCvValue, rescheduleReasonCvIsActive);
             final String rescheduleReasonComment = rs.getString("rescheduleReasonComment");
             final Boolean recalculateInterest = rs.getBoolean("recalculateInterest");
 

@@ -29,13 +29,14 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.fineract.infrastructure.codes.CodeConstants;
 import org.apache.fineract.infrastructure.codes.CodeConstants.CODEVALUE_JSON_INPUT_PARAMS;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "m_code_value", uniqueConstraints = { @UniqueConstraint(columnNames = { "code_id", "code_value" }, name = "code_value_duplicate") })
+@Table(name = "m_code_value", uniqueConstraints = { @UniqueConstraint(columnNames = { "code_id", "code_value" }, name = CodeConstants.UNIQUE_CODE_VALUE_CONSTRAINT_NAME) })
 public class CodeValue extends AbstractPersistable<Long> {
 
     @Column(name = "code_value", length = 100)
@@ -146,5 +147,31 @@ public class CodeValue extends AbstractPersistable<Long> {
 
     public CodeValueData toData() {
         return CodeValueData.instance(getId(), this.label, this.position, this.isActive, this.mandatory);
+    }
+    
+    /** 
+     * set the isActive property to false 
+     * 
+     * @return None
+     **/
+    public void delete() {
+        this.isActive = false;
+        
+        // update the name of the code value
+        this.label = this.label + "_deleted_" + this.getId();
+    }
+    
+    /** 
+     * @return true if the "isActive" property is false, else false
+     **/
+    public boolean isDeleted() {
+        return !this.isActive;
+    }
+    
+    /**
+     * @return true if the "isActive" property is true, else false
+     */
+    public boolean isActive() {
+        return this.isActive;
     }
 }

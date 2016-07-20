@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.codes.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
@@ -96,12 +97,27 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
             this.context.authenticatedUser();
 
             final CodeValueDataMapper rm = new CodeValueDataMapper();
-            final String sql = "select " + rm.schema() + "where cv.id = ? order by position";
+            final String sql = "select " + rm.schema() + " where cv.id = ? and cv.is_active = 1 order by position";
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { codeValueId });
         } catch (final EmptyResultDataAccessException e) {
             throw new CodeValueNotFoundException(codeValueId);
         }
 
+    }
+
+    @Override
+    public Collection<CodeValueData> retrieveAllActiveCodeValues(Long codeId) {
+        final Collection<CodeValueData> codeValues = this.retrieveAllCodeValues(codeId);
+        
+        Collection<CodeValueData> activeCodeValues = new ArrayList<CodeValueData>();
+        
+        for (CodeValueData codeValue : codeValues) {
+            if (codeValue.isActive()) {
+                activeCodeValues.add(codeValue);
+            }
+        }
+        
+        return activeCodeValues;
     }
 }

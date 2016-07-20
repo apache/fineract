@@ -48,4 +48,12 @@ public interface CodeValueReadPlatformService {
     Collection<CodeValueData> retrieveAllCodeValues(final Long codeId);
 
     CodeValueData retrieveCodeValue(final Long codeValueId);
+    
+    /**
+     * Retrieves all code values with 'deleted' property set to false
+     * 
+     * @param codeId {@link Code} entity identifier
+     * @return {@link CodeValueData} objects
+     */
+    Collection<CodeValueData> retrieveAllActiveCodeValues(final Long codeId);
 }
