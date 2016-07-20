@@ -777,4 +777,10 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     public boolean isAccrualTransaction() {
         return isAccrual();
     }
+    
+    public boolean isPaymentTransaction() {
+        return this.isNotReversed()
+                && !(this.isDisbursement() || this.isAccrual() || this.isRepaymentAtDisbursement() || this.isNonMonetaryTransaction() || this
+                        .isIncomePosting());
+    }
 }
