@@ -409,6 +409,11 @@ public final class Client extends AbstractPersistable<Long> {
         this.activatedBy = currentUser;
         this.officeJoiningDate = this.activationDate;
         this.status = ClientStatus.ACTIVE.getValue();
+        
+        // in case a closed client is being re open
+        this.closureDate = null;
+        this.closureReason = null;
+        this.closedBy = null;
 
         validate();
     }
