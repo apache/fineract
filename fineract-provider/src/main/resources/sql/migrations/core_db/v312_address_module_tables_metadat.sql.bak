@@ -67,17 +67,17 @@ CREATE TABLE `m_client_address` (
 	`address_type_id` INT(11) NOT NULL DEFAULT '0',
 	`is_active` TINYINT(4) NOT NULL DEFAULT '0',
 	PRIMARY KEY (`id`),
-	INDEX `addressIdFk` (`address_id`),
+	UNIQUE INDEX `clientaddtyp` (`client_id`, `address_type_id`, `is_active`),
 	INDEX `address_codefk` (`address_type_id`),
-	INDEX `clientaddressfk` (`client_id`),
+	INDEX `addressIdFk` (`address_id`),
+	CONSTRAINT `addressIdFk` FOREIGN KEY (`address_id`) REFERENCES `m_address` (`id`),
 	CONSTRAINT `address_codefk` FOREIGN KEY (`address_type_id`) REFERENCES `m_code_value` (`id`),
 	CONSTRAINT `clientaddressfk` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 )
 COLLATE='utf8_general_ci'
 ENGINE=InnoDB
-AUTO_INCREMENT=28
+AUTO_INCREMENT=22
 ;
-
 
 --field configuration
 CREATE TABLE `m_field_configuration` (
@@ -94,34 +94,3 @@ COLLATE='utf8_general_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=19
 ;
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET NAMES utf8mb4 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
--- Dumping data for table mifostenant-default.m_field_configuration: ~18 rows (approximately)
-/*!40000 ALTER TABLE `m_field_configuration` DISABLE KEYS */;
-INSERT INTO `m_field_configuration` (`id`, `entity`, `table`, `field`, `is_enabled`, `is_mandatory`, `validation_regex`) VALUES
-	(1, 'CLIENT', 'm_address', 'addressType', 1, 0, ''),
-	(2, 'CLIENT', 'm_address', 'street', 1, 1, ''),
-	(3, 'CLIENT', 'm_address', 'address_line_1', 1, 0, ''),
-	(4, 'CLIENT', 'm_address', 'address_line_2', 1, 0, ''),
-	(5, 'CLIENT', 'm_address', 'address_line_3', 1, 0, ''),
-	(6, 'CLIENT', 'm_address', 'town_village', 0, 0, ''),
-	(7, 'CLIENT', 'm_address', 'city', 1, 0, ''),
-	(8, 'CLIENT', 'm_address', 'county_district', 0, 0, ''),
-	(9, 'CLIENT', 'm_address', 'state_province_id', 1, 0, ''),
-	(10, 'CLIENT', 'm_address', 'country_id', 1, 0, ''),
-	(11, 'CLIENT', 'm_address', 'postal_code', 1, 0, ''),
-	(12, 'CLIENT', 'm_address', 'latitude', 0, 0, ''),
-	(13, 'CLIENT', 'm_address', 'longitude', 0, 0, ''),
-	(14, 'CLIENT', 'm_address', 'created_by', 1, 0, ''),
-	(15, 'CLIENT', 'm_address', 'created_on', 1, 0, ''),
-	(16, 'CLIENT', 'm_address', 'updated_by', 1, 0, ''),
-	(17, 'CLIENT', 'm_address', 'updated_on', 1, 0, ''),
-	(18, 'CLIENT', 'm_address', 'is_active', 1, 0, NULL);
-/*!40000 ALTER TABLE `m_field_configuration` ENABLE KEYS */;
-/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
-/*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
