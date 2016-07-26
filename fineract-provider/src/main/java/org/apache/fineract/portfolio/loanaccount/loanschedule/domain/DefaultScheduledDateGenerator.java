@@ -111,10 +111,6 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
                 dueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms.getRepaymentPeriodFrequencyType(),
                         loanApplicationTerms.getRepaymentEvery(), dueRepaymentPeriodDate, loanApplicationTerms.getNthDay(),
                         loanApplicationTerms.getWeekDayType());
-                if (previousDate == dueRepaymentPeriodDate) {
-                    // in case getRepaymentPeriodDate returns the same date, we prevent an infinite loop by breaking
-                    break;
-                }
             }
         }
         return dueRepaymentPeriodDate;
