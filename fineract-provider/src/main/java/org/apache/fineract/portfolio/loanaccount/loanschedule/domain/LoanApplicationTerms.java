@@ -21,7 +21,9 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.domain;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -192,6 +194,25 @@ public final class LoanApplicationTerms {
     private final boolean isSkipRepaymentOnFirstDayOfMonth;
 
     private final HolidayDetailDTO holidayDetailDTO;
+    
+    private final Set<Integer> periodNumbersApplicableForPrincipalGrace = new HashSet<>();
+    
+    private final Set<Integer> periodNumbersApplicableForInterestGrace = new HashSet<>();
+    
+    
+    // used for FLAT loans when interest rate changed 
+    private Integer excludePeriodsForCalculation = 0;
+    private Money totalPrincipalAccountedForInterestCalcualtion;
+    
+    
+    //used for FLAT loans generation on modifying terms 
+    private Money totalPrincipalAccounted;
+    private Money totalInterestAccounted;
+    private int periodsCompleted = 0;
+    private int extraPeriods = 0;
+    
+    
+    
 
     public static LoanApplicationTerms assembleFrom(final ApplicationCurrency currency, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
@@ -482,6 +503,12 @@ public final class LoanApplicationTerms {
         this.isInterestChargedFromDateSameAsDisbursalDateEnabled = isInterestChargedFromDateSameAsDisbursalDateEnabled;
         this.holidayDetailDTO = holidayDetailDTO;
         this.allowCompoundingOnEod = allowCompoundingOnEod;
+        Integer periodNumber = 1;
+        updatePeriodNumberApplicableForPrincipalOrInterestGrace(periodNumber);
+        updateRecurringMoratoriumOnPrincipalPeriods(periodNumber);
+        this.totalPrincipalAccountedForInterestCalcualtion = principal.zero();
+        this.totalInterestAccounted = principal.zero();
+        this.totalPrincipalAccounted = principal.zero();
     }
 
     public Money adjustPrincipalIfLastRepaymentPeriod(final Money principalForPeriod, final Money totalCumulativePrincipalToDate,
@@ -706,17 +733,14 @@ public final class LoanApplicationTerms {
         switch (this.interestMethod) {
             case FLAT:
                 final BigDecimal interestRateForLoanTerm = calculateFlatInterestRateForLoanTerm(calculator, mc);
-                totalInterestDue = this.principal.multiplyRetainScale(interestRateForLoanTerm, mc.getRoundingMode());
+                totalInterestDue = this.principal.minus(totalPrincipalAccountedForInterestCalcualtion).multiplyRetainScale(interestRateForLoanTerm,
+                        mc.getRoundingMode());
 
             break;
             case DECLINING_BALANCE:
             break;
             case INVALID:
             break;
-        }
-
-        if (this.totalInterestDue != null) {
-            totalInterestDue = this.totalInterestDue;
         }
 
         return totalInterestDue;
@@ -844,13 +868,19 @@ public final class LoanApplicationTerms {
     private Money calculateTotalInterestPerInstallmentWithoutGrace(final PaymentPeriodsInOneYearCalculator calculator, final MathContext mc) {
 
         final Money totalInterestForLoanTerm = calculateTotalFlatInterestDueWithoutGrace(calculator, mc);
-
-        return totalInterestForLoanTerm.dividedBy(Long.valueOf(this.actualNumberOfRepayments), mc.getRoundingMode());
+        Money interestPerInstallment = totalInterestForLoanTerm.dividedBy(Long.valueOf(this.actualNumberOfRepayments) - defaultToZeroIfNull(this.excludePeriodsForCalculation), mc.getRoundingMode());
+        if (this.excludePeriodsForCalculation < this.periodsCompleted) {
+            Money interestLeft = this.totalInterestDue.minus(this.totalInterestAccounted);
+            interestPerInstallment = interestLeft.dividedBy(Long.valueOf(this.actualNumberOfRepayments)
+                    - defaultToZeroIfNull(this.periodsCompleted), mc.getRoundingMode());
+        }
+        
+        return interestPerInstallment;
     }
 
     private Money calculateTotalPrincipalPerPeriodWithoutGrace(final MathContext mc, final int periodNumber) {
         final int totalRepaymentsWithCapitalPayment = calculateNumberOfRepaymentsWithPrincipalPayment();
-        Money principalPerPeriod = this.principal.dividedBy(totalRepaymentsWithCapitalPayment, mc.getRoundingMode()).plus(
+        Money principalPerPeriod = this.principal.minus(totalPrincipalAccounted).dividedBy(totalRepaymentsWithCapitalPayment, mc.getRoundingMode()).plus(
                 this.adjustPrincipalForFlatLoans);
         if (isPrincipalGraceApplicableForThisPeriod(periodNumber)) {
             principalPerPeriod = principalPerPeriod.zero();
@@ -906,11 +936,30 @@ public final class LoanApplicationTerms {
 
             final Money totalInterestFree = interestPerGracePeriod.multipliedBy(getInterestChargingGrace());
             final Money realTotalInterestForLoan = totalInterestForLoanTerm.minus(totalInterestFree);
-
-            final Integer interestPaymentDuePeriods = calculateNumberOfRepaymentPeriodsWhereInterestPaymentIsDue(this.actualNumberOfRepayments);
-
+            
+            
+            
+            Integer interestPaymentDuePeriods = calculateNumberOfRemainingInterestPaymentPeriods(this.actualNumberOfRepayments,
+                    this.excludePeriodsForCalculation);
             interestForInstallment = realTotalInterestForLoan
                     .dividedBy(BigDecimal.valueOf(interestPaymentDuePeriods), mc.getRoundingMode());
+            if (this.excludePeriodsForCalculation < this.periodsCompleted) {
+                Money interestLeft = this.totalInterestDue.minus(this.totalInterestAccounted);
+                Integer interestDuePeriods = calculateNumberOfRemainingInterestPaymentPeriods(this.actualNumberOfRepayments,
+                        this.periodsCompleted);
+                interestForInstallment = interestLeft.dividedBy(Long.valueOf(interestDuePeriods), mc.getRoundingMode());
+            }
+            if(!this.periodNumbersApplicableForInterestGrace.isEmpty()){
+                int periodsElapsed = calculateLastInterestGracePeriod(periodNumber);
+                if (periodsElapsed > this.excludePeriodsForCalculation && periodsElapsed > this.periodsCompleted) {
+                    Money interestLeft = this.totalInterestDue.minus(this.totalInterestAccounted);
+                    Integer interestDuePeriods = calculateNumberOfRemainingInterestPaymentPeriods(this.actualNumberOfRepayments,
+                            periodsElapsed);
+                    interestForInstallment = interestLeft.dividedBy(Long.valueOf(interestDuePeriods), mc.getRoundingMode());
+                }
+            }
+            
+
         }
 
         return interestForInstallment;
@@ -1032,24 +1081,46 @@ public final class LoanApplicationTerms {
 
     private int calculateNumberOfRepaymentsWithPrincipalPayment() {
         int numPeriods = calculateNumberOfRemainingPrincipalPaymentPeriods(this.actualNumberOfRepayments,
-                this.getRecurringMoratoriumOnPrincipalPeriods(), this.getPrincipalGrace(), 0);
+                this.periodsCompleted);
+//        numPeriods = numPeriods - this.periodsCompleted;
         return numPeriods;
     }
-
-    private Integer calculateNumberOfRepaymentPeriodsWhereInterestPaymentIsDue(final Integer totalNumberOfRepaymentPeriods) {
-        return totalNumberOfRepaymentPeriods - Math.max(getInterestChargingGrace(), getInterestPaymentGrace());
+    
+    private Integer calculateNumberOfRemainingInterestPaymentPeriods(final Integer totalNumberOfRepaymentPeriods, int periodsElapsed) {
+        int principalFeePeriods = 0;
+        for (Integer intNumber : this.periodNumbersApplicableForInterestGrace) {
+            if (intNumber > periodsElapsed) {
+                principalFeePeriods++;
+            }
+        }
+        Integer periodsRemaining = totalNumberOfRepaymentPeriods - periodsElapsed - principalFeePeriods;
+        return periodsRemaining;
+    }
+    
+    private Integer calculateLastInterestGracePeriod(int periodNumber){
+        int lastGracePeriod = 0;
+        for (Integer grace : this.periodNumbersApplicableForInterestGrace) {
+            if(grace < periodNumber && lastGracePeriod < grace){
+                lastGracePeriod = grace;
+            }
+        }
+        return lastGracePeriod;
     }
 
     public boolean isPrincipalGraceApplicableForThisPeriod(final int periodNumber) {
-        if (this.getRecurringMoratoriumOnPrincipalPeriods() > 0) {
-            return ((periodNumber > 0 && periodNumber <= getPrincipalGrace()) || (periodNumber > 0 && (((periodNumber - getPrincipalGrace()) % (this
-                    .getRecurringMoratoriumOnPrincipalPeriods() + 1)) != 1)));
+        boolean isPrincipalGraceApplicableForThisPeriod = false;
+        if (this.periodNumbersApplicableForPrincipalGrace.contains(periodNumber)) {
+            isPrincipalGraceApplicableForThisPeriod = true;
         }
-        return periodNumber > 0 && periodNumber <= getPrincipalGrace();
+        return isPrincipalGraceApplicableForThisPeriod;
     }
 
-    private boolean isInterestPaymentGraceApplicableForThisPeriod(final int periodNumber) {
-        return periodNumber > 0 && periodNumber <= getInterestPaymentGrace();
+    public boolean isInterestPaymentGraceApplicableForThisPeriod(final int periodNumber) {
+        boolean isInterestPaymentGraceApplicableForThisPeriod = false;
+        if (this.periodNumbersApplicableForInterestGrace.contains(periodNumber)) {
+            isInterestPaymentGraceApplicableForThisPeriod = true;
+        }
+        return isInterestPaymentGraceApplicableForThisPeriod;
     }
 
     private boolean isFirstPeriodAfterInterestPaymentGracePeriod(final int periodNumber) {
@@ -1099,7 +1170,7 @@ public final class LoanApplicationTerms {
             final double principalDouble = balance.getAmount().multiply(BigDecimal.valueOf(-1)).doubleValue();
 
             final Integer periodsRemaining = calculateNumberOfRemainingPrincipalPaymentPeriods(this.actualNumberOfRepayments,
-                    this.getRecurringMoratoriumOnPrincipalPeriods(), this.getPrincipalGrace(), periodsElapsed);
+                    periodsElapsed);
 
             double installmentAmount = FinanicalFunctions.pmt(periodicInterestRate.doubleValue(), periodsRemaining.doubleValue(),
                     principalDouble, futureValue, false);
@@ -1165,7 +1236,7 @@ public final class LoanApplicationTerms {
         Money principal = this.principal;
         if (this.fixedPrincipalAmount == null) {
             final Integer numberOfPrincipalPaymentPeriods = calculateNumberOfRemainingPrincipalPaymentPeriods(
-                    this.actualNumberOfRepayments, this.getRecurringMoratoriumOnPrincipalPeriods(), this.getPrincipalGrace(), periodNumber);
+                    this.actualNumberOfRepayments, periodNumber);
             principal = this.principal.dividedBy(numberOfPrincipalPaymentPeriods, mc.getRoundingMode());
             this.fixedPrincipalAmount = principal.getAmount();
         }
@@ -1179,21 +1250,19 @@ public final class LoanApplicationTerms {
 
     public void updateFixedPrincipalAmount(final MathContext mc, final int periodNumber, final Money outstandingAmount) {
         final Integer numberOfPrincipalPaymentPeriods = calculateNumberOfRemainingPrincipalPaymentPeriods(this.actualNumberOfRepayments,
-                this.getRecurringMoratoriumOnPrincipalPeriods(), this.getPrincipalGrace(), periodNumber - 1);
+                periodNumber - 1);
         Money principal = outstandingAmount.dividedBy(numberOfPrincipalPaymentPeriods, mc.getRoundingMode());
         this.fixedPrincipalAmount = principal.getAmount();
     }
 
-    private static Integer calculateNumberOfRemainingPrincipalPaymentPeriods(final Integer totalNumberOfRepaymentPeriods,
-            final int recurringMoratoriumOnPrincipalPeriods, final int PrincipalGrace, int periodsElapsed) {
-        if (PrincipalGrace > periodsElapsed) {
-            periodsElapsed = PrincipalGrace;
+    private Integer calculateNumberOfRemainingPrincipalPaymentPeriods(final Integer totalNumberOfRepaymentPeriods, int periodsElapsed) {
+        int principalFeePeriods = 0;
+        for (Integer intNumber : this.periodNumbersApplicableForPrincipalGrace) {
+            if (intNumber > periodsElapsed) {
+                principalFeePeriods++;
+            }
         }
-        Integer periodsRemaining = totalNumberOfRepaymentPeriods - periodsElapsed;
-        if (recurringMoratoriumOnPrincipalPeriods > 0) {
-            double periodsRemainingDouble = ((double) periodsRemaining / ((double) (recurringMoratoriumOnPrincipalPeriods + 1)));
-            periodsRemaining = (int) Math.ceil(periodsRemainingDouble);
-        }
+        Integer periodsRemaining = totalNumberOfRepaymentPeriods - periodsElapsed - principalFeePeriods;
         return periodsRemaining;
     }
 
@@ -1469,10 +1538,7 @@ public final class LoanApplicationTerms {
     }
 
     public void updateTotalInterestDue(Money totalInterestDue) {
-
-        if (totalInterestDue != null) {
-            this.totalInterestDue = totalInterestDue;
-        }
+        this.totalInterestDue = totalInterestDue;
     }
 
     public ApplicationCurrency getApplicationCurrency() {
@@ -1576,4 +1642,81 @@ public final class LoanApplicationTerms {
         }
         return disbursedAmount;
     }
+    
+    public void updatePeriodNumberApplicableForPrincipalOrInterestGrace(final Integer periodsApplicationForGrace) {
+        int applicablePeriodNumber = periodsApplicationForGrace;
+        int graceOnPrincipal = defaultToZeroIfNull(this.principalGrace);
+        int graceOnInterest = defaultToZeroIfNull(this.interestPaymentGrace);
+
+        while (graceOnPrincipal > 0 || graceOnInterest > 0) {
+            if (graceOnPrincipal > 0) {
+                this.periodNumbersApplicableForPrincipalGrace.add(applicablePeriodNumber);
+            }
+            if (graceOnInterest > 0) {
+                this.periodNumbersApplicableForInterestGrace.add(applicablePeriodNumber);
+            }
+            applicablePeriodNumber++;
+            graceOnPrincipal--;
+            graceOnInterest--;
+        }
+    }
+    
+    /**
+     * set the value to zero if the provided value is null
+     * 
+     * @return integer value equal/greater than 0
+     **/
+    private Integer defaultToZeroIfNull(Integer value) {
+
+        return (value != null) ? value : 0;
+    }
+    
+    public void updateExcludePeriodsForCalculation(Integer excludePeriodsForCalculation){
+        this.excludePeriodsForCalculation = excludePeriodsForCalculation;
+        this.extraPeriods = 0;
+    }
+    
+    public Integer getActualNoOfRepaymnets() {
+        return this.actualNumberOfRepayments;
+    }
+    
+    public Money getTotalInterestDue() {
+        return this.totalInterestDue;
+    }
+    
+    private void updateRecurringMoratoriumOnPrincipalPeriods(Integer periodNumber) {
+        Boolean isPrincipalGraceApplicableForThisPeriod = false;
+        Integer numberOfRepayments = this.actualNumberOfRepayments;
+        if (this.getRecurringMoratoriumOnPrincipalPeriods() > 0) {
+            while (numberOfRepayments > 0) {
+                isPrincipalGraceApplicableForThisPeriod = ((periodNumber > 0 && periodNumber <= getPrincipalGrace()) || (periodNumber > 0 && (((periodNumber - getPrincipalGrace()) % (this
+                        .getRecurringMoratoriumOnPrincipalPeriods() + 1)) != 1)));
+                if (isPrincipalGraceApplicableForThisPeriod) {
+                    this.periodNumbersApplicableForPrincipalGrace.add(periodNumber);
+                }
+                numberOfRepayments--;
+                periodNumber++;
+            }
+        }
+
+    }
+
+    
+    public void setTotalPrincipalAccounted(Money totalPrincipalAccounted) {
+        this.totalPrincipalAccountedForInterestCalcualtion = totalPrincipalAccounted;
+    }
+    
+    
+    //Used for FLAT loans to calculate principal and interest per installment  
+    public void updateAccountedTillPeriod(int periodNumber,  Money totalPrincipalAccounted,Money totalInterestAccounted, int extendPeriods){
+        this.periodsCompleted = periodNumber;
+        this.totalPrincipalAccounted = totalPrincipalAccounted;
+        this.totalInterestAccounted = totalInterestAccounted;
+        this.extraPeriods = this.extraPeriods + extendPeriods;
+    }
+    
+    public void updateTotalInterestAccounted(Money totalInterestAccounted){
+        this.totalInterestAccounted = totalInterestAccounted;
+    }
+    
 }
