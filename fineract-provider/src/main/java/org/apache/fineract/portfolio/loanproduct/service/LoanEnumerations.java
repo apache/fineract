@@ -551,6 +551,22 @@ public class LoanEnumerations {
                 optionData = new EnumOptionData(LoanTermVariationType.PRINCIPAL_AMOUNT.getValue().longValue(),
                         LoanTermVariationType.PRINCIPAL_AMOUNT.getCode(), "principalAmount");
             break;
+            case GRACE_ON_INTEREST:
+                optionData = new EnumOptionData(LoanTermVariationType.GRACE_ON_INTEREST.getValue().longValue(),
+                        LoanTermVariationType.GRACE_ON_INTEREST.getCode(), "graceOnInterest");
+            break;
+            case GRACE_ON_PRINCIPAL:
+                optionData = new EnumOptionData(LoanTermVariationType.GRACE_ON_PRINCIPAL.getValue().longValue(),
+                        LoanTermVariationType.GRACE_ON_PRINCIPAL.getCode(), "graceOnPrincipal");
+            break;
+            case EXTEND_REPAYMENT_PERIOD:
+                optionData = new EnumOptionData(LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getValue().longValue(),
+                        LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getCode(), "extendRepaymentPeriod");
+            break;
+            case INTEREST_RATE_FROM_INSTALLMENT:
+                optionData = new EnumOptionData(LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getValue().longValue(),
+                        LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getCode(), "interestRateForInstallment");
+            break;
             default:
                 optionData = new EnumOptionData(LoanTermVariationType.INVALID.getValue().longValue(),
                         LoanTermVariationType.INVALID.getCode(), "Invalid");
