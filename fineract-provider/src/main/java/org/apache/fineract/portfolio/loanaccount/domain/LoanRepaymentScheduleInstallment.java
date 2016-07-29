@@ -794,4 +794,37 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         return getPenaltyChargesPaid(currency).plus(getFeeChargesPaid(currency)).plus(getInterestPaid(currency))
                 .plus(getPrincipalCompleted(currency));
     }
+    
+    /**
+     * Gets the interest due for this installment
+     * 
+     * @param currency {@link MonetaryCurrency} object
+     * @return installment interest due
+     */
+    public Money getInterestDue(final MonetaryCurrency currency) {
+        final Money interestAccountedFor = getInterestWaived(currency).plus(getInterestWrittenOff(currency));
+        return getInterestCharged(currency).minus(interestAccountedFor);
+    }
+    
+    /**
+     * Gets the fee charges due for this installment
+     * 
+     * @param currency {@link MonetaryCurrency} object
+     * @return installment fee charges due
+     */
+    public Money getFeeChargesDue(final MonetaryCurrency currency) {
+        final Money feeChargesAccountedFor = getFeeChargesWaived(currency).plus(getFeeChargesWrittenOff(currency));
+        return getFeeChargesCharged(currency).minus(feeChargesAccountedFor);
+    }
+    
+    /**
+     * Gets the penalty charges due for this installment
+     * 
+     * @param currency {@link MonetaryCurrency} object
+     * @return installment penalty charges due
+     */
+    public Money getPenaltyChargesDue(final MonetaryCurrency currency) {
+        final Money feeChargesAccountedFor = getPenaltyChargesWaived(currency).plus(getPenaltyChargesWrittenOff(currency));
+        return getPenaltyChargesCharged(currency).minus(feeChargesAccountedFor);
+    }
 }
