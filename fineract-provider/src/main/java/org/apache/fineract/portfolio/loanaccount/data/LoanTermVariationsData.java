@@ -29,7 +29,7 @@ public class LoanTermVariationsData implements Comparable<LoanTermVariationsData
     @SuppressWarnings("unused")
     private final Long id;
     private final EnumOptionData termType;
-    private final LocalDate termVariationApplicableFrom;
+    private LocalDate termVariationApplicableFrom;
     private final BigDecimal decimalValue;
     private final LocalDate dateValue;
     private final boolean isSpecificToInstallment;
@@ -112,6 +112,10 @@ public class LoanTermVariationsData implements Comparable<LoanTermVariationsData
             }
         }
         return comparsion;
+    }
+    
+    public void setApplicableFromDate(final LocalDate applicableFromDate) {
+        this.termVariationApplicableFrom = applicableFromDate;
     }
 
 }
