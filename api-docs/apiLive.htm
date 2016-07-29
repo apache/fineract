@@ -11877,11 +11877,11 @@ Content-Type: application/json Request Body:
 {
 	"loanId": 1,
 	"graceOnPrincipal": 2,
-	"rescheduleFromDate": "04 December 2014",
-	"adjustedDueDate": "20 December 2014",
+	"rescheduleFromDate": "25 December 2013",
+	"adjustedDueDate": "31 December 2013",
 	"dateFormat": "dd MMMM yyyy",
 	"locale": "en",
-	"submittedOnDate": "04 September 2014",
+	"submittedOnDate": "04 September 2013",
 	"rescheduleReasonComment" : "Client has gone AWOL",
 	"rescheduleReasonId": 1
 }
@@ -11907,52 +11907,80 @@ GET https://DomainName/api/v1/rescheduleloans/{requestId}
 					</code>
 					<code class="method-response">
 {
-  "id": 2,
-  "loanId": 17,
-  "clientId": 4,
-  "clientName": "Fernando Michael Torres",
-  "loanAccountNumber": "000000017",
+  "id": 1,
+  "loanId": 1,
+  "clientId": 1,
+  "clientName": "test test",
+  "loanAccountNumber": "000000001",
   "statusEnum": {
-    "id": 500,
-    "code": "loanStatusType.rejected",
-    "value": "Rejected",
-    "pendingApproval": false,
+    "id": 100,
+    "code": "loanStatusType.submitted.and.pending.approval",
+    "value": "Submitted and pending approval",
+    "pendingApproval": true,
     "approved": false,
-    "rejected": true
+    "rejected": false
   },
   "rescheduleFromInstallment": 5,
-  "graceOnPrincipal": 3,
   "rescheduleFromDate": [
     2013,
     12,
-    6
+    25
   ],
   "recalculateInterest": false,
   "rescheduleReasonCodeValue": {
-    "id": 239,
-    "name": "client cannot pay on time"
+    "id": 1,
+    "name": "Passport",
+    "isActive": false
   },
   "timeline": {
     "submittedOnDate": [
-      2014,
-      8,
+      2013,
+      9,
       4
     ],
     "submittedByUsername": "mifos",
     "submittedByFirstname": "App",
-    "submittedByLastname": "Administrator",
-    "rejectedOnDate": [
-      2014,
-      8,
-      5
-    ],
-    "rejectedByUsername": "mifos",
-    "rejectedByFirstname": "App",
-    "rejectedByLastname": "Administrator"
+    "submittedByLastname": "Administrator"
   },
-  "rescheduleReasonComment": ""
-}
-					</code>
+  "rescheduleReasonComment": "Client has gone AWOL",
+  "loanTermVariationsData": [
+    {
+      "id": 13,
+      "termType": {
+        "id": 4,
+        "code": "loanTermType.dueDate",
+        "value": "dueDate"
+      },
+      "termVariationApplicableFrom": [
+        2013,
+        12,
+        25
+      ],
+      "dateValue": [
+        2013,
+        12,
+        31
+      ],
+      "isSpecificToInstallment": false
+    },
+    {
+      "id": 14,
+      "termType": {
+        "id": 8,
+        "code": "loanTermType.graceOnPrincipal",
+        "value": "graceOnPrincipal"
+      },
+      "termVariationApplicableFrom": [
+        2013,
+        12,
+        25
+      ],
+      "decimalValue": 2,
+      "isSpecificToInstallment": false
+    }
+  ]
+}			
+</code>
 				</div>
 			</div>
 			<a id="loan_reschedule_preview_retrieve" name="loan_reschedule_preview_retrieve" class="old-syle-anchor">&nbsp;</a>

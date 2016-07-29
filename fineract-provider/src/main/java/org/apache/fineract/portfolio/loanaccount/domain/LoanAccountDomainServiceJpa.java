@@ -447,15 +447,21 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
      */
     @Override
     public void recalculateAccruals(Loan loan) {
+        boolean isInterestCalcualtionHappened = loan.repaymentScheduleDetail().isInterestRecalculationEnabled();
+        recalculateAccruals(loan, isInterestCalcualtionHappened);
+    }
+
+    @Override
+    public void recalculateAccruals(Loan loan, boolean isInterestCalcualtionHappened) {
         LocalDate accruedTill = loan.getAccruedTill();
+        if (!loan.isPeriodicAccrualAccountingEnabledOnLoanProduct() || !isInterestCalcualtionHappened
+                || accruedTill == null || loan.isNpa() || !loan.status().isActive()) { return; }
+        
         boolean isOrganisationDateEnabled = this.configurationDomainService.isOrganisationstartDateEnabled();
         Date organisationStartDate = new Date();
         if(isOrganisationDateEnabled){
             organisationStartDate = this.configurationDomainService.retrieveOrganisationStartDate(); 
         }
-        
-        if (!loan.isPeriodicAccrualAccountingEnabledOnLoanProduct() || !loan.repaymentScheduleDetail().isInterestRecalculationEnabled()
-                || accruedTill == null || loan.isNpa() || !loan.status().isActive()) { return; }
         Collection<LoanScheduleAccrualData> loanScheduleAccrualDatas = new ArrayList<>();
         List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
         Long loanId = loan.getId();
@@ -695,17 +701,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 constructEntityMap(BUSINESS_ENTITY.LOAN_TRANSACTION, payment));
         return changes;
 
-    }
-
-    private LoanRepaymentScheduleInstallment fetchLoanRepaymentScheduleInstallment(LocalDate fromDate, final Loan loan) {
-        LoanRepaymentScheduleInstallment installment = null;
-        for (LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : loan.getRepaymentScheduleInstallments()) {
-            if (fromDate.equals(loanRepaymentScheduleInstallment.getFromDate())) {
-                installment = loanRepaymentScheduleInstallment;
-                break;
-            }
-        }
-        return installment;
     }
 
     private Map<BUSINESS_ENTITY, Object> constructEntityMap(final BUSINESS_ENTITY entityEvent, Object entity) {

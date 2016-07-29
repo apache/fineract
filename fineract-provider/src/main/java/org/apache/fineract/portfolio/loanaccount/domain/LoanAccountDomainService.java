@@ -65,4 +65,6 @@ public interface LoanAccountDomainService {
      * @param loan {@link Loan} object
      */
     void disableStandingInstructionsLinkedToClosedLoan(Loan loan);
+
+    void recalculateAccruals(Loan loan, boolean isInterestCalcualtionHappened);
 }
