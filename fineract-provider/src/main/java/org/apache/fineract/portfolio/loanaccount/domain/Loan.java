@@ -2734,6 +2734,8 @@ public class Loan extends AbstractPersistable<Long> {
         final LoanStatus currentStatus = LoanStatus.fromInt(this.loanStatus);
         final LoanStatus statusEnum = this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSAL_UNDO, currentStatus);
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_DISBURSAL_UNDO, getDisbursementDate());
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
         if (!statusEnum.hasStateOf(currentStatus)) {
             this.loanStatus = statusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
@@ -2750,6 +2752,7 @@ public class Loan extends AbstractPersistable<Long> {
                 }
             }
             boolean isEmiAmountChanged = this.loanTermVariations.size() > 0;
+            
             updateLoanToPreDisbursalState();
             if (isScheduleRegenerateRequired || isDisbursedAmountChanged || isEmiAmountChanged
                     || this.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
@@ -2760,14 +2763,14 @@ public class Loan extends AbstractPersistable<Long> {
                 if (isDisbursedAmountChanged) {
                     updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
                 }
+            }else if(isPeriodicAccrualAccountingEnabledOnLoanProduct()){
+                for (final LoanRepaymentScheduleInstallment period : getRepaymentScheduleInstallments()) {
+                    period.resetAccrualComponents();
+                }
             }
 
             actualChanges.put("actualDisbursementDate", "");
 
-            existingTransactionIds.addAll(findExistingTransactionIds());
-            existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
-            this.accruedTill = null;
-            reverseExistingTransactions();
             updateLoanSummaryDerivedFields();
 
         }
@@ -2789,6 +2792,9 @@ public class Loan extends AbstractPersistable<Long> {
 
     private void updateLoanToPreDisbursalState() {
         this.actualDisbursementDate = null;
+        
+        this.accruedTill = null;
+        reverseExistingTransactions();
 
         for (final LoanCharge charge : charges()) {
             if (charge.isOverdueInstallmentCharge()) {

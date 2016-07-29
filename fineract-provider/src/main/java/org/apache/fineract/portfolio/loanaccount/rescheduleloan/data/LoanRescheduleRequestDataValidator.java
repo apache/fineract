@@ -34,7 +34,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
-import org.apache.fineract.portfolio.loanaccount.rescheduleloan.service.LoanRescheduleRequestReadPlatformService;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -46,13 +45,10 @@ import com.google.gson.reflect.TypeToken;
 public class LoanRescheduleRequestDataValidator {
 
     private final FromJsonHelper fromJsonHelper;
-    private final LoanRescheduleRequestReadPlatformService loanRescheduleRequestReadPlatformService;
 
     @Autowired
-    public LoanRescheduleRequestDataValidator(FromJsonHelper fromJsonHelper,
-            LoanRescheduleRequestReadPlatformService loanRescheduleRequestReadPlatformService) {
+    public LoanRescheduleRequestDataValidator(FromJsonHelper fromJsonHelper) {
         this.fromJsonHelper = fromJsonHelper;
-        this.loanRescheduleRequestReadPlatformService = loanRescheduleRequestReadPlatformService;
     }
 
     /**
@@ -158,10 +154,6 @@ public class LoanRescheduleRequestDataValidator {
                         .failWithCode("repayment.schedule.installment.obligation.met", "Repayment schedule installment obligation met");
             }
 
-            if (installment != null && installment.isPartlyPaid()) {
-                dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
-                        .failWithCode("repayment.schedule.installment.partly.paid", "Repayment schedule installment is partly paid");
-            }
         }
 
         if(loan.isMultiDisburmentLoan()) {
