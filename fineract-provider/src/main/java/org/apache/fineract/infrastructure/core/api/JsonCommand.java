@@ -78,17 +78,17 @@ public final class JsonCommand {
 
     public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
-            final String url, final Long productId,final Boolean status) {
+            final String url, final Long productId) {
         return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, null, null,
-                null, null, null, url, productId,status);
+                null, null, null, url, productId,null);
     }
 
     public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
             final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId, final String url,
-            final Long productId,final Boolean status) {
+            final Long productId) {
         return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, groupId,
-                clientId, loanId, savingsId, transactionId, url, productId,status);
+                clientId, loanId, savingsId, transactionId, url, productId,null);
 
     }
 
@@ -96,7 +96,7 @@ public final class JsonCommand {
         final String jsonCommand = command.fromApiJsonHelper.toJson(parsedCommand);
         return new JsonCommand(command.commandId, jsonCommand, parsedCommand, command.fromApiJsonHelper, command.entityName,
                 command.resourceId, command.subresourceId, command.groupId, command.clientId, command.loanId, command.savingsId,
-                command.transactionId, command.url, command.productId,command.status);
+                command.transactionId, command.url, command.productId,null);
     }
 
     public JsonCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,

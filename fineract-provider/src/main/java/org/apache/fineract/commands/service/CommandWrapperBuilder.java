@@ -45,8 +45,8 @@ public class CommandWrapperBuilder {
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
-                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId,
-                this.status);
+                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId
+                ,this.status);
     }
     
     public CommandWrapperBuilder addClientAddress(final long clientId,final long addressTypeId) {
