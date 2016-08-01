@@ -1165,6 +1165,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanAccountDomainService.recalculateAccruals(loan);
         this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_CLOSE,
                 constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
+        
+        // disable all active standing instructions linked to the loan
+        this.loanAccountDomainService.disableStandingInstructionsLinkedToClosedLoan(loan);
+        
         CommandProcessingResult result = null;
         if (possibleClosingTransaction != null) {
 
@@ -1221,6 +1225,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
         this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_CLOSE_AS_RESCHEDULE,
                 constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
+        
+        // disable all active standing instructions linked to the loan
+        this.loanAccountDomainService.disableStandingInstructionsLinkedToClosedLoan(loan);
+        
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loanId) //

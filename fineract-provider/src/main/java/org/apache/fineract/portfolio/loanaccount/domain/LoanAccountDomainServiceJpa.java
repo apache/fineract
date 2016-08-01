@@ -50,7 +50,10 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRepository;
+import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstruction;
 import org.apache.fineract.portfolio.account.domain.AccountTransferTransaction;
+import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
+import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
@@ -96,6 +99,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final PlatformSecurityContext context;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final LoanUtilService loanUtilService;
+    private final StandingInstructionRepository standingInstructionRepository;
 
     @Autowired
     public LoanAccountDomainServiceJpa(final LoanAssembler loanAccountAssembler, final LoanRepository loanRepository,
@@ -108,7 +112,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
             final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository,
             final LoanAccrualPlatformService loanAccrualPlatformService, final PlatformSecurityContext context,
-            final BusinessEventNotifierService businessEventNotifierService, final LoanUtilService loanUtilService) {
+            final BusinessEventNotifierService businessEventNotifierService, final LoanUtilService loanUtilService, 
+            final StandingInstructionRepository standingInstructionRepository) {
         this.loanAccountAssembler = loanAccountAssembler;
         this.loanRepository = loanRepository;
         this.loanTransactionRepository = loanTransactionRepository;
@@ -125,6 +130,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         this.context = context;
         this.businessEventNotifierService = businessEventNotifierService;
         this.loanUtilService = loanUtilService;
+        this.standingInstructionRepository = standingInstructionRepository;
     }
 
     @Transactional
@@ -208,6 +214,9 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_MAKE_REPAYMENT,
                 constructEntityMap(BUSINESS_ENTITY.LOAN_TRANSACTION, newRepaymentTransaction));
+        
+        // disable all active standing orders linked to this loan if status changes to closed
+        disableStandingInstructionsLinkedToClosedLoan(loan);
 
         builderResult.withEntityId(newRepaymentTransaction.getId()) //
                 .withOfficeId(loan.getOfficeId()) //
@@ -705,4 +714,20 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         return map;
     }
 
+    @Override
+    @Transactional
+    public void disableStandingInstructionsLinkedToClosedLoan(Loan loan) {
+        if ((loan != null) && (loan.status() != null) && loan.status().isClosed()) {
+            final Integer standingInstructionStatus = StandingInstructionStatus.ACTIVE.getValue();
+            final Collection<AccountTransferStandingInstruction> accountTransferStandingInstructions = this.standingInstructionRepository
+                    .findByLoanAccountAndStatus(loan, standingInstructionStatus);
+            
+            if (!accountTransferStandingInstructions.isEmpty()) {
+                for (AccountTransferStandingInstruction accountTransferStandingInstruction : accountTransferStandingInstructions) {
+                    accountTransferStandingInstruction.updateStatus(StandingInstructionStatus.DISABLED.getValue());
+                    this.standingInstructionRepository.save(accountTransferStandingInstruction);
+                }
+            }
+        }
+    }
 }
