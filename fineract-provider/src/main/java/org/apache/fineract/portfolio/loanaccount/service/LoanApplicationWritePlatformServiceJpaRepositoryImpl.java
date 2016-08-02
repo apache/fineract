@@ -31,6 +31,7 @@ import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumb
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
@@ -84,6 +85,7 @@ import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
+import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
@@ -126,9 +128,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringRepository;
+import org.apache.fineract.portfolio.loanaccount.data.GroupLoanIndividualMonitoringDataValidator;
+import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoring;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 @Service
 public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements LoanApplicationWritePlatformService {
@@ -168,7 +174,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final FineractEntityToEntityMappingRepository repository;
     private final FineractEntityRelationRepository fineractEntityRelationRepository;
-
+    private final GroupLoanIndividualMonitoringRepositoryWrapper groupLoanIndividualMonitoringRepository;
+    private final CodeValueRepository codeValueRepository;
+    
     @Autowired
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
             final LoanApplicationTransitionApiJsonValidator loanApplicationTransitionApiJsonValidator,
@@ -186,9 +194,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final LoanReadPlatformService loanReadPlatformService,
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
             final BusinessEventNotifierService businessEventNotifierService, final ConfigurationDomainService configurationDomainService,
-            final LoanScheduleAssembler loanScheduleAssembler, final LoanUtilService loanUtilService, 
+            final LoanScheduleAssembler loanScheduleAssembler, final LoanUtilService loanUtilService,
             final CalendarReadPlatformService calendarReadPlatformService, final GlobalConfigurationRepositoryWrapper globalConfigurationRepository,
-            final FineractEntityToEntityMappingRepository repository, final FineractEntityRelationRepository fineractEntityRelationRepository) {
+            final FineractEntityToEntityMappingRepository repository, final FineractEntityRelationRepository fineractEntityRelationRepository,
+            final GroupLoanIndividualMonitoringRepositoryWrapper groupLoanIndividualMonitoringRepository, final CodeValueRepository codeValueRepository) {
         this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
@@ -222,6 +231,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.globalConfigurationRepository = globalConfigurationRepository;
         this.repository = repository;
         this.fineractEntityRelationRepository = fineractEntityRelationRepository;
+        this.groupLoanIndividualMonitoringRepository = groupLoanIndividualMonitoringRepository;
+        this.codeValueRepository = codeValueRepository;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -252,6 +263,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                         }
             
             this.fromApiJsonDeserializer.validateForCreate(command.json(), isMeetingMandatoryForJLGLoans, loanProduct);
+            //validate for glim application
+            if(command.hasParameter(LoanApiConstants.clientMembersParamName)){
+            	GroupLoanIndividualMonitoringDataValidator.validateForGroupLoanIndividualMonitoring(command, LoanApiConstants.principalParamName);
+            }
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
@@ -349,6 +364,27 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 final AccountAssociations accountAssociations = AccountAssociations.associateSavingsAccount(newLoanApplication,
                         savingsAccount, AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue(), isActive);
                 this.accountAssociationsRepository.save(accountAssociations);
+            }
+            //save glim data
+            if(command.hasParameter(LoanApiConstants.clientMembersParamName)){
+            	JsonArray clientMembers = command.arrayOfParameterNamed(LoanApiConstants.clientMembersParamName);
+                for(JsonElement clientMember :clientMembers) {            	
+                	JsonObject member = clientMember.getAsJsonObject();
+                	Long glimClientId = member.get(LoanApiConstants.idParamName).getAsLong();
+                	Client client = this.clientRepository.getActiveClientInUserScope(glimClientId);
+                	BigDecimal proposedAmount = null;
+                	Boolean isSelected = member.has(LoanApiConstants.isSelectedParamName) && member.get(LoanApiConstants.isSelectedParamName).getAsBoolean();
+                	if(member.has(LoanApiConstants.amountParamName)){
+                		proposedAmount = member.get(LoanApiConstants.amountParamName).getAsBigDecimal();
+                	}
+                	CodeValue loanPurpose = null;
+                	if(member.has(LoanApiConstants.loanPurposeIdParamName)){
+                		Long loanPurposeId = member.get(LoanApiConstants.loanPurposeIdParamName).getAsLong();
+                		loanPurpose = this.codeValueRepository.findOne(loanPurposeId);
+                	}
+                	GroupLoanIndividualMonitoring groupLoanIndividualMonitoring = GroupLoanIndividualMonitoring.createInstance(newLoanApplication, client, proposedAmount, null, null, loanPurpose, isSelected);
+                	this.groupLoanIndividualMonitoringRepository.save(groupLoanIndividualMonitoring);
+                }	
             }
 
             return new CommandProcessingResultBuilder() //
@@ -502,6 +538,11 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             this.fromApiJsonDeserializer.validateForModify(command.json(), loanProductForValidations, existingLoanApplication);
 
             checkClientOrGroupActive(existingLoanApplication);
+            
+            //validate for glim application
+            if(command.hasParameter(LoanApiConstants.clientMembersParamName)){
+            	GroupLoanIndividualMonitoringDataValidator.validateForGroupLoanIndividualMonitoring(command, LoanApiConstants.principalParamName);
+            }
 
             final Set<LoanCharge> existingCharges = existingLoanApplication.charges();
             Map<Long, LoanChargeData> chargesMap = new HashMap<>();
@@ -853,7 +894,31 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 }
 
             }
-
+            
+            //modify glim data
+            if(command.hasParameter(LoanApiConstants.clientMembersParamName)){
+            	JsonArray clientMembers = command.arrayOfParameterNamed(LoanApiConstants.clientMembersParamName);
+                for(JsonElement clientMember :clientMembers) {            	
+                	JsonObject member = clientMember.getAsJsonObject();
+                	BigDecimal amount = null;
+                	Boolean isSelected = member.has(LoanApiConstants.isSelectedParamName) && member.get(LoanApiConstants.isSelectedParamName).getAsBoolean();
+                	if(member.has(LoanApiConstants.amountParamName)){
+                		amount = member.get(LoanApiConstants.amountParamName).getAsBigDecimal();
+                	}
+                	if(member.has(LoanApiConstants.glimIdParamName)){
+                    	Long glimId = member.get(LoanApiConstants.glimIdParamName).getAsLong();            	
+                    	GroupLoanIndividualMonitoring groupLoanIndividualMonitoring = this.groupLoanIndividualMonitoringRepository.findOneWithNotFoundDetection(glimId);
+                    	groupLoanIndividualMonitoring.setProposedAmount(amount);
+                    	if(member.has(LoanApiConstants.loanPurposeIdParamName)){
+                    		Long loanPurposeId = member.get(LoanApiConstants.loanPurposeIdParamName).getAsLong();
+                    		CodeValue loanPurpose = this.codeValueRepository.findOne(loanPurposeId);
+                    		groupLoanIndividualMonitoring.setLoanPurpose(loanPurpose);
+                    	}
+                    	groupLoanIndividualMonitoring.setIsSelected(isSelected);
+                    	this.groupLoanIndividualMonitoringRepository.save(groupLoanIndividualMonitoring);
+                	}
+                }
+            }
             return new CommandProcessingResultBuilder() //
                     .withEntityId(loanId) //
                     .withOfficeId(existingLoanApplication.getOfficeId()) //
@@ -948,6 +1013,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         if (loan.loanProduct().isMultiDisburseLoan()) {
             this.validateMultiDisbursementData(command, expectedDisbursementDate);
         }
+        // validate for GLIM application
+        if(command.hasParameter(LoanApiConstants.clientMembersParamName)){
+        	GroupLoanIndividualMonitoringDataValidator.validateForGroupLoanIndividualMonitoring(command, LoanApiConstants.approvedLoanAmountParameterName);
+        }
 
         checkClientOrGroupActive(loan);
         Boolean isSkipRepaymentOnFirstMonth = false;
@@ -992,6 +1061,25 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_APPROVED,
                     constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
+        }        
+        //update approved amount
+        if(command.hasParameter(LoanApiConstants.clientMembersParamName)){
+        	JsonArray clientMembers = command.arrayOfParameterNamed(LoanApiConstants.clientMembersParamName);
+            for(JsonElement clientMember :clientMembers) {            	
+            	JsonObject member = clientMember.getAsJsonObject();
+            	BigDecimal amount = null;
+            	if(member.has(LoanApiConstants.amountParamName)){
+            		amount = member.get(LoanApiConstants.amountParamName).getAsBigDecimal();
+            	}
+            	Boolean isSelected = member.has(LoanApiConstants.isSelectedParamName) && member.get(LoanApiConstants.isSelectedParamName).getAsBoolean();            	      
+            	if(member.has(LoanApiConstants.glimIdParamName) && member.get(LoanApiConstants.glimIdParamName) != null){
+            		Long glimId = member.get(LoanApiConstants.glimIdParamName).getAsLong();
+                	GroupLoanIndividualMonitoring groupLoanIndividualMonitoring = this.groupLoanIndividualMonitoringRepository.findOneWithNotFoundDetection(glimId);
+                	groupLoanIndividualMonitoring.setApprovedAmount(amount);
+                	groupLoanIndividualMonitoring.setIsSelected(isSelected);
+                	this.groupLoanIndividualMonitoringRepository.save(groupLoanIndividualMonitoring);
+            	}
+            }	
         }
 
         return new CommandProcessingResultBuilder() //

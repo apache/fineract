@@ -78,7 +78,7 @@ public final class LoanEventApiJsonValidator {
         } else {
             disbursementParameters = new HashSet<>(Arrays.asList("actualDisbursementDate", "externalId", "note", "locale",
                     "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber", "adjustRepaymentDate", 
-                    LoanApiConstants.principalDisbursedParameterName, LoanApiConstants.emiAmountParameterName));
+                    LoanApiConstants.principalDisbursedParameterName, LoanApiConstants.emiAmountParameterName, LoanApiConstants.clientMembersParamName));
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
