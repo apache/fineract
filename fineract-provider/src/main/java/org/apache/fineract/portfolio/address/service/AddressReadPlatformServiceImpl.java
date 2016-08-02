@@ -191,10 +191,8 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 	@Override
 	public Collection<AddressData> retrieveAllClientAddress(final long clientid) {
 		this.context.authenticatedUser();
-		System.out.println("client Id received" + clientid);
 		final AddMapper rm = new AddMapper();
 		final String sql = "select " + rm.schema() + " and ca.client_id=?";
-
 		return this.jdbcTemplate.query(sql, rm, new Object[] { clientid });
 	}
 

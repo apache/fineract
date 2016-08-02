@@ -55,7 +55,7 @@ CREATE TABLE `m_address` (
 )
 COLLATE='utf8_general_ci'
 ENGINE=InnoDB
-AUTO_INCREMENT=20
+AUTO_INCREMENT=1
 ;
 
 
@@ -75,7 +75,7 @@ CREATE TABLE `m_client_address` (
 )
 COLLATE='utf8_general_ci'
 ENGINE=InnoDB
-AUTO_INCREMENT=28
+AUTO_INCREMENT=1
 ;
 
 
@@ -92,7 +92,7 @@ CREATE TABLE `m_field_configuration` (
 )
 COLLATE='utf8_general_ci'
 ENGINE=InnoDB
-AUTO_INCREMENT=19
+AUTO_INCREMENT=1
 ;
 
 

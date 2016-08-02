@@ -19,9 +19,8 @@
 package org.apache.fineract.portfolio.address.domain;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -40,8 +39,11 @@ import com.google.gson.JsonObject;
 @Table(name = "m_address")
 public class Address extends AbstractPersistable<Long> {
 
+	/*@OneToMany(mappedBy = "address", cascade = CascadeType.ALL)
+	private List<ClientAddress> clientaddress = new ArrayList<>();*/
+	
 	@OneToMany(mappedBy = "address", cascade = CascadeType.ALL)
-	private List<ClientAddress> clientaddress = new ArrayList<>();
+	private Set<ClientAddress> clientaddress;
 
 	private String street;
 
@@ -204,8 +206,14 @@ public class Address extends AbstractPersistable<Long> {
 				state_province, country, postal_code, latitude, longitude, null, null, null, null);
 	}
 
-	public List<ClientAddress> getClientaddress() {
+	
+
+	public Set<ClientAddress> getClientaddress() {
 		return this.clientaddress;
+	}
+
+	public void setClientaddress(Set<ClientAddress> clientaddress) {
+		this.clientaddress = clientaddress;
 	}
 
 	public String getStreet() {
@@ -272,10 +280,7 @@ public class Address extends AbstractPersistable<Long> {
 		return this.updated_on;
 	}
 
-	public void setClientaddress(final List<ClientAddress> clientaddress) {
-		this.clientaddress = clientaddress;
-	}
-
+	
 	public void setStreet(final String street) {
 		this.street = street;
 	}

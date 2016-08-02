@@ -212,12 +212,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
              
              final Boolean isAddressEnabled=configuration.isEnabled(); 
 
-            // this.fromApiJsonDeserializer.validateForCreate(command.json());
-             
-             
-             
-
-             final Long officeId = command.longValueOfParameterNamed(ClientApiConstants.officeIdParamName);
+            final Long officeId = command.longValueOfParameterNamed(ClientApiConstants.officeIdParamName);
 
              final Office clientOffice = this.officeRepository.findOne(officeId);
              if (clientOffice == null) { throw new OfficeNotFoundException(officeId); }
@@ -305,16 +300,11 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
              	extractAndCreateClientNonPerson(newClient, command);
              
              final long clientId=newClient.getId();
-             System.out.println("client with client ID created:"+clientId);
-             
-             
              
              if(isAddressEnabled)
              {
                 
-                
-                    
-      this.addressWritePlatformService.addNewClientAddress(newClient,command);
+        this.addressWritePlatformService.addNewClientAddress(newClient,command);
                  
               
              }

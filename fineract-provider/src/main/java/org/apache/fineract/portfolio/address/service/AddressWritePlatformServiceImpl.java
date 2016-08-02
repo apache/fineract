@@ -163,15 +163,9 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 		boolean is_address_config_update = false;
 
 		final CodeValue addresstyp = this.codeValueRepository.getOne(addressTypeId);
-		
-		
-		System.out.println("clientId is"+ clientId);
-		System.out.println("addresstyp:" +addresstyp);
-		System.out.println("status:" +status);
-
 		final ClientAddress clientAddressObj = this.clientAddressRepositoryWrapper
 				.findOneByClientIdAndAddressTypeAndIsActive(clientId, addresstyp, status);
-		System.out.println(clientAddressObj);
+		
 		final long addrId = clientAddressObj.getAddress().getId();
 		final Address addobj = this.addressRepository.getOne(addrId);
 
@@ -276,25 +270,23 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 		 */
 		final Boolean testActive = command.booleanPrimitiveValueOfParameterNamed("is_active");
 		if (testActive != null) {
-			System.out.println("it is configuration update");
-			System.out.print("is active received "+testActive);
 			is_address_config_update = true;
 			final boolean active = command.booleanPrimitiveValueOfParameterNamed("is_active");
 			clientAddressObj.setIs_active(active);
 
 		}
 
-		if (is_address_config_update) {
+/*		if (is_address_config_update) {
 			try {
-				System.out.println("I might throw an error");
+				
 				this.clientAddressRepository.save(clientAddressObj);
 			} catch (Exception dve) {
 				//handleIntegrityIssues(clientAddressObj, dve);
-				System.out.println("i caught this exception");
+				
 
 			}
 
-		}
+		}*/
 
 		return new CommandProcessingResultBuilder().withCommandId(command.commandId())
 				.withEntityId(clientAddressObj.getId()).build();

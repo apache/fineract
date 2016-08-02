@@ -79,22 +79,6 @@ public class AddressConfigurationApiResources {
 	}
 
 	@GET
-	@Path("/fieldconfiguration/{entity}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String getAddresses(@PathParam("entity") final String entityname, @Context final UriInfo uriInfo) {
-		this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-
-		final Collection<FieldConfigurationData> fldconfig = this.readPlatformServicefld
-				.retrieveFieldConfiguration(entityname);
-
-		final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper
-				.process(uriInfo.getQueryParameters());
-		return this.toApiJsonSerializerfld.serialize(settings, fldconfig, this.RESPONSE_DATA_PARAMETERS);
-
-	}
-
-	@GET
 	@Path("/template/")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })

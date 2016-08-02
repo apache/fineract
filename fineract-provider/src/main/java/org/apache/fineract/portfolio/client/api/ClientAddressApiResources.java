@@ -93,10 +93,8 @@ public class ClientAddressApiResources {
 		Collection<AddressData> address;
 
 		this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-		System.out.println("addressType Id received" + addressTypeId);
+		
 		if (addressTypeId == 0 && status == null) {
-			System.out.println("client Id received" + clientid);
-
 			address = this.readPlatformService.retrieveAllClientAddress(clientid);
 		} else if (addressTypeId != 0 && status == null) {
 			address = this.readPlatformService.retrieveAddressbyType(clientid, addressTypeId);
