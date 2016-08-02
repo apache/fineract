@@ -47,19 +47,19 @@ public class CodeValueRepositoryWrapper {
 
     public CodeValue findOneWithNotFoundDetection(final Long id) {
         final CodeValue codeValue = this.repository.findOne(id);
-        if (codeValue == null) { throw new CodeValueNotFoundException(id); }
+        if (codeValue == null || codeValue.isDeleted()) { throw new CodeValueNotFoundException(id); }
         return codeValue;
     }
 
     public CodeValue findOneByCodeNameAndIdWithNotFoundDetection(final String codeName, final Long id) {
         final CodeValue codeValue = this.repository.findByCodeNameAndId(codeName, id);
-        if (codeValue == null) { throw new CodeValueNotFoundException(codeName, id); }
+        if (codeValue == null || codeValue.isDeleted()) { throw new CodeValueNotFoundException(codeName, id); }
         return codeValue;
     }
     
     public CodeValue findOneByCodeNameAndLabelWithNotFoundDetection(final String codeName, final String label) {
         final CodeValue codeValue = this.repository.findByCodeNameAndLabel(codeName, label);
-        if (codeValue == null) { throw new CodeValueNotFoundException(codeName, label); }
+        if (codeValue == null || codeValue.isDeleted()) { throw new CodeValueNotFoundException(codeName, label); }
         return codeValue;
     }
     

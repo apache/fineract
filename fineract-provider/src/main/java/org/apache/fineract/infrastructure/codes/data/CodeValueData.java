@@ -57,10 +57,9 @@ public class CodeValueData implements Serializable {
         return new CodeValueData(id, name, position, description, isActive, mandatory);
     }
 
-    public static CodeValueData instance(final Long id, final String name) {
+    public static CodeValueData instance(final Long id, final String name, final boolean isActive) {
         String description = null;
         Integer position = null;
-        boolean isActive = false;
         boolean mandatory = false;
         
         return new CodeValueData(id, name, position, description, isActive, mandatory);
@@ -97,7 +96,7 @@ public class CodeValueData implements Serializable {
     }
 
     /**
-     * @return the active
+     * @return the isActive
      */
     public boolean isActive() {
         return active;
