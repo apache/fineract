@@ -1,1 +1,0 @@
-ALTER TABLE `m_product_loan`ADD COLUMN `sync_expected_with_disbursement_date` TINYINT NULL  DEFAULT '0'  AFTER `instalment_amount_in_multiples_of`;
