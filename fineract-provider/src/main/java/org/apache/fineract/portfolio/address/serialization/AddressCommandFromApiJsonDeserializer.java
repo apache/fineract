@@ -42,18 +42,29 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 @Component
-public class AddAddressCommandFromApiJsonDeserializer {
+public class AddressCommandFromApiJsonDeserializer {
 	private final FromJsonHelper fromApiJsonHelper;
 	private final FieldConfigurationReadPlatformService readservice;
 
 	@Autowired
-	public AddAddressCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
+	public AddressCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
 			final FieldConfigurationReadPlatformService readservice) {
 		this.fromApiJsonHelper = fromApiJsonHelper;
 		this.readservice = readservice;
 	}
+	
+	public void validateForUpdate(final String json)
+	{
+		validate(json,false);
+	}
+	
+	public void validateForCreate(final String json, final boolean fromNewClient) 
+	{
+		validate(json,fromNewClient);
+	}
 
-	public void validateForCreate(final String json, final boolean fromNewClient) {
+	public void validate(final String json, final boolean fromNewClient) 
+	{
 		if (StringUtils.isBlank(json)) {
 			throw new InvalidJsonException();
 		}
@@ -74,6 +85,9 @@ public class AddAddressCommandFromApiJsonDeserializer {
 		final Map<String, Boolean> madatoryFieldsMap = new HashMap<String, Boolean>();
 		final Map<String, Boolean> enabledFieldsMap = new HashMap<String, Boolean>();
 		final Map<String, String> regexFieldsMap = new HashMap<String, String>();
+		
+		
+		//validate the json fields from the configuration data fields
 
 		for (final FieldConfigurationData data : configurationData) {
 			madatoryFieldsMap.put(data.getField(), data.isIs_mandatory());
@@ -87,6 +101,11 @@ public class AddAddressCommandFromApiJsonDeserializer {
 			enabledFieldList.add("addressTypeId");
 			madatoryFieldsMap.put("addressTypeId", true);
 
+		}
+		if(!fromNewClient)
+		{
+			enabledFieldList.add("addressId");
+			madatoryFieldsMap.put("addressId", true);
 		}
 		final Set<String> supportedParameters = new HashSet<>(enabledFieldList);
 		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);

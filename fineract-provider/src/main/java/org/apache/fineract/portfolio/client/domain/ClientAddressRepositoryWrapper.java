@@ -39,5 +39,12 @@ public class ClientAddressRepositoryWrapper {
 		// AddressNotFoundException(clientId, addressType); }
 		return clientAddress;
 	}
+	
+	public ClientAddress findOneByClientIdAndAddressId(final long clientId, final long addressId) {
+		final ClientAddress clientAddress = this.clientAddressRepository
+				.findByClientIdAndAddressId(clientId, addressId);
+		
+		return clientAddress;
+	}
 
 }

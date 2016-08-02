@@ -38,7 +38,7 @@ public class CommandWrapper {
     private final String json;
     private final String transactionId;
     private final Long productId;
-    private final Boolean status;
+   
   
 
     @SuppressWarnings("unused")
@@ -78,13 +78,13 @@ public class CommandWrapper {
         this.json = null;
         this.transactionId = null;
         this.productId = productId;
-        this.status=null;
+       
         
         }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
             final String actionName, final String entityName, final Long entityId, final Long subentityId, final String href,
-            final String json, final String transactionId, final Long productId, final Long templateId,final Boolean status) {
+            final String json, final String transactionId, final Long productId, final Long templateId) {
 
         this.commandId = null;
         this.officeId = officeId;
@@ -102,7 +102,7 @@ public class CommandWrapper {
         this.transactionId = transactionId;
         this.productId = productId;
         this.templateId = templateId;
-        this.status=status;
+       
       
     }
 
@@ -125,17 +125,11 @@ public class CommandWrapper {
         this.json = null;
         this.transactionId = transactionId;
         this.productId = productId;
-        this.status=null;
+       
         
     }
     
     
-   
-
-	public Boolean getStatus() {
-		return this.status;
-	}
-
 	public String getHref() {
         return this.href;
     }

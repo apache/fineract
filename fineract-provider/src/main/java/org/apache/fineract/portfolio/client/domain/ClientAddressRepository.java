@@ -25,7 +25,12 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface ClientAddressRepository
 		extends JpaRepository<ClientAddress, Long>, JpaSpecificationExecutor<ClientAddress> {
 	ClientAddress findByClientId(String clientId);
+	
+//	ClientAddress findByAddressId(long addressId);
+	
 
 	ClientAddress findByClientIdAndAddressTypeAndIsActive(final long clientId, final CodeValue addressTypeId,
 			final boolean isActive);
+	
+	ClientAddress findByClientIdAndAddressId(final long clientId, final long addressId);
 }

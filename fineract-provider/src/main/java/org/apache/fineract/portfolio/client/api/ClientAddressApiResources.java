@@ -127,12 +127,12 @@ public class ClientAddressApiResources {
 	@PUT
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String UpdateClientAddress(@QueryParam("type") final long addressTypeId,
-			@QueryParam("status") final boolean status, @PathParam("clientid") final long clientid,
+	public String UpdateClientAddress(
+			 @PathParam("clientid") final long clientid,
 			final String apiRequestBodyAsJson) {
 
 		final CommandWrapper commandRequest = new CommandWrapperBuilder()
-				.updateClientAddress(clientid, addressTypeId, status).withJson(apiRequestBodyAsJson).build();
+				.updateClientAddress(clientid).withJson(apiRequestBodyAsJson).build();
 
 		final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

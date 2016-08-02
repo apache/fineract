@@ -41,12 +41,12 @@ public class CommandWrapperBuilder {
     private String transactionId;
     private Long productId;
     private Long templateId;
-    private Boolean status;
+   
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
-                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId
-                ,this.status);
+                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId,
+                this.templateId);
     }
     
     public CommandWrapperBuilder addClientAddress(final long clientId,final long addressTypeId) {
@@ -58,13 +58,11 @@ public class CommandWrapperBuilder {
         return this;
     }
     
-    public CommandWrapperBuilder updateClientAddress(final long clientId,final long addressTypeID,final boolean status) {
+    public CommandWrapperBuilder updateClientAddress(final long clientId) {
         this.actionName = "UPDATE";
         this.entityName = "ADDRESS";
-        this.entityId = addressTypeID;
         this.href = "/Address/template";
         this.clientId=clientId;
-        this.status=status;
         return this;
     }
     
