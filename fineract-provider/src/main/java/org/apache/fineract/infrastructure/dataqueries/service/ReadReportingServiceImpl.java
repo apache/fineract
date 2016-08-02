@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.dataqueries.service;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -28,6 +29,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -485,4 +487,10 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         }
     }
 
+    @Override
+    public ByteArrayOutputStream generatePentahoReportAsOutputStream(String reportName, String outputTypeParam,
+            Map<String, String> queryParams, Locale locale, AppUser runReportAsUser, StringBuilder errorLog) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
