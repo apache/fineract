@@ -151,173 +151,11 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 		return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(typ).build();
 	}
 
-	@Override
-	public CommandProcessingResult updateClientAddress(final Long clientId, final Long addressTypeId,
-			final Boolean status, final JsonCommand command) {
-		this.context.authenticatedUser();
 
-		long stateId;
-
-		long countryId;
-
-		CodeValue stateIdobj;
-
-		CodeValue countryIdObj;
-
-		boolean is_address_update = false;
-
-		boolean is_address_config_update = false;
-		
-		this.fromApiJsonDeserializer.validateForUpdate(command.json());
-
-		final CodeValue addresstyp = this.codeValueRepository.getOne(addressTypeId);
-		final ClientAddress clientAddressObj = this.clientAddressRepositoryWrapper
-				.findOneByClientIdAndAddressTypeAndIsActive(clientId, addresstyp, status);
-		
-		final long addrId = clientAddressObj.getAddress().getId();
-		final Address addobj = this.addressRepository.getOne(addrId);
-
-		if (!(command.stringValueOfParameterNamed("street").isEmpty())) {
-
-			is_address_update = true;
-			final String street = command.stringValueOfParameterNamed("street");
-			addobj.setStreet(street);
-
-		}
-
-		if (!(command.stringValueOfParameterNamed("address_line_1").isEmpty())) {
-
-			is_address_update = true;
-			final String address_line_1 = command.stringValueOfParameterNamed("address_line_1");
-			addobj.setAddress_line_1(address_line_1);
-
-		}
-		if (!(command.stringValueOfParameterNamed("address_line_2").isEmpty())) {
-
-			is_address_update = true;
-			final String address_line_2 = command.stringValueOfParameterNamed("address_line_2");
-			addobj.setAddress_line_2(address_line_2);
-
-		}
-
-		if (!(command.stringValueOfParameterNamed("address_line_3").isEmpty())) {
-			is_address_update = true;
-			final String address_line_3 = command.stringValueOfParameterNamed("address_line_3");
-			addobj.setAddress_line_3(address_line_3);
-
-		}
-
-		if (!(command.stringValueOfParameterNamed("town_village").isEmpty())) {
-
-			is_address_update = true;
-			final String town_village = command.stringValueOfParameterNamed("town_village");
-			addobj.setTown_village(town_village);
-		}
-
-		if (!(command.stringValueOfParameterNamed("city").isEmpty())) {
-			is_address_update = true;
-			final String city = command.stringValueOfParameterNamed("city");
-			addobj.setCity(city);
-		}
-
-		if (!(command.stringValueOfParameterNamed("county_district").isEmpty())) {
-			is_address_update = true;
-			final String county_district = command.stringValueOfParameterNamed("county_district");
-			addobj.setCounty_district(county_district);
-		}
-		if ((command.longValueOfParameterNamed("state_province_id") !=null))
-			{
-			if((command.longValueOfParameterNamed("state_province_id") !=0) )
-			is_address_update = true;
-			stateId = command.longValueOfParameterNamed("state_province_id");
-			stateIdobj = this.codeValueRepository.getOne(stateId);
-			addobj.setState_province(stateIdobj);
-		}
-		if ((command.longValueOfParameterNamed("country_id") !=null)) 
-		{
-			if((command.longValueOfParameterNamed("country_id") != 0))
-			is_address_update = true;
-			countryId = command.longValueOfParameterNamed("country_id");
-			countryIdObj = this.codeValueRepository.getOne(countryId);
-			addobj.setCountry(countryIdObj);
-		}
-		if (!(command.stringValueOfParameterNamed("postal_code").isEmpty())) {
-			is_address_update = true;
-			final String postal_code = command.stringValueOfParameterNamed("postal_code");
-			addobj.setPostal_code(postal_code);
-		}
-		if (command.bigDecimalValueOfParameterNamed("latitude") != null) {
-
-			is_address_update = true;
-			final BigDecimal latitude = command.bigDecimalValueOfParameterNamed("latitude");
-
-			addobj.setLatitude(latitude);
-		}
-		if (command.bigDecimalValueOfParameterNamed("longitude") != null) {
-			is_address_update = true;
-			final BigDecimal longitude = command.bigDecimalValueOfParameterNamed("longitude");
-			addobj.setLongitude(longitude);
-
-		}
-
-		if (is_address_update) {
-
-			this.addressRepository.save(addobj);
-
-		}
-
-		/*
-		 * if(command.longValueOfParameterNamed("address_type_id")!=null) {
-		 * is_address_config_update=true; final long
-		 * newAddressTypeId=command.longValueOfParameterNamed("address_type_id")
-		 * ; CodeValue
-		 * addressTypeIdObj=this.codeValueRepository.getOne(newAddressTypeId);
-		 * clientAddressObj.setAddressType(addressTypeIdObj);
-		 *
-		 * }
-		 */
-		final Boolean testActive = command.booleanPrimitiveValueOfParameterNamed("is_active");
-		if (testActive != null) {
-			is_address_config_update = true;
-			final boolean active = command.booleanPrimitiveValueOfParameterNamed("is_active");
-			clientAddressObj.setIs_active(active);
-
-		}
-
-/*		if (is_address_config_update) {
-			try {
-				
-				this.clientAddressRepository.save(clientAddressObj);
-			} catch (Exception dve) {
-				//handleIntegrityIssues(clientAddressObj, dve);
-				
-
-			}
-
-		}*/
-
-		return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-				.withEntityId(clientAddressObj.getId()).build();
-	}
-
-/*	private void handleIntegrityIssues(final ClientAddress clientAddressObj, final Exception dve) {
-		final Throwable realCause = dve.getCause();
-		if (realCause.getMessage().contains("clientaddtyp")) {
-			// final String name = command.stringValueOfParameterNamed("name");
-			throw new PlatformDataIntegrityException(
-					"error.msg.code.duplicate.address", "client with clinet ID  '"
-							+ clientAddressObj.getClient().getId() + "' already has submited type address",
-					"Client address", clientAddressObj);
-		}
-
-		logger.error(dve.getMessage(), dve);
-		throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
-				"Unknown data integrity issue with resource: " + realCause.getMessage());
-	}*/
 	
 	
 	@Override
-	public CommandProcessingResult updateclientAddress(final Long clientId,
+	public CommandProcessingResult updateClientAddress(final Long clientId,
 			 final JsonCommand command) {
 		this.context.authenticatedUser();
 
@@ -337,12 +175,9 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 		
 		final long addressId=command.longValueOfParameterNamed("addressId");
 
-		//final Address addobj = this.addressRepository.getOne(addressId);
-		//final CodeValue addresstyp = this.codeValueRepository.getOne(addressTypeId);
 		final ClientAddress clientAddressObj = this.clientAddressRepositoryWrapper
 				.findOneByClientIdAndAddressId(clientId, addressId);
 		
-		//final long addrId = clientAddressObj.getAddress().getId();
 		final Address addobj = this.addressRepository.getOne(addressId);
 
 		if (!(command.stringValueOfParameterNamed("street").isEmpty())) {
@@ -440,16 +275,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 
 		}
 
-		/*
-		 * if(command.longValueOfParameterNamed("address_type_id")!=null) {
-		 * is_address_config_update=true; final long
-		 * newAddressTypeId=command.longValueOfParameterNamed("address_type_id")
-		 * ; CodeValue
-		 * addressTypeIdObj=this.codeValueRepository.getOne(newAddressTypeId);
-		 * clientAddressObj.setAddressType(addressTypeIdObj);
-		 *
-		 * }
-		 */
+		
 		final Boolean testActive = command.booleanPrimitiveValueOfParameterNamed("is_active");
 		if (testActive != null) {
 			is_address_config_update = true;
@@ -458,17 +284,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 
 		}
 
-/*		if (is_address_config_update) {
-			try {
-				
-				this.clientAddressRepository.save(clientAddressObj);
-			} catch (Exception dve) {
-				//handleIntegrityIssues(clientAddressObj, dve);
-				
 
-			}
-
-		}*/
 
 		return new CommandProcessingResultBuilder().withCommandId(command.commandId())
 				.withEntityId(clientAddressObj.getId()).build();

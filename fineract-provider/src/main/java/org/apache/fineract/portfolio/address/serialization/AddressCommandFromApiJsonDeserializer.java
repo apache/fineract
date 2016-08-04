@@ -81,7 +81,7 @@ public class AddressCommandFromApiJsonDeserializer {
 		 Set<String> supportedParameters=new HashSet<>();
 
 		final List<FieldConfigurationData> configurationData = new ArrayList<>(
-				this.readservice.retrieveFieldConfigurationList("client"));
+				this.readservice.retrieveFieldConfigurationList("ADDRESS"));
 		final List<String> enabledFieldList = new ArrayList<>();
 		
 		final Map<String, Boolean> madatoryFieldsMap = new HashMap<String, Boolean>();

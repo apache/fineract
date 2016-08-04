@@ -41,7 +41,7 @@ public class UpdateClientAddressCommandHandler implements NewCommandSourceHandle
 	public CommandProcessingResult processCommand(final JsonCommand command) {
 		/*return this.writePlatformService.updateClientAddress(command.getClientId(), command.entityId(),
 				command.getStatus(), command);*/
-		return this.writePlatformService.updateclientAddress(command.getClientId(), 
+		return this.writePlatformService.updateClientAddress(command.getClientId(), 
 				 command);
 		
 

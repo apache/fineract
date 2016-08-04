@@ -25,9 +25,7 @@ import org.apache.fineract.portfolio.client.domain.Client;
 public interface AddressWritePlatformService {
 	CommandProcessingResult addClientAddress(Long clientId, Long addressTypeId, JsonCommand command);
 
-	CommandProcessingResult updateClientAddress(Long clientId, Long addressTypeID, Boolean status, JsonCommand command);
-
 	CommandProcessingResult addNewClientAddress(Client client, JsonCommand command);
 
-	CommandProcessingResult updateclientAddress(Long clientId,JsonCommand command);
+	CommandProcessingResult updateClientAddress(Long clientId,JsonCommand command);
 }
