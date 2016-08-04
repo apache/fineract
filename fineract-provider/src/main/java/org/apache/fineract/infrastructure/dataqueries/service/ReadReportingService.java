@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.ws.rs.core.StreamingOutput;
@@ -26,6 +28,7 @@ import javax.ws.rs.core.StreamingOutput;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportParameterData;
+import org.apache.fineract.useradministration.domain.AppUser;
 
 public interface ReadReportingService {
 
@@ -44,4 +47,7 @@ public interface ReadReportingService {
     ReportData retrieveReport(final Long id);
 
     Collection<String> getAllowedReportTypes();
+    
+    ByteArrayOutputStream generatePentahoReportAsOutputStream(String reportName, String outputTypeParam,
+            Map<String, String> queryParams, Locale locale, AppUser runReportAsUser, StringBuilder errorLog);
 }
