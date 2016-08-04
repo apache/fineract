@@ -65,6 +65,7 @@ public final class JsonCommand {
     private final String transactionId;
     private final String url;
     private final Long productId;
+   
 
     public static JsonCommand from(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
             final String entityName, final Long resourceId, final Long subresourceId, final Long groupId, final Long clientId,
@@ -116,9 +117,10 @@ public final class JsonCommand {
         this.transactionId = transactionId;
         this.url = url;
         this.productId = productId;
+        
     }
-
-    public String json() {
+    
+  public String json() {
         return this.jsonCommand;
     }
 

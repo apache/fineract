@@ -68,6 +68,7 @@ public class ClientApiConstants {
     // general
     public static final String localeParamName = "locale";
     public static final String dateFormatParamName = "dateFormat";
+    public static final String address = "address";
     
     public static final String CLIENT_TYPE_INDIVIDUAL = "Individual";
 
@@ -175,14 +176,14 @@ public class ClientApiConstants {
     public static final String staffOptionsParamName = "staffOptions";
 
     public static final Set<String> CLIENT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(localeParamName, dateFormatParamName, groupIdParamName, accountNoParamName, externalIdParamName,
+            Arrays.asList(address,localeParamName, dateFormatParamName, groupIdParamName, accountNoParamName, externalIdParamName,
                     mobileNoParamName, firstnameParamName, middlenameParamName, lastnameParamName, fullnameParamName, officeIdParamName,
                     activeParamName, activationDateParamName, staffIdParamName, submittedOnDateParamName, savingsProductIdParamName,
                     dateOfBirthParamName, genderIdParamName, clientTypeIdParamName, clientClassificationIdParamName, 
                     clientNonPersonDetailsParamName, displaynameParamName, legalFormIdParamName));
     
     public static final Set<String> CLIENT_NON_PERSON_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(localeParamName, dateFormatParamName, incorpNumberParamName, remarksParamName, incorpValidityTillParamName, 
+            Arrays.asList(address,localeParamName, dateFormatParamName, incorpNumberParamName, remarksParamName, incorpValidityTillParamName, 
             		constitutionIdParamName, mainBusinessLineIdParamName));
 
     public static final Set<String> CLIENT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
