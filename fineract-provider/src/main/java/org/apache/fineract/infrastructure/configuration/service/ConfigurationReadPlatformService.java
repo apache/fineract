@@ -24,6 +24,8 @@ import org.apache.fineract.infrastructure.configuration.data.GlobalConfiguration
 public interface ConfigurationReadPlatformService {
 
     GlobalConfigurationPropertyData retrieveGlobalConfiguration(Long configId);
+    
+    GlobalConfigurationPropertyData retrieveGlobalConfiguration(String name);
 
     GlobalConfigurationData retrieveGlobalConfiguration(boolean survey);
 

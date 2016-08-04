@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.address.serialization;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -77,11 +78,12 @@ public class AddressCommandFromApiJsonDeserializer {
 				.resource("Address");
 
 		final JsonElement element = this.fromApiJsonHelper.parse(json);
+		 Set<String> supportedParameters=new HashSet<>();
 
 		final List<FieldConfigurationData> configurationData = new ArrayList<>(
 				this.readservice.retrieveFieldConfigurationList("client"));
 		final List<String> enabledFieldList = new ArrayList<>();
-
+		
 		final Map<String, Boolean> madatoryFieldsMap = new HashMap<String, Boolean>();
 		final Map<String, Boolean> enabledFieldsMap = new HashMap<String, Boolean>();
 		final Map<String, String> regexFieldsMap = new HashMap<String, String>();
@@ -98,22 +100,31 @@ public class AddressCommandFromApiJsonDeserializer {
 			}
 		}
 		if (fromNewClient) {
+			
+			 
 			enabledFieldList.add("addressTypeId");
+			enabledFieldList.add("locale");
+			supportedParameters = new HashSet<>(enabledFieldList);
+			//enabledFieldList.add("address");
+			
 			madatoryFieldsMap.put("addressTypeId", true);
+			
 
 		}
 		if(!fromNewClient)
 		{
+			enabledFieldList.add("locale");
 			enabledFieldList.add("addressId");
 			madatoryFieldsMap.put("addressId", true);
+			supportedParameters = new HashSet<>(enabledFieldList);
 		}
-		final Set<String> supportedParameters = new HashSet<>(enabledFieldList);
+		//final Set<String> supportedParameters = new HashSet<>(enabledFieldList);
 		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
 		final String street = this.fromApiJsonHelper.extractStringNamed("street", element);
 
 		if (enabledFieldsMap.get("street")) {
-			if (madatoryFieldsMap.get("street")) {
+			if (madatoryFieldsMap.get("street")&&fromNewClient) {
 
 				baseDataValidator.reset().parameter("street").value(street).notBlank();
 
@@ -126,7 +137,7 @@ public class AddressCommandFromApiJsonDeserializer {
 		}
 		final String address_line_1 = this.fromApiJsonHelper.extractStringNamed("address_line_1", element);
 		if (enabledFieldsMap.get("address_line_1")) {
-			if (madatoryFieldsMap.get("address_line_1")) {
+			if (madatoryFieldsMap.get("address_line_1")&&fromNewClient) {
 				baseDataValidator.reset().parameter("address_line_1").value(address_line_1).notBlank();
 			}
 			if (!regexFieldsMap.get("address_line_1").isEmpty()) {
@@ -137,7 +148,7 @@ public class AddressCommandFromApiJsonDeserializer {
 		}
 		final String address_line_2 = this.fromApiJsonHelper.extractStringNamed("address_line_2", element);
 		if (enabledFieldsMap.get("address_line_2")) {
-			if (madatoryFieldsMap.get("address_line_2")) {
+			if (madatoryFieldsMap.get("address_line_2")&&fromNewClient) {
 				baseDataValidator.reset().parameter("address_line_2").value(address_line_2).notBlank();
 			}
 			if (!regexFieldsMap.get("address_line_2").isEmpty()) {
@@ -147,7 +158,7 @@ public class AddressCommandFromApiJsonDeserializer {
 		}
 		final String address_line_3 = this.fromApiJsonHelper.extractStringNamed("address_line_3", element);
 		if (enabledFieldsMap.get("address_line_3")) {
-			if (madatoryFieldsMap.get("address_line_3")) {
+			if (madatoryFieldsMap.get("address_line_3")&&fromNewClient) {
 				baseDataValidator.reset().parameter("address_line_3").value(address_line_3).notBlank();
 			}
 			if (!regexFieldsMap.get("address_line_3").isEmpty()) {
@@ -157,7 +168,7 @@ public class AddressCommandFromApiJsonDeserializer {
 		}
 		final String town_village = this.fromApiJsonHelper.extractStringNamed("town_village", element);
 		if (enabledFieldsMap.get("town_village")) {
-			if (madatoryFieldsMap.get("town_village")) {
+			if (madatoryFieldsMap.get("town_village")&&fromNewClient) {
 				baseDataValidator.reset().parameter("town_village").value(town_village).notBlank();
 			}
 			if (!regexFieldsMap.get("town_village").isEmpty()) {
@@ -168,7 +179,7 @@ public class AddressCommandFromApiJsonDeserializer {
 		final String city = this.fromApiJsonHelper.extractStringNamed("city", element);
 
 		if (enabledFieldsMap.get("city")) {
-			if (madatoryFieldsMap.get("city")) {
+			if (madatoryFieldsMap.get("city")&&fromNewClient) {
 				baseDataValidator.reset().parameter("city").value(city).notBlank();
 			}
 			if (!regexFieldsMap.get("city").isEmpty()) {
@@ -178,7 +189,7 @@ public class AddressCommandFromApiJsonDeserializer {
 		}
 		final String county_district = this.fromApiJsonHelper.extractStringNamed("county_district", element);
 		if (enabledFieldsMap.get("county_district")) {
-			if (madatoryFieldsMap.get("county_district")) {
+			if (madatoryFieldsMap.get("county_district")&&fromNewClient) {
 				baseDataValidator.reset().parameter("county_district").value(county_district).notBlank();
 			}
 			if (!regexFieldsMap.get("county_district").isEmpty()) {
@@ -191,7 +202,7 @@ public class AddressCommandFromApiJsonDeserializer {
 
 			final long state_province_id = this.fromApiJsonHelper.extractLongNamed("state_province_id", element);
 			if (enabledFieldsMap.get("state_province_id")) {
-				if (madatoryFieldsMap.get("state_province_id")) {
+				if (madatoryFieldsMap.get("state_province_id")&&fromNewClient) {
 					baseDataValidator.reset().parameter("state_province_id").value(state_province_id).notBlank();
 				}
 				if (!regexFieldsMap.get("state_province_id").isEmpty()) {
@@ -204,7 +215,7 @@ public class AddressCommandFromApiJsonDeserializer {
 		if (this.fromApiJsonHelper.extractLongNamed("country_id", element) != null) {
 			final long country_id = this.fromApiJsonHelper.extractLongNamed("country_id", element);
 			if (enabledFieldsMap.get("country_id")) {
-				if (madatoryFieldsMap.get("country_id")) {
+				if (madatoryFieldsMap.get("country_id")&&fromNewClient) {
 					baseDataValidator.reset().parameter("country_id").value(country_id).notBlank();
 				}
 				if (!regexFieldsMap.get("country_id").isEmpty()) {
@@ -216,7 +227,7 @@ public class AddressCommandFromApiJsonDeserializer {
 
 		final String postal_code = this.fromApiJsonHelper.extractStringNamed("postal_code", element);
 		if (enabledFieldsMap.get("postal_code")) {
-			if (madatoryFieldsMap.get("postal_code")) {
+			if (madatoryFieldsMap.get("postal_code")&&fromNewClient) {
 				baseDataValidator.reset().parameter("postal_code").value(postal_code).notBlank();
 			}
 			if (!regexFieldsMap.get("postal_code").isEmpty()) {
@@ -228,7 +239,7 @@ public class AddressCommandFromApiJsonDeserializer {
 		if (this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("latitude", element) != null) {
 			final BigDecimal latitude = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("latitude", element);
 			if (enabledFieldsMap.get("latitude")) {
-				if (madatoryFieldsMap.get("latitude")) {
+				if (madatoryFieldsMap.get("latitude")&&fromNewClient) {
 					baseDataValidator.reset().parameter("latitude").value(latitude).notBlank();
 				}
 				if (!regexFieldsMap.get("latitude").isEmpty()) {
@@ -241,7 +252,7 @@ public class AddressCommandFromApiJsonDeserializer {
 		if (this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("longitude", element) != null) {
 			final BigDecimal longitude = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("longitude", element);
 			if (enabledFieldsMap.get("longitude")) {
-				if (madatoryFieldsMap.get("longitude")) {
+				if (madatoryFieldsMap.get("longitude")&&fromNewClient) {
 					baseDataValidator.reset().parameter("longitude").value(longitude).notBlank();
 				}
 				if (!regexFieldsMap.get("longitude").isEmpty()) {

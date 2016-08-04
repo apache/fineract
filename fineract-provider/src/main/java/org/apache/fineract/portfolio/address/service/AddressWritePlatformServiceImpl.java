@@ -115,12 +115,14 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 		long stateId;
 		long countryId;
 
-		this.fromApiJsonDeserializer.validateForCreate(command.json(), true);
+		
 		
 		final JsonArray addressArray = command.arrayOfParameterNamed("address");
 
 		for (int i = 0; i < addressArray.size(); i++) {
 			final JsonObject jsonObject = addressArray.get(i).getAsJsonObject();
+			
+			// validate every address
 			this.fromApiJsonDeserializer.validateForCreate(jsonObject.toString(), true);
 
 			if (command.longValueOfParameterNamed("state_province_id") != null) {
@@ -394,18 +396,24 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 		if ((command.longValueOfParameterNamed("state_province_id") !=null))
 			{
 			if((command.longValueOfParameterNamed("state_province_id") !=0) )
-			is_address_update = true;
-			stateId = command.longValueOfParameterNamed("state_province_id");
-			stateIdobj = this.codeValueRepository.getOne(stateId);
-			addobj.setState_province(stateIdobj);
+			{
+				is_address_update = true;
+				stateId = command.longValueOfParameterNamed("state_province_id");
+				stateIdobj = this.codeValueRepository.getOne(stateId);
+				addobj.setState_province(stateIdobj);
+			}
+			
 		}
 		if ((command.longValueOfParameterNamed("country_id") !=null)) 
 		{
 			if((command.longValueOfParameterNamed("country_id") != 0))
-			is_address_update = true;
-			countryId = command.longValueOfParameterNamed("country_id");
-			countryIdObj = this.codeValueRepository.getOne(countryId);
-			addobj.setCountry(countryIdObj);
+			{
+				is_address_update = true;
+				countryId = command.longValueOfParameterNamed("country_id");
+				countryIdObj = this.codeValueRepository.getOne(countryId);
+				addobj.setCountry(countryIdObj);
+			}
+			
 		}
 		if (!(command.stringValueOfParameterNamed("postal_code").isEmpty())) {
 			is_address_update = true;

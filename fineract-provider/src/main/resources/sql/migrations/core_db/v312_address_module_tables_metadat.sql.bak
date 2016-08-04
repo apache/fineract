@@ -103,7 +103,7 @@ AUTO_INCREMENT=1
 -- Dumping data for table mifostenant-default.m_field_configuration: ~18 rows (approximately)
 /*!40000 ALTER TABLE `m_field_configuration` DISABLE KEYS */;
 INSERT INTO `m_field_configuration` ( `entity`, `table`, `field`, `is_enabled`, `is_mandatory`, `validation_regex`) VALUES
-	('CLIENT', 'm_address', 'addressType', 1, 0, ''),
+	( 'CLIENT', 'm_address', 'addressType', 1, 0, ''),
 	('CLIENT', 'm_address', 'street', 1, 1, ''),
 	('CLIENT', 'm_address', 'address_line_1', 1, 0, ''),
 	('CLIENT', 'm_address', 'address_line_2', 1, 0, ''),

@@ -205,10 +205,11 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     public CommandProcessingResult createClient(final JsonCommand command) {
     	 try {
              final AppUser currentUser = this.context.authenticatedUser();
+             this.fromApiJsonDeserializer.validateForCreate(command.json());
              
-             final long configId=29;
+             //final long configId=29;
              
-             final GlobalConfigurationPropertyData configuration=this.configurationReadPlatformService.retrieveGlobalConfiguration(configId);
+             final GlobalConfigurationPropertyData configuration=this.configurationReadPlatformService.retrieveGlobalConfiguration("Enable-Address");
              
              final Boolean isAddressEnabled=configuration.isEnabled(); 
 

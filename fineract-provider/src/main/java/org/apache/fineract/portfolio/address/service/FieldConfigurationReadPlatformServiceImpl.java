@@ -45,7 +45,7 @@ public class FieldConfigurationReadPlatformServiceImpl implements FieldConfigura
 
 	private static final class FieldMapper implements RowMapper<FieldConfigurationData> {
 		public String schema() {
-			return "fld.id as fieldConfigurationId,fld.entity as entity,fld.table as entitytable,fld.field as field,fld.is_enabled as is_enabled,"
+			return "fld.id as fieldConfigurationId,fld.entity as entity,fld.subentity as subentity,fld.field as field,fld.is_enabled as is_enabled,"
 					+ "fld.is_mandatory as is_mandatory,fld.validation_regex as validation_regex from m_field_configuration fld";
 		}
 
@@ -54,13 +54,13 @@ public class FieldConfigurationReadPlatformServiceImpl implements FieldConfigura
 				throws SQLException {
 			final long fieldConfigurationId = rs.getLong("fieldConfigurationId");
 			final String entity = rs.getString("entity");
-			final String entitytable = rs.getString("entitytable");
+			final String subentity = rs.getString("subentity");
 			final String field = rs.getString("field");
 			final boolean is_enabled = rs.getBoolean("is_enabled");
 			final boolean is_mandatory = rs.getBoolean("is_mandatory");
 			final String validation_regex = rs.getString("validation_regex");
 
-			return FieldConfigurationData.instance(fieldConfigurationId, entity, entitytable, field, is_enabled,
+			return FieldConfigurationData.instance(fieldConfigurationId, entity, subentity, field, is_enabled,
 					is_mandatory, validation_regex);
 
 		}

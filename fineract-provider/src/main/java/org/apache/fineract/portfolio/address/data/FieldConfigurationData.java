@@ -23,7 +23,7 @@ public class FieldConfigurationData {
 
 	private final String entity;
 
-	private final String table;
+	private final String subentity;
 
 	private final String field;
 
@@ -33,11 +33,11 @@ public class FieldConfigurationData {
 
 	private final String validation_regex;
 
-	private FieldConfigurationData(final long fieldConfigurationId, final String entity, final String table,
+	private FieldConfigurationData(final long fieldConfigurationId, final String entity, final String subentity,
 			final String field, final boolean is_enabled, final boolean is_mandatory, final String validation_regex) {
 		this.fieldConfigurationId = fieldConfigurationId;
 		this.entity = entity;
-		this.table = table;
+		this.subentity = subentity;
 		this.field = field;
 		this.is_enabled = is_enabled;
 		this.is_mandatory = is_mandatory;
@@ -45,9 +45,9 @@ public class FieldConfigurationData {
 	}
 
 	public static FieldConfigurationData instance(final long fieldConfigurationId, final String entity,
-			final String table, final String field, final boolean is_enabled, final boolean is_mandatory,
+			final String subentity, final String field, final boolean is_enabled, final boolean is_mandatory,
 			final String validation_regex) {
-		return new FieldConfigurationData(fieldConfigurationId, entity, table, field, is_enabled, is_mandatory,
+		return new FieldConfigurationData(fieldConfigurationId, entity, subentity, field, is_enabled, is_mandatory,
 				validation_regex);
 	}
 
@@ -59,8 +59,8 @@ public class FieldConfigurationData {
 		return this.entity;
 	}
 
-	public String getTable() {
-		return this.table;
+	public String getSubEntity() {
+		return this.subentity;
 	}
 
 	public String getField() {
