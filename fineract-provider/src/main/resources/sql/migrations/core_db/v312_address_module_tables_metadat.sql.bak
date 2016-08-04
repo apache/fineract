@@ -26,7 +26,7 @@ INSERT INTO `m_code` (`id`, `code_name`, `is_system_defined`) VALUES (152, 'ADDR
 alter table `m_portfolio_command_source` add column `status` TINYINT(4) NULL DEFAULT NULL;
 
 --configuration
-INSERT INTO `c_configuration` (`id`, `name`, `value`, `date_value`, `enabled`, `is_trap_door`, `description`) VALUES ('Enable-Address', NULL, NULL, 1, 0, NULL);
+INSERT INTO `c_configuration` (`id`, `name`, `value`, `date_value`, `enabled`, `is_trap_door`, `description`) VALUES (29, 'Enable-Address', NULL, NULL, 1, 0, NULL);
 
 --add address table
 CREATE TABLE `m_address` (
@@ -53,6 +53,7 @@ CREATE TABLE `m_address` (
 	CONSTRAINT `address_fields_codefk1` FOREIGN KEY (`state_province_id`) REFERENCES `m_code_value` (`id`),
 	CONSTRAINT `address_fields_codefk2` FOREIGN KEY (`country_id`) REFERENCES `m_code_value` (`id`)
 )
+COLLATE='utf8_general_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1
 ;
@@ -72,6 +73,7 @@ CREATE TABLE `m_client_address` (
 	CONSTRAINT `address_codefk` FOREIGN KEY (`address_type_id`) REFERENCES `m_code_value` (`id`),
 	CONSTRAINT `clientaddressfk` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 )
+COLLATE='utf8_general_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1
 ;
@@ -88,6 +90,7 @@ CREATE TABLE `m_field_configuration` (
 	`validation_regex` VARCHAR(50) NULL DEFAULT NULL,
 	PRIMARY KEY (`id`)
 )
+COLLATE='utf8_general_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1
 ;
@@ -99,25 +102,25 @@ AUTO_INCREMENT=1
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 -- Dumping data for table mifostenant-default.m_field_configuration: ~18 rows (approximately)
 /*!40000 ALTER TABLE `m_field_configuration` DISABLE KEYS */;
-INSERT INTO `m_field_configuration` ( `entity`, `subentity`, `field`, `is_enabled`, `is_mandatory`, `validation_regex`) VALUES
-	('ADDRESS', 'CLIENT', 'addressType', 1, 0, ''),
-	('ADDRESS', 'CLIENT', 'street', 1, 1, ''),
-	('ADDRESS', 'CLIENT', 'address_line_1', 1, 0, ''),
-	('ADDRESS', 'CLIENT', 'address_line_2', 1, 0, ''),
-	('ADDRESS', 'CLIENT', 'address_line_3', 1, 0, ''),
-	('ADDRESS', 'CLIENT', 'town_village', 0, 0, ''),
-	('ADDRESS', 'CLIENT', 'city', 1, 0, ''),
-	('ADDRESS', 'CLIENT', 'county_district', 0, 0, ''),
-	('ADDRESS', 'CLIENT', 'state_province_id', 1, 0, ''),
-	('ADDRESS', 'CLIENT', 'country_id', 1, 0, ''),
-	('ADDRESS', 'CLIENT', 'postal_code', 1, 0, ''),
-	('ADDRESS', 'CLIENT', 'latitude', 0, 0, ''),
-	('ADDRESS', 'CLIENT', 'longitude', 0, 0, ''),
-	('ADDRESS', 'CLIENT', 'created_by', 1, 0, ''),
-	('ADDRESS', 'CLIENT', 'created_on', 1, 0, ''),
-	('ADDRESS', 'CLIENT', 'updated_by', 1, 0, ''),
-	('ADDRESS', 'CLIENT', 'updated_on', 1, 0, ''),
-	('ADDRESS', 'CLIENT', 'is_active', 1, 0, NULL);
+INSERT INTO `m_field_configuration` ( `entity`, `table`, `field`, `is_enabled`, `is_mandatory`, `validation_regex`) VALUES
+	('CLIENT', 'm_address', 'addressType', 1, 0, ''),
+	('CLIENT', 'm_address', 'street', 1, 1, ''),
+	('CLIENT', 'm_address', 'address_line_1', 1, 0, ''),
+	('CLIENT', 'm_address', 'address_line_2', 1, 0, ''),
+	('CLIENT', 'm_address', 'address_line_3', 1, 0, ''),
+	('CLIENT', 'm_address', 'town_village', 0, 0, ''),
+	('CLIENT', 'm_address', 'city', 1, 0, ''),
+	('CLIENT', 'm_address', 'county_district', 0, 0, ''),
+	('CLIENT', 'm_address', 'state_province_id', 1, 0, ''),
+	('CLIENT', 'm_address', 'country_id', 1, 0, ''),
+	('CLIENT', 'm_address', 'postal_code', 1, 0, ''),
+	('CLIENT', 'm_address', 'latitude', 0, 0, ''),
+	('CLIENT', 'm_address', 'longitude', 0, 0, ''),
+	('CLIENT', 'm_address', 'created_by', 1, 0, ''),
+	('CLIENT', 'm_address', 'created_on', 1, 0, ''),
+	('CLIENT', 'm_address', 'updated_by', 1, 0, ''),
+	('CLIENT', 'm_address', 'updated_on', 1, 0, ''),
+	('CLIENT', 'm_address', 'is_active', 1, 0, NULL);
 /*!40000 ALTER TABLE `m_field_configuration` ENABLE KEYS */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
