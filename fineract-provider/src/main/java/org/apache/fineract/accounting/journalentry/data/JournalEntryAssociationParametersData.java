@@ -22,15 +22,31 @@ public class JournalEntryAssociationParametersData {
 
     private final boolean transactionDetailsRequired;
     private final boolean runningBalanceRequired;
+    private final boolean paymentDetailsRequired;
+    private final boolean notesRequired;
 
     public JournalEntryAssociationParametersData() {
         this.transactionDetailsRequired = false;
         this.runningBalanceRequired = false;
+        this.paymentDetailsRequired = false;
+        this.notesRequired = false;
     }
 
-    public JournalEntryAssociationParametersData(final boolean transactionDetailsRequired, final boolean runningBalanceRequired) {
+    public JournalEntryAssociationParametersData(final boolean transactionDetailsRequired, 
+            final boolean runningBalanceRequired, final boolean paymentDetails) { 
+            
+        Boolean notesRequired = false;
+        Boolean paymentDetailsRequired = paymentDetails;
+        
+        if(transactionDetailsRequired) {
+            notesRequired = transactionDetailsRequired;
+            paymentDetailsRequired = transactionDetailsRequired;
+        }
+        
+        this.notesRequired = notesRequired;
         this.transactionDetailsRequired = transactionDetailsRequired;
-        this.runningBalanceRequired = runningBalanceRequired;
+        this.paymentDetailsRequired = paymentDetailsRequired;
+        this.runningBalanceRequired = runningBalanceRequired; 
     }
 
     public boolean isTransactionDetailsRequired() {
@@ -39,5 +55,13 @@ public class JournalEntryAssociationParametersData {
 
     public boolean isRunningBalanceRequired() {
         return this.runningBalanceRequired;
+    }
+    
+    public boolean isPaymentDetailsRequired() {
+        return this.paymentDetailsRequired;
+    }
+    
+    public boolean isNotesRequired() {
+        return this.notesRequired;
     }
 }
