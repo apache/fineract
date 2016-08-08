@@ -238,7 +238,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             updatedExtraCriteria = " where aud.processing_result_enum = 2";
         }
 
-        updatedExtraCriteria += " order by aud.id";
+        updatedExtraCriteria += " group by aud.id order by aud.id";
 
         return retrieveEntries("makerchecker", updatedExtraCriteria, includeJson);
     }
