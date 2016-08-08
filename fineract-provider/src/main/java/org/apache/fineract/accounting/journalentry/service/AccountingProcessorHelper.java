@@ -820,11 +820,12 @@ public class AccountingProcessorHelper {
         SavingsAccountTransaction savingsAccountTransaction = null;
         ClientTransaction clientTransaction = null;
         final Long shareTransactionId = null;
-        final PaymentDetail paymentDetail = null;
+        PaymentDetail paymentDetail = null;
         String modifiedTransactionId = transactionId;
         if (StringUtils.isNumeric(transactionId)) {
             long id = Long.parseLong(transactionId);
             savingsAccountTransaction = this.savingsAccountTransactionRepository.findOne(id);
+            paymentDetail = this.savingsAccountTransactionRepository.findOne(id).getPaymentDetail();
             modifiedTransactionId = SAVINGS_TRANSACTION_IDENTIFIER + transactionId;
         }
         final JournalEntry journalEntry = JournalEntry.createNew(office, paymentDetail, account, currencyCode, modifiedTransactionId,
@@ -889,12 +890,13 @@ public class AccountingProcessorHelper {
         LoanTransaction loanTransaction = null;
         SavingsAccountTransaction savingsAccountTransaction = null;
         ClientTransaction clientTransaction = null;
-        final PaymentDetail paymentDetail = null;
+        PaymentDetail paymentDetail = null;
         final Long shareTransactionId = null;
         String modifiedTransactionId = transactionId;
         if (StringUtils.isNumeric(transactionId)) {
             long id = Long.parseLong(transactionId);
             loanTransaction = this.loanTransactionRepository.findOne(id);
+            paymentDetail = this.loanTransactionRepository.findOne(id).getPaymentDetail();
             modifiedTransactionId = LOAN_TRANSACTION_IDENTIFIER + transactionId;
         }
         final JournalEntry journalEntry = JournalEntry.createNew(office, paymentDetail, account, currencyCode, modifiedTransactionId,
@@ -909,12 +911,13 @@ public class AccountingProcessorHelper {
         LoanTransaction loanTransaction = null;
         SavingsAccountTransaction savingsAccountTransaction = null;
         ClientTransaction clientTransaction = null;
-        final PaymentDetail paymentDetail = null;
+        PaymentDetail paymentDetail = null;
         final Long shareTransactionId = null;
         String modifiedTransactionId = transactionId;
         if (StringUtils.isNumeric(transactionId)) {
             long id = Long.parseLong(transactionId);
             savingsAccountTransaction = this.savingsAccountTransactionRepository.findOne(id);
+            paymentDetail = this.savingsAccountTransactionRepository.findOne(id).getPaymentDetail();
             modifiedTransactionId = SAVINGS_TRANSACTION_IDENTIFIER + transactionId;
         }
         final JournalEntry journalEntry = JournalEntry.createNew(office, paymentDetail, account, currencyCode, modifiedTransactionId,
