@@ -76,29 +76,44 @@ public class GlobalConfigurationApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveConfiguration(@Context final UriInfo uriInfo,@DefaultValue("false") @QueryParam("survey") final boolean survey) {
+    public String retrieveConfiguration(@Context final UriInfo uriInfo,
+    		@QueryParam("configName") final String configName,@DefaultValue("false") @QueryParam("survey") final boolean survey) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-        final GlobalConfigurationData configurationData = this.readPlatformService.retrieveGlobalConfiguration(survey);
+        if(configName!=null)
+        {
+        	 final GlobalConfigurationPropertyData configurationData = this.readPlatformService.retrieveGlobalConfiguration(configName);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, configurationData, this.RESPONSE_DATA_PARAMETERS);
+             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+             return this.propertyDataJsonSerializer.serialize(settings, configurationData, this.RESPONSE_DATA_PARAMETERS);
+        }
+        else
+        {
+        	final GlobalConfigurationData configurationData = this.readPlatformService.retrieveGlobalConfiguration(survey);
+        	 final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+             return this.toApiJsonSerializer.serialize(settings, configurationData, this.RESPONSE_DATA_PARAMETERS);
+        }
+
+       
     }
     
     @GET
     @Path("{configId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveOne(@PathParam("configId") final Long configId, @Context final UriInfo uriInfo) {
+    public String retrieveOne(@PathParam("configId") final Long configId,
+    		@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-        final GlobalConfigurationPropertyData configurationData = this.readPlatformService.retrieveGlobalConfiguration(configId);
-
+        final GlobalConfigurationPropertyData configurationData=this.readPlatformService.retrieveGlobalConfiguration(configId);
+       
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.propertyDataJsonSerializer.serialize(settings, configurationData, this.RESPONSE_DATA_PARAMETERS);
     }
+    
+  
 
 
     @PUT
