@@ -16,13 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.configuration.api;
+package org.apache.fineract.portfolio.address.api;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
@@ -30,91 +36,80 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationData;
-import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
-import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.address.data.AddressData;
+import org.apache.fineract.portfolio.address.data.FieldConfigurationData;
+import org.apache.fineract.portfolio.address.service.AddressReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.address.service.FieldConfigurationReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/configurations")
+@Path("/fieldconfiguration/{entity}")
 @Component
 @Scope("singleton")
-public class GlobalConfigurationApiResource {
+public class EntityFieldConfigurationApiResources {
 
-	private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("globalConfiguration"));
-
-	private final String resourceNameForPermissions = "CONFIGURATION";
-
+	private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("clientAddressId", "client_id",
+			"address_id", "address_type_id", "is_active", "fieldConfigurationId", "entity", "table", "field",
+			"is_enabled", "is_mandatory", "validation_regex"));
+	private final String resourceNameForPermissions = "Address";
 	private final PlatformSecurityContext context;
-	private final ConfigurationReadPlatformService readPlatformService;
-	private final DefaultToApiJsonSerializer<GlobalConfigurationData> toApiJsonSerializer;
-	private final DefaultToApiJsonSerializer<GlobalConfigurationPropertyData> propertyDataJsonSerializer;
+	private final AddressReadPlatformServiceImpl readPlatformService;
+	private final DefaultToApiJsonSerializer<AddressData> toApiJsonSerializer;
+	private final FieldConfigurationReadPlatformService readPlatformServicefld;
+	private final DefaultToApiJsonSerializer<FieldConfigurationData> toApiJsonSerializerfld;
 	private final ApiRequestParameterHelper apiRequestParameterHelper;
 	private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
 	@Autowired
-	public GlobalConfigurationApiResource(final PlatformSecurityContext context,
-			final ConfigurationReadPlatformService readPlatformService,
-			final DefaultToApiJsonSerializer<GlobalConfigurationData> toApiJsonSerializer,
+	public EntityFieldConfigurationApiResources(final PlatformSecurityContext context,
+			final AddressReadPlatformServiceImpl readPlatformService,
+			final DefaultToApiJsonSerializer<AddressData> toApiJsonSerializer,
+			final FieldConfigurationReadPlatformService readPlatformServicefld,
+			final DefaultToApiJsonSerializer<FieldConfigurationData> toApiJsonSerializerfld,
 			final ApiRequestParameterHelper apiRequestParameterHelper,
-			final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-			final DefaultToApiJsonSerializer<GlobalConfigurationPropertyData> propertyDataJsonSerializer) {
+			final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
 		this.context = context;
 		this.readPlatformService = readPlatformService;
 		this.toApiJsonSerializer = toApiJsonSerializer;
+		this.readPlatformServicefld = readPlatformServicefld;
+		this.toApiJsonSerializerfld = toApiJsonSerializerfld;
 		this.apiRequestParameterHelper = apiRequestParameterHelper;
 		this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-		this.propertyDataJsonSerializer = propertyDataJsonSerializer;
 	}
 
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveConfiguration(@Context final UriInfo uriInfo,
-			@DefaultValue("false") @QueryParam("survey") final boolean survey) {
-
-		this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-		final GlobalConfigurationData configurationData = this.readPlatformService.retrieveGlobalConfiguration(survey);
-		final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper
-				.process(uriInfo.getQueryParameters());
-		return this.toApiJsonSerializer.serialize(settings, configurationData, this.RESPONSE_DATA_PARAMETERS);
-	}
-
-	@GET
-	@Path("{configId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveOne(@PathParam("configId") final Long configId, @Context final UriInfo uriInfo) {
-
+	public String getAddresses(@PathParam("entity") final String entityname, @Context final UriInfo uriInfo) {
 		this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-		final GlobalConfigurationPropertyData configurationData = this.readPlatformService
-				.retrieveGlobalConfiguration(configId);
+		final Collection<FieldConfigurationData> fldconfig = this.readPlatformServicefld
+				.retrieveFieldConfiguration(entityname);
 
 		final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper
 				.process(uriInfo.getQueryParameters());
-		return this.propertyDataJsonSerializer.serialize(settings, configurationData, this.RESPONSE_DATA_PARAMETERS);
+		return this.toApiJsonSerializerfld.serialize(settings, fldconfig, this.RESPONSE_DATA_PARAMETERS);
+
 	}
 
-	@PUT
-	@Path("{configId}")
+	@POST
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String updateConfiguration(@PathParam("configId") final Long configId, final String apiRequestBodyAsJson) {
+	public String addEntityConfiguration(@PathParam("entity") final String entityname,
+			final String apiRequestBodyAsJson) {
 
-		final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-				.updateGlobalConfiguration(configId) //
-				.withJson(apiRequestBodyAsJson) //
-				.build();
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().addEntityFieldConfiguration(entityname)
+				.withJson(apiRequestBodyAsJson).build();
 
 		final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
 		return this.toApiJsonSerializer.serialize(result);
 	}
+
 }
