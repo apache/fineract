@@ -18,15 +18,12 @@
 --
 
 --code inserts
-INSERT INTO `m_code` (`id`, `code_name`, `is_system_defined`) VALUES (150, 'INDIAN STATES', 0);
-INSERT INTO `m_code` (`id`, `code_name`, `is_system_defined`) VALUES (151, 'COUNTRY ID', 0);
-INSERT INTO `m_code` (`id`, `code_name`, `is_system_defined`) VALUES (152, 'ADDRESS TYPE ID', 0);
-
---add new column in portfolio
-alter table `m_portfolio_command_source` add column `status` TINYINT(4) NULL DEFAULT NULL;
+INSERT INTO `m_code` ( `code_name`, `is_system_defined`) VALUES ( 'INDIAN STATES', 0);
+INSERT INTO `m_code` (`code_name`, `is_system_defined`) VALUES ('COUNTRY ID', 0);
+INSERT INTO `m_code` ( `code_name`, `is_system_defined`) VALUES ('ADDRESS TYPE ID', 0);
 
 --configuration
-INSERT INTO `c_configuration` (`id`, `name`, `value`, `date_value`, `enabled`, `is_trap_door`, `description`) VALUES ('Enable-Address', NULL, NULL, 1, 0, NULL);
+INSERT INTO `c_configuration` (`name`, `value`, `date_value`, `enabled`, `is_trap_door`, `description`) VALUES ('Enable-Address', NULL, NULL, 1, 0, NULL);
 
 --add address table
 CREATE TABLE `m_address` (
