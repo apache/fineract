@@ -563,6 +563,22 @@ public class CommandWrapperBuilder {
         this.json = json;
         return this;
     }
+    public CommandWrapperBuilder undoRejection(final Long clientId) {
+        this.actionName = "UNDOREJECT";
+        this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.clientId = clientId;
+        this.href = "/clients/" + clientId + "?command=undoRejection";
+        return this;
+    }
+    public CommandWrapperBuilder undoWithdrawal(final Long clientId) {
+        this.actionName = "UNDOWITHDRAWAL";
+        this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.clientId = clientId;
+        this.href = "/clients/" + clientId + "?command=undoWithdrawal";
+        return this;
+    }
 
     public CommandWrapperBuilder createDatatable(final String datatable, final Long apptableId, final Long datatableId) {
         this.actionName = "CREATE";
