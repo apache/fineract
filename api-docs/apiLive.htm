@@ -222,6 +222,22 @@
 							</tr>
 							<tr>
 								<td></td>
+								<td>clients/{clientId}?command=UndoRejection</td>
+								<td><a href="#clients_UndoRejection">UndoReject a Client</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>clients/{clientId}?command=UndoWithdrawal</td>
+								<td><a href="#clients_UndoWithdrawal">UndoWithdrawal Client</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
 								<td>clients/{clientId}?command=assignStaff</td>
 								<td><a href="#clients_assignStaff">Assign Staff</a></td>
 								<td></td>
@@ -4962,10 +4978,86 @@ Request Body:
 		<div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=reactivate</code>
 	        <code class="method-request">POST clients/1?command=reactivate
+
 Content-Type: application/json
 Request Body:
 {
 "reactivationDate":"28 November 2014",
+"locale":"en",
+"dateFormat":"dd MMMM yyyy"
+}
+			</code>
+	        <code class="method-response">
+{
+
+  "clientId":15,
+  "resourceId":15
+}
+	        </code>
+	    </div>
+	</div>
+	
+	<a id="clients_UndoRejection" name="clients_UndoRejection" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>UndoReject a Client</h4>
+	        <p>Clients can be reactivated after they have been rejected.</p>
+	        <p>Trying to reactivate a client in any other state throws an error.</p>
+	         <table class=matrixHeading>
+				<tr class="matrixHeadingBG">
+					<td><div class="fineractHeading2">Mandatory Fields</div></td>
+				</tr>
+				<tr class=alt>
+					<td>reopenedDate<br>
+					</td>
+				</tr>
+			</table>
+	    </div>
+		<div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=UndoRejection</code>
+	        <code class="method-request">POST clients/1?command=UndoRejection
+			
+Content-Type: application/json
+Request Body:
+{
+"reopenedDate":"28 November 2014",
+"locale":"en",
+"dateFormat":"dd MMMM yyyy"
+}
+			</code>
+	        <code class="method-response">
+{
+
+  "clientId":15,
+  "resourceId":15
+}
+	        </code>
+	    </div>
+	</div>
+			
+<a id="clients_UndoWithdrawal" name="clients_UndoWithdrawal" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>UndoWithdraw a Client</h4>
+	        <p>Clients can be reactivated after they have been withdrawn.</p>
+	        <p>Trying to reactivate a client in any other state throws an error.</p>
+	         <table class=matrixHeading>
+				<tr class="matrixHeadingBG">
+					<td><div class="fineractHeading2">Mandatory Fields</div></td>
+				</tr>
+				<tr class=alt>
+					<td>reopenedDate<br>
+					</td>
+				</tr>
+			</table>
+	    </div>
+		<div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=UndoWithdrawal</code>
+	        <code class="method-request">POST clients/1?command=UndoWithdrawal
+Content-Type: application/json
+Request Body:
+{
+"reopenedDate":"28 November 2014",
 "locale":"en",
 "dateFormat":"dd MMMM yyyy"
 }
