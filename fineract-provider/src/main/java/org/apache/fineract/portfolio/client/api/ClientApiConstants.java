@@ -91,6 +91,8 @@ public class ClientApiConstants {
     public static final String staffIdParamName = "staffId";
     public static final String closureDateParamName = "closureDate";
     public static final String closureReasonIdParamName = "closureReasonId";
+    public static final String reopenedDateParamName = "reopenedDate";
+
 
     public static final String rejectionDateParamName = "rejectionDate";
     public static final String rejectionReasonIdParamName = "rejectionReasonId";
@@ -221,8 +223,14 @@ public class ClientApiConstants {
     public static final Set<String> CLIENT_REJECT_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(localeParamName, dateFormatParamName, rejectionDateParamName, rejectionReasonIdParamName));
 
-    public static final Set<String> CLIENT_WITHDRAW_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(localeParamName, dateFormatParamName, withdrawalDateParamName, withdrawalReasonIdParamName));
+	public static final Set<String> CLIENT_WITHDRAW_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(localeParamName, dateFormatParamName, withdrawalDateParamName, withdrawalReasonIdParamName));
+	
+	public static final Set<String> UNDOREJECTION_REQUEST_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(localeParamName, dateFormatParamName, reopenedDateParamName));
+	
+	public static final Set<String> UNDOWITHDRAWN_REQUEST_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(localeParamName, dateFormatParamName, reopenedDateParamName));
 
     public static final Set<String> CLIENT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(chargeIdParamName,
             clientIdParamName, chargeNameParamName, penaltyParamName, chargeTimeTypeParamName, dueAsOfDateParamName,
