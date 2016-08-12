@@ -16,17 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.configuration.service;
+package org.apache.fineract.portfolio.address.service;
 
-import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationData;
-import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
+import java.util.Collection;
+import java.util.List;
 
-public interface ConfigurationReadPlatformService {
+import org.apache.fineract.portfolio.address.data.FieldConfigurationData;
 
-    GlobalConfigurationPropertyData retrieveGlobalConfiguration(Long configId);
-    
-    GlobalConfigurationPropertyData retrieveGlobalConfiguration(String name);
+public interface FieldConfigurationReadPlatformService {
+	public Collection<FieldConfigurationData> retrieveFieldConfiguration(String entity);
 
-    GlobalConfigurationData retrieveGlobalConfiguration(boolean survey);
-
+	List<FieldConfigurationData> retrieveFieldConfigurationList(String entity);
 }
