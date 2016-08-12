@@ -3056,6 +3056,30 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr>
+								<td><a href="#report_mailing_jobs">Report Mailing Job</a></td>
+								<td>reportmailingjob</td>
+								<td><a href="#report_mailing_jobs_create">Create a Report Mailing Job</a></td>
+								<td><a href="#report_mailing_jobs_list">List Reports Mailing Jobs</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>reportmailingjob/{id}</td>
+								<td></td>
+								<td><a href="#report_mailing_jobs_retrieve">Retrieve a Report Mailing Job</a></td>
+								<td><a href="#report_mailing_jobs_update">Update a Report Mailing Job</a></td>
+								<td><a href="#report_mailing_jobs_delete">Delete a Report Mailing Job</a></td>
+							</tr>
+                            <tr>
+								<td></td>
+								<td>reportmailingjobrunhistory/{jobId}</td>
+								<td></td>
+								<td><a href="#report_mailing_job_history_list">Retrieve Reports Mailing Job History</a></td>
+								<td></td>
+								<td></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -34293,6 +34317,426 @@ GET https://DomainName/api/v1/runreports/{reportName}
             ]
         }
     ]
+}
+					</code>
+				</div>
+			</div>
+			
+			<!-- start of report mailing jobs api docs -->
+			<a id="report_mailing_jobs" name="report_mailing_jobs" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Report Mailing Jobs</h3>
+					<p>This resource allows you to create a scheduled job that runs a report and sents it by email to specified email addresses.</p>
+					<p>The scheduled job can be configured to run once or on a regular basis (once a day, twice a week, etc).</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>name</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The name of the report mailing job. It must be unique.</td>
+						</tr>
+						<tr class=alt>
+							<td>description</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Description of the report mailing job.</td>
+						</tr>
+						<tr class=alt>
+							<td>startDateTime</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Date and time to start the report mailing job.</td>
+						</tr>
+						<tr class=alt>
+							<td>stretchyReportId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The identifier of the stretchy report to be sent.</td>
+						</tr>
+						<tr class=alt>
+							<td>emailRecipients</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Comma separated report recipient email addresses.</td>
+						</tr>
+						<tr class=alt>
+							<td>emailSubject</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The subject of the email to be sent.</td>
+						</tr>
+						<tr class=alt>
+							<td>emailMessage</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The body of the email to be sent.</td>
+						</tr>
+						<tr class=alt>
+							<td>emailAttachmentFileFormatId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The Enum constant id of the email attachment file format.</td>
+						</tr>
+						<tr class=alt>
+							<td>recurrence</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Rule or repeating pattern for recurring events. See - <a target="_blank" href="http://www.kanzaki.com/docs/ical/rrule.html">http://www.kanzaki.com/docs/ical/rrule.html</a></td>
+						</tr>
+						<tr class=alt>
+							<td>isActive</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Indicates whether or not the scheduler should be created as active.</td>
+						</tr>
+						<tr class=alt>
+							<td>stretchyReportParamMap</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: A map of the stretchy report parameter names to values.</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			
+			<a id="report_mailing_jobs_template" name="report_mailing_jobs_template" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Report Mailing Job Details Template</h4>
+					<p>This is a convenience resource. It can be useful when
+						building maintenance user interface screens for report mailing job
+						applications. The template data returned consists of any or all
+						of:
+					<ul>
+						<li class=normalli>Field Defaults</li>
+						<li class=normalli>Allowed Value Lists</li>
+					</ul>
+					</p>
+					<p>Example Request:</p>
+					<div class=apiClick>reportmailingjobs/template</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/reportmailingjobs/template
+					</code>
+					<code class="method-response">
+{
+    "isActive": false,
+    "emailAttachmentFileFormatOptions": [
+        {
+          "id": 1,
+          "code": "ReportMailingJobEmailAttachmentFileFormat.xls",
+          "value": "xls"
+        },
+        {
+          "id": 2,
+          "code": "ReportMailingJobEmailAttachmentFileFormat.pdf",
+          "value": "pdf"
+        },
+        {
+          "id": 3,
+          "code": "ReportMailingJobEmailAttachmentFileFormat.csv",
+          "value": "csv"
+        }
+    ],
+    "stretchyReportParamDateOptions": [
+        {
+          "id": 1,
+          "code": "reportMailingJobStretchyReportParamDateOption.today",
+          "value": "today"
+        },
+        {
+          "id": 2,
+          "code": "reportMailingJobStretchyReportParamDateOption.yesterday",
+          "value": "yesterday"
+        },
+        {
+          "id": 3,
+          "code": "reportMailingJobStretchyReportParamDateOption.tomorrow",
+          "value": "tomorrow"
+        }
+    ]
+}
+					</code>
+				</div>
+			</div>
+            
+            <a id="report_mailing_jobs_retrieve" name="report_mailing_jobs_retrieve" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Report Mailing Job</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>reportmailingjobs/1</div>
+					<br>
+					<br>
+					<div class=apiClick>reportmailingjobs/1?template=true</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/reportmailingjobs/{id}
+					</code>
+					<code class="method-response">
+{
+    "id": 1,
+    "name": "Client Numbers Report",
+    "description": "Client Numbers Report",
+    "startDateTime": 1469627093000,
+    "recurrence": "",
+    "timeline": {
+        "createdOnDate": [
+            2016,
+            7,
+            27
+        ],
+        "createdByUsername": "musoni",
+        "createdByFirstname": "firstname",
+        "createdByLastname": "lastname"
+    },
+    "emailRecipients": "info@musonisystem.com",
+    "emailSubject": "Client Numbers Report",
+    "emailMessage": "Client Numbers Report",
+    "emailAttachmentFileFormat": {
+        "id": 1,
+        "code": "ReportMailingJobEmailAttachmentFileFormat.xls",
+        "value": "xls"
+    },
+    "stretchyReport": {
+        "id": 120,
+        "reportName": "Client Numbers Report",
+        "reportType": "Pentaho",
+        "reportCategory": "Client",
+        "description": "",
+        "coreReport": false,
+        "useReport": true
+    },
+    "stretchyReportParamMap": "{\"startDate\":\"2016-07-01\",\"endDate\":\"2016-08-02\",\"selectOffice\":\"1\",\"environementUrl\":\"environementUrl\"}",
+    "nextRunDateTime": 1469627093000,
+    "numberOfRuns": 0,
+    "isActive": true,
+    "runAsUserId": 1
+}
+					</code>
+				</div>
+			</div>
+            
+            <a id="report_mailing_jobs_list" name="report_mailing_jobs_list" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Report Mailing Jobs</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>reportmailingjobs</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/reportmailingjobs
+					</code>
+					<code class="method-response">
+[
+    {
+        "id": 1,
+        "name": "Client Numbers Report",
+        "description": "Client Numbers Report",
+        "startDateTime": 1469627093000,
+        "recurrence": "",
+        "timeline": {
+            "createdOnDate": [
+                2016,
+                7,
+                27
+            ],
+            "createdByUsername": "musoni",
+            "createdByFirstname": "firstname",
+            "createdByLastname": "lastname"
+        },
+        "emailRecipients": "info@musonisystem.com",
+        "emailSubject": "Client Numbers Report",
+        "emailMessage": "Client Numbers Report",
+        "emailAttachmentFileFormat": {
+            "id": 1,
+            "code": "ReportMailingJobEmailAttachmentFileFormat.xls",
+            "value": "xls"
+        },
+        "stretchyReport": {
+            "id": 120,
+            "reportName": "Client Numbers Report",
+            "reportType": "Pentaho",
+            "reportCategory": "Client",
+            "description": "",
+            "coreReport": false,
+            "useReport": true
+        },
+        "stretchyReportParamMap": "{\"startDate\":\"2016-07-01\",\"endDate\":\"2016-08-02\",\"selectOffice\":\"1\",\"environementUrl\":\"environementUrl\"}",
+        "nextRunDateTime": 1469627093000,
+        "numberOfRuns": 0,
+        "isActive": true,
+        "runAsUserId": 1
+    }
+]
+					</code>
+				</div>
+			</div>
+            
+            <a id="report_mailing_job_history_list" name="report_mailing_job_history_list" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Report Mailing Job History</h4>
+                    <p>The <i>list</i> capability of report mailing job history can support <b>pagination</b> and <b>sorting</b>.</p>
+					<h5>Optional Arguments</h5>
+					<dl class="argument-list">
+						<dt>offset</dt>
+						<dd>
+							Integer <span>optional</span>, defaults to 0
+						</dd>
+						<dd>Indicates the result from which pagination starts</dd>
+
+						<dt>limit</dt>
+						<dd>
+							Integer <span>optional</span>, defaults to 200
+						</dd>
+						<dd>Restricts the size of results returned. To override the default and return all entries you must explicitly pass a non-positive integer value for limit e.g. limit=0, or limit=-1</dd>
+
+						<dt>orderBy</dt>
+						<dd>
+							String <span>optional</span>, one of <span>startDateTime, endDateTime, status</span>
+						</dd>
+						<dd>Orders results by the indicated field.</dd>
+
+						<dt>sortBy</dt>
+						<dd>
+							String <span>optional</span>, one of <span>ASC, DESC</span>
+						</dd>
+						<dd>Indicates what way to order results if <i>orderBy</i> is used.</dd>
+					</dl>
+					<p>Example Requests:</p>
+					<div class=apiClick>reportmailingjobrunhistory/1</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/reportmailingjobrunhistory/{reportMailingJobId}
+					</code>
+					<code class="method-response">
+[
+    {
+        "id": 1,
+        "reportMailingJobId": 1,
+        "startDateTime": 1469627093000",
+        "endDateTime": 1469627093050,
+        "status": "success",
+        "errorMessage": "",
+        "errorLog": ""
+    }
+]
+					</code>
+				</div>
+			</div>
+			
+			<a id="report_mailing_jobs_create" name="report_mailing_jobs_create" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create a Report Mailing Job</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>name, startDateTime, stretchyReportId, emailRecipients, emailSubject, emailMessage, emailAttachmentFileFormatId, recurrence, isActive</td>
+						</tr>
+					</table>
+						<br />
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>description, stretchyReportParamMap</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/reportmailingjobs
+					</code>
+					<code class="method-request">
+POST reportmailingjobs
+Content-Type: application/json Request Body:
+{
+    "locale": "en_GB",
+    "dateFormat": "dd-MM-yyyy HH:mm:ss",
+    "name": "Client Numbers Report",
+    "description": "Client Numbers Report",
+    "startDateTime": "02-08-2016 11:34:18",
+    "stretchyReportId": "120",
+    "emailRecipients": "info@musonisystem.com",
+    "emailSubject": "Client Numbers Report",
+    "emailMessage": "Client Numbers Report",
+    "emailAttachmentFileFormatId": "1",
+    "recurrence": "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,WE,FR",
+    "isActive": true,
+    "stretchyReportParamMap": "{\"startDate\":\"2016-07-01\",\"endDate\":\"2016-08-02\",\"selectOffice\":\"1\",\"environementUrl\":\"environementUrl\"}"
+}
+					</code>
+					<code class="method-response">
+{
+    "resourceId": 1
+}
+					</code>
+				</div>
+			</div>
+			
+			<a id="report_mailing_jobs_update" name="report_mailing_jobs_update" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Report Mailing Job</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/reportmailingjobs/{id}
+						</code>
+					<code class="method-request">
+PUT reportmailingjobs/1
+Content-Type: application/json
+Request Body:
+{
+    "locale": "en_GB",
+    "dateFormat": "dd-MM-yyyy HH:mm:ss",
+    "startDateTime": "10-08-2016 23:30:00"
+}
+				
+					</code>
+					<code class="method-response">
+{
+    "resourceId": 1,
+    "changes": {
+        "startDateTime": "10-08-2016 23:30:00"
+    }
+}
+					</code>
+				</div>
+			</div>
+			
+			<a id="report_mailing_jobs_delete" name="report_mailing_jobs_delete" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete a Report Mailing Job</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/reportmailingjobs/{id}
+						</code>
+					<code class="method-request">
+DELETE reportmailingjobs/1
+Content-Type: application/json
+Request Body:
+{
+}
+					</code>
+					<code class="method-response">
+{
+    "resourceId": 1
 }
 					</code>
 				</div>
