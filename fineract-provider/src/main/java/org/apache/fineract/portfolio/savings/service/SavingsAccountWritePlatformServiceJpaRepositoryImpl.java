@@ -18,6 +18,26 @@
  */
 package org.apache.fineract.portfolio.savings.service;
 
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.amountParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargeIdParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawBalanceParamName;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -41,6 +61,9 @@ import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
+import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstruction;
+import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
+import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.charge.domain.Charge;
@@ -88,25 +111,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.amountParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargeIdParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawBalanceParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
-
 @Service
 public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements SavingsAccountWritePlatformService {
 
@@ -133,6 +137,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final ConfigurationDomainService configurationDomainService;
     private final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository;
     private final AppUserRepositoryWrapper appuserRepository;
+    private final StandingInstructionRepository standingInstructionRepository;
 
     @Autowired
     public SavingsAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -152,7 +157,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final SavingsAccountDataValidator fromApiJsonDeserializer, final SavingsAccountRepositoryWrapper savingsRepository,
             final StaffRepositoryWrapper staffRepository, final ConfigurationDomainService configurationDomainService,
             final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
-            final AppUserRepositoryWrapper appuserRepository) {
+            final AppUserRepositoryWrapper appuserRepository, 
+            final StandingInstructionRepository standingInstructionRepository) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
@@ -176,6 +182,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.configurationDomainService = configurationDomainService;
         this.depositAccountOnHoldTransactionRepository = depositAccountOnHoldTransactionRepository;
         this.appuserRepository = appuserRepository;
+        this.standingInstructionRepository = standingInstructionRepository;
     }
 
     @Transactional
@@ -646,6 +653,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             }
 
         }
+        
+        // disable all standing orders linked to the savings account
+        this.disableStandingInstructionsLinkedToClosedSavings(account);
+        
         return new CommandProcessingResultBuilder() //
                 .withEntityId(savingsId) //
                 .withOfficeId(account.officeId()) //
@@ -673,7 +684,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final SavingsAccountTransaction newTransferTransaction = SavingsAccountTransaction.initiateTransfer(savingsAccount,
                 savingsAccount.office(), transferDate, user);
-        savingsAccount.getTransactions().add(newTransferTransaction);
+        savingsAccount.addTransaction(newTransferTransaction);
         savingsAccount.setStatus(SavingsAccountStatusType.TRANSFER_IN_PROGRESS.getValue());
         final MathContext mc = MathContext.DECIMAL64;
         boolean isInterestTransfer = false;
@@ -705,7 +716,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final SavingsAccountTransaction withdrawtransferTransaction = SavingsAccountTransaction.withdrawTransfer(savingsAccount,
                 savingsAccount.office(), transferDate, user);
-        savingsAccount.getTransactions().add(withdrawtransferTransaction);
+        savingsAccount.addTransaction(withdrawtransferTransaction);
         savingsAccount.setStatus(SavingsAccountStatusType.ACTIVE.getValue());
         final MathContext mc = MathContext.DECIMAL64;
         boolean isInterestTransfer = false;
@@ -745,7 +756,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final SavingsAccountTransaction acceptTransferTransaction = SavingsAccountTransaction.approveTransfer(savingsAccount,
                 acceptedInOffice, transferDate, user);
-        savingsAccount.getTransactions().add(acceptTransferTransaction);
+        savingsAccount.addTransaction(acceptTransferTransaction);
         savingsAccount.setStatus(SavingsAccountStatusType.ACTIVE.getValue());
         if (fieldOfficer != null) {
             savingsAccount.reassignSavingsOfficer(fieldOfficer, transferDate);
@@ -1275,4 +1286,25 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         return user;
     }
 
+	/** 
+     * Disable all standing instructions linked to the savings account if the status is "closed" 
+     * 
+     * @param savingsAccount -- the savings account object
+     * @return None
+     **/
+    @Transactional
+    private void disableStandingInstructionsLinkedToClosedSavings(final SavingsAccount savingsAccount) {
+        if (savingsAccount != null && savingsAccount.isClosed()) {
+            final Integer standingInstructionStatus = StandingInstructionStatus.ACTIVE.getValue();
+            final Collection<AccountTransferStandingInstruction> accountTransferStandingInstructions = this.standingInstructionRepository
+                    .findBySavingsAccountAndStatus(savingsAccount, standingInstructionStatus);
+            
+            if (!accountTransferStandingInstructions.isEmpty()) {
+                for (AccountTransferStandingInstruction accountTransferStandingInstruction : accountTransferStandingInstructions) {
+                    accountTransferStandingInstruction.updateStatus(StandingInstructionStatus.DISABLED.getValue());
+                    this.standingInstructionRepository.save(accountTransferStandingInstruction);
+                }
+            }
+        }
+    }
 }

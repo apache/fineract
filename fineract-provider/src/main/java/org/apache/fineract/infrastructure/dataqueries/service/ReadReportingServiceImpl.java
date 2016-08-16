@@ -484,5 +484,4 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             return new ReportParameterData(id, null, null, parameterName);
         }
     }
-
 }

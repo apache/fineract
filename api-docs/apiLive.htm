@@ -222,6 +222,22 @@
 							</tr>
 							<tr>
 								<td></td>
+								<td>clients/{clientId}?command=UndoRejection</td>
+								<td><a href="#clients_UndoRejection">UndoReject a Client</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>clients/{clientId}?command=UndoWithdrawal</td>
+								<td><a href="#clients_UndoWithdrawal">UndoWithdrawal Client</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
 								<td>clients/{clientId}?command=assignStaff</td>
 								<td><a href="#clients_assignStaff">Assign Staff</a></td>
 								<td></td>
@@ -292,6 +308,22 @@
 								<td></td>
 								<td></td>
 							</tr>
+                            <tr>
+                                <td><a href="#client_address">Client Address</a></td>
+                                <td>client/{clientId}/addresses</td>
+                                <td><a href="#client_address_create">Create an address for a Client</a></td>
+                                <td><a href="#client_address_list">List all Addresses for a Client</a></td>
+                                <td><a href="#client_address_update">Update an address for a Client</a></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td><a href="#entity_field_list">Entity Field Configuration</a></td>
+                                <td>fieldconfiguration/{entity}</td>
+                                td></td>
+                                <td><a href="#entity_field_list">List all configuration for a entity</a></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
 							<tr>
 								<td><a href="#client_identifiers">Client Identifiers</a></td>
 								<td>clients/{clientId}/identifiers</td>
@@ -1024,7 +1056,7 @@
 								<td></td>
 								<td></td>
 							</tr>
-							
+
 							<tr>
 								<td></td>
 								<td>accounts/share/{accountId}?command=activate</td>
@@ -1057,7 +1089,7 @@
 								<td></td>
 								<td></td>
 							</tr>
-							
+
 							<tr>
 								<td></td>
 								<td>accounts/share/{accountId}?command=rejectadditionalshares</td>
@@ -1066,7 +1098,7 @@
 								<td></td>
 								<td></td>
 							</tr>
-							
+
 							<tr>
 								<td></td>
 								<td>accounts/share/{accountId}?command=redeemshares</td>
@@ -1075,12 +1107,12 @@
 								<td></td>
 								<td></td>
 							</tr>
-							
+
 						</table>
 					</div>
 				</div>
 			</div>
-			
+
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Loan</h2>
 				<div id="toc-menu-loan" class="flybar-menu">
@@ -1976,7 +2008,7 @@
 								<td></td>
 								<td></td>
 							</tr>
-														
+
 							<tr>
 								<td></td>
 								<td>savingsproducts/{productId}</td>
@@ -2032,7 +2064,7 @@
 								<td><a href="#shareproducts_retrieve">Retrieve a Share product</a></td>
 								<td><a href="#shareproducts_update">Update a Share product</a></td>
 							</tr>
-							
+
 							<tr>
 								<td><a href="#configs">Currency</a></td>
 								<td>currencies</td>
@@ -3037,6 +3069,30 @@
 								<td>runreports/{reportName}</td>
 								<td></td>
 								<td><a href="#report_run">Run a Report</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#report_mailing_jobs">Report Mailing Job</a></td>
+								<td>reportmailingjob</td>
+								<td><a href="#report_mailing_jobs_create">Create a Report Mailing Job</a></td>
+								<td><a href="#report_mailing_jobs_list">List Reports Mailing Jobs</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>reportmailingjob/{id}</td>
+								<td></td>
+								<td><a href="#report_mailing_jobs_retrieve">Retrieve a Report Mailing Job</a></td>
+								<td><a href="#report_mailing_jobs_update">Update a Report Mailing Job</a></td>
+								<td><a href="#report_mailing_jobs_delete">Delete a Report Mailing Job</a></td>
+							</tr>
+                            <tr>
+								<td></td>
+								<td>reportmailingjobrunhistory/{jobId}</td>
+								<td></td>
+								<td><a href="#report_mailing_job_history_list">Retrieve Reports Mailing Job History</a></td>
 								<td></td>
 								<td></td>
 							</tr>
@@ -4460,6 +4516,187 @@ GET https://DomainName/api/v1/clients/template
 }
 					</code>
 				</div>
+
+                <div class="method-example">
+                    <code class="method-declaration">
+                        GET https://DomainName/api/v1/clients/template
+                    </code>
+                    <code class="method-response">
+                        {
+                        "activationDate":[2014,3,4],
+                        "officeId":1,
+                        "officeOptions":[{
+                        "id":1,
+                        "name":"Head Office",
+                        "nameDecorated":"Head Office"
+                        }],
+                        "staffOptions":[{
+                        "id":1,
+                        "firstname":"xyz",
+                        "lastname":"sjs",
+                        "displayName":"sjs, xyz",
+                        "officeId":1,
+                        "officeName":"Head Office",
+                        "isLoanOfficer":true,
+                        "isActive":true
+                        }],
+                        "savingProductOptions":[{
+                        "id":4,
+                        "name":"account overdraft",
+                        "withdrawalFeeForTransfers":false,
+                        "allowOverdraft":false
+                        }]
+                        }
+                    </code>
+                </div>
+
+                <div class="method-example">
+                    <p>if address is enabled</p>
+                    <code class="method-declaration">
+                        GET https://DomainName/api/v1/clients/template
+                    </code>
+                    <code class="method-response">
+
+
+                        {
+                        "activationDate":
+                        [
+                        2016,
+                        8,
+                        11
+                        ],
+                        "officeId": 1,
+                        "officeOptions":
+                        [
+                        {
+                        "id": 1,
+                        "name": "Head Office",
+                        "nameDecorated": "Head Office"
+                        }
+                        ],
+                        "savingProductOptions":
+                        [
+                        ],
+                        "genderOptions":
+                        [
+                        {
+                        "id": 748,
+                        "name": "Female",
+                        "position": 1,
+                        "isActive": true
+                        },
+                        {
+                        "id": 749,
+                        "name": "Male",
+                        "position": 2,
+                        "isActive": true
+                        }
+                        ],
+                        "clientTypeOptions":
+                        [
+                        {
+                        "id": 761,
+                        "name": "JLG",
+                        "position": 1,
+                        "description": "",
+                        "isActive": true
+                        },
+                        {
+                        "id": 760,
+                        "name": "individual",
+                        "position": 2,
+                        "description": "",
+                        "isActive": true
+                        }
+                        ],
+                        "clientClassificationOptions":
+                        [
+                        ],
+                        "clientNonPersonConstitutionOptions":
+                        [
+                        ],
+                        "clientNonPersonMainBusinessLineOptions":
+                        [
+                        ],
+                        "clientLegalFormOptions":
+                        [
+                        {
+                        "id": 1,
+                        "code": "legalFormType.person",
+                        "value": "PERSON"
+                        },
+                        {
+                        "id": 2,
+                        "code": "legalFormType.entity",
+                        "value": "ENTITY"
+                        }
+                        ],
+                        "address":
+                        {
+                        "countryIdOptions":
+                        [
+                        {
+                        "id": 802,
+                        "name": "INDIA",
+                        "position": 1,
+                        "isActive": true
+                        },
+                        {
+                        "id": 803,
+                        "name": "BANGLADESH",
+                        "position": 2,
+                        "isActive": true
+                        },
+                        {
+                        "id": 807,
+                        "name": "UNITED STATES",
+                        "position": 3,
+                        "isActive": true
+                        }
+                        ],
+                        "stateProvinceIdOptions":
+                        [
+                        {
+                        "id": 800,
+                        "name": "MAHARASHTRA",
+                        "position": 1,
+                        "isActive": true
+                        },
+                        {
+                        "id": 801,
+                        "name": "GUJRAT",
+                        "position": 2,
+                        "isActive": true
+                        }
+                        ],
+                        "addressTypeIdOptions":
+                        [
+                        {
+                        "id": 804,
+                        "name": "PERMANENT ADDRESS",
+                        "position": 1,
+                        "isActive": true
+                        },
+                        {
+                        "id": 805,
+                        "name": "OFFICE ADDRESS",
+                        "position": 2,
+                        "isActive": true
+                        },
+                        {
+                        "id": 806,
+                        "name": "CURRENT ADDRESS",
+                        "position": 3,
+                        "isActive": true
+                        }
+                        ]
+                        },
+                        "isAddressEnabled": true
+                        }
+
+
+                    </code>
+                </div>
 			</div>
 
 			<a id="clients_create" name="clients_create" class="old-syle-anchor">&nbsp;</a>
@@ -4467,10 +4704,13 @@ GET https://DomainName/api/v1/clients/template
 				<div class="method-description">
 					<h4>Create a Client</h4>
 					<p>
-						<b>Note:</b> You can enter either:<br>
+						<b>Note:</b>1. You can enter either:<br>
 						firstname/middlename/lastname - for a person (middlename is
 						optional) OR<br> fullname - for a business or organisation
 						(or person known by one name).<br>
+                               &nbsp; &nbsp; &nbsp;     2.If address is enable(enable-address=true), then additional field <br>
+                        called address has to be passed
+
 					</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
@@ -4478,6 +4718,7 @@ GET https://DomainName/api/v1/clients/template
 						</tr>
 						<tr class=alt>
 							<td>firstname and lastname OR fullname,<br> officeId,<br> active=true and activationDate OR active=false,<br>
+                                if(address enabled) address
 							</td>
 						</tr>
 					</table>
@@ -4520,6 +4761,45 @@ Content-Type: application/json Request Body:
 }
 					</code>
 				</div>
+                <div class="method-example">
+                    <code class="method-declaration">
+                        <p>if address is enabled</p>
+                        POST https://DomainName/api/v1/clients
+                    </code>
+                    <code class="method-request">
+                        POST clients
+                        Content-Type: application/json Request Body:
+                        {
+
+                        "firstname": "Petra",
+                        "lastname": "Yton",
+                        "externalId": "786YYH7",
+                        "dateFormat": "dd MMMM yyyy",
+                        "locale": "en",
+                        "active": true,
+                        "activationDate": "04 March 2009",
+                        "submittedOnDate":"04 March 2009",
+                        "officeId":1,
+                        "address":[
+                        {
+                        "addressTypeId": 805,
+                        "isActive": true,
+                        "street": "rapchik",
+                        "stateProvinceId": 800,
+                        "countryId": 802
+                        }
+                        ]
+                        }
+                    </code>
+                    <code class="method-response">
+                        {
+                        "officeId": 1,
+                        "clientId": 1,
+                        "resourceId": 1,
+                        "savingsId": 10
+                        }
+                    </code>
+                </div>
 				<div class="method-example">
 					<code class="method-request">
 POST clients
@@ -4698,10 +4978,86 @@ Request Body:
 		<div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=reactivate</code>
 	        <code class="method-request">POST clients/1?command=reactivate
+
 Content-Type: application/json
 Request Body:
 {
 "reactivationDate":"28 November 2014",
+"locale":"en",
+"dateFormat":"dd MMMM yyyy"
+}
+			</code>
+	        <code class="method-response">
+{
+
+  "clientId":15,
+  "resourceId":15
+}
+	        </code>
+	    </div>
+	</div>
+	
+	<a id="clients_UndoRejection" name="clients_UndoRejection" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>UndoReject a Client</h4>
+	        <p>Clients can be reactivated after they have been rejected.</p>
+	        <p>Trying to reactivate a client in any other state throws an error.</p>
+	         <table class=matrixHeading>
+				<tr class="matrixHeadingBG">
+					<td><div class="fineractHeading2">Mandatory Fields</div></td>
+				</tr>
+				<tr class=alt>
+					<td>reopenedDate<br>
+					</td>
+				</tr>
+			</table>
+	    </div>
+		<div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=UndoRejection</code>
+	        <code class="method-request">POST clients/1?command=UndoRejection
+			
+Content-Type: application/json
+Request Body:
+{
+"reopenedDate":"28 November 2014",
+"locale":"en",
+"dateFormat":"dd MMMM yyyy"
+}
+			</code>
+	        <code class="method-response">
+{
+
+  "clientId":15,
+  "resourceId":15
+}
+	        </code>
+	    </div>
+	</div>
+			
+<a id="clients_UndoWithdrawal" name="clients_UndoWithdrawal" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>UndoWithdraw a Client</h4>
+	        <p>Clients can be reactivated after they have been withdrawn.</p>
+	        <p>Trying to reactivate a client in any other state throws an error.</p>
+	         <table class=matrixHeading>
+				<tr class="matrixHeadingBG">
+					<td><div class="fineractHeading2">Mandatory Fields</div></td>
+				</tr>
+				<tr class=alt>
+					<td>reopenedDate<br>
+					</td>
+				</tr>
+			</table>
+	    </div>
+		<div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=UndoWithdrawal</code>
+	        <code class="method-request">POST clients/1?command=UndoWithdrawal
+Content-Type: application/json
+Request Body:
+{
+"reopenedDate":"28 November 2014",
 "locale":"en",
 "dateFormat":"dd MMMM yyyy"
 }
@@ -5324,10 +5680,357 @@ GET https://DomainName/api/v1/clients/{clientId}/accounts
             }
         }
     ]
-}
-					</code>
-				</div>
+}</code>
+                </div>
 			</div>
+
+            <!-- start of entity field configuration api -->
+            <a id="entity_field_configuration" name="entity_field_configuration" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h3>Entity Field Configuration </h3>
+                    <p>Entity Field configuration API is a generic and extensible <br>
+                        wherein various entities and subentities can be related.<br>
+                        Also it gives the user an ability to enable/disable fields,<br> add regular expression for validation</p>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG">
+                            <td><div class="fineractHeading2">Field Descriptions</div></td>
+                        </tr>
+                        <tr class=alt>
+                            <td>entity</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Entity to which relationship is to be established
+                                </br> </td>
+                        </tr>
+                        <tr class=alt>
+                            <td>subentity</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Entity which uses/relies on other entity for addional description
+                            </td>
+                        </tr>
+                        <tr class=alt>
+                            <td>field</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Field of the Enity which is to be configured
+                            </td>
+                        </tr>
+                        <tr class=alt>
+                            <td>validation_regex</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Regular expression for validating field's data
+                            </td>
+                        </tr>
+                        <tr class=alt>
+                            <td>is_enabled</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>This is used to enable/disable field
+                            </td>
+                        </tr>
+                        <tr class=alt>
+                            <td>is_mandatory</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>This is used to make field mandatory
+                            </td>
+                        </tr>
+
+                    </table>
+                </div>
+            </div>
+            <a id="entity_field_list" name="entity_field_list" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-example">
+                    <code class="method-declaration">
+                        GET https://DomainName/api/v1/fieldconfiguration/{entity}
+                    </code>
+                    <code class="method-response">
+                        [
+                        {
+                        "fieldConfigurationId": 1,
+                        "entity": "ADDRESS",
+                        "subentity": "CLIENT",
+                        "field": "addressType",
+                        "is_enabled": true,
+                        "is_mandatory": false,
+                        "validation_regex": ""
+                        },
+                        {
+                        "fieldConfigurationId": 2,
+                        "entity": "ADDRESS",
+                        "subentity": "CLIENT",
+                        "field": "street",
+                        "is_enabled": true,
+                        "is_mandatory": true,
+                        "validation_regex": ""
+                        },
+                        {
+                        "fieldConfigurationId": 3,
+                        "entity": "ADDRESS",
+                        "subentity": "CLIENT",
+                        "field": "addressLine1",
+                        "is_enabled": true,
+                        "is_mandatory": false,
+                        "validation_regex": ""
+                        },
+                        {
+                        "fieldConfigurationId": 4,
+                        "entity": "ADDRESS",
+                        "subentity": "CLIENT",
+                        "field": "addressLine2",
+                        "is_enabled": true,
+                        "is_mandatory": false,
+                        "validation_regex": ""
+                        },
+                        {
+                        "fieldConfigurationId": 5,
+                        "entity": "ADDRESS",
+                        "subentity": "CLIENT",
+                        "field": "addressLine3",
+                        "is_enabled": true,
+                        "is_mandatory": false,
+                        "validation_regex": ""
+                        }
+                        ]
+                    </code>
+                </div>
+                </div>
+
+
+
+            <!-- start of client address api docs -->
+            <a id="client_address" name="client_address" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h3>Client Address</h3>
+                    <p>Address module is an optional module and can be configured<br>
+                        into the system by using GlobalConfiguration setting: enable-address.<br>
+                        In order to activate Address module, we need to enable the configuration,<br>
+                        enable-address by setting its value to true.
+                    </p>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG">
+                            <td><div class="fineractHeading2">Field Descriptions</div></td>
+                        </tr>
+                        <tr class=alt>
+                            <td>addressTypeId</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Address module has the ability to store<br>
+                            multiple types of address of clients.addressTypeId is basically a code whose value<br>
+                            are used to store the different types of addresses.
+                                </br> </td>
+                        </tr>
+                        <tr class=alt>
+                            <td>street,addressLine1,addressLine2,addressLine3,townVillage,city,<br>
+                                countyDistrict,stateProvinceId,<br>
+                                countryId,postalCode,latitude,longitude,createdBy,createdOn,<br>
+                                updatedBy,updatedOn</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>The above are the fields of address<br>
+                                which are configurable using settings stored for each field in<br>
+                                m_field_configuration table.
+                                 </td>
+                        </tr>
+
+                    </table>
+                </div>
+            </div>
+
+            <a id="client_address_list" name="client_address_list" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>List all addresses for a Client</h4>
+                    <p>Example Requests:</p>
+                    <div class=apiClick>client/1/addresses</div>
+                    <br>
+                    <br>
+                    <div class=apiClick>clients/1/addresses?status=false,true&&type=1,2,3</div>
+
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+                        GET https://DomainName/api/v1/client/{clientid}/addresses
+                    </code>
+                    <code class="method-response">
+                        [
+                        {
+                        "client_id": 111755,
+                        "addressType": "PERMANENT ADDRESS",
+                        "addressId": 14,
+                        "addressTypeId": 804,
+                        "isActive": false,
+                        "street": "anki's home",
+                        "addressLine1": "test123",
+                        "addressLine2": "iuyt",
+                        "addressLine3": "",
+                        "townVillage": "",
+                        "city": "mumbai",
+                        "countyDistrict": "",
+                        "stateProvinceId": 801,
+                        "countryName": "UNITED STATES",
+                        "stateName": "GUJRAT",
+                        "countryId": 807,
+                        "postalCode": "400095",
+                        "createdBy": "",
+                        "updatedBy": ""
+                        },
+                        {
+                        "client_id": 111755,
+                        "addressType": "PERMANENT ADDRESS",
+                        "addressId": 17,
+                        "addressTypeId": 804,
+                        "isActive": false,
+                        "street": "anki's home",
+                        "addressLine1": "",
+                        "addressLine2": "",
+                        "addressLine3": "",
+                        "townVillage": "",
+                        "city": "",
+                        "countyDistrict": "",
+                        "stateProvinceId": 800,
+                        "countryName": "INDIA",
+                        "stateName": "MAHARASHTRA",
+                        "countryId": 802,
+                        "postalCode": "",
+                        "createdBy": "",
+                        "updatedBy": ""
+                        },
+                        {
+                        "client_id": 111755,
+                        "addressType": "OFFICE ADDRESS",
+                        "addressId": 18,
+                        "addressTypeId": 805,
+                        "isActive": false,
+                        "street": "anki's office",
+                        "addressLine1": "",
+                        "addressLine2": "",
+                        "addressLine3": "",
+                        "townVillage": "",
+                        "city": "",
+                        "countyDistrict": "",
+                        "stateProvinceId": 0,
+                        "countryId": 0,
+                        "postalCode": "",
+                        "createdBy": "",
+                        "updatedBy": ""
+                        }
+                        ]
+                    </code>
+                </div>
+
+                <div class="method-example">
+                    <code class="method-declaration">
+                        GET https://DomainName/api/v1/client/{clientid}/addresses?type=804&&status=false
+                    </code>
+                    <code class="method-response">
+                        [
+                        {
+                        "client_id": 111755,
+                        "addressType": "PERMANENT ADDRESS",
+                        "addressId": 14,
+                        "addressTypeId": 804,
+                        "isActive": false,
+                        "street": "anki's home",
+                        "addressLine1": "test123",
+                        "addressLine2": "iuyt",
+                        "addressLine3": "",
+                        "townVillage": "",
+                        "city": "mumbai",
+                        "countyDistrict": "",
+                        "stateProvinceId": 801,
+                        "countryName": "UNITED STATES",
+                        "stateName": "GUJRAT",
+                        "countryId": 807,
+                        "postalCode": "400095",
+                        "createdBy": "",
+                        "updatedBy": ""
+                        }
+                        }
+                        ]
+                    </code>
+                </div>
+            </div>
+
+            <a id="client_address_create" name="client_address_create" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Create an address for a Client</h4>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG">
+                            <td><div class="fineractHeading2">Mandatory Fields</div></td>
+                        </tr>
+                        <tr class=alt>
+                            <td>type and clientId
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+                        POST https://DomainName/api/v1/client/{clientId}/addresses?type={addressTypeId}
+                    </code>
+                    <code class="method-request">
+                        POST client/1/address?type=805
+                        Content-Type: application/json Request Body:
+                        {
+                        "street":"Ipca",
+                        "addressLine1":"Kandivali",
+                        "addressLine2":"plot47",
+                        "addressLine3":"charkop",
+                        "city":"Mumbai",
+                        "stateProvinceId":800,
+                        "countryId":802,
+                        "postalCode":"400064"
+                        }
+                    </code>
+                    <code class="method-response">
+                        {
+                        "resourceId":15
+                        }
+                    </code>
+                </div>
+            </div>
+
+            <a id="client_address_update" name="client_address_update" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>update an address for a Client</h4>
+                    <p>All the address fields can be updated by using update client address API</p>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG">
+                            <td><div class="fineractHeading2">Mandatory Fields</div></td>
+                        </tr>
+                        <tr class=alt>
+                            <td>type and addressId
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+                        PUT https://DomainName/api/v1/client/{clientId}/addresses?type={addressTypeId}
+                    </code>
+                    <code class="method-request">
+                        POST client/1/addresses?type=805
+                        Content-Type: application/json Request Body:
+                        {
+                        "addressId":67,
+                        "street":"goldensource"
+                        }
+                    </code>
+                    <code class="method-response">
+                        {
+                        "resourceId":67
+                        }
+                    </code>
+                </div>
+            </div>
 
 			<!-- start of client Identifiers API docs-->
 			<a id="client_identifiers" name="client_identifiers" class="old-syle-anchor">&nbsp;</a>
@@ -10152,8 +10855,8 @@ No Request Body:
 						<dd>
 							<b>'foreclosure'</b><br> "transaction date" is set to the current date by default<br>
 							"transaction amount" is set
-							to the sum of total loan outstanding principal 
-							and total Interest/ Fee/ Charges / Penalties 
+							to the sum of total loan outstanding principal
+							and total Interest/ Fee/ Charges / Penalties
 							till foreclosure date.
 						</dd>
 					</dl>
@@ -11877,11 +12580,11 @@ Content-Type: application/json Request Body:
 {
 	"loanId": 1,
 	"graceOnPrincipal": 2,
-	"rescheduleFromDate": "04 December 2014",
-	"adjustedDueDate": "20 December 2014",
+	"rescheduleFromDate": "25 December 2013",
+	"adjustedDueDate": "31 December 2013",
 	"dateFormat": "dd MMMM yyyy",
 	"locale": "en",
-	"submittedOnDate": "04 September 2014",
+	"submittedOnDate": "04 September 2013",
 	"rescheduleReasonComment" : "Client has gone AWOL",
 	"rescheduleReasonId": 1
 }
@@ -11907,52 +12610,80 @@ GET https://DomainName/api/v1/rescheduleloans/{requestId}
 					</code>
 					<code class="method-response">
 {
-  "id": 2,
-  "loanId": 17,
-  "clientId": 4,
-  "clientName": "Fernando Michael Torres",
-  "loanAccountNumber": "000000017",
+  "id": 1,
+  "loanId": 1,
+  "clientId": 1,
+  "clientName": "test test",
+  "loanAccountNumber": "000000001",
   "statusEnum": {
-    "id": 500,
-    "code": "loanStatusType.rejected",
-    "value": "Rejected",
-    "pendingApproval": false,
+    "id": 100,
+    "code": "loanStatusType.submitted.and.pending.approval",
+    "value": "Submitted and pending approval",
+    "pendingApproval": true,
     "approved": false,
-    "rejected": true
+    "rejected": false
   },
   "rescheduleFromInstallment": 5,
-  "graceOnPrincipal": 3,
   "rescheduleFromDate": [
     2013,
     12,
-    6
+    25
   ],
   "recalculateInterest": false,
   "rescheduleReasonCodeValue": {
-    "id": 239,
-    "name": "client cannot pay on time"
+    "id": 1,
+    "name": "Passport",
+    "isActive": false
   },
   "timeline": {
     "submittedOnDate": [
-      2014,
-      8,
+      2013,
+      9,
       4
     ],
     "submittedByUsername": "mifos",
     "submittedByFirstname": "App",
-    "submittedByLastname": "Administrator",
-    "rejectedOnDate": [
-      2014,
-      8,
-      5
-    ],
-    "rejectedByUsername": "mifos",
-    "rejectedByFirstname": "App",
-    "rejectedByLastname": "Administrator"
+    "submittedByLastname": "Administrator"
   },
-  "rescheduleReasonComment": ""
-}
-					</code>
+  "rescheduleReasonComment": "Client has gone AWOL",
+  "loanTermVariationsData": [
+    {
+      "id": 13,
+      "termType": {
+        "id": 4,
+        "code": "loanTermType.dueDate",
+        "value": "dueDate"
+      },
+      "termVariationApplicableFrom": [
+        2013,
+        12,
+        25
+      ],
+      "dateValue": [
+        2013,
+        12,
+        31
+      ],
+      "isSpecificToInstallment": false
+    },
+    {
+      "id": 14,
+      "termType": {
+        "id": 8,
+        "code": "loanTermType.graceOnPrincipal",
+        "value": "graceOnPrincipal"
+      },
+      "termVariationApplicableFrom": [
+        2013,
+        12,
+        25
+      ],
+      "decimalValue": 2,
+      "isSpecificToInstallment": false
+    }
+  ]
+}			
+</code>
 				</div>
 			</div>
 			<a id="loan_reschedule_preview_retrieve" name="loan_reschedule_preview_retrieve" class="old-syle-anchor">&nbsp;</a>
@@ -19748,7 +20479,7 @@ Content-Type: application/json
 				<tr class=alt><td>taxGroupId</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If withhold tax set as true, with hold tax will be applied as per the tax group provided </td></tr>
 
-				
+
 	        </table>
 	    </div>
 	</div>
@@ -20320,12 +21051,12 @@ Content-Type: application/json
             <br/>
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Optional Fields</div></td></tr>
-                <tr class=alt><td>sharesIssued, minimumShares, maximumShares, minimumActivePeriodForDividends, minimumactiveperiodFrequencyType, 
+                <tr class=alt><td>sharesIssued, minimumShares, maximumShares, minimumActivePeriodForDividends, minimumactiveperiodFrequencyType,
 				lockinPeriodFrequency, lockinPeriodFrequencyType, marketPricePeriods, chargesSelected</tr>
             </table>
         </div>
         <div class="method-example">
-		
+
             <code class="method-declaration">POST https://Domain Name/api/v1/products/share</code>
 			<code class="method-request">POST shareproducts
 Content-Type: application/json
@@ -20358,7 +21089,7 @@ Request Body:
 "chargesSelected": [{
 	"id": 20
 }],
-"accountingRule": "1"	
+"accountingRule": "1"
 }
 
 			</code>
@@ -20402,7 +21133,7 @@ Request Body:
 "shareReferenceId": 5,
 "shareSuspenseId": 8,
 "shareEquityId": 66,
-"incomeFromFeeAccountId": 2	
+"incomeFromFeeAccountId": 2
 }
 			</code>
 			<code class="method-response">
@@ -20775,10 +21506,10 @@ Request Body:
             <div class=apiClick>shareproducts</div>
         </div>
         <div class="method-example">
-		
+
             <code class="method-declaration">GET https://Domain Name/api/v1/products/share?limit=10&offset=0</code>
             <code class="method-response">
-			
+
 {
 	"totalFilteredRecords": 1,
 	"pageItems": [{
@@ -20791,7 +21522,7 @@ Request Body:
 </code>
        </div>
 </div>
-	
+
     <a id="savingsproducts_create" name="savingsproducts_create" class="old-syle-anchor">&nbsp;</a>
     <div class="method-section">
         <div class="method-description">
@@ -22178,7 +22909,7 @@ Content-Type: application/json
 	<div class="method-section">
 	    <div class="method-description">
 	        <h2>Share Account:</h2>
-	        <p>Share accounts are instances of a praticular share product created for an individual. 
+	        <p>Share accounts are instances of a praticular share product created for an individual.
 			An application process around the creation of accounts is also supported.</p>
 
 	        <table class=matrixHeading>
@@ -22260,7 +22991,7 @@ Content-Type: application/json
 	        </table>
 	    </div>
 	</div>
-	
+
 <a id="shareaccount_template" name="shareaccount_template" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
@@ -22331,7 +23062,7 @@ Content-Type: application/json
 			"value": "Flat"
 		},
 		"amount": 1.000000,
-		
+
 	}],
 	"lockinPeriodFrequencyTypeOptions": [{
 		"id": 0,
@@ -22402,7 +23133,7 @@ Request Body:
 {
 	"clientId": "7",
 	"productId": 1,
-	
+
 	"requestedShares": 100,
 	"externalId": "1",
 	"submittedDate": "01 May 2016",
@@ -22426,7 +23157,7 @@ Request Body:
 		"chargeId": 23,
 		"amount": 2
 	}],
-	
+
 	"savingsAccountId": 13
 }
 			</code>
@@ -22437,7 +23168,7 @@ Request Body:
 	        </code>
 	    </div>
 </div>
-	
+
 <a id="shareaccount_approve" name="shareaccount_approve" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
@@ -22458,7 +23189,7 @@ Request Body:
 			</code>
 	        <code class="method-response">
 {
-  
+
   "resourceId": 1,
   "changes": {
     "status": {
@@ -22496,7 +23227,7 @@ Request Body:
 			</code>
 	        <code class="method-response">
 {
-  
+
   "resourceId": 1,
   "changes": {
     "status": {
@@ -22515,7 +23246,7 @@ Request Body:
 	        </code>
 	    </div>
 </div>
-	
+
 <a id="shareaccount_reject" name="shareaccount_reject" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
@@ -22535,7 +23266,7 @@ Request Body:
 			</code>
 	        <code class="method-response">
 {
-  
+
   "resourceId": 1,
   "changes": {
     "status": {
@@ -22613,7 +23344,7 @@ Request Body:
                 </tr>
             </table>
             <br />
-           
+
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/accounts/share/{shareAccountId}?command=close</code>
@@ -22629,7 +23360,7 @@ Request Body:
 			</code>
 	        <code class="method-response">
 {
-  
+
   "resourceId":5,
   "changes":{
    "status":{
@@ -22648,7 +23379,7 @@ Request Body:
   "note":"close note"
   }
 }
-	        
+
 	        </code>
 	    </div>
 </div>
@@ -22659,7 +23390,7 @@ Request Body:
 	        <h2>Apply additional shares on a share account</h2>
 	          <p><i>requestedDate</i> is requsted date of share purchase</p>
 			<p><i>requestedShares</i> is number of shares to be purchase</p>
-            
+
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG">
                     <td><div class="fineractHeading2">Mandatory Fields</div></td>
@@ -22669,7 +23400,7 @@ Request Body:
                 </tr>
             </table>
             <br />
-           
+
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/accounts/share/{shareAccountId}?command=applyadditionalshares</code>
@@ -22685,10 +23416,10 @@ Request Body:
 			</code>
 	        <code class="method-response">
 {
-  
+
   "resourceId":5,
 }
-	        
+
 	        </code>
 	    </div>
 </div>
@@ -22698,7 +23429,7 @@ Request Body:
 	    <div class="method-description">
 	        <h2>Approve additional shares request on a share account</h2>
 	         <p><i>requestedShares</i> is Share purchase transaction ids</p>
-            
+
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG">
                     <td><div class="fineractHeading2">Mandatory Fields</div></td>
@@ -22708,7 +23439,7 @@ Request Body:
                 </tr>
             </table>
             <br />
-           
+
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/accounts/share/{shareAccountId}?command=approveadditionalshares</code>
@@ -22723,10 +23454,10 @@ Request Body:
 			</code>
 	        <code class="method-response">
 {
-  
+
   "resourceId":5,
 }
-	        
+
 	        </code>
 	    </div>
 </div>
@@ -22736,7 +23467,7 @@ Request Body:
 	    <div class="method-description">
 	        <h2>Reject additional shares request on a share account</h2>
 	         <p><i>requestedShares</i> is Share purchase transaction ids</p>
-            
+
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG">
                     <td><div class="fineractHeading2">Mandatory Fields</div></td>
@@ -22746,7 +23477,7 @@ Request Body:
                 </tr>
             </table>
             <br />
-           
+
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/accounts/share/{shareAccountId}?command=rejectadditionalshares</code>
@@ -22759,10 +23490,10 @@ Request Body:
 			</code>
 	        <code class="method-response">
 {
-  
+
   "resourceId":5,
 }
-	        
+
 	        </code>
 	    </div>
 </div>
@@ -22774,7 +23505,7 @@ Request Body:
 	        <p>Results redeem some/all shares from share account.</p>
             <p><i>requestedDate</i> is requsted date of shares redeem</p>
 			<p><i>requestedShares</i> is number of shares to be redeemed</p>
-			
+
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG">
                     <td><div class="fineractHeading2">Mandatory Fields</div></td>
@@ -22784,7 +23515,7 @@ Request Body:
                 </tr>
             </table>
             <br />
-           
+
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/accounts/share/{shareAccountId}?command=redeemshares</code>
@@ -22800,10 +23531,10 @@ Request Body:
 			</code>
 	        <code class="method-response">
 {
-  
+
   "resourceId":5,
 }
-	        
+
 	        </code>
 	    </div>
 </div>
@@ -22814,7 +23545,7 @@ Request Body:
             <h2>List share applications/accounts</h2>
             <p>Example Requests:</p>
             <div class=apiClick>shareaccount</div>
-            
+
         </div>
         <div class="method-example">
             <code class="method-declaration">GET https://Domain Name/api/v1/accounts/share</code>
@@ -22829,7 +23560,7 @@ Request Body:
       "clientName": "Client Name",
       "productId": 1,
       "productName": "Share Product Name",
-      
+
       "status": {
         "id": 100,
         "code": "shareAccountStatusType.submitted.and.pending.approval",
@@ -22862,7 +23593,7 @@ Request Body:
 	  "purchasedPrice": 5
 	  }
 	  ],
-     
+
       "summary": {
         "currency": {
           "code": "USD",
@@ -22884,7 +23615,7 @@ Request Body:
 	<div class="method-section">
 	    <div class="method-description">
 	        <h2>Retrieve a share application/account:</h2>
-	        
+
 	        <p>Example Requests : </p>
 	        <div class=apiClick>shareaccount/1</div>
 	    </div>
@@ -23271,7 +24002,7 @@ No Request Body:
 	        </code>
 	        <code class="method-response">
 {
-  
+
   "resourceId": 1,
   "changes": {
   "dateFormat": "dd MMMM yyyy",
@@ -23283,7 +24014,7 @@ No Request Body:
 	        </code>
 	    </div>
 	</div>
-	
+
 <!-- end of share accounts api doc
 <!-- start of savings accounts api -->
 	<a id="savingsaccounts" name="savingsaccounts" class="old-syle-anchor">&nbsp;</a>
@@ -23388,7 +24119,7 @@ No Request Body:
 
 				<tr class=alt><td>overdraftLimit</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If provided, sets the maximum allowed overdraft amount for a  savings account e.g. <b>5,000</b> else set the limit as zero</td></tr>
-				
+
 				<tr class=alt><td>withHoldTax</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If tax group provided at product level, will allow to Enable or disable withhold tax on interest posting for savings account </td></tr>
 
@@ -24476,8 +25207,8 @@ No Request Body:
 	        </code>
 	    </div>
 	</div>
-	
-	
+
+
 	<a id="savingsaccounts_withholdtaxupdate" name="savingsaccounts_withholdtaxupdate" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
@@ -27062,7 +27793,7 @@ No Request Body:
 				<tr class=alt><td>withHoldTax</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If tax group provided at product level, will allow to Enable or disable withhold tax on interest posting for savings account </td></tr>
 
-				
+
 	        </table>
 	    </div>
 	</div>
@@ -33682,6 +34413,426 @@ GET https://DomainName/api/v1/runreports/{reportName}
 					</code>
 				</div>
 			</div>
+			
+			<!-- start of report mailing jobs api docs -->
+			<a id="report_mailing_jobs" name="report_mailing_jobs" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Report Mailing Jobs</h3>
+					<p>This resource allows you to create a scheduled job that runs a report and sents it by email to specified email addresses.</p>
+					<p>The scheduled job can be configured to run once or on a regular basis (once a day, twice a week, etc).</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>name</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The name of the report mailing job. It must be unique.</td>
+						</tr>
+						<tr class=alt>
+							<td>description</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Description of the report mailing job.</td>
+						</tr>
+						<tr class=alt>
+							<td>startDateTime</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Date and time to start the report mailing job.</td>
+						</tr>
+						<tr class=alt>
+							<td>stretchyReportId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The identifier of the stretchy report to be sent.</td>
+						</tr>
+						<tr class=alt>
+							<td>emailRecipients</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Comma separated report recipient email addresses.</td>
+						</tr>
+						<tr class=alt>
+							<td>emailSubject</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The subject of the email to be sent.</td>
+						</tr>
+						<tr class=alt>
+							<td>emailMessage</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The body of the email to be sent.</td>
+						</tr>
+						<tr class=alt>
+							<td>emailAttachmentFileFormatId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The Enum constant id of the email attachment file format.</td>
+						</tr>
+						<tr class=alt>
+							<td>recurrence</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Rule or repeating pattern for recurring events. See - <a target="_blank" href="http://www.kanzaki.com/docs/ical/rrule.html">http://www.kanzaki.com/docs/ical/rrule.html</a></td>
+						</tr>
+						<tr class=alt>
+							<td>isActive</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Indicates whether or not the scheduler should be created as active.</td>
+						</tr>
+						<tr class=alt>
+							<td>stretchyReportParamMap</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: A map of the stretchy report parameter names to values.</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			
+			<a id="report_mailing_jobs_template" name="report_mailing_jobs_template" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Report Mailing Job Details Template</h4>
+					<p>This is a convenience resource. It can be useful when
+						building maintenance user interface screens for report mailing job
+						applications. The template data returned consists of any or all
+						of:
+					<ul>
+						<li class=normalli>Field Defaults</li>
+						<li class=normalli>Allowed Value Lists</li>
+					</ul>
+					</p>
+					<p>Example Request:</p>
+					<div class=apiClick>reportmailingjobs/template</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/reportmailingjobs/template
+					</code>
+					<code class="method-response">
+{
+    "isActive": false,
+    "emailAttachmentFileFormatOptions": [
+        {
+          "id": 1,
+          "code": "ReportMailingJobEmailAttachmentFileFormat.xls",
+          "value": "xls"
+        },
+        {
+          "id": 2,
+          "code": "ReportMailingJobEmailAttachmentFileFormat.pdf",
+          "value": "pdf"
+        },
+        {
+          "id": 3,
+          "code": "ReportMailingJobEmailAttachmentFileFormat.csv",
+          "value": "csv"
+        }
+    ],
+    "stretchyReportParamDateOptions": [
+        {
+          "id": 1,
+          "code": "reportMailingJobStretchyReportParamDateOption.today",
+          "value": "today"
+        },
+        {
+          "id": 2,
+          "code": "reportMailingJobStretchyReportParamDateOption.yesterday",
+          "value": "yesterday"
+        },
+        {
+          "id": 3,
+          "code": "reportMailingJobStretchyReportParamDateOption.tomorrow",
+          "value": "tomorrow"
+        }
+    ]
+}
+					</code>
+				</div>
+			</div>
+            
+            <a id="report_mailing_jobs_retrieve" name="report_mailing_jobs_retrieve" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Report Mailing Job</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>reportmailingjobs/1</div>
+					<br>
+					<br>
+					<div class=apiClick>reportmailingjobs/1?template=true</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/reportmailingjobs/{id}
+					</code>
+					<code class="method-response">
+{
+    "id": 1,
+    "name": "Client Numbers Report",
+    "description": "Client Numbers Report",
+    "startDateTime": 1469627093000,
+    "recurrence": "",
+    "timeline": {
+        "createdOnDate": [
+            2016,
+            7,
+            27
+        ],
+        "createdByUsername": "musoni",
+        "createdByFirstname": "firstname",
+        "createdByLastname": "lastname"
+    },
+    "emailRecipients": "info@musonisystem.com",
+    "emailSubject": "Client Numbers Report",
+    "emailMessage": "Client Numbers Report",
+    "emailAttachmentFileFormat": {
+        "id": 1,
+        "code": "ReportMailingJobEmailAttachmentFileFormat.xls",
+        "value": "xls"
+    },
+    "stretchyReport": {
+        "id": 120,
+        "reportName": "Client Numbers Report",
+        "reportType": "Pentaho",
+        "reportCategory": "Client",
+        "description": "",
+        "coreReport": false,
+        "useReport": true
+    },
+    "stretchyReportParamMap": "{\"startDate\":\"2016-07-01\",\"endDate\":\"2016-08-02\",\"selectOffice\":\"1\",\"environementUrl\":\"environementUrl\"}",
+    "nextRunDateTime": 1469627093000,
+    "numberOfRuns": 0,
+    "isActive": true,
+    "runAsUserId": 1
+}
+					</code>
+				</div>
+			</div>
+            
+            <a id="report_mailing_jobs_list" name="report_mailing_jobs_list" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Report Mailing Jobs</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>reportmailingjobs</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/reportmailingjobs
+					</code>
+					<code class="method-response">
+[
+    {
+        "id": 1,
+        "name": "Client Numbers Report",
+        "description": "Client Numbers Report",
+        "startDateTime": 1469627093000,
+        "recurrence": "",
+        "timeline": {
+            "createdOnDate": [
+                2016,
+                7,
+                27
+            ],
+            "createdByUsername": "musoni",
+            "createdByFirstname": "firstname",
+            "createdByLastname": "lastname"
+        },
+        "emailRecipients": "info@musonisystem.com",
+        "emailSubject": "Client Numbers Report",
+        "emailMessage": "Client Numbers Report",
+        "emailAttachmentFileFormat": {
+            "id": 1,
+            "code": "ReportMailingJobEmailAttachmentFileFormat.xls",
+            "value": "xls"
+        },
+        "stretchyReport": {
+            "id": 120,
+            "reportName": "Client Numbers Report",
+            "reportType": "Pentaho",
+            "reportCategory": "Client",
+            "description": "",
+            "coreReport": false,
+            "useReport": true
+        },
+        "stretchyReportParamMap": "{\"startDate\":\"2016-07-01\",\"endDate\":\"2016-08-02\",\"selectOffice\":\"1\",\"environementUrl\":\"environementUrl\"}",
+        "nextRunDateTime": 1469627093000,
+        "numberOfRuns": 0,
+        "isActive": true,
+        "runAsUserId": 1
+    }
+]
+					</code>
+				</div>
+			</div>
+            
+            <a id="report_mailing_job_history_list" name="report_mailing_job_history_list" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Report Mailing Job History</h4>
+                    <p>The <i>list</i> capability of report mailing job history can support <b>pagination</b> and <b>sorting</b>.</p>
+					<h5>Optional Arguments</h5>
+					<dl class="argument-list">
+						<dt>offset</dt>
+						<dd>
+							Integer <span>optional</span>, defaults to 0
+						</dd>
+						<dd>Indicates the result from which pagination starts</dd>
+
+						<dt>limit</dt>
+						<dd>
+							Integer <span>optional</span>, defaults to 200
+						</dd>
+						<dd>Restricts the size of results returned. To override the default and return all entries you must explicitly pass a non-positive integer value for limit e.g. limit=0, or limit=-1</dd>
+
+						<dt>orderBy</dt>
+						<dd>
+							String <span>optional</span>, one of <span>startDateTime, endDateTime, status</span>
+						</dd>
+						<dd>Orders results by the indicated field.</dd>
+
+						<dt>sortBy</dt>
+						<dd>
+							String <span>optional</span>, one of <span>ASC, DESC</span>
+						</dd>
+						<dd>Indicates what way to order results if <i>orderBy</i> is used.</dd>
+					</dl>
+					<p>Example Requests:</p>
+					<div class=apiClick>reportmailingjobrunhistory/1</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/reportmailingjobrunhistory/{reportMailingJobId}
+					</code>
+					<code class="method-response">
+[
+    {
+        "id": 1,
+        "reportMailingJobId": 1,
+        "startDateTime": 1469627093000",
+        "endDateTime": 1469627093050,
+        "status": "success",
+        "errorMessage": "",
+        "errorLog": ""
+    }
+]
+					</code>
+				</div>
+			</div>
+			
+			<a id="report_mailing_jobs_create" name="report_mailing_jobs_create" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create a Report Mailing Job</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>name, startDateTime, stretchyReportId, emailRecipients, emailSubject, emailMessage, emailAttachmentFileFormatId, recurrence, isActive</td>
+						</tr>
+					</table>
+						<br />
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>description, stretchyReportParamMap</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/reportmailingjobs
+					</code>
+					<code class="method-request">
+POST reportmailingjobs
+Content-Type: application/json Request Body:
+{
+    "locale": "en_GB",
+    "dateFormat": "dd-MM-yyyy HH:mm:ss",
+    "name": "Client Numbers Report",
+    "description": "Client Numbers Report",
+    "startDateTime": "02-08-2016 11:34:18",
+    "stretchyReportId": "120",
+    "emailRecipients": "info@musonisystem.com",
+    "emailSubject": "Client Numbers Report",
+    "emailMessage": "Client Numbers Report",
+    "emailAttachmentFileFormatId": "1",
+    "recurrence": "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,WE,FR",
+    "isActive": true,
+    "stretchyReportParamMap": "{\"startDate\":\"2016-07-01\",\"endDate\":\"2016-08-02\",\"selectOffice\":\"1\",\"environementUrl\":\"environementUrl\"}"
+}
+					</code>
+					<code class="method-response">
+{
+    "resourceId": 1
+}
+					</code>
+				</div>
+			</div>
+			
+			<a id="report_mailing_jobs_update" name="report_mailing_jobs_update" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Report Mailing Job</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/reportmailingjobs/{id}
+						</code>
+					<code class="method-request">
+PUT reportmailingjobs/1
+Content-Type: application/json
+Request Body:
+{
+    "locale": "en_GB",
+    "dateFormat": "dd-MM-yyyy HH:mm:ss",
+    "startDateTime": "10-08-2016 23:30:00"
+}
+				
+					</code>
+					<code class="method-response">
+{
+    "resourceId": 1,
+    "changes": {
+        "startDateTime": "10-08-2016 23:30:00"
+    }
+}
+					</code>
+				</div>
+			</div>
+			
+			<a id="report_mailing_jobs_delete" name="report_mailing_jobs_delete" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete a Report Mailing Job</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/reportmailingjobs/{id}
+						</code>
+					<code class="method-request">
+DELETE reportmailingjobs/1
+Content-Type: application/json
+Request Body:
+{
+}
+					</code>
+					<code class="method-response">
+{
+    "resourceId": 1
+}
+					</code>
+				</div>
+			</div>
 
 			<!-- start of authentication api docs -->
 			<a id="authenticationbasic" name="authenticationbasic" class="old-syle-anchor">&nbsp;</a>
@@ -39552,7 +40703,7 @@ No Request Body:
 				</div>
 			</div>
 			<!-- End of floatingrates -->
-			
+
 			<!-- Tax components-->
 			<a id="taxcomponent" name="taxcomponent" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -39716,7 +40867,7 @@ No Request Body:
 						4,
 						11],
 						"taxComponentHistories": [{
-							
+
 						}]
 					},
 					{
@@ -39737,9 +40888,9 @@ No Request Body:
 						4,
 						11],
 						"taxComponentHistories": [{
-							
+
 						}]
-					}]	
+					}]
 					</code>
 				</div>
 			</div>
@@ -39777,7 +40928,7 @@ No Request Body:
 						4,
 						11],
 						"taxComponentHistories": [{
-							
+
 						}]
 					}
 					</code>
@@ -39940,7 +41091,7 @@ No Request Body:
 							"startDate": "11 April 2016"
 						}],
 						"dateFormat": "dd MMMM yyyy"
-					}  
+					}
 					</code>
 					<code class="method-response">
 					{
@@ -39992,7 +41143,7 @@ No Request Body:
 							4,
 							11]
 						}]
-					}]	
+					}]
 					</code>
 				</div>
 			</div>
@@ -43002,8 +44153,8 @@ Request Body:
 					</code>
 				</div>
 			</div>
-			
-			
+
+
 			<a id="selfloanapply" name="selfloanapply" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -44201,7 +45352,7 @@ No Request Body:
 						</tr>
 					</table>
 	    </div>
-		
+
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://DomainName/api/v1/self/beneficiaries/tpt
 	        </code>
@@ -44216,7 +45367,7 @@ Request Body:
 	"accountNumber": "0000001",
 	"accountType": 1,
 	"transferLimit": 1000
-    
+
 }
 					</code>
 					<code class="method-response">
@@ -44235,7 +45386,7 @@ Request Body:
 	        <p>Example Requests:</p>
 	        <div class=apiClick>/self/beneficiaries/tpt</div>
 	    </div>
-		
+
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://DomainName/api/v1/self/beneficiaries/tpt
 	        </code>
@@ -44295,7 +45446,7 @@ Content-Type: application/json
 						</tr>
 					</table>
 	    </div>
-		
+
 	    <div class="method-example">
 	        <code class="method-declaration">PUT https://DomainName/api/v1/self/beneficiaries/tpt/{beneficiaryId}
 	        </code>
@@ -44306,7 +45457,7 @@ Request Body:
 {
 	"name": "beneficiary nick name",
 	"transferLimit": 1000
-    
+
 }
 					</code>
 					<code class="method-response">
@@ -44329,7 +45480,7 @@ Request Body:
 	        <p>Example Requests:</p>
 	        <div class=apiClick>/self/beneficiaries/tpt/{beneficiaryId}</div>
 	    </div>
-		
+
 	    <div class="method-example">
 	        <code class="method-declaration">DELETE https://DomainName/api/v1/self/beneficiaries/tpt/{beneficiaryId}
 	        </code>
@@ -44593,6 +45744,7 @@ No Request Body:
 					<td></td>
 					<td></td>
 				</tr>
+
 				<tr>
 					<td><a href="#client_identifiers">Client Identifiers</a></td>
 					<td>clients/{clientId}/identifiers</td>
@@ -46298,7 +47450,7 @@ No Request Body:
 					<td></td>
 					<td></td>
 				</tr>
-				
+
 				<tr>
 					<td></td>
 					<td>shareproducts/template</td>

@@ -178,7 +178,9 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
     @Override
     public CommandProcessingResult delete(final Long id) {
         AccountTransferStandingInstruction standingInstructionsForUpdate = this.standingInstructionRepository.findOne(id);
-        standingInstructionsForUpdate.updateStatus(StandingInstructionStatus.DELETED.getValue());
+        // update the "deleted" and "name" properties of the standing instruction
+        standingInstructionsForUpdate.delete();
+        
         final Map<String, Object> actualChanges = new HashMap<>();
         actualChanges.put(statusParamName, StandingInstructionStatus.DELETED.getValue());
         return new CommandProcessingResultBuilder() //

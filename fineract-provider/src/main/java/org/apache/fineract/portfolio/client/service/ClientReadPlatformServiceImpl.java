@@ -27,6 +27,8 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
+import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -39,6 +41,8 @@ import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.portfolio.address.data.AddressData;
+import org.apache.fineract.portfolio.address.service.AddressReadPlatformService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.data.ClientNonPersonData;
@@ -74,18 +78,25 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final ClientLookupMapper lookupMapper = new ClientLookupMapper();
     private final ClientMembersOfGroupMapper membersOfGroupMapper = new ClientMembersOfGroupMapper();
     private final ParentGroupsMapper clientGroupsMapper = new ParentGroupsMapper();
+    
+    private final AddressReadPlatformService addressReadPlatformService;
+    private final ConfigurationReadPlatformService configurationReadPlatformService;
 
     @Autowired
     public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final OfficeReadPlatformService officeReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
             final CodeValueReadPlatformService codeValueReadPlatformService,
-            final SavingsProductReadPlatformService savingsProductReadPlatformService) {
+            final SavingsProductReadPlatformService savingsProductReadPlatformService,
+            final AddressReadPlatformService addressReadPlatformService,
+            final ConfigurationReadPlatformService configurationReadPlatformService) {
         this.context = context;
         this.officeReadPlatformService = officeReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.staffReadPlatformService = staffReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.savingsProductReadPlatformService = savingsProductReadPlatformService;
+        this.addressReadPlatformService=addressReadPlatformService;
+        this.configurationReadPlatformService=configurationReadPlatformService;
     }
 
     @Override
@@ -93,10 +104,21 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         this.context.authenticatedUser();
 
         final Long defaultOfficeId = defaultToUsersOfficeIfNull(officeId);
+        AddressData address=null;
 
         final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
 
         final Collection<SavingsProductData> savingsProductDatas = this.savingsProductReadPlatformService.retrieveAllForLookupByType(null);
+        
+        final GlobalConfigurationPropertyData configuration=this.configurationReadPlatformService.retrieveGlobalConfiguration("Enable-Address");
+        
+        final Boolean isAddressEnabled=configuration.isEnabled(); 
+        if(isAddressEnabled)
+        {
+        	 address = this.addressReadPlatformService.retrieveTemplate();
+        }
+        
+       
 
         Collection<StaffData> staffOptions = null;
 
@@ -129,7 +151,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         return ClientData.template(defaultOfficeId, new LocalDate(), offices, staffOptions, null, genderOptions, savingsProductDatas,
                 clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions,
-                clientLegalFormOptions);
+                clientLegalFormOptions,address,isAddressEnabled);
     }
 
     @Override
@@ -760,7 +782,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final Collection<CodeValueData> clientNonPersonMainBusinessLineOptions = null;
         final List<EnumOptionData> clientLegalFormOptions = null;
         return ClientData.template(null, null, null, null, narrations, null, null, clientTypeOptions, clientClassificationOptions, 
-        		clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions, clientLegalFormOptions);
+        		clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions, clientLegalFormOptions,null,null);
     }
 
 }

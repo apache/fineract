@@ -26,6 +26,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -33,8 +34,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -73,8 +72,7 @@ public class ShareAccountTransaction extends AbstractPersistable<Long> {
     @Column(name = "is_active", nullable = false)
     private boolean active = true ;
     
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "shareAccountTransaction", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "shareAccountTransaction", orphanRemoval = true, fetch=FetchType.EAGER)
     private final Set<ShareAccountChargePaidBy> shareAccountChargesPaid = new HashSet<>();
     
     protected ShareAccountTransaction() {

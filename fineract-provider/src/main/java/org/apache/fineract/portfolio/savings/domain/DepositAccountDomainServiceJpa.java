@@ -466,7 +466,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
     }
 
     private void updateAlreadyPostedTransactions(final Set<Long> existingTransactionIds, final SavingsAccount savingsAccount) {
-        List<SavingsAccountTransaction> transactions = savingsAccount.getTransactions();
+        List<SavingsAccountTransaction> transactions = savingsAccount.getTransactions() ;
         int size = transactions.size();
         for (int i = size - 1;; i--) {
             SavingsAccountTransaction transaction = transactions.get(i);

@@ -145,4 +145,19 @@ public class AccountTransferAssembler {
         return accountTransferDetails;
     }
 
+    public AccountTransferDetails assembleLoanToLoanTransfer(final AccountTransferDTO accountTransferDTO, final Loan fromLoanAccount,
+            final Loan toLoanAccount, final LoanTransaction disburseTransaction, final LoanTransaction repaymentTransaction) {
+        final Money transactionMonetaryAmount = Money.of(fromLoanAccount.getCurrency(), accountTransferDTO.getTransactionAmount());
+        AccountTransferDetails accountTransferDetails = accountTransferDTO.getAccountTransferDetails();
+        if (accountTransferDetails == null) {
+            accountTransferDetails = this.accountTransferDetailAssembler.assembleLoanToLoanTransfer(fromLoanAccount, toLoanAccount,
+                    accountTransferDTO.getFromTransferType());
+        }
+        AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.LoanToLoanTransfer(accountTransferDetails,
+                disburseTransaction, repaymentTransaction, accountTransferDTO.getTransactionDate(), transactionMonetaryAmount,
+                accountTransferDTO.getDescription());
+        accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
+        return accountTransferDetails;
+    }
+
 }

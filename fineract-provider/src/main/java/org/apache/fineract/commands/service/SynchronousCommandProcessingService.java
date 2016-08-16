@@ -211,7 +211,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         final String authToken = ThreadLocalContextUtil.getAuthToken();
         final String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
-        final AppUser appUser = this.context.authenticatedUser();
+        final AppUser appUser = this.context.authenticatedUser(CommandWrapper.wrap(actionName, 
+                entityName, null, null));
 
         final HookEventSource hookEventSource = new HookEventSource(entityName, actionName);
 
