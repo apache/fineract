@@ -4,6 +4,7 @@ Changelog
 Releases
 ===============
 
+1. 16 Aug 2016 - 16.08.01.RELEASE
 1. 27 Jun 2016 - 16.06.01.RELEASE
 1. 13 May 2016 - 16.05.01.RELEASE
 1. 13 Apr 2016 - 16.04.01.RELEASE
@@ -88,6 +89,49 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+16.08.01.RELEASE
+=============
+
+This release adds Topup Loans, Multi-Rescheduling, ability to schedule and email reports etc as improvements.
+ 
+Platform & API
+New Features & Improvements
+
+ - [FINERACT-50] - Add "mandatory" property to code value entity
+ - [FINERACT-53] - Make the "clientId" URL parameter optional for "loan details template" retrieval
+ - [FINERACT-57] - Set closure properties of reactivated closed client entity to null 
+ - [FINERACT-202] - Ability to reschedule loans more than once
+ - [FINERACT-70] - Rename deleted standing instruction by appending "_deleted_" string and the id
+ - Capture Address for Clients
+ - [FINERACT-65] - Implement ability to schedule & e-mail reports
+ - [FINERACT-131] - Topup Loan
+ - Added buttons for client UNDOREJECT and UNDOWITHDRAWAL
+ 
+Bugs
+ - [FINERACT-44] - Cannot delete an inactive charge associated with a product (loan/savings)
+ - [FINERACT-45] - The "getRejectedByUser" method in the "LoanRescheduleRequest" entity class returns the wrong value.
+ - [FINERACT-47] - Expired user password cannot be updated by the same user
+ - [FINERACT-55] - Standing instruction not disabled at loan/savings account closure
+ - [FINERACT-61] - Incorrect penalty and fee charges amount inserted into the "m_loan_arrears_aging" table
+ - [FINERACT-190] - Client accounts API shows multiple entries for same share account
+ - [FINERACT-206] - When deleting a group with with a user who has roles. It throws com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException: Cannot delete or update a parent row: a foreign key constraint fails 
+ - [FINERACT-71] - "AuditReadPlatformServiceImpl.retrieveEntries" returns duplicate results for users without the "ALL_FUNCTIONS" and "CHECKER_SUPER_USER" permissions.
+ 
+ 
+ 
+Community-app
+New Features & Improvements
+
+ - [FINERACT-202] - Ability to reschedule loans more than once
+ - [FINERACT-131] - Topup Loan
+ - Added buttons for client UNDOREJECT and UNDOWITHDRAWAL
+
+ Bugs
+ 
+ - showing gl account types and usage in locale specific language
+ - [MIFOSX-2634] - Few sidebar menu items are not visible
+
 
 16.06.01.RELEASE
 =============
