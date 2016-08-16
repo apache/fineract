@@ -21,37 +21,9 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
+import javax.persistence.*;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
@@ -101,33 +73,10 @@ import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
-import org.apache.fineract.portfolio.loanaccount.exception.ExceedingTrancheCountException;
-import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
-import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
-import org.apache.fineract.portfolio.loanaccount.exception.InvalidRefundDateException;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanDisbursalException;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanForeclosureException;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerAssignmentDateException;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerUnassignmentDateException;
-import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
-import org.apache.fineract.portfolio.loanaccount.exception.UndoLastTrancheDisbursementException;
+import org.apache.fineract.portfolio.loanaccount.exception.*;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
-import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
-import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
-import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
-import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
-import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.*;
+import org.apache.fineract.portfolio.loanproduct.domain.*;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -396,6 +345,14 @@ public class Loan extends AbstractPersistable<Long> {
 
     @Column(name = "loan_sub_status_id", nullable = true)
     private Integer loanSubStatus;
+
+    @Column(name = "is_topup", nullable = false)
+    private boolean isTopup = false;
+
+//    @OneToOne(cascade = CascadeType.ALL,  orphanRemoval = true, fetch=FetchType.EAGER)
+//    @JoinColumn(name = "loan_id", referencedColumnName= "id" , nullable = true)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loan", optional = true, orphanRemoval = true, fetch=FetchType.EAGER)
+    private LoanTopupDetails loanTopupDetails;
 
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
@@ -2769,6 +2726,11 @@ public class Loan extends AbstractPersistable<Long> {
                 }
             }
 
+            if(this.isTopup){
+                this.loanTopupDetails.setAccountTransferDetails(null);
+                this.loanTopupDetails.setTopupAmount(null);
+            }
+
             actualChanges.put("actualDisbursementDate", "");
 
             updateLoanSummaryDerivedFields();
@@ -4765,6 +4727,12 @@ public class Loan extends AbstractPersistable<Long> {
                             defaultUserMessage);
                     dataValidationErrors.add(error);
                 }
+                if(isOpen() && this.isTopup()){
+                    final String defaultUserMessage = "Loan Undo disbursal is not allowed on Topup Loans";
+                    final ApiParameterError error = ApiParameterError.generalError("error.msg.loan.undo.disbursal.not.allowed.on.topup.loan",
+                            defaultUserMessage);
+                    dataValidationErrors.add(error);
+                }
             break;
             case LOAN_REPAYMENT_OR_WAIVER:
                 if (!isOpen()) {
@@ -6353,4 +6321,32 @@ public class Loan extends AbstractPersistable<Long> {
         return retData.size()>0?retData:null;
 	}
 
+    public void setIsTopup(final boolean isTopup) {
+        this.isTopup = isTopup;
+    }
+
+    public boolean isTopup() {
+        return this.isTopup;
+    }
+
+    public BigDecimal getFirstDisbursalAmount() {
+        BigDecimal firstDisbursalAmount;
+
+        if(this.isMultiDisburmentLoan()){
+            List<DisbursementData> disbursementData = getDisbursmentData();
+            Collections.sort(disbursementData);
+            firstDisbursalAmount = disbursementData.get(disbursementData.size()-1).amount();
+        }else{
+            firstDisbursalAmount = this.getLoanRepaymentScheduleDetail().getPrincipal().getAmount();
+        }
+        return firstDisbursalAmount;
+    }
+
+    public void setTopupLoanDetails(LoanTopupDetails topupLoanDetails) {
+        this.loanTopupDetails = topupLoanDetails;
+    }
+
+    public LoanTopupDetails getTopupLoanDetails() {
+        return this.loanTopupDetails;
+    }
 }

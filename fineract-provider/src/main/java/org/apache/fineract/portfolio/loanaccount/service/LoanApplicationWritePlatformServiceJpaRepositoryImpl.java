@@ -40,6 +40,8 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
+import org.apache.fineract.infrastructure.core.exceptionmapper.PlatformDomainRuleExceptionMapper;
 import org.apache.fineract.infrastructure.entityaccess.exception.NotOfficeSpecificProductException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -83,17 +85,7 @@ import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
-import org.apache.fineract.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.*;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified;
@@ -286,6 +278,43 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     newLoanApplication.getTermPeriodFrequencyType(), productRelatedDetail.getNumberOfRepayments(),
                     productRelatedDetail.getRepayEvery(), productRelatedDetail.getRepaymentPeriodFrequencyType().getValue(),
                     newLoanApplication);
+
+            if(loanProduct.canUseForTopup() && clientId != null){
+                final Boolean isTopup = command.booleanObjectValueOfParameterNamed(LoanApiConstants.isTopup);
+                if(null == isTopup){
+                    newLoanApplication.setIsTopup(false);
+                }else{
+                    newLoanApplication.setIsTopup(isTopup);
+                }
+
+                if(newLoanApplication.isTopup()){
+                    final Long loanIdToClose = command.longValueOfParameterNamed(LoanApiConstants.loanIdToClose);
+                    final Loan loanToClose = this.loanRepository.findNonClosedLoanThatBelongsToClient(loanIdToClose, clientId);
+                    if(loanToClose == null){
+                        throw new LoanNotFoundException(loanIdToClose);
+                    }
+                    if(loanToClose.isMultiDisburmentLoan() && !loanToClose.isInterestRecalculationEnabledForProduct()){
+                        throw new GeneralPlatformDomainRuleException("error.msg.loan.topup.on.multi.tranche.loan.without.interest.recalculation.not.supported",
+                                "Topup on loan with multi-tranche disbursal and without interest recalculation is not supported.");
+                    }
+                    final LocalDate disbursalDateOfLoanToClose = loanToClose.getDisbursementDate();
+                    if(!newLoanApplication.getSubmittedOnDate().isAfter(disbursalDateOfLoanToClose)){
+                        throw new GeneralPlatformDomainRuleException("error.msg.loan.submitted.date.before.topup.loan.disbursal.date",
+                                "Submitted date of this loan application "+newLoanApplication.getSubmittedOnDate()
+                                        +" is before the disbursed date of loan to be closed "+ disbursalDateOfLoanToClose);
+                    }
+                    BigDecimal loanOutstanding = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(loanIdToClose,
+                            newLoanApplication.getDisbursementDate()).getAmount();
+                    final BigDecimal firstDisbursalAmount = newLoanApplication.getFirstDisbursalAmount();
+                    if(loanOutstanding.compareTo(firstDisbursalAmount) > 0){
+                        throw new GeneralPlatformDomainRuleException("error.msg.loan.amount.less.than.outstanding.of.loan.to.be.closed",
+                                "Topup loan amount should be greater than outstanding amount of loan to be closed.");
+                    }
+
+                    final LoanTopupDetails topupDetails = new LoanTopupDetails(newLoanApplication, loanIdToClose);
+                    newLoanApplication.setTopupLoanDetails(topupDetails);
+                }
+            }
 
             this.loanRepository.save(newLoanApplication);
 
@@ -555,6 +584,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final Set<LoanCollateral> possiblyModifedLoanCollateralItems = this.loanCollateralAssembler
                     .fromParsedJson(command.parsedJson());
 
+
             final Map<String, Object> changes = existingLoanApplication.loanApplicationModification(command, possiblyModifedLoanCharges,
                     possiblyModifedLoanCollateralItems, this.aprCalculator, isChargeModified);
 
@@ -619,6 +649,56 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             if (existingLoanApplication.loanProduct().getLoanProductConfigurableAttributes() != null) {
                 updateProductRelatedDetails(productRelatedDetail, existingLoanApplication);
             }
+
+            if(existingLoanApplication.getLoanProduct().canUseForTopup() && existingLoanApplication.getClientId() != null){
+                final Boolean isTopup = command.booleanObjectValueOfParameterNamed(LoanApiConstants.isTopup);
+                if(command.isChangeInBooleanParameterNamed(LoanApiConstants.isTopup, existingLoanApplication.isTopup())){
+                    existingLoanApplication.setIsTopup(isTopup);
+                    changes.put(LoanApiConstants.isTopup, isTopup);
+                }
+
+                if(existingLoanApplication.isTopup()){
+                    final Long loanIdToClose = command.longValueOfParameterNamed(LoanApiConstants.loanIdToClose);
+                    LoanTopupDetails existingLoanTopupDetails = existingLoanApplication.getTopupLoanDetails();
+                    if(existingLoanTopupDetails == null
+                            || (existingLoanTopupDetails != null && existingLoanTopupDetails.getLoanIdToClose() != loanIdToClose)){
+                        final Loan loanToClose = this.loanRepository.findNonClosedLoanThatBelongsToClient(loanIdToClose, existingLoanApplication.getClientId());
+                        if(loanToClose == null){
+                            throw new LoanNotFoundException(loanIdToClose);
+                        }
+                        if(loanToClose.isMultiDisburmentLoan() && !loanToClose.isInterestRecalculationEnabledForProduct()){
+                            throw new GeneralPlatformDomainRuleException("error.msg.loan.topup.on.multi.tranche.loan.without.interest.recalculation.not.supported",
+                                    "Topup on loan with multi-tranche disbursal and without interest recalculation is not supported.");
+                        }
+                        final LocalDate disbursalDateOfLoanToClose = loanToClose.getDisbursementDate();
+                        if(!existingLoanApplication.getSubmittedOnDate().isAfter(disbursalDateOfLoanToClose)){
+                            throw new GeneralPlatformDomainRuleException("error.msg.loan.submitted.date.before.topup.loan.disbursal.date",
+                                    "Submitted date of this loan application "+existingLoanApplication.getSubmittedOnDate()
+                                            +" is before the disbursed date of loan to be closed "+ disbursalDateOfLoanToClose);
+                        }
+                        BigDecimal loanOutstanding = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(loanIdToClose,
+                                existingLoanApplication.getDisbursementDate()).getAmount();
+                        final BigDecimal firstDisbursalAmount = existingLoanApplication.getFirstDisbursalAmount();
+                        if(loanOutstanding.compareTo(firstDisbursalAmount) > 0){
+                            throw new GeneralPlatformDomainRuleException("error.msg.loan.amount.less.than.outstanding.of.loan.to.be.closed",
+                                    "Topup loan amount should be greater than outstanding amount of loan to be closed.");
+                        }
+
+                        final LoanTopupDetails topupDetails = new LoanTopupDetails(existingLoanApplication, loanIdToClose);
+                        existingLoanApplication.setTopupLoanDetails(topupDetails);
+                        changes.put(LoanApiConstants.loanIdToClose, loanIdToClose);
+                    }
+                }else{
+                    existingLoanApplication.setTopupLoanDetails(null);
+                }
+            } else {
+                if(existingLoanApplication.isTopup()){
+                    existingLoanApplication.setIsTopup(false);
+                    existingLoanApplication.setTopupLoanDetails(null);
+                    changes.put(LoanApiConstants.isTopup, false);
+                }
+            }
+
 
             final String fundIdParamName = "fundId";
             if (changes.containsKey(fundIdParamName)) {
@@ -979,6 +1059,22 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 LocalDate recalculateFrom = null;
                 ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
                 loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
+            }
+
+            if(loan.isTopup() && loan.getClientId() != null){
+                final Long loanIdToClose = loan.getTopupLoanDetails().getLoanIdToClose();
+                final Loan loanToClose = this.loanRepository.findNonClosedLoanThatBelongsToClient(loanIdToClose, loan.getClientId());
+                if(loanToClose == null){
+                    throw new LoanNotFoundException(loanIdToClose);
+                }
+
+                BigDecimal loanOutstanding = this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(loanIdToClose,
+                        expectedDisbursementDate).getAmount();
+                final BigDecimal firstDisbursalAmount = loan.getFirstDisbursalAmount();
+                if(loanOutstanding.compareTo(firstDisbursalAmount) > 0){
+                    throw new GeneralPlatformDomainRuleException("error.msg.loan.amount.less.than.outstanding.of.loan.to.be.closed",
+                            "Topup loan amount should be greater than outstanding amount of loan to be closed.");
+                }
             }
 
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);

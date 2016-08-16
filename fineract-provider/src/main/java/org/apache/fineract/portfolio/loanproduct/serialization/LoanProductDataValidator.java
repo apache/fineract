@@ -107,7 +107,8 @@ public final class LoanProductDataValidator {
             LoanProductConstants.recalculationCompoundingFrequencyOnDayParamName,
             LoanProductConstants.recalculationRestFrequencyWeekdayParamName,
             LoanProductConstants.recalculationRestFrequencyNthDayParamName, LoanProductConstants.recalculationRestFrequencyOnDayParamName,
-            LoanProductConstants.isCompoundingToBePostedAsTransactionParamName, LoanProductConstants.allowCompoundingOnEodParamName));
+            LoanProductConstants.isCompoundingToBePostedAsTransactionParamName, LoanProductConstants.allowCompoundingOnEodParamName,
+            LoanProductConstants.canUseForTopup));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -620,6 +621,12 @@ public final class LoanProductDataValidator {
         validateVariableInstallmentSettings(baseDataValidator, element);
 
         validatePartialPeriodSupport(interestCalculationPeriodType, baseDataValidator, element, null);
+
+        if(this.fromApiJsonHelper.parameterExists(LoanProductConstants.canUseForTopup, element)){
+            final Boolean canUseForTopup = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.canUseForTopup,
+                    element);
+            baseDataValidator.reset().parameter(LoanProductConstants.canUseForTopup).value(canUseForTopup).validateForBooleanValue();
+        }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -1439,6 +1446,12 @@ public final class LoanProductDataValidator {
         validateVariableInstallmentSettings(baseDataValidator, element);
 
         validatePartialPeriodSupport(interestCalculationPeriodType, baseDataValidator, element, loanProduct);
+
+        if(this.fromApiJsonHelper.parameterExists(LoanProductConstants.canUseForTopup, element)){
+            final Boolean canUseForTopup = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.canUseForTopup,
+                    element);
+            baseDataValidator.reset().parameter(LoanProductConstants.canUseForTopup).value(canUseForTopup).validateForBooleanValue();
+        }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

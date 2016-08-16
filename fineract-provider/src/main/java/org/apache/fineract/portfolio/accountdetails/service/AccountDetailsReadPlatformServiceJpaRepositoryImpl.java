@@ -111,6 +111,11 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         return retrieveLoanAccountDetails(loanWhereClause, new Object[] { groupId, loanOfficerId });
     }
 
+    @Override public Collection<LoanAccountSummaryData> retrieveClientActiveLoanAccountSummary(final Long clientId) {
+        final String loanWhereClause = " where l.client_id = ? and l.loan_status_id = 300 ";
+        return retrieveLoanAccountDetails(loanWhereClause, new Object[] { clientId });
+    }
+
     private List<LoanAccountSummaryData> retrieveLoanAccountDetails(final String loanwhereClause, final Object[] inputs) {
         final LoanAccountSummaryDataMapper rm = new LoanAccountSummaryDataMapper();
         final String sql = "select " + rm.loanAccountSummarySchema() + loanwhereClause;

@@ -156,4 +156,9 @@ public class AccountTransferDetails extends AbstractPersistable<Long> {
         return AccountTransferType.fromInt(this.transferType);
     }
 
+    public static AccountTransferDetails LoanToLoanTransfer(Office fromOffice, Client fromClient, Loan fromLoanAccount, Office toOffice, Client toClient,
+            Loan toLoanAccount, Integer transferType) {
+        return new AccountTransferDetails(fromOffice, fromClient, null, fromLoanAccount, toOffice, toClient, null, toLoanAccount,
+                transferType, null);
+    }
 }
