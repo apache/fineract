@@ -26,7 +26,7 @@ INSERT INTO `m_code` (`code_name`, `is_system_defined`) VALUES ('ADDRESS_TYPE',1
 
 
 -- configuration
-INSERT INTO `c_configuration` (`name`, `value`, `date_value`, `enabled`, `is_trap_door`, `description`) VALUES ('Enable-Address', NULL, NULL, 1, 0, NULL);
+INSERT INTO `c_configuration` (`name`, `value`, `date_value`, `enabled`, `is_trap_door`, `description`) VALUES ('Enable-Address', NULL, NULL, 0, 0, NULL);
 
 -- add address table
 CREATE TABLE `m_address` (
