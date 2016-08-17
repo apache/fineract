@@ -226,7 +226,7 @@ public final class Client extends AbstractPersistable<Long> {
 	@Temporal(TemporalType.DATE)
 	private Date reopenedDate;
 
-	@ManyToOne(optional = true)
+	@ManyToOne(optional = true, fetch=FetchType.LAZY)
 	@JoinColumn(name = "reopened_by_userid", nullable = true)
 	private AppUser reopenedBy;
 
