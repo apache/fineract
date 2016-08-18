@@ -2969,7 +2969,7 @@ public class Loan extends AbstractPersistable<Long> {
                 .getTransactionDate());
         boolean reprocess = true;
 
-        if (isTransactionChronologicallyLatest && adjustedTransaction == null
+        if (!isForeclosure() && isTransactionChronologicallyLatest && adjustedTransaction == null
                 && loanTransaction.getTransactionDate().isEqual(DateUtils.getLocalDateOfTenant()) && currentInstallment != null
                 && currentInstallment.getTotalOutstanding(getCurrency()).isEqualTo(loanTransaction.getAmount(getCurrency()))) {
             reprocess = false;
@@ -6067,8 +6067,7 @@ public class Loan extends AbstractPersistable<Long> {
                 }
             } else if (installment.getDueDate().isAfter(paymentDate)) {
                 paidFromFutureInstallments = paidFromFutureInstallments.plus(installment.getInterestPaid(currency))
-                        .plus(installment.getPenaltyChargesPaid(currency)).plus(installment.getFeeChargesPaid(currency))
-                        .minus(installment.getFeeChargesWaived(currency)).minus(installment.getPenaltyChargesWaived(currency));
+                        .plus(installment.getPenaltyChargesPaid(currency)).plus(installment.getFeeChargesPaid(currency));
             }
 
         }
@@ -6091,18 +6090,33 @@ public class Loan extends AbstractPersistable<Long> {
         interestForCurrentPeriod = Money.of(getCurrency(),BigDecimal.valueOf(calculateInterestForDays(totalPeriodDays, installment.getInterestCharged(getCurrency())
                 .getAmount(), tillDays)));
         interestAccountedForCurrentPeriod = installment.getInterestWaived(getCurrency()).plus(installment.getInterestPaid(getCurrency()));
-        for (LoanCharge loanCharge : this.charges) {
-            if (loanCharge.isActive()
-                    && loanCharge.isDueForCollectionFromAndUpToAndIncluding(installment.getFromDate(), paymentDate)) {
-                if (loanCharge.isPenaltyCharge()) {
-                    penaltyForCurrentPeriod = loanCharge.getAmount(getCurrency());
-                    penaltyAccoutedForCurrentPeriod = loanCharge.getAmountWaived(getCurrency()).plus(loanCharge.getAmountPaid(getCurrency()));
-                } else {
-                    feeForCurrentPeriod = loanCharge.getAmount(currency);
-                    feeAccountedForCurrentPeriod = loanCharge.getAmountWaived(getCurrency()).plus(loanCharge.getAmountPaid(getCurrency()));
-                }
-            }
-        }
+		for (LoanCharge loanCharge : this.charges) {
+			if (loanCharge.isActive() && !loanCharge.isDueAtDisbursement()) {
+				if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(installment.getFromDate(), paymentDate)) {
+					if (loanCharge.isPenaltyCharge()) {
+						penaltyForCurrentPeriod = penaltyForCurrentPeriod.plus(loanCharge.getAmount(getCurrency()));
+						penaltyAccoutedForCurrentPeriod = penaltyAccoutedForCurrentPeriod.plus(loanCharge
+								.getAmountWaived(getCurrency()).plus(loanCharge.getAmountPaid(getCurrency())));
+					} else {
+						feeForCurrentPeriod = feeForCurrentPeriod.plus(loanCharge.getAmount(currency));
+						feeAccountedForCurrentPeriod = feeAccountedForCurrentPeriod
+								.plus(loanCharge.getAmountWaived(getCurrency()).plus(
+
+										loanCharge.getAmountPaid(getCurrency())));
+					}
+				} else if (loanCharge.isInstalmentFee()) {
+					LoanInstallmentCharge loanInstallmentCharge = loanCharge
+							.getInstallmentLoanCharge(installment.getInstallmentNumber());
+					if (loanCharge.isPenaltyCharge()) {
+						penaltyAccoutedForCurrentPeriod = penaltyAccoutedForCurrentPeriod
+								.plus(loanInstallmentCharge.getAmountPaid(currency));
+					} else {
+						feeAccountedForCurrentPeriod = feeAccountedForCurrentPeriod
+								.plus(loanInstallmentCharge.getAmountPaid(currency));
+					}
+				}
+			}
+		}
         
         Money[] balances = new Money[6];
         balances[0] = interestForCurrentPeriod;
