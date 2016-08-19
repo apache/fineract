@@ -6349,4 +6349,8 @@ public class Loan extends AbstractPersistable<Long> {
     public LoanTopupDetails getTopupLoanDetails() {
         return this.loanTopupDetails;
     }
+    
+    public Collection<LoanCharge> getLoanCharges() {
+        return this.charges;
+    }
 }
