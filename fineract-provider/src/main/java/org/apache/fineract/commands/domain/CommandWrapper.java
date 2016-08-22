@@ -38,6 +38,12 @@ public class CommandWrapper {
     private final String json;
     private final String transactionId;
     private final Long productId;
+    private final Long cbId;
+    private final Long ocbId;
+    private final Boolean status;
+
+    
+    
 
     @SuppressWarnings("unused")
     private Long templateId;
@@ -52,14 +58,16 @@ public class CommandWrapper {
     }
 
     public static CommandWrapper fromExistingCommand(final Long commandId, final String actionName, final String entityName,
-            final Long resourceId, final Long subresourceId, final String resourceGetUrl, final Long productId, final Long officeId,
-            final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId) {
-        return new CommandWrapper(commandId, actionName, entityName, resourceId, subresourceId, resourceGetUrl, productId, officeId,
-                groupId, clientId, loanId, savingsId, transactionId);
+            final Long resourceId, final Long subresourceId, final String resourceGetUrl,final Long productId, final Long officeId,
+            final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId,final Long cbId,final Long ocbId,
+            final Boolean status) {
+        return new CommandWrapper(commandId, actionName, entityName, resourceId, subresourceId, resourceGetUrl,productId, officeId,
+                groupId, clientId, loanId, savingsId, transactionId,cbId,ocbId,status);
     }
 
     private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId,
             final Long subresourceId, final String resourceGetUrl, final Long productId) {
+        
         this.commandId = commandId;
         this.officeId = null;
         this.groupId = null;
@@ -75,13 +83,17 @@ public class CommandWrapper {
         this.json = null;
         this.transactionId = null;
         this.productId = productId;
+        this.cbId=null;
+        this.ocbId=null;
+        this.status=null;
     }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
             final String actionName, final String entityName, final Long entityId, final Long subentityId, final String href,
-            final String json, final String transactionId, final Long productId, final Long templateId) {
+            final String json, final String transactionId, final Long productId, final Long templateId,final Long cbId,final Long ocbId,final Boolean status) {
 
         this.commandId = null;
+        
         this.officeId = officeId;
         this.groupId = groupId;
         this.clientId = clientId;
@@ -97,13 +109,18 @@ public class CommandWrapper {
         this.transactionId = transactionId;
         this.productId = productId;
         this.templateId = templateId;
+        this.cbId=cbId;
+        this.ocbId=ocbId;
+        this.status=status;
     }
 
     private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId,
             final Long subresourceId, final String resourceGetUrl, final Long productId, final Long officeId, final Long groupId,
-            final Long clientId, final Long loanId, final Long savingsId, final String transactionId) {
+            final Long clientId, final Long loanId, final Long savingsId, final String transactionId,final Long cbId,
+            final Long ocbId,final Boolean status) {
 
         this.commandId = commandId;
+        
         this.officeId = officeId;
         this.groupId = groupId;
         this.clientId = clientId;
@@ -118,10 +135,28 @@ public class CommandWrapper {
         this.json = null;
         this.transactionId = transactionId;
         this.productId = productId;
+        this.cbId=cbId;
+        this.ocbId=ocbId;
+        this.status=status;
+    }
+    
+
+    
+    public Boolean getStatus() {
+        return this.status;
     }
 
     public String getHref() {
         return this.href;
+    }
+    
+    public Long getCbId() {
+        return this.cbId;
+    }
+
+    
+    public Long getOcbId() {
+        return this.ocbId;
     }
 
     public String getJson() {
@@ -189,6 +224,7 @@ public class CommandWrapper {
                 && isUpdateOperation() || isWorkingDaysResource() && isUpdateOperation() || isPasswordPreferencesResource()
                 && isUpdateOperation() || isUpdateOperation() && this.entityId != null;
     }
+   
 
     public boolean isCacheResource() {
         return this.entityName.equalsIgnoreCase("CACHE");

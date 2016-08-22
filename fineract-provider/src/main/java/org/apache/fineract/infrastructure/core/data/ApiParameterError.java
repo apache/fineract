@@ -79,7 +79,8 @@ public class ApiParameterError {
     }
 
     private ApiParameterError(final String globalisationMessageCode, final String defaultUserMessage, final Object[] defaultUserMessageArgs) {
-        this.userMessageGlobalisationCode = globalisationMessageCode;
+       // this.userMessageGlobalisationCode = globalisationMessageCode;
+        this.userMessageGlobalisationCode = defaultUserMessage;
         this.developerMessage = defaultUserMessage;
         this.defaultUserMessage = defaultUserMessage;
 

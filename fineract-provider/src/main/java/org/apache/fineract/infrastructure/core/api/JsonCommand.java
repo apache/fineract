@@ -40,7 +40,6 @@ import org.joda.time.format.DateTimeFormatter;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
 import com.google.gson.reflect.TypeToken;
 
 /**
@@ -65,28 +64,35 @@ public final class JsonCommand {
     private final String transactionId;
     private final String url;
     private final Long productId;
+    private final Long cbId;
+    private final Long ocbId;
+    private final Boolean status;
+
+    
+   
 
     public static JsonCommand from(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
             final String entityName, final Long resourceId, final Long subresourceId, final Long groupId, final Long clientId,
-            final Long loanId, final Long savingsId, final String transactionId, final String url, final Long productId) {
+            final Long loanId, final Long savingsId, final String transactionId, final String url, final Long productId,final Long cbId,final Long ocbId,
+            final Boolean status) {
         return new JsonCommand(null, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, groupId,
-                clientId, loanId, savingsId, transactionId, url, productId);
+                clientId, loanId, savingsId, transactionId, url, productId,cbId,ocbId,status);
 
     }
 
     public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
-            final String url, final Long productId) {
+            final String url, final Long productId,final Long cbId,final Long ocbId,final Boolean status) {
         return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, null, null,
-                null, null, null, url, productId);
+                null, null, null, url, productId,cbId,ocbId,status);
     }
 
     public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
             final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId, final String url,
-            final Long productId) {
+            final Long productId,final Long cbId,final Long ocbId,final Boolean status) {
         return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, groupId,
-                clientId, loanId, savingsId, transactionId, url, productId);
+                clientId, loanId, savingsId, transactionId, url, productId,cbId,ocbId,status);
 
     }
 
@@ -94,13 +100,13 @@ public final class JsonCommand {
         final String jsonCommand = command.fromApiJsonHelper.toJson(parsedCommand);
         return new JsonCommand(command.commandId, jsonCommand, parsedCommand, command.fromApiJsonHelper, command.entityName,
                 command.resourceId, command.subresourceId, command.groupId, command.clientId, command.loanId, command.savingsId,
-                command.transactionId, command.url, command.productId);
+                command.transactionId, command.url, command.productId,command.cbId,command.ocbId,command.status);
     }
 
     public JsonCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
             final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final String transactionId, final String url,
-            final Long productId) {
+            final Long productId, final Long cbId, final Long ocbId,final Boolean status) {
 
         this.commandId = commandId;
         this.jsonCommand = jsonCommand;
@@ -116,6 +122,15 @@ public final class JsonCommand {
         this.transactionId = transactionId;
         this.url = url;
         this.productId = productId;
+        this.cbId=cbId;
+        this.ocbId=ocbId;
+        this.status=status;
+    }
+    
+
+    
+    public Boolean getStatus() {
+        return this.status;
     }
 
     public String json() {
@@ -137,6 +152,13 @@ public final class JsonCommand {
 
     public Long commandId() {
         return this.commandId;
+    }
+    public Long getCbId() {
+        return this.cbId;
+    }
+
+    public Long getOcbId() {
+        return this.ocbId;
     }
 
     public String entityName() {

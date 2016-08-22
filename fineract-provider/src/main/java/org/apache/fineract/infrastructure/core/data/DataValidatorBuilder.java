@@ -18,19 +18,22 @@
  */
 package org.apache.fineract.infrastructure.core.data;
 
-import com.google.gson.JsonArray;
-import net.fortuna.ical4j.model.ValidationException;
-import net.fortuna.ical4j.model.property.RRule;
-import org.apache.commons.lang.StringUtils;
-import org.joda.time.LocalDate;
-import org.quartz.CronExpression;
-import org.springframework.util.ObjectUtils;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDate;
+import org.quartz.CronExpression;
+import org.springframework.util.ObjectUtils;
+
+import com.google.gson.JsonArray;
+
+import net.fortuna.ical4j.model.ValidationException;
+import net.fortuna.ical4j.model.property.RRule;
 
 public class DataValidatorBuilder {
 
@@ -145,8 +148,16 @@ public class DataValidatorBuilder {
      * param and if it has invalid value or value not passed then call this
      * method, this method is always used with input as false
      */
-    public DataValidatorBuilder trueOrFalseRequired(final boolean trueOfFalseFieldProvided) {
-        if (!trueOfFalseFieldProvided && !this.ignoreNullValue) {
+    public DataValidatorBuilder trueOrFalseRequired(final Boolean trueOfFalseFieldProvided) {
+       
+        
+        //if (!trueOfFalseFieldProvided  !this.ignoreNullValue)
+        if (!("true".equals(trueOfFalseFieldProvided.toString())||"false".equals(trueOfFalseFieldProvided.toString()))){
+           
+            
+            if(!this.ignoreNullValue)
+            {
+            
             final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                     .append(this.parameter).append(".must.be.true.or.false");
             final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(this.parameter).append(
@@ -154,6 +165,7 @@ public class DataValidatorBuilder {
             final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
                     defaultEnglishMessage.toString(), this.parameter);
             this.dataValidationErrors.add(error);
+        }
         }
         return this;
     }

@@ -95,6 +95,18 @@ public class CommandSource extends AbstractPersistable<Long> {
     
     @Column(name = "transaction_id", length = 100)
     private String transactionId;
+    
+    @Column(name="cb_id")
+    private Long creditBureauId;
+    
+    @Column(name="ocb_id")
+    private Long orgcreditBureauId;
+    
+    @Column(name="status")
+    private Boolean status;
+
+    
+    
 
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker) {
         return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(), command.subentityId(),
@@ -116,6 +128,17 @@ public class CommandSource extends AbstractPersistable<Long> {
         this.maker = maker;
         this.madeOnDate = madeOnDateTime.toDate();
         this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
+    }
+    
+
+    
+    public Boolean getStatus() {
+        return this.status;
+    }
+
+    
+    public void setStatus(Boolean status) {
+        this.status = status;
     }
 
     public void markAsChecked(final AppUser checker, final DateTime checkedOnDate) {
@@ -252,5 +275,26 @@ public class CommandSource extends AbstractPersistable<Long> {
     public void updateTransaction(final String transactionId) {
         this.transactionId = transactionId;
     }
+    
+    public Long getCreditBureauId() {
+        return this.creditBureauId;
+    }
+
+    
+    public void setCreditBureauId(Long creditBureauId) {
+        this.creditBureauId = creditBureauId;
+    }
+
+    
+    public Long getOrgcreditBureauId() {
+        return this.orgcreditBureauId;
+    }
+
+    
+    public void setOrgcreditBureauId(Long orgcreditBureauId) {
+        this.orgcreditBureauId = orgcreditBureauId;
+    }
+    
+    
 
 }

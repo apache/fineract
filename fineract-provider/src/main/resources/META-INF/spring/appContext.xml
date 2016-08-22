@@ -54,7 +54,9 @@
 										  org.apache.fineract.template.*,
 										  org.apache.fineract.template.service.*,
 										  org.apache.fineract.useradministration.*,
-										  org.apache.fineract.batch">
+										  org.apache.fineract.batch,
+										  org.apache.fineract.CreditCheck.*,
+										  com.conflux.highmark.*">
 		<context:exclude-filter expression="org.springframework.stereotype.Controller"
 			type="annotation" />
 
@@ -79,6 +81,9 @@
 	<jpa:repositories base-package="org.apache.fineract.mix.domain" />
 	<jpa:repositories base-package="org.apache.fineract.scheduledjobs.domain" />
 	<jpa:repositories base-package="org.apache.fineract.template.domain" />
+	<jpa:repositories base-package="com.conflux.highmark.domain" />
+	<jpa:repositories base-package="org.apache.fineract.CreditCheck.domain" />
+	
 	
 	<import resource="infrastructure.xml" />
 

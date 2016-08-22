@@ -173,6 +173,32 @@ public class ClientApiConstants {
     // template related part of response
     public static final String officeOptionsParamName = "officeOptions";
     public static final String staffOptionsParamName = "staffOptions";
+    
+    //address parameters:
+    public static final String streetParamName="streetParam";
+
+    public static final String address_line_1ParamName="address_line_1";
+
+    public static final String address_line_2ParamName="address_line_2";
+
+    public static final String address_line_3ParamName="address_line_3";
+
+    public static final String town_villageParamName="town_village";
+
+    public static final String cityParamName="city";
+
+    public static final String county_districtParamName="county_district";
+
+    public static final String state_province_idParamName="state_province_id";
+
+    public static final String country_idParamName="country_id";
+
+    public static final String postal_codeParamName="postal_code";
+
+    public static final String latitudeParPamName="latitude";
+
+    public static final String longitudeParPamName="longitude";
+    
 
     public static final Set<String> CLIENT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(localeParamName, dateFormatParamName, groupIdParamName, accountNoParamName, externalIdParamName,
@@ -181,14 +207,23 @@ public class ClientApiConstants {
                     dateOfBirthParamName, genderIdParamName, clientTypeIdParamName, clientClassificationIdParamName, 
                     clientNonPersonDetailsParamName, displaynameParamName, legalFormIdParamName));
     
+    public static final Set<String> CLIENT_CREATE_WITH_ADDRESS_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(localeParamName, dateFormatParamName, groupIdParamName, accountNoParamName, externalIdParamName,
+                    mobileNoParamName, firstnameParamName, middlenameParamName, lastnameParamName, fullnameParamName, officeIdParamName,
+                    activeParamName, activationDateParamName, staffIdParamName, submittedOnDateParamName, savingsProductIdParamName,
+                    dateOfBirthParamName, genderIdParamName, clientTypeIdParamName, clientClassificationIdParamName, 
+                    clientNonPersonDetailsParamName, displaynameParamName, legalFormIdParamName,
+                    streetParamName,address_line_1ParamName,address_line_2ParamName,address_line_3ParamName,
+                    town_villageParamName,cityParamName,county_districtParamName,state_province_idParamName,
+                    country_idParamName,postal_codeParamName,latitudeParPamName,longitudeParPamName));
+    
     public static final Set<String> CLIENT_NON_PERSON_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(localeParamName, dateFormatParamName, incorpNumberParamName, remarksParamName, incorpValidityTillParamName, 
             		constitutionIdParamName, mainBusinessLineIdParamName));
 
     public static final Set<String> CLIENT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, accountNoParamName, externalIdParamName, mobileNoParamName, firstnameParamName, middlenameParamName,
-
-    lastnameParamName, fullnameParamName, activeParamName, activationDateParamName, staffIdParamName, savingsProductIdParamName,
+lastnameParamName, fullnameParamName, activeParamName, activationDateParamName, staffIdParamName, savingsProductIdParamName,
             dateOfBirthParamName, genderIdParamName, clientTypeIdParamName, clientClassificationIdParamName, submittedOnDateParamName, 
             clientNonPersonDetailsParamName, displaynameParamName, legalFormIdParamName));
     

@@ -27,6 +27,7 @@ import org.apache.fineract.useradministration.api.PasswordPreferencesApiConstant
 
 public class CommandWrapperBuilder {
 
+    
     private Long officeId;
     private Long groupId;
     private Long clientId;
@@ -41,10 +42,14 @@ public class CommandWrapperBuilder {
     private String transactionId;
     private Long productId;
     private Long templateId;
+    private Long cbId;
+    private Long ocbId;
+    private Boolean status;
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
-                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId);
+                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId,
+                this.cbId,this.ocbId,this.status);
     }
 
     public CommandWrapperBuilder withLoanId(final Long withLoanId) {
@@ -311,6 +316,72 @@ public class CommandWrapperBuilder {
         this.entityName = "CODE";
         this.entityId = null;
         this.href = "/codes/template";
+        return this;
+    }
+    
+    public CommandWrapperBuilder createCreditBureau() {
+        this.actionName = "CREATE";
+        this.entityName = "CreditBureau";
+        this.entityId = null;
+        this.href = "/CBConfig/template";
+        return this;
+    }
+    
+    public CommandWrapperBuilder createCB_LP_Mapping(final long cbId) {
+        this.actionName = "CREATE";
+        this.entityName = "CB_LP_Mapping";
+        this.entityId = cbId;
+        this.href = "/CBConfig/template";
+        this.cbId=cbId;
+        return this;
+    }
+    public CommandWrapperBuilder addClientAddress(final long clientId,final long addressTypeId) {
+        this.actionName = "CREATE";
+        this.entityName = "ADDRESS";
+        this.entityId = addressTypeId;
+        this.href = "/Address/template";
+        this.clientId=clientId;
+        return this;
+    }
+    public CommandWrapperBuilder addEntityFieldConfiguration(final String entityname) {
+        this.actionName = "MAP";
+        this.entityName = entityname.toUpperCase();
+        this.entityId = null;
+        this.href = "/Address/template";
+        return this;
+    }
+    public CommandWrapperBuilder updateClientAddress(final long clientId,final long addressTypeID,final boolean status) {
+        this.actionName = "UPDATE";
+        this.entityName = "ADDRESS";
+        this.entityId = addressTypeID;
+        this.href = "/Address/template";
+        this.clientId=clientId;
+        this.status=status;
+        return this;
+    }
+    public CommandWrapperBuilder updateCbLpMapping() {
+        this.actionName = "UPDATE";
+        this.entityName = "CB_LP_Mapping";
+        this.entityId = null;
+        this.href = "/CBConfig/template";
+        return this;
+    }
+    
+    public CommandWrapperBuilder addOrgCreditBureau(final long ocbId) {
+        this.actionName = "CREATE";
+        this.entityName = "OrgCreditBureau";
+        this.entityId = ocbId;
+        this.href = "/cbconfig/orgcb/template";
+        this.ocbId=ocbId;
+        return this;
+    }
+    
+    
+    public CommandWrapperBuilder updateCreditBureau() {
+        this.actionName = "UPDATE";
+        this.entityName = "OrgCreditBureau";
+        this.entityId = null;
+        this.href = "/CBConfig/template";
         return this;
     }
 
