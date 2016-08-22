@@ -1062,7 +1062,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     loanApplicationTerms.updateAccountedTillPeriod(scheduleParams.getPeriodNumber() - 1,
                             scheduleParams.getTotalCumulativePrincipal(), scheduleParams.getTotalCumulativeInterest(),
                             loanTermVariationsData.getDecimalValue().intValue());
-                    loanApplicationTerms.setFixedEmiAmount(null);
+                    adjustInstallmentOrPrincipalAmount(loanApplicationTerms, scheduleParams.getTotalCumulativePrincipal(),
+                            scheduleParams.getPeriodNumber(), mc);
                     loanTermVariationsData.setProcessed(true);
                 break;
                 case GRACE_ON_PRINCIPAL:
