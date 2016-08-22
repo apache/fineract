@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.data;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.RescheduleLoansApiConstants;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequest;
@@ -140,9 +142,9 @@ public class LoanRescheduleRequestDataValidator {
                 && !this.fromJsonHelper.parameterExists(RescheduleLoansApiConstants.adjustedDueDateParamName, jsonElement)) {
             dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.graceOnPrincipalParamName).notNull();
         }
-
+        LoanRepaymentScheduleInstallment installment = null;
         if (rescheduleFromDate != null) {
-            LoanRepaymentScheduleInstallment installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
+            installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
 
             if (installment == null) {
                 dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
@@ -165,8 +167,23 @@ public class LoanRescheduleRequestDataValidator {
             dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(RescheduleLoansApiConstants.resheduleWithInterestRecalculationNotSupportedErrorCode,
                     "Loan rescheduling is not supported for the loan product with interest recalculation enabled");
         }
-        
+        validateForOverdueCharges(dataValidatorBuilder, loan, installment);
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    }
+    
+    
+    private void validateForOverdueCharges(DataValidatorBuilder dataValidatorBuilder, final Loan loan,
+            final LoanRepaymentScheduleInstallment installment) {
+        if (installment != null) {
+            LocalDate rescheduleFromDate = installment.getFromDate();
+            Collection<LoanCharge> charges = loan.getLoanCharges();
+            for (LoanCharge loanCharge : charges) {
+                if (loanCharge.isOverdueInstallmentCharge() && loanCharge.getDueLocalDate().isAfter(rescheduleFromDate)) {
+                    dataValidatorBuilder.failWithCodeNoParameterAddedToErrorCode("not.allowed.due.to.overdue.charges");
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -212,7 +229,7 @@ public class LoanRescheduleRequestDataValidator {
 
         LocalDate rescheduleFromDate = loanRescheduleRequest.getRescheduleFromDate();
         final Loan loan = loanRescheduleRequest.getLoan();
-
+        LoanRepaymentScheduleInstallment installment = null;
         if (loan != null) {
 
             if (!loan.status().isActive()) {
@@ -220,7 +237,7 @@ public class LoanRescheduleRequestDataValidator {
             }
 
             if (rescheduleFromDate != null) {
-                LoanRepaymentScheduleInstallment installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
+                 installment = loan.getRepaymentScheduleInstallment(rescheduleFromDate);
 
                 if (installment == null) {
                     dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(
@@ -233,6 +250,8 @@ public class LoanRescheduleRequestDataValidator {
                 }
             }
         }
+        
+        validateForOverdueCharges(dataValidatorBuilder, loan, installment);
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
