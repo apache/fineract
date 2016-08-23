@@ -674,13 +674,16 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 if(existingLoanApplication.isTopup()){
                     final Long loanIdToClose = command.longValueOfParameterNamed(LoanApiConstants.loanIdToClose);
                     LoanTopupDetails existingLoanTopupDetails = existingLoanApplication.getTopupLoanDetails();
-                    final Long existingLoanIdToClose = existingLoanTopupDetails.getLoanIdToClose();
                     if(existingLoanTopupDetails == null
-                            || (existingLoanTopupDetails != null && existingLoanIdToClose != loanIdToClose)
+                            || (existingLoanTopupDetails != null && existingLoanTopupDetails.getLoanIdToClose() != loanIdToClose)
                             || changes.containsKey("submittedOnDate")
                             || changes.containsKey("expectedDisbursementDate")
                             || changes.containsKey("principal")
                             || changes.containsKey(LoanApiConstants.disbursementDataParameterName)){
+                        Long existingLoanIdToClose = null;
+                        if(existingLoanTopupDetails != null){
+                            existingLoanIdToClose = existingLoanTopupDetails.getLoanIdToClose();
+                        }
                         final Loan loanToClose = this.loanRepository.findNonClosedLoanThatBelongsToClient(loanIdToClose, existingLoanApplication.getClientId());
                         if(loanToClose == null){
                             throw new GeneralPlatformDomainRuleException("error.msg.loan.loanIdToClose.no.active.loan.associated.to.client.found",
