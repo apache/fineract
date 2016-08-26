@@ -1600,4 +1600,22 @@ public class LoanAccountData {
         
         return LoanAccountData.collateralTemplate(loanCollateralOptions);
     }
+    
+    public boolean isLoanProductLinkedToFloatingRate() {
+        return this.isLoanProductLinkedToFloatingRate;
+    }
+    
+    public LocalDate getDisbursementDate(){
+        return this.timeline.getDisbursementDate();
+    }
+
+    
+    public boolean isFloatingInterestRate() {
+        return this.isFloatingInterestRate;
+    }
+
+    
+    public BigDecimal getInterestRateDifferential() {
+        return this.interestRateDifferential;
+    }
 }

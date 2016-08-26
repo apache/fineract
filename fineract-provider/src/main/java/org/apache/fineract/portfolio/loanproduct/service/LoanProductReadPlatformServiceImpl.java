@@ -617,5 +617,58 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId });
     }
+    
+    @Override
+    public LoanProductData retrieveLoanProductFloatingDetails(final Long loanProductId) {
+
+        try {
+            final LoanProductFloatingRateMapper rm = new LoanProductFloatingRateMapper();
+            final String sql = "select " + rm.schema() + " where lp.id = ?";
+
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId });
+
+        } catch (final EmptyResultDataAccessException e) {
+            throw new LoanProductNotFoundException(loanProductId);
+        }
+    }
+    
+    
+    private static final class LoanProductFloatingRateMapper implements RowMapper<LoanProductData> {
+
+        public LoanProductFloatingRateMapper() {}
+
+        public String schema() {
+            return "lp.id as id,  lp.name as name," 
+                    + "lp.is_linked_to_floating_interest_rates as isLinkedToFloatingInterestRates, "
+                    + "lfr.floating_rates_id as floatingRateId, " + "fr.name as floatingRateName, "
+                    + "lfr.interest_rate_differential as interestRateDifferential, "
+                    + "lfr.min_differential_lending_rate as minDifferentialLendingRate, "
+                    + "lfr.default_differential_lending_rate as defaultDifferentialLendingRate, "
+                    + "lfr.max_differential_lending_rate as maxDifferentialLendingRate, "
+                    + "lfr.is_floating_interest_rate_calculation_allowed as isFloatingInterestRateCalculationAllowed "
+                    + " from m_product_loan lp " + " left join m_product_loan_floating_rates as lfr on lfr.loan_product_id = lp.id "
+                    + " left join m_floating_rates as fr on lfr.floating_rates_id = fr.id ";
+        }
+
+        @Override
+        public LoanProductData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = JdbcSupport.getLong(rs, "id");
+            final String name = rs.getString("name");
+
+            final boolean isLinkedToFloatingInterestRates = rs.getBoolean("isLinkedToFloatingInterestRates");
+            final Integer floatingRateId = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "floatingRateId");
+            final String floatingRateName = rs.getString("floatingRateName");
+            final BigDecimal interestRateDifferential = rs.getBigDecimal("interestRateDifferential");
+            final BigDecimal minDifferentialLendingRate = rs.getBigDecimal("minDifferentialLendingRate");
+            final BigDecimal defaultDifferentialLendingRate = rs.getBigDecimal("defaultDifferentialLendingRate");
+            final BigDecimal maxDifferentialLendingRate = rs.getBigDecimal("maxDifferentialLendingRate");
+            final boolean isFloatingInterestRateCalculationAllowed = rs.getBoolean("isFloatingInterestRateCalculationAllowed");
+
+            return LoanProductData.loanProductWithFloatingRates(id, name, isLinkedToFloatingInterestRates, floatingRateId,
+                    floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
+                    maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed);
+        }
+    }
 
 }

@@ -393,7 +393,7 @@ public class LoansApiResource {
             	loanBasicDetails = LoanAccountData.withLoanCalendarData(loanBasicDetails, calendarData);
         }
 
-        Collection<InterestRatePeriodData> interestRatesPeriods = this.loanReadPlatformService.retrieveLoanInterestRatePeriodData(loanId);
+        Collection<InterestRatePeriodData> interestRatesPeriods = this.loanReadPlatformService.retrieveLoanInterestRatePeriodData(loanBasicDetails);
 
         Collection<LoanTransactionData> loanRepayments = null;
         LoanScheduleData repaymentSchedule = null;
