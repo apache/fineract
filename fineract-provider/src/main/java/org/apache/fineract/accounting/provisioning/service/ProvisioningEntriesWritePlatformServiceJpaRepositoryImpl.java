@@ -226,11 +226,11 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             GLAccount liabilityAccount = glAccountRepository.findOne(data.getLiablityAccount());
             GLAccount expenseAccount = glAccountRepository.findOne(data.getExpenseAccount());
             MonetaryCurrency currency = loanProduct.getPrincipalAmount().getCurrency();
-            Money money = Money.of(currency, data.getOutstandingBalance());
+			Long criteriaId = data.getCriteriaId();
+			Money money = Money.of(currency, data.getOutstandingAsPerType());
             Money amountToReserve = money.percentageOf(data.getPercentage(), MoneyHelper.getRoundingMode());
-            Long criteraId = data.getCriteriaId();
             LoanProductProvisioningEntry entry = new LoanProductProvisioningEntry(loanProduct, office, data.getCurrencyCode(),
-                    provisioningCategory, data.getOverdueInDays(), amountToReserve.getAmount(), liabilityAccount, expenseAccount, criteraId);
+                    provisioningCategory, data.getOverdueInDays(), amountToReserve.getAmount(), liabilityAccount, expenseAccount, criteriaId);
             entry.setProvisioningEntry(parent);
             if (!provisioningEntries.containsKey(entry)) {
                 provisioningEntries.put(entry, entry);

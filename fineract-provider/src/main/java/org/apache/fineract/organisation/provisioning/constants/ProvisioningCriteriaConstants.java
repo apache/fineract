@@ -54,11 +54,13 @@ public interface ProvisioningCriteriaConstants {
 
     public final static String JSON_EXPENSE_ACCOUNT_PARAM = "expenseAccount";
     
+    public final static String JSON_PROVISIONING_AMOUNT_TYPE= "provisioningAmountType";
+    
     Set<String> supportedParametersForCreate = new HashSet<>(Arrays.asList(JSON_LOCALE_PARAM, JSON_CRITERIANAME_PARAM,
-            JSON_LOANPRODUCTS_PARAM, JSON_PROVISIONING_DEFINITIONS_PARAM));
+            JSON_LOANPRODUCTS_PARAM, JSON_PROVISIONING_DEFINITIONS_PARAM, JSON_PROVISIONING_AMOUNT_TYPE));
 
     Set<String> supportedParametersForUpdate = new HashSet<>(Arrays.asList(JSON_CRITERIAID_PARAM, JSON_LOCALE_PARAM, JSON_CRITERIANAME_PARAM,
-            JSON_LOANPRODUCTS_PARAM, JSON_PROVISIONING_DEFINITIONS_PARAM));
+            JSON_LOANPRODUCTS_PARAM, JSON_PROVISIONING_DEFINITIONS_PARAM, JSON_PROVISIONING_AMOUNT_TYPE));
 
     Set<String> loanProductSupportedParams = new HashSet<>(Arrays.asList(JSON_LOAN_PRODUCT_ID_PARAM,
             JSON_LOAN_PRODUCTNAME_PARAM, JSON_LOAN_PRODUCT_BORROWERCYCLE_PARAM)) ;

@@ -21,6 +21,8 @@ package org.apache.fineract.organisation.provisioning.data;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+
 public final class ProvisioningCriteriaDefinitionData implements Comparable<ProvisioningCriteriaDefinitionData>, Serializable {
 
     private final Long id;

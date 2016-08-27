@@ -23,6 +23,9 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.organisation.provisioning.domain.ProvisioningAmountType;
+import org.apache.fineract.organisation.provisioning.service.ProvisioningEnumerations;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 
 @SuppressWarnings("unused")
@@ -35,7 +38,23 @@ public class ProvisioningCriteriaData implements Comparable<ProvisioningCriteria
     private Collection<LoanProductData> selectedLoanProducts ;
     private final Collection<ProvisioningCriteriaDefinitionData> definitions;
     private final Collection<GLAccountData> glAccounts;
+    private final Collection <EnumOptionData> provisioningAmountTypeOptions;
+    private final EnumOptionData provisioningAmountType;
+    
 
+    private ProvisioningCriteriaData(final Long criteriaId, final String criteriaName, final Collection<LoanProductData> loanProducts,
+            Collection<ProvisioningCriteriaDefinitionData> definitions, Collection<GLAccountData> glAccounts, final String createdBy,
+            final EnumOptionData provisioningAmountType) {
+        this.criteriaId = criteriaId;
+        this.criteriaName = criteriaName;
+        this.loanProducts = loanProducts;
+        this.definitions = definitions;
+        this.glAccounts = glAccounts;
+        this.createdBy = createdBy;
+        this.provisioningAmountTypeOptions = null;
+        this.provisioningAmountType = provisioningAmountType;
+    }
+    
     private ProvisioningCriteriaData(final Long criteriaId, final String criteriaName, final Collection<LoanProductData> loanProducts,
             Collection<ProvisioningCriteriaDefinitionData> definitions, Collection<GLAccountData> glAccounts, final String createdBy) {
         this.criteriaId = criteriaId;
@@ -44,10 +63,26 @@ public class ProvisioningCriteriaData implements Comparable<ProvisioningCriteria
         this.definitions = definitions;
         this.glAccounts = glAccounts;
         this.createdBy = createdBy;
+        this.provisioningAmountTypeOptions = null;
+        this.provisioningAmountType = null;
+    }
+    
+    private ProvisioningCriteriaData(final Long criteriaId, final String criteriaName, final Collection<LoanProductData> loanProducts,
+            Collection<ProvisioningCriteriaDefinitionData> definitions, Collection<GLAccountData> glAccounts, final String createdBy,
+            final Collection <EnumOptionData> provisioningAmountTypeOptions) {
+        this.criteriaId = criteriaId;
+        this.criteriaName = criteriaName;
+        this.loanProducts = loanProducts;
+        this.definitions = definitions;
+        this.glAccounts = glAccounts;
+        this.createdBy = createdBy;
+        this.provisioningAmountTypeOptions = provisioningAmountTypeOptions;
+        this.provisioningAmountType = null;
     }
 
+
     private ProvisioningCriteriaData(ProvisioningCriteriaData data, final Collection<LoanProductData> loanProducts,
-            Collection<GLAccountData> glAccounts) {
+            Collection<GLAccountData> glAccounts, final Collection<EnumOptionData> provisioningAmountTypeOptions) {
         this.criteriaId = data.criteriaId;
         this.criteriaName = data.criteriaName;
         this.selectedLoanProducts = data.loanProducts ;
@@ -56,13 +91,28 @@ public class ProvisioningCriteriaData implements Comparable<ProvisioningCriteria
         this.definitions = data.definitions;
         this.glAccounts = glAccounts;
         this.createdBy = data.createdBy;
+        this.provisioningAmountTypeOptions = provisioningAmountTypeOptions;
+        this.provisioningAmountType = data.provisioningAmountType;
     }
-    public static ProvisioningCriteriaData toLookup(final Long criteriaId, final String criteriaName, final Collection<LoanProductData> loanProducts,
-            final List<ProvisioningCriteriaDefinitionData> definitions) {
-        Collection<GLAccountData> glAccounts = null;
-        String createdBy = null;
-        return new ProvisioningCriteriaData(criteriaId, criteriaName, loanProducts, definitions, glAccounts, createdBy);
+    
+    public ProvisioningCriteriaData( final String criteriaName,final EnumOptionData provisioningAmountType) {
+        this.criteriaId = null;
+        this.criteriaName = criteriaName;
+        this.selectedLoanProducts = null ;
+        this.loanProducts = null;
+        this.definitions = null;
+        this.glAccounts = null;
+        this.createdBy = null;
+        this.provisioningAmountTypeOptions = null;
+        this.provisioningAmountType = provisioningAmountType;
     }
+
+	public static ProvisioningCriteriaData toLookup(final Long criteriaId, ProvisioningCriteriaData data, 
+			final Collection<LoanProductData> loanProducts, final List<ProvisioningCriteriaDefinitionData> definitions) {
+		Collection<GLAccountData> glAccounts = null;
+		String createdBy = null;
+		return new ProvisioningCriteriaData(criteriaId, data.criteriaName, loanProducts, definitions, glAccounts, createdBy, data.provisioningAmountType);
+	}
 
     public static ProvisioningCriteriaData toLookup(final Long criteriaId, final String criteriaName, String createdBy) {
         Collection<GLAccountData> glAccounts = null;
@@ -71,17 +121,19 @@ public class ProvisioningCriteriaData implements Comparable<ProvisioningCriteria
         return new ProvisioningCriteriaData(criteriaId, criteriaName, loanProducts, definitions, glAccounts, createdBy);
     }
 
-    public static ProvisioningCriteriaData toTemplate(final Collection<ProvisioningCriteriaDefinitionData> definitions,
-            final Collection<LoanProductData> loanProducts, final Collection<GLAccountData> glAccounts) {
+	public static ProvisioningCriteriaData toTemplate(final Collection<ProvisioningCriteriaDefinitionData> definitions,
+			final Collection<LoanProductData> loanProducts, final Collection<GLAccountData> glAccounts,
+			final Collection<EnumOptionData> provisioningAmountTypeOptions) {
         Long criteriaId = null;
         String criteriaName = null;
         String createdBy = null;
-        return new ProvisioningCriteriaData(criteriaId, criteriaName, loanProducts, definitions, glAccounts, createdBy);
+        EnumOptionData provisioningAmountType = null;
+        return new ProvisioningCriteriaData(criteriaId, criteriaName, loanProducts, definitions, glAccounts, createdBy,  provisioningAmountTypeOptions);
     }
     
     public static ProvisioningCriteriaData toTemplate(final ProvisioningCriteriaData data, final Collection<ProvisioningCriteriaDefinitionData> definitions,
-            final Collection<LoanProductData> loanProducts, final Collection<GLAccountData> glAccounts) {
-        return new ProvisioningCriteriaData(data, loanProducts, glAccounts);
+            final Collection<LoanProductData> loanProducts, final Collection<GLAccountData> glAccounts, final Collection<EnumOptionData> provisioningAmountTypeOptions) {
+        return new ProvisioningCriteriaData(data, loanProducts, glAccounts, provisioningAmountTypeOptions);
     }
 
     @Override

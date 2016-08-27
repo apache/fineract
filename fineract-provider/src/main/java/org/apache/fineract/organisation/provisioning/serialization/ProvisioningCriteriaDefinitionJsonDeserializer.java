@@ -66,6 +66,14 @@ public class ProvisioningCriteriaDefinitionJsonDeserializer implements Provision
         final String name = this.fromApiJsonHelper.extractStringNamed(ProvisioningCriteriaConstants.JSON_CRITERIANAME_PARAM, element);
         baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_CRITERIANAME_PARAM).value(name).notBlank()
                 .notExceedingLengthOf(200);
+        
+		if (this.fromApiJsonHelper.parameterExists(ProvisioningCriteriaConstants.JSON_PROVISIONING_AMOUNT_TYPE,
+				element)) {
+			Integer provisioningAmountType = this.fromApiJsonHelper.extractIntegerNamed(ProvisioningCriteriaConstants.JSON_PROVISIONING_AMOUNT_TYPE,
+					element, locale);
+			baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_AMOUNT_TYPE)
+					.value(provisioningAmountType).notNull().inMinMaxRange(1, 2);
+		}
 
         // if the param present, then we should have the loan product ids. If
         // not we will load all loan products
@@ -148,6 +156,14 @@ public class ProvisioningCriteriaDefinitionJsonDeserializer implements Provision
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("provisioningcriteria");
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject());
+        
+        if (this.fromApiJsonHelper.parameterExists(ProvisioningCriteriaConstants.JSON_PROVISIONING_AMOUNT_TYPE,
+				element)) {
+			Integer provisioningAmountType = this.fromApiJsonHelper.extractIntegerNamed(ProvisioningCriteriaConstants.JSON_PROVISIONING_AMOUNT_TYPE,
+					element, locale);
+			baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_PROVISIONING_AMOUNT_TYPE)
+					.value(provisioningAmountType).notNull().inMinMaxRange(1, 2);
+		}
         
         if(this.fromApiJsonHelper.parameterExists(ProvisioningCriteriaConstants.JSON_CRITERIANAME_PARAM, element)) {
             final String name = this.fromApiJsonHelper.extractStringNamed(ProvisioningCriteriaConstants.JSON_CRITERIANAME_PARAM, element);
