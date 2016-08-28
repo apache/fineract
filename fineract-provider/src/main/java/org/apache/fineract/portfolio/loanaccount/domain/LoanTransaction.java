@@ -602,7 +602,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return new LoanTransactionData(getId(), this.office.getId(), this.office.getName(), transactionType, paymentDetailData,
                 currencyData, getTransactionDate(), this.amount, this.principalPortion, this.interestPortion, this.feeChargesPortion,
                 this.penaltyChargesPortion, this.overPaymentPortion, this.externalId, transfer, null, outstandingLoanBalance,
-                this.unrecognizedIncomePortion, this.manuallyAdjustedOrReversed);
+                this.unrecognizedIncomePortion, this.manuallyAdjustedOrReversed, this.reversed);
     }
 
     public Map<String, Object> toMapData(final CurrencyData currencyData) {
