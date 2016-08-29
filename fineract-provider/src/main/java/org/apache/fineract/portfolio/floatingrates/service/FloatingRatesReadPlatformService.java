@@ -35,6 +35,6 @@ public interface FloatingRatesReadPlatformService {
 
 	FloatingRateData retrieveBaseLendingRate();
 
-	List<InterestRatePeriodData> retrieveInterestRatePeriods(Long floatingRateId);
+	List<InterestRatePeriodData> retrieveInterestRatePeriods(Long productId);
 
 }
