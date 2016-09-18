@@ -201,4 +201,14 @@ public class AccountTransferDetailAssembler {
         return AccountTransferDetails.LoanTosavingsTransfer(fromOffice, fromClient, fromLoanAccount, toOffice, toClient, toSavingsAccount,
                 transferType);
     }
+
+    public AccountTransferDetails assembleLoanToLoanTransfer(Loan fromLoanAccount, Loan toLoanAccount, Integer transferType) {
+        final Office fromOffice = fromLoanAccount.getOffice();
+        final Client fromClient = fromLoanAccount.client();
+        final Office toOffice = toLoanAccount.getOffice();
+        final Client toClient = toLoanAccount.client();
+
+        return AccountTransferDetails.LoanToLoanTransfer(fromOffice, fromClient, fromLoanAccount, toOffice, toClient, toLoanAccount,
+                transferType);
+    }
 }

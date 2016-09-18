@@ -20,12 +20,15 @@ package org.apache.fineract.portfolio.tax.domain;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -36,8 +39,6 @@ import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.portfolio.tax.api.TaxApiConstants;
 import org.apache.fineract.portfolio.tax.exception.TaxMappingNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 @Entity
 @Table(name = "m_tax_group")
@@ -46,25 +47,24 @@ public class TaxGroup extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "name", length = 100)
     private String name;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
     @JoinColumn(name = "tax_group_id", referencedColumnName = "id", nullable = false)
-    private List<TaxGroupMappings> taxGroupMappings = new ArrayList<>();
+    private Set<TaxGroupMappings> taxGroupMappings = new HashSet<>();
 
     protected TaxGroup() {
 
     }
 
-    private TaxGroup(final String name, final List<TaxGroupMappings> taxGroupMappings) {
+    private TaxGroup(final String name, final Set<TaxGroupMappings> taxGroupMappings) {
         this.name = name;
         this.taxGroupMappings = taxGroupMappings;
     }
 
-    public static TaxGroup createTaxGroup(final String name, final List<TaxGroupMappings> taxGroupMappings) {
+    public static TaxGroup createTaxGroup(final String name, final Set<TaxGroupMappings> taxGroupMappings) {
         return new TaxGroup(name, taxGroupMappings);
     }
 
-    public Map<String, Object> update(final JsonCommand command, final List<TaxGroupMappings> taxGroupMappings) {
+    public Map<String, Object> update(final JsonCommand command, final Set<TaxGroupMappings> taxGroupMappings) {
         final Map<String, Object> changes = new HashMap<>();
 
         if (command.isChangeInStringParameterNamed(TaxApiConstants.nameParamName, this.name)) {
@@ -106,7 +106,7 @@ public class TaxGroup extends AbstractAuditableCustom<AppUser, Long> {
         return null;
     }
 
-    public List<TaxGroupMappings> getTaxGroupMappings() {
+    public Set<TaxGroupMappings> getTaxGroupMappings() {
         return this.taxGroupMappings;
     }
 

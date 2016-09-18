@@ -211,7 +211,7 @@ public class LoanRescheduleRequestTest {
     	final HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(requestSpec, generalResponseSpec, loanId);
     	final Float totalExpectedRepayment = (Float) loanSummary.get("totalExpectedRepayment");
     	
-    	assertEquals("NUMBER OF REPAYMENTS SHOULD BE 16, NOT 12", "16", numberOfRepayments.toString());
+    	assertEquals("NUMBER OF REPAYMENTS SHOULD BE 16, NOT 12", "12", numberOfRepayments.toString());
     	assertEquals("TOTAL EXPECTED REPAYMENT MUST BE EQUAL TO 118000.0", "118000.0", totalExpectedRepayment.toString());
     	
     	System.out.println("Successfully approved loan reschedule request (ID: " + this.loanRescheduleRequestId + ")");

@@ -23,7 +23,6 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -87,8 +86,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationsComparator;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.apache.fineract.portfolio.loanaccount.exception.MinDaysBetweenDisbursalAndFirstRepaymentViolationException;
@@ -623,9 +620,8 @@ public class LoanScheduleAssembler {
     }
 
     public LoanScheduleModel assembleForInterestRecalculation(final LoanApplicationTerms loanApplicationTerms, final Long officeId,
-            List<LoanTransaction> transactions, final Set<LoanCharge> loanCharges,
-            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
-            final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, final LocalDate rescheduleFrom) {
+            Loan loan, final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
+            final LocalDate rescheduleFrom) {
         final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
         final MathContext mc = new MathContext(8, roundingMode);
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
@@ -636,15 +632,13 @@ public class LoanScheduleAssembler {
 
         final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
         HolidayDetailDTO detailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
-        return loanScheduleGenerator.rescheduleNextInstallments(mc, loanApplicationTerms, loanCharges, detailDTO, transactions,
-                loanRepaymentScheduleTransactionProcessor, repaymentScheduleInstallments, rescheduleFrom).getLoanScheduleModel();
+        return loanScheduleGenerator.rescheduleNextInstallments(mc, loanApplicationTerms, loan, detailDTO,
+                loanRepaymentScheduleTransactionProcessor, rescheduleFrom).getLoanScheduleModel();
     }
 
     public LoanRepaymentScheduleInstallment calculatePrepaymentAmount(MonetaryCurrency currency, LocalDate onDate,
-            LoanApplicationTerms loanApplicationTerms, final Set<LoanCharge> loanCharges, final Long officeId,
-            List<LoanTransaction> loanTransactions,
-            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor,
-            final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments) {
+            LoanApplicationTerms loanApplicationTerms, Loan loan, final Long officeId,
+            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor) {
         final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
         final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
         final MathContext mc = new MathContext(8, roundingMode);
@@ -655,15 +649,15 @@ public class LoanScheduleAssembler {
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         HolidayDetailDTO holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays);
 
-        return loanScheduleGenerator.calculatePrepaymentAmount(currency, onDate, loanApplicationTerms, mc, loanCharges, holidayDetailDTO,
-                loanTransactions, loanRepaymentScheduleTransactionProcessor, repaymentScheduleInstallments);
+        return loanScheduleGenerator.calculatePrepaymentAmount(currency, onDate, loanApplicationTerms, mc, loan, holidayDetailDTO,
+                loanRepaymentScheduleTransactionProcessor);
 
     }
 
     public void assempleVariableScheduleFrom(final Loan loan, final String json) {
         this.variableLoanScheduleFromApiJsonValidator.validateSchedule(json, loan);
 
-        List<LoanTermVariations> variations = loan.getLoanTermVariations();
+        Set<LoanTermVariations> variations = loan.getLoanTermVariations();
         List<LoanTermVariations> newVariations = new ArrayList<>();
         extractLoanTermVariations(loan, json, newVariations);
 
@@ -674,8 +668,8 @@ public class LoanScheduleAssembler {
             newVariations = retainVariations;
         }
         variations.addAll(newVariations);
-        Collections.sort(variations, new LoanTermVariationsComparator());
-
+        //Collections.sort(variations, new LoanTermVariationsComparator());
+        
         /*
          * List<LoanTermVariationsData> loanTermVariationsDatas = new
          * ArrayList<>();
@@ -686,7 +680,7 @@ public class LoanScheduleAssembler {
          */
 
         // date validations
-        List<LoanRepaymentScheduleInstallment> installments = loan.fetchRepaymentScheduleInstallments();
+        List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments();
         Set<LocalDate> dueDates = new TreeSet<>();
         LocalDate graceApplicable = loan.getExpectedDisbursedOnLocalDate();
         Integer graceOnPrincipal = loan.getLoanProductRelatedDetail().graceOnPrincipalPayment();
@@ -845,11 +839,12 @@ public class LoanScheduleAssembler {
         loan.regenerateRepaymentSchedule(scheduleGeneratorDTO, currentUser);
     }
 
-    private List<LoanTermVariations> adjustExistingVariations(List<LoanTermVariations> variations, List<LoanTermVariations> newVariations,
+    private List<LoanTermVariations> adjustExistingVariations(Set<LoanTermVariations> variations, List<LoanTermVariations> newVariations,
             final Map<LocalDate, LocalDate> adjustDueDateVariations) {
         Map<LocalDate, LoanTermVariations> amountVariations = new HashMap<>();
         Map<LocalDate, LoanTermVariations> dueDateVariations = new HashMap<>();
         Map<LocalDate, LoanTermVariations> insertVariations = new HashMap<>();
+        
         for (LoanTermVariations loanTermVariations : variations) {
             switch (loanTermVariations.getTermType()) {
                 case EMI_AMOUNT:

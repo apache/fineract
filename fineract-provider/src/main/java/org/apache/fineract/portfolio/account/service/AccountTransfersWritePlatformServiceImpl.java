@@ -33,6 +33,7 @@ import java.util.Locale;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.data.AccountTransfersDataValidator;
@@ -253,7 +254,8 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         for (final AccountTransferTransaction accountTransfer : acccountTransfers) {
             if (accountTransfer.getFromLoanTransaction() != null) {
                 this.loanAccountDomainService.reverseTransfer(accountTransfer.getFromLoanTransaction());
-            } else if (accountTransfer.getToLoanTransaction() != null) {
+            }
+            if (accountTransfer.getToLoanTransaction() != null) {
                 this.loanAccountDomainService.reverseTransfer(accountTransfer.getToLoanTransaction());
             }
             if (accountTransfer.getFromTransaction() != null) {
@@ -409,9 +411,45 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                     toSavingsAccount, deposit, loanTransaction);
             this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
             transferTransactionId = accountTransferDetails.getId();
+        } else {
+            throw new GeneralPlatformDomainRuleException("error.msg.accounttransfer.loan.to.loan.not.supported",
+                    "Account transfer from loan to another loan is not supported");
         }
 
         return transferTransactionId;
+    }
+
+    @Override
+    public AccountTransferDetails repayLoanWithTopup(AccountTransferDTO accountTransferDTO) {
+        final boolean isAccountTransfer = true;
+        Loan fromLoanAccount = null;
+        if (accountTransferDTO.getFromLoan() == null) {
+            fromLoanAccount = this.loanAccountAssembler.assembleFrom(accountTransferDTO.getFromAccountId());
+        } else {
+            fromLoanAccount = accountTransferDTO.getFromLoan();
+            this.loanAccountAssembler.setHelpers(fromLoanAccount);
+        }
+        Loan toLoanAccount = null;
+        if (accountTransferDTO.getToLoan() == null) {
+            toLoanAccount = this.loanAccountAssembler.assembleFrom(accountTransferDTO.getToAccountId());
+        } else {
+            toLoanAccount = accountTransferDTO.getToLoan();
+            this.loanAccountAssembler.setHelpers(toLoanAccount);
+        }
+
+        LoanTransaction disburseTransaction = this.loanAccountDomainService.makeDisburseTransaction(accountTransferDTO.getFromAccountId(),
+                accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
+                accountTransferDTO.getPaymentDetail(), accountTransferDTO.getNoteText(), accountTransferDTO.getTxnExternalId(), true);
+
+        LoanTransaction repayTransaction = this.loanAccountDomainService.makeRepayment(toLoanAccount, new CommandProcessingResultBuilder(),
+                accountTransferDTO.getTransactionDate(), accountTransferDTO.getTransactionAmount(),
+                accountTransferDTO.getPaymentDetail(), null, null, false, isAccountTransfer,null,false, true);
+
+        AccountTransferDetails accountTransferDetails = this.accountTransferAssembler.assembleLoanToLoanTransfer(accountTransferDTO, fromLoanAccount,
+                toLoanAccount, disburseTransaction, repayTransaction);
+        this.accountTransferDetailRepository.saveAndFlush(accountTransferDetails);
+
+        return accountTransferDetails;
     }
 
     @Override

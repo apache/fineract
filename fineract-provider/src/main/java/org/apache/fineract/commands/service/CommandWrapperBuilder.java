@@ -41,12 +41,31 @@ public class CommandWrapperBuilder {
     private String transactionId;
     private Long productId;
     private Long templateId;
+   
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
-                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId, this.templateId);
+                this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId,
+                this.templateId);
     }
-
+    
+    public CommandWrapperBuilder addClientAddress(final long clientId,final long addressTypeId) {
+        this.actionName = "CREATE";
+        this.entityName = "ADDRESS";
+        this.entityId = addressTypeId;
+        this.href = "/clients/"+clientId+"/addresses";
+        this.clientId=clientId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder updateClientAddress(final long clientId) {
+        this.actionName = "UPDATE";
+        this.entityName = "ADDRESS";
+        this.href = "/clients/"+clientId+"/addresses";
+        this.clientId=clientId;
+        return this;
+    }
+  
     public CommandWrapperBuilder withLoanId(final Long withLoanId) {
         this.loanId = withLoanId;
         return this;
@@ -561,6 +580,22 @@ public class CommandWrapperBuilder {
         this.entityId = null;
         this.href = "/datatables/" + datatable;
         this.json = json;
+        return this;
+    }
+    public CommandWrapperBuilder undoRejection(final Long clientId) {
+        this.actionName = "UNDOREJECT";
+        this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.clientId = clientId;
+        this.href = "/clients/" + clientId + "?command=undoRejection";
+        return this;
+    }
+    public CommandWrapperBuilder undoWithdrawal(final Long clientId) {
+        this.actionName = "UNDOWITHDRAWAL";
+        this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.clientId = clientId;
+        this.href = "/clients/" + clientId + "?command=undoWithdrawal";
         return this;
     }
 
@@ -2736,4 +2771,27 @@ public class CommandWrapperBuilder {
         return this;
 	}
 
+	public CommandWrapperBuilder createReportMailingJob(final String entityName) {
+        this.actionName = "CREATE";
+        this.entityName = entityName;
+        this.entityId = null;
+        this.href = "/reportmailingjobs";
+        return this;
+    }
+    
+    public CommandWrapperBuilder updateReportMailingJob(final String entityName, final Long entityId) {
+        this.actionName = "UPDATE";
+        this.entityName = entityName;
+        this.entityId = entityId;
+        this.href = "/reportmailingjobs/" + entityId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder deleteReportMailingJob(final String entityName, final Long entityId) {
+        this.actionName = "DELETE";
+        this.entityName = entityName;
+        this.entityId = entityId;
+        this.href = "/reportmailingjobs/" + entityId;
+        return this;
+    }
 }

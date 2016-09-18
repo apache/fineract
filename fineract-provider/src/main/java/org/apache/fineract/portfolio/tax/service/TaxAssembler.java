@@ -20,8 +20,10 @@ package org.apache.fineract.portfolio.tax.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
@@ -114,12 +116,12 @@ public class TaxAssembler {
 
         final String name = this.fromApiJsonHelper.extractStringNamed(TaxApiConstants.nameParamName, element);
         boolean isUpdate = false;
-        final List<TaxGroupMappings> groupMappings = assembleTaxGroupMappingsFrom(command, isUpdate);
+        final Set<TaxGroupMappings> groupMappings = assembleTaxGroupMappingsFrom(command, isUpdate);
         return TaxGroup.createTaxGroup(name, groupMappings);
     }
 
-    public List<TaxGroupMappings> assembleTaxGroupMappingsFrom(final JsonCommand command, boolean isUpdate) {
-        List<TaxGroupMappings> groupMappings = new ArrayList<>();
+    public Set<TaxGroupMappings> assembleTaxGroupMappingsFrom(final JsonCommand command, boolean isUpdate) {
+        Set<TaxGroupMappings> groupMappings = new HashSet<>();
         final JsonElement element = command.parsedJson();
 
         final JsonObject topLevelJsonElement = element.getAsJsonObject();

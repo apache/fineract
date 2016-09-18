@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.configuration.service;
 import java.util.Map;
 
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationDataValidator;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -43,13 +44,16 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
     private final PlatformSecurityContext context;
     private final GlobalConfigurationRepositoryWrapper repository;
     private final GlobalConfigurationDataValidator globalConfigurationDataValidator;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public GlobalConfigurationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final GlobalConfigurationRepositoryWrapper codeRepository, final GlobalConfigurationDataValidator dataValidator) {
+            final GlobalConfigurationRepositoryWrapper codeRepository, final GlobalConfigurationDataValidator dataValidator,
+            final ConfigurationDomainService configurationDomainService) {
         this.context = context;
         this.repository = codeRepository;
         this.globalConfigurationDataValidator = dataValidator;
+        this.configurationDomainService = configurationDomainService;
 
     }
 
@@ -67,6 +71,7 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
             final Map<String, Object> changes = configItemForUpdate.update(command);
 
             if (!changes.isEmpty()) {
+                this.configurationDomainService.removeGlobalConfigurationPropertyDataFromCache(configItemForUpdate.getName());
                 this.repository.save(configItemForUpdate);
             }
 

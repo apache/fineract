@@ -132,7 +132,11 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         final BigDecimal disbursalAmount = loanTransactionDTO.getAmount();
         final boolean isReversal = loanTransactionDTO.isReversed();
         final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
-        if (loanTransactionDTO.isAccountTransfer()) {
+        if(loanTransactionDTO.isLoanToLoanTransfer()){
+            this.helper.createCashBasedJournalEntriesAndReversalsForLoan(office, currencyCode,
+                    CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue(), FINANCIAL_ACTIVITY.ASSET_TRANSFER.getValue(), loanProductId,
+                    paymentTypeId, loanId, transactionId, transactionDate, disbursalAmount, isReversal);
+        } else if (loanTransactionDTO.isAccountTransfer()) {
             this.helper.createCashBasedJournalEntriesAndReversalsForLoan(office, currencyCode,
                     CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue(), FINANCIAL_ACTIVITY.LIABILITY_TRANSFER.getValue(), loanProductId,
                     paymentTypeId, loanId, transactionId, transactionDate, disbursalAmount, isReversal);
@@ -240,7 +244,10 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         }
 
         /*** create a single debit entry (or reversal) for the entire amount **/
-        if (loanTransactionDTO.isAccountTransfer()) {
+        if(loanTransactionDTO.isLoanToLoanTransfer()){
+            this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, FINANCIAL_ACTIVITY.ASSET_TRANSFER.getValue(),
+                    loanProductId, paymentTypeId, loanId, transactionId, transactionDate, totalDebitAmount, isReversal);
+        } else if (loanTransactionDTO.isAccountTransfer()) {
             this.helper.createDebitJournalEntryOrReversalForLoan(office, currencyCode, FINANCIAL_ACTIVITY.LIABILITY_TRANSFER.getValue(),
                     loanProductId, paymentTypeId, loanId, transactionId, transactionDate, totalDebitAmount, isReversal);
         } else {

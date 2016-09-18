@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.portfolio.tax.service;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -98,7 +98,7 @@ public class TaxWritePlatformServiceImpl implements TaxWritePlatformService {
         this.validator.validateForTaxGroupUpdate(command.json());
         final TaxGroup taxGroup = this.taxGroupRepositoryWrapper.findOneWithNotFoundDetection(id);
         final boolean isUpdate = true;
-        List<TaxGroupMappings> groupMappings = this.taxAssembler.assembleTaxGroupMappingsFrom(command, isUpdate);
+        Set<TaxGroupMappings> groupMappings = this.taxAssembler.assembleTaxGroupMappingsFrom(command, isUpdate);
         this.validator.validateTaxGroupEndDateAndTaxComponent(taxGroup, groupMappings);
         Map<String, Object> changes = taxGroup.update(command, groupMappings);
         this.validator.validateTaxGroup(taxGroup);

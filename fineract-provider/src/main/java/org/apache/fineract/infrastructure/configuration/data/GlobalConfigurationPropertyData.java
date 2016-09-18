@@ -60,4 +60,34 @@ public class GlobalConfigurationPropertyData {
         this.description = description;
         this.trapDoor = isTrapDoor;
     }
+
+	public String getName() {
+		return this.name;
+	}
+
+	public boolean isEnabled() {
+		return this.enabled;
+	}
+
+	public Long getValue() {
+		return this.value;
+	}
+
+	public Date getDateValue() {
+		return this.dateValue;
+	}
+
+	public Long getId() {
+		return this.id;
+	}
+
+	public String getDescription() {
+		return this.description;
+	}
+
+	public boolean isTrapDoor() {
+		return this.trapDoor;
+	}
+    
+    
 }

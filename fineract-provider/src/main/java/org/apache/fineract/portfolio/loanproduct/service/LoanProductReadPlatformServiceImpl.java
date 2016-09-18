@@ -206,6 +206,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lpr.allow_compounding_on_eod as allowCompoundingOnEod, "
                     + "lp.hold_guarantee_funds as holdGuaranteeFunds, "
                     + "lp.principal_threshold_for_last_installment as principalThresholdForLastInstallment, "
+                    + "lp.sync_expected_with_disbursement_date as syncExpectedWithDisbursementDate, "
                     + "lpg.id as lpgId, lpg.mandatory_guarantee as mandatoryGuarantee, "
                     + "lpg.minimum_guarantee_from_own_funds as minimumGuaranteeFromOwnFunds, lpg.minimum_guarantee_from_guarantor_funds as minimumGuaranteeFromGuarantor, "
                     + "lp.account_moves_out_of_npa_only_on_arrears_completion as accountMovesOutOfNPAOnlyOnArrearsCompletion, "
@@ -223,7 +224,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lfr.is_floating_interest_rate_calculation_allowed as isFloatingInterestRateCalculationAllowed, "
                     + "lp.allow_variabe_installments as isVariableIntallmentsAllowed, "
                     + "lvi.minimum_gap as minimumGap, "
-                    + "lvi.maximum_gap as maximumGap "
+                    + "lvi.maximum_gap as maximumGap, "
+                    + "lp.can_use_for_topup as canUseForTopup "
                     + " from m_product_loan lp "
                     + " left join m_fund f on f.id = lp.fund_id "
                     + " left join m_product_loan_recalculation_details lpr on lpr.product_id=lp.id "
@@ -441,6 +443,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
             final BigDecimal principalThresholdForLastInstallment = rs.getBigDecimal("principalThresholdForLastInstallment");
             final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = rs.getBoolean("accountMovesOutOfNPAOnlyOnArrearsCompletion");
+            final boolean syncExpectedWithDisbursementDate = rs.getBoolean("syncExpectedWithDisbursementDate");
+            
+            final boolean canUseForTopup = rs.getBoolean("canUseForTopup");
 
             return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -457,7 +462,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     installmentAmountInMultiplesOf, allowAttributeOverrides, isLinkedToFloatingInterestRates, floatingRateId,
                     floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                     maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableIntallmentsAllowed, minimumGap,
-                    maximumGap);
+                    maximumGap, syncExpectedWithDisbursementDate, canUseForTopup);
         }
     }
 
@@ -611,6 +616,59 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                 + "Select pm.product_id from m_product_mix pm where pm.restricted_product_id=?)";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId });
+    }
+    
+    @Override
+    public LoanProductData retrieveLoanProductFloatingDetails(final Long loanProductId) {
+
+        try {
+            final LoanProductFloatingRateMapper rm = new LoanProductFloatingRateMapper();
+            final String sql = "select " + rm.schema() + " where lp.id = ?";
+
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId });
+
+        } catch (final EmptyResultDataAccessException e) {
+            throw new LoanProductNotFoundException(loanProductId);
+        }
+    }
+    
+    
+    private static final class LoanProductFloatingRateMapper implements RowMapper<LoanProductData> {
+
+        public LoanProductFloatingRateMapper() {}
+
+        public String schema() {
+            return "lp.id as id,  lp.name as name," 
+                    + "lp.is_linked_to_floating_interest_rates as isLinkedToFloatingInterestRates, "
+                    + "lfr.floating_rates_id as floatingRateId, " + "fr.name as floatingRateName, "
+                    + "lfr.interest_rate_differential as interestRateDifferential, "
+                    + "lfr.min_differential_lending_rate as minDifferentialLendingRate, "
+                    + "lfr.default_differential_lending_rate as defaultDifferentialLendingRate, "
+                    + "lfr.max_differential_lending_rate as maxDifferentialLendingRate, "
+                    + "lfr.is_floating_interest_rate_calculation_allowed as isFloatingInterestRateCalculationAllowed "
+                    + " from m_product_loan lp " + " left join m_product_loan_floating_rates as lfr on lfr.loan_product_id = lp.id "
+                    + " left join m_floating_rates as fr on lfr.floating_rates_id = fr.id ";
+        }
+
+        @Override
+        public LoanProductData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = JdbcSupport.getLong(rs, "id");
+            final String name = rs.getString("name");
+
+            final boolean isLinkedToFloatingInterestRates = rs.getBoolean("isLinkedToFloatingInterestRates");
+            final Integer floatingRateId = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "floatingRateId");
+            final String floatingRateName = rs.getString("floatingRateName");
+            final BigDecimal interestRateDifferential = rs.getBigDecimal("interestRateDifferential");
+            final BigDecimal minDifferentialLendingRate = rs.getBigDecimal("minDifferentialLendingRate");
+            final BigDecimal defaultDifferentialLendingRate = rs.getBigDecimal("defaultDifferentialLendingRate");
+            final BigDecimal maxDifferentialLendingRate = rs.getBigDecimal("maxDifferentialLendingRate");
+            final boolean isFloatingInterestRateCalculationAllowed = rs.getBoolean("isFloatingInterestRateCalculationAllowed");
+
+            return LoanProductData.loanProductWithFloatingRates(id, name, isLinkedToFloatingInterestRates, floatingRateId,
+                    floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
+                    maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed);
+        }
     }
 
 }
