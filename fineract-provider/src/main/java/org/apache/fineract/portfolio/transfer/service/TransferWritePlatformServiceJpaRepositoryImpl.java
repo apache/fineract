@@ -45,11 +45,11 @@ import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.exception.ClientNotInGroupException;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.portfolio.transfer.data.TransfersDataValidator;
@@ -68,36 +68,36 @@ import com.google.gson.JsonObject;
 @Service
 public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWritePlatformService {
 
-    private final ClientRepositoryWrapper clientRepository;
+    private final ClientRepositoryWrapper clientRepositoryWrapper;
     private final OfficeRepositoryWrapper officeRepository;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final GroupRepositoryWrapper groupRepository;
     private final LoanWritePlatformService loanWritePlatformService;
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
-    private final LoanRepository loanRepository;
-    private final SavingsAccountRepository savingsAccountRepository;
+    private final LoanRepositoryWrapper loanRepositoryWrapper;
+    private final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper;
     private final TransfersDataValidator transfersDataValidator;
     private final NoteWritePlatformService noteWritePlatformService;
     private final StaffRepositoryWrapper staffRepositoryWrapper;
 
     @Autowired
-    public TransferWritePlatformServiceJpaRepositoryImpl(final ClientRepositoryWrapper clientRepository,
+    public TransferWritePlatformServiceJpaRepositoryImpl(final ClientRepositoryWrapper clientRepositoryWrapper,
             final OfficeRepositoryWrapper officeRepository, final CalendarInstanceRepository calendarInstanceRepository,
             final LoanWritePlatformService loanWritePlatformService, final GroupRepositoryWrapper groupRepository,
-            final LoanRepository loanRepository, final TransfersDataValidator transfersDataValidator,
+            final LoanRepositoryWrapper loanRepositoryWrapper, final TransfersDataValidator transfersDataValidator,
             final NoteWritePlatformService noteWritePlatformService, final StaffRepositoryWrapper staffRepositoryWrapper,
-            final SavingsAccountRepository savingsAccountRepository,
+            final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
             final SavingsAccountWritePlatformService savingsAccountWritePlatformService) {
-        this.clientRepository = clientRepository;
+        this.clientRepositoryWrapper = clientRepositoryWrapper;
         this.officeRepository = officeRepository;
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.loanWritePlatformService = loanWritePlatformService;
         this.groupRepository = groupRepository;
-        this.loanRepository = loanRepository;
+        this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.transfersDataValidator = transfersDataValidator;
         this.noteWritePlatformService = noteWritePlatformService;
         this.staffRepositoryWrapper = staffRepositoryWrapper;
-        this.savingsAccountRepository = savingsAccountRepository;
+        this.savingsAccountRepositoryWrapper = savingsAccountRepositoryWrapper;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
     }
 
@@ -214,12 +214,12 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         }
 
         client.getGroups().add(destinationGroup);
-        this.clientRepository.saveAndFlush(client);
+        this.clientRepositoryWrapper.saveAndFlush(client);
 
         /**
          * Active JLG loans are now linked to the new Group and Loan officer
          **/
-        final List<Loan> allClientJLGLoans = this.loanRepository.findByClientIdAndGroupId(client.getId(), sourceGroup.getId());
+        final List<Loan> allClientJLGLoans = this.loanRepositoryWrapper.findByClientIdAndGroupId(client.getId(), sourceGroup.getId());
         for (final Loan loan : allClientJLGLoans) {
             if (loan.status().isActiveOrAwaitingApprovalOrDisbursal()) {
                 loan.updateGroup(destinationGroup);
@@ -229,7 +229,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                 } else if (newLoanOfficer != null) {
                     loan.reassignLoanOfficer(newLoanOfficer, DateUtils.getLocalDateOfTenant());
                 }
-                this.loanRepository.saveAndFlush(loan);
+                this.loanRepositoryWrapper.saveAndFlush(loan);
             }
         }
 
@@ -260,11 +260,11 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
 
         final Long destinationOfficeId = jsonCommand.longValueOfParameterNamed(TransferApiConstants.destinationOfficeIdParamName);
         final Office office = this.officeRepository.findOneWithNotFoundDetection(destinationOfficeId);
-        final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+        final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId, true);
         handleClientTransferLifecycleEvent(client, office, TransferEventType.PROPOSAL, jsonCommand);
-        this.clientRepository.saveAndFlush(client);
+        this.clientRepositoryWrapper.saveAndFlush(client);
         handleClientTransferLifecycleEvent(client, client.getTransferToOffice(), TransferEventType.ACCEPTANCE, jsonCommand);
-        this.clientRepository.save(client);
+        this.clientRepositoryWrapper.save(client);
 
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
@@ -292,9 +292,9 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
 
         final Long destinationOfficeId = jsonCommand.longValueOfParameterNamed(TransferApiConstants.destinationOfficeIdParamName);
         final Office office = this.officeRepository.findOneWithNotFoundDetection(destinationOfficeId);
-        final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+        final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
         handleClientTransferLifecycleEvent(client, office, TransferEventType.PROPOSAL, jsonCommand);
-        this.clientRepository.save(client);
+        this.clientRepositoryWrapper.save(client);
 
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
@@ -319,11 +319,11 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     public CommandProcessingResult acceptClientTransfer(final Long clientId, final JsonCommand jsonCommand) {
         // validation
         this.transfersDataValidator.validateForAcceptClientTransfer(jsonCommand.json());
-        final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+        final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId, true);
         validateClientAwaitingTransferAcceptance(client);
 
         handleClientTransferLifecycleEvent(client, client.getTransferToOffice(), TransferEventType.ACCEPTANCE, jsonCommand);
-        this.clientRepository.save(client);
+        this.clientRepositoryWrapper.save(client);
 
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
@@ -336,11 +336,11 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     public CommandProcessingResult withdrawClientTransfer(final Long clientId, final JsonCommand jsonCommand) {
         // validation
         this.transfersDataValidator.validateForWithdrawClientTransfer(jsonCommand.json());
-        final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+        final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
         validateClientAwaitingTransferAcceptanceOnHold(client);
 
         handleClientTransferLifecycleEvent(client, client.getOffice(), TransferEventType.WITHDRAWAL, jsonCommand);
-        this.clientRepository.save(client);
+        this.clientRepositoryWrapper.save(client);
 
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
@@ -353,9 +353,9 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     public CommandProcessingResult rejectClientTransfer(final Long clientId, final JsonCommand jsonCommand) {
         // validation
         this.transfersDataValidator.validateForRejectClientTransfer(jsonCommand.json());
-        final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+        final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
         handleClientTransferLifecycleEvent(client, client.getOffice(), TransferEventType.REJECTION, jsonCommand);
-        this.clientRepository.save(client);
+        this.clientRepositoryWrapper.save(client);
 
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
@@ -379,9 +379,9 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         }
 
         /*** Handle Active Loans ***/
-        if (this.loanRepository.doNonClosedLoanAccountsExistForClient(client.getId())) {
+        if (this.loanRepositoryWrapper.doNonClosedLoanAccountsExistForClient(client.getId())) {
             // get each individual loan for the client
-            for (final Loan loan : this.loanRepository.findLoanByClientId(client.getId())) {
+            for (final Loan loan : this.loanRepositoryWrapper.findLoanByClientId(client.getId())) {
                 /**
                  * We need to create transactions etc only for loans which are
                  * disbursed and not yet closed
@@ -389,41 +389,41 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                 if (loan.isDisbursed() && !loan.isClosed()) {
                     switch (transferEventType) {
                         case ACCEPTANCE:
-                            this.loanWritePlatformService.acceptLoanTransfer(loan.getId(), DateUtils.getLocalDateOfTenant(),
+                            this.loanWritePlatformService.acceptLoanTransfer(loan, DateUtils.getLocalDateOfTenant(),
                                     destinationOffice, staff);
                         break;
                         case PROPOSAL:
-                            this.loanWritePlatformService.initiateLoanTransfer(loan.getId(), DateUtils.getLocalDateOfTenant());
+                            this.loanWritePlatformService.initiateLoanTransfer(loan, DateUtils.getLocalDateOfTenant());
                         break;
                         case REJECTION:
-                            this.loanWritePlatformService.rejectLoanTransfer(loan.getId());
+                            this.loanWritePlatformService.rejectLoanTransfer(loan);
                         break;
                         case WITHDRAWAL:
-                            this.loanWritePlatformService.withdrawLoanTransfer(loan.getId(), DateUtils.getLocalDateOfTenant());
+                            this.loanWritePlatformService.withdrawLoanTransfer(loan, DateUtils.getLocalDateOfTenant());
                     }
                 }
             }
         }
 
         /*** Handle Active Savings (Currently throw and exception) ***/
-        if (this.savingsAccountRepository.doNonClosedSavingAccountsExistForClient(client.getId())) {
+        if (this.savingsAccountRepositoryWrapper.doNonClosedSavingAccountsExistForClient(client.getId())) {
             // get each individual saving account for the client
-            for (final SavingsAccount savingsAccount : this.savingsAccountRepository.findSavingAccountByClientId(client.getId())) {
+            for (final SavingsAccount savingsAccount : this.savingsAccountRepositoryWrapper.findSavingAccountByClientId(client.getId())) {
                 if (savingsAccount.isActivated() && !savingsAccount.isClosed()) {
                     switch (transferEventType) {
                         case ACCEPTANCE:
-                            this.savingsAccountWritePlatformService.acceptSavingsTransfer(savingsAccount.getId(),
+                            this.savingsAccountWritePlatformService.acceptSavingsTransfer(savingsAccount,
                                     DateUtils.getLocalDateOfTenant(), destinationOffice, staff);
                         break;
                         case PROPOSAL:
-                            this.savingsAccountWritePlatformService.initiateSavingsTransfer(savingsAccount.getId(),
+                            this.savingsAccountWritePlatformService.initiateSavingsTransfer(savingsAccount,
                                     DateUtils.getLocalDateOfTenant());
                         break;
                         case REJECTION:
-                            this.savingsAccountWritePlatformService.rejectSavingsTransfer(savingsAccount.getId());
+                            this.savingsAccountWritePlatformService.rejectSavingsTransfer(savingsAccount);
                         break;
                         case WITHDRAWAL:
-                            this.savingsAccountWritePlatformService.withdrawSavingsTransfer(savingsAccount.getId(),
+                            this.savingsAccountWritePlatformService.withdrawSavingsTransfer(savingsAccount,
                                     DateUtils.getLocalDateOfTenant());
                     }
                 }
@@ -480,7 +480,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                     final JsonObject jsonObject = clientsArray.get(i).getAsJsonObject();
                     if (jsonObject.has(TransferApiConstants.idParamName)) {
                         final Long id = jsonObject.get(TransferApiConstants.idParamName).getAsLong();
-                        final Client client = this.clientRepository.findOneWithNotFoundDetection(id);
+                        final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(id);
                         clients.add(client);
                     }
                 }

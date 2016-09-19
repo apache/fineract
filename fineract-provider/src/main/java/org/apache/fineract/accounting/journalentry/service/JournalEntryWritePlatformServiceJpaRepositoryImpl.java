@@ -69,9 +69,8 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.organisation.office.domain.OfficeRepository;
+import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.domain.OrganisationCurrencyRepositoryWrapper;
-import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
 import org.apache.fineract.portfolio.client.domain.ClientTransaction;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
@@ -93,7 +92,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private final GLClosureRepository glClosureRepository;
     private final GLAccountRepository glAccountRepository;
     private final JournalEntryRepository glJournalEntryRepository;
-    private final OfficeRepository officeRepository;
+    private final OfficeRepositoryWrapper officeRepositoryWrapper;
     private final AccountingProcessorForLoanFactory accountingProcessorForLoanFactory;
     private final AccountingProcessorForSavingsFactory accountingProcessorForSavingsFactory;
     private final AccountingProcessorForSharesFactory accountingProcessorForSharesFactory;
@@ -109,7 +108,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
     @Autowired
     public JournalEntryWritePlatformServiceJpaRepositoryImpl(final GLClosureRepository glClosureRepository,
-            final JournalEntryRepository glJournalEntryRepository, final OfficeRepository officeRepository,
+            final JournalEntryRepository glJournalEntryRepository, final OfficeRepositoryWrapper officeRepositoryWrapper,
             final GLAccountRepository glAccountRepository, final JournalEntryCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final AccountingProcessorHelper accountingProcessorHelper, final AccountingRuleRepository accountingRuleRepository,
             final AccountingProcessorForLoanFactory accountingProcessorForLoanFactory,
@@ -121,7 +120,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
             final CashBasedAccountingProcessorForClientTransactions accountingProcessorForClientTransactions) {
         this.glClosureRepository = glClosureRepository;
-        this.officeRepository = officeRepository;
+        this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.glJournalEntryRepository = glJournalEntryRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.glAccountRepository = glAccountRepository;
@@ -147,9 +146,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
             // check office is valid
             final Long officeId = command.longValueOfParameterNamed(JournalEntryJsonInputParams.OFFICE_ID.getValue());
-            final Office office = this.officeRepository.findOne(officeId);
-            if (office == null) { throw new OfficeNotFoundException(officeId); }
-
+            final Office office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
             final Long accountRuleId = command.longValueOfParameterNamed(JournalEntryJsonInputParams.ACCOUNTING_RULE.getValue());
             final String currencyCode = command.stringValueOfParameterNamed(JournalEntryJsonInputParams.CURRENCY_CODE.getValue());
 
@@ -647,9 +644,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
             // check office is valid
             final Long officeId = command.longValueOfParameterNamed(JournalEntryJsonInputParams.OFFICE_ID.getValue());
-            final Office office = this.officeRepository.findOne(officeId);
-            if (office == null) { throw new OfficeNotFoundException(officeId); }
-
+            final Office office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
             final String currencyCode = command.stringValueOfParameterNamed(JournalEntryJsonInputParams.CURRENCY_CODE.getValue());
 
             validateBusinessRulesForJournalEntries(journalEntryCommand);

@@ -21,6 +21,7 @@ package org.apache.fineract.organisation.office.domain;
 import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
@@ -44,12 +45,20 @@ public class OfficeRepositoryWrapper {
         return office;
     }
 
-    public void save(final Office entity) {
-        this.repository.save(entity);
+    @Transactional(readOnly=true)
+    public Office findOfficeHierarchy(final Long id) {
+        final Office office = this.repository.findOne(id);
+        if (office == null) { throw new OfficeNotFoundException(id); }
+        office.loadLazyCollections(); 
+        return office ;
+        
+    }
+    public Office save(final Office entity) {
+        return this.repository.save(entity);
     }
 
-    public void saveAndFlush(final Office entity) {
-        this.repository.saveAndFlush(entity);
+    public Office saveAndFlush(final Office entity) {
+        return this.repository.saveAndFlush(entity);
     }
 
     public void delete(final Office entity) {

@@ -30,6 +30,7 @@ import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
 import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.joda.time.LocalDate;
@@ -76,13 +77,13 @@ public interface LoanWritePlatformService {
 
     void applyHolidaysToLoans();
 
-    LoanTransaction initiateLoanTransfer(Long accountId, LocalDate transferDate);
+    LoanTransaction initiateLoanTransfer(Loan loan, LocalDate transferDate);
 
-    LoanTransaction withdrawLoanTransfer(Long accountId, LocalDate transferDate);
+    LoanTransaction withdrawLoanTransfer(final Loan loan, LocalDate transferDate);
 
-    void rejectLoanTransfer(Long accountId);
+    void rejectLoanTransfer(final Loan loan);
 
-    LoanTransaction acceptLoanTransfer(Long accountId, LocalDate transferDate, Office acceptedInOffice, Staff loanOfficer);
+    LoanTransaction acceptLoanTransfer(Loan loan, LocalDate transferDate, Office acceptedInOffice, Staff loanOfficer);
 
     CommandProcessingResult payLoanCharge(Long loanId, Long loanChargeId, JsonCommand command, boolean isChargeIdIncludedInJson);
 

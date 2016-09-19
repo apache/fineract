@@ -33,7 +33,7 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientAddress;
 import org.apache.fineract.portfolio.client.domain.ClientAddressRepository;
 import org.apache.fineract.portfolio.client.domain.ClientAddressRepositoryWrapper;
-import org.apache.fineract.portfolio.client.domain.ClientRepository;
+import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +45,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 	private final PlatformSecurityContext context;
 	private final CodeValueRepository codeValueRepository;
 	private final ClientAddressRepository clientAddressRepository;
-	private final ClientRepository clientRepository;
+	private final ClientRepositoryWrapper clientRepositoryWrapper;
 	private final AddressRepository addressRepository;
 	private final ClientAddressRepositoryWrapper clientAddressRepositoryWrapper;
 	private final AddressCommandFromApiJsonDeserializer fromApiJsonDeserializer;
@@ -53,13 +53,13 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 	@Autowired
 	public AddressWritePlatformServiceImpl(final PlatformSecurityContext context,
 			final CodeValueRepository codeValueRepository, final ClientAddressRepository clientAddressRepository,
-			final ClientRepository clientRepository, final AddressRepository addressRepository,
+			final ClientRepositoryWrapper clientRepositoryWrapper, final AddressRepository addressRepository,
 			final ClientAddressRepositoryWrapper clientAddressRepositoryWrapper,
 			final AddressCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
 		this.context = context;
 		this.codeValueRepository = codeValueRepository;
 		this.clientAddressRepository = clientAddressRepository;
-		this.clientRepository = clientRepository;
+		this.clientRepositoryWrapper = clientRepositoryWrapper;
 		this.addressRepository = addressRepository;
 		this.clientAddressRepositoryWrapper = clientAddressRepositoryWrapper;
 		this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -96,7 +96,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 		final Long addressid = add.getId();
 		final Address addobj = this.addressRepository.getOne(addressid);
 
-		final Client client = this.clientRepository.getOne(clientId);
+		final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
 		final boolean isActive = command.booleanPrimitiveValueOfParameterNamed("isActive");
 
 		final ClientAddress clientAddressobj = ClientAddress.fromJson(isActive, client, addobj, addressTypeIdObj);

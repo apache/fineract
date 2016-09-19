@@ -49,7 +49,7 @@ import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.joda.time.LocalDate;
@@ -69,7 +69,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
     private final LoanWritePlatformService loanWritePlatformService;
     private final ConfigurationDomainService configurationDomainService;
     private final GroupRepositoryWrapper groupRepository;
-    private final LoanRepository loanRepository;
+    private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final ClientRepositoryWrapper clientRepository;
 
     @Autowired
@@ -78,7 +78,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
             final CalendarCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final CalendarInstanceRepository calendarInstanceRepository, final LoanWritePlatformService loanWritePlatformService,
             final ConfigurationDomainService configurationDomainService, final GroupRepositoryWrapper groupRepository,
-            final LoanRepository loanRepository, final ClientRepositoryWrapper clientRepository) {
+            final LoanRepositoryWrapper loanRepositoryWrapper, final ClientRepositoryWrapper clientRepository) {
         this.calendarRepository = calendarRepository;
         this.calendarHistoryRepository = calendarHistoryRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -86,7 +86,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         this.loanWritePlatformService = loanWritePlatformService;
         this.configurationDomainService = configurationDomainService;
         this.groupRepository = groupRepository;
-        this.loanRepository = loanRepository;
+        this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.clientRepository = clientRepository;
     }
 
@@ -104,7 +104,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
             entityType = centerOrGroup.isCenter() ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
             entityId = command.getGroupId();
         } else if (command.getLoanId() != null) {
-            final Loan loan = this.loanRepository.findOne(command.getLoanId());
+            final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(command.getLoanId(), true);
             entityActivationDate = (loan.getApprovedOnDate() == null) ? loan.getSubmittedOnDate() : loan.getApprovedOnDate();
             entityType = CalendarEntityType.LOANS;
             entityId = command.getLoanId();

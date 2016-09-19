@@ -83,7 +83,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
     private final LoanAssembler loanAccountAssembler;
-    private final LoanRepository loanRepository;
+    private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanTransactionRepository loanTransactionRepository;
     private final ConfigurationDomainService configurationDomainService;
     private final HolidayRepository holidayRepository;
@@ -102,7 +102,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
     private final StandingInstructionRepository standingInstructionRepository;
 
     @Autowired
-    public LoanAccountDomainServiceJpa(final LoanAssembler loanAccountAssembler, final LoanRepository loanRepository,
+    public LoanAccountDomainServiceJpa(final LoanAssembler loanAccountAssembler, final LoanRepositoryWrapper loanRepositoryWrapper,
             final LoanTransactionRepository loanTransactionRepository, final NoteRepository noteRepository,
             final ConfigurationDomainService configurationDomainService, final HolidayRepository holidayRepository,
             final WorkingDaysRepositoryWrapper workingDaysRepository,
@@ -115,7 +115,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final BusinessEventNotifierService businessEventNotifierService, final LoanUtilService loanUtilService, 
             final StandingInstructionRepository standingInstructionRepository) {
         this.loanAccountAssembler = loanAccountAssembler;
-        this.loanRepository = loanRepository;
+        this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.loanTransactionRepository = loanTransactionRepository;
         this.noteRepository = noteRepository;
         this.configurationDomainService = configurationDomainService;
@@ -260,7 +260,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                     this.repaymentScheduleInstallmentRepository.save(installment);
                 }
             }
-            this.loanRepository.saveAndFlush(loan);
+            this.loanRepositoryWrapper.saveAndFlush(loan);
         } catch (final DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -282,7 +282,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                     this.repaymentScheduleInstallmentRepository.save(installment);
                 }
             }
-            this.loanRepository.save(loan);
+            this.loanRepositoryWrapper.save(loan);
         } catch (final DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -403,7 +403,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay);
 
         saveLoanTransactionWithDataIntegrityViolationChecks(newRefundTransaction);
-        this.loanRepository.save(loan);
+        this.loanRepositoryWrapper.save(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
             final Note note = Note.loanTransactionNote(loan, newRefundTransaction, noteText);
@@ -593,7 +593,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 existingReversedTransactionIds, allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay);
 
         this.loanTransactionRepository.save(newRefundTransaction);
-        this.loanRepository.save(loan);
+        this.loanRepositoryWrapper.save(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
             final Note note = Note.loanTransactionNote(loan, newRefundTransaction, noteText);
@@ -646,7 +646,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 }
                 createdDate = createdDate.plusSeconds(1);
                 newTransactions.add(accrualTransaction);
-                loan.getLoanTransactions().add(accrualTransaction);
+                loan.addLoanTransaction(accrualTransaction);
                 Set<LoanChargePaidBy> accrualCharges = accrualTransaction.getLoanChargesPaid();
                 for (LoanCharge loanCharge : loan.charges()) {
                     if (loanCharge.isActive()

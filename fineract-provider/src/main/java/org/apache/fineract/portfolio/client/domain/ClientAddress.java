@@ -25,7 +25,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.address.domain.Address;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 

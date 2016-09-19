@@ -42,9 +42,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.organisation.office.domain.OfficeRepository;
-import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
+import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +58,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final OfficeRepository officeRepository;
+    private final OfficeRepositoryWrapper officeRepositoryWrapper;
 
     private final JournalEntryDataValidator dataValidator;
 
@@ -89,10 +87,10 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
             + "where je2.id = je.id and je.entry_date = je3.date group by je.id order by je.entry_date DESC " + selectRunningBalanceSqlLimit;
 
     @Autowired
-    public JournalEntryRunningBalanceUpdateServiceImpl(final RoutingDataSource dataSource, final OfficeRepository officeRepository,
+    public JournalEntryRunningBalanceUpdateServiceImpl(final RoutingDataSource dataSource, final OfficeRepositoryWrapper officeRepositoryWrapper,
             final JournalEntryDataValidator dataValidator, final FromJsonHelper fromApiJsonHelper) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.officeRepository = officeRepository;
+        this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.dataValidator = dataValidator;
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
@@ -120,9 +118,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
         if (officeId == null) {
             updateRunningBalance();
         } else {
-            final Office office = this.officeRepository.findOne(officeId);
-            if (office == null) { throw new OfficeNotFoundException(officeId); }
-
+            this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
             String dateFinder = "select MIN(je.entry_date) as entityDate " + "from acc_gl_journal_entry  je "
                     + "where je.is_running_balance_calculated=0  and je.office_id=?";
             try {

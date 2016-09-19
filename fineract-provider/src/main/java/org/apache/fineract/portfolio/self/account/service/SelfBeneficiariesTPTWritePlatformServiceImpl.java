@@ -34,9 +34,9 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.self.account.data.SelfBeneficiariesTPTDataValidator;
 import org.apache.fineract.portfolio.self.account.domain.SelfBeneficiariesTPT;
 import org.apache.fineract.portfolio.self.account.domain.SelfBeneficiariesTPTRepository;
@@ -58,21 +58,21 @@ public class SelfBeneficiariesTPTWritePlatformServiceImpl implements
 	private final PlatformSecurityContext context;
 	private final SelfBeneficiariesTPTRepository repository;
 	private final SelfBeneficiariesTPTDataValidator validator;
-	private final LoanRepository loanRepo;
-	private final SavingsAccountRepository savingRepo;
+	private final LoanRepositoryWrapper loanRepositoryWrapper;
+	private final SavingsAccountRepositoryWrapper savingRepositoryWrapper;
 
 	@Autowired
 	public SelfBeneficiariesTPTWritePlatformServiceImpl(
 			final PlatformSecurityContext context,
 			final SelfBeneficiariesTPTRepository repository,
 			final SelfBeneficiariesTPTDataValidator validator,
-			final LoanRepository loanRepo,
-			final SavingsAccountRepository savingRepo) {
+			final LoanRepositoryWrapper loanRepositoryWrapper,
+			final SavingsAccountRepositoryWrapper savingRepositoryWrapper) {
 		this.context = context;
 		this.repository = repository;
 		this.validator = validator;
-		this.loanRepo = loanRepo;
-		this.savingRepo = savingRepo;
+		this.loanRepositoryWrapper = loanRepositoryWrapper;
+		this.savingRepositoryWrapper = savingRepositoryWrapper;
 		this.logger = LoggerFactory
 				.getLogger(SelfBeneficiariesTPTWritePlatformServiceImpl.class);
 	}
@@ -95,8 +95,7 @@ public class SelfBeneficiariesTPTWritePlatformServiceImpl implements
 
 		boolean validAccountDetails = true;
 		if (accountType.equals(PortfolioAccountType.LOAN)) {
-			Loan loan = this.loanRepo
-					.findNonClosedLoanByAccountNumber(accountNumber);
+			Loan loan = this.loanRepositoryWrapper.findNonClosedLoanByAccountNumber(accountNumber);
 			if (loan != null && loan.getClientId() != null
 					&& loan.getOffice().getName().equals(officeName)) {
 				accountId = loan.getId();
@@ -106,7 +105,7 @@ public class SelfBeneficiariesTPTWritePlatformServiceImpl implements
 				validAccountDetails = false;
 			}
 		} else {
-			SavingsAccount savings = this.savingRepo
+			SavingsAccount savings = this.savingRepositoryWrapper
 					.findNonClosedAccountByAccountNumber(accountNumber);
 			if (savings != null
 					&& savings.getClient() != null

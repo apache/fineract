@@ -47,7 +47,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
         @UniqueConstraint(columnNames = { "external_id" }, name = "externalid_org") })
 public class Office extends AbstractPersistable<Long> {
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private final List<Office> children = new LinkedList<>();
 
@@ -237,5 +237,9 @@ public class Office extends AbstractPersistable<Long> {
         }
 
         return match;
+    }
+    
+    public void loadLazyCollections() {
+        this.children.size() ;
     }
 }

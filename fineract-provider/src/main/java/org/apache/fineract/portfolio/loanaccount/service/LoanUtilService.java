@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -289,10 +290,10 @@ public class LoanUtilService {
         return calculatedRepaymentsStartingFromDate;
     }
     
-    public Set<LoanDisbursementDetails> fetchDisbursementData(final JsonObject command) {
+    public List<LoanDisbursementDetails> fetchDisbursementData(final JsonObject command) {
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(command);
         final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(command);
-        Set<LoanDisbursementDetails> disbursementDatas = new HashSet<>();
+        List<LoanDisbursementDetails> disbursementDatas = new ArrayList<>();
         if (command.has(LoanApiConstants.disbursementDataParameterName)) {
             final JsonArray disbursementDataArray = command.getAsJsonArray(LoanApiConstants.disbursementDataParameterName);
             if (disbursementDataArray != null && disbursementDataArray.size() > 0) {

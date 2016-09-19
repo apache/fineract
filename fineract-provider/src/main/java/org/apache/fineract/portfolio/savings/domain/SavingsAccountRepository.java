@@ -25,6 +25,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+//Use SavingsAccountRepositoryWrapper.
 public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, Long>, JpaSpecificationExecutor<SavingsAccount> {
 
     @Query("from SavingsAccount s_acc where s_acc.client.id = :clientId")

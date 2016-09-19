@@ -97,7 +97,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
     @Transactional
     public CommandProcessingResult createGuarantor(final Long loanId, final JsonCommand command) {
         final GuarantorCommand guarantorCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
-        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
         return createGuarantor(loan, command, guarantorCommand, existGuarantorList);
     }
@@ -186,7 +186,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             final GuarantorCommand guarantorCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
             guarantorCommand.validateForUpdate();
 
-            final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+            final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
             validateLoanStatus(loan);
             final Guarantor guarantorForUpdate = this.guarantorRepository.findByLoanAndId(loan, guarantorId);
             if (guarantorForUpdate == null) { throw new GuarantorNotFoundException(loanId, guarantorId); }
@@ -239,7 +239,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
     @Override
     @Transactional
     public CommandProcessingResult removeGuarantor(final Long loanId, final Long guarantorId, final Long guarantorFundingId) {
-        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         validateLoanStatus(loan);
         final Guarantor guarantorForDelete = this.guarantorRepository.findByLoanAndId(loan, guarantorId);
         if (guarantorForDelete == null || (guarantorFundingId == null && !guarantorForDelete.getGuarantorFundDetails().isEmpty())) { throw new GuarantorNotFoundException(

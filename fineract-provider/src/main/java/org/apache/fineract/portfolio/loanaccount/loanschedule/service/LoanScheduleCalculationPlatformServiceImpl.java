@@ -21,10 +21,8 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
@@ -227,7 +225,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         final MonetaryCurrency currency = loan.getCurrency();
         Money outstanding = loan.getPrincpal();
 
-        Set<LoanDisbursementDetails> disbursementDetails = new HashSet<>();
+        List<LoanDisbursementDetails> disbursementDetails = new ArrayList<>();
         if (loan.isMultiDisburmentLoan()) {
             disbursementDetails = loan.getDisbursementDetails();
             outstanding = outstanding.zero();
