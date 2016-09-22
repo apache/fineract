@@ -16,6 +16,7 @@
 -- specific language governing permissions and limitations
 -- under the License.
 --
+
 DELIMITER $$
 CREATE PROCEDURE `CashierTransactionSummary`(
 	IN `officeId` BIGINT,

@@ -3,7 +3,7 @@ Changelog
 
 Releases
 ===============
-
+1. 22 Sep 2016 - 16.09.01.RELEASE
 1. 16 Aug 2016 - 16.08.01.RELEASE
 1. 27 Jun 2016 - 16.06.01.RELEASE
 1. 13 May 2016 - 16.05.01.RELEASE
@@ -90,6 +90,31 @@ Releases
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
 
+16.09.01.RELEASE
+=============
+
+This release adds performance improvements.
+ 
+Platform & API
+New Features & Improvements
+ - Fix for performance issues 
+ - Performance issue fix for repayment template
+ - Loading child entites lazily
+ - [MIFOSX-1894] - Cashier Transaction Summary Pentaho Report
+ 
+Bugs
+ - [MIFOSX-2731] Combined both savings charges and penalties into charges dropdown
+ - [MIFOSX-2784] Including all transactions in Teller Cashier transaction list
+  
+Community-app
+New Features & Improvements
+
+Bugs
+ 
+ - MIFOSX-2167 - Not able to select the role in edit user page
+ - Excluding futureSchedule while fetching the loan details
+ - [MIFOSX-2784] UX changes for including all transactions into the Teller Cashier transaction list
+ 
 16.08.01.RELEASE
 =============
 
