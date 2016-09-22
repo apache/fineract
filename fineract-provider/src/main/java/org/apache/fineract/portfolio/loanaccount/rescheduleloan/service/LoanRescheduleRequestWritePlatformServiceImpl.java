@@ -55,7 +55,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachin
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRescheduleRequestToTermVariationMapping;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
@@ -104,7 +104,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     private final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService;
     private final LoanTransactionRepository loanTransactionRepository;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
-    private final LoanRepository loanRepository;
+    private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanAssembler loanAssembler;
     private final LoanUtilService loanUtilService;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
@@ -129,7 +129,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository,
             final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService,
             final LoanTransactionRepository loanTransactionRepository,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService, final LoanRepository loanRepository,
+            final JournalEntryWritePlatformService journalEntryWritePlatformService, final LoanRepositoryWrapper loanRepositoryWrapper,
             final LoanAssembler loanAssembler, final LoanUtilService loanUtilService,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             final LoanScheduleGeneratorFactory loanScheduleFactory, final LoanSummaryWrapper loanSummaryWrapper,
@@ -145,7 +145,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
         this.loanScheduleHistoryWritePlatformService = loanScheduleHistoryWritePlatformService;
         this.loanTransactionRepository = loanTransactionRepository;
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
-        this.loanRepository = loanRepository;
+        this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.loanAssembler = loanAssembler;
         this.loanUtilService = loanUtilService;
         this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
@@ -281,7 +281,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
             // create a new entry in the m_loan_reschedule_request table
             this.loanRescheduleRequestRepository.save(loanRescheduleRequest);
-            this.loanRepository.save(loan);
+            this.loanRepositoryWrapper.save(loan);
 
             return new CommandProcessingResultBuilder().withCommandId(jsonCommand.commandId()).withEntityId(loanRescheduleRequest.getId())
                     .withLoanId(loan.getId()).build();
@@ -508,7 +508,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     this.repaymentScheduleInstallmentRepository.save(installment);
                 }
             }
-            this.loanRepository.saveAndFlush(loan);
+            this.loanRepositoryWrapper.saveAndFlush(loan);
         } catch (final DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

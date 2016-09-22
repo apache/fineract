@@ -37,7 +37,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
@@ -45,9 +44,8 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.apache.fineract.portfolio.calendar.domain.CalendarRepository;
 import org.apache.fineract.portfolio.calendar.exception.CalendarInstanceNotFoundException;
 import org.apache.fineract.portfolio.calendar.exception.CalendarNotFoundException;
-import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
 import org.apache.fineract.portfolio.client.domain.Client;
-import org.apache.fineract.portfolio.client.domain.ClientRepository;
+import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepository;
 import org.apache.fineract.portfolio.group.exception.ClientNotInGroupException;
@@ -73,28 +71,26 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
     private final MeetingDataValidator meetingDataValidator;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final CalendarRepository calendarRepository;
-    private final ClientRepository clientRepository;
+    private final ClientRepositoryWrapper clientRepositoryWrapper;
     private final GroupRepository groupRepository;
     private final FromJsonHelper fromApiJsonHelper;
     private final ConfigurationDomainService configurationDomainService;
-    private final CalendarReadPlatformService calendarReadPlatformService;
 
     @Autowired
     public MeetingWritePlatformServiceJpaRepositoryImpl(final MeetingRepositoryWrapper meetingRepositoryWrapper,
             final MeetingRepository meetingRepository, final MeetingDataValidator meetingDataValidator,
             final CalendarInstanceRepository calendarInstanceRepository, final CalendarRepository calendarRepository,
-            final ClientRepository clientRepository, final GroupRepository groupRepository, final FromJsonHelper fromApiJsonHelper,
-            final ConfigurationDomainService configurationDomainService, final CalendarReadPlatformService calendarReadPlatformService) {
+            final ClientRepositoryWrapper clientRepositoryWrapper, final GroupRepository groupRepository, final FromJsonHelper fromApiJsonHelper,
+            final ConfigurationDomainService configurationDomainService) {
         this.meetingRepositoryWrapper = meetingRepositoryWrapper;
         this.meetingRepository = meetingRepository;
         this.meetingDataValidator = meetingDataValidator;
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.calendarRepository = calendarRepository;
-        this.clientRepository = clientRepository;
+        this.clientRepositoryWrapper = clientRepositoryWrapper;
         this.groupRepository = groupRepository;
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.configurationDomainService = configurationDomainService;
-        this.calendarReadPlatformService = calendarReadPlatformService;
     }
 
     @Override
@@ -203,7 +199,7 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
                     final Integer attendanceTypeId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(attendanceTypeParamName,
                             attendanceElement);
 
-                    final Client client = this.clientRepository.findOne(clientId);
+                    final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId, true);
 
                     if (meeting.isGroupEntity() && !client.isChildOfGroup(meeting.entityId())) {
                         throw new ClientNotInGroupException(clientId, meeting.entityId());

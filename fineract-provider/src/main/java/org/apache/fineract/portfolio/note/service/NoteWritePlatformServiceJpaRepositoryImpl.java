@@ -31,7 +31,7 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepository;
 import org.apache.fineract.portfolio.group.exception.GroupNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
@@ -51,14 +51,13 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
     private final NoteRepository noteRepository;
     private final ClientRepositoryWrapper clientRepository;
     private final GroupRepository groupRepository;
-    // private final SavingAccountRepository savingAccountRepository;
-    private final LoanRepository loanRepository;
+    private final LoanRepositoryWrapper loanRepository;
     private final LoanTransactionRepository loanTransactionRepository;
     private final NoteCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
     @Autowired
     public NoteWritePlatformServiceJpaRepositoryImpl(final NoteRepository noteRepository, final ClientRepositoryWrapper clientRepository,
-            final GroupRepository groupRepository, final LoanRepository loanRepository,
+            final GroupRepository groupRepository, final LoanRepositoryWrapper loanRepository,
             final LoanTransactionRepository loanTransactionRepository, final NoteCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.noteRepository = noteRepository;
         this.clientRepository = clientRepository;
@@ -118,9 +117,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
         final Long resourceId = command.getLoanId();
 
-        final Loan loan = this.loanRepository.findOne(resourceId);
-        if (loan == null) { throw new LoanNotFoundException(resourceId); }
-
+        final Loan loan = this.loanRepository.findOneWithNotFoundDetection(resourceId);
         final String note = command.stringValueOfParameterNamed("note");
         final Note newNote = Note.loanNote(loan, note);
 
@@ -291,10 +288,8 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
         final NoteType type = NoteType.LOAN;
 
-        final Loan loan = this.loanRepository.findOne(resourceId);
-        if (loan == null) { throw new LoanNotFoundException(resourceId); }
+        final Loan loan = this.loanRepository.findOneWithNotFoundDetection(resourceId);
         final Note noteForUpdate = this.noteRepository.findByLoanIdAndId(resourceId, noteId);
-
         if (noteForUpdate == null) { throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase()); }
 
         final Map<String, Object> changes = noteForUpdate.update(command);

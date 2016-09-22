@@ -245,10 +245,10 @@ public class Loan extends AbstractPersistable<Long> {
     @Column(name = "loan_product_counter")
     private Integer loanProductCounter;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch=FetchType.LAZY)
     private Set<LoanCharge> charges = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch=FetchType.LAZY)
     private Set<LoanTrancheCharge> trancheCharges = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch=FetchType.LAZY)
@@ -257,26 +257,14 @@ public class Loan extends AbstractPersistable<Long> {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch=FetchType.LAZY)
     private Set<LoanOfficerAssignmentHistory> loanOfficerHistory;
 
-    // see
-    // http://stackoverflow.com/questions/4334970/hibernate-cannot-simultaneously-fetch-multiple-bags
     @OrderBy(value = "installmentNumber")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch=FetchType.EAGER)
-    private final Set<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch=FetchType.LAZY)
+    private final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments = new ArrayList<>();
 
-    // see
-    // http://stackoverflow.com/questions/4334970/hibernate-cannot-simultaneously-fetch-multiple-bags
     @OrderBy(value = "dateOf, id")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch=FetchType.EAGER)
-    private final Set<LoanTransaction> loanTransactions = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch=FetchType.LAZY)
+    private final List<LoanTransaction> loanTransactions = new ArrayList<>();
 
-    private transient List<LoanTransaction> sortedTransactions = null ;
-    
-    private transient boolean isTransactionsListDirty = false ;
-    
-    private transient List<LoanRepaymentScheduleInstallment> sortedrepaymentScheduleInstallments = null ;
-    
-    private transient boolean isrepaymentScheduleInstallmentsListDirty = false ;
-    
     @Embedded
     private LoanSummary summary;
 
@@ -302,13 +290,13 @@ public class Loan extends AbstractPersistable<Long> {
     @Column(name = "max_outstanding_loan_balance", scale = 6, precision = 19, nullable = false)
     private BigDecimal maxOutstandingLoanBalance;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch=FetchType.LAZY)
     @OrderBy(value = "expectedDisbursementDate, id")
-    private Set<LoanDisbursementDetails> disbursementDetails = new HashSet<>();
+    private List<LoanDisbursementDetails> disbursementDetails = new ArrayList<>();
 
     @OrderBy(value = "termApplicableFrom, id")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch=FetchType.EAGER)
-    private final Set<LoanTermVariations> loanTermVariations = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true, fetch=FetchType.LAZY)
+    private final List<LoanTermVariations> loanTermVariations = new ArrayList<>();
 
     @Column(name = "total_recovered_derived", scale = 6, precision = 19)
     private BigDecimal totalRecovered;
@@ -349,8 +337,6 @@ public class Loan extends AbstractPersistable<Long> {
     @Column(name = "is_topup", nullable = false)
     private boolean isTopup = false;
 
-//    @OneToOne(cascade = CascadeType.ALL,  orphanRemoval = true, fetch=FetchType.EAGER)
-//    @JoinColumn(name = "loan_id", referencedColumnName= "id" , nullable = true)
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loan", optional = true, orphanRemoval = true, fetch=FetchType.EAGER)
     private LoanTopupDetails loanTopupDetails;
 
@@ -358,7 +344,7 @@ public class Loan extends AbstractPersistable<Long> {
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy,
             final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges,
-            final Set<LoanCollateral> collateral, final BigDecimal fixedEmiAmount, final Set<LoanDisbursementDetails> disbursementDetails,
+            final Set<LoanCollateral> collateral, final BigDecimal fixedEmiAmount, final List<LoanDisbursementDetails> disbursementDetails,
             final BigDecimal maxOutstandingLoanBalance, final Boolean createStandingInstructionAtDisbursement,
             final Boolean isFloatingInterestRate, final BigDecimal interestRateDifferential) {
         final LoanStatus status = null;
@@ -375,7 +361,7 @@ public class Loan extends AbstractPersistable<Long> {
             final LoanTransactionProcessingStrategy transactionProcessingStrategy,
             final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges,
             final Set<LoanCollateral> collateral, final Boolean syncDisbursementWithMeeting, final BigDecimal fixedEmiAmount,
-            final Set<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance,
+            final List<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance,
             final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,
             final BigDecimal interestRateDifferential) {
         final LoanStatus status = null;
@@ -391,7 +377,7 @@ public class Loan extends AbstractPersistable<Long> {
             final LoanTransactionProcessingStrategy transactionProcessingStrategy,
             final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges,
             final Set<LoanCollateral> collateral, final Boolean syncDisbursementWithMeeting, final BigDecimal fixedEmiAmount,
-            final Set<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance,
+            final List<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance,
             final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,
             final BigDecimal interestRateDifferential) {
         final LoanStatus status = null;
@@ -409,7 +395,7 @@ public class Loan extends AbstractPersistable<Long> {
             final Staff loanOfficer, final CodeValue loanPurpose, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
             final LoanProduct loanProduct, final LoanProductRelatedDetail loanRepaymentScheduleDetail, final LoanStatus loanStatus,
             final Set<LoanCharge> loanCharges, final Set<LoanCollateral> collateral, final Boolean syncDisbursementWithMeeting,
-            final BigDecimal fixedEmiAmount, final Set<LoanDisbursementDetails> disbursementDetails,
+            final BigDecimal fixedEmiAmount, final List<LoanDisbursementDetails> disbursementDetails,
             final BigDecimal maxOutstandingLoanBalance, final Boolean createStandingInstructionAtDisbursement,
             final Boolean isFloatingInterestRate, final BigDecimal interestRateDifferential) {
 
@@ -587,7 +573,6 @@ public class Loan extends AbstractPersistable<Long> {
             mapEntry.getValue().updateLoan(this);
         }
         this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
-        this.isTransactionsListDirty = true ;
         updateLoanSummaryDerivedFields();
         this.loanTransactions.removeAll(changedTransactionDetail.getNewTransactionMappings().values());
         return changedTransactionDetail;
@@ -1098,7 +1083,6 @@ public class Loan extends AbstractPersistable<Long> {
 
     public void updateLoanSchedule(final LoanScheduleModel modifiedLoanSchedule, AppUser currentUser) {
         this.repaymentScheduleInstallments.clear();
-        this.isrepaymentScheduleInstallmentsListDirty = true ;
         for (final LoanScheduleModelPeriod scheduledLoanInstallment : modifiedLoanSchedule.getPeriods()) {
 
             if (scheduledLoanInstallment.isRepaymentPeriod()) {
@@ -1120,7 +1104,6 @@ public class Loan extends AbstractPersistable<Long> {
 
     public void updateLoanSchedule(final Collection<LoanRepaymentScheduleInstallment> installments, AppUser currentUser) {
         this.repaymentScheduleInstallments.clear();
-        this.isrepaymentScheduleInstallmentsListDirty = true ;
         for (final LoanRepaymentScheduleInstallment installment : installments) {
             addLoanRepaymentScheduleInstallment(installment);
         }
@@ -1848,8 +1831,7 @@ public class Loan extends AbstractPersistable<Long> {
         List<LoanTransaction> transactions = getLoanTransactions() ;
         for (final LoanTransaction loanTransaction : transactions) {
             if (loanTransaction.isDisbursement()) {
-                this.loanTransactions.remove(loanTransaction);
-                transactions.remove(loanTransaction) ;
+                removeLoanTransaction(loanTransaction);
                 break;
             }
         }
@@ -2201,7 +2183,6 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public Collection<Long> findExistingTransactionIds() {
-
         final Collection<Long> ids = new ArrayList<>();
         List<LoanTransaction> transactions = getLoanTransactions() ;
         for (final LoanTransaction transaction : transactions) {
@@ -2749,7 +2730,6 @@ public class Loan extends AbstractPersistable<Long> {
             }
         }
         this.loanTransactions.retainAll(retainTransactions);
-        isTransactionsListDirty = true ;
     }
 
     private void updateLoanToPreDisbursalState() {
@@ -3008,7 +2988,6 @@ public class Loan extends AbstractPersistable<Long> {
              * transactions first and then new transactions.
              */
             this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
-            this.isTransactionsListDirty = true ;
         }
 
         updateLoanSummaryDerivedFields();
@@ -4478,17 +4457,15 @@ public class Loan extends AbstractPersistable<Long> {
 
     //This method returns copy of all transactions
     public List<LoanTransaction> getLoanTransactions() {
-        if(this.sortedTransactions == null || isTransactionsListDirty) {
-            this.sortedTransactions = new ArrayList<>(this.loanTransactions) ;
-            this.sortedTransactions.sort(new LoanTransactionComparator());
-            this.isTransactionsListDirty = false ;
-        }
-        return sortedTransactions;
+        return this.loanTransactions;
     }
 
     public void addLoanTransaction(final LoanTransaction loanTransaction) {
         this.loanTransactions.add(loanTransaction) ;
-        this.isTransactionsListDirty = true ;
+    }
+    
+    public void removeLoanTransaction(final LoanTransaction loanTransaction) {
+        this.loanTransactions.remove(loanTransaction) ;
     }
     
     public void setLoanStatus(final Integer loanStatus) {
@@ -4859,7 +4836,7 @@ public class Loan extends AbstractPersistable<Long> {
         return list;
     }
 
-    public Set<LoanDisbursementDetails> getDisbursementDetails() {
+    public List<LoanDisbursementDetails> getDisbursementDetails() {
         return this.disbursementDetails;
     }
 
@@ -5017,7 +4994,6 @@ public class Loan extends AbstractPersistable<Long> {
          * first and then new transactions.
          */
         this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
-        this.isTransactionsListDirty = true ;
         updateLoanSummaryDerivedFields();
 
         this.loanTransactions.removeAll(changedTransactionDetail.getNewTransactionMappings().values());
@@ -5430,11 +5406,7 @@ public class Loan extends AbstractPersistable<Long> {
      * @return List of loan repayments schedule objects
      **/
     public List<LoanRepaymentScheduleInstallment> getRepaymentScheduleInstallments() {
-        if (this.sortedrepaymentScheduleInstallments == null || this.isrepaymentScheduleInstallmentsListDirty) {
-            this.sortedrepaymentScheduleInstallments = new ArrayList<>(this.repaymentScheduleInstallments);
-            this.sortedrepaymentScheduleInstallments.sort(LoanRepaymentScheduleInstallment.installmentNumberComparator);
-        }
-        return sortedrepaymentScheduleInstallments;
+        return this.repaymentScheduleInstallments;
     }
 
     public Integer getLoanRepaymentScheduleInstallmentsSize() {
@@ -5443,7 +5415,6 @@ public class Loan extends AbstractPersistable<Long> {
     public void addLoanRepaymentScheduleInstallment(final LoanRepaymentScheduleInstallment installment) {
         installment.updateLoan(this);
         this.repaymentScheduleInstallments.add(installment);
-        this.isrepaymentScheduleInstallmentsListDirty = true ;
     }
     /**
      * @return Loan product minimum repayments schedule related detail
@@ -5944,7 +5915,7 @@ public class Loan extends AbstractPersistable<Long> {
         this.interestRateDifferential = interestRateDifferential;
     }
 
-    public Set<LoanTermVariations> getLoanTermVariations() {
+    public List<LoanTermVariations> getLoanTermVariations() {
         return this.loanTermVariations;
     }
 
@@ -5982,7 +5953,7 @@ public class Loan extends AbstractPersistable<Long> {
      * get the next repayment date for rescheduling at the time of disbursement
      */
     public LocalDate getNextPossibleRepaymentDateForRescheduling() {
-        Set<LoanDisbursementDetails> loanDisbursementDetails = this.disbursementDetails;
+        List<LoanDisbursementDetails> loanDisbursementDetails = this.disbursementDetails;
         LocalDate nextRepaymentDate = new LocalDate();
         for (LoanDisbursementDetails loanDisbursementDetail : loanDisbursementDetails) {
             if (loanDisbursementDetail.actualDisbursementDate() == null) {
@@ -6366,5 +6337,28 @@ public class Loan extends AbstractPersistable<Long> {
     
     public Collection<LoanCharge> getLoanCharges() {
         return this.charges;
+    }
+    
+    public void initializeLazyCollections() {
+        this.charges.size() ;
+        this.trancheCharges.size() ;
+        this.repaymentScheduleInstallments.size() ;
+        this.loanTransactions.size() ;
+        this.disbursementDetails.size() ;
+        this.loanTermVariations.size() ;
+        this.collateral.size() ;
+        this.loanOfficerHistory.size() ;
+    }
+    
+    public void initializeLoanOfficerHistory() {
+        this.loanOfficerHistory.size() ;
+    }
+    
+    public void initilizeTransactions() {
+        this.loanTransactions.size() ;
+    }
+    
+    public void initializeRepaymentSchedule() {
+        this.repaymentScheduleInstallments.size() ;
     }
 }

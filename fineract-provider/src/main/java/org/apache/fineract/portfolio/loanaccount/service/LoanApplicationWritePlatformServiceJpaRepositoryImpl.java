@@ -41,8 +41,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
-import org.apache.fineract.infrastructure.core.exceptionmapper.PlatformDomainRuleExceptionMapper;
-import org.apache.fineract.infrastructure.entityaccess.exception.NotOfficeSpecificProductException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -52,6 +50,7 @@ import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRela
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepository;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMapping;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMappingRepository;
+import org.apache.fineract.infrastructure.entityaccess.exception.NotOfficeSpecificProductException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
@@ -85,11 +84,21 @@ import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
-import org.apache.fineract.portfolio.loanaccount.domain.*;
+import org.apache.fineract.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTopupDetails;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
@@ -132,7 +141,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanApplicationTransitionApiJsonValidator loanApplicationTransitionApiJsonValidator;
     private final LoanProductDataValidator loanProductCommandFromApiJsonDeserializer;
     private final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer;
-    private final LoanRepository loanRepository;
+    private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final NoteRepository noteRepository;
     private final LoanScheduleCalculationPlatformService calculationPlatformService;
     private final LoanAssembler loanAssembler;
@@ -167,7 +176,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer,
             final LoanProductDataValidator loanProductCommandFromApiJsonDeserializer, final AprCalculator aprCalculator,
             final LoanAssembler loanAssembler, final LoanChargeAssembler loanChargeAssembler,
-            final CollateralAssembler loanCollateralAssembler, final LoanRepository loanRepository, final NoteRepository noteRepository,
+            final CollateralAssembler loanCollateralAssembler, final LoanRepositoryWrapper loanRepositoryWrapper,
+            final NoteRepository noteRepository,
             final LoanScheduleCalculationPlatformService calculationPlatformService, final ClientRepositoryWrapper clientRepository,
             final LoanProductRepository loanProductRepository, final AccountNumberGenerator accountNumberGenerator,
             final LoanSummaryWrapper loanSummaryWrapper, final GroupRepositoryWrapper groupRepository,
@@ -190,7 +200,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.loanAssembler = loanAssembler;
         this.loanChargeAssembler = loanChargeAssembler;
         this.loanCollateralAssembler = loanCollateralAssembler;
-        this.loanRepository = loanRepository;
+        this.loanRepositoryWrapper = loanRepositoryWrapper ;
         this.noteRepository = noteRepository;
         this.calculationPlatformService = calculationPlatformService;
         this.clientRepository = clientRepository;
@@ -289,7 +299,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
                 if(newLoanApplication.isTopup()){
                     final Long loanIdToClose = command.longValueOfParameterNamed(LoanApiConstants.loanIdToClose);
-                    final Loan loanToClose = this.loanRepository.findNonClosedLoanThatBelongsToClient(loanIdToClose, clientId);
+                    final Loan loanToClose = this.loanRepositoryWrapper.findNonClosedLoanThatBelongsToClient(loanIdToClose, clientId);
                     if(loanToClose == null){
                         throw new GeneralPlatformDomainRuleException("error.msg.loan.loanIdToClose.no.active.loan.associated.to.client.found",
                                 "loanIdToClose is invalid, No Active Loan associated with the given Client ID found.");
@@ -330,7 +340,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 }
             }
 
-            this.loanRepository.save(newLoanApplication);
+            this.loanRepositoryWrapper.save(newLoanApplication);
 
             if (loanProduct.isInterestRecalculationEnabled()) {
                 this.fromApiJsonDeserializer.validateLoanForInterestRecalculation(newLoanApplication);
@@ -341,7 +351,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository
                         .findByAccountType(EntityAccountType.LOAN);
                 newLoanApplication.updateAccountNo(this.accountNumberGenerator.generate(newLoanApplication, accountNumberFormat));
-                this.loanRepository.save(newLoanApplication);
+                this.loanRepositoryWrapper.save(newLoanApplication);
             }
 
             final String submittedOnNote = command.stringValueOfParameterNamed("submittedOnNote");
@@ -552,7 +562,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 LoanChargeData chargeData = new LoanChargeData(charge.getId(), charge.getDueLocalDate(), charge.amountOrPercentage());
                 chargesMap.put(charge.getId(), chargeData);
             }
-            Set<LoanDisbursementDetails> disbursementDetails = this.loanUtilService.fetchDisbursementData(command.parsedJson()
+            List<LoanDisbursementDetails> disbursementDetails = this.loanUtilService.fetchDisbursementData(command.parsedJson()
                     .getAsJsonObject());
 
             /**
@@ -684,7 +694,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                         if(existingLoanTopupDetails != null){
                             existingLoanIdToClose = existingLoanTopupDetails.getLoanIdToClose();
                         }
-                        final Loan loanToClose = this.loanRepository.findNonClosedLoanThatBelongsToClient(loanIdToClose, existingLoanApplication.getClientId());
+                        final Loan loanToClose = this.loanRepositoryWrapper.findNonClosedLoanThatBelongsToClient(loanIdToClose, existingLoanApplication.getClientId());
                         if(loanToClose == null){
                             throw new GeneralPlatformDomainRuleException("error.msg.loan.loanIdToClose.no.active.loan.associated.to.client.found",
                                     "loanIdToClose is invalid, No Active Loan associated with the given Client ID found.");
@@ -960,7 +970,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             // updating loan interest recalculation details throwing null
             // pointer exception after saveAndFlush
             // http://stackoverflow.com/questions/17151757/hibernate-cascade-update-gives-null-pointer/17334374#17334374
-            this.loanRepository.save(existingLoanApplication);
+            this.loanRepositoryWrapper.save(existingLoanApplication);
 
             if (productRelatedDetail.isInterestRecalculationEnabled()) {
                 this.fromApiJsonDeserializer.validateLoanForInterestRecalculation(existingLoanApplication);
@@ -1023,7 +1033,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final List<Note> relatedNotes = this.noteRepository.findByLoanId(loan.getId());
         this.noteRepository.deleteInBatch(relatedNotes);
 
-        this.loanRepository.delete(loanId);
+        this.loanRepositoryWrapper.delete(loanId);
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(loanId) //
@@ -1100,7 +1110,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             if(loan.isTopup() && loan.getClientId() != null){
                 final Long loanIdToClose = loan.getTopupLoanDetails().getLoanIdToClose();
-                final Loan loanToClose = this.loanRepository.findNonClosedLoanThatBelongsToClient(loanIdToClose, loan.getClientId());
+                final Loan loanToClose = this.loanRepositoryWrapper.findNonClosedLoanThatBelongsToClient(loanIdToClose, loan.getClientId());
                 if(loanToClose == null){
                     throw new GeneralPlatformDomainRuleException("error.msg.loan.to.be.closed.with.topup.is.not.active",
                             "Loan to be closed with this topup is not active.");
@@ -1205,7 +1215,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         final Map<String, Object> changes = loan.loanApplicationRejection(currentUser, command, defaultLoanLifecycleStateMachine());
         if (!changes.isEmpty()) {
-            this.loanRepository.save(loan);
+            this.loanRepositoryWrapper.save(loan);
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
@@ -1239,7 +1249,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final Map<String, Object> changes = loan.loanApplicationWithdrawnByApplicant(currentUser, command,
                 defaultLoanLifecycleStateMachine());
         if (!changes.isEmpty()) {
-            this.loanRepository.save(loan);
+            this.loanRepositoryWrapper.save(loan);
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
@@ -1260,8 +1270,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     }
 
     private Loan retrieveLoanBy(final Long loanId) {
-        final Loan loan = this.loanRepository.findOne(loanId);
-        if (loan == null) { throw new LoanNotFoundException(loanId); }
+        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         loan.setHelpers(defaultLoanLifecycleStateMachine(), this.loanSummaryWrapper, this.loanRepaymentScheduleTransactionProcessorFactory);
         return loan;
     }
@@ -1311,7 +1320,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     this.repaymentScheduleInstallmentRepository.save(installment);
                 }
             }
-            this.loanRepository.saveAndFlush(loan);
+            this.loanRepositoryWrapper.saveAndFlush(loan);
         } catch (final DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

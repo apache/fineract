@@ -36,8 +36,7 @@ import org.apache.fineract.organisation.holiday.domain.Holiday;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
 import org.apache.fineract.organisation.holiday.exception.HolidayDateException;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.organisation.office.domain.OfficeRepository;
-import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
+import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.apache.fineract.organisation.workingdays.service.WorkingDaysUtil;
@@ -61,18 +60,18 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
     private final HolidayRepositoryWrapper holidayRepository;
     private final WorkingDaysRepositoryWrapper daysRepositoryWrapper;
     private final PlatformSecurityContext context;
-    private final OfficeRepository officeRepository;
+    private final OfficeRepositoryWrapper officeRepositoryWrapper;
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
     public HolidayWritePlatformServiceJpaRepositoryImpl(final HolidayDataValidator fromApiJsonDeserializer,
             final HolidayRepositoryWrapper holidayRepository, final PlatformSecurityContext context,
-            final OfficeRepository officeRepository, final FromJsonHelper fromApiJsonHelper,
+            final OfficeRepositoryWrapper officeRepositoryWrapper, final FromJsonHelper fromApiJsonHelper,
             final WorkingDaysRepositoryWrapper daysRepositoryWrapper) {
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.holidayRepository = holidayRepository;
         this.context = context;
-        this.officeRepository = officeRepository;
+        this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.daysRepositoryWrapper = daysRepositoryWrapper;
     }
@@ -162,8 +161,7 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
             for (int i = 0; i < array.size(); i++) {
                 final JsonObject officeElement = array.get(i).getAsJsonObject();
                 final Long officeId = this.fromApiJsonHelper.extractLongNamed(HolidayApiConstants.officeIdParamName, officeElement);
-                final Office office = this.officeRepository.findOne(officeId);
-                if (office == null) { throw new OfficeNotFoundException(officeId); }
+                final Office office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
                 offices.add(office);
             }
         }

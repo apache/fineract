@@ -28,7 +28,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
-import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.charge.domain.Charge;
@@ -38,7 +37,7 @@ import org.apache.fineract.portfolio.floatingrates.domain.FloatingRateRepository
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.fund.domain.FundRepository;
 import org.apache.fineract.portfolio.fund.exception.FundNotFoundException;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionProcessingStrategyRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionProcessingStrategyNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
@@ -75,7 +74,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     private final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService;
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
     private final FloatingRateRepositoryWrapper floatingRateRepository;
-    private final LoanRepository loanRepository;
+    private final LoanRepositoryWrapper loanRepositoryWrapper;
 
     @Autowired
     public LoanProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -86,7 +85,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
             final FineractEntityAccessUtil fineractEntityAccessUtil,
             final FloatingRateRepositoryWrapper floatingRateRepository,
-            final LoanRepository loanRepository) {
+            final LoanRepositoryWrapper loanRepositoryWrapper) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.loanProductRepository = loanProductRepository;
@@ -97,7 +96,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         this.accountMappingWritePlatformService = accountMappingWritePlatformService;
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
         this.floatingRateRepository = floatingRateRepository;
-        this.loanRepository = loanRepository;
+        this.loanRepositoryWrapper = loanRepositoryWrapper;
     }
 
     @Transactional
@@ -182,7 +181,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             validateInputDates(command);
 
             if(anyChangeInCriticalFloatingRateLinkedParams(command, product) 
-            		&& this.loanRepository.doNonClosedLoanAccountsExistForProduct(product.getId())){
+            		&& this.loanRepositoryWrapper.doNonClosedLoanAccountsExistForProduct(product.getId())){
             	throw new LoanProductCannotBeModifiedDueToNonClosedLoansException(product.getId());
             }
             

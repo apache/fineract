@@ -35,8 +35,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.organisation.office.domain.OfficeRepository;
-import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
+import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepository;
 import org.apache.fineract.organisation.staff.exception.StaffNotFoundException;
@@ -70,7 +69,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     private final TellerCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final TellerRepository tellerRepository;
     private final TellerRepositoryWrapper tellerRepositoryWrapper;
-    private final OfficeRepository officeRepository;
+    private final OfficeRepositoryWrapper officeRepositoryWrapper;
     private final StaffRepository staffRepository;
     private final CashierRepository cashierRepository;
     private final CashierTransactionRepository cashierTxnRepository;
@@ -80,7 +79,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     @Autowired
     public TellerWritePlatformServiceJpaImpl(final PlatformSecurityContext context,
             final TellerCommandFromApiJsonDeserializer fromApiJsonDeserializer, final TellerRepository tellerRepository,
-            final TellerRepositoryWrapper tellerRepositoryWrapper, final OfficeRepository officeRepository,
+            final TellerRepositoryWrapper tellerRepositoryWrapper, final OfficeRepositoryWrapper officeRepositoryWrapper,
             final StaffRepository staffRepository, CashierRepository cashierRepository, CashierTransactionRepository cashierTxnRepository,
             JournalEntryRepository glJournalEntryRepository,
             FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper) {
@@ -88,7 +87,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.tellerRepository = tellerRepository;
         this.tellerRepositoryWrapper = tellerRepositoryWrapper;
-        this.officeRepository = officeRepository;
+        this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.staffRepository = staffRepository;
         this.cashierRepository = cashierRepository;
         this.cashierTxnRepository = cashierTxnRepository;
@@ -108,9 +107,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 
             // final Office parent =
             // validateUserPriviledgeOnOfficeAndRetrieve(currentUser, officeId);
-            final Office tellerOffice = this.officeRepository.findOne(officeId);
-            if (tellerOffice == null) { throw new OfficeNotFoundException(officeId); }
-
+            final Office tellerOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
             final Teller teller = Teller.fromJson(tellerOffice, command);
 
             // pre save to generate id for use in office hierarchy
@@ -133,9 +130,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
         try {
 
             final Long officeId = command.longValueOfParameterNamed("officeId");
-            final Office tellerOffice = this.officeRepository.findOne(officeId);
-            if (tellerOffice == null) { throw new OfficeNotFoundException(officeId); }
-
+            final Office tellerOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
             final AppUser currentUser = this.context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForCreateAndUpdateTeller(command.json());
@@ -167,9 +162,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     private Teller validateUserPriviledgeOnTellerAndRetrieve(final AppUser currentUser, final Long tellerId) {
 
         final Long userOfficeId = currentUser.getOffice().getId();
-        final Office userOffice = this.officeRepository.findOne(userOfficeId);
-        if (userOffice == null) { throw new OfficeNotFoundException(userOfficeId); }
-
+        final Office userOffice = this.officeRepositoryWrapper.findOfficeHierarchy(userOfficeId);
         final Teller tellerToReturn = this.tellerRepository.findOne(tellerId);
         if (tellerToReturn != null) {
             final Long tellerOfficeId = tellerToReturn.officeId();

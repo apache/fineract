@@ -292,18 +292,14 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     protected SavingsAccountSummary summary;
 
     @OrderBy(value = "dateOf, createdDate, id")
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true, fetch=FetchType.EAGER)
-    protected final Set<SavingsAccountTransaction> transactions = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true, fetch=FetchType.LAZY)
+    protected final List<SavingsAccountTransaction> transactions = new ArrayList<>();
     
-    private transient List<SavingsAccountTransaction> orderedTransactions = null ;
-    
-    private transient boolean isTransactionsDirty = false ;
-    
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true, fetch=FetchType.LAZY)
     protected Set<SavingsAccountCharge> charges = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true, fetch=FetchType.EAGER)
-    private Set<SavingsOfficerAssignmentHistory> savingsOfficerHistory;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true, fetch=FetchType.LAZY)
+    private Set<SavingsOfficerAssignmentHistory> savingsOfficerHistory = new HashSet<>();
 
     @Transient
     protected boolean accountNumberRequiresAutoGeneration = false;
@@ -419,7 +415,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.enforceMinRequiredBalance = enforceMinRequiredBalance;
         this.minRequiredBalance = minRequiredBalance;
         this.minBalanceForInterestCalculation = product.minBalanceForInterestCalculation();
-        this.savingsOfficerHistory = null;
+        //this.savingsOfficerHistory = null;
         this.withHoldTax = withHoldTax;
         this.taxGroup = product.getTaxGroup();
     }
@@ -2266,17 +2262,11 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public List<SavingsAccountTransaction> getTransactions() {
-        if(this.orderedTransactions == null || isTransactionsDirty) {
-            this.orderedTransactions = new ArrayList<>(this.transactions) ;
-            this.orderedTransactions.sort(new SavingsAccountTransactionComparator());
-            this.isTransactionsDirty = false ;
-        }
-        return orderedTransactions;
+        return this.transactions;
     }
 
     public void addTransaction(final SavingsAccountTransaction transaction) {
         this.transactions.add(transaction);
-        this.isTransactionsDirty = true ;
     }
     
     public void setStatus(final Integer status) {
@@ -2800,4 +2790,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         recalculateDailyBalances(Money.zero(this.currency), transactionDate);
 		this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
 	}
+	
+    public void loadLazyCollections() {
+        transactions.size();
+        charges.size();
+        savingsOfficerHistory.size();
+    }
 }

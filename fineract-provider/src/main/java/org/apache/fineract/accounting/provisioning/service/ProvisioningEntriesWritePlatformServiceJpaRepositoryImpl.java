@@ -50,7 +50,7 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.organisation.office.domain.OfficeRepository;
+import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaData;
 import org.apache.fineract.organisation.provisioning.domain.ProvisioningCategory;
 import org.apache.fineract.organisation.provisioning.domain.ProvisioningCategoryRepository;
@@ -72,7 +72,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     private final ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService ;
     private final LoanProductRepository loanProductRepository;
     private final GLAccountRepository glAccountRepository;
-    private final OfficeRepository officeRepository;
+    private final OfficeRepositoryWrapper officeRepositoryWrapper;
     private final ProvisioningCategoryRepository provisioningCategoryRepository;
     private final PlatformSecurityContext platformSecurityContext;
     private final ProvisioningEntryRepository provisioningEntryRepository;
@@ -85,7 +85,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService,
             final ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService,
             final LoanProductRepository loanProductRepository, final GLAccountRepository glAccountRepository,
-            final OfficeRepository officeRepository, final ProvisioningCategoryRepository provisioningCategoryRepository,
+            final OfficeRepositoryWrapper officeRepositoryWrapper, final ProvisioningCategoryRepository provisioningCategoryRepository,
             final PlatformSecurityContext platformSecurityContext, final ProvisioningEntryRepository provisioningEntryRepository,
             final JournalEntryWritePlatformService journalEntryWritePlatformService,
             final ProvisioningEntriesDefinitionJsonDeserializer fromApiJsonDeserializer, final FromJsonHelper fromApiJsonHelper) {
@@ -93,7 +93,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
         this.provisioningCriteriaReadPlatformService = provisioningCriteriaReadPlatformService ;
         this.loanProductRepository = loanProductRepository;
         this.glAccountRepository = glAccountRepository;
-        this.officeRepository = officeRepository;
+        this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.provisioningCategoryRepository = provisioningCategoryRepository;
         this.platformSecurityContext = platformSecurityContext;
         this.provisioningEntryRepository = provisioningEntryRepository;
@@ -221,7 +221,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
         Map<LoanProductProvisioningEntry, LoanProductProvisioningEntry> provisioningEntries = new HashMap<>();
         for (LoanProductProvisioningEntryData data : entries) {
             LoanProduct loanProduct = this.loanProductRepository.findOne(data.getProductId());
-            Office office = this.officeRepository.findOne(data.getOfficeId());
+            Office office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(data.getOfficeId());
             ProvisioningCategory provisioningCategory = provisioningCategoryRepository.findOne(data.getCategoryId());
             GLAccount liabilityAccount = glAccountRepository.findOne(data.getLiablityAccount());
             GLAccount expenseAccount = glAccountRepository.findOne(data.getExpenseAccount());

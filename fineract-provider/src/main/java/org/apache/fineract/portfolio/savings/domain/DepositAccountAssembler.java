@@ -177,7 +177,8 @@ public class DepositAccountAssembler {
         AccountType accountType = AccountType.INVALID;
         final Long clientId = this.fromApiJsonHelper.extractLongNamed(clientIdParamName, element);
         if (clientId != null) {
-            client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+            final boolean isCalendarInherited = command.booleanPrimitiveValueOfParameterNamed(isCalendarInheritedParamName);
+            client = this.clientRepository.findOneWithNotFoundDetection(clientId, isCalendarInherited); //we need group collection if isCalendarInherited is true
             accountType = AccountType.INDIVIDUAL;
             if (client.isNotActive()) { throw new ClientNotActiveException(clientId); }
         }

@@ -47,8 +47,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.organisation.office.domain.OfficeRepository;
-import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
+import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,17 +63,17 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
     private final AccountingRuleRepositoryWrapper accountingRuleRepositoryWrapper;
     private final AccountingRuleRepository accountingRuleRepository;
     private final GLAccountRepositoryWrapper accountRepositoryWrapper;
-    private final OfficeRepository officeRepository;
+    private final OfficeRepositoryWrapper officeRepositoryWrapper;
     private final AccountingRuleCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final CodeValueRepository codeValueRepository;
 
     @Autowired
     public AccountingRuleWritePlatformServiceJpaRepositoryImpl(final AccountingRuleRepositoryWrapper accountingRuleRepositoryWrapper,
-            final GLAccountRepositoryWrapper accountRepositoryWrapper, final OfficeRepository officeRepository,
+            final GLAccountRepositoryWrapper accountRepositoryWrapper, final OfficeRepositoryWrapper officeRepositoryWrapper,
             final AccountingRuleRepository ruleRepository, final AccountingRuleCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final CodeValueRepository codeValueRepository) {
         this.accountRepositoryWrapper = accountRepositoryWrapper;
-        this.officeRepository = officeRepository;
+        this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.accountingRuleRepository = ruleRepository;
         this.accountingRuleRepositoryWrapper = accountingRuleRepositoryWrapper;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -107,8 +106,7 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
             final Long officeId = command.longValueOfParameterNamed(GLClosureJsonInputParams.OFFICE_ID.getValue());
             Office office = null;
             if (officeId != null) {
-                office = this.officeRepository.findOne(officeId);
-                if (office == null) { throw new OfficeNotFoundException(officeId); }
+                office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
             }
 
             final AccountingRule accountingRule = assembleAccountingRuleAndTags(office, command);
@@ -268,8 +266,7 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
             }
 
             if (officeId != null && changesOnly.containsKey(AccountingRuleJsonInputParams.OFFICE_ID.getValue())) {
-                final Office userOffice = this.officeRepository.findOne(officeId);
-                if (userOffice == null) { throw new OfficeNotFoundException(officeId); }
+                final Office userOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
                 accountingRule.setOffice(userOffice);
             }
 

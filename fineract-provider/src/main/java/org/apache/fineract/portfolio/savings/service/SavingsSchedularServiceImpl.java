@@ -26,7 +26,7 @@ import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,24 +37,24 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
 
     private final SavingsAccountAssembler savingAccountAssembler;
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
-    private final SavingsAccountRepository savingAccountRepository;
+    private final SavingsAccountRepositoryWrapper savingAccountRepositoryWrapper;
     private final SavingsAccountReadPlatformService savingAccountReadPlatformService;
 
     @Autowired
     public SavingsSchedularServiceImpl(final SavingsAccountAssembler savingAccountAssembler,
             final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
-            final SavingsAccountRepository savingAccountRepository,
+            final SavingsAccountRepositoryWrapper savingAccountRepositoryWrapper,
             final SavingsAccountReadPlatformService savingAccountReadPlatformService) {
         this.savingAccountAssembler = savingAccountAssembler;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
-        this.savingAccountRepository = savingAccountRepository;
+        this.savingAccountRepositoryWrapper = savingAccountRepositoryWrapper;
         this.savingAccountReadPlatformService = savingAccountReadPlatformService;
     }
 
     @CronTarget(jobName = JobName.POST_INTEREST_FOR_SAVINGS)
     @Override
     public void postInterestForAccounts() throws JobExecutionException {
-        final List<SavingsAccount> savingsAccounts = this.savingAccountRepository.findSavingAccountByStatus(SavingsAccountStatusType.ACTIVE
+        final List<SavingsAccount> savingsAccounts = this.savingAccountRepositoryWrapper.findSavingAccountByStatus(SavingsAccountStatusType.ACTIVE
                 .getValue());
         StringBuffer sb = new StringBuffer();
         for (final SavingsAccount savingsAccount : savingsAccounts) {

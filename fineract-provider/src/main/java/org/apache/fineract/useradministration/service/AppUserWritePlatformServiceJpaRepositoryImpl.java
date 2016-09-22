@@ -36,12 +36,11 @@ import org.apache.fineract.infrastructure.core.service.PlatformEmailSendExceptio
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.organisation.office.domain.OfficeRepository;
-import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
+import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.Client;
-import org.apache.fineract.portfolio.client.domain.ClientRepository;
+import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.useradministration.api.AppUserApiConstant;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserPreviousPassword;
@@ -77,29 +76,29 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     private final UserDomainService userDomainService;
     private final PlatformPasswordEncoder platformPasswordEncoder;
     private final AppUserRepository appUserRepository;
-    private final OfficeRepository officeRepository;
+    private final OfficeRepositoryWrapper officeRepositoryWrapper;
     private final RoleRepository roleRepository;
     private final UserDataValidator fromApiJsonDeserializer;
     private final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository;
     private final StaffRepositoryWrapper staffRepositoryWrapper;
-    private final ClientRepository clientRepository;
+    private final ClientRepositoryWrapper clientRepositoryWrapper;
 
     @Autowired
     public AppUserWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AppUserRepository appUserRepository,
-            final UserDomainService userDomainService, final OfficeRepository officeRepository, final RoleRepository roleRepository,
+            final UserDomainService userDomainService, final OfficeRepositoryWrapper officeRepositoryWrapper, final RoleRepository roleRepository,
             final PlatformPasswordEncoder platformPasswordEncoder, final UserDataValidator fromApiJsonDeserializer,
             final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository, final StaffRepositoryWrapper staffRepositoryWrapper,
-            final ClientRepository clientRepository) {
+            final ClientRepositoryWrapper clientRepositoryWrapper) {
         this.context = context;
         this.appUserRepository = appUserRepository;
         this.userDomainService = userDomainService;
-        this.officeRepository = officeRepository;
+        this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.roleRepository = roleRepository;
         this.platformPasswordEncoder = platformPasswordEncoder;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.appUserPreviewPasswordRepository = appUserPreviewPasswordRepository;
         this.staffRepositoryWrapper = staffRepositoryWrapper;
-        this.clientRepository = clientRepository;
+        this.clientRepositoryWrapper = clientRepositoryWrapper;
     }
 
     @Transactional
@@ -115,8 +114,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             final String officeIdParamName = "officeId";
             final Long officeId = command.longValueOfParameterNamed(officeIdParamName);
 
-            final Office userOffice = this.officeRepository.findOne(officeId);
-            if (userOffice == null) { throw new OfficeNotFoundException(officeId); }
+            final Office userOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
 
             final String[] roles = command.arrayValueOfParameterNamed("roles");
             final Set<Role> allRoles = assembleSetOfRoles(roles);
@@ -140,7 +138,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             	for(JsonElement clientElement : clientsArray){
             		clientIds.add(clientElement.getAsLong());
             	}
-            	clients = this.clientRepository.findAll(clientIds);
+            	clients = this.clientRepositoryWrapper.findAll(clientIds);
             }
 
             appUser = AppUser.fromJson(userOffice, linkedStaff, allRoles, clients, command);
@@ -199,16 +197,14 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             	for(JsonElement clientElement : clientsArray){
             		clientIds.add(clientElement.getAsLong());
             	}
-            	clients = this.clientRepository.findAll(clientIds);
+            	clients = this.clientRepositoryWrapper.findAll(clientIds);
             }
 
             final Map<String, Object> changes = userToUpdate.update(command, this.platformPasswordEncoder, clients);
 
             if (changes.containsKey("officeId")) {
                 final Long officeId = (Long) changes.get("officeId");
-                final Office office = this.officeRepository.findOne(officeId);
-                if (office == null) { throw new OfficeNotFoundException(officeId); }
-
+                final Office office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
                 userToUpdate.changeOffice(office);
             }
 

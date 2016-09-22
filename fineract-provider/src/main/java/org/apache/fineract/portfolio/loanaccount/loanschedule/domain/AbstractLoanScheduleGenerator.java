@@ -2041,7 +2041,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             final LocalDate scheduleTillDate) {
         // Loan transactions to process and find the variation on payments
         Collection<RecalculationDetail> recalculationDetails = new ArrayList<>();
-        for (LoanTransaction loanTransaction : loan.getLoanTransactions()) {
+        List<LoanTransaction> transactions = loan.getLoanTransactions() ;
+        for (LoanTransaction loanTransaction : transactions) {
             if (loanTransaction.isPaymentTransaction()) {
                 recalculationDetails.add(new RecalculationDetail(loanTransaction.getTransactionDate(), LoanTransaction
                         .copyTransactionProperties(loanTransaction)));

@@ -309,7 +309,7 @@ public class SavingsAccountAssembler {
      * request inheriting details where relevant from chosen
      * {@link SavingsProduct}.
      */
-    public SavingsAccount assembleFrom(final Client client, final Group group, final SavingsProduct product, final LocalDate appliedonDate,
+    public SavingsAccount assembleFrom(final Client client, final Group group, final Long productId, final LocalDate appliedonDate,
             final AppUser appliedBy) {
 
         AccountType accountType = AccountType.INVALID;
@@ -330,7 +330,7 @@ public class SavingsAccountAssembler {
             if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(client.getId(), group.getId()); }
             accountType = AccountType.JLG;
         }
-
+        final SavingsProduct product = this.savingProductRepository.findOne(productId) ;
         final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromSavingsProduct(product);
         final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, null, null, null,
                 accountType, appliedonDate, appliedBy, product.nominalAnnualInterestRate(), product.interestCompoundingPeriodType(),

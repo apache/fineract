@@ -135,7 +135,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanOverdueInstallmentCh
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSubStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
@@ -143,7 +143,16 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTrancheDisbursementC
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
-import org.apache.fineract.portfolio.loanaccount.exception.*;
+import org.apache.fineract.portfolio.loanaccount.exception.DateMismatchException;
+import org.apache.fineract.portfolio.loanaccount.exception.ExceedingTrancheCountException;
+import org.apache.fineract.portfolio.loanaccount.exception.InvalidPaidInAdvanceAmountException;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanDisbursalException;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanForeclosureException;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanMultiDisbursementException;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerUnassignmentException;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
 import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorDomainService;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
@@ -190,7 +199,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final PlatformSecurityContext context;
     private final LoanEventApiJsonValidator loanEventApiJsonValidator;
     private final LoanUpdateCommandFromApiJsonDeserializer loanUpdateCommandFromApiJsonDeserializer;
-    private final LoanRepository loanRepository;
+    private final LoanRepositoryWrapper loanRepositoryWrapper ;
     private final LoanAccountDomainService loanAccountDomainService;
     private final NoteRepository noteRepository;
     private final LoanTransactionRepository loanTransactionRepository;
@@ -229,7 +238,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final LoanEventApiJsonValidator loanEventApiJsonValidator,
             final LoanUpdateCommandFromApiJsonDeserializer loanUpdateCommandFromApiJsonDeserializer, final LoanAssembler loanAssembler,
-            final LoanRepository loanRepository, final LoanAccountDomainService loanAccountDomainService,
+            final LoanAccountDomainService loanAccountDomainService,
             final LoanTransactionRepository loanTransactionRepository, final NoteRepository noteRepository,
             final ChargeRepositoryWrapper chargeRepository, final LoanChargeRepository loanChargeRepository,
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
@@ -252,11 +261,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final BusinessEventNotifierService businessEventNotifierService, final GuarantorDomainService guarantorDomainService,
             final LoanUtilService loanUtilService, final LoanSummaryWrapper loanSummaryWrapper,
             final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessingStrategy,
-            final CodeValueRepositoryWrapper codeValueRepository) {
+            final CodeValueRepositoryWrapper codeValueRepository,
+            final LoanRepositoryWrapper loanRepositoryWrapper) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanAssembler = loanAssembler;
-        this.loanRepository = loanRepository;
+        this.loanRepositoryWrapper = loanRepositoryWrapper ;
         this.loanAccountDomainService = loanAccountDomainService;
         this.loanTransactionRepository = loanTransactionRepository;
         this.noteRepository = noteRepository;
@@ -360,7 +370,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             if(loan.isTopup() && loan.getClientId() != null){
                 final Long loanIdToClose = loan.getTopupLoanDetails().getLoanIdToClose();
-                final Loan loanToClose = this.loanRepository.findNonClosedLoanThatBelongsToClient(loanIdToClose, loan.getClientId());
+                final Loan loanToClose = this.loanRepositoryWrapper.findNonClosedLoanThatBelongsToClient(loanIdToClose, loan.getClientId());
                 if(loanToClose == null){
                     throw new GeneralPlatformDomainRuleException("error.msg.loan.to.be.closed.with.topup.is.not.active",
                             "Loan to be closed with this topup is not active.");
@@ -545,7 +555,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     this.repaymentScheduleInstallmentRepository.save(installment);
                 }
             }
-            this.loanRepository.saveAndFlush(loan);
+            this.loanRepositoryWrapper.saveAndFlush(loan);
         } catch (final DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -566,7 +576,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     this.repaymentScheduleInstallmentRepository.save(installment);
                 }
             }
-            this.loanRepository.save(loan);
+            this.loanRepositoryWrapper.save(loan);
         } catch (final DataIntegrityViolationException e) {
             final Throwable realCause = e.getCause();
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -814,8 +824,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
         for (final SingleRepaymentCommand singleLoanRepaymentCommand : repaymentCommand) {
             if (singleLoanRepaymentCommand != null) {
-                Loan loans = this.loanRepository.findOne(singleLoanRepaymentCommand.getLoanId());
-                final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loans.getOfficeId(),
+                Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(singleLoanRepaymentCommand.getLoanId());
+                final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
                         singleLoanRepaymentCommand.getTransactionDate().toDate());
                 final WorkingDays workingDays = this.workingDaysRepository.findOne();
                 final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
@@ -823,9 +833,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
                 holidayDetailDTO = new HolidayDetailDTO(isHolidayEnabled, holidays, workingDays, allowTransactionsOnHoliday,
                         allowTransactionsOnNonWorkingDay);
-                loans.validateRepaymentDateIsOnHoliday(singleLoanRepaymentCommand.getTransactionDate(),
+                loan.validateRepaymentDateIsOnHoliday(singleLoanRepaymentCommand.getTransactionDate(),
                         holidayDetailDTO.isAllowTransactionsOnHoliday(), holidayDetailDTO.getHolidays());
-                loans.validateRepaymentDateIsOnNonWorkingDay(singleLoanRepaymentCommand.getTransactionDate(),
+                loan.validateRepaymentDateIsOnNonWorkingDay(singleLoanRepaymentCommand.getTransactionDate(),
                         holidayDetailDTO.getWorkingDays(), holidayDetailDTO.isAllowTransactionsOnNonWorkingDay());
                 isHolidayValidationDone = true;
                 break;
@@ -962,7 +972,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         Collection<Long> transactionIds = new ArrayList<>();
-        for (LoanTransaction transaction : loan.getLoanTransactions()) {
+        List<LoanTransaction> transactions = loan.getLoanTransactions() ;
+        for (LoanTransaction transaction : transactions) {
             if (transaction.isRefund() && transaction.isNotReversed()) {
                 transactionIds.add(transaction.getId());
             }
@@ -1277,7 +1288,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .build();
     }
 
-    private void validateAddingNewChargeAllowed(Set<LoanDisbursementDetails> loanDisburseDetails) {
+    private void validateAddingNewChargeAllowed(List<LoanDisbursementDetails> loanDisburseDetails) {
         boolean pendingDisbursementAvailable = false;
         for (LoanDisbursementDetails disbursementDetail : loanDisburseDetails) {
             if (disbursementDetail.actualDisbursementDate() == null) {
@@ -1299,7 +1310,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         checkClientOrGroupActive(loan);
 
-        Set<LoanDisbursementDetails> loanDisburseDetails = loan.getDisbursementDetails();
+        List<LoanDisbursementDetails> loanDisburseDetails = loan.getDisbursementDetails();
         final Long chargeDefinitionId = command.longValueOfParameterNamed("chargeId");
         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeDefinitionId);
 
@@ -1823,11 +1834,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
-    public LoanTransaction initiateLoanTransfer(final Long accountId, final LocalDate transferDate) {
+    public LoanTransaction initiateLoanTransfer(final Loan loan, final LocalDate transferDate) {
 
         AppUser currentUser = getAppUserIfPresent();
-
-        final Loan loan = this.loanAssembler.assembleFrom(accountId);
+        this.loanAssembler.setHelpers(loan);
         checkClientOrGroupActive(loan);
         this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.LOAN_INITIATE_TRANSFER,
                 constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
@@ -1851,12 +1861,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
-    public LoanTransaction acceptLoanTransfer(final Long accountId, final LocalDate transferDate, final Office acceptedInOffice,
+    public LoanTransaction acceptLoanTransfer(final Loan loan, final LocalDate transferDate, final Office acceptedInOffice,
             final Staff loanOfficer) {
-
         AppUser currentUser = getAppUserIfPresent();
-
-        final Loan loan = this.loanAssembler.assembleFrom(accountId);
+        this.loanAssembler.setHelpers(loan) ;
         this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.LOAN_ACCEPT_TRANSFER,
                 constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
         final List<Long> existingTransactionIds = new ArrayList<>(loan.findExistingTransactionIds());
@@ -1886,11 +1894,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
-    public LoanTransaction withdrawLoanTransfer(final Long accountId, final LocalDate transferDate) {
-
+    public LoanTransaction withdrawLoanTransfer(final Loan loan, final LocalDate transferDate) {
         AppUser currentUser = getAppUserIfPresent();
-
-        final Loan loan = this.loanAssembler.assembleFrom(accountId);
+        this.loanAssembler.setHelpers(loan);
         this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.LOAN_WITHDRAW_TRANSFER,
                 constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
 
@@ -1914,8 +1920,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
-    public void rejectLoanTransfer(final Long accountId) {
-        final Loan loan = this.loanAssembler.assembleFrom(accountId);
+    public void rejectLoanTransfer(final Loan loan) {
+        this.loanAssembler.setHelpers(loan);
         this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.LOAN_REJECT_TRANSFER,
                 constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
         loan.setLoanStatus(LoanStatus.TRANSFER_ON_HOLD.getValue());
@@ -1988,7 +1994,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_REASSIGN_OFFICER,
                     constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
         }
-        this.loanRepository.flush();
+        this.loanRepositoryWrapper.flush();
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -2070,7 +2076,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loanIds.add(calendarInstance.getEntityId());
         }
 
-        final List<Loan> loans = this.loanRepository.findByIdsAndLoanStatusAndLoanType(loanIds, loanStatuses, loanTypes);
+        final List<Loan> loans = this.loanRepositoryWrapper.findByIdsAndLoanStatusAndLoanType(loanIds, loanStatuses, loanTypes);
         List<Holiday> holidays = null;
         final LocalDate recalculateFrom = null;
         // loop through each loan to reschedule the repayment dates
@@ -2116,19 +2122,19 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Loan> loansToUpdate;
         if (loan.isGroupLoan()) {
             if (loan.loanProduct().isIncludeInBorrowerCycle()) {
-                loansToUpdate = this.loanRepository.getGroupLoansToUpdateLoanCounter(loan.getCurrentLoanCounter(), loan.getGroupId(),
+                loansToUpdate = this.loanRepositoryWrapper.getGroupLoansToUpdateLoanCounter(loan.getCurrentLoanCounter(), loan.getGroupId(),
                         AccountType.GROUP.getValue());
             } else {
-                loansToUpdate = this.loanRepository.getGroupLoansToUpdateLoanProductCounter(loan.getLoanProductLoanCounter(),
+                loansToUpdate = this.loanRepositoryWrapper.getGroupLoansToUpdateLoanProductCounter(loan.getLoanProductLoanCounter(),
                         loan.getGroupId(), AccountType.GROUP.getValue());
             }
 
         } else {
             if (loan.loanProduct().isIncludeInBorrowerCycle()) {
-                loansToUpdate = this.loanRepository
+                loansToUpdate = this.loanRepositoryWrapper
                         .getClientOrJLGLoansToUpdateLoanCounter(loan.getCurrentLoanCounter(), loan.getClientId());
             } else {
-                loansToUpdate = this.loanRepository.getClientLoansToUpdateLoanProductCounter(loan.getLoanProductLoanCounter(),
+                loansToUpdate = this.loanRepositoryWrapper.getClientLoansToUpdateLoanProductCounter(loan.getLoanProductLoanCounter(),
                         loan.getClientId());
             }
 
@@ -2144,13 +2150,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private void updateLoanCounters(final Loan loan, final LocalDate actualDisbursementDate) {
 
         if (loan.isGroupLoan()) {
-            final List<Loan> loansToUpdateForLoanCounter = this.loanRepository.getGroupLoansDisbursedAfter(actualDisbursementDate.toDate(),
+            final List<Loan> loansToUpdateForLoanCounter = this.loanRepositoryWrapper.getGroupLoansDisbursedAfter(actualDisbursementDate.toDate(),
                     loan.getGroupId(), AccountType.GROUP.getValue());
             final Integer newLoanCounter = getNewGroupLoanCounter(loan);
             final Integer newLoanProductCounter = getNewGroupLoanProductCounter(loan);
             updateLoanCounter(loan, loansToUpdateForLoanCounter, newLoanCounter, newLoanProductCounter);
         } else {
-            final List<Loan> loansToUpdateForLoanCounter = this.loanRepository.getClientOrJLGLoansDisbursedAfter(
+            final List<Loan> loansToUpdateForLoanCounter = this.loanRepositoryWrapper.getClientOrJLGLoansDisbursedAfter(
                     actualDisbursementDate.toDate(), loan.getClientId());
             final Integer newLoanCounter = getNewClientOrJLGLoanCounter(loan);
             final Integer newLoanProductCounter = getNewClientOrJLGLoanProductCounter(loan);
@@ -2160,7 +2166,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     private Integer getNewGroupLoanCounter(final Loan loan) {
 
-        Integer maxClientLoanCounter = this.loanRepository.getMaxGroupLoanCounter(loan.getGroupId(), AccountType.GROUP.getValue());
+        Integer maxClientLoanCounter = this.loanRepositoryWrapper.getMaxGroupLoanCounter(loan.getGroupId(), AccountType.GROUP.getValue());
         if (maxClientLoanCounter == null) {
             maxClientLoanCounter = 1;
         } else {
@@ -2171,7 +2177,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     private Integer getNewGroupLoanProductCounter(final Loan loan) {
 
-        Integer maxLoanProductLoanCounter = this.loanRepository.getMaxGroupLoanProductCounter(loan.loanProduct().getId(),
+        Integer maxLoanProductLoanCounter = this.loanRepositoryWrapper.getMaxGroupLoanProductCounter(loan.loanProduct().getId(),
                 loan.getGroupId(), AccountType.GROUP.getValue());
         if (maxLoanProductLoanCounter == null) {
             maxLoanProductLoanCounter = 1;
@@ -2211,12 +2217,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loan.updateClientLoanCounter(null);
         }
         loan.updateLoanProductLoanCounter(newLoanProductCounter);
-        this.loanRepository.save(loansToUpdateForLoanCounter);
+        this.loanRepositoryWrapper.save(loansToUpdateForLoanCounter);
     }
 
     private Integer getNewClientOrJLGLoanCounter(final Loan loan) {
 
-        Integer maxClientLoanCounter = this.loanRepository.getMaxClientOrJLGLoanCounter(loan.getClientId());
+        Integer maxClientLoanCounter = this.loanRepositoryWrapper.getMaxClientOrJLGLoanCounter(loan.getClientId());
         if (maxClientLoanCounter == null) {
             maxClientLoanCounter = 1;
         } else {
@@ -2227,7 +2233,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     private Integer getNewClientOrJLGLoanProductCounter(final Loan loan) {
 
-        Integer maxLoanProductLoanCounter = this.loanRepository.getMaxClientOrJLGLoanProductCounter(loan.loanProduct().getId(),
+        Integer maxLoanProductLoanCounter = this.loanRepositoryWrapper.getMaxClientOrJLGLoanProductCounter(loan.loanProduct().getId(),
                 loan.getClientId());
         if (maxLoanProductLoanCounter == null) {
             maxLoanProductLoanCounter = 1;
@@ -2256,7 +2262,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 }
             }
         }
-        this.loanRepository.save(loansToUpdate);
+        this.loanRepositoryWrapper.save(loansToUpdate);
     }
 
     @Transactional
@@ -2285,17 +2291,17 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             // get all loans
             final List<Loan> loans = new ArrayList<>();
             // get all individual and jlg loans
-            loans.addAll(this.loanRepository.findByClientOfficeIdsAndLoanStatus(officeIds, loanStatuses));
+            loans.addAll(this.loanRepositoryWrapper.findByClientOfficeIdsAndLoanStatus(officeIds, loanStatuses));
             // FIXME: AA optimize to get all client and group loans belongs to a
             // office id
             // get all group loans
-            loans.addAll(this.loanRepository.findByGroupOfficeIdsAndLoanStatus(officeIds, loanStatuses));
+            loans.addAll(this.loanRepositoryWrapper.findByGroupOfficeIdsAndLoanStatus(officeIds, loanStatuses));
 
             for (final Loan loan : loans) {
                 // apply holiday
                 loan.applyHolidayToRepaymentScheduleDates(holiday);
             }
-            this.loanRepository.save(loans);
+            this.loanRepositoryWrapper.save(loans);
             holiday.processed();
         }
         this.holidayRepository.save(holidays);
@@ -2307,10 +2313,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Long productId = loan.loanProduct().getId();
 
         if (loan.isGroupLoan()) {
-            activeLoansLoanProductIds = this.loanRepository.findActiveLoansLoanProductIdsByGroup(loan.getGroupId(),
+            activeLoansLoanProductIds = this.loanRepositoryWrapper.findActiveLoansLoanProductIdsByGroup(loan.getGroupId(),
                     LoanStatus.ACTIVE.getValue());
         } else {
-            activeLoansLoanProductIds = this.loanRepository.findActiveLoansLoanProductIdsByClient(loan.getClientId(),
+            activeLoansLoanProductIds = this.loanRepositoryWrapper.findActiveLoansLoanProductIdsByClient(loan.getClientId(),
                     LoanStatus.ACTIVE.getValue());
         }
         checkForProductMixRestrictions(activeLoansLoanProductIds, productId, loan.loanProduct().productName());

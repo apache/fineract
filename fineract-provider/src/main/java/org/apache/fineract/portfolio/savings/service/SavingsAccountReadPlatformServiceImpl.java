@@ -677,7 +677,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final Collection<SavingsAccountTransactionData> transactions = null;
             final Collection<SavingsAccountChargeData> charges = null;
 
-            final boolean feeChargesOnly = true;
+            final boolean feeChargesOnly = false;
             final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
                     .retrieveSavingsProductApplicableCharges(feeChargesOnly);
 
