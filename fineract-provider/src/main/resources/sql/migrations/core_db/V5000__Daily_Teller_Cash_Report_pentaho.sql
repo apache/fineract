@@ -23,10 +23,7 @@ CREATE PROCEDURE `CashierTransactionSummary`(
 	IN `tellerId` BIGINT,
 	IN `cashierId` BIGINT,
 	IN `currencyCode` TEXT,
-	IN `startDate` DATE,
-	IN `endDate` DATE
-
-
+	IN `asOnDate` DATE
 )
 LANGUAGE SQL
 NOT DETERMINISTIC
@@ -216,20 +213,17 @@ AND c.id = cashierId;
 -- Insert currency into final temporary table
 INSERT INTO final_temp_cashier_report VALUES ('Currency', currencyCode, '');
 
--- Insert start date into final temporary table
-INSERT INTO final_temp_cashier_report VALUES ('Start Date', startDate, '');
-
--- Insert end date into final temporary table
-INSERT INTO final_temp_cashier_report VALUES ('End Date', endDate, '');
+-- Insert date into final temporary table
+INSERT INTO final_temp_cashier_report VALUES ('As On Date', asOnDate, '');
 
 -- Insert opening balance into final temporary table
 INSERT INTO final_temp_cashier_report 
 SELECT 'Beginning cash drawer balance' AS '', 
 CAST(SUM(CASE
-WHEN (transaction_type = 'cash_allocated' AND transaction_date < startDate) THEN amount
-WHEN (transaction_type = 'cash_settled' AND transaction_date < startDate) THEN (-1 * amount)
-WHEN (transaction_type = 'cash_in' AND transaction_date < startDate) THEN amount
-WHEN (transaction_type = 'cash_out' AND transaction_date < startDate) THEN (-1 * amount)
+WHEN (transaction_type = 'cash_allocated' AND transaction_date < asOnDate) THEN amount
+WHEN (transaction_type = 'cash_settled' AND transaction_date < asOnDate) THEN (-1 * amount)
+WHEN (transaction_type = 'cash_in' AND transaction_date < asOnDate) THEN amount
+WHEN (transaction_type = 'cash_out' AND transaction_date < asOnDate) THEN (-1 * amount)
 ELSE 0
 END) AS CHAR) AS '', '' AS '' 
 FROM temp_cashier_transactions;
@@ -238,10 +232,10 @@ FROM temp_cashier_transactions;
 INSERT INTO final_temp_cashier_report 
 SELECT 'Ending cash drawer balance' AS '', 
 CAST(SUM(CASE
-WHEN (transaction_type = 'cash_allocated' AND transaction_date <= endDate) THEN amount
-WHEN (transaction_type = 'cash_settled' AND transaction_date <= endDate) THEN (-1 * amount)
-WHEN (transaction_type = 'cash_in' AND transaction_date <= endDate) THEN amount
-WHEN (transaction_type = 'cash_out' AND transaction_date <= endDate) THEN (-1 * amount)
+WHEN (transaction_type = 'cash_allocated' AND transaction_date <= asOnDate) THEN amount
+WHEN (transaction_type = 'cash_settled' AND transaction_date <= asOnDate) THEN (-1 * amount)
+WHEN (transaction_type = 'cash_in' AND transaction_date <= asOnDate) THEN amount
+WHEN (transaction_type = 'cash_out' AND transaction_date <= asOnDate) THEN (-1 * amount)
 ELSE 0
 END) AS CHAR) AS '', '' AS '' 
 FROM temp_cashier_transactions;
@@ -250,7 +244,7 @@ FROM temp_cashier_transactions;
 INSERT INTO final_temp_cashier_report 
 SELECT 'Total cash disbursed' AS '', 
 SUM(CASE
-WHEN (transaction_type = 'cash_out' AND transaction_date BETWEEN startDate AND  endDate) THEN amount
+WHEN (transaction_type = 'cash_out' AND transaction_date BETWEEN asOnDate AND  asOnDate) THEN amount
 ELSE 0
 END) AS '', '' AS ''
 FROM temp_cashier_transactions;
@@ -259,7 +253,7 @@ FROM temp_cashier_transactions;
 INSERT INTO final_temp_cashier_report 
 SELECT 'Total cash received' AS '', 
 SUM(CASE
-WHEN (transaction_type = 'cash_in' AND transaction_date BETWEEN startDate AND  endDate) THEN amount
+WHEN (transaction_type = 'cash_in' AND transaction_date BETWEEN asOnDate AND  asOnDate) THEN amount
 ELSE 0
 END) AS '', '' AS ''
 FROM temp_cashier_transactions;
@@ -267,7 +261,7 @@ FROM temp_cashier_transactions;
 -- Insert cash allocated into final temporary table
 INSERT INTO final_temp_cashier_report SELECT 'Cash Allocated' AS '', 
 SUM(CASE
-WHEN (transaction_type = 'cash_allocated' AND transaction_date BETWEEN startDate AND  endDate) THEN amount
+WHEN (transaction_type = 'cash_allocated' AND transaction_date BETWEEN asOnDate AND  asOnDate) THEN amount
 ELSE 0
 END) AS '', '' AS ''
 FROM temp_cashier_transactions;
@@ -275,7 +269,7 @@ FROM temp_cashier_transactions;
 -- Insert cash settled into final temporary table
 INSERT INTO final_temp_cashier_report SELECT 'Cash Settled' AS '', 
 SUM(CASE
-WHEN (transaction_type = 'cash_settled' AND transaction_date BETWEEN startDate AND  endDate) THEN amount
+WHEN (transaction_type = 'cash_settled' AND transaction_date BETWEEN asOnDate AND  asOnDate) THEN amount
 ELSE 0
 END) AS '', '' AS ''
 FROM temp_cashier_transactions;
@@ -284,7 +278,7 @@ FROM temp_cashier_transactions;
 INSERT INTO final_temp_cashier_report 
 SELECT 'Account Transfers' AS '', 
 SUM(CASE
-WHEN (transaction_type = 'transfers' AND transaction_date BETWEEN startDate AND  endDate) THEN amount
+WHEN (transaction_type = 'transfers' AND transaction_date BETWEEN asOnDate AND  asOnDate) THEN amount
 ELSE 0
 END) AS '', '' AS ''
 FROM temp_cashier_transactions;
@@ -299,7 +293,7 @@ ELSE 0
 END) AS '', '' AS ''
 FROM temp_cashier_transactions
 WHERE transaction_type NOT IN ('cash_allocated', 'cash_settled', 'cash_in', 'cash_out', 'transfers') 
-AND transaction_date BETWEEN startDate AND  endDate
+AND transaction_date BETWEEN asOnDate AND  asOnDate
 GROUP BY transaction_type;
 
 -- SELECT * FROM temp_cashier_transactions;
@@ -314,7 +308,7 @@ DROP TEMPORARY TABLE IF EXISTS final_temp_cashier_report;
 END $$
 DELIMITER ;
 
-INSERT INTO `stretchy_report` (`report_name`, `report_type`, `report_subtype`, `report_category`, `report_sql`, `description`, `core_report`, `use_report`) VALUES ('Cashier Transaction Summary (Pentaho)', 'Pentaho', NULL, NULL, NULL, 'Cashier Transaction Summary', 1, 1);
+INSERT INTO `stretchy_report` (`report_name`, `report_type`, `report_subtype`, `report_category`, `report_sql`, `description`, `core_report`, `use_report`) VALUES ('Daily Teller Cash Report (Pentaho)', 'Pentaho', NULL, NULL, NULL, 'Daily Teller Cash Report', 1, 1);
 
 INSERT INTO `stretchy_parameter` (`parameter_name`, `parameter_variable`, `parameter_label`, `parameter_displayType`, `parameter_FormatType`, `parameter_default`, `selectOne`, `selectAll`, `parameter_sql`, `parent_id`) VALUES ('tellerIdSelectOne', 'tellerId', 'Teller', 'select', 'number', '0', 'Y', 'N', 'select id, name from m_tellers where office_id = ${officeId}', (select id from (select id from stretchy_parameter where parameter_name='OfficeIdSelectOne') as x));
 
@@ -322,14 +316,14 @@ INSERT INTO `stretchy_parameter` (`parameter_name`, `parameter_variable`, `param
 
 INSERT INTO `stretchy_parameter` (`parameter_name`, `parameter_variable`, `parameter_label`, `parameter_displayType`, `parameter_FormatType`, `parameter_default`, `selectOne`, `selectAll`, `parameter_sql`, `parent_id`) VALUES ('currencyCodeSelectOne', 'currencyCode', 'Currency', 'select', 'string', '0', 'Y', 'N', 'select `code`, `name` from m_organisation_currency order by `code`', null);
 
-INSERT INTO stretchy_report_parameter (report_id, parameter_id, report_parameter_name) VALUES ((select sr.id From stretchy_report sr where sr.report_name='Cashier Transaction Summary (Pentaho)'),(select sp.id from stretchy_parameter sp where sp.parameter_name='OfficeIdSelectOne'), 'officeId');
+INSERT INTO stretchy_report_parameter (report_id, parameter_id, report_parameter_name) VALUES ((select sr.id From stretchy_report sr where sr.report_name='Daily Teller Cash Report (Pentaho)'),(select sp.id from stretchy_parameter sp where sp.parameter_name='OfficeIdSelectOne'), 'officeId');
 
-INSERT INTO stretchy_report_parameter (report_id, parameter_id, report_parameter_name) VALUES ((select sr.id From stretchy_report sr where sr.report_name='Cashier Transaction Summary (Pentaho)'),(select sp.id from stretchy_parameter sp where sp.parameter_name='tellerIdSelectOne'), 'tellerId');
+INSERT INTO stretchy_report_parameter (report_id, parameter_id, report_parameter_name) VALUES ((select sr.id From stretchy_report sr where sr.report_name='Daily Teller Cash Report (Pentaho)'),(select sp.id from stretchy_parameter sp where sp.parameter_name='tellerIdSelectOne'), 'tellerId');
 
-INSERT INTO stretchy_report_parameter (report_id, parameter_id, report_parameter_name) VALUES ((select sr.id From stretchy_report sr where sr.report_name='Cashier Transaction Summary (Pentaho)'),(select sp.id from stretchy_parameter sp where sp.parameter_name='cashierIdSelectOne'), 'cashierId');
+INSERT INTO stretchy_report_parameter (report_id, parameter_id, report_parameter_name) VALUES ((select sr.id From stretchy_report sr where sr.report_name='Daily Teller Cash Report (Pentaho)'),(select sp.id from stretchy_parameter sp where sp.parameter_name='cashierIdSelectOne'), 'cashierId');
 
-INSERT INTO stretchy_report_parameter (report_id, parameter_id, report_parameter_name) VALUES ((select sr.id From stretchy_report sr where sr.report_name='Cashier Transaction Summary (Pentaho)'),(select sp.id from stretchy_parameter sp where sp.parameter_name='currencyCodeSelectOne'), 'currencyCode');
+INSERT INTO stretchy_report_parameter (report_id, parameter_id, report_parameter_name) VALUES ((select sr.id From stretchy_report sr where sr.report_name='Daily Teller Cash Report (Pentaho)'),(select sp.id from stretchy_parameter sp where sp.parameter_name='currencyCodeSelectOne'), 'currencyCode');
 
-INSERT INTO stretchy_report_parameter (report_id, parameter_id, report_parameter_name) VALUES ((select sr.id From stretchy_report sr where sr.report_name='Cashier Transaction Summary (Pentaho)'),(select sp.id from stretchy_parameter sp where sp.parameter_name='startDateSelect'), 'startDate');
+INSERT INTO stretchy_report_parameter (report_id, parameter_id, report_parameter_name) VALUES ((select sr.id From stretchy_report sr where sr.report_name='Daily Teller Cash Report (Pentaho)'),(select sp.id from stretchy_parameter sp where sp.parameter_name='asOnDate'), 'asOnDate');
 
-INSERT INTO stretchy_report_parameter (report_id, parameter_id, report_parameter_name) VALUES ((select sr.id From stretchy_report sr where sr.report_name='Cashier Transaction Summary (Pentaho)'),(select sp.id from stretchy_parameter sp where sp.parameter_name='endDateSelect'), 'endDate');
+INSERT INTO m_permission (grouping,code,entity_name,action_name,can_maker_checker) VALUES ('report','READ_Daily Teller Cash Report (Pentaho)','Daily Teller Cash Report (Pentaho)','READ',0);
