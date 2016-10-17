@@ -48,7 +48,7 @@ public class InterestRateChartSlabFields {
     @Column(name = "description", nullable = true)
     private String description;
 
-    @Column(name = "period_type_enum", nullable = false)
+    @Column(name = "period_type_enum", nullable = true)
     private Integer periodType;
 
     @Column(name = "from_period")

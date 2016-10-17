@@ -26,12 +26,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 
 @Entity
 @Table(name = "m_share_account_charge_paid_by")
-public class ShareAccountChargePaidBy extends AbstractPersistable<Long>{
+public class ShareAccountChargePaidBy extends AbstractPersistableCustom<Long>{
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "share_transaction_id", referencedColumnName = "id", nullable = false)

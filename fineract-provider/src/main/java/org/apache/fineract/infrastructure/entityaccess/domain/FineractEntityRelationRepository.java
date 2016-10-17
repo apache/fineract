@@ -24,6 +24,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface FineractEntityRelationRepository extends JpaRepository<FineractEntityRelation, Long>{
 
-	@Query("from FineractEntityRelation fea where fea.codeName= :codeName")
+	@Query("select fea from FineractEntityRelation fea where fea.codeName= :codeName")
 	FineractEntityRelation findOneByCodeName(@Param("codeName") String codeName);
 }

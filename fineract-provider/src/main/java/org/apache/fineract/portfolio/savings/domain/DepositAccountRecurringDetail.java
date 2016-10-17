@@ -36,16 +36,16 @@ import javax.persistence.Table;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.joda.time.LocalDate;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_deposit_account_recurring_detail")
-public class DepositAccountRecurringDetail extends AbstractPersistable<Long> {
+public class DepositAccountRecurringDetail extends AbstractPersistableCustom<Long> {
 
     @Column(name = "mandatory_recommended_deposit_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal mandatoryRecommendedDepositAmount;
@@ -54,9 +54,9 @@ public class DepositAccountRecurringDetail extends AbstractPersistable<Long> {
     private BigDecimal totalOverdueAmount;
 
     @Column(name = "is_calendar_inherited", nullable = false)
-    private final boolean isCalendarInherited;
+    private boolean isCalendarInherited;
 
-    @Column(name = "no_of_overdue_installments", nullable = false)
+    @Column(name = "no_of_overdue_installments", nullable = true)
     private Integer noOfOverdueInstallments;
 
     @Embedded

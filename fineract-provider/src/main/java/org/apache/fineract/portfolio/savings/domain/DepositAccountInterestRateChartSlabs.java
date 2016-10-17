@@ -30,14 +30,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestIncentives;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartSlab;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartSlabFields;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_savings_account_interest_rate_slab")
-public class DepositAccountInterestRateChartSlabs extends AbstractPersistable<Long> {
+public class DepositAccountInterestRateChartSlabs extends AbstractPersistableCustom<Long> {
 
     @Embedded
     private InterestRateChartSlabFields slabFields;

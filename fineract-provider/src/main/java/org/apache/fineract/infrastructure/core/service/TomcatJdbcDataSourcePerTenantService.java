@@ -106,7 +106,8 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         poolConfiguration.setRemoveAbandonedTimeout(tenantConnectionObj.getRemoveAbandonedTimeout());
         poolConfiguration.setLogAbandoned(tenantConnectionObj.isLogAbandoned());
         poolConfiguration.setAbandonWhenPercentageFull(tenantConnectionObj.getAbandonWhenPercentageFull());
-
+        poolConfiguration.setDefaultAutoCommit(true);
+        
         /**
          * Vishwas- Do we need to enable the below properties and add
          * ResetAbandonedTimer for long running batch Jobs?

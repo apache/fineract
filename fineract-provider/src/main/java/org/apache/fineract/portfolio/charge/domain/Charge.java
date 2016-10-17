@@ -52,11 +52,11 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.joda.time.MonthDay;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_charge", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name") })
-public class Charge extends AbstractPersistable<Long> {
+public class Charge extends AbstractPersistableCustom<Long> {
 
     @Column(name = "name", length = 100)
     private String name;

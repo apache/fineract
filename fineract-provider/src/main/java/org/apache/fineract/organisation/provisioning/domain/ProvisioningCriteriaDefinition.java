@@ -20,6 +20,7 @@ package org.apache.fineract.organisation.provisioning.domain;
 
 import java.math.BigDecimal;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -27,11 +28,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_provisioning_criteria_definition")
-public class ProvisioningCriteriaDefinition extends AbstractPersistable<Long> {
+public class ProvisioningCriteriaDefinition extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "criteria_id", referencedColumnName = "id", nullable = false)

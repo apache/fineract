@@ -25,12 +25,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.address.domain.Address;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_client_address")
-public class ClientAddress extends AbstractPersistable<Long> {
+public class ClientAddress extends AbstractPersistableCustom<Long> {
 
 	@ManyToOne
 	private Client client;

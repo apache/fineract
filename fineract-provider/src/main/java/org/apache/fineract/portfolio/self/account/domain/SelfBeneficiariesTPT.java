@@ -28,12 +28,12 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_selfservice_beneficiaries_tpt", uniqueConstraints = { @UniqueConstraint(columnNames = {
 		"name", "app_user_id", "is_active" }, name = "name") })
-public class SelfBeneficiariesTPT extends AbstractPersistable<Long> {
+public class SelfBeneficiariesTPT extends AbstractPersistableCustom<Long> {
 
 	@Column(name = "app_user_id", nullable = false)
 	private Long appUserId;

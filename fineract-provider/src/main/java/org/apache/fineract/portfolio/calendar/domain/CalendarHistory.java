@@ -29,11 +29,11 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.joda.time.LocalDate;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_calendar_history")
-public class CalendarHistory extends AbstractPersistable<Long> {
+public class CalendarHistory extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "calendar_id", referencedColumnName = "id", nullable = false)

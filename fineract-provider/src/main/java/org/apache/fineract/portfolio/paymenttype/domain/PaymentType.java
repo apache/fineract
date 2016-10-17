@@ -29,11 +29,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.paymenttype.api.PaymentTypeApiResourceConstants;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_payment_type")
-public class PaymentType extends AbstractPersistable<Long> {
+public class PaymentType extends AbstractPersistableCustom<Long> {
 
     @Column(name = "value")
     private String name;

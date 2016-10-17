@@ -33,11 +33,11 @@ import org.apache.fineract.infrastructure.sms.SmsApiConstants;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.group.domain.Group;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "sms_messages_outbound")
-public class SmsMessage extends AbstractPersistable<Long> {
+public class SmsMessage extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = true)

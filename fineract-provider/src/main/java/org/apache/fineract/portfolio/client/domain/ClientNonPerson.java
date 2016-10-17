@@ -42,11 +42,11 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_client_non_person")
-public class ClientNonPerson extends AbstractPersistable<Long> {
+public class ClientNonPerson extends AbstractPersistableCustom<Long> {
 	
 	@OneToOne(optional = false)
     @JoinColumn(name = "client_id", referencedColumnName = "id", nullable = false, unique = true)

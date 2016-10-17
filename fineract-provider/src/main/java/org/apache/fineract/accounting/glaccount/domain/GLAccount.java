@@ -37,11 +37,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.glaccount.api.GLAccountJsonInputParams;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "acc_gl_account", uniqueConstraints = { @UniqueConstraint(columnNames = { "gl_code" }, name = "acc_gl_code") })
-public class GLAccount extends AbstractPersistable<Long> {
+public class GLAccount extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
@@ -52,7 +52,7 @@ public class GLAccount extends AbstractPersistable<Long> {
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private final List<GLAccount> children = new LinkedList<>();
+    private List<GLAccount> children = new LinkedList<>();
 
     @Column(name = "name", nullable = false, length = 45)
     private String name;

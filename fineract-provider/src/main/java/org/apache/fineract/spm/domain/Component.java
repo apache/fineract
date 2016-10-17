@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.spm.domain;
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "m_survey_components")
-public class Component extends AbstractPersistable<Long> {
+public class Component extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "survey_id")

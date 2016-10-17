@@ -40,6 +40,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -54,7 +55,6 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 /**
  * All monetary transactions against a loan are modelled through this entity.
@@ -62,7 +62,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
  */
 @Entity
 @Table(name = "m_loan_transaction", uniqueConstraints = { @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE") })
-public final class LoanTransaction extends AbstractPersistable<Long> {
+public class LoanTransaction extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", nullable = false)
@@ -77,15 +77,15 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     private PaymentDetail paymentDetail;
 
     @Column(name = "transaction_type_enum", nullable = false)
-    private final Integer typeOf;
+    private Integer typeOf;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "transaction_date", nullable = false)
-    private final Date dateOf;
+    private Date dateOf;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "submitted_on_date", nullable = false)
-    private final Date submittedOnDate;
+    private Date submittedOnDate;
 
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
@@ -118,9 +118,9 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     @Column(name = "created_date", nullable = false)
     private Date createdDate;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "appuser_id", nullable = true)
-    private final AppUser appUser;
+    private AppUser appUser;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanTransaction", orphanRemoval = true, fetch=FetchType.EAGER)
     private Set<LoanChargePaidBy> loanChargesPaid = new HashSet<>();
@@ -136,12 +136,12 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     private Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings = new HashSet<>();
 
     protected LoanTransaction() {
-        this.loan = null;
+       /* this.loan = null;
         this.dateOf = null;
         this.typeOf = null;
         this.submittedOnDate = DateUtils.getDateOfTenant();
         this.createdDate = new Date();
-        this.appUser = null;
+        this.appUser = null;*/
     }
 
     public static LoanTransaction incomePosting(final Loan loan, final Office office, final Date dateOf, final BigDecimal amount,

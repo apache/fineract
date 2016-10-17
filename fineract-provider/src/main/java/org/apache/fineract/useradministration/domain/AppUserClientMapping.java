@@ -25,11 +25,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.fineract.portfolio.client.domain.Client;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_selfservice_user_client_mapping")
-public class AppUserClientMapping extends AbstractPersistable<Long> {
+public class AppUserClientMapping extends AbstractPersistableCustom<Long> {
 	
     @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "client_id", nullable = false)

@@ -28,18 +28,17 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_share_account_charge")
-public class ShareAccountCharge extends AbstractPersistable<Long> {
+public class ShareAccountCharge extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false)
@@ -427,14 +426,5 @@ public class ShareAccountCharge extends AbstractPersistable<Long> {
                 .append(this.charge.getId(), rhs.charge.getId()) //
                 .append(this.amount, rhs.amount) //
                 .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(3, 5) //
-                .append(getId()) //
-                .append(this.charge.getId()) //
-                .append(this.amount)//
-                .toHashCode();
     }
 }

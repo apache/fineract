@@ -54,19 +54,19 @@ import org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConst
 import org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.joda.time.LocalDate;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 @Entity
 @Table(name = "m_interest_rate_chart")
-public class InterestRateChart extends AbstractPersistable<Long> {
+public class InterestRateChart extends AbstractPersistableCustom<Long> {
 
     @Embedded
     private InterestRateChartFields chartFields;
 
-    @OneToMany(mappedBy = "interestRateChart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "interestRateChart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<InterestRateChartSlab> chartSlabs = new HashSet<>();
 
     protected InterestRateChart() {

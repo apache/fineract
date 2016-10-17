@@ -202,7 +202,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
             processPostActiveActions(account, fmt, existingTransactionIds, existingReversedTransactionIds);
 
-            this.savingAccountRepositoryWrapper.save(account);
+            this.savingAccountRepositoryWrapper.saveAndFlush(account);
         }
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
@@ -280,7 +280,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     private Long saveTransactionToGenerateTransactionId(final SavingsAccountTransaction transaction) {
-        this.savingsAccountTransactionRepository.save(transaction);
+        this.savingsAccountTransactionRepository.saveAndFlush(transaction);
         return transaction.getId();
     }
 
@@ -413,7 +413,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 }
             }
 
-            this.savingAccountRepositoryWrapper.save(account);
+            this.savingAccountRepositoryWrapper.saveAndFlush(account);
 
             postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
         }
@@ -478,6 +478,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
         account.validateAccountBalanceDoesNotBecomeNegative(SavingsApiConstants.undoTransactionAction, depositAccountOnHoldTransactions);
         account.activateAccountBasedOnBalance();
+        this.savingAccountRepositoryWrapper.saveAndFlush(account);
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
 
         return new CommandProcessingResultBuilder() //
@@ -566,6 +567,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
         account.validateAccountBalanceDoesNotBecomeNegative(SavingsApiConstants.adjustTransactionAction, depositAccountOnHoldTransactions);
         account.activateAccountBasedOnBalance();
+        this.savingAccountRepositoryWrapper.saveAndFlush(account);
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
         return new CommandProcessingResultBuilder() //
                 .withEntityId(newtransactionId) //
@@ -687,7 +689,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 financialYearBeginningMonth);
 
         this.savingsAccountTransactionRepository.save(newTransferTransaction);
-        this.savingAccountRepositoryWrapper.save(savingsAccount);
+        this.savingAccountRepositoryWrapper.saveAndFlush(savingsAccount);
 
         postJournalEntries(savingsAccount, existingTransactionIds, existingReversedTransactionIds);
 
@@ -717,7 +719,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 financialYearBeginningMonth);
 
         this.savingsAccountTransactionRepository.save(withdrawtransferTransaction);
-        this.savingAccountRepositoryWrapper.save(savingsAccount);
+        this.savingAccountRepositoryWrapper.saveAndFlush(savingsAccount);
 
         postJournalEntries(savingsAccount, existingTransactionIds, existingReversedTransactionIds);
 
@@ -758,7 +760,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 financialYearBeginningMonth);
 
         this.savingsAccountTransactionRepository.save(acceptTransferTransaction);
-        this.savingAccountRepositoryWrapper.save(savingsAccount);
+        this.savingAccountRepositoryWrapper.saveAndFlush(savingsAccount);
 
         postJournalEntries(savingsAccount, existingTransactionIds, existingReversedTransactionIds);
 
@@ -815,7 +817,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
 
         savingsAccount.addCharge(fmt, savingsAccountCharge, chargeDefinition);
-
+        this.savingsAccountChargeRepository.save(savingsAccountCharge);
         this.savingAccountRepositoryWrapper.saveAndFlush(savingsAccount);
 
         return new CommandProcessingResultBuilder() //
@@ -1054,7 +1056,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         account.validateAccountBalanceDoesNotBecomeNegative("." + SavingsAccountTransactionType.PAY_CHARGE.getCode(),
                 depositAccountOnHoldTransactions);
 
-        this.savingAccountRepositoryWrapper.save(account);
+        this.savingAccountRepositoryWrapper.saveAndFlush(account);
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
     }
@@ -1245,7 +1247,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         account.setSubStatusInactive(appuserRepository.fetchSystemUser());
-        this.savingAccountRepositoryWrapper.save(account);
+        this.savingAccountRepositoryWrapper.saveAndFlush(account);
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
     }
 
@@ -1265,7 +1267,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         account.escheat(appuserRepository.fetchSystemUser());
-        this.savingAccountRepositoryWrapper.save(account);
+        this.savingAccountRepositoryWrapper.saveAndFlush(account);
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
     }
 	

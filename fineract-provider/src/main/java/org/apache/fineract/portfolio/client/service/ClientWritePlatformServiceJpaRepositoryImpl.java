@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.persistence.PersistenceException;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandProcessingService;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -176,9 +179,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
+    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 
-        final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("external_id")) {
 
             final String externalId = command.stringValueOfParameterNamed("externalId");
@@ -316,8 +318,12 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .setRollbackTransaction(result.isRollbackTransaction())//
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(command, dve);
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch(final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
+         	return CommandProcessingResult.empty();
         }
     }
     
@@ -500,8 +506,12 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .with(changes) //
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(command, dve);
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch(final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
+         	return CommandProcessingResult.empty();
         }
     }
 
@@ -532,7 +542,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .setRollbackTransaction(result.isRollbackTransaction())//
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(command, dve);
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -552,7 +562,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         return commandProcessingResult;
     }
 
-    private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
+    private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
         logger.error(dve.getMessage(), dve);
     }
 
@@ -686,7 +696,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withEntityId(clientId) //
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(command, dve);
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }
     }

@@ -23,6 +23,7 @@ gradle clean tomcatrunwar
 buildscript {
   repositories {
   	 jcenter()
+  	 mavenCentral()
   }
 
   dependencies {
@@ -30,6 +31,8 @@ buildscript {
                'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0',
                'org.zeroturnaround:gradle-jrebel-plugin:1.1.2',
                'org.springframework.boot:spring-boot-gradle-plugin:1.1.6.RELEASE' // also change springDataJpaVersion below
+     classpath 'org.apache.openjpa:openjpa-all:2.4.1'
+     classpath 'at.schmutterer.oss.gradle:gradle-openjpa:0.2.0'
   }
 }
 
@@ -42,6 +45,7 @@ apply plugin: 'idea'
 apply plugin: 'tomcat'
 apply plugin: 'project-report'
 apply plugin: 'java'
+apply plugin: 'openjpa'
 
 /* define the valid syntax level for source files */
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -64,9 +68,16 @@ repositories {
 	jcenter()
 	// mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
 }
+openjpa {
+    files = fileTree(sourceSets.main.output.classesDir).matching {
+		include '**/AbstractPersistableCustom.class'
+		include '**/domain/*.class'
+		
+    }
+    enforcePropertyRestrictions = true
+}
 
 configurations {
-	hibernateDependencies
 	providedRuntime // needed for Spring Boot executable WAR
     providedCompile
 	compile() {
@@ -136,11 +147,6 @@ task dist(type:Zip){
 
 war {
     war.finalizedBy(bootRepackage)
-	if (project.hasProperty('buildType') && project.getProperty('buildType') == 'TEST') {
-		from(configurations.hibernateDependencies) { // notice the parens
-        	into "WEB-INF/lib/" // no leading slash
-    }
-	}
 }
 
 license {
@@ -200,7 +206,6 @@ sourceSets {
  integrationTest {
     	compileClasspath += main.output + test.output
         runtimeClasspath += main.output + test.output
-        runtimeClasspath += configurations.hibernateDependencies
     }
 }
 
@@ -231,9 +236,6 @@ configurations {
 }
 dependencies {
     driver 'org.drizzle.jdbc:drizzle-jdbc:1.3'
-    hibernateDependencies(
-    [group:'org.springframework.boot', name:'spring-boot-starter-data-jpa', version:'1.1.6.RELEASE'],
-    ) 
 }
 
 test {

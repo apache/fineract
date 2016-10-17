@@ -24,11 +24,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_hook_configuration")
-public class HookConfiguration extends AbstractPersistable<Long> {
+public class HookConfiguration extends AbstractPersistableCustom<Long> {
 
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "hook_id", referencedColumnName = "id", nullable = false)

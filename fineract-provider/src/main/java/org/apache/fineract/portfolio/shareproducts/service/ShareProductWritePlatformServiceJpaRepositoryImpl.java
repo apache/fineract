@@ -21,6 +21,9 @@ package org.apache.fineract.portfolio.shareproducts.service;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import javax.persistence.PersistenceException;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -78,9 +81,13 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
                     .withCommandId(jsonCommand.commandId()) //
                     .withEntityId(product.getId()) //
                     .build();
-        } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve);
+        }catch (DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch (PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleDataIntegrityIssues(jsonCommand, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
 
     }
@@ -105,9 +112,13 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
                     .withEntityId(productId) //
                     .with(changes) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve);
+        }catch (DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch (PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleDataIntegrityIssues(jsonCommand, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -135,7 +146,7 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
                     .withSubEntityId(dividendPayOutDetails.getId())//
                     .build();
         } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve);
+            handleDataIntegrityIssues(dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -175,16 +186,22 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
         }
     }
 
-    private void handleDataIntegrityIssues(final DataIntegrityViolationException dve) {
-        final Throwable realCause = dve.getMostSpecificCause();
-        throw new PlatformDataIntegrityException("error.msg.glClosure.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource GL Closure: " + realCause.getMessage());
+    private void handleDataIntegrityIssues(final Exception e) {
+        throw new PlatformDataIntegrityException("error.msg.shareproduct.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource.");
     }
 
-    private void handleDataIntegrityIssues(@SuppressWarnings("unused") final JsonCommand command, final DataIntegrityViolationException dve) {
-        final Throwable realCause = dve.getMostSpecificCause();
-        throw new PlatformDataIntegrityException("error.msg.glClosure.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource GL Closure: " + realCause.getMessage());
+    
+    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
+
+        if (realCause.getMessage().contains("'name'")) {
+            final String name = command.stringValueOfParameterNamed(ShareProductApiConstants.name_paramname);
+            throw new PlatformDataIntegrityException("error.msg.shareproduct.duplicate.name", "Share Product with name `" + name
+                    + "` already exists", "name", name);
+        } 
+
+        throw new PlatformDataIntegrityException("error.msg.shareproduct.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource.");
     }
 
 }

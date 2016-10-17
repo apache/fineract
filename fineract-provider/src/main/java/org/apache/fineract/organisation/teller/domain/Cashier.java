@@ -22,7 +22,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.joda.time.LocalDate;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -40,7 +40,7 @@ import java.util.Map;
 @Entity
 @Table(name = "m_cashiers", uniqueConstraints = { @UniqueConstraint(name = "ux_cashiers_staff_teller", columnNames = { "staff_id",
         "teller_id" }) })
-public class Cashier extends AbstractPersistable<Long> {
+public class Cashier extends AbstractPersistableCustom<Long> {
 
     // ManyToOne(fetch = FetchType.LAZY)
     // JoinColumn(name = "office_id", nullable = false)

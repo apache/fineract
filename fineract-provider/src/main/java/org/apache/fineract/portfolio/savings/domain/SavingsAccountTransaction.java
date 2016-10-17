@@ -39,6 +39,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -52,7 +53,6 @@ import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.apache.fineract.portfolio.tax.domain.TaxComponent;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -61,10 +61,10 @@ import org.springframework.util.CollectionUtils;
  */
 @Entity
 @Table(name = "m_savings_account_transaction")
-public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
+public final class SavingsAccountTransaction extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "savings_account_id", nullable = false)
+    @JoinColumn(name = "savings_account_id", referencedColumnName="id", nullable = false)
     private SavingsAccount savingsAccount;
 
     @ManyToOne
@@ -76,11 +76,11 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     private PaymentDetail paymentDetail;
 
     @Column(name = "transaction_type_enum", nullable = false)
-    private final Integer typeOf;
+    private Integer typeOf;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "transaction_date", nullable = false)
-    private final Date dateOf;
+    private  Date dateOf;
 
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
@@ -88,28 +88,28 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     @Column(name = "is_reversed", nullable = false)
     private boolean reversed;
 
-    @Column(name = "running_balance_derived", scale = 6, precision = 19, nullable = false)
+    @Column(name = "running_balance_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal runningBalance;
 
-    @Column(name = "cumulative_balance_derived", scale = 6, precision = 19, nullable = false)
+    @Column(name = "cumulative_balance_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal cumulativeBalance;
 
     @Temporal(TemporalType.DATE)
-    @Column(name = "balance_end_date_derived", nullable = false)
+    @Column(name = "balance_end_date_derived", nullable = true)
     private Date balanceEndDate;
 
-    @Column(name = "balance_number_of_days_derived", nullable = false)
+    @Column(name = "balance_number_of_days_derived", nullable = true)
     private Integer balanceNumberOfDays;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccountTransaction", orphanRemoval = true, fetch=FetchType.EAGER)
-    private final Set<SavingsAccountChargePaidBy> savingsAccountChargesPaid = new HashSet<>();
+    private Set<SavingsAccountChargePaidBy> savingsAccountChargesPaid = new HashSet<>();
 
     @Column(name = "overdraft_amount_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal overdraftAmount;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date", nullable = false)
-    private final Date createdDate;
+    private Date createdDate;
 
     @ManyToOne
     @JoinColumn(name = "appuser_id", nullable = true)
@@ -117,7 +117,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
     @JoinColumn(name = "savings_transaction_id", referencedColumnName = "id", nullable = false)
-    private final List<SavingsAccountTransactionTaxDetails> taxDetails = new ArrayList<>();
+    private List<SavingsAccountTransactionTaxDetails> taxDetails = new ArrayList<>();
 
     protected SavingsAccountTransaction() {
         this.dateOf = null;

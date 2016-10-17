@@ -44,6 +44,7 @@ import javax.persistence.UniqueConstraint;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.security.domain.PlatformUser;
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
@@ -54,14 +55,13 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.useradministration.service.AppUserConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 @Entity
 @Table(name = "m_appuser", uniqueConstraints = @UniqueConstraint(columnNames = { "username" }, name = "username_org"))
-public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
+public class AppUser extends AbstractPersistableCustom<Long> implements PlatformUser {
 
     private final static Logger logger = LoggerFactory.getLogger(AppUser.class);
 
@@ -84,10 +84,10 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
     private boolean accountNonExpired;
 
     @Column(name = "nonlocked", nullable = false)
-    private final boolean accountNonLocked;
+    private boolean accountNonLocked;
 
     @Column(name = "nonexpired_credentials", nullable = false)
-    private final boolean credentialsNonExpired;
+    private boolean credentialsNonExpired;
 
     @Column(name = "enabled", nullable = false)
     private boolean enabled;

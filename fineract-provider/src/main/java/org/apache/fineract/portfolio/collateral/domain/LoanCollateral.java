@@ -29,19 +29,17 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.collateral.api.CollateralApiConstants.COLLATERAL_JSON_INPUT_PARAMS;
 import org.apache.fineract.portfolio.collateral.data.CollateralData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_loan_collateral")
-public class LoanCollateral extends AbstractPersistable<Long> {
+public class LoanCollateral extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", nullable = false)
@@ -124,7 +122,7 @@ public class LoanCollateral extends AbstractPersistable<Long> {
         this.type = type;
     }
 
-    @Override
+   /* @Override
     public boolean equals(final Object obj) {
         if (obj == null) { return false; }
         if (obj == this) { return true; }
@@ -146,5 +144,5 @@ public class LoanCollateral extends AbstractPersistable<Long> {
                 .append(this.description) //
                 .append(this.value)//
                 .toHashCode();
-    }
+    }*/
 }

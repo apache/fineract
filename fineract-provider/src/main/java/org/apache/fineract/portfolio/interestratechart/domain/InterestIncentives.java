@@ -29,11 +29,11 @@ import javax.persistence.Table;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_interest_incentives")
-public class InterestIncentives extends AbstractPersistable<Long> {
+public class InterestIncentives extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "interest_rate_slab_id", nullable = false)

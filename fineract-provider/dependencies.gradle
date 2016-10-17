@@ -37,11 +37,13 @@ dependencies {
                 [group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion],
                 [group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springBootVersion],
                 [group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: springBootVersion],
-				[group: 'org.eclipse.persistence', name: 'javax.persistence', version: '2.0.0'],
+				//[group: 'org.eclipse.persistence', name: 'javax.persistence', version: '2.0.0'],
                 [group: 'org.springframework', name: 'spring-context-support', version: springVersion],
 				
 	       		[group: 'org.springframework.security.oauth', name: 'spring-security-oauth2', version: springOauthVersion],
 
+                [group: 'org.apache.openjpa', name:'openjpa-all', version:'2.4.1'],
+                [group: 'org.apache.openjpa', name:'openjpa-maven-plugin', version:'2.4.1'],
                 [group: 'javax.ws.rs', name: 'jsr311-api', version: '1.1.1'],
                 [group: 'com.sun.jersey', name: 'jersey-core', version: jerseyVersion],
                 [group: 'com.sun.jersey', name: 'jersey-servlet', version: jerseyVersion],

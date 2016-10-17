@@ -27,11 +27,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_loan_charge_paid_by")
-public class LoanChargePaidBy extends AbstractPersistable<Long> {
+public class LoanChargePaidBy extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "loan_transaction_id", nullable = false)

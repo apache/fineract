@@ -76,6 +76,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.LocalDateInterval;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -112,7 +113,6 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 import org.springframework.util.CollectionUtils;
 
 import com.google.gson.JsonArray;
@@ -123,7 +123,7 @@ import com.google.gson.JsonArray;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "deposit_type_enum", discriminatorType = DiscriminatorType.INTEGER)
 @DiscriminatorValue("100")
-public class SavingsAccount extends AbstractPersistable<Long> {
+public class SavingsAccount extends AbstractPersistableCustom<Long> {
 
     @Version
     int version;
@@ -293,7 +293,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     @OrderBy(value = "dateOf, createdDate, id")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true, fetch=FetchType.LAZY)
-    protected final List<SavingsAccountTransaction> transactions = new ArrayList<>();
+    protected List<SavingsAccountTransaction> transactions = new ArrayList<>();
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true, fetch=FetchType.LAZY)
     protected Set<SavingsAccountCharge> charges = new HashSet<>();
@@ -2425,7 +2425,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
 
         // add new charge to savings account
-        charges().add(savingsAccountCharge);
+        this.charges.add(savingsAccountCharge);
 
     }
 
@@ -2573,7 +2573,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public Set<SavingsAccountCharge> charges() {
-        return (this.charges == null) ? new HashSet<>() : this.charges;
+        return (this.charges == null) ? new HashSet<SavingsAccountCharge>() : this.charges;
     }
 
     public void validateAccountValuesWithProduct() {

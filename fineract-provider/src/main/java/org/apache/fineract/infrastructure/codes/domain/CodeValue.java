@@ -32,11 +32,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.codes.CodeConstants.CODEVALUE_JSON_INPUT_PARAMS;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_code_value", uniqueConstraints = { @UniqueConstraint(columnNames = { "code_id", "code_value" }, name = "code_value_duplicate") })
-public class CodeValue extends AbstractPersistable<Long> {
+public class CodeValue extends AbstractPersistableCustom<Long> {
 
     @Column(name = "code_value", length = 100)
     private String label;

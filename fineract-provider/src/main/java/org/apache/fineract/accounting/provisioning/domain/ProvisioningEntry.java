@@ -35,17 +35,17 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_provisioning_history")
-public class ProvisioningEntry extends AbstractPersistable<Long> {
+public class ProvisioningEntry extends AbstractPersistableCustom<Long> {
 
     @Column(name = "journal_entry_created")
     private Boolean isJournalEntryCreated;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch=FetchType.EAGER)
-    Set<LoanProductProvisioningEntry> provisioningEntries = new HashSet<>();
+    private Set<LoanProductProvisioningEntry> provisioningEntries = new HashSet<>();
     
     @OneToOne
     @JoinColumn(name = "createdby_id")

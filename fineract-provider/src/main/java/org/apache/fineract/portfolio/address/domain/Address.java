@@ -33,17 +33,17 @@ import javax.persistence.Table;
 
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.client.domain.ClientAddress;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 import com.google.gson.JsonObject;
 
 @Entity
 @Table(name = "m_address")
-public class Address extends AbstractPersistable<Long> {
+public class Address extends AbstractPersistableCustom<Long> {
 
 	/*
 	 * @OneToMany(mappedBy = "address", cascade = CascadeType.ALL) private

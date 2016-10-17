@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.savings.service;
 
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
@@ -29,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.PersistenceException;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -99,8 +101,12 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
                     .withEntityId(product.getId()) //
                     .build();
         } catch (final DataAccessException e) {
-            handleDataIntegrityIssues(command, e);
+            handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleDataIntegrityIssues(command, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -155,8 +161,12 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
                     .withEntityId(product.getId()) //
                     .with(changes).build();
         } catch (final DataAccessException e) {
-            handleDataIntegrityIssues(command, e);
+            handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleDataIntegrityIssues(command, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -179,9 +189,8 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleDataIntegrityIssues(final JsonCommand command, final DataAccessException dae) {
+    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dae) {
 
-        final Throwable realCause = dae.getMostSpecificCause();
         if (realCause.getMessage().contains("sp_unq_name")) {
 
             final String name = command.stringValueOfParameterNamed("name");
@@ -199,7 +208,7 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
                 "Unknown data integrity issue with resource.");
     }
 
-    private void logAsErrorUnexpectedDataIntegrityException(final DataAccessException dae) {
+    private void logAsErrorUnexpectedDataIntegrityException(final Exception dae) {
         this.logger.error(dae.getMessage(), dae);
     }
 }

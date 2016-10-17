@@ -34,11 +34,11 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_share_account_transactions")
-public class ShareAccountTransaction extends AbstractPersistable<Long> {
+public class ShareAccountTransaction extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false)
@@ -73,7 +73,7 @@ public class ShareAccountTransaction extends AbstractPersistable<Long> {
     private boolean active = true ;
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "shareAccountTransaction", orphanRemoval = true, fetch=FetchType.EAGER)
-    private final Set<ShareAccountChargePaidBy> shareAccountChargesPaid = new HashSet<>();
+    private Set<ShareAccountChargePaidBy> shareAccountChargesPaid = new HashSet<>();
     
     protected ShareAccountTransaction() {
 

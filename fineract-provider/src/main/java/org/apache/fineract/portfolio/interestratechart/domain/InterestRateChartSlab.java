@@ -52,14 +52,14 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants;
 import org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 @Entity
 @Table(name = "m_interest_rate_slab")
-public class InterestRateChartSlab extends AbstractPersistable<Long> {
+public class InterestRateChartSlab extends AbstractPersistableCustom<Long> {
 
     @Embedded
     private InterestRateChartSlabFields slabFields;
@@ -68,7 +68,7 @@ public class InterestRateChartSlab extends AbstractPersistable<Long> {
     @JoinColumn(name = "interest_rate_chart_id", referencedColumnName = "id", nullable = false)
     private InterestRateChart interestRateChart;
 
-    @OneToMany(mappedBy = "interestRateChartSlab", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "interestRateChartSlab", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<InterestIncentives> interestIncentives = new HashSet<>();
 
     protected InterestRateChartSlab() {

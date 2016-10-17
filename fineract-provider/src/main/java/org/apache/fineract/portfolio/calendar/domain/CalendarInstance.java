@@ -25,11 +25,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_calendar_instance")
-public class CalendarInstance extends AbstractPersistable<Long> {
+public class CalendarInstance extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "calendar_id", nullable = false)
