@@ -26,7 +26,7 @@ Instructions to execute Integration tests
 4. With fineract-provider as current working directory run below commands
 4.a. ./gradlew migrateTenantListDB -PdbName=mifosplatform-tenants
 4.b. ./gradlew migrateTenantDB -PdbName=mifostenant-default
-5. Run './gradlew clean integrationTest -PbuildType=TEST'
+5. Run './gradlew clean integrationTest'
 
 
 More details of the project can be found at https://cwiki.apache.org/confluence/display/FINERACT
