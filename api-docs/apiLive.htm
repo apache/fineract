@@ -3361,6 +3361,14 @@
 								<td></td>
 							</tr>
 							<tr>
+								<td><a href="#selfuser">Update User</a></td>
+								<td>self/user</td>
+								<td></td>
+								<td></td>
+								<td><a href="#selfuser">Update User</a></td>
+								<td></td>
+							</tr>
+							<tr>
 								<td><a href="#selflistclients">Clients</a></td>
 								<td>self/clients</td>
 								<td></td>
@@ -42916,6 +42924,38 @@ No Request Body
     "errors": []
 }
 					</code>
+				</div>
+			</div>
+
+			<a id="selfuser" name="selfuser" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update User</h4>
+					<p>This API can be used by Self Service user to update their own user information. Currently, "password" and "repeatPassword" are the only parameters accepted.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/self/user
+					</code>
+					<code class="method-request">
+PUT self/user
+Content-Type: application/json
+
+{
+	"password":"Abcd1234",
+	"repeatPassword":"Abcd1234"
+}
+					</code>
+					<p>Example response</p>
+<code class="method-response">
+{
+	"officeId": 1,
+	"resourceId": 6,
+	"changes": {
+		"passwordEncoded": "6a72a630795be86fe926ce540fc45b6b922fe5ba130f185fe806a26b5e5efcdd"
+	}
+}
+</code>
 				</div>
 			</div>
 
