@@ -57,18 +57,18 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
         	}
         	email.setFrom(authuser, authuserName);
 
-            final StringBuilder subjectBuilder = new StringBuilder().append("Fineract Prototype Demo: ").append(emailDetail.getContactName())
-                    .append(" user account creation.");
-
+            final StringBuilder subjectBuilder = new StringBuilder().append("Welcome to Fineract Prototype Demo: ").append(emailDetail.getContactName());
+                    
             email.setSubject(subjectBuilder.toString());
 
             final String sendToEmail = emailDetail.getAddress();
 
             final StringBuilder messageBuilder = new StringBuilder().append("You are receiving this email as your email account: ")
                     .append(sendToEmail).append(" has being used to create a user account for an organisation named [")
-                    .append(emailDetail.getOrganisationName()).append("] on Fineract Prototype Demo.")
-                    .append("You can login using the following credentials: username: ").append(emailDetail.getUsername())
-                    .append(" password: ").append(unencodedPassword);
+                    .append(emailDetail.getOrganisationName()).append("] on Fineract Prototype Demo.\n")
+                    .append("You can login using the following credentials:\n username: ").append(emailDetail.getUsername()).append("\n")
+                    .append(" password: ").append(unencodedPassword).append("\n")
+                    .append("You must change your password upon first login.");
 
             email.setMsg(messageBuilder.toString());
 
