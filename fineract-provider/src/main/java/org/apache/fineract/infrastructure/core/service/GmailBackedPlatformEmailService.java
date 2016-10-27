@@ -57,8 +57,8 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
         	}
         	email.setFrom(authuser, authuserName);
 
-            final StringBuilder subjectBuilder = new StringBuilder().append("Fineract Prototype Demo: ").append(emailDetail.getContactName())
-                    .append(" user account creation.");
+            final StringBuilder subjectBuilder = new StringBuilder().append("Welcome ").append(emailDetail.getContactName())
+                    .append(" to ").append(emailDetail.getOrganisationName());
 
             email.setSubject(subjectBuilder.toString());
 
@@ -66,9 +66,11 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
 
             final StringBuilder messageBuilder = new StringBuilder().append("You are receiving this email as your email account: ")
                     .append(sendToEmail).append(" has being used to create a user account for an organisation named [")
-                    .append(emailDetail.getOrganisationName()).append("] on Fineract Prototype Demo.")
-                    .append("You can login using the following credentials: username: ").append(emailDetail.getUsername())
-                    .append(" password: ").append(unencodedPassword);
+                    .append(emailDetail.getOrganisationName()).append("] on Mifos.\n")
+                    .append("You can login using the following credentials:\nusername: ").append(emailDetail.getUsername()).append("\n")
+                    .append("password: ").append(unencodedPassword).append("\n")
+                    .append("You must change this password upon first log in using Uppercase, Lowercase, number and character.\n")
+                    .append("Thank you and welcome to the organisation.");
 
             email.setMsg(messageBuilder.toString());
 
