@@ -705,4 +705,10 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
         this.amount = amount.getAmount();
     }
 
+    /**
+     * @return {@link PaymentDetail}
+     */
+    public PaymentDetail getPaymentDetail() {
+        return this.paymentDetail;
+    }
 }

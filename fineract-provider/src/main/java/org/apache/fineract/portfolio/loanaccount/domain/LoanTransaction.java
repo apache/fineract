@@ -783,4 +783,11 @@ public class LoanTransaction extends AbstractPersistableCustom<Long> {
                 && !(this.isDisbursement() || this.isAccrual() || this.isRepaymentAtDisbursement() || this.isNonMonetaryTransaction() || this
                         .isIncomePosting());
     }
+
+    /**
+     * @return {@link PaymentDetail}
+     */
+    public PaymentDetail getPaymentDetail() {
+        return this.paymentDetail;
+    }
 }
