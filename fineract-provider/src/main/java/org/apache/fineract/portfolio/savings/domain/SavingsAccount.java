@@ -235,6 +235,7 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
     @Column(name = "interest_calculation_type_enum", nullable = false)
     protected Integer interestCalculationType;
 
+   
     /**
      * A value from the {@link SavingsInterestCalculationDaysInYearType}
      * enumeration.
@@ -462,13 +463,10 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
     public boolean isClosed() {
         return SavingsAccountStatusType.fromInt(this.status).isClosed();
     }
-
     public void postInterest(final MathContext mc, final LocalDate interestPostingUpToDate, final boolean isInterestTransfer,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
-
+            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,final boolean postInterestAsOn) {
         final List<PostingPeriod> postingPeriods = calculateInterestUsing(mc, interestPostingUpToDate, isInterestTransfer,
-                isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
-
+                isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestAsOn);
         Money interestPostedToDate = Money.zero(this.currency);
 
         boolean recalucateDailyBalanceDetails = false;
@@ -477,23 +475,23 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
         withholdTransactions.addAll(findWithHoldTransactions());
 
         for (final PostingPeriod interestPostingPeriod : postingPeriods) {
-
+            
             final LocalDate interestPostingTransactionDate = interestPostingPeriod.dateOfPostingTransaction();
             final Money interestEarnedToBePostedForPeriod = interestPostingPeriod.getInterestEarned();
-
+            
             if (!interestPostingTransactionDate.isAfter(interestPostingUpToDate)) {
-
                 interestPostedToDate = interestPostedToDate.plus(interestEarnedToBePostedForPeriod);
 
                 final SavingsAccountTransaction postingTransaction = findInterestPostingTransactionFor(interestPostingTransactionDate);
                 if (postingTransaction == null) {
                     SavingsAccountTransaction newPostingTransaction;
                     if (interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(currency))) {
+                        
                         newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(), interestPostingTransactionDate,
-                                interestEarnedToBePostedForPeriod);
+                                interestEarnedToBePostedForPeriod, interestPostingPeriod.isUserPosting());
                     } else {
                         newPostingTransaction = SavingsAccountTransaction.overdraftInterest(this, office(), interestPostingTransactionDate,
-                                interestEarnedToBePostedForPeriod.negated());
+                                interestEarnedToBePostedForPeriod.negated(), interestPostingPeriod.isUserPosting());
                     }
                     addTransaction(newPostingTransaction);
                     if (applyWithHoldTax) {
@@ -519,10 +517,12 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
                         SavingsAccountTransaction newPostingTransaction;
                         if (interestEarnedToBePostedForPeriod.isGreaterThanOrEqualTo(Money.zero(currency))) {
                             newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
-                                    interestPostingTransactionDate, interestEarnedToBePostedForPeriod);
+                                    interestPostingTransactionDate, interestEarnedToBePostedForPeriod,
+                                    interestPostingPeriod.isUserPosting());
                         } else {
                             newPostingTransaction = SavingsAccountTransaction.overdraftInterest(this, office(),
-                                    interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated());
+                                    interestPostingTransactionDate, interestEarnedToBePostedForPeriod.negated(),
+                                    interestPostingPeriod.isUserPosting());
                         }
                         addTransaction(newPostingTransaction);
                         if (applyWithHoldTaxForOldTransaction) {
@@ -641,6 +641,16 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
         return savingsTransaction;
     }
 
+    public List<LocalDate> getManualPostingDates() {
+        List<LocalDate> transactions = new ArrayList<>();
+        for (SavingsAccountTransaction trans : this.transactions) {
+            if (trans.isManualTransaction()) {
+                transactions.add(trans.getTransactionLocalDate());
+            }
+        }
+        return transactions;
+    }
+
     /**
      * All interest calculation based on END-OF-DAY-BALANCE.
      * 
@@ -657,9 +667,10 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
      * 
      * @param isInterestTransfer
      *            TODO
-     */
+     */   
+       
     public List<PostingPeriod> calculateInterestUsing(final MathContext mc, final LocalDate upToInterestCalculationDate,
-            boolean isInterestTransfer, final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
+            boolean isInterestTransfer, final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,final boolean postInterestAsOn) {
 
         // no openingBalance concept supported yet but probably will to allow
         // for migrations.
@@ -680,10 +691,14 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
                 .fromInt(this.interestCompoundingPeriodType);
 
         final SavingsInterestCalculationDaysInYearType daysInYearType = SavingsInterestCalculationDaysInYearType
-                .fromInt(this.interestCalculationDaysInYearType);
-
+                .fromInt(this.interestCalculationDaysInYearType);      
+         List<LocalDate> postedAsOnDates= getManualPostingDates();
+         if(postInterestAsOn){
+             postedAsOnDates.add(upToInterestCalculationDate);
+         }
         final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(
-                getStartInterestCalculationDate(), upToInterestCalculationDate, postingPeriodType, financialYearBeginningMonth);
+                getStartInterestCalculationDate(), upToInterestCalculationDate, postingPeriodType, financialYearBeginningMonth,
+                postedAsOnDates);
 
         final List<PostingPeriod> allPostingPeriods = new ArrayList<>();
 
@@ -719,12 +734,17 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
         final Money minOverdraftForInterestCalculation = Money.of(getCurrency(), this.minOverdraftForInterestCalculation);
 
         for (final LocalDateInterval periodInterval : postingPeriodIntervals) {
+            
+            boolean isUserPosting = false;
+            if(postedAsOnDates.contains(periodInterval.endDate().plusDays(1))){
+                isUserPosting = true;
+            }
 
             final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance,
                     retreiveOrderedNonInterestPostingTransactions(), this.currency, compoundingPeriodType, interestCalculationType,
                     interestRateAsFraction, daysInYearType.getValue(), upToInterestCalculationDate, interestPostTransactions,
                     isInterestTransfer, minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd,
-                    overdraftInterestRateAsFraction, minOverdraftForInterestCalculation);
+                    overdraftInterestRateAsFraction, minOverdraftForInterestCalculation, isUserPosting);
 
             periodStartingBalance = postingPeriod.closingBalance();
 
@@ -2133,13 +2153,15 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
         if (isSavingsChargeApplied) {
             final MathContext mc = MathContext.DECIMAL64;
             boolean isInterestTransfer = false;
+            boolean postInterestAsOnDate = false;
             if (this.isBeforeLastPostingPeriod(getActivationLocalDate())) {
                 final LocalDate today = DateUtils.getLocalDateOfTenant();
-                this.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+                this.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
+                        postInterestAsOnDate);
             } else {
                 final LocalDate today = DateUtils.getLocalDateOfTenant();
                 this.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                        financialYearBeginningMonth);
+                        financialYearBeginningMonth, postInterestAsOnDate);
             }
         }
     }
@@ -2781,10 +2803,10 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
 		this.sub_status = SavingsAccountSubStatusEnum.ESCHEAT.getValue();
 		this.closedOnDate = DateUtils.getDateOfTenant();
 		this.closedBy = appUser;
-		
+                boolean postInterestAsOnDate = false;
     	LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
 		if(this.getSummary().getAccountBalance(this.getCurrency()).isGreaterThanZero()){
-			SavingsAccountTransaction transaction = SavingsAccountTransaction.escheat(this, transactionDate, appUser);
+            SavingsAccountTransaction transaction = SavingsAccountTransaction.escheat(this, transactionDate, appUser, postInterestAsOnDate);
 			this.transactions.add(transaction);
 		}
         recalculateDailyBalances(Money.zero(this.currency), transactionDate);

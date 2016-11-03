@@ -114,6 +114,9 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     @ManyToOne
     @JoinColumn(name = "appuser_id", nullable = true)
     private AppUser appUser;
+    
+    @Column(name = "is_manual", length = 1, nullable = true)
+    private boolean isManualTransaction;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
     @JoinColumn(name = "savings_transaction_id", referencedColumnName = "id", nullable = false)
@@ -126,112 +129,123 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     }
 
     public static SavingsAccountTransaction deposit(final SavingsAccount savingsAccount, final Office office,
-            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser) {
+            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser,
+            final boolean isManualTransaction) {
         final boolean isReversed = false;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, SavingsAccountTransactionType.DEPOSIT.getValue(), date,
-                createdDate, amount, isReversed, appUser);
+                createdDate, amount, isReversed, appUser, isManualTransaction);
     }
 
     public static SavingsAccountTransaction deposit(final SavingsAccount savingsAccount, final Office office,
             final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser,
             final SavingsAccountTransactionType savingsAccountTransactionType) {
         final boolean isReversed = false;
+        final boolean isManualTransaction = false;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, savingsAccountTransactionType.getValue(), date,
-                createdDate, amount, isReversed, appUser);
+                createdDate, amount, isReversed, appUser,isManualTransaction);
     }
 
     public static SavingsAccountTransaction withdrawal(final SavingsAccount savingsAccount, final Office office,
             final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser) {
         final boolean isReversed = false;
+        final boolean isManualTransaction = false;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, SavingsAccountTransactionType.WITHDRAWAL.getValue(),
-                date, createdDate, amount, isReversed, appUser);
+                date, createdDate, amount, isReversed, appUser, isManualTransaction);
     }
 
     public static SavingsAccountTransaction interestPosting(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
-            final Money amount) {
+            final Money amount,final boolean isManualTransaction) {
         final boolean isReversed = false;
         return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.INTEREST_POSTING.getValue(), date,
-                amount, isReversed, null);
+                amount, isReversed, null, isManualTransaction);
     }
 
     public static SavingsAccountTransaction overdraftInterest(final SavingsAccount savingsAccount, final Office office,
-            final LocalDate date, final Money amount) {
+            final LocalDate date, final Money amount,final boolean isManualTransaction) {
         final boolean isReversed = false;
         return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue(), date,
-                amount, isReversed, null);
+                amount, isReversed, null, isManualTransaction);
     }
 
     public static SavingsAccountTransaction withdrawalFee(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
             final Money amount, final AppUser appUser) {
         final boolean isReversed = false;
+        final boolean isManualTransaction = false;
         return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.WITHDRAWAL_FEE.getValue(), date, amount,
-                isReversed, appUser);
+                isReversed, appUser, isManualTransaction);
     }
 
     public static SavingsAccountTransaction annualFee(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
             final Money amount, final AppUser appUser) {
         final boolean isReversed = false;
+        final boolean isManualTransaction = false;
         return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.ANNUAL_FEE.getValue(), date, amount,
-                isReversed, appUser);
+                isReversed, appUser, isManualTransaction);
     }
 
     public static SavingsAccountTransaction charge(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
             final Money amount, final AppUser appUser) {
         final boolean isReversed = false;
+        final boolean isManualTransaction = false;
         return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.PAY_CHARGE.getValue(), date, amount,
-                isReversed, appUser);
+                isReversed, appUser, isManualTransaction);
     }
 
     public static SavingsAccountTransaction waiver(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
             final Money amount, final AppUser appUser) {
         final boolean isReversed = false;
+        final boolean isManualTransaction = false;
         return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.WAIVE_CHARGES.getValue(), date, amount,
-                isReversed, appUser);
+                isReversed, appUser, isManualTransaction);
     }
 
     public static SavingsAccountTransaction initiateTransfer(final SavingsAccount savingsAccount, final Office office,
             final LocalDate date, final AppUser appUser) {
         final boolean isReversed = false;
+        final boolean isManualTransaction = false;
         final PaymentDetail paymentDetail = null;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
                 SavingsAccountTransactionType.INITIATE_TRANSFER.getValue(), date, new Date(), savingsAccount.getSummary()
-                        .getAccountBalance(), isReversed, appUser);
+                        .getAccountBalance(), isReversed, appUser, isManualTransaction);
     }
 
     public static SavingsAccountTransaction approveTransfer(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
             final AppUser appUser) {
         final boolean isReversed = false;
+        final boolean isManualTransaction = false;
         final PaymentDetail paymentDetail = null;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
                 SavingsAccountTransactionType.APPROVE_TRANSFER.getValue(), date, new Date(), savingsAccount.getSummary()
-                        .getAccountBalance(), isReversed, appUser);
+                        .getAccountBalance(), isReversed, appUser, isManualTransaction);
     }
 
     public static SavingsAccountTransaction withdrawTransfer(final SavingsAccount savingsAccount, final Office office,
             final LocalDate date, final AppUser appUser) {
         final boolean isReversed = false;
+        final boolean isManualTransaction = false;
         final PaymentDetail paymentDetail = null;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
                 SavingsAccountTransactionType.WITHDRAW_TRANSFER.getValue(), date, new Date(), savingsAccount.getSummary()
-                        .getAccountBalance(), isReversed, appUser);
+                        .getAccountBalance(), isReversed, appUser, isManualTransaction);
     }
 
     public static SavingsAccountTransaction withHoldTax(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
             final Money amount, final Map<TaxComponent, BigDecimal> taxDetails) {
         final boolean isReversed = false;
+        final boolean isManualTransaction = false;
         SavingsAccountTransaction accountTransaction = new SavingsAccountTransaction(savingsAccount, office,
-                SavingsAccountTransactionType.WITHHOLD_TAX.getValue(), date, amount, isReversed, null);
+                SavingsAccountTransactionType.WITHHOLD_TAX.getValue(), date, amount, isReversed, null, isManualTransaction);
         updateTaxDetails(taxDetails, accountTransaction);
         return accountTransaction;
     }
 
     public static SavingsAccountTransaction escheat(final SavingsAccount savingsAccount, final LocalDate date,
-            final AppUser appUser) {
+            final AppUser appUser,final boolean accountTransaction) {
         final boolean isReversed = false;
         final PaymentDetail paymentDetail = null;
         return new SavingsAccountTransaction(savingsAccount, savingsAccount.office(), paymentDetail,
                 SavingsAccountTransactionType.ESCHEAT.getValue(), date, new Date(), savingsAccount.getSummary()
-                        .getAccountBalance(), isReversed, appUser);
+                        .getAccountBalance(), isReversed, appUser,accountTransaction);
     }
 
     public static void updateTaxDetails(final Map<TaxComponent, BigDecimal> taxDetails, final SavingsAccountTransaction accountTransaction) {
@@ -245,23 +259,25 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     public static SavingsAccountTransaction copyTransaction(SavingsAccountTransaction accountTransaction) {
         return new SavingsAccountTransaction(accountTransaction.savingsAccount, accountTransaction.office,
                 accountTransaction.paymentDetail, accountTransaction.typeOf, accountTransaction.transactionLocalDate(),
-                accountTransaction.createdDate, accountTransaction.amount, accountTransaction.reversed, accountTransaction.appUser);
+                accountTransaction.createdDate, accountTransaction.amount, accountTransaction.reversed, accountTransaction.appUser,
+                accountTransaction.isManualTransaction);
     }
 
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final Integer typeOf,
-            final LocalDate transactionLocalDate, final Money amount, final boolean isReversed, final AppUser appUser) {
-        this(savingsAccount, office, null, typeOf, transactionLocalDate, new Date(), amount, isReversed, appUser);
+            final LocalDate transactionLocalDate, final Money amount, final boolean isReversed, final AppUser appUser,final boolean isManualTransaction) {
+        this(savingsAccount, office, null, typeOf, transactionLocalDate, new Date(), amount, isReversed, appUser, isManualTransaction);
     }
 
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final PaymentDetail paymentDetail,
             final Integer typeOf, final LocalDate transactionLocalDate, final Date createdDate, final Money amount,
-            final boolean isReversed, final AppUser appUser) {
-        this(savingsAccount, office, paymentDetail, typeOf, transactionLocalDate, createdDate, amount.getAmount(), isReversed, appUser);
+            final boolean isReversed, final AppUser appUser, final boolean isManualTransaction) {
+        this(savingsAccount, office, paymentDetail, typeOf, transactionLocalDate, createdDate, amount.getAmount(), isReversed, appUser,
+                isManualTransaction);
     }
 
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final PaymentDetail paymentDetail,
             final Integer typeOf, final LocalDate transactionLocalDate, final Date createdDate, final BigDecimal amount,
-            final boolean isReversed, final AppUser appUser) {
+            final boolean isReversed, final AppUser appUser, final boolean isManualTransaction) {
         this.savingsAccount = savingsAccount;
         this.office = office;
         this.typeOf = typeOf;
@@ -271,6 +287,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
         this.paymentDetail = paymentDetail;
         this.createdDate = createdDate;
         this.appUser = appUser;
+        this.isManualTransaction = isManualTransaction;
     }
 
     public LocalDate transactionLocalDate() {
@@ -389,7 +406,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
         this.cumulativeBalance = Money.of(currency, this.runningBalance).multipliedBy(this.balanceNumberOfDays).getAmount();
     }
 
-    private LocalDate getTransactionLocalDate() {
+    public LocalDate getTransactionLocalDate() {
         return new LocalDate(this.dateOf);
     }
 
@@ -469,6 +486,14 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
 
     public boolean isAfter(final LocalDate transactionDate) {
         return getTransactionLocalDate().isAfter(transactionDate);
+    }
+    
+    public boolean isManualTransaction() {
+        return this.isManualTransaction;
+    }
+    
+    public void setPostInterestAsOn(boolean isManualTransaction) {
+        this.isManualTransaction = isManualTransaction;
     }
 
     public EndOfDayBalance toEndOfDayBalance(final LocalDateInterval periodInterval, final MonetaryCurrency currency) {
@@ -703,6 +728,23 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
 
     public void updateAmount(final Money amount) {
         this.amount = amount.getAmount();
+    }
+    
+    public Integer getTypeOf() {
+        return this.typeOf;
+    }
+    
+    public SavingsAccount getSavingsAccount() {
+        return this.savingsAccount;
+    }
+
+    
+    public void setSavingsAccount(SavingsAccount savingsAccount) {
+        this.savingsAccount = savingsAccount;
+    }
+
+    public Date getDateOf() {
+        return this.dateOf;
     }
 
 }
