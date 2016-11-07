@@ -51,7 +51,10 @@ import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSeria
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.Page;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.notification.eventandlistener.fixeddepositaccount.FixedDepositAccountApprovedEvent;
+import org.apache.fineract.notification.eventandlistener.fixeddepositaccount.NewFixedDepositAccountEvent;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
@@ -65,6 +68,7 @@ import org.apache.fineract.portfolio.savings.service.DepositAccountPreMatureCalc
 import org.apache.fineract.portfolio.savings.service.DepositAccountReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -85,15 +89,17 @@ public class FixedDepositAccountsApiResource {
     private final FromJsonHelper fromJsonHelper;
     private final DepositAccountPreMatureCalculationPlatformService accountPreMatureCalculationPlatformService;
     private final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
+    private final ApplicationEventPublisher publisher;
 
     @Autowired
     public FixedDepositAccountsApiResource(final DepositAccountReadPlatformService depositAccountReadPlatformService,
-            final PlatformSecurityContext context, final DefaultToApiJsonSerializer<DepositAccountData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService, final FromJsonHelper fromJsonHelper,
-            final DepositAccountPreMatureCalculationPlatformService accountPreMatureCalculationPlatformService,
-            final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService) {
+                                           final PlatformSecurityContext context, final DefaultToApiJsonSerializer<DepositAccountData> toApiJsonSerializer,
+                                           final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+                                           final ApiRequestParameterHelper apiRequestParameterHelper,
+                                           final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService, final FromJsonHelper fromJsonHelper,
+                                           final DepositAccountPreMatureCalculationPlatformService accountPreMatureCalculationPlatformService,
+                                           final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
+                                           final ApplicationEventPublisher publisher) {
         this.depositAccountReadPlatformService = depositAccountReadPlatformService;
         this.context = context;
         this.toApiJsonSerializer = toApiJsonSerializer;
@@ -103,6 +109,7 @@ public class FixedDepositAccountsApiResource {
         this.fromJsonHelper = fromJsonHelper;
         this.accountPreMatureCalculationPlatformService = accountPreMatureCalculationPlatformService;
         this.accountAssociationsReadPlatformService = accountAssociationsReadPlatformService;
+        this.publisher = publisher;
     }
 
     @GET
@@ -156,6 +163,15 @@ public class FixedDepositAccountsApiResource {
                 .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        this.publisher.publishEvent(new NewFixedDepositAccountEvent(
+                this,
+                "created",
+                this.context.authenticatedUser(),
+                ThreadLocalContextUtil.getTenant().getTenantIdentifier(),
+                result.resourceId(),
+                result.getOfficeId()
+        ));
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -276,6 +292,16 @@ public class FixedDepositAccountsApiResource {
         } else if (is(commandParam, "approve")) {
             final CommandWrapper commandRequest = builder.approveFixedDepositAccountApplication(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+            this.publisher.publishEvent(new FixedDepositAccountApprovedEvent(
+                    this,
+                    "approved",
+                    this.context.authenticatedUser(),
+                    ThreadLocalContextUtil.getTenant().getTenantIdentifier(),
+                    result.resourceId(),
+                    result.getOfficeId()
+            ));
+
         } else if (is(commandParam, "undoapproval")) {
             final CommandWrapper commandRequest = builder.undoFixedDepositAccountApplication(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

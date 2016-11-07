@@ -54,7 +54,9 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.notification.eventandlistener.center.NewCenterEvent;
 import org.apache.fineract.portfolio.accountdetails.data.AccountSummaryCollectionData;
 import org.apache.fineract.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
@@ -70,6 +72,7 @@ import org.apache.fineract.portfolio.meeting.data.MeetingData;
 import org.apache.fineract.portfolio.meeting.service.MeetingReadPlatformService;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -92,16 +95,18 @@ public class CentersApiResource {
     private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final MeetingReadPlatformService meetingReadPlatformService;
+    private final ApplicationEventPublisher publisher;
 
     @Autowired
     public CentersApiResource(final PlatformSecurityContext context, final CenterReadPlatformService centerReadPlatformService,
-            final ToApiJsonSerializer<CenterData> centerApiJsonSerializer, final ToApiJsonSerializer<Object> toApiJsonSerializer,
-            final ToApiJsonSerializer<AccountSummaryCollectionData> groupSummaryToApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final CollectionSheetReadPlatformService collectionSheetReadPlatformService, final FromJsonHelper fromJsonHelper,
-            final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
-            final CalendarReadPlatformService calendarReadPlatformService, final MeetingReadPlatformService meetingReadPlatformService) {
+                              final ToApiJsonSerializer<CenterData> centerApiJsonSerializer, final ToApiJsonSerializer<Object> toApiJsonSerializer,
+                              final ToApiJsonSerializer<AccountSummaryCollectionData> groupSummaryToApiJsonSerializer,
+                              final ApiRequestParameterHelper apiRequestParameterHelper,
+                              final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+                              final CollectionSheetReadPlatformService collectionSheetReadPlatformService, final FromJsonHelper fromJsonHelper,
+                              final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
+                              final CalendarReadPlatformService calendarReadPlatformService, final MeetingReadPlatformService meetingReadPlatformService,
+                              final ApplicationEventPublisher publisher) {
         this.context = context;
         this.centerReadPlatformService = centerReadPlatformService;
         this.centerApiJsonSerializer = centerApiJsonSerializer;
@@ -114,6 +119,7 @@ public class CentersApiResource {
         this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
         this.calendarReadPlatformService = calendarReadPlatformService;
         this.meetingReadPlatformService = meetingReadPlatformService;
+        this.publisher = publisher;
     }
 
     @GET
@@ -233,6 +239,16 @@ public class CentersApiResource {
                 .withJson(apiRequestBodyAsJson) //
                 .build(); //
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        this.publisher.publishEvent(new NewCenterEvent(
+                this,
+                "created",
+                this.context.authenticatedUser(),
+                ThreadLocalContextUtil.getTenant().getTenantIdentifier(),
+                result.resourceId(),
+                result.getOfficeId()
+        ));
+
         return this.toApiJsonSerializer.serialize(result);
 
     }

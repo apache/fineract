@@ -204,7 +204,7 @@ CREATE TABLE IF NOT EXISTS `m_calendar_instance` (
 
 -- ================= end of reference/lookup tables =============
 
--- DDL for office related tables
+-- DDL for officeId related tables
 CREATE TABLE `m_office` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `parent_id` bigint(20) DEFAULT NULL,
@@ -235,7 +235,7 @@ CREATE TABLE `m_office_transaction` (
   CONSTRAINT `FK1E37728B93C6C1B6` FOREIGN KEY (`to_office_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- ============ end of office related tables ==========
+-- ============ end of officeId related tables ==========
 
 -- DDL for admin tables
 CREATE TABLE `m_permission` (

@@ -51,7 +51,10 @@ import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSeria
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.Page;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.notification.eventandlistener.recurringdepositaccount.NewRecurringDepositAccountEvent;
+import org.apache.fineract.notification.eventandlistener.recurringdepositaccount.RecurringDepositAccountApprovedEvent;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
@@ -63,6 +66,7 @@ import org.apache.fineract.portfolio.savings.service.DepositAccountPreMatureCalc
 import org.apache.fineract.portfolio.savings.service.DepositAccountReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -82,14 +86,16 @@ public class RecurringDepositAccountsApiResource {
     private final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService;
     private final FromJsonHelper fromJsonHelper;
     private final DepositAccountPreMatureCalculationPlatformService accountPreMatureCalculationPlatformService;
+    private final ApplicationEventPublisher publisher;
 
     @Autowired
     public RecurringDepositAccountsApiResource(final DepositAccountReadPlatformService depositAccountReadPlatformService,
-            final PlatformSecurityContext context, final DefaultToApiJsonSerializer<DepositAccountData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService, final FromJsonHelper fromJsonHelper,
-            final DepositAccountPreMatureCalculationPlatformService accountPreMatureCalculationPlatformService) {
+                                               final PlatformSecurityContext context, final DefaultToApiJsonSerializer<DepositAccountData> toApiJsonSerializer,
+                                               final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+                                               final ApiRequestParameterHelper apiRequestParameterHelper,
+                                               final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService, final FromJsonHelper fromJsonHelper,
+                                               final DepositAccountPreMatureCalculationPlatformService accountPreMatureCalculationPlatformService,
+                                               final ApplicationEventPublisher publisher) {
         this.depositAccountReadPlatformService = depositAccountReadPlatformService;
         this.context = context;
         this.toApiJsonSerializer = toApiJsonSerializer;
@@ -98,6 +104,7 @@ public class RecurringDepositAccountsApiResource {
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
         this.fromJsonHelper = fromJsonHelper;
         this.accountPreMatureCalculationPlatformService = accountPreMatureCalculationPlatformService;
+        this.publisher = publisher;
     }
 
     @GET
@@ -153,6 +160,15 @@ public class RecurringDepositAccountsApiResource {
                 .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        this.publisher.publishEvent(new NewRecurringDepositAccountEvent(
+                this,
+                "created",
+                this.context.authenticatedUser(),
+                ThreadLocalContextUtil.getTenant().getTenantIdentifier(),
+                result.resourceId(),
+                result.getOfficeId()
+        ));
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -266,6 +282,16 @@ public class RecurringDepositAccountsApiResource {
         } else if (is(commandParam, "approve")) {
             final CommandWrapper commandRequest = builder.approveRecurringDepositAccountApplication(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+            this.publisher.publishEvent(new RecurringDepositAccountApprovedEvent(
+                    this,
+                    "approved",
+                    this.context.authenticatedUser(),
+                    ThreadLocalContextUtil.getTenant().getTenantIdentifier(),
+                    result.resourceId(),
+                    result.getOfficeId()
+            ));
+
         } else if (is(commandParam, "undoapproval")) {
             final CommandWrapper commandRequest = builder.undoRecurringDepositAccountApplication(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

@@ -49,7 +49,12 @@ import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSeria
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.notification.eventandlistener.interestposted.InterestPostedEvent;
+import org.apache.fineract.notification.eventandlistener.savingsaccount.NewSavingsAccountEvent;
+import org.apache.fineract.notification.eventandlistener.savingsaccount.SavingsAccountApprovedEvent;
+import org.apache.fineract.notification.eventandlistener.savingsaccountclosed.SavingsAccountClosedEvent;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
@@ -58,6 +63,7 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -73,19 +79,22 @@ public class SavingsAccountsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService;
+    private final ApplicationEventPublisher publisher;
 
     @Autowired
     public SavingsAccountsApiResource(final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
-            final PlatformSecurityContext context, final DefaultToApiJsonSerializer<SavingsAccountData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService) {
+                                      final PlatformSecurityContext context, final DefaultToApiJsonSerializer<SavingsAccountData> toApiJsonSerializer,
+                                      final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+                                      final ApiRequestParameterHelper apiRequestParameterHelper,
+                                      final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService,
+                                      final ApplicationEventPublisher publisher) {
         this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
         this.context = context;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
+        this.publisher = publisher;
     }
 
     @GET
@@ -133,6 +142,15 @@ public class SavingsAccountsApiResource {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingsAccount().withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        this.publisher.publishEvent(new NewSavingsAccountEvent(
+                this,
+                "created",
+                this.context.authenticatedUser(),
+                ThreadLocalContextUtil.getTenant().getTenantIdentifier(),
+                result.getSavingsId(),
+                result.getOfficeId()
+        ));
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -251,6 +269,16 @@ public class SavingsAccountsApiResource {
         } else if (is(commandParam, "approve")) {
             final CommandWrapper commandRequest = builder.approveSavingsAccountApplication(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+            this.publisher.publishEvent(new SavingsAccountApprovedEvent(
+                    this,
+                    "approved",
+                    this.context.authenticatedUser(),
+                    ThreadLocalContextUtil.getTenant().getTenantIdentifier(),
+                    accountId,
+                    result.getOfficeId()
+            ));
+
         } else if (is(commandParam, "undoapproval")) {
             final CommandWrapper commandRequest = builder.undoSavingsAccountApplication(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -263,12 +291,32 @@ public class SavingsAccountsApiResource {
         } else if (is(commandParam, "postInterest")) {
             final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+            this.publisher.publishEvent(new InterestPostedEvent(
+                    this,
+                    "interestPosted",
+                    this.context.authenticatedUser(),
+                    ThreadLocalContextUtil.getTenant().getTenantIdentifier(),
+                    accountId,
+                    result.getOfficeId()
+            ));
+
         } else if (is(commandParam, "applyAnnualFees")) {
             final CommandWrapper commandRequest = builder.savingsAccountApplyAnnualFees(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "close")) {
             final CommandWrapper commandRequest = builder.closeSavingsAccountApplication(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+            this.publisher.publishEvent(new SavingsAccountClosedEvent(
+                    this,
+                    "closed",
+                    this.context.authenticatedUser(),
+                    ThreadLocalContextUtil.getTenant().getTenantIdentifier(),
+                    accountId,
+                    result.getOfficeId()
+            ));
+
         } else if (is(commandParam, "assignSavingsOfficer")) {
             final CommandWrapper commandRequest = builder.assignSavingsOfficer(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

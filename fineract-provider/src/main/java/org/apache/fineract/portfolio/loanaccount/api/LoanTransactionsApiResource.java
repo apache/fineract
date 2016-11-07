@@ -45,13 +45,16 @@ import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamE
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.notification.eventandlistener.repayment.RepaymentEvent;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -71,19 +74,22 @@ public class LoanTransactionsApiResource {
     private final DefaultToApiJsonSerializer<LoanTransactionData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    private final ApplicationEventPublisher publisher;
 
     @Autowired
     public LoanTransactionsApiResource(final PlatformSecurityContext context, final LoanReadPlatformService loanReadPlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final DefaultToApiJsonSerializer<LoanTransactionData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
+                                       final ApiRequestParameterHelper apiRequestParameterHelper,
+                                       final DefaultToApiJsonSerializer<LoanTransactionData> toApiJsonSerializer,
+                                       final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+                                       PaymentTypeReadPlatformService paymentTypeReadPlatformService,
+                                       final ApplicationEventPublisher publisher) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
+        this.publisher = publisher;
     }
 
     private boolean is(final String commandParam, final String commandValue) {
@@ -176,6 +182,16 @@ public class LoanTransactionsApiResource {
         if (is(commandParam, "repayment")) {
             final CommandWrapper commandRequest = builder.loanRepaymentTransaction(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+            this.publisher.publishEvent(new RepaymentEvent(
+                    this,
+                    "repaymentMade",
+                    this.context.authenticatedUser(),
+                    ThreadLocalContextUtil.getTenant().getTenantIdentifier(),
+                    loanId,
+                    result.getOfficeId()
+            ));
+
         } else if (is(commandParam, "waiveinterest")) {
             final CommandWrapper commandRequest = builder.waiveInterestPortionTransaction(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -188,6 +204,16 @@ public class LoanTransactionsApiResource {
         } else if (is(commandParam, "close")) {
             final CommandWrapper commandRequest = builder.closeLoanTransaction(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+            this.publisher.publishEvent(new RepaymentEvent(
+                    this,
+                    "closed",
+                    this.context.authenticatedUser(),
+                    ThreadLocalContextUtil.getTenant().getTenantIdentifier(),
+                    loanId,
+                    result.getOfficeId()
+            ));
+
         } else if (is(commandParam, "undowriteoff")) {
             final CommandWrapper commandRequest = builder.undoWriteOffLoanTransaction(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

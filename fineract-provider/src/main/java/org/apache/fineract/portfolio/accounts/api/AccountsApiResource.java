@@ -38,7 +38,10 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.Page;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.notification.eventandlistener.shareaccount.NewShareAccountEvent;
+import org.apache.fineract.notification.eventandlistener.shareaccount.ShareAccountApprovedEvent;
 import org.apache.fineract.portfolio.accounts.constants.AccountsApiConstants;
 import org.apache.fineract.portfolio.accounts.data.AccountData;
 import org.apache.fineract.portfolio.accounts.service.AccountReadPlatformService;
@@ -46,6 +49,7 @@ import org.apache.fineract.portfolio.products.exception.ResourceNotFoundExceptio
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -60,18 +64,21 @@ public class AccountsApiResource {
     private final DefaultToApiJsonSerializer<AccountData> toApiJsonSerializer;
     private final PlatformSecurityContext platformSecurityContext;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final ApplicationEventPublisher publisher;
     
     @Autowired
     public AccountsApiResource(final ApplicationContext applicationContext,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final DefaultToApiJsonSerializer<AccountData> toApiJsonSerializer,
-            final PlatformSecurityContext platformSecurityContext,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+                               final ApiRequestParameterHelper apiRequestParameterHelper,
+                               final DefaultToApiJsonSerializer<AccountData> toApiJsonSerializer,
+                               final PlatformSecurityContext platformSecurityContext,
+                               final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+                               final ApplicationEventPublisher publisher) {
         this.applicationContext = applicationContext ;
         this.apiRequestParameterHelper = apiRequestParameterHelper ;
         this.toApiJsonSerializer = toApiJsonSerializer ;
         this.platformSecurityContext = platformSecurityContext ; 
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService ;
+        this.publisher = publisher;
     }
     
     @GET
@@ -133,6 +140,16 @@ public class AccountsApiResource {
         this.platformSecurityContext.authenticatedUser();
         commandWrapper = new CommandWrapperBuilder().createAccount(accountType).withJson(apiRequestBodyAsJson).build();
         final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
+        if (accountType.equals("share")) {
+            publisher.publishEvent(new NewShareAccountEvent(
+                    this,
+                    "created",
+                    this.platformSecurityContext.authenticatedUser(),
+                    ThreadLocalContextUtil.getTenant().getTenantIdentifier(),
+                    commandProcessingResult.resourceId(),
+                    this.platformSecurityContext.authenticatedUser().getOffice().getId()
+            ));
+        }
         return this.toApiJsonSerializer.serialize(commandProcessingResult);
     }
     
@@ -140,12 +157,23 @@ public class AccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String handleCommands(@PathParam("type") final String accountType, @PathParam("accountId") final Long accountId, @QueryParam("command") final String commandParam,
+    public String handleCommands(@PathParam("type") final String accountType, @PathParam("accountId") final Long accountId,
+                                 @QueryParam("command") final String commandParam,
             final String apiRequestBodyAsJson) {
         CommandWrapper commandWrapper = null;
         this.platformSecurityContext.authenticatedUser();
         commandWrapper = new CommandWrapperBuilder().createAccountCommand(accountType, accountId, commandParam).withJson(apiRequestBodyAsJson).build();
         final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
+        if (accountType.equals("share") && commandParam.equals("approve")) {
+            publisher.publishEvent(new ShareAccountApprovedEvent(
+                    this,
+                    "approved",
+                    this.platformSecurityContext.authenticatedUser(),
+                    ThreadLocalContextUtil.getTenant().getTenantIdentifier(),
+                    commandProcessingResult.resourceId(),
+                    this.platformSecurityContext.authenticatedUser().getOffice().getId()
+            ));
+        }
         return this.toApiJsonSerializer.serialize(commandProcessingResult);
     }
     

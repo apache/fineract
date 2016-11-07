@@ -465,8 +465,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
      * (non-Javadoc)
      * 
      * @see
-     * org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService
-     * #recalculateAccruals(org.apache.fineract.portfolio.loanaccount.domain.Loan)
+     * org.apache.fineract.portfolio.loan.domain.LoanAccountDomainService
+     * #recalculateAccruals(org.apache.fineract.portfolio.loan.domain.Loan)
      */
     @Override
     public void recalculateAccruals(Loan loan) {

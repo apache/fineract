@@ -41,7 +41,9 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.notification.eventandlistener.deposit.DepositEvent;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
@@ -49,6 +51,7 @@ import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -65,20 +68,23 @@ public class SavingsAccountTransactionsApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    private final ApplicationEventPublisher publisher;
 
     @Autowired
     public SavingsAccountTransactionsApiResource(final PlatformSecurityContext context,
-            final DefaultToApiJsonSerializer<SavingsAccountTransactionData> toApiJsonSerializer,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
-            PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
+                                                 final DefaultToApiJsonSerializer<SavingsAccountTransactionData> toApiJsonSerializer,
+                                                 final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+                                                 final ApiRequestParameterHelper apiRequestParameterHelper,
+                                                 final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
+                                                 PaymentTypeReadPlatformService paymentTypeReadPlatformService,
+                                                 final ApplicationEventPublisher publisher) {
         this.context = context;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
         this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
+        this.publisher = publisher;
     }
 
     private boolean is(final String commandParam, final String commandValue) {
@@ -139,6 +145,16 @@ public class SavingsAccountTransactionsApiResource {
             if (is(commandParam, "deposit")) {
                 final CommandWrapper commandRequest = builder.savingsAccountDeposit(savingsId).build();
                 result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+                this.publisher.publishEvent(new DepositEvent(
+                        this,
+                        "depositMade",
+                        this.context.authenticatedUser(),
+                        ThreadLocalContextUtil.getTenant().getTenantIdentifier(),
+                        savingsId,
+                        result.getOfficeId()
+                ));
+
             } else if (is(commandParam, "withdrawal")) {
                 final CommandWrapper commandRequest = builder.savingsAccountWithdrawal(savingsId).build();
                 result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
