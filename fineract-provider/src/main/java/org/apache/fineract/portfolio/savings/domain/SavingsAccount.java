@@ -2666,8 +2666,7 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
         SavingsCompoundingInterestPeriodType savingsCompoundingInterestPeriodType = SavingsCompoundingInterestPeriodType
                 .fromInt(interestCompoundingPeriodType);
 
-        if (postingtoCompoundMap.get(savingsPostingInterestPeriodType) == null
-                || !postingtoCompoundMap.get(savingsPostingInterestPeriodType).contains(savingsCompoundingInterestPeriodType)) {
+        if (postingtoCompoundMap.get(savingsPostingInterestPeriodType) == null) {
             baseDataValidator.failWithCodeNoParameterAddedToErrorCode("posting.period.type.is.less.than.compound.period.type",
                     savingsPostingInterestPeriodType.name(), savingsCompoundingInterestPeriodType.name());
 

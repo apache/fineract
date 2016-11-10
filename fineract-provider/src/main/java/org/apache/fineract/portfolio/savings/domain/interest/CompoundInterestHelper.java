@@ -46,10 +46,13 @@ public class CompoundInterestHelper {
         Money interestEarned = Money.zero(currency);
 
         // total interest earned in previous periods but not yet recognised
-        BigDecimal interestEarnedButNotPosted = BigDecimal.ZERO;
+		BigDecimal compoundedInterest = BigDecimal.ZERO;
+		BigDecimal unCompoundedInterest = BigDecimal.ZERO;
+		final CompoundInterestValues compoundInterestValues = new CompoundInterestValues(compoundedInterest,
+				unCompoundedInterest);
         for (final PostingPeriod postingPeriod : allPeriods) {
 
-            final BigDecimal interestEarnedThisPeriod = postingPeriod.calculateInterest(interestEarnedButNotPosted);
+            final BigDecimal interestEarnedThisPeriod = postingPeriod.calculateInterest(compoundInterestValues);
 
             final Money moneyToBePostedForPeriod = Money.of(currency, interestEarnedThisPeriod);
 
@@ -58,9 +61,9 @@ public class CompoundInterestHelper {
             // interest for accounts which has post interest to linked savings
             // account and if already transfered then it includes in interest
             // calculation.
-            if (postingPeriod.isInterestTransfered() || !interestTransferEnabled
-                    || (lockUntil != null && !postingPeriod.dateOfPostingTransaction().isAfter(lockUntil))) {
-                interestEarnedButNotPosted = interestEarnedButNotPosted.add(moneyToBePostedForPeriod.getAmount());
+            if (!(postingPeriod.isInterestTransfered() || !interestTransferEnabled
+                    || (lockUntil != null && !postingPeriod.dateOfPostingTransaction().isAfter(lockUntil)))) {
+            	compoundInterestValues.setcompoundedInterest(BigDecimal.ZERO);
             }
         }
 
