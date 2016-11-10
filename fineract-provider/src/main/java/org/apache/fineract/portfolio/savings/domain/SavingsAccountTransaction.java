@@ -129,9 +129,9 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     }
 
     public static SavingsAccountTransaction deposit(final SavingsAccount savingsAccount, final Office office,
-            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser,
-            final boolean isManualTransaction) {
+            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser) {
         final boolean isReversed = false;
+        final boolean isManualTransaction = false;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, SavingsAccountTransactionType.DEPOSIT.getValue(), date,
                 createdDate, amount, isReversed, appUser, isManualTransaction);
     }
@@ -327,13 +327,17 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     }
 
     public boolean isPostInterestCalculationRequired() {
-        return this.isDeposit() || this.isChargeTransaction() || this.isDividendPayout();
+        return this.isDeposit() || this.isWithdrawal() || this.isChargeTransaction() || this.isDividendPayout() || this.isInterestPosting();
     }
 
     public boolean isInterestPostingAndNotReversed() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isInterestPosting() && isNotReversed();
     }
 
+	public boolean isInterestPosting() {
+		return SavingsAccountTransactionType.fromInt(this.typeOf).isInterestPosting()
+				|| SavingsAccountTransactionType.fromInt(this.typeOf).isOverDraftInterestPosting();
+	}
     public boolean isWithdrawalFeeAndNotReversed() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isWithdrawalFee() && isNotReversed();
     }
