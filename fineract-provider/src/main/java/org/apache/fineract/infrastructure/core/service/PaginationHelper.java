@@ -36,4 +36,14 @@ public class PaginationHelper<E> {
 
         return new Page<>(items, totalFilteredRecords);
     }
+
+    public Page<Long> fetchPage(JdbcTemplate jdbcTemplate, String sql, String sqlCountRows, Class<Long> type) {
+        final List<Long> items = jdbcTemplate.queryForList(sql, type);
+
+        // determine how many rows are available
+        @SuppressWarnings("deprecation")
+        final int totalFilteredRecords = jdbcTemplate.queryForInt(sqlCountRows);
+
+        return new Page<>(items, totalFilteredRecords);
+    }
 }

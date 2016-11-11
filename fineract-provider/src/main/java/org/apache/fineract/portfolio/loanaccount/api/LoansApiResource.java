@@ -358,7 +358,7 @@ public class LoansApiResource {
     public String retrieveLoan(@PathParam("loanId") final Long loanId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @Context final UriInfo uriInfo) {
-
+        long start = System.currentTimeMillis() ;
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveOne(loanId);
@@ -392,9 +392,7 @@ public class LoansApiResource {
             if(calendarData != null)
             	loanBasicDetails = LoanAccountData.withLoanCalendarData(loanBasicDetails, calendarData);
         }
-
         Collection<InterestRatePeriodData> interestRatesPeriods = this.loanReadPlatformService.retrieveLoanInterestRatePeriodData(loanBasicDetails);
-
         Collection<LoanTransactionData> loanRepayments = null;
         LoanScheduleData repaymentSchedule = null;
         Collection<LoanChargeData> charges = null;
@@ -597,7 +595,13 @@ public class LoansApiResource {
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
-        return this.toApiJsonSerializer.serialize(settings, loanAccount, this.LOAN_DATA_PARAMETERS);
+        long end = System.currentTimeMillis() ;
+        System.out.println("LoansApiResource.retrieveLoan() Time took: "+(end-start));
+        start = System.currentTimeMillis() ;
+        String toReturn = this.toApiJsonSerializer.serialize(settings, loanAccount, this.LOAN_DATA_PARAMETERS);
+        end = System.currentTimeMillis() ;
+        System.out.println("LoansApiResource.retrieveLoan() Time took to Serialize: "+(end-start));
+        return toReturn ;
     }
 
     @GET

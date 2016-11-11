@@ -20,7 +20,9 @@ package org.apache.fineract.portfolio.transfer.service;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -40,6 +42,9 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.apache.fineract.portfolio.client.exception.ClientHasBeenClosedException;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
+import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.exception.ClientNotInGroupException;
@@ -79,6 +84,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     private final TransfersDataValidator transfersDataValidator;
     private final NoteWritePlatformService noteWritePlatformService;
     private final StaffRepositoryWrapper staffRepositoryWrapper;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Autowired
     public TransferWritePlatformServiceJpaRepositoryImpl(final ClientRepositoryWrapper clientRepositoryWrapper,
@@ -87,7 +93,8 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
             final LoanRepositoryWrapper loanRepositoryWrapper, final TransfersDataValidator transfersDataValidator,
             final NoteWritePlatformService noteWritePlatformService, final StaffRepositoryWrapper staffRepositoryWrapper,
             final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
-            final SavingsAccountWritePlatformService savingsAccountWritePlatformService) {
+            final SavingsAccountWritePlatformService savingsAccountWritePlatformService, 
+            final BusinessEventNotifierService businessEventNotifierService) {
         this.clientRepositoryWrapper = clientRepositoryWrapper;
         this.officeRepository = officeRepository;
         this.calendarInstanceRepository = calendarInstanceRepository;
@@ -99,6 +106,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         this.staffRepositoryWrapper = staffRepositoryWrapper;
         this.savingsAccountRepositoryWrapper = savingsAccountRepositoryWrapper;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
+        this.businessEventNotifierService = businessEventNotifierService;
     }
 
     @Override
@@ -293,9 +301,12 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         final Long destinationOfficeId = jsonCommand.longValueOfParameterNamed(TransferApiConstants.destinationOfficeIdParamName);
         final Office office = this.officeRepository.findOneWithNotFoundDetection(destinationOfficeId);
         final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+        this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.CLIENTS_PROPOSE_TRANSFER,
+                constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
         handleClientTransferLifecycleEvent(client, office, TransferEventType.PROPOSAL, jsonCommand);
         this.clientRepositoryWrapper.save(client);
-
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.CLIENTS_PROPOSE_TRANSFER,
+                constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
                 .withEntityId(clientId) //
@@ -321,9 +332,12 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         this.transfersDataValidator.validateForAcceptClientTransfer(jsonCommand.json());
         final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId, true);
         validateClientAwaitingTransferAcceptance(client);
-
+        this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.CLIENTS_ACCEPT_TRANSFER,
+                constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
         handleClientTransferLifecycleEvent(client, client.getTransferToOffice(), TransferEventType.ACCEPTANCE, jsonCommand);
         this.clientRepositoryWrapper.save(client);
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.CLIENTS_ACCEPT_TRANSFER,
+                constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
 
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
@@ -337,11 +351,13 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         // validation
         this.transfersDataValidator.validateForWithdrawClientTransfer(jsonCommand.json());
         final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+        this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.CLIENTS_WITHDRAW_TRANSFER,
+                constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
         validateClientAwaitingTransferAcceptanceOnHold(client);
-
         handleClientTransferLifecycleEvent(client, client.getOffice(), TransferEventType.WITHDRAWAL, jsonCommand);
         this.clientRepositoryWrapper.save(client);
-
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.CLIENTS_WITHDRAW_TRANSFER,
+                constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
                 .withEntityId(clientId) //
@@ -354,8 +370,13 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         // validation
         this.transfersDataValidator.validateForRejectClientTransfer(jsonCommand.json());
         final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+        this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.CLIENTS_REJECT_TRANSFER,
+                constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
         handleClientTransferLifecycleEvent(client, client.getOffice(), TransferEventType.REJECTION, jsonCommand);
         this.clientRepositoryWrapper.save(client);
+
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.CLIENTS_REJECT_TRANSFER,
+                constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
 
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
@@ -501,6 +522,12 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
 
     private void validateClientAwaitingTransferAcceptanceOnHold(final Client client) {
         if (!client.isTransferInProgressOrOnHold()) { throw new ClientNotAwaitingTransferApprovalOrOnHoldException(client.getId()); }
+    }
+
+    private Map<BUSINESS_ENTITY, Object> constructEntityMap(final BUSINESS_ENTITY entityEvent, Object entity) {
+        Map<BUSINESS_ENTITY, Object> map = new HashMap<>(1);
+        map.put(entityEvent, entity);
+        return map;
     }
 
     /**

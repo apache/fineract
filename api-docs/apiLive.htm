@@ -2064,7 +2064,46 @@
 								<td><a href="#shareproducts_retrieve">Retrieve a Share product</a></td>
 								<td><a href="#shareproducts_update">Update a Share product</a></td>
 							</tr>
-
+							<tr>
+								<td><a href="#smscampaigns">SMS Campaigns</a></td>
+								<td>smscampaigns</td>
+								<td><a href="#smscampaigns_create">Create a SMS Campaign</a></td>
+								<td><a href="#smscampaigns_list">List SMS Campaigns</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							tr>
+								<td></td>
+								<td>smscampaigns/{campaignId}</td>
+								<td></td>
+								<td><a href="#smscampaigns_retrieve">Retrieve a SMS Campaign</a></td>
+								<td><a href="#smscampaigns_update">Update a SMS Campaign</a></td>
+								<td><a href="#smscampaigns_delete">Delete a SMS Campaign</a></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>smscampaigns/{campaignId}command=activate</td>
+								<td></td>
+								<td><a href="#smscampaigns_activate">Activate a SMS Campaign</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>smscampaigns/{campaignId}command=close</td>
+								<td></td>
+								<td><a href="#smscampaigns_close">Close a SMS Campaign</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>smscampaigns/{campaignId}command=reactivate</td>
+								<td></td>
+								<td><a href="#smscampaigns_reactivate">Reactivate a SMS Campaign</a></td>
+								<td></td>
+								<td></td>
+							</tr>
 							<tr>
 								<td><a href="#configs">Currency</a></td>
 								<td>currencies</td>
@@ -21038,7 +21077,291 @@ Content-Type: application/json
         </div>
     </div>
 
-	<a id="shareproducts_create" name="shareproducts_create" class="old-syle-anchor">&nbsp;</a>
+	<a id="smscampaigns_create" name="smscampaigns_create" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Create a SMS Campaign</h4>
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields</div></td></tr>
+                <tr class=alt>
+                	<td>campaignName, campaignType, triggerType, providerId, runReportId, message</td>
+                </tr>
+            </table>
+            <br/>
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields for Cash based on selected report id</div></td></tr>
+                <tr class=alt>
+                	<td>paramValue in json format</td>
+                </tr>
+            </table>
+          </div>
+        <div class="method-example">
+
+            <code class="method-declaration">POST https://Domain Name/api/v1/smscampaigns</code>
+			<code class="method-request">POST smscampaigns
+Content-Type: application/json
+Request Body:
+{
+"campaignName": "Savings Deposit Campaign",
+"campaignType": "SMS",
+"triggerType": 3,
+"providerId": 2,
+"runReportId": 180,
+"paramValue": "{"officeId":1,"loanOfficerId":-1,"transactionId":1,"reportName":"Savings Deposit"}",
+"message": "Hello {fullName} your account is credited with {depositAmount} on {transactionDate}",
+}
+
+			</code>
+			<code class="method-response">
+{
+  "resourceId": 1
+}
+</code>
+			
+        </div>
+</div>
+
+<a id="smscampaigns_list" name="smscampaigns_list" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>List SMS Campaigns</h4>
+			<table class=matrixHeading>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields</div></td></tr>
+                <tr class=alt>
+                	<td></td>
+                </tr>
+            </table>
+            <p>Example Requests:</p>
+            <div class=apiClick>smscampaigns</div>
+        </div>
+        <div class="method-example">
+
+            <code class="method-declaration">GET https://Domain Name/api/v1/smscampaigns</code>
+            <code class="method-response">
+
+[{
+		"id": 1,
+		"campaignName": "Savings Deposit Campaign"
+		"campaignType": "SMS",
+		"triggerType": 3,
+		"providerId": 2,
+		"runReportId": 180,
+		"reportName" : "Savings Deposit",
+		"paramValue": "{"officeId":1,"loanOfficerId":-1,"transactionId":1,"reportName":"Savings Deposit"}",
+		"message": "Hello {fullName} your account is credited with {depositAmount} on {transactionDate}",
+		"status" : { "id":"","code":"","value":""}
+		
+}]
+</code>
+       </div>
+</div>
+
+<a id="smscampaigns_retrieve" name="smscampaigns_retrieve" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Retrieve a Share Product</h4>
+            <p>Example Requests: </p>
+            <div class=apiClick>smscampaigns/1</div>
+            <br><br>
+            <div class=apiClick>smscampaigns/1?template=true</div>
+        </div>
+        <div class="method-example">
+			<code class="method-declaration">GET https://Domain Name/api/v1/smscampaigns/1</code>
+			<code class="method-response">
+{
+		"id": 1,
+		"campaignName": "Savings Deposit Campaign"
+		"campaignType": "SMS",
+		"triggerType": 3,
+		"providerId": 2,
+		"runReportId": 180,
+		"reportName" : "Savings Deposit",
+		"paramValue": "{"officeId":1,"loanOfficerId":-1,"transactionId":1,"reportName":"Savings Deposit"}",
+		"message": "Hello {fullName} your account is credited with {depositAmount} on {transactionDate}",
+		"status" : { "id":"","code":"","value":""}				
+}
+<B>In case of Scheduled Campaign</B>
+{
+		"id": 1,
+		"campaignName": "Savings Deposit Campaign"
+		"campaignType": "SMS",
+		"triggerType": 3,
+		"providerId": 2,
+		"runReportId": 180,
+		"reportName" : "Savings Deposit",
+		"paramValue": "{"officeId":1,"loanOfficerId":-1,"transactionId":1,"reportName":"Savings Deposit"}",
+		"message": "Hello {fullName} your account is credited with {depositAmount} on {transactionDate}",
+		"status" : { "id":"","code":"","value":""},
+		"nextTriggerDate": "22 Jan 2017",
+		"lastTriggerDate": "22 Jan 2016",
+		"recurrenceStartDate":"22 Jan 2016",
+		"recurrence": "YEARLY"			
+}
+			</code>
+        </div>
+</div>
+
+<a id="smscampaigns_update" name="smscampaigns_update" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Update a Campaign</h4>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">PUT https://Domain Name/api/v1/smscampaigns/{campaignId}</code>
+			<code class="method-request">POST smscampaigns/1
+Content-Type: application/json
+Request Body:
+{
+  "message": "Hello your savings account {savingsAccountNo} debited with {withdrawAmount}"
+  
+}
+			</code>
+			<code class="method-response">
+{
+  "resourceId": 1,
+  "changes": {
+    "message": "Hello your savings account {savingsAccountNo} debited with {withdrawAmount}"
+  }
+}
+			</code>
+        </div>
+</div>
+
+<a id="smscampaigns_delete" name="smscampaigns_delete" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Delete a SMS Campaign</h4>
+                    <p>
+                        <b>Note:</b> Only closed SMS Campaigns can be
+						deleted
+                    </p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+DELETE https://DomainName/api/v1/smscampaigns/{campaignId}
+                    </code>
+                    <code class="method-request">
+DELETE smscampaigns/1
+Content-Type: application/json
+No Request Body:
+                    </code>
+                    <code class="method-response">
+{
+    "resourceId": 1,
+    "changes": {}
+}
+        </code>
+    </div>
+</div>
+
+<a id="smscampaigns_activate" name="smscampaigns_activate" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Activates SMS Campaign</h2>
+	        
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/smscampaigns/{campaignId}?command=activate</code>
+	        <code class="method-request">POST smscampaigns/1?command=activate
+Content-Type: application/json
+Request Body:
+{
+"activationDate":"01 May 2016",
+"locale":"en",
+"dateFormat":"dd MMMM yyyy"
+}
+</code>
+<code class="method-response">
+{
+
+  "resourceId": 1,
+  "changes": {
+    "status": {
+      "id": 300,
+      "code": "smsCampaignStatus.active",
+      "value": "Activated",
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "activationDate": "01 May 2016"
+  }
+}
+	        </code>
+	    </div>
+</div>
+
+<a id="smscampaigns_close" name="smscampaigns_close" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Deactivates SMS Campaign</h2>
+	        
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/smscampaigns/{campaignId}?command=close</code>
+	        <code class="method-request">POST smscampaigns/1?command=close
+Content-Type: application/json
+Request Body:
+{
+"closureDate":"01 May 2016",
+"locale":"en",
+"dateFormat":"dd MMMM yyyy"
+}
+</code>
+<code class="method-response">
+{
+  "resourceId": 1,
+  "changes": {
+    "status": {
+      "id": 600,
+      "code": "smsCampaignStatus.closed",
+      "value": "Activated",
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "closureDate": "01 May 2016"
+  }
+}
+	        </code>
+	    </div>
+</div>
+
+<a id="smscampaigns_reactivate" name="smscampaigns_reactivate" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Reactivates SMS Campaign</h2>
+	        
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/smscampaigns/{campaignId}?command=reactivate</code>
+	        <code class="method-request">POST smscampaigns/1?command=reactivate
+Content-Type: application/json
+Request Body:
+{
+"activationDate":"01 May 2016",
+"locale":"en",
+"dateFormat":"dd MMMM yyyy"
+}
+</code>
+<code class="method-response">
+{
+
+  "resourceId": 1,
+  "changes": {
+    "status": {
+      "id": 300,
+      "code": "smsCampaignStatus.active",
+      "value": "Activated",
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "activationDate": "01 May 2016"
+  }
+}
+	        </code>
+	    </div>
+</div>
+
+<a id="shareproducts_create" name="shareproducts_create" class="old-syle-anchor">&nbsp;</a>
     <div class="method-section">
         <div class="method-description">
             <h4>Create a Share Product</h4>

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.sms.domain;
 
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -26,18 +27,25 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaign;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.sms.SmsApiConstants;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.group.domain.Group;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "sms_messages_outbound")
 public class SmsMessage extends AbstractPersistableCustom<Long> {
+
+    @Column(name = "external_id", nullable = true)
+    private Long externalId;
 
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = true)
@@ -51,6 +59,10 @@ public class SmsMessage extends AbstractPersistableCustom<Long> {
     @JoinColumn(name = "staff_id", nullable = true)
     private Staff staff;
 
+    @ManyToOne
+    @JoinColumn(name = "campaign_id", nullable = false)
+    private SmsCampaign smsCampaign;
+
     @Column(name = "status_enum", nullable = false)
     private Integer statusType;
 
@@ -60,23 +72,51 @@ public class SmsMessage extends AbstractPersistableCustom<Long> {
     @Column(name = "message", nullable = false)
     private String message;
 
-    public static SmsMessage pendingSms(final Group group, final Client client, final Staff staff, final String message,
-            final String mobileNo) {
-        return new SmsMessage(group, client, staff, SmsMessageStatusType.PENDING, message, mobileNo);
+//    @Column(name = "provider_id", nullable = true)
+//    private Long providerId;
+//
+//    @Column(name = "campaign_name", nullable = true)
+//    private String campaignName;
+
+    @Column(name = "submittedon_date", nullable = true)
+    @Temporal(TemporalType.DATE)
+    private Date submittedOnDate;
+
+    @Column(name = "delivered_on_date", nullable = true)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date deliveredOnDate;
+
+    public static SmsMessage pendingSms(final Long externalId, final Group group, final Client client, final Staff staff,
+            final String message, final String mobileNo, final SmsCampaign smsCampaign) {
+        return new SmsMessage(externalId, group, client, staff, SmsMessageStatusType.PENDING, message, mobileNo, smsCampaign);
+    }
+
+    public static SmsMessage sentSms(final Long externalId, final Group group, final Client client, final Staff staff,
+            final String message, final String mobileNo, final SmsCampaign smsCampaign) {
+        return new SmsMessage(externalId, group, client, staff, SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT, message, mobileNo, smsCampaign);
+    }
+
+    public static SmsMessage instance(Long externalId, final Group group, final Client client, final Staff staff,
+            final SmsMessageStatusType statusType, final String message, final String mobileNo, final SmsCampaign smsCampaign) {
+
+        return new SmsMessage(externalId, group, client, staff, statusType, message, mobileNo, smsCampaign);
     }
 
     protected SmsMessage() {
         //
     }
 
-    private SmsMessage(final Group group, final Client client, final Staff staff, final SmsMessageStatusType statusType,
-            final String message, final String mobileNo) {
+    private SmsMessage(Long externalId, final Group group, final Client client, final Staff staff, final SmsMessageStatusType statusType,
+            final String message, final String mobileNo, final SmsCampaign smsCampaign) {
+        this.externalId = externalId;
         this.group = group;
         this.client = client;
         this.staff = staff;
         this.statusType = statusType.getValue();
         this.mobileNo = mobileNo;
         this.message = message;
+        this.smsCampaign = smsCampaign;
+        this.submittedOnDate = LocalDate.now().toDate();
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -90,5 +130,57 @@ public class SmsMessage extends AbstractPersistableCustom<Long> {
         }
 
         return actualChanges;
+    }
+
+    public Long getExternalId() {
+        return this.externalId;
+    }
+
+    public SmsCampaign getSmsCampaign() {
+        return this.smsCampaign;
+    }
+
+    public Group getGroup() {
+        return group;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public Staff getStaff() {
+        return staff;
+    }
+
+    public Integer getStatusType() {
+        return statusType;
+    }
+
+    public String getMobileNo() {
+        return mobileNo;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setExternalId(final Long externalId) {
+        this.externalId = externalId;
+    }
+
+    public void setStatusType(final Integer statusType) {
+        this.statusType = statusType;
+    }
+
+    public Date getSubmittedOnDate() {
+        return this.submittedOnDate;
+    }
+
+    public Date getDeliveredOnDate() {
+        return this.deliveredOnDate;
+    }
+
+    public void setDeliveredOnDate(final Date deliveredOnDate) {
+        this.deliveredOnDate = deliveredOnDate;
     }
 }

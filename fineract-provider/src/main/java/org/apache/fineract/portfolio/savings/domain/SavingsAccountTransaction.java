@@ -729,16 +729,15 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     public void updateAmount(final Money amount) {
         this.amount = amount.getAmount();
     }
-    
+
     public Integer getTypeOf() {
         return this.typeOf;
     }
-    
+
     public SavingsAccount getSavingsAccount() {
         return this.savingsAccount;
     }
 
-    
     public void setSavingsAccount(SavingsAccount savingsAccount) {
         this.savingsAccount = savingsAccount;
     }
@@ -747,4 +746,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
         return this.dateOf;
     }
 
+    public PaymentDetail getPaymentDetail() {
+    	return this.paymentDetail ;
+    }
 }

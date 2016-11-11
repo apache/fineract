@@ -778,6 +778,14 @@ public class LoanTransaction extends AbstractPersistableCustom<Long> {
         return isAccrual();
     }
     
+    public BigDecimal getOutstandingLoanBalance() {
+        return outstandingLoanBalance;
+    }
+    
+    public PaymentDetail getPaymentDetail() {
+        return this.paymentDetail;
+    }
+    
     public boolean isPaymentTransaction() {
         return this.isNotReversed()
                 && !(this.isDisbursement() || this.isAccrual() || this.isRepaymentAtDisbursement() || this.isNonMonetaryTransaction() || this

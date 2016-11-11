@@ -271,6 +271,19 @@ public class JsonParserHelper {
         return jsonArray;
     }
 
+    public JsonObject extractJsonObjectNamed(final String parameterName, final JsonElement element) {
+        JsonObject jsonObject = null;
+
+        if (element.isJsonObject()) {
+            final JsonObject object = element.getAsJsonObject();
+            if (object.has(parameterName)) {
+                jsonObject = object.get(parameterName).getAsJsonObject();
+            }
+        }
+
+        return jsonObject;
+    }
+
     /**
      * Used with the local date is in array format
      */
