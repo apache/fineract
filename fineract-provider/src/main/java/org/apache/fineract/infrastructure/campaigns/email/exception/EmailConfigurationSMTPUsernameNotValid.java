@@ -16,16 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.domain;
+package org.apache.fineract.infrastructure.campaigns.email.exception;
 
-import java.util.List;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface ReportParameterUsageRepository extends JpaRepository<ReportParameterUsage, Long>,
-        JpaSpecificationExecutor<ReportParameterUsage> {
-    // no added behaviour
-	
-	List<ReportParameterUsage> findByReport(Report report);
+public class EmailConfigurationSMTPUsernameNotValid  extends AbstractPlatformDomainRuleException {
+    
+    public  EmailConfigurationSMTPUsernameNotValid(final String smtpUsername) {
+        super("error.msg.scheduledemail.configuration.smtpusername.not.valid",
+                "SMTP username configuration with email " + "'"+smtpUsername+"'" + " is not a valid email address ");
+    }
 }

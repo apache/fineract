@@ -16,16 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.domain;
+package org.apache.fineract.infrastructure.campaigns.email.service;
 
-import java.util.List;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.apache.fineract.infrastructure.campaigns.email.data.EmailMessageWithAttachmentData;
 
-public interface ReportParameterUsageRepository extends JpaRepository<ReportParameterUsage, Long>,
-        JpaSpecificationExecutor<ReportParameterUsage> {
-    // no added behaviour
-	
-	List<ReportParameterUsage> findByReport(Report report);
+public interface EmailMessageJobEmailService {
+
+    void sendEmailWithAttachment(EmailMessageWithAttachmentData emailMessageWithAttachmentData);
+
 }

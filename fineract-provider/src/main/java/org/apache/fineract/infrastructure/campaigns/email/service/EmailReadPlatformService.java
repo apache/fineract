@@ -16,16 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.domain;
+package org.apache.fineract.infrastructure.campaigns.email.service;
 
+import org.apache.fineract.infrastructure.core.service.Page;
+import org.apache.fineract.infrastructure.campaigns.email.data.EmailData;
+
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+public interface EmailReadPlatformService {
 
-public interface ReportParameterUsageRepository extends JpaRepository<ReportParameterUsage, Long>,
-        JpaSpecificationExecutor<ReportParameterUsage> {
-    // no added behaviour
-	
-	List<ReportParameterUsage> findByReport(Report report);
+    Collection<EmailData> retrieveAll();
+
+    EmailData retrieveOne(Long resourceId);
+    
+    Collection<EmailData> retrieveAllPending(Integer limit);
+    
+    Collection<EmailData> retrieveAllSent(Integer limit);
+    
+    Collection<EmailData> retrieveAllDelivered(Integer limit);
+    
+    Collection<EmailData> retrieveAllFailed(Integer limit);
+
+    Page<EmailData> retrieveEmailByStatus(Integer limit, Integer status, Date dateFrom, Date dateTo);
+    
+    List<Long> retrieveExternalIdsOfAllSent(Integer limit);
 }
