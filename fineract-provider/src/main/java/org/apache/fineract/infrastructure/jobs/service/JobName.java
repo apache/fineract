@@ -42,7 +42,10 @@ public enum JobName {
     POST_DIVIDENTS_FOR_SHARES("Post Dividends For Shares"), //
     UPDATE_SAVINGS_DORMANT_ACCOUNTS("Update Savings Dormant Accounts"), //
     ADD_PERIODIC_ACCRUAL_ENTRIES_FOR_LOANS_WITH_INCOME_POSTED_AS_TRANSACTIONS("Add Accrual Transactions For Loans With Income Posted As Transactions"),
-    EXECUTE_REPORT_MAILING_JOBS("Execute Report Mailing Jobs");
+    EXECUTE_REPORT_MAILING_JOBS("Execute Report Mailing Jobs"),
+	SEND_MESSAGES_TO_EMAIL_GATEWAY("Send messages to Email gateway"),
+    UPDATE_EMAIL_OUTBOUND_WITH_CAMPAIGN_MESSAGE("Update Email Outbound with campaign message"),
+    EXECUTE_EMAIL("Execute Email");
 
     private final String name;
 
