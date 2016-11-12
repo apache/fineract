@@ -21,6 +21,6 @@ package org.apache.fineract.portfolio.client.domain;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-abstract interface ClientRepository extends JpaRepository<Client, Long>, JpaSpecificationExecutor<Client> {
+public abstract interface ClientRepository extends JpaRepository<Client, Long>, JpaSpecificationExecutor<Client> {
     // no added behaviour
 }

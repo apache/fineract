@@ -16,16 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.domain;
+package org.apache.fineract.infrastructure.campaigns.email.data;
 
-import java.util.List;
+public class PreviewCampaignMessage {
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+    @SuppressWarnings("unused")
+    private final String campaignMessage;
 
-public interface ReportParameterUsageRepository extends JpaRepository<ReportParameterUsage, Long>,
-        JpaSpecificationExecutor<ReportParameterUsage> {
-    // no added behaviour
-	
-	List<ReportParameterUsage> findByReport(Report report);
+    private final Integer totalNumberOfMessages;
+
+    public PreviewCampaignMessage(String campaignMessage, Integer totalNumberOfMessages) {
+        this.campaignMessage = campaignMessage;
+        this.totalNumberOfMessages = totalNumberOfMessages;
+    }
+
+    public String getCampaignMessage() {
+        return campaignMessage;
+    }
+
+    public Integer getTotalNumberOfMessages() {
+        return totalNumberOfMessages;
+    }
 }

@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.domain;
+package org.apache.fineract.infrastructure.campaigns.email.exception;
 
-import java.util.List;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+/**
+ * A {@link RuntimeException} thrown when a code is not found.
+ */
+public class EmailNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-public interface ReportParameterUsageRepository extends JpaRepository<ReportParameterUsage, Long>,
-        JpaSpecificationExecutor<ReportParameterUsage> {
-    // no added behaviour
-	
-	List<ReportParameterUsage> findByReport(Report report);
+    public EmailNotFoundException(final Long resourceId) {
+        super("error.msg.scheduledemail.identifier.not.found", "Email with identifier `" + resourceId + "` does not exist", resourceId);
+    }
 }
