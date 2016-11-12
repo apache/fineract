@@ -16,16 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.domain;
+package org.apache.fineract.infrastructure.campaigns.email.exception;
 
-import java.util.List;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface ReportParameterUsageRepository extends JpaRepository<ReportParameterUsage, Long>,
-        JpaSpecificationExecutor<ReportParameterUsage> {
-    // no added behaviour
-	
-	List<ReportParameterUsage> findByReport(Report report);
+public class EmailCampaignMustBeClosedToEditException extends AbstractPlatformDomainRuleException {
+
+    public EmailCampaignMustBeClosedToEditException(final Long resourceId) {
+        super("error.msg.emailcampaign.campaign.cannot.be.updated",
+                "Campaign with identifier " + resourceId + " cannot be updated as it is not in `Closed` state.", resourceId);
+    }
 }
