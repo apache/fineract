@@ -27,11 +27,11 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_entity_relation")
-public class FineractEntityRelation extends AbstractPersistable<Long> {
+public class FineractEntityRelation extends AbstractPersistableCustom<Long> {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "relationId", orphanRemoval = true)
     private Set<FineractEntityToEntityMapping> fineractEntityToEntityMapping = new HashSet<>();

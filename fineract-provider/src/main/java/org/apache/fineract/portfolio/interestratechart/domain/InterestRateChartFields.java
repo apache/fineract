@@ -54,7 +54,7 @@ public class InterestRateChartFields {
     private Date fromDate;
 
     @Temporal(TemporalType.DATE)
-    @Column(name = "end_date", nullable = false)
+    @Column(name = "end_date", nullable = true)
     private Date endDate;
 
     @Column(name = "is_primary_grouping_by_amount", nullable = false)

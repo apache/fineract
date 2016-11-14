@@ -46,7 +46,7 @@ import org.joda.time.LocalDate;
 public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<AppUser, Long> {
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "loan_id")
+    @JoinColumn(name = "loan_id", referencedColumnName="id")
     private Loan loan;
 
     @Column(name = "installment", nullable = false)
@@ -133,6 +133,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
     @JoinColumn(name = "loan_repayment_schedule_id", referencedColumnName = "id", nullable = false)
     private Set<LoanInterestRecalcualtionAdditionalDetails> loanCompoundingDetails = new HashSet<>();
+    
     protected LoanRepaymentScheduleInstallment() {
         this.installmentNumber = null;
         this.fromDate = null;

@@ -28,25 +28,25 @@ import org.springframework.data.repository.query.Param;
 //Use SavingsAccountRepositoryWrapper.
 public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, Long>, JpaSpecificationExecutor<SavingsAccount> {
 
-    @Query("from SavingsAccount s_acc where s_acc.client.id = :clientId")
+    @Query("select s_acc from SavingsAccount s_acc where s_acc.client.id = :clientId")
     List<SavingsAccount> findSavingAccountByClientId(@Param("clientId") Long clientId);
 
-    @Query("from SavingsAccount s_acc where s_acc.status = :status")
+    @Query("select s_acc from SavingsAccount s_acc where s_acc.status = :status")
     List<SavingsAccount> findSavingAccountByStatus(@Param("status") Integer status);
 
-    @Query("from SavingsAccount sa where sa.client.id = :clientId and sa.group.id = :groupId")
+    @Query("select sa from SavingsAccount sa where sa.client.id = :clientId and sa.group.id = :groupId")
     List<SavingsAccount> findByClientIdAndGroupId(@Param("clientId") Long clientId, @Param("groupId") Long groupId);
 
-    @Query("select case when (count (saving) > 0) then true else false end from SavingsAccount saving where saving.client.id = :clientId and saving.status in (100,200,300,303,304)")
+    @Query("select case when (count (saving) > 0) then 'true' else 'false' end from SavingsAccount saving where saving.client.id = :clientId and saving.status in (100,200,300,303,304)")
     boolean doNonClosedSavingAccountsExistForClient(@Param("clientId") Long clientId);
 
-    @Query("from SavingsAccount sa where sa.client.id is null and sa.group.id = :groupId")
+    @Query("select sa from SavingsAccount sa where sa.client.id is null and sa.group.id = :groupId")
     List<SavingsAccount> findByGroupId(@Param("groupId") Long groupId);
 
-    @Query("from SavingsAccount sa where sa.id = :accountId and sa.depositType = :depositAccountTypeId")
+    @Query("select sa from SavingsAccount sa where sa.id = :accountId and sa.depositType = :depositAccountTypeId")
     SavingsAccount findByIdAndDepositAccountType(@Param("accountId") Long accountId,
             @Param("depositAccountTypeId") Integer depositAccountTypeId);
 
-    @Query("from SavingsAccount sa where sa.accountNumber = :accountNumber and sa.status in (100, 200, 300, 303, 304) ")
+    @Query("select sa from SavingsAccount sa where sa.accountNumber = :accountNumber and sa.status in (100, 200, 300, 303, 304) ")
     SavingsAccount findNonClosedAccountByAccountNumber(@Param("accountNumber") String accountNumber);
 }

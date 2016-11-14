@@ -28,11 +28,11 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_deposit_product_recurring_detail")
-public class DepositProductRecurringDetail extends AbstractPersistable<Long> {
+public class DepositProductRecurringDetail extends AbstractPersistableCustom<Long> {
 
     @Embedded
     private DepositRecurringDetail recurringDetail;

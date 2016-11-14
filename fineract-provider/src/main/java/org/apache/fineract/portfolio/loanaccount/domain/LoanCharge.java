@@ -41,8 +41,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -54,11 +54,10 @@ import org.apache.fineract.portfolio.charge.exception.LoanChargeWithoutMandatory
 import org.apache.fineract.portfolio.loanaccount.command.LoanChargeCommand;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidDetail;
 import org.joda.time.LocalDate;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_loan_charge")
-public class LoanCharge extends AbstractPersistable<Long> {
+public class LoanCharge extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", referencedColumnName = "id", nullable = false)
@@ -121,15 +120,15 @@ public class LoanCharge extends AbstractPersistable<Long> {
     private BigDecimal maxCap;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loancharge", orphanRemoval = true, fetch=FetchType.EAGER)
-    private final Set<LoanInstallmentCharge> loanInstallmentCharge = new HashSet<>();
+    private Set<LoanInstallmentCharge> loanInstallmentCharge = new HashSet<>();
 
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
 
-    @OneToOne(mappedBy = "loancharge", cascade = CascadeType.ALL, optional = true, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "loancharge", cascade = CascadeType.ALL, optional = true, orphanRemoval = true, fetch = FetchType.EAGER)
     private LoanOverdueInstallmentCharge overdueInstallmentCharge;
 
-    @OneToOne(mappedBy = "loancharge", cascade = CascadeType.ALL, optional = true, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "loancharge", cascade = CascadeType.ALL, optional = true, orphanRemoval = true, fetch = FetchType.EAGER)
     private LoanTrancheDisbursementCharge loanTrancheDisbursementCharge;
 
     public static LoanCharge createNewFromJson(final Loan loan, final Charge chargeDefinition, final JsonCommand command) {
@@ -500,7 +499,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
             for (final LoanInstallmentCharge chargePerInstallment : this.loanInstallmentCharge) {
                 if (index == loanChargePerInstallmentArray.length) {
                     remove.add(chargePerInstallment);
-                    chargePerInstallment.updateInstallment(null);
+                    //chargePerInstallment.updateInstallment(null);
                 } else {
                     chargePerInstallment.copyFrom(loanChargePerInstallmentArray[index++]);
                 }
@@ -757,7 +756,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
         return this.charge;
     }
 
-    @Override
+    /*@Override
     public boolean equals(final Object obj) {
         if (obj == null) { return false; }
         if (obj == this) { return true; }
@@ -774,12 +773,12 @@ public class LoanCharge extends AbstractPersistable<Long> {
     @Override
     public int hashCode() {
         return 1;
-        /*
+        
          * return new HashCodeBuilder(3, 5) // .append(getId()) //
          * .append(this.charge.getId()) //
          * .append(this.amount).append(getDueLocalDate()) // .toHashCode();
-         */
-    }
+         
+    }*/
 
     public ChargePaymentMode getChargePaymentMode() {
         return ChargePaymentMode.fromInt(this.chargePaymentMode);

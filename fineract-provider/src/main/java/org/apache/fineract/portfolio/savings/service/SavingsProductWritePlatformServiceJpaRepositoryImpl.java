@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.PersistenceException;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -37,7 +40,6 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
-import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.charge.domain.Charge;
@@ -85,9 +87,8 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleDataIntegrityIssues(final JsonCommand command, final DataAccessException dae) {
+    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dae) {
 
-        final Throwable realCause = dae.getMostSpecificCause();
         if (realCause.getMessage().contains("sp_unq_name")) {
 
             final String name = command.stringValueOfParameterNamed("name");
@@ -105,7 +106,7 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
                 "Unknown data integrity issue with resource.");
     }
 
-    private void logAsErrorUnexpectedDataIntegrityException(final DataAccessException dae) {
+    private void logAsErrorUnexpectedDataIntegrityException(final Exception dae) {
         this.logger.error(dae.getMessage(), dae);
     }
 
@@ -134,8 +135,12 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
                     .withEntityId(product.getId()) //
                     .build();
         } catch (final DataAccessException e) {
-            handleDataIntegrityIssues(command, e);
+            handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleDataIntegrityIssues(command, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -189,8 +194,12 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
                     .withEntityId(product.getId()) //
                     .with(changes).build();
         } catch (final DataAccessException e) {
-            handleDataIntegrityIssues(command, e);
+            handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleDataIntegrityIssues(command, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 

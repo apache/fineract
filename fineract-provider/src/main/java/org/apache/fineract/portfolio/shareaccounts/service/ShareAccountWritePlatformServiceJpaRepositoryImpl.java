@@ -27,7 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.PersistenceException;
+
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
@@ -35,6 +38,7 @@ import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccou
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -102,8 +106,12 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                     .withEntityId(account.getId()) //
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve);
+            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleDataIntegrityIssues(jsonCommand, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -196,8 +204,12 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                     .with(changes) //
                     .build();
         } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve);
+            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleDataIntegrityIssues(jsonCommand, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -226,7 +238,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                     .with(changes) //
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve);
+            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -267,7 +279,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                     .with(changes) //
                     .build();
         } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve);
+            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -301,7 +313,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                     .with(changes) //
                     .build();
         } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve);
+            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -338,7 +350,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                     .with(changes) //
                     .build();
         } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve);
+            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -360,7 +372,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                     .with(changes) //
                     .build();
         } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve);
+            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -397,7 +409,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                     .with(changes) //
                     .build();
         } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve);
+            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -426,7 +438,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                     .with(changes) //
                     .build();
         } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve);
+            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -461,7 +473,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                     .with(changes) //
                     .build();
         } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve);
+            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -495,12 +507,13 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
                     .with(changes) //
                     .build();
         } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(jsonCommand, dve);
+            handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }
     }
 
-    private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
-
+    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
+        throw new PlatformDataIntegrityException("error.msg.shareaccount.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource.");
     }
 }

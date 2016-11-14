@@ -28,12 +28,12 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.joda.time.DateTime;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_report_mailing_job_run_history")
-public class ReportMailingJobRunHistory extends AbstractPersistable<Long> {
+public class ReportMailingJobRunHistory extends AbstractPersistableCustom<Long> {
     private static final long serialVersionUID = -3757370929988421076L;
 
     @ManyToOne

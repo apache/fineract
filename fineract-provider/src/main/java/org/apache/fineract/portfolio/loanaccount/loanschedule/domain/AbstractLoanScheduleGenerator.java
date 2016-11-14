@@ -1373,32 +1373,32 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                         params.getActualRepaymentDate(), applicableVariations);
                 Money interest = principalInterestForThisPeriod.interest();
                 totalInterest = totalInterest.plus(interest);
-
-                Money uncompounded = params.getUnCompoundedAmount();
-                Money compounded = uncompounded.zero();
-                for (Map.Entry<LocalDate, Money> mapEntry : params.getCompoundingMap().entrySet()) {
-                    if (mapEntry.getKey().isAfter(params.getPeriodStartDate())) {
-                        compounded = compounded.plus(mapEntry.getValue());
-                    }
-                }
-                if (compounded.isGreaterThanZero() && startDate.isEqual(additionalPeriodsStartDate)) {
-                    params.setCompoundedInLastInstallment(uncompoundedFromLastInstallment);// uncompounded in last installment
-                    additionalPeriodsStartDate = additionalPeriodsStartDate.plusDays(1);
-                }
-                Money compoundedForThisPeriod = compounded.minus(uncompounded);
-                Money uncompoundedForThisPeriod = interest.minus(compoundedForThisPeriod);
-                params.setUnCompoundedAmount(uncompoundedForThisPeriod);
-                LocalDate compoundingDate = params.getPeriodStartDate();
-                if (loanApplicationTerms.allowCompoundingOnEod()) {
-                    compoundingDate = compoundingDate.minusDays(1);
-                }
-                compoundingDate = getNextCompoundScheduleDate(compoundingDate, loanApplicationTerms, holidayDetailDTO);
-                if(compoundingDate.isEqual(params.getActualRepaymentDate())){
-                    params.getCompoundingMap().put(compoundingDate, uncompoundedForThisPeriod);
-                    params.setUnCompoundedAmount(uncompoundedForThisPeriod.zero());
-                }
                 
-
+                if(loanApplicationTerms.getInterestRecalculationCompoundingMethod().isCompoundingEnabled()) {
+                	Money uncompounded = params.getUnCompoundedAmount();
+                	Money compounded = uncompounded.zero();
+                	for (Map.Entry<LocalDate, Money> mapEntry : params.getCompoundingMap().entrySet()) {
+                		if (mapEntry.getKey().isAfter(params.getPeriodStartDate())) {
+                			compounded = compounded.plus(mapEntry.getValue());
+                		}
+                	}
+                	if (compounded.isGreaterThanZero() && startDate.isEqual(additionalPeriodsStartDate)) {
+                		params.setCompoundedInLastInstallment(uncompoundedFromLastInstallment);// uncompounded in last installment
+                		additionalPeriodsStartDate = additionalPeriodsStartDate.plusDays(1);
+                	}
+                	Money compoundedForThisPeriod = compounded.minus(uncompounded);
+                	Money uncompoundedForThisPeriod = interest.minus(compoundedForThisPeriod);
+                	params.setUnCompoundedAmount(uncompoundedForThisPeriod);
+                	LocalDate compoundingDate = params.getPeriodStartDate();
+                	if (loanApplicationTerms.allowCompoundingOnEod()) {
+                		compoundingDate = compoundingDate.minusDays(1);
+                	}
+                	compoundingDate = getNextCompoundScheduleDate(compoundingDate, loanApplicationTerms, holidayDetailDTO);
+                	if(compoundingDate.isEqual(params.getActualRepaymentDate())){
+                		params.getCompoundingMap().put(compoundingDate, uncompoundedForThisPeriod);
+                		params.setUnCompoundedAmount(uncompoundedForThisPeriod.zero());
+                	}
+                }
             }
             params.setPeriodStartDate(params.getActualRepaymentDate());
         } while (params.getActualRepaymentDate().isBefore(currentDate) && !outstanding.isZero());

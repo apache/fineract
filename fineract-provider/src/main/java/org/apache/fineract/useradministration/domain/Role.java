@@ -34,12 +34,12 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.useradministration.data.RoleData;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_role", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name") })
-public class Role extends AbstractPersistable<Long> {
+public class Role extends AbstractPersistableCustom<Long> {
 
     @Column(name = "name", unique = true, nullable = false, length = 100)
     private String name;
@@ -52,7 +52,7 @@ public class Role extends AbstractPersistable<Long> {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "m_role_permission", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
-    private final Set<Permission> permissions = new HashSet<>();
+    private Set<Permission> permissions = new HashSet<>();
 
     public static Role fromJson(final JsonCommand command) {
         final String name = command.stringValueOfParameterNamed("name");

@@ -26,11 +26,13 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
 
 	<persistence-unit name="jpa-pu" transaction-type="RESOURCE_LOCAL">
-		<provider>org.hibernate.ejb.HibernatePersistence</provider>
-		<properties>
-			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLInnoDBDialect" />
-			<property name="hibernate.jdbc.batch_size" value="100" />
-			<property name="hibernate.order_inserts" value="true" />
-		</properties>
+		<provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
+	<properties>
+        <property name="openjpa.Compatibility" value="QuotedNumbersInQueries=true"/>
+        <property name="openjpa.jdbc.DBDictionary" value="org.apache.fineract.infrastructure.core.domain.MySQLDictionaryCustom"/>
+        <!--<property name="openjpa.InverseManager" value="true(Action=warn)"/> -->
+      <!-- <property name="openjpa.Log" value="DefaultLevel=WARN, Runtime=INFO, Tool=INFO, SQL=TRACE"/>-->
+       <property name="openjpa.jdbc.MappingDefaults" value="ForeignKeyDeleteAction=CASCADE"/>
+	</properties>
 	</persistence-unit>
 </persistence>

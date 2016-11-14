@@ -27,9 +27,10 @@ import org.springframework.data.repository.query.Param;
 
 public interface ProvisioningEntryRepository extends JpaRepository<ProvisioningEntry, Long>, JpaSpecificationExecutor<ProvisioningEntry> {
 
-    @Query("select entry from ProvisioningEntry entry where entry.createdDate = :createdDate")
+	//OPENJPA throws error if we use entry 
+    @Query("select entry1 from ProvisioningEntry entry1 where entry1.createdDate = :createdDate")
     ProvisioningEntry findByProvisioningEntryDate(@Param("createdDate") Date createdDate);
     
-    @Query("select entry from ProvisioningEntry entry where entry.createdDate = (select max(entry1.createdDate) from ProvisioningEntry entry1 where entry1.isJournalEntryCreated='1')")
+    @Query("select entry1 from ProvisioningEntry entry1 where entry1.createdDate = (select max(entry2.createdDate) from ProvisioningEntry entry2 where entry2.isJournalEntryCreated=true)")
     ProvisioningEntry findExistingProvisioningEntryWithJournalEntries() ;
 }

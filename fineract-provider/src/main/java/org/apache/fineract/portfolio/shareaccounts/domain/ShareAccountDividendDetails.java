@@ -24,11 +24,11 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_share_account_dividend_details")
-public class ShareAccountDividendDetails extends AbstractPersistable<Long> {
+public class ShareAccountDividendDetails extends AbstractPersistableCustom<Long> {
 
     @Column(name = "account_id", nullable = false)
     private Long shareAccountId;

@@ -944,6 +944,7 @@ public class ShareAccountDataSerializer {
         JsonElement element = jsonCommand.parsedJson();
         LocalDate closedDate = this.fromApiJsonHelper.extractLocalDateNamed(ShareAccountApiConstants.closeddate_paramname, element);
         baseDataValidator.reset().parameter(ShareAccountApiConstants.approveddate_paramname).value(closedDate).notNull();
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         boolean isTransactionBeforeExistingTransactions = false ;
         Set<ShareAccountTransaction> transactions = account.getShareAccountTransactions() ;
         for(ShareAccountTransaction transaction: transactions) {

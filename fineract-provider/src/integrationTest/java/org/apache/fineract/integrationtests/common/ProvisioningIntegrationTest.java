@@ -155,14 +155,24 @@ public class ProvisioningIntegrationTest {
         Assert.assertEquals(newdefintions.size(), requestedDefinitions.size()) ;
         for(int i = 0 ; i < newdefintions.size() ; i++) {
             Map requestedMap = (Map)requestedDefinitions.get(i) ;
-            Map newMap = (Map)newdefintions.get(i) ;
-            checkProperty("categoryId", requestedMap, newMap) ;
-            checkProperty("categoryName", requestedMap, newMap) ;
-            checkProperty("minAge", requestedMap, newMap) ;
-            checkProperty("maxAge", requestedMap, newMap) ;
-            checkProperty("provisioningPercentage", requestedMap, newMap) ;
-            checkProperty("liabilityAccount", requestedMap, newMap) ;
-            checkProperty("expenseAccount", requestedMap, newMap) ;
+            Object requestedCategoryId = requestedMap.get("categoryId") ;
+            boolean found = false ; 
+            for(int j = 0 ; j < newdefintions.size(); j++) {
+            	Map newMap = (Map)newdefintions.get(j) ;
+                Object newCategoryId = newMap.get("categoryId") ;
+                if(requestedCategoryId.equals(newCategoryId)) {
+                	found = true ;
+                    checkProperty("categoryId", requestedMap, newMap) ;
+                    checkProperty("categoryName", requestedMap, newMap) ;
+                    checkProperty("minAge", requestedMap, newMap) ;
+                    checkProperty("maxAge", requestedMap, newMap) ;
+                    checkProperty("provisioningPercentage", requestedMap, newMap) ;
+                    checkProperty("liabilityAccount", requestedMap, newMap) ;
+                    checkProperty("expenseAccount", requestedMap, newMap) ;
+                    break ; //internal loop
+                }
+            }
+            if(!found) Assert.fail("No Category found with Id:"+requestedCategoryId);
         }
     }
     

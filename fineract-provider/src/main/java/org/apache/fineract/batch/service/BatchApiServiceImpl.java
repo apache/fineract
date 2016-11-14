@@ -35,6 +35,7 @@ import org.apache.fineract.batch.exception.ErrorHandler;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.batch.service.ResolutionHelper.BatchRequestNode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
@@ -216,7 +217,22 @@ public class BatchApiServiceImpl implements BatchApiService {
             errResponseList.add(errResponse);
 
             return errResponseList;
-        }
+        }catch (final NonTransientDataAccessException ex) {
+        	 ErrorInfo e = ErrorHandler.handler(ex);
+             BatchResponse errResponse = new BatchResponse();
+             errResponse.setStatusCode(e.getStatusCode());
 
+             for (BatchResponse res : checkList) {
+                 if (!res.getStatusCode().equals(200)) {
+                     errResponse.setBody("Transaction is being rolled back. First erroneous request: \n" + new Gson().toJson(res));
+                     break;
+                 }
+             }
+             checkList.clear();
+             List<BatchResponse> errResponseList = new ArrayList<>();
+             errResponseList.add(errResponse);
+
+             return errResponseList;
+        }
     }
 }

@@ -27,11 +27,11 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_provision_category", uniqueConstraints = { @UniqueConstraint(columnNames = { "category_name" }, name = "category_name") })
-public class ProvisioningCategory extends AbstractPersistable<Long> {
+public class ProvisioningCategory extends AbstractPersistableCustom<Long> {
 
     @Column(name = "category_name", nullable = false, unique = true)
     private String categoryName;

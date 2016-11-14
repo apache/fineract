@@ -24,13 +24,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "stretchy_report_parameter")
-public final class ReportParameterUsage extends AbstractPersistable<Long> {
+public final class ReportParameterUsage extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "report_id", nullable = false)
@@ -53,7 +51,7 @@ public final class ReportParameterUsage extends AbstractPersistable<Long> {
         this.reportParameterName = reportParameterName;
     }
 
-    @Override
+    /*@Override
     public boolean equals(final Object obj) {
         if (obj == null) { return false; }
         if (obj == this) { return true; }
@@ -75,7 +73,7 @@ public final class ReportParameterUsage extends AbstractPersistable<Long> {
                 .append(this.parameter.getId()) //
                 .append(this.reportParameterName) //
                 .toHashCode();
-    }
+    }*/
 
     public boolean hasIdOf(final Long id) {
         return getId().equals(id);

@@ -34,11 +34,11 @@ import javax.persistence.Table;
 import org.apache.fineract.portfolio.account.domain.AccountAssociations;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_guarantor_funding_details")
-public class GuarantorFundingDetails extends AbstractPersistable<Long> {
+public class GuarantorFundingDetails extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "guarantor_id", nullable = false)
@@ -64,7 +64,7 @@ public class GuarantorFundingDetails extends AbstractPersistable<Long> {
     private BigDecimal amountTransfered;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "guarantorFundingDetails", orphanRemoval = true, fetch=FetchType.EAGER)
-    private final List<GuarantorFundingTransaction> guarantorFundingTransactions = new ArrayList<>();
+    private List<GuarantorFundingTransaction> guarantorFundingTransactions = new ArrayList<>();
 
     protected GuarantorFundingDetails() {}
 

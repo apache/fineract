@@ -67,14 +67,16 @@ public class WorkingDayValidator {
 
         final Boolean extendTermForDailyRepayments = this.fromApiJsonHelper.extractBooleanNamed("extendTermForDailyRepayments", element);
         baseDataValidator.reset().parameter(WorkingDaysApiConstants.extendTermForDailyRepayments).value(extendTermForDailyRepayments).ignoreIfNull().validateForBooleanValue();
-        
+
+        final Boolean extendTermForRepaymentsOnHolidays = this.fromApiJsonHelper.extractBooleanNamed("extendTermForRepaymentsOnHolidays", element);
+        baseDataValidator.reset().parameter(WorkingDaysApiConstants.extendTermForRepaymentsOnHolidays).value(extendTermForRepaymentsOnHolidays).ignoreIfNull().validateForBooleanValue();
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
-            //
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
     }

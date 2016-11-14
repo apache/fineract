@@ -236,7 +236,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 		final List<CodeValueData> countryoptions = new ArrayList<>(
 				this.readService.retrieveCodeValuesByCode("COUNTRY"));
 
-		final List<CodeValueData> StateOptions = new ArrayList<>(this.readService.retrieveCodeValuesByCode("STATES"));
+		final List<CodeValueData> StateOptions = new ArrayList<>(this.readService.retrieveCodeValuesByCode("STATE"));
 
 		final List<CodeValueData> addressTypeOptions = new ArrayList<>(
 				this.readService.retrieveCodeValuesByCode("ADDRESS_TYPE"));

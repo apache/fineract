@@ -121,8 +121,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
 
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat());
             validateDueDateOnWorkingDay(clientCharge, fmt);
-
-            this.clientChargeRepository.save(clientCharge);
+            this.clientChargeRepository.saveAndFlush(clientCharge);
 
             return new CommandProcessingResultBuilder() //
                     .withEntityId(clientCharge.getId()) //

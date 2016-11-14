@@ -25,6 +25,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface ClientNonPersonRepository extends JpaRepository<ClientNonPerson, Long>, JpaSpecificationExecutor<ClientNonPerson>{
 
-	@Query("from ClientNonPerson clientNonPerson where clientNonPerson.client.id = :clientId")	
+	@Query("select clientNonPerson from ClientNonPerson clientNonPerson where clientNonPerson.client.id = :clientId")	
 	ClientNonPerson findByClientId(@Param("clientId") Long clientId);	
 }

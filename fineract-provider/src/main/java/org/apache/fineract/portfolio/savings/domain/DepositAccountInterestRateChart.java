@@ -31,6 +31,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChart;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartFields;
@@ -39,11 +40,10 @@ import org.apache.fineract.portfolio.interestratechart.incentive.AttributeIncent
 import org.apache.fineract.portfolio.interestratechart.incentive.AttributeIncentiveCalculationFactory;
 import org.apache.fineract.portfolio.interestratechart.incentive.IncentiveDTO;
 import org.joda.time.LocalDate;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_savings_account_interest_rate_chart")
-public class DepositAccountInterestRateChart extends AbstractPersistable<Long> {
+public class DepositAccountInterestRateChart extends AbstractPersistableCustom<Long> {
 
     @Embedded
     private InterestRateChartFields chartFields;

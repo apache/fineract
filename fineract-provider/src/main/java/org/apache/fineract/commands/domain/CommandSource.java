@@ -32,11 +32,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.DateTime;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_portfolio_command_source")
-public class CommandSource extends AbstractPersistable<Long> {
+public class CommandSource extends AbstractPersistableCustom<Long> {
 
     @Column(name = "action_name", nullable = true, length = 100)
     private String actionName;

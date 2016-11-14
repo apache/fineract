@@ -54,11 +54,11 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_account_transfer_standing_instructions", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name") })
-public class AccountTransferStandingInstruction extends AbstractPersistable<Long> {
+public class AccountTransferStandingInstruction extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "account_transfer_details_id", nullable = true)

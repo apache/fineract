@@ -29,11 +29,11 @@ import javax.persistence.Table;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_product_loan_variable_installment_config")
-public class LoanProductVariableInstallmentConfig extends AbstractPersistable<Long> {
+public class LoanProductVariableInstallmentConfig extends AbstractPersistableCustom<Long> {
 
     @OneToOne
     @JoinColumn(name = "loan_product_id", nullable = false)

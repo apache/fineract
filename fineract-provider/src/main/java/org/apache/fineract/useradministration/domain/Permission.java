@@ -22,23 +22,23 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_permission")
-public class Permission extends AbstractPersistable<Long> {
+public class Permission extends AbstractPersistableCustom<Long> {
 
     @Column(name = "grouping", nullable = false, length = 45)
-    private final String grouping;
+    private String grouping;
 
     @Column(name = "code", nullable = false, length = 100)
-    private final String code;
+    private String code;
 
     @Column(name = "entity_name", nullable = true, length = 100)
-    private final String entityName;
+    private String entityName;
 
     @Column(name = "action_name", nullable = true, length = 100)
-    private final String actionName;
+    private String actionName;
 
     @Column(name = "can_maker_checker", nullable = false)
     private boolean canMakerChecker;

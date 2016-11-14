@@ -270,6 +270,10 @@ public class FromJsonHelper {
         return this.helperDelegator.extractMonthDayFormatParameter(element);
     }
 
+    public JsonObject extractJsonObjectNamed(final String parameterName, final JsonElement element) {
+        return this.helperDelegator.extractJsonObjectNamed(parameterName, element);
+    }
+
     public Gson getGsonConverter() {
         return this.gsonConverter;
     }

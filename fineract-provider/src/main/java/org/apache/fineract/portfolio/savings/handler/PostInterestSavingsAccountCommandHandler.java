@@ -41,6 +41,6 @@ public class PostInterestSavingsAccountCommandHandler implements NewCommandSourc
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.postInterest(command.getSavingsId());
+        return this.writePlatformService.postInterest(command);
     }
 }

@@ -32,6 +32,6 @@ public interface HolidayRepository extends JpaRepository<Holiday, Long>, JpaSpec
     List<Holiday> findByOfficeIdAndGreaterThanDate(@Param("officeId") Long officeId, @Param("date") Date date,
             @Param("status") Integer status);
 
-    @Query("from Holiday holiday where holiday.processed = false and holiday.status = :status")
+    @Query("select holiday from Holiday holiday where holiday.processed = false and holiday.status = :status")
     List<Holiday> findUnprocessed(@Param("status") Integer status);
 }

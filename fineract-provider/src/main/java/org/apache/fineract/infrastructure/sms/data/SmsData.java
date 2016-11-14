@@ -25,28 +25,23 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
  */
 public class SmsData {
 
-    @SuppressWarnings("unused")
     private final Long id;
-    @SuppressWarnings("unused")
     private final Long groupId;
-    @SuppressWarnings("unused")
     private final Long clientId;
-    @SuppressWarnings("unused")
     private final Long staffId;
-    @SuppressWarnings("unused")
     private final EnumOptionData status;
-    @SuppressWarnings("unused")
     private final String mobileNo;
-    @SuppressWarnings("unused")
     private final String message;
+    private final Long providerId;
+    private final String campaignName;
 
     public static SmsData instance(final Long id, final Long groupId, final Long clientId, final Long staffId, final EnumOptionData status,
-            final String mobileNo, final String message) {
-        return new SmsData(id, groupId, clientId, staffId, status, mobileNo, message);
+            final String mobileNo, final String message, final Long providerId, final String camapignName) {
+        return new SmsData(id, groupId, clientId, staffId, status, mobileNo, message, providerId, camapignName);
     }
 
     private SmsData(final Long id, final Long groupId, final Long clientId, final Long staffId, final EnumOptionData status,
-            final String mobileNo, final String message) {
+            final String mobileNo, final String message, final Long providerId, final String camapignName) {
         this.id = id;
         this.groupId = groupId;
         this.clientId = clientId;
@@ -54,5 +49,44 @@ public class SmsData {
         this.status = status;
         this.mobileNo = mobileNo;
         this.message = message;
+        this.providerId = providerId;
+        this.campaignName = camapignName;
     }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public Long getGroupId() {
+        return this.groupId;
+    }
+
+    public Long getClientId() {
+        return this.clientId;
+    }
+
+    public Long getStaffId() {
+        return this.staffId;
+    }
+
+    public EnumOptionData getStatus() {
+        return this.status;
+    }
+
+    public String getMobileNo() {
+        return this.mobileNo;
+    }
+
+    public String getMessage() {
+        return this.message;
+    }
+
+    public Long getProviderId() {
+        return this.providerId;
+    }
+
+    public String getCampaignName() {
+        return this.campaignName;
+    }
+
 }

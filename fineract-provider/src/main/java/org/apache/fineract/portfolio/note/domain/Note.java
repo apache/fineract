@@ -44,7 +44,7 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
 
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = true)
-    private final Client client;
+    private Client client;
 
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = true)
@@ -62,7 +62,7 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
     private String note;
 
     @Column(name = "note_type_enum")
-    private final Integer noteTypeId;
+    private Integer noteTypeId;
 
     @ManyToOne
     @JoinColumn(name = "savings_account_id", nullable = true)

@@ -22,7 +22,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.PersistenceException;
+
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -100,8 +103,12 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
                     .withEntityId(report.getId()) //
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleReportDataIntegrityIssues(command, dve);
+            handleReportDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleReportDataIntegrityIssues(command, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -137,8 +144,12 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
                     .with(changes) //
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleReportDataIntegrityIssues(command, dve);
+            handleReportDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleReportDataIntegrityIssues(command, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -169,10 +180,9 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleReportDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
+    private void handleReportDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 
-        final Throwable realCause = dve.getMostSpecificCause();
-        if (realCause.getMessage().contains("unq_report_name")) {
+        if (realCause.getMessage().contains("unq_report_name") || realCause.getMessage().contains("report_name_UNIQUE")) {
             final String name = command.stringValueOfParameterNamed("reportName");
             throw new PlatformDataIntegrityException("error.msg.report.duplicate.name", "A report with name '" + name + "' already exists",
                     "name", name);

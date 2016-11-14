@@ -27,6 +27,6 @@ public interface FineractEntityToEntityMappingRepository extends JpaRepository<F
     
    
 
-	@Query("from FineractEntityToEntityMapping feem where feem.fromId= :fromId and feem.toId= :toId and feem.relationId= :relId")
+	@Query("select feem from FineractEntityToEntityMapping feem where feem.fromId= :fromId and feem.toId= :toId and feem.relationId= :relId")
 	FineractEntityToEntityMapping findListByProductId(@Param("relId")FineractEntityRelation relId, @Param("toId")Long toId, @Param("fromId")Long fromId );
 }

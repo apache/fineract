@@ -60,7 +60,9 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
         for (final SavingsAccount savingsAccount : savingsAccounts) {
             try {
                 this.savingAccountAssembler.assignSavingAccountHelpers(savingsAccount);
-                this.savingsAccountWritePlatformService.postInterest(savingsAccount);
+                boolean postInterestAsOn = false;
+                LocalDate transactionDate = null;
+                this.savingsAccountWritePlatformService.postInterest(savingsAccount, postInterestAsOn, transactionDate);
             } catch (Exception e) {
                 Throwable realCause = e;
                 if (e.getCause() != null) {

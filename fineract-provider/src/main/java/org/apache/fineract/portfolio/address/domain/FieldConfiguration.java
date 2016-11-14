@@ -22,11 +22,11 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_field_configuration")
-public class FieldConfiguration extends AbstractPersistable<Long> {
+public class FieldConfiguration extends AbstractPersistableCustom<Long> {
 
 	private String entity;
 

@@ -24,11 +24,11 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_document")
-public class Document extends AbstractPersistable<Long> {
+public class Document extends AbstractPersistableCustom<Long> {
 
     @Column(name = "parent_entity_type", length = 50)
     private String parentEntityType;

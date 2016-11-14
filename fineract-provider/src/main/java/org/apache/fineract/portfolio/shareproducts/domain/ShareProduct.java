@@ -81,7 +81,7 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "issued_shares", nullable = false)
     private Long totalSharesIssued;
 
-    @Column(name = "totalsubscribed_shares", nullable = false)
+    @Column(name = "totalsubscribed_shares", nullable = true)
     private Long totalSubscribedShares;
     
     @Column(name = "unit_price", nullable = false)

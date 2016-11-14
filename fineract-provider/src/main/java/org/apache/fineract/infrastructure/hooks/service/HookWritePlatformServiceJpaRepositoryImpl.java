@@ -18,9 +18,26 @@
  */
 package org.apache.fineract.infrastructure.hooks.service;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.actionNameParamName;
+import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.configParamName;
+import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.contentTypeName;
+import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.entityNameParamName;
+import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.eventsParamName;
+import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.nameParamName;
+import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.payloadURLName;
+import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.templateIdParamName;
+import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.webTemplateName;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.persistence.PersistenceException;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -29,7 +46,13 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.infrastructure.hooks.domain.*;
+import org.apache.fineract.infrastructure.hooks.domain.Hook;
+import org.apache.fineract.infrastructure.hooks.domain.HookConfiguration;
+import org.apache.fineract.infrastructure.hooks.domain.HookRepository;
+import org.apache.fineract.infrastructure.hooks.domain.HookResource;
+import org.apache.fineract.infrastructure.hooks.domain.HookTemplate;
+import org.apache.fineract.infrastructure.hooks.domain.HookTemplateRepository;
+import org.apache.fineract.infrastructure.hooks.domain.Schema;
 import org.apache.fineract.infrastructure.hooks.exception.HookNotFoundException;
 import org.apache.fineract.infrastructure.hooks.exception.HookTemplateNotFoundException;
 import org.apache.fineract.infrastructure.hooks.processor.ProcessorHelper;
@@ -44,12 +67,11 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import retrofit.RetrofitError;
-
-import java.util.*;
-import java.util.Map.Entry;
-
-import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.*;
 
 @Service
 public class HookWritePlatformServiceJpaRepositoryImpl
@@ -117,8 +139,12 @@ public class HookWritePlatformServiceJpaRepositoryImpl
                     .withCommandId(command.commandId())
                     .withEntityId(hook.getId()).build();
         } catch (final DataIntegrityViolationException dve) {
-            handleHookDataIntegrityIssues(command, dve);
+            handleHookDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleHookDataIntegrityIssues(command, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -181,8 +207,12 @@ public class HookWritePlatformServiceJpaRepositoryImpl
                     .with(changes) //
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleHookDataIntegrityIssues(command, dve);
-            return null;
+            handleHookDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
+            return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleHookDataIntegrityIssues(command, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -192,12 +222,9 @@ public class HookWritePlatformServiceJpaRepositoryImpl
     public CommandProcessingResult deleteHook(final Long hookId) {
 
         this.context.authenticatedUser();
-
         final Hook hook = retrieveHookBy(hookId);
-
         try {
             this.hookRepository.delete(hook);
-            this.hookRepository.flush();
         } catch (final DataIntegrityViolationException e) {
             throw new PlatformDataIntegrityException(
                     "error.msg.unknown.data.integrity.issue",
@@ -348,9 +375,8 @@ public class HookWritePlatformServiceJpaRepositoryImpl
         }
     }
 
-    private void handleHookDataIntegrityIssues(final JsonCommand command,
-            final DataIntegrityViolationException dve) {
-        final Throwable realCause = dve.getMostSpecificCause();
+    private void handleHookDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
+            final Exception dve) {
         if (realCause.getMessage().contains("hook_name")) {
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException(

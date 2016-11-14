@@ -41,11 +41,11 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariations;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_loan_reschedule_request")
-public class LoanRescheduleRequest extends AbstractPersistable<Long> {
+public class LoanRescheduleRequest extends AbstractPersistableCustom<Long> {
 	
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)

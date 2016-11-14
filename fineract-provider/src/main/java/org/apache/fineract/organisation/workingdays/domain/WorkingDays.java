@@ -20,7 +20,7 @@ package org.apache.fineract.organisation.workingdays.domain;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.organisation.workingdays.api.WorkingDaysApiConstants;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,7 +31,7 @@ import java.util.Map;
 
 @Entity
 @Table(name = "m_working_days")
-public class WorkingDays extends AbstractPersistable<Long> {
+public class WorkingDays extends AbstractPersistableCustom<Long> {
 
     @Column(name = "recurrence", length = 100, nullable = true)
     private String recurrence;
@@ -41,15 +41,19 @@ public class WorkingDays extends AbstractPersistable<Long> {
 
     @Column(name = "extend_term_daily_repayments", nullable = false)
     private Boolean extendTermForDailyRepayments;
+
+    @Column(name = "extend_term_holiday_repayment", nullable = false)
+    private Boolean extendTermForRepaymentsOnHolidays;
     
     protected WorkingDays() {
 
     }
 
-    protected WorkingDays(final String recurrence, final Integer repaymentReschedulingType, final Boolean extendTermForDailyRepayments ) {
+    protected WorkingDays(final String recurrence, final Integer repaymentReschedulingType, final Boolean extendTermForDailyRepayments, final Boolean extendTermForRepaymentsOnHolidays) {
         this.recurrence = recurrence;
         this.repaymentReschedulingType = repaymentReschedulingType;
         this.extendTermForDailyRepayments = extendTermForDailyRepayments;
+        this.extendTermForRepaymentsOnHolidays = extendTermForRepaymentsOnHolidays;
     }
 
     /**
@@ -74,6 +78,8 @@ public class WorkingDays extends AbstractPersistable<Long> {
         return this.extendTermForDailyRepayments;
     }
 
+    public Boolean getExtendTermForRepaymentsOnHolidays() { return this.extendTermForRepaymentsOnHolidays; }
+
     public Map<String, Object> update(final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
@@ -96,6 +102,13 @@ public class WorkingDays extends AbstractPersistable<Long> {
             actualChanges.put(WorkingDaysApiConstants.extendTermForDailyRepayments, newValue);
             this.extendTermForDailyRepayments = newValue;
         }
+
+        if (command.isChangeInBooleanParameterNamed(WorkingDaysApiConstants.extendTermForRepaymentsOnHolidays, this.extendTermForRepaymentsOnHolidays)) {
+            final Boolean newValue = command.booleanPrimitiveValueOfParameterNamed(WorkingDaysApiConstants.extendTermForRepaymentsOnHolidays);
+            actualChanges.put(WorkingDaysApiConstants.extendTermForRepaymentsOnHolidays, newValue);
+            this.extendTermForRepaymentsOnHolidays = newValue;
+        }
+
         return actualChanges;
     }
 

@@ -39,24 +39,24 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.joda.time.LocalDate;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_tellers", uniqueConstraints = {
         @UniqueConstraint(name = "ux_tellers_name", columnNames = {"name"})
 })
-public class Teller extends AbstractPersistable<Long> {
+public class Teller extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "debit_account_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "debit_account_id", nullable = true)
     private GLAccount debitAccount;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "credit_account_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "credit_account_id", nullable = true)
     private GLAccount creditAccount;
 
     @Column(name = "name", nullable = false, length = 100)
@@ -66,11 +66,11 @@ public class Teller extends AbstractPersistable<Long> {
     private String description;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "valid_from", nullable = false)
+    @Column(name = "valid_from", nullable = true)
     private Date startDate;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "valid_to", nullable = false)
+    @Column(name = "valid_to", nullable = true)
     private Date endDate;
 
     @Column(name = "state", nullable = false)
@@ -78,9 +78,6 @@ public class Teller extends AbstractPersistable<Long> {
 
     @OneToMany(mappedBy = "teller", fetch = FetchType.LAZY)
     private Set<Cashier> cashiers;
-
-    @OneToMany(mappedBy = "teller", fetch = FetchType.LAZY)
-    private Set<TellerTransaction> tellerTransactions;
 
     public Teller() {
         super();
@@ -287,11 +284,8 @@ public class Teller extends AbstractPersistable<Long> {
         this.cashiers = cashiers;
     }
 
-    public Set<TellerTransaction> getTransactions() {
-        return tellerTransactions;
-    }
-
-    public void setTransactions(Set<TellerTransaction> tellerTransactions) {
-        this.tellerTransactions = tellerTransactions;
-    }
+	public void initializeLazyCollections() {
+		this.office.getId();
+		this.cashiers.size();
+	}
 }

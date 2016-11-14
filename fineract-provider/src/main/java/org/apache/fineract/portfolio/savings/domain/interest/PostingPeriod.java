@@ -54,6 +54,7 @@ public class PostingPeriod {
 
     // include in compounding interest
     private boolean interestTransfered = false;
+    private boolean isUserPosting = false;
 
     // minimum balance for interest calculation
     private final Money minBalanceForInterestCalculation;
@@ -65,7 +66,7 @@ public class PostingPeriod {
             final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
             final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
-            final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd) {
+            final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,final boolean isUserPosting) {
 
     	final BigDecimal overdraftInterestRateAsFraction = BigDecimal.ZERO;
     	final Money minOverdraftForInterestCalculation = Money.zero(currency);
@@ -74,7 +75,7 @@ public class PostingPeriod {
     			interestCompoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYear, 
     			upToInterestCalculationDate, interestPostTransactions, isInterestTransfer, 
     			minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd, 
-    			overdraftInterestRateAsFraction, minOverdraftForInterestCalculation);
+    			overdraftInterestRateAsFraction, minOverdraftForInterestCalculation, isUserPosting);
     }
 
     // isInterestTransfer boolean is to identify newly created transaction is
@@ -85,7 +86,7 @@ public class PostingPeriod {
             final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
             final LocalDate upToInterestCalculationDate, Collection<Long> interestPostTransactions, boolean isInterestTransfer,
             final Money minBalanceForInterestCalculation, final boolean isSavingsInterestPostingAtCurrentPeriodEnd,
-            final BigDecimal overdraftInterestRateAsFraction, final Money minOverdraftForInterestCalculation) {
+            final BigDecimal overdraftInterestRateAsFraction, final Money minOverdraftForInterestCalculation, boolean isUserPosting) {
 
         final List<EndOfDayBalance> accountEndOfDayBalances = new ArrayList<>();
         boolean interestTransfered = false;
@@ -147,7 +148,7 @@ public class PostingPeriod {
         return new PostingPeriod(periodInterval, currency, periodStartingBalance, openingDayBalance, interestCompoundingPeriodType,
                 interestCalculationType, interestRateAsFraction, daysInYear, compoundingPeriods, interestTransfered,
                 minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd,
-                overdraftInterestRateAsFraction, minOverdraftForInterestCalculation);
+                overdraftInterestRateAsFraction, minOverdraftForInterestCalculation, isUserPosting);
     }
 
     private PostingPeriod(final LocalDateInterval periodInterval, final MonetaryCurrency currency, final Money openingBalance,
@@ -155,7 +156,7 @@ public class PostingPeriod {
             final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
             final List<CompoundingPeriod> compoundingPeriods, boolean interestTransfered, final Money minBalanceForInterestCalculation,
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final BigDecimal overdraftInterestRateAsFraction, 
-            final Money minOverdraftForInterestCalculation) {
+            final Money minOverdraftForInterestCalculation, boolean isUserPosting) {
         this.periodInterval = periodInterval;
         this.currency = currency;
         this.openingBalance = openingBalance;
@@ -174,6 +175,7 @@ public class PostingPeriod {
         this.minBalanceForInterestCalculation = minBalanceForInterestCalculation;
         this.overdraftInterestRateAsFraction = overdraftInterestRateAsFraction;
         this.minOverdraftForInterestCalculation = minOverdraftForInterestCalculation;
+        this.isUserPosting = isUserPosting;
     }
 
     public Money interest() {
@@ -192,19 +194,32 @@ public class PostingPeriod {
         return this.openingBalance;
     }
 
-    public BigDecimal calculateInterest(final BigDecimal interestFromPreviousPostingPeriod) {
+    public BigDecimal calculateInterest(final CompoundInterestValues compoundInterestValues) {
         BigDecimal interestEarned = BigDecimal.ZERO;
 
         // for each compounding period accumulate the amount of interest
         // to be applied to the balanced for interest calculation
-        BigDecimal interestCompounded = interestFromPreviousPostingPeriod;
         for (final CompoundingPeriod compoundingPeriod : this.compoundingPeriods) {
 
             final BigDecimal interestUnrounded = compoundingPeriod.calculateInterest(this.interestCompoundingType,
-                    this.interestCalculationType, interestCompounded, this.interestRateAsFraction, this.daysInYear,
+                    this.interestCalculationType, compoundInterestValues.getcompoundedInterest(), this.interestRateAsFraction, this.daysInYear,
                     this.minBalanceForInterestCalculation.getAmount(), 	this.overdraftInterestRateAsFraction,
                     this.minOverdraftForInterestCalculation.getAmount());
-            interestCompounded = interestCompounded.add(interestUnrounded);
+			BigDecimal unCompoundedInterest = compoundInterestValues.getuncompoundedInterest().add(interestUnrounded);
+			compoundInterestValues.setuncompoundedInterest(unCompoundedInterest);
+			LocalDate compoundingPeriodEndDate = compoundingPeriod.getPeriodInterval().endDate();
+			if (!SavingsCompoundingInterestPeriodType.DAILY.equals(this.interestCompoundingType)) {
+				compoundingPeriodEndDate = determineInterestPeriodEndDateFrom(
+						compoundingPeriod.getPeriodInterval().startDate(), this.interestCompoundingType,
+						compoundingPeriod.getPeriodInterval().endDate());
+			}
+
+			if (compoundingPeriodEndDate.equals(compoundingPeriod.getPeriodInterval().endDate())) {
+				BigDecimal interestCompounded = compoundInterestValues.getcompoundedInterest()
+						.add(unCompoundedInterest);
+				compoundInterestValues.setcompoundedInterest(interestCompounded);
+				compoundInterestValues.setZeroForInterestToBeUncompounded();
+			}
             interestEarned = interestEarned.add(interestUnrounded);
         }
 
@@ -409,5 +424,13 @@ public class PostingPeriod {
 
     public boolean isInterestTransfered() {
         return this.interestTransfered;
+    }
+
+    public LocalDateInterval getPeriodInterval() {
+        return this.periodInterval;
+    }
+    
+    public boolean isUserPosting() {
+        return this.isUserPosting;
     }
 }

@@ -24,12 +24,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.charge.domain.Charge;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_loan_tranche_charges")
-public class LoanTrancheCharge extends AbstractPersistable<Long> {
+public class LoanTrancheCharge extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "loan_id", nullable = false)

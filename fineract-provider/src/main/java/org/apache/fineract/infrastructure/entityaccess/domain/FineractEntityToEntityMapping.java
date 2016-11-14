@@ -34,11 +34,11 @@ import javax.persistence.UniqueConstraint;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.entityaccess.api.FineractEntityApiResourceConstants;
 import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityToEntityMappingDateException;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_entity_to_entity_mapping", uniqueConstraints = { @UniqueConstraint(columnNames = { "rel_id", "from_id", "to_id" }) })
-public class FineractEntityToEntityMapping extends AbstractPersistable<Long> {
+public class FineractEntityToEntityMapping extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "rel_id")
@@ -50,11 +50,11 @@ public class FineractEntityToEntityMapping extends AbstractPersistable<Long> {
     @Column(name = "to_id")
     private Long toId;
 
-    @Column(name = "start_date", nullable = false)
+    @Column(name = "start_date", nullable = true)
     @Temporal(TemporalType.DATE)
     private Date startDate;
 
-    @Column(name = "end_date", nullable = false)
+    @Column(name = "end_date", nullable = true)
     @Temporal(TemporalType.DATE)
     private Date endDate;
 

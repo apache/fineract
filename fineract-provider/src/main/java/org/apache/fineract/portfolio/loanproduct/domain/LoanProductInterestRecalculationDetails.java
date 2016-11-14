@@ -28,7 +28,7 @@ import javax.persistence.Table;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 /**
  * Entity for capturing interest recalculation settings
@@ -38,7 +38,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_product_loan_recalculation_details")
-public class LoanProductInterestRecalculationDetails extends AbstractPersistable<Long> {
+public class LoanProductInterestRecalculationDetails extends AbstractPersistableCustom<Long> {
 
     @OneToOne
     @JoinColumn(name = "product_id", nullable = false)

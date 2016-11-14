@@ -28,10 +28,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.codes.service.CodeReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -65,6 +67,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
@@ -264,7 +267,18 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             // show duplicate datatable error msg
             if (realCause.getMessage()
                     .contains("Duplicate entry") || cause.getMessage()
-                    .contains("Duplicate entry")) { throw new PlatformDataIntegrityException("error.msg.datatable.registered",
+                    .contains("Duplicate entry")) { 
+            	throw new PlatformDataIntegrityException("error.msg.datatable.registered",
+                            "Datatable `" + dataTableName + "` is already registered against an application table.", "dataTableName",
+                            dataTableName); }
+            logAsErrorUnexpectedDataIntegrityException(dve);
+            throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.");
+        }catch (final PersistenceException dve) {
+        	final Throwable cause = dve.getCause() ;
+        	if (cause.getMessage()
+                    .contains("Duplicate entry")) { 
+        		throw new PlatformDataIntegrityException("error.msg.datatable.registered",
                             "Datatable `" + dataTableName + "` is already registered against an application table.", "dataTableName",
                             dataTableName); }
             logAsErrorUnexpectedDataIntegrityException(dve);
@@ -374,6 +388,19 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             logAsErrorUnexpectedDataIntegrityException(dve);
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
+        }catch(final PersistenceException e) {
+        	final Throwable cause = e.getCause() ;
+            if (cause.getMessage()
+                    .contains("Duplicate entry")) { 
+            	throw new PlatformDataIntegrityException(
+                            "error.msg.datatable.entry.duplicate", "An entry already exists for datatable `" + dataTableName
+                                    + "` and application table with identifier `" + appTableId + "`.",
+                            "dataTableName", dataTableName, appTableId); }
+
+            logAsErrorUnexpectedDataIntegrityException(e);
+            throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.");
+        	
         }
     }
 
@@ -400,6 +427,17 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final Throwable realCause = dve.getMostSpecificCause();
             if (realCause.getMessage()
                     .contains("Duplicate entry") || cause.getMessage()
+                    .contains("Duplicate entry")) { throw new PlatformDataIntegrityException(
+                            "error.msg.datatable.entry.duplicate", "An entry already exists for datatable `" + dataTableName
+                                    + "` and application table with identifier `" + appTableId + "`.",
+                            "dataTableName", dataTableName, appTableId); }
+
+            logAsErrorUnexpectedDataIntegrityException(dve);
+            throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.");
+        }catch (final PersistenceException dve) {
+            final Throwable cause = dve.getCause() ;
+            if (cause.getMessage()
                     .contains("Duplicate entry")) { throw new PlatformDataIntegrityException(
                             "error.msg.datatable.entry.duplicate", "An entry already exists for datatable `" + dataTableName
                                     + "` and application table with identifier `" + appTableId + "`.",
@@ -574,6 +612,21 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             }
 
             throwExceptionIfValidationWarningsExist(dataValidationErrors);
+        }catch (final PersistenceException | BadSqlGrammarException ee) {
+        	Throwable realCause = ExceptionUtils.getRootCause(ee.getCause()) ;
+        	 final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+             final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("datatable");
+             if (realCause.getMessage().toLowerCase().contains("duplicate column name")) {
+                 baseDataValidator.reset().parameter("name").failWithCode("duplicate.column.name");
+             } else if (realCause.getMessage().contains("Table") && realCause.getMessage().contains("already exists")) {
+                 baseDataValidator.reset().parameter("datatableName").value(datatableName).failWithCode("datatable.already.exists");
+             } else if (realCause.getMessage().contains("Column") && realCause.getMessage().contains("big")) {
+                 baseDataValidator.reset().parameter("column").failWithCode("length.too.big");
+             } else if (realCause.getMessage().contains("Row") && realCause.getMessage().contains("large")) {
+                 baseDataValidator.reset().parameter("row").failWithCode("size.too.large");
+             }
+
+             throwExceptionIfValidationWarningsExist(dataValidationErrors);
         }
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withResourceIdAsString(datatableName).build();
@@ -942,7 +995,22 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             }
 
             throwExceptionIfValidationWarningsExist(dataValidationErrors);
-        }
+        }catch (final PersistenceException ee) {
+        	Throwable realCause = ExceptionUtils.getRootCause(ee.getCause()) ;
+       	 	final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("datatable");
+            if (realCause.getMessage().toLowerCase().contains("duplicate column name")) {
+                baseDataValidator.reset().parameter("name").failWithCode("duplicate.column.name");
+            } else if (realCause.getMessage().contains("Table") && realCause.getMessage().contains("already exists")) {
+                baseDataValidator.reset().parameter("datatableName").value(datatableName).failWithCode("datatable.already.exists");
+            } else if (realCause.getMessage().contains("Column") && realCause.getMessage().contains("big")) {
+                baseDataValidator.reset().parameter("column").failWithCode("length.too.big");
+            } else if (realCause.getMessage().contains("Row") && realCause.getMessage().contains("large")) {
+                baseDataValidator.reset().parameter("row").failWithCode("size.too.large");
+            }
+
+            throwExceptionIfValidationWarningsExist(dataValidationErrors);
+       }
     }
 
     @Transactional

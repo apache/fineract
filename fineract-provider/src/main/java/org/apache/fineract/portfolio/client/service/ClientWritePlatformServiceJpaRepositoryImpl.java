@@ -19,11 +19,15 @@
 package org.apache.fineract.portfolio.client.service;
 
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.persistence.PersistenceException;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandProcessingService;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -60,6 +64,9 @@ import org.apache.fineract.portfolio.client.exception.ClientHasNoStaffException;
 import org.apache.fineract.portfolio.client.exception.ClientMustBePendingToBeDeletedException;
 import org.apache.fineract.portfolio.client.exception.InvalidClientSavingProductException;
 import org.apache.fineract.portfolio.client.exception.InvalidClientStateTransitionException;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
+import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepository;
 import org.apache.fineract.portfolio.group.exception.GroupMemberCountNotInPermissibleRangeException;
@@ -110,13 +117,15 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final CommandProcessingService commandProcessingService;
     private final ConfigurationDomainService configurationDomainService;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
-	private final FromJsonHelper fromApiJsonHelper;
-	private final ConfigurationReadPlatformService configurationReadPlatformService;
-	private final AddressWritePlatformService addressWritePlatformService;
+    private final FromJsonHelper fromApiJsonHelper;
+    private final ConfigurationReadPlatformService configurationReadPlatformService;
+    private final AddressWritePlatformService addressWritePlatformService;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final ClientRepositoryWrapper clientRepository, final ClientNonPersonRepositoryWrapper clientNonPersonRepository, final OfficeRepositoryWrapper officeRepositoryWrapper, final NoteRepository noteRepository,
+            final ClientRepositoryWrapper clientRepository, final ClientNonPersonRepositoryWrapper clientNonPersonRepository,
+            final OfficeRepositoryWrapper officeRepositoryWrapper, final NoteRepository noteRepository,
             final ClientDataValidator fromApiJsonDeserializer, final AccountNumberGenerator accountNumberGenerator,
             final GroupRepository groupRepository, final StaffRepositoryWrapper staffRepository,
             final CodeValueRepositoryWrapper codeValueRepository, final LoanRepositoryWrapper loanRepositoryWrapper,
@@ -125,7 +134,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final CommandProcessingService commandProcessingService, final ConfigurationDomainService configurationDomainService,
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final FromJsonHelper fromApiJsonHelper,
             final ConfigurationReadPlatformService configurationReadPlatformService,
-			final AddressWritePlatformService addressWritePlatformService) {
+            final AddressWritePlatformService addressWritePlatformService, final BusinessEventNotifierService businessEventNotifierService) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.clientNonPersonRepository = clientNonPersonRepository;
@@ -144,8 +153,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.configurationDomainService = configurationDomainService;
         this.accountNumberFormatRepository = accountNumberFormatRepository;
         this.fromApiJsonHelper = fromApiJsonHelper;
-    	this.configurationReadPlatformService = configurationReadPlatformService;
-		this.addressWritePlatformService = addressWritePlatformService;
+        this.configurationReadPlatformService = configurationReadPlatformService;
+        this.addressWritePlatformService = addressWritePlatformService;
+        this.businessEventNotifierService = businessEventNotifierService;
     }
 
     @Transactional
@@ -155,7 +165,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
         if (client.isNotPending()) { throw new ClientMustBePendingToBeDeletedException(clientId); }
-
+        this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.CLIENTS_DELETE,
+                constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
         final List<Note> relatedNotes = this.noteRepository.findByClientId(clientId);
         this.noteRepository.deleteInBatch(relatedNotes);
 
@@ -164,7 +175,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         	this.clientNonPersonRepository.delete(clientNonPerson);
         
         this.clientRepository.delete(client);
-
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.CLIENTS_DELETE,
+                constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
         return new CommandProcessingResultBuilder() //
                 .withOfficeId(client.officeId()) //
                 .withClientId(clientId) //
@@ -176,9 +188,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
+    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 
-        final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("external_id")) {
 
             final String externalId = command.stringValueOfParameterNamed("externalId");
@@ -273,6 +284,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             
             final Client newClient = Client.createNew(currentUser, clientOffice, clientParentGroup, staff, savingsProductId, gender,
                     clientType, clientClassification, legalFormValue, command);
+            this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.CLIENTS_CREATE,
+                    constructEntityMap(BUSINESS_ENTITY.CLIENT, newClient));
             boolean rollbackTransaction = false;
             if (newClient.isActive()) {
                 validateParentGroupRulesBeforeClientActivation(newClient);
@@ -304,7 +317,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 this.addressWritePlatformService.addNewClientAddress(newClient, command);
             }
 
-
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.CLIENTS_CREATE,
+                    constructEntityMap(BUSINESS_ENTITY.CLIENT, newClient));
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withOfficeId(clientOffice.getId()) //
@@ -316,8 +330,12 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .setRollbackTransaction(result.isRollbackTransaction())//
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(command, dve);
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch(final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
+         	return CommandProcessingResult.empty();
         }
     }
     
@@ -500,8 +518,12 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .with(changes) //
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(command, dve);
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch(final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
+         	return CommandProcessingResult.empty();
         }
     }
 
@@ -513,7 +535,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId, true);
             validateParentGroupRulesBeforeClientActivation(client);
-
+            this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.CLIENTS_ACTIVATE,
+                    constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
             final Locale locale = command.extractLocale();
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
             final LocalDate activationDate = command.localDateValueOfParameterNamed("activationDate");
@@ -522,7 +545,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             client.activate(currentUser, fmt, activationDate);
             CommandProcessingResult result = openSavingsAccount(client, fmt);
             this.clientRepository.saveAndFlush(client);
-
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.CLIENTS_ACTIVATE,
+                    constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withOfficeId(client.officeId()) //
@@ -532,7 +556,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .setRollbackTransaction(result.isRollbackTransaction())//
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(command, dve);
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -552,7 +576,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         return commandProcessingResult;
     }
 
-    private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
+    private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
         logger.error(dve.getMessage(), dve);
     }
 
@@ -599,7 +623,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.fromApiJsonDeserializer.validateForAssignStaff(command.json());
 
         final Client clientForUpdate = this.clientRepository.findOneWithNotFoundDetection(clientId);
-
+        this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.CLIENTS_ASSIGN_STAFF,
+                constructEntityMap(BUSINESS_ENTITY.CLIENT, clientForUpdate));
         Staff staff = null;
         final Long staffId = command.longValueOfParameterNamed(ClientApiConstants.staffIdParamName);
         if (staffId != null) {
@@ -615,7 +640,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.clientRepository.saveAndFlush(clientForUpdate);
 
         actualChanges.put(ClientApiConstants.staffIdParamName, staffId);
-
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.CLIENTS_ASSIGN_STAFF,
+                constructEntityMap(BUSINESS_ENTITY.CLIENT, clientForUpdate));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withOfficeId(clientForUpdate.officeId()) //
@@ -634,6 +660,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             this.fromApiJsonDeserializer.validateClose(command);
 
             final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+            this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.CLIENTS_CLOSE,
+                    constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
             final LocalDate closureDate = command.localDateValueOfParameterNamed(ClientApiConstants.closureDateParamName);
             final Long closureReasonId = command.longValueOfParameterNamed(ClientApiConstants.closureReasonIdParamName);
 
@@ -679,14 +707,15 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             client.close(currentUser, closureReason, closureDate.toDate());
             this.clientRepository.saveAndFlush(client);
-
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.CLIENTS_CLOSE,
+                    constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withClientId(clientId) //
                     .withEntityId(clientId) //
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(command, dve);
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -753,6 +782,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.fromApiJsonDeserializer.validateRejection(command);
 
         final Client client = this.clientRepository.findOneWithNotFoundDetection(entityId);
+        this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.CLIENTS_REJECT,
+                constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
         final LocalDate rejectionDate = command.localDateValueOfParameterNamed(ClientApiConstants.rejectionDateParamName);
         final Long rejectionReasonId = command.longValueOfParameterNamed(ClientApiConstants.rejectionReasonIdParamName);
 
@@ -770,7 +801,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         }
         client.reject(currentUser, rejectionReason, rejectionDate.toDate());
         this.clientRepository.saveAndFlush(client);
-
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.CLIENTS_REJECT,
+                constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withClientId(entityId) //
@@ -784,6 +816,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.fromApiJsonDeserializer.validateWithdrawn(command);
 
         final Client client = this.clientRepository.findOneWithNotFoundDetection(entityId);
+        this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.CLIENTS_WITHDRAW,
+                constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
         final LocalDate withdrawalDate = command.localDateValueOfParameterNamed(ClientApiConstants.withdrawalDateParamName);
         final Long withdrawalReasonId = command.longValueOfParameterNamed(ClientApiConstants.withdrawalReasonIdParamName);
 
@@ -801,7 +835,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         }
         client.withdraw(currentUser, withdrawalReason, withdrawalDate.toDate());
         this.clientRepository.saveAndFlush(client);
-
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.CLIENTS_WITHDRAW,
+                constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withClientId(entityId) //
@@ -815,6 +850,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.fromApiJsonDeserializer.validateReactivate(command);
 
         final Client client = this.clientRepository.findOneWithNotFoundDetection(entityId);
+        this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.CLIENTS_REACTIVATE,
+                constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
         final LocalDate reactivateDate = command.localDateValueOfParameterNamed(ClientApiConstants.reactivationDateParamName);
 
         if (!client.isClosed()) {
@@ -827,7 +864,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         }
         client.reActivate(currentUser, reactivateDate.toDate());
         this.clientRepository.saveAndFlush(client);
-
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.CLIENTS_REACTIVATE,
+                constructEntityMap(BUSINESS_ENTITY.CLIENT, client));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withClientId(entityId) //
@@ -889,4 +927,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 				.withEntityId(entityId) //
 				.build();
 	}
+
+    private Map<BUSINESS_ENTITY, Object> constructEntityMap(final BUSINESS_ENTITY entityEvent, Object entity) {
+        Map<BUSINESS_ENTITY, Object> map = new HashMap<>(1);
+        map.put(entityEvent, entity);
+        return map;
+    }
 }

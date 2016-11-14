@@ -117,12 +117,11 @@ public class ClientSavingsIntegrationTest {
         this.savingsAccountHelper.postInterestForSavings(savingsId);
         summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
         Assert.assertFalse(summaryBefore.equals(summary));
-
+        
         final Object savingsInterest = this.savingsAccountHelper.getSavingsInterest(savingsId);
         // verifySavingsInterest(savingsInterest);
-
     }
-
+    
     @Test
     public void testSavingsAccountWithMinBalanceForInterestCalculation() {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
@@ -795,6 +794,1024 @@ public class ClientSavingsIntegrationTest {
         assertEquals("validation.msg.savingsaccount.close.results.in.balance.not.zero",
                 savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
     }
+    
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testSavingsAccountPostInterestOnLastDayWithOverdraft() {
+		this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec,
+				this.responseSpec);
+
+		/***
+		 * Create a client to apply for savings account (overdraft account).
+		 */
+		final Integer clientID = ClientHelper.createClient(this.requestSpec,
+				this.responseSpec);
+		Assert.assertNotNull(clientID);
+		final String minBalanceForInterestCalculation = null;
+
+		/***
+		 * Create savings product with zero opening balance and overdraft
+		 * enabled
+		 */
+		final String zeroOpeningBalance = "0.0";
+		final String minRequiredBalance = null;
+		final String enforceMinRequiredBalance = "false";
+		final boolean allowOverdraft = true;
+		final Integer savingsProductID = createSavingsProduct(this.requestSpec,
+				this.responseSpec, zeroOpeningBalance,
+				minBalanceForInterestCalculation, minRequiredBalance,
+				enforceMinRequiredBalance, allowOverdraft);
+		Assert.assertNotNull(savingsProductID);
+
+		/***
+		 * Apply for Savings account
+		 */
+		final Integer savingsId = this.savingsAccountHelper
+				.applyForSavingsApplication(clientID, savingsProductID,
+						ACCOUNT_TYPE_INDIVIDUAL);
+		Assert.assertNotNull(savingsProductID);
+
+		HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(
+				clientID, savingsProductID, savingsId, ACCOUNT_TYPE_INDIVIDUAL);
+		Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+
+		HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(
+				this.requestSpec, this.responseSpec, savingsId);
+		SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+		/***
+		 * Approve the savings account
+		 */
+		savingsStatusHashMap = this.savingsAccountHelper
+				.approveSavings(savingsId);
+		SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+		DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+		Calendar todaysDate = Calendar.getInstance();
+		todaysDate.add(Calendar.MONTH, -1);
+
+		final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+
+		/***
+		 * Activate the application and verify account status
+		 * 
+		 * @param activationDate
+		 *            this value is every time first day of previous month
+		 */
+		savingsStatusHashMap = activateSavingsAccount(savingsId,
+				ACTIVATION_DATE);
+		SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+		/***
+		 * Verify the account summary
+		 */
+		final HashMap summaryBefore = this.savingsAccountHelper
+				.getSavingsSummary(savingsId);
+		this.savingsAccountHelper.calculateInterestForSavings(savingsId);
+		HashMap summary = this.savingsAccountHelper
+				.getSavingsSummary(savingsId);
+		assertEquals(summaryBefore, summary);
+
+		final Integer lastDayOfMonth = todaysDate
+				.getActualMaximum(Calendar.DAY_OF_MONTH);
+		todaysDate.set(Calendar.DAY_OF_MONTH, lastDayOfMonth);
+		final String WITHDRAWAL_DATE = dateFormat.format(todaysDate.getTime());
+		Float balance = Float.valueOf(zeroOpeningBalance);
+
+		DateFormat transactionDateFormat = new SimpleDateFormat("dd MMMM yyyy",
+				Locale.US);
+		Calendar transactionDate = Calendar.getInstance();
+		transactionDate.set(Calendar.DAY_OF_MONTH, 2);
+		String TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
+
+		/***
+		 * Perform Deposit transaction on last day of month and verify account
+		 * balance.
+		 * 
+		 * @param transactionDate
+		 *            this value is every time last day of previous month
+		 */
+		Integer depositTransactionId = (Integer) this.savingsAccountHelper
+				.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
+						WITHDRAWAL_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+		HashMap depositTransaction = this.savingsAccountHelper
+				.getSavingsTransaction(savingsId, depositTransactionId);
+		balance += new Float(DEPOSIT_AMOUNT);
+		assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT),
+				depositTransaction.get("amount"));
+		assertEquals("Verifying Balance after Deposit", balance,
+				depositTransaction.get("runningBalance"));
+
+		/***
+		 * Calculate expected interest to be posted, interest should be posted
+		 * for one day only because deposit transaction happened on last day of
+		 * month before this account balance is negative.
+		 */
+		this.savingsAccountHelper.postInterestForSavings(savingsId);
+		HashMap accountDetails = this.savingsAccountHelper
+				.getSavingsDetails(savingsId);
+		summary = (HashMap) accountDetails.get("summary");
+		Float accountDetailsPostInterestPosted = Float.valueOf(summary.get(
+				"totalInterestPosted").toString());
+
+		Float nominalAnnualInterest = Float.valueOf(accountDetails.get(
+				"nominalAnnualInterestRate").toString());
+		HashMap interestCalculationDaysInYearType = (HashMap) accountDetails
+				.get("interestCalculationDaysInYearType");
+		Integer daysInYear = Integer.valueOf(interestCalculationDaysInYearType
+				.get("id").toString());
+		double interestRateInFraction = (nominalAnnualInterest / 100);
+		double perDay = (double) 1 / (daysInYear);
+		double interestPerDay = interestRateInFraction * perDay;
+		Float interestPosted = (float) (interestPerDay * balance * 1);
+
+		/***
+		 * Apply rounding on interestPosted, actualInterestPosted and verify
+		 * both are same
+		 */
+		DecimalFormat decimalFormat = new DecimalFormat("",
+				new DecimalFormatSymbols(Locale.US));
+		decimalFormat.applyPattern("#.###");
+		interestPosted = new Float(decimalFormat.format(interestPosted));
+		accountDetailsPostInterestPosted = new Float(
+				decimalFormat.format(accountDetailsPostInterestPosted));
+		assertEquals("Verifying interest posted", interestPosted,
+				accountDetailsPostInterestPosted);
+
+		this.savingsAccountHelper.postInterestAsOnSavings(savingsId,
+				TRANSACTION_DATE);
+		HashMap accountTransactionDetails = this.savingsAccountHelper
+				.getSavingsDetails(savingsId);
+		summary = (HashMap) accountDetails.get("summary");
+		Float accountDetailsPostInterest = Float.valueOf(summary.get(
+				"totalInterestPosted").toString());
+
+		nominalAnnualInterest = Float.valueOf(accountDetails.get(
+				"nominalAnnualInterestRate").toString());
+		interestCalculationDaysInYearType = (HashMap) accountDetails
+				.get("interestCalculationDaysInYearType");
+		daysInYear = Integer.valueOf(interestCalculationDaysInYearType
+				.get("id").toString());
+		interestRateInFraction = (nominalAnnualInterest / 100);
+		perDay = (double) 1 / (daysInYear);
+		interestPerDay = interestRateInFraction * perDay;
+		interestPosted = (float) (interestPerDay * balance * 1);
+
+		/***
+		 * Apply rounding on interestPosted, actualInterestPosted and verify
+		 * both are same
+		 */
+		decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
+				Locale.US));
+		decimalFormat.applyPattern("#.###");
+		interestPosted = new Float(decimalFormat.format(interestPosted));
+		accountDetailsPostInterestPosted = new Float(
+				decimalFormat.format(accountDetailsPostInterestPosted));
+		assertEquals("Verifying interest posted", interestPosted,
+				accountDetailsPostInterestPosted);
+		System.out
+				.println("-----Post Interest As on Successfully Worked----------");
+
+		transactionDate.set(Calendar.DAY_OF_MONTH, 3);
+		TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
+
+		this.savingsAccountHelper.postInterestAsOnSavings(savingsId,
+				TRANSACTION_DATE);
+		accountTransactionDetails = this.savingsAccountHelper
+				.getSavingsDetails(savingsId);
+		summary = (HashMap) accountDetails.get("summary");
+		accountDetailsPostInterest = Float.valueOf(summary.get(
+				"totalInterestPosted").toString());
+
+		nominalAnnualInterest = Float.valueOf(accountDetails.get(
+				"nominalAnnualInterestRate").toString());
+		interestCalculationDaysInYearType = (HashMap) accountDetails
+				.get("interestCalculationDaysInYearType");
+		daysInYear = Integer.valueOf(interestCalculationDaysInYearType
+				.get("id").toString());
+		interestRateInFraction = (nominalAnnualInterest / 100);
+		perDay = (double) 1 / (daysInYear);
+		interestPerDay = interestRateInFraction * perDay;
+		interestPosted = (float) (interestPerDay * balance * 1);
+
+		/***
+		 * Apply rounding on interestPosted, actualInterestPosted and verify
+		 * both are same
+		 */
+		decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
+				Locale.US));
+		decimalFormat.applyPattern("#.###");
+		interestPosted = new Float(decimalFormat.format(interestPosted));
+		accountDetailsPostInterestPosted = new Float(
+				decimalFormat.format(accountDetailsPostInterestPosted));
+		assertEquals("Verifying interest posted", interestPosted,
+				accountDetailsPostInterestPosted);
+		System.out
+				.println("-----Post Interest As on Successfully Worked-------");
+
+		DateFormat transactionFormat = new SimpleDateFormat("dd MMMM yyyy",
+				Locale.US);
+		Calendar transactionCalendarDateFormat = Calendar.getInstance();
+		transactionCalendarDateFormat.add(Calendar.DAY_OF_MONTH, 0);
+		transactionDate.set(Calendar.DAY_OF_MONTH, 22);
+		TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
+		if (Calendar.DAY_OF_MONTH >= 22) {
+			this.savingsAccountHelper.postInterestAsOnSavings(savingsId,
+					TRANSACTION_DATE);
+			accountTransactionDetails = this.savingsAccountHelper
+					.getSavingsDetails(savingsId);
+			summary = (HashMap) accountTransactionDetails.get("summary");
+			accountDetailsPostInterest = Float.valueOf(summary.get(
+					"totalInterestPosted").toString());
+
+			nominalAnnualInterest = Float.valueOf(accountDetails.get(
+					"nominalAnnualInterestRate").toString());
+			interestCalculationDaysInYearType = (HashMap) accountDetails
+					.get("interestCalculationDaysInYearType");
+			daysInYear = Integer.valueOf(interestCalculationDaysInYearType.get(
+					"id").toString());
+			interestRateInFraction = (nominalAnnualInterest / 100);
+			perDay = (double) 1 / (daysInYear);
+			interestPerDay = interestRateInFraction * perDay;
+			interestPosted = (float) (interestPerDay * balance * 19);
+
+			/***
+			 * Apply rounding on interestPosted, actualInterestPosted and verify
+			 * both are same
+			 */
+			decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
+					Locale.US));
+			decimalFormat.applyPattern("#.###");
+			interestPosted = new Float(decimalFormat.format(interestPosted));
+			accountDetailsPostInterestPosted = new Float(
+					decimalFormat.format(accountDetailsPostInterestPosted));
+			assertEquals("Verifying interest posted", interestPosted,
+					accountDetailsPostInterestPosted);
+			System.out
+					.println("-----Post Interest As on Successfully Worked----------");
+		}
+		DateFormat lastTransactionDateFormat = new SimpleDateFormat(
+				"dd MMMM yyyy", Locale.US);
+		Calendar postedLastDate = Calendar.getInstance();
+		int numberOfDateOfMonth = postedLastDate
+				.getActualMaximum(Calendar.DAY_OF_MONTH);
+		TRANSACTION_DATE = lastTransactionDateFormat.format(transactionDate
+				.getTime());
+
+		if (Calendar.DAY_OF_MONTH == numberOfDateOfMonth) {
+
+			this.savingsAccountHelper.postInterestAsOnSavings(savingsId,
+					TRANSACTION_DATE);
+			accountTransactionDetails = this.savingsAccountHelper
+					.getSavingsDetails(savingsId);
+			summary = (HashMap) accountTransactionDetails.get("summary");
+			accountDetailsPostInterest = Float.valueOf(summary.get(
+					"totalInterestPosted").toString());
+
+			nominalAnnualInterest = Float.valueOf(accountDetails.get(
+					"nominalAnnualInterestRate").toString());
+			interestCalculationDaysInYearType = (HashMap) accountDetails
+					.get("interestCalculationDaysInYearType");
+			daysInYear = Integer.valueOf(interestCalculationDaysInYearType.get(
+					"id").toString());
+			interestRateInFraction = (nominalAnnualInterest / 100);
+			perDay = (double) 1 / (daysInYear);
+			interestPerDay = interestRateInFraction * perDay;
+			interestPosted = (float) (interestPerDay * balance * 8);
+
+			/***
+			 * Apply rounding on interestPosted, actualInterestPosted and verify
+			 * both are same
+			 */
+			decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
+					Locale.US));
+			decimalFormat.applyPattern("#.###");
+			interestPosted = new Float(decimalFormat.format(interestPosted));
+			accountDetailsPostInterestPosted = new Float(
+					decimalFormat.format(accountDetailsPostInterestPosted));
+			assertEquals("Verifying interest posted", interestPosted,
+					accountDetailsPostInterestPosted);
+			System.out
+					.println("-----Post Interest As on Successfully Worked----------");
+
+		}
+		transactionDate.set(Calendar.DAY_OF_MONTH, 1);
+		TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
+		this.savingsAccountHelper.postInterestAsOnSavings(savingsId,
+				TRANSACTION_DATE);
+		accountTransactionDetails = this.savingsAccountHelper
+				.getSavingsDetails(savingsId);
+		summary = (HashMap) accountTransactionDetails.get("summary");
+		accountDetailsPostInterest = Float.valueOf(summary.get(
+				"totalInterestPosted").toString());
+
+		nominalAnnualInterest = Float.valueOf(accountDetails.get(
+				"nominalAnnualInterestRate").toString());
+		interestCalculationDaysInYearType = (HashMap) accountDetails
+				.get("interestCalculationDaysInYearType");
+		daysInYear = Integer.valueOf(interestCalculationDaysInYearType
+				.get("id").toString());
+		interestRateInFraction = (nominalAnnualInterest / 100);
+		perDay = (double) 1 / (daysInYear);
+		interestPerDay = interestRateInFraction * perDay;
+		interestPosted = (float) (interestPerDay * balance * 1);
+
+		/***
+		 * Apply rounding on interestPosted, actualInterestPosted and verify
+		 * both are same
+		 */
+		decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
+				Locale.US));
+		decimalFormat.applyPattern("#.###");
+		interestPosted = new Float(decimalFormat.format(interestPosted));
+		accountDetailsPostInterestPosted = new Float(
+				decimalFormat.format(accountDetailsPostInterestPosted));
+		assertEquals("Verifying interest posted", interestPosted,
+				accountDetailsPostInterestPosted);
+		System.out
+				.println("-----Post Interest As on Successfully Worked----------");
+
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testSavingsAccountPostInterestOnLastDayWithdrawalWithOverdraft() {
+		this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec,
+				this.responseSpec);
+
+		/***
+		 * Create a client to apply for savings account (overdraft account).
+		 */
+		final Integer clientID = ClientHelper.createClient(this.requestSpec,
+				this.responseSpec);
+		Assert.assertNotNull(clientID);
+		final String minBalanceForInterestCalculation = null;
+
+		/***
+		 * Create savings product with zero opening balance and overdraft
+		 * enabled
+		 */
+		final String zeroOpeningBalance = "0.0";
+		final String minRequiredBalance = null;
+		final String enforceMinRequiredBalance = "false";
+		final boolean allowOverdraft = true;
+		final Integer savingsProductID = createSavingsProduct(this.requestSpec,
+				this.responseSpec, zeroOpeningBalance,
+				minBalanceForInterestCalculation, minRequiredBalance,
+				enforceMinRequiredBalance, allowOverdraft);
+		Assert.assertNotNull(savingsProductID);
+
+		/***
+		 * Apply for Savings account
+		 */
+		final Integer savingsId = this.savingsAccountHelper
+				.applyForSavingsApplication(clientID, savingsProductID,
+						ACCOUNT_TYPE_INDIVIDUAL);
+		Assert.assertNotNull(savingsProductID);
+
+		HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(
+				clientID, savingsProductID, savingsId, ACCOUNT_TYPE_INDIVIDUAL);
+		Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+
+		HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(
+				this.requestSpec, this.responseSpec, savingsId);
+		SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+		/***
+		 * Approve the savings account
+		 */
+		savingsStatusHashMap = this.savingsAccountHelper
+				.approveSavings(savingsId);
+		SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+		DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+		Calendar todaysDate = Calendar.getInstance();
+		todaysDate.add(Calendar.MONTH, -1);
+
+		final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+
+		/***
+		 * Activate the application and verify account status
+		 * 
+		 * @param activationDate
+		 *            this value is every time first day of previous month
+		 */
+		savingsStatusHashMap = activateSavingsAccount(savingsId,
+				ACTIVATION_DATE);
+		SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+		/***
+		 * Verify the account summary
+		 */
+		final HashMap summaryBefore = this.savingsAccountHelper
+				.getSavingsSummary(savingsId);
+		this.savingsAccountHelper.calculateInterestForSavings(savingsId);
+		HashMap summary = this.savingsAccountHelper
+				.getSavingsSummary(savingsId);
+		assertEquals(summaryBefore, summary);
+
+		final Integer lastDayOfMonth = todaysDate
+				.getActualMaximum(Calendar.DAY_OF_MONTH);
+		todaysDate.set(Calendar.DAY_OF_MONTH, lastDayOfMonth);
+		final String WITHDRAWAL_DATE = dateFormat.format(todaysDate.getTime());
+		Float balance = Float.valueOf(zeroOpeningBalance);
+
+		DateFormat transactionDateFormat = new SimpleDateFormat("dd MMMM yyyy",
+				Locale.US);
+		Calendar transactionDate = Calendar.getInstance();
+		transactionDate.set(Calendar.DAY_OF_MONTH, 2);
+		String TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
+
+		 /***
+         * Perform withdraw transaction, verify account balance(account balance
+         * will go to negative as no deposits are there prior to this
+         * transaction)
+         */
+        Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
+        		ACTIVATION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
+        balance -= new Float(WITHDRAW_AMOUNT);
+        assertEquals("Verifying Withdrawal Amount", new Float(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
+        assertEquals("Verifying Balance after Withdrawal", balance, withdrawTransaction.get("runningBalance"));
+        
+        /***
+         * Perform Deposit transaction on last day of month and verify account
+         * balance.
+         * 
+         * @param transactionDate
+         *            this value is every time last day of previous month
+         */
+        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
+        		WITHDRAWAL_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
+        balance += new Float(DEPOSIT_AMOUNT);
+        assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+        assertEquals("Verifying Balance after Deposit", balance, depositTransaction.get("runningBalance"));
+
+		/***
+		 * Calculate expected interest to be posted, interest should be posted
+		 * for one day only because deposit transaction happened on last day of
+		 * month before this account balance is negative.
+		 */
+		this.savingsAccountHelper.postInterestForSavings(savingsId);
+		HashMap accountDetails = this.savingsAccountHelper
+				.getSavingsDetails(savingsId);
+		summary = (HashMap) accountDetails.get("summary");
+		Float accountDetailsPostInterestPosted = Float.valueOf(summary.get(
+				"totalInterestPosted").toString());
+
+		Float nominalAnnualInterest = Float.valueOf(accountDetails.get(
+				"nominalAnnualInterestRate").toString());
+		HashMap interestCalculationDaysInYearType = (HashMap) accountDetails
+				.get("interestCalculationDaysInYearType");
+		Integer daysInYear = Integer.valueOf(interestCalculationDaysInYearType
+				.get("id").toString());
+		double interestRateInFraction = (nominalAnnualInterest / 100);
+		double perDay = (double) 1 / (daysInYear);
+		double interestPerDay = interestRateInFraction * perDay;
+		Float interestPosted = (float) (interestPerDay * balance * 1);
+
+		/***
+		 * Apply rounding on interestPosted, actualInterestPosted and verify
+		 * both are same
+		 */
+		DecimalFormat decimalFormat = new DecimalFormat("",
+				new DecimalFormatSymbols(Locale.US));
+		decimalFormat.applyPattern("#.###");
+		interestPosted = new Float(decimalFormat.format(interestPosted));
+		accountDetailsPostInterestPosted = new Float(
+				decimalFormat.format(accountDetailsPostInterestPosted));
+		assertEquals("Verifying interest posted", interestPosted,
+				accountDetailsPostInterestPosted);
+
+		this.savingsAccountHelper.postInterestAsOnSavings(savingsId,
+				TRANSACTION_DATE);
+		HashMap accountTransactionDetails = this.savingsAccountHelper
+				.getSavingsDetails(savingsId);
+		summary = (HashMap) accountDetails.get("summary");
+		Float accountDetailsPostInterest = Float.valueOf(summary.get(
+				"totalInterestPosted").toString());
+
+		nominalAnnualInterest = Float.valueOf(accountDetails.get(
+				"nominalAnnualInterestRate").toString());
+		interestCalculationDaysInYearType = (HashMap) accountDetails
+				.get("interestCalculationDaysInYearType");
+		daysInYear = Integer.valueOf(interestCalculationDaysInYearType
+				.get("id").toString());
+		interestRateInFraction = (nominalAnnualInterest / 100);
+		perDay = (double) 1 / (daysInYear);
+		interestPerDay = interestRateInFraction * perDay;
+		interestPosted = (float) (interestPerDay * balance * 1);
+
+		/***
+		 * Apply rounding on interestPosted, actualInterestPosted and verify
+		 * both are same
+		 */
+		decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
+				Locale.US));
+		decimalFormat.applyPattern("#.###");
+		interestPosted = new Float(decimalFormat.format(interestPosted));
+		accountDetailsPostInterestPosted = new Float(
+				decimalFormat.format(accountDetailsPostInterestPosted));
+		assertEquals("Verifying interest posted", interestPosted,
+				accountDetailsPostInterestPosted);
+		System.out
+				.println("-----Post Interest As on Successfully Worked----------");
+
+		transactionDate.set(Calendar.DAY_OF_MONTH, 3);
+		TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
+
+		this.savingsAccountHelper.postInterestAsOnSavings(savingsId,
+				TRANSACTION_DATE);
+		accountTransactionDetails = this.savingsAccountHelper
+				.getSavingsDetails(savingsId);
+		summary = (HashMap) accountDetails.get("summary");
+		accountDetailsPostInterest = Float.valueOf(summary.get(
+				"totalInterestPosted").toString());
+
+		nominalAnnualInterest = Float.valueOf(accountDetails.get(
+				"nominalAnnualInterestRate").toString());
+		interestCalculationDaysInYearType = (HashMap) accountDetails
+				.get("interestCalculationDaysInYearType");
+		daysInYear = Integer.valueOf(interestCalculationDaysInYearType
+				.get("id").toString());
+		interestRateInFraction = (nominalAnnualInterest / 100);
+		perDay = (double) 1 / (daysInYear);
+		interestPerDay = interestRateInFraction * perDay;
+		interestPosted = (float) (interestPerDay * balance * 1);
+
+		/***
+		 * Apply rounding on interestPosted, actualInterestPosted and verify
+		 * both are same
+		 */
+		decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
+				Locale.US));
+		decimalFormat.applyPattern("#.###");
+		interestPosted = new Float(decimalFormat.format(interestPosted));
+		accountDetailsPostInterestPosted = new Float(
+				decimalFormat.format(accountDetailsPostInterestPosted));
+		assertEquals("Verifying interest posted", interestPosted,
+				accountDetailsPostInterestPosted);
+		System.out
+				.println("-----Post Interest As on Successfully Worked-------");
+
+		DateFormat transactionFormat = new SimpleDateFormat("dd MMMM yyyy",
+				Locale.US);
+		Calendar transactionCalendarDateFormat = Calendar.getInstance();
+		transactionCalendarDateFormat.add(Calendar.DAY_OF_MONTH, 0);
+		transactionDate.set(Calendar.DAY_OF_MONTH, 22);
+		TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
+		if (Calendar.DAY_OF_MONTH >= 22) {
+			this.savingsAccountHelper.postInterestAsOnSavings(savingsId,
+					TRANSACTION_DATE);
+			accountTransactionDetails = this.savingsAccountHelper
+					.getSavingsDetails(savingsId);
+			summary = (HashMap) accountTransactionDetails.get("summary");
+			accountDetailsPostInterest = Float.valueOf(summary.get(
+					"totalInterestPosted").toString());
+
+			nominalAnnualInterest = Float.valueOf(accountDetails.get(
+					"nominalAnnualInterestRate").toString());
+			interestCalculationDaysInYearType = (HashMap) accountDetails
+					.get("interestCalculationDaysInYearType");
+			daysInYear = Integer.valueOf(interestCalculationDaysInYearType.get(
+					"id").toString());
+			interestRateInFraction = (nominalAnnualInterest / 100);
+			perDay = (double) 1 / (daysInYear);
+			interestPerDay = interestRateInFraction * perDay;
+			interestPosted = (float) (interestPerDay * balance * 19);
+
+			/***
+			 * Apply rounding on interestPosted, actualInterestPosted and verify
+			 * both are same
+			 */
+			decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
+					Locale.US));
+			decimalFormat.applyPattern("#.###");
+			interestPosted = new Float(decimalFormat.format(interestPosted));
+			accountDetailsPostInterestPosted = new Float(
+					decimalFormat.format(accountDetailsPostInterestPosted));
+			assertEquals("Verifying interest posted", interestPosted,
+					accountDetailsPostInterestPosted);
+			System.out
+					.println("-----Post Interest As on Successfully Worked----------");
+		}
+		DateFormat lastTransactionDateFormat = new SimpleDateFormat(
+				"dd MMMM yyyy", Locale.US);
+		Calendar postedLastDate = Calendar.getInstance();
+		int numberOfDateOfMonth = postedLastDate
+				.getActualMaximum(Calendar.DAY_OF_MONTH);
+		TRANSACTION_DATE = lastTransactionDateFormat.format(transactionDate
+				.getTime());
+
+		if (Calendar.DAY_OF_MONTH == numberOfDateOfMonth) {
+
+			this.savingsAccountHelper.postInterestAsOnSavings(savingsId,
+					TRANSACTION_DATE);
+			accountTransactionDetails = this.savingsAccountHelper
+					.getSavingsDetails(savingsId);
+			summary = (HashMap) accountTransactionDetails.get("summary");
+			accountDetailsPostInterest = Float.valueOf(summary.get(
+					"totalInterestPosted").toString());
+
+			nominalAnnualInterest = Float.valueOf(accountDetails.get(
+					"nominalAnnualInterestRate").toString());
+			interestCalculationDaysInYearType = (HashMap) accountDetails
+					.get("interestCalculationDaysInYearType");
+			daysInYear = Integer.valueOf(interestCalculationDaysInYearType.get(
+					"id").toString());
+			interestRateInFraction = (nominalAnnualInterest / 100);
+			perDay = (double) 1 / (daysInYear);
+			interestPerDay = interestRateInFraction * perDay;
+			interestPosted = (float) (interestPerDay * balance * 8);
+
+			/***
+			 * Apply rounding on interestPosted, actualInterestPosted and verify
+			 * both are same
+			 */
+			decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
+					Locale.US));
+			decimalFormat.applyPattern("#.###");
+			interestPosted = new Float(decimalFormat.format(interestPosted));
+			accountDetailsPostInterestPosted = new Float(
+					decimalFormat.format(accountDetailsPostInterestPosted));
+			assertEquals("Verifying interest posted", interestPosted,
+					accountDetailsPostInterestPosted);
+			System.out
+					.println("-----Post Interest As on Successfully Worked----------");
+
+		}
+		transactionDate.set(Calendar.DAY_OF_MONTH, 1);
+		TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
+		this.savingsAccountHelper.postInterestAsOnSavings(savingsId,
+				TRANSACTION_DATE);
+		accountTransactionDetails = this.savingsAccountHelper
+				.getSavingsDetails(savingsId);
+		summary = (HashMap) accountTransactionDetails.get("summary");
+		accountDetailsPostInterest = Float.valueOf(summary.get(
+				"totalInterestPosted").toString());
+
+		nominalAnnualInterest = Float.valueOf(accountDetails.get(
+				"nominalAnnualInterestRate").toString());
+		interestCalculationDaysInYearType = (HashMap) accountDetails
+				.get("interestCalculationDaysInYearType");
+		daysInYear = Integer.valueOf(interestCalculationDaysInYearType
+				.get("id").toString());
+		interestRateInFraction = (nominalAnnualInterest / 100);
+		perDay = (double) 1 / (daysInYear);
+		interestPerDay = interestRateInFraction * perDay;
+		interestPosted = (float) (interestPerDay * balance * 1);
+
+		/***
+		 * Apply rounding on interestPosted, actualInterestPosted and verify
+		 * both are same
+		 */
+		decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(
+				Locale.US));
+		decimalFormat.applyPattern("#.###");
+		interestPosted = new Float(decimalFormat.format(interestPosted));
+		accountDetailsPostInterestPosted = new Float(
+				decimalFormat.format(accountDetailsPostInterestPosted));
+		assertEquals("Verifying interest posted", interestPosted,
+				accountDetailsPostInterestPosted);
+		System.out
+				.println("-----Post Interest As on Successfully Worked----------");
+	}
+       
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testSavingsAccountPostInterestWithOverdraft() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
+
+        /***
+         * Create a client to apply for savings account (overdraft account).
+         */
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientID);
+        final String minBalanceForInterestCalculation = null;
+
+        /***
+         * Create savings product with zero opening balance and overdraft
+         * enabled
+         */
+        final String zeroOpeningBalance = "0.0";
+        final String minRequiredBalance = null;
+        final String enforceMinRequiredBalance = "false";
+        final boolean allowOverdraft = true;
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, zeroOpeningBalance,
+                minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
+        Assert.assertNotNull(savingsProductID);
+
+        /***
+         * Apply for Savings account
+         */
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertNotNull(savingsProductID);
+
+        HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(clientID, savingsProductID, savingsId,
+                ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        /***
+         * Approve the savings account
+         */
+        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        Calendar todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -1);
+        todaysDate.set(Calendar.DAY_OF_MONTH, 1);
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+        final Integer lastDayOfMonth = todaysDate.getActualMaximum(Calendar.DAY_OF_MONTH);
+        todaysDate.set(Calendar.DAY_OF_MONTH, lastDayOfMonth);
+        final String TRANSACTION_DATE = dateFormat.format(todaysDate.getTime());
+
+        Calendar postedDate = Calendar.getInstance();
+        postedDate.set(Calendar.DAY_OF_MONTH, 2);
+
+        final String POSTED_TRANSACTION_DATE = dateFormat.format(postedDate.getTime());
+
+        /***
+         * Activate the application and verify account status
+         * 
+         * @param activationDate
+         *            this value is every time first day of previous month
+         */
+        savingsStatusHashMap = activateSavingsAccount(savingsId, ACTIVATION_DATE);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        /***
+         * Verify the account summary
+         */
+        final HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        this.savingsAccountHelper.calculateInterestForSavings(savingsId);
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        assertEquals(summaryBefore, summary);
+
+        Float balance = Float.valueOf(zeroOpeningBalance);
+
+        /***
+         * Perform withdraw transaction, verify account balance(account balance
+         * will go to negative as no deposits are there prior to this
+         * transaction)
+         */
+        Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
+                ACTIVATION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
+        balance -= new Float(WITHDRAW_AMOUNT);
+        assertEquals("Verifying Withdrawal Amount", new Float(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
+        assertEquals("Verifying Balance after Withdrawal", balance, withdrawTransaction.get("runningBalance"));
+
+        /***
+         * Perform Deposit transaction on last day of month and verify account
+         * balance.
+         * 
+         * @param transactionDate
+         *            this value is every time last day of previous month
+         */
+        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
+                TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
+        balance += new Float(DEPOSIT_AMOUNT);
+        assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+        assertEquals("Verifying Balance after Deposit", balance, depositTransaction.get("runningBalance"));
+
+        /***
+         * Perform Post interest transaction and verify the posted amount
+         */
+        this.savingsAccountHelper.postInterestForSavings(savingsId);
+        HashMap accountDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
+        summary = (HashMap) accountDetails.get("summary");
+        Float actualInterestPosted = Float.valueOf(summary.get("totalInterestPosted").toString());
+
+        /***
+         * Calculate expected interest to be posted, interest should be posted
+         * for one day only because deposit transaction happened on last day of
+         * month before this account balance is negative.
+         */
+        this.savingsAccountHelper.postInterestAsOnSavings(savingsId, POSTED_TRANSACTION_DATE);
+        HashMap accountDetailsPostInterest = this.savingsAccountHelper.getSavingsDetails(savingsId);
+        summary = (HashMap) accountDetails.get("summary");
+        ArrayList interestPostingTransaction = (ArrayList) ((HashMap) ((ArrayList) accountDetails.get("transactions")).get(0)).get("date");
+        Float accountDetailsPostInterestPosted = Float.valueOf(summary.get("totalInterestPosted").toString());
+
+        /***
+         * Calculate expected interest to be posted, interest should be posted
+         * for one day only because deposit transaction happened on last day of
+         * month before this account balance is negative.
+         */
+        final Float nominalAnnualInterest = Float.valueOf(accountDetails.get("nominalAnnualInterestRate").toString());
+        final HashMap interestCalculationDaysInYearType = (HashMap) accountDetails.get("interestCalculationDaysInYearType");
+        final Integer daysInYear = Integer.valueOf(interestCalculationDaysInYearType.get("id").toString());
+        double interestRateInFraction = (nominalAnnualInterest / 100);
+        double perDay = (double) 1 / (daysInYear);
+        double interestPerDay = interestRateInFraction * perDay;
+        Float interestPosted = (float) (interestPerDay * balance * 1);
+
+        /***
+         * Apply rounding on interestPosted, actualInterestPosted and verify
+         * both are same
+         */
+        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
+        decimalFormat.applyPattern("#.###");
+        interestPosted = new Float(decimalFormat.format(interestPosted));
+        actualInterestPosted = new Float(decimalFormat.format(accountDetailsPostInterestPosted));
+        assertEquals("Verifying interest posted", interestPosted, accountDetailsPostInterestPosted);
+        System.out.println("------Post Interest As On After doing a post interest Successfully worked--------");
+
+        todaysDate = Calendar.getInstance();
+        final String CLOSEDON_DATE = dateFormat.format(todaysDate.getTime());
+
+        Calendar interestPostingDate = Calendar.getInstance();
+        Calendar todysDate = Calendar.getInstance();
+        interestPostingDate.set((int) interestPostingTransaction.get(0), (int) interestPostingTransaction.get(1) - 1,
+                (int) interestPostingTransaction.get(2));
+        final String INTEREST_POSTING_DATE = dateFormat.format(interestPostingDate.getTime());
+        final String TODYS_POSTING_DATE = dateFormat.format(todysDate.getTime());
+        String withdrawBalance = "true";
+
+        if (TODYS_POSTING_DATE.equalsIgnoreCase(INTEREST_POSTING_DATE)) {
+            final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
+            validationErrorHelper.closeSavingsAccountPostInterestAndGetBackRequiredField(savingsId, withdrawBalance,
+                    CommonConstants.RESPONSE_ERROR, CLOSEDON_DATE);
+        } else {
+            final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
+            ArrayList<HashMap> savingsAccountErrorData = (ArrayList<HashMap>) validationErrorHelper
+                    .closeSavingsAccountPostInterestAndGetBackRequiredField(savingsId, withdrawBalance, CommonConstants.RESPONSE_ERROR,
+                            CLOSEDON_DATE);
+            assertEquals("error.msg.postInterest.notDone", savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        }
+
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testPostInterestAsOnSavingsAccountWithOverdraft() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
+        final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
+
+        /***
+         * Create a client to apply for savings account (overdraft account).
+         */
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientID);
+        final String minBalanceForInterestCalculation = null;
+
+        /***
+         * Create savings product with zero opening balance and overdraft
+         * enabled
+         */
+        final String zeroOpeningBalance = "0.0";
+        final String minRequiredBalance = null;
+        final String enforceMinRequiredBalance = "false";
+        final boolean allowOverdraft = true;
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, zeroOpeningBalance,
+                minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
+        Assert.assertNotNull(savingsProductID);
+
+        /***
+         * Apply for Savings account
+         */
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertNotNull(savingsProductID);
+
+        HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(clientID, savingsProductID, savingsId,
+                ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        /***
+         * Approve the savings account
+         */
+        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        Calendar todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -1);
+        todaysDate.set(Calendar.DAY_OF_MONTH, 1);
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+        final Integer lastDayOfMonth = todaysDate.getActualMaximum(Calendar.DAY_OF_MONTH);
+        todaysDate.set(Calendar.DAY_OF_MONTH, lastDayOfMonth);
+        final String TRANSACTION_DATE = dateFormat.format(todaysDate.getTime());
+        
+        Calendar postedDate = Calendar.getInstance();
+        postedDate.set(Calendar.DAY_OF_MONTH, 1);
+       
+        final String POSTED_TRANSACTION_DATE = dateFormat.format(postedDate.getTime());        
+        Calendar postedLastDate = Calendar.getInstance();
+        int countOfDate=postedDate.getActualMaximum(Calendar.DAY_OF_MONTH);
+        System.out.println("count Of Date---> "+countOfDate);
+        postedLastDate.set(Calendar.DAY_OF_MONTH,countOfDate);
+        final String POSTED_LAST_TRANSACTION_DATE = dateFormat.format(postedLastDate.getTime());
+
+        /***
+         * Activate the application and verify account status
+         * 
+         * @param activationDate
+         *            this value is every time first day of previous month
+         */
+        savingsStatusHashMap = activateSavingsAccount(savingsId, ACTIVATION_DATE);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        /***
+         * Verify the account summary
+         */
+        final HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        this.savingsAccountHelper.calculateInterestForSavings(savingsId);
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        assertEquals(summaryBefore, summary);
+
+        Float balance = Float.valueOf(zeroOpeningBalance);
+
+        /***
+         * Perform withdraw transaction, verify account balance(account balance
+         * will go to negative as no deposits are there prior to this
+         * transaction)
+         */
+        Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
+                ACTIVATION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
+        balance -= new Float(WITHDRAW_AMOUNT);
+        assertEquals("Verifying Withdrawal Amount", new Float(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
+        assertEquals("Verifying Balance after Withdrawal", balance, withdrawTransaction.get("runningBalance"));
+
+        /***
+         * Perform Deposit transaction on last day of month and verify account
+         * balance.
+         * 
+         * @param transactionDate
+         *            this value is every time last day of previous month
+         */
+        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
+                TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
+        balance += new Float(DEPOSIT_AMOUNT);
+        assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+        assertEquals("Verifying Balance after Deposit", balance, depositTransaction.get("runningBalance"));
+
+        /***
+         * Perform Post interest transaction and verify the posted amount
+         */
+        this.savingsAccountHelper.postInterestAsOnSavings(savingsId, POSTED_TRANSACTION_DATE);
+        HashMap accountDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
+        summary = (HashMap) accountDetails.get("summary");
+        Float actualInterestPosted = Float.valueOf(summary.get("totalInterestPosted").toString());
+        
+    
+        /***
+         * Calculate expected interest to be posted, interest should be posted
+         * for one day only because deposit transaction happened on last day of
+         * month before this account balance is negative.
+         */
+        final Float nominalAnnualInterest = Float.valueOf(accountDetails.get("nominalAnnualInterestRate").toString());
+        final HashMap interestCalculationDaysInYearType = (HashMap) accountDetails.get("interestCalculationDaysInYearType");
+        final Integer daysInYear = Integer.valueOf(interestCalculationDaysInYearType.get("id").toString());
+        double interestRateInFraction = (nominalAnnualInterest / 100);
+        double perDay = (double) 1 / (daysInYear);
+        double interestPerDay = interestRateInFraction * perDay;
+        Float interestPosted = (float) (interestPerDay * balance * 1);
+
+        /***
+         * Apply rounding on interestPosted, actualInterestPosted and verify
+         * both are same
+         */
+        DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
+        decimalFormat.applyPattern("#.###");
+        interestPosted = new Float(decimalFormat.format(interestPosted));
+        actualInterestPosted = new Float(decimalFormat.format(actualInterestPosted));
+       assertEquals("Verifying interest posted", interestPosted, actualInterestPosted);           
+       System.out.println("------Post Interest As On Successful Worked--------");
+       
+       this.savingsAccountHelper.postInterestAsOnSavings(savingsId, POSTED_LAST_TRANSACTION_DATE);
+       HashMap accountLastDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
+       summary = (HashMap) accountLastDetails.get("summary");
+       Float actualLastInterestPosted = Float.valueOf(summary.get("totalInterestPosted").toString());
+       
+       final Float nominalLastAnnualInterest = Float.valueOf(accountDetails.get("nominalAnnualInterestRate").toString());
+       final HashMap interestLastCalculationDaysInYearType = (HashMap) accountDetails.get("interestCalculationDaysInYearType");
+       final Integer daysLastInYear = Integer.valueOf(interestCalculationDaysInYearType.get("id").toString());
+       double interestLastRateInFraction = (nominalAnnualInterest / 100);
+       double perLastDay = (double) 1 / (daysInYear);
+       double interestLastPerDay = interestLastRateInFraction * perLastDay;
+       Float interestLastPosted = (float) (interestLastPerDay * balance * 1);
+       
+       DecimalFormat decimalLastFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
+       decimalLastFormat.applyPattern("#.###");
+       interestLastPosted = new Float(decimalLastFormat.format(interestLastPosted));
+       actualInterestPosted = new Float(decimalFormat.format(actualInterestPosted));
+      assertEquals("Verifying interest posted", interestLastPosted, actualInterestPosted);           
+      System.out.println("------Post Interest As On Successful Worked--------");
+       
+    }
+    
+    
     
     @Test
     public void testSavingsAccount_WITH_WITHHOLD_TAX() {

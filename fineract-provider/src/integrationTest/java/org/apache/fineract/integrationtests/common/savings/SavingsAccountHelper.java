@@ -47,6 +47,7 @@ public class SavingsAccountHelper {
     private static final String WITHDRAWN_BY_CLIENT_SAVINGS_COMMAND = "withdrawnByApplicant";
     private static final String CALCULATE_INTEREST_SAVINGS_COMMAND = "calculateInterest";
     private static final String POST_INTEREST_SAVINGS_COMMAND = "postInterest";
+    private static final String POST_INTEREST_AS_ON_SAVINGS_COMMAND = "postInterestAsOn";
     private static final String CLOSE_SAVINGS_COMMAND = "close";
     private static final String UPDATE_WITHHOLD_TAX_STATUS = "updateWithHoldTax";
 
@@ -195,6 +196,12 @@ public class SavingsAccountHelper {
         performSavingActions(createSavingsCalculateInterestURL(POST_INTEREST_SAVINGS_COMMAND, savingsId),
                 getCalculatedInterestForSavingsApplicationAsJSON(), "");
     }
+    
+    public void postInterestAsOnSavings(final Integer savingsId, final String today) {
+        System.out.println("--------------------------------- POST INTEREST AS ON FOR SAVINGS --------------------------------");
+        performSavingActions(createSavingsPostInterestAsOnURL(POST_INTEREST_AS_ON_SAVINGS_COMMAND, savingsId),
+                getCalculatedInterestForSavingsApplicationAsJSON(today), CommonConstants.RESPONSE_RESOURCE_ID);
+    }
 
     public Integer addChargesForSavings(final Integer savingsId, final Integer chargeId, boolean addDueDate) {
         System.out.println("--------------------------------- ADD CHARGES FOR SAVINGS --------------------------------");
@@ -286,6 +293,16 @@ public class SavingsAccountHelper {
         System.out.println(savingsAccountCalculatedInterestJson);
         return savingsAccountCalculatedInterestJson;
     }
+    
+    private String getCalculatedInterestForSavingsApplicationAsJSON(final String today) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("locale", CommonConstants.locale);
+        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("transactionDate", today);
+        map.put("postInterestManualOrAutomatic", "true");
+        String savingsAccountCalculatedInterestJson = new Gson().toJson(map);
+        return savingsAccountCalculatedInterestJson;
+    }
 
     private String getSavingsPayChargeJSON(final String amount, final String dueDate) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -321,6 +338,20 @@ public class SavingsAccountHelper {
         map.put("closedOnDate", closedOnDate);
         map.put("withdrawBalance", withdrawBalance);
         map.put("note", "Close Test");
+        
+        String josn = new Gson().toJson(map);
+        return josn;
+    }
+    
+    private String getCloseAccountPostInterestJSON(String withdrawBalance, String closedOnDate) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("locale", CommonConstants.locale);
+        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("closedOnDate", closedOnDate);
+        map.put("withdrawBalance", withdrawBalance);
+        map.put("note", "Close Test");
+        map.put("postInterestValidationOnClosure", "true");
+        
         String josn = new Gson().toJson(map);
         return josn;
     }
@@ -340,6 +371,10 @@ public class SavingsAccountHelper {
 
     private String createSavingsCalculateInterestURL(final String command, final Integer savingsID) {
         return SAVINGS_ACCOUNT_URL + "/" + savingsID + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
+    }
+    
+    private String createSavingsPostInterestAsOnURL(final String command, final Integer savingsID) {
+        return SAVINGS_ACCOUNT_URL + "/" + savingsID + "/transactions/" + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
     }
 
     private String createChargesURL(final String command, final Integer savingsID, final Integer chargeId) {
@@ -417,6 +452,13 @@ public class SavingsAccountHelper {
         System.out.println("---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
         return performSavingActions(createSavingsOperationURL(CLOSE_SAVINGS_COMMAND, savingsID),
                 getCloseAccountJSON(withdrawBalance, closedOnDate), jsonAttributeToGetBack);
+    }
+    
+    public Object closeSavingsAccountPostInterestAndGetBackRequiredField(final Integer savingsID, String withdrawBalance,
+            final String jsonAttributeToGetBack, final String closedOnDate) {
+        System.out.println("---------------------------------- CLOSE SAVINGS APPLICATION ----------------------------------");
+        return performSavingActions(createSavingsOperationURL(CLOSE_SAVINGS_COMMAND, savingsID),
+                getCloseAccountPostInterestJSON(withdrawBalance, closedOnDate), jsonAttributeToGetBack);
     }
 
     private String getPeriodChargeRequestJSON(Integer chargeId, boolean addDueDate) {
