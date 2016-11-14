@@ -484,4 +484,35 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             return new ReportParameterData(id, null, null, parameterName);
         }
     }
+
+    @Override
+    public GenericResultsetData retrieveGenericResultSetForSmsCampaign(String name, String type, Map<String, String> queryParams) {
+        final long startTime = System.currentTimeMillis();
+        logger.info("STARTING REPORT: " + name + "   Type: " + type);
+
+        final String sql = sqlToRunForSmsCampaign(name, type, queryParams);
+
+        final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
+
+        final long elapsed = System.currentTimeMillis() - startTime;
+        logger.info("FINISHING Report/Request Name: " + name + " - " + type + "     Elapsed Time: " + elapsed);
+        return result;
+    }
+    
+    @Override
+    public String sqlToRunForSmsCampaign(final String name, final String type, final Map<String, String> queryParams) {
+        String sql = getSql(name, type);
+
+        final Set<String> keys = queryParams.keySet();
+        for (String key : keys) {
+            final String pValue = queryParams.get(key);
+            // logger.info("(" + key + " : " + pValue + ")");
+            key = "${" + key + "}";
+            sql = this.genericDataService.replace(sql, key, pValue);
+        }
+
+        sql = this.genericDataService.wrapSQL(sql);
+
+        return sql;
+    }
 }

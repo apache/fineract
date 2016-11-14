@@ -205,6 +205,10 @@ public class ClientTransaction extends AbstractPersistableCustom<Long> {
         return client.getId();
     }
 
+    public Client getClient() {
+        return this.client ;
+    }
+    
     public Money getAmount() {
         return Money.of(getCurrency(), this.amount);
     }

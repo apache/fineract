@@ -2803,4 +2803,51 @@ public class CommandWrapperBuilder {
         this.href = "/reportmailingjobs/" + entityId;
         return this;
     }
+    
+    public CommandWrapperBuilder createSmsCampaign() {
+        this.actionName = "CREATE";
+        this.entityName = "SMSCAMPAIGN";
+        this.entityId = null;
+        this.href = "/smscampaigns";
+        return this;
+    }
+    
+    public CommandWrapperBuilder updateSmsCampaign(final Long resourceId) {
+        this.actionName = "UPDATE";
+        this.entityName = "SMSCAMPAIGN";
+        this.entityId = resourceId;
+        this.href = "/smscampaigns/"+resourceId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder activateSmsCampaign(final Long resourceId) {
+        this.actionName = "ACTIVATE";
+        this.entityName = "SMSCAMPAIGN";
+        this.entityId = resourceId;
+        this.href = "/smscampaigns/"+resourceId + "?command=activate";
+        return this;
+    }
+
+    public CommandWrapperBuilder closeSmsCampaign(final Long resourceId) {
+        this.actionName = "CLOSE";
+        this.entityName = "SMSCAMPAIGN";
+        this.entityId = resourceId;
+        this.href = "/smscampaigns/"+resourceId + "?command=close";
+        return this;
+    }
+    public CommandWrapperBuilder reactivateSmsCampaign(final Long resourceId) {
+        this.actionName = "REACTIVATE";
+        this.entityName = "SMSCAMPAIGN";
+        this.entityId = resourceId;
+        this.href = "/smscampaigns/"+resourceId + "?command=reactivate";
+        return this;
+    }
+    
+    public CommandWrapperBuilder deleteSmsCampaign(final Long resourceId) {
+        this.actionName = "DELETE";
+        this.entityName = "SMSCAMPAIGN";
+        this.entityId = resourceId;
+        this.href = "/smscampaigns/"+resourceId;
+        return this;
+    }
 }
