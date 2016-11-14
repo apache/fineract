@@ -195,7 +195,7 @@ INSERT INTO `stretchy_parameter` (`parameter_name`, `parameter_variable`, `param
 VALUES ('SelectLoanType', 'loanType', 'Loan Type', 'select', 'number', '-1', 'Y', "select\nenum_id as id,\nenum_value as value\nfrom r_enum_value\nwhere enum_name = 'loan_type_enum'", NULL);
 INSERT INTO `stretchy_parameter` (`parameter_name`, `parameter_variable`, `parameter_label`, `parameter_displayType`, `parameter_FormatType`, `parameter_default`, `special`, `selectOne`, `selectAll`, `parameter_sql`, `parent_id`) VALUES 
 ('DefaultSavings', 'savingsId', 'Savings', 'none', 'number', '-1', NULL, NULL, 'Y', NULL, 5);
-INSERT INTO `mifostenant-default`.`stretchy_parameter` (`parameter_name`, `parameter_variable`, `parameter_label`, `parameter_displayType`, `parameter_FormatType`, `parameter_default`, `selectAll`, `parameter_sql`, `parent_id`) VALUES ('DefaultSavingsTransactionId', 'savingsTransactionId', 'Savings Transaction', 'none', 'number', '-1', 'Y', NULL, '5');
+INSERT INTO `stretchy_parameter` (`parameter_name`, `parameter_variable`, `parameter_label`, `parameter_displayType`, `parameter_FormatType`, `parameter_default`, `selectAll`, `parameter_sql`, `parent_id`) VALUES ('DefaultSavingsTransactionId', 'savingsTransactionId', 'Savings Transaction', 'none', 'number', '-1', 'Y', NULL, '5');
 
 SET @LRej = (select id from `stretchy_report` where `report_name`='Loan Rejected');
 SET @LApp = (select id from `stretchy_report` where `report_name`='Loan Approved');
