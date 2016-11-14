@@ -3,6 +3,7 @@ Changelog
 
 Releases
 ===============
+1. 14 Nov 2016 - 16.11.01.RELEASE
 1. 22 Sep 2016 - 16.09.01.RELEASE
 1. 16 Aug 2016 - 16.08.01.RELEASE
 1. 27 Jun 2016 - 16.06.01.RELEASE
@@ -89,6 +90,35 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+16.11.01.RELEASE
+=============
+
+This release is being made on top of first Fineract incubator release (0.4.0.incubating) which involved migration to OpenJPA instead of hibernate as JPA provider.
+This release adds SMS campaign as a new major feature along with below additional enhancements.
+ 
+Platform & API
+New Features & Improvements
+
+ - Migration to OpenJPA
+ - SMS Campaign feature
+ - [FINERACT-37] - Support rescheduling repayments on holidays
+ - Add API to allow self service user to change their password
+ - Savings interest posting on specified date
+ 
+Community-app
+New Features & Improvements
+
+ - SMS Campaign feature
+ - UI for address module enhancement
+ - Savings interest posting on specified date
+ 
+ Bugs
+ 
+ - interest amount label in prepay loan page
+ - [MIFOSX-2794] - After Cancel of edit meeting page the "Next Meeting on" is not displaying date in Center general page
+ - [MIFOSX-2745] - GL Creation
+
 
 16.09.01.RELEASE
 =============
