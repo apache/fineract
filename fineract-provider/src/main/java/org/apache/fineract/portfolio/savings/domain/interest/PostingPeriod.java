@@ -194,19 +194,32 @@ public class PostingPeriod {
         return this.openingBalance;
     }
 
-    public BigDecimal calculateInterest(final BigDecimal interestFromPreviousPostingPeriod) {
+    public BigDecimal calculateInterest(final CompoundInterestValues compoundInterestValues) {
         BigDecimal interestEarned = BigDecimal.ZERO;
 
         // for each compounding period accumulate the amount of interest
         // to be applied to the balanced for interest calculation
-        BigDecimal interestCompounded = interestFromPreviousPostingPeriod;
         for (final CompoundingPeriod compoundingPeriod : this.compoundingPeriods) {
 
             final BigDecimal interestUnrounded = compoundingPeriod.calculateInterest(this.interestCompoundingType,
-                    this.interestCalculationType, interestCompounded, this.interestRateAsFraction, this.daysInYear,
+                    this.interestCalculationType, compoundInterestValues.getcompoundedInterest(), this.interestRateAsFraction, this.daysInYear,
                     this.minBalanceForInterestCalculation.getAmount(), 	this.overdraftInterestRateAsFraction,
                     this.minOverdraftForInterestCalculation.getAmount());
-            interestCompounded = interestCompounded.add(interestUnrounded);
+			BigDecimal unCompoundedInterest = compoundInterestValues.getuncompoundedInterest().add(interestUnrounded);
+			compoundInterestValues.setuncompoundedInterest(unCompoundedInterest);
+			LocalDate compoundingPeriodEndDate = compoundingPeriod.getPeriodInterval().endDate();
+			if (!SavingsCompoundingInterestPeriodType.DAILY.equals(this.interestCompoundingType)) {
+				compoundingPeriodEndDate = determineInterestPeriodEndDateFrom(
+						compoundingPeriod.getPeriodInterval().startDate(), this.interestCompoundingType,
+						compoundingPeriod.getPeriodInterval().endDate());
+			}
+
+			if (compoundingPeriodEndDate.equals(compoundingPeriod.getPeriodInterval().endDate())) {
+				BigDecimal interestCompounded = compoundInterestValues.getcompoundedInterest()
+						.add(unCompoundedInterest);
+				compoundInterestValues.setcompoundedInterest(interestCompounded);
+				compoundInterestValues.setZeroForInterestToBeUncompounded();
+			}
             interestEarned = interestEarned.add(interestUnrounded);
         }
 

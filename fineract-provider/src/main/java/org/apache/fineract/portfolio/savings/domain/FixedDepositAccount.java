@@ -190,10 +190,9 @@ public class FixedDepositAccount extends SavingsAccount {
     public void updateMaturityDateAndAmountBeforeAccountActivation(final MathContext mc, final boolean isPreMatureClosure,
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
         List<SavingsAccountTransaction> allTransactions = new ArrayList<>();
-        final boolean postInterestAsOn = false;
         final Money transactionAmountMoney = Money.of(getCurrency(), this.accountTermAndPreClosure.depositAmount());
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(null, office(), null,
-                this.accountSubmittedOrActivationDate(), transactionAmountMoney, new Date(), null, postInterestAsOn); // TODO:
+                this.accountSubmittedOrActivationDate(), transactionAmountMoney, new Date(), null); // TODO:
                                                                                                     // verify
                                                                                                     // if
                                                                                                     // it
@@ -496,9 +495,9 @@ public class FixedDepositAccount extends SavingsAccount {
         final LocalDate interestPostingUpToDate = maturityDate();
         final MathContext mc = MathContext.DECIMAL64;
         final boolean isInterestTransfer = false;
-        final boolean postInterestAsOn = false;
+        final LocalDate postInterestOnDate = null;
         final List<PostingPeriod> postingPeriods = calculateInterestUsing(mc, interestPostingUpToDate, isInterestTransfer,
-                isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestAsOn);
+                isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate);
 
         Money interestPostedToDate = Money.zero(this.currency);
 
@@ -518,7 +517,7 @@ public class FixedDepositAccount extends SavingsAccount {
             final SavingsAccountTransaction postingTransaction = findInterestPostingTransactionFor(interestPostingTransactionDate);
             if (postingTransaction == null) {
                 final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
-                        interestPostingTransactionDate, interestEarnedToBePostedForPeriod, postInterestAsOn);
+                        interestPostingTransactionDate, interestEarnedToBePostedForPeriod, interestPostingPeriod.isUserPosting());
                 this.transactions.add(newPostingTransaction);
                 recalucateDailyBalanceDetails = true;
             } else {
@@ -526,7 +525,7 @@ public class FixedDepositAccount extends SavingsAccount {
                 if (correctionRequired) {
                     postingTransaction.reverse();
                     final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
-                            interestPostingTransactionDate, interestEarnedToBePostedForPeriod, postInterestAsOn);
+                            interestPostingTransactionDate, interestEarnedToBePostedForPeriod, interestPostingPeriod.isUserPosting());
                     this.transactions.add(newPostingTransaction);
                     recalucateDailyBalanceDetails = true;
                 }
@@ -609,17 +608,16 @@ public class FixedDepositAccount extends SavingsAccount {
     @Override
     public void postInterest(final MathContext mc, final LocalDate postingDate, boolean isInterestTransfer,
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
-            final boolean postAsInterestOn) {
-        final boolean postInterestAsOn=false;
+            final LocalDate postInterestOnDate) {
         final LocalDate interestPostingUpToDate = interestPostingUpToDate(postingDate);
         super.postInterest(mc, interestPostingUpToDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth, postInterestAsOn);
+                financialYearBeginningMonth, postInterestOnDate);
     }
 
     @Override
     public List<PostingPeriod> calculateInterestUsing(final MathContext mc, final LocalDate postingDate, boolean isInterestTransfer,
             final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
-            final boolean postAsInterestOn) {
+            final LocalDate  postAsInterestOn) {
         final LocalDate interestPostingUpToDate = interestPostingUpToDate(postingDate);
         return super.calculateInterestUsing(mc, interestPostingUpToDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
                 financialYearBeginningMonth, postAsInterestOn);
