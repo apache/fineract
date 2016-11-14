@@ -173,7 +173,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
         if (responseOne != null) {
 //            String smsResponse = responseOne.getBody();
             if (!responseOne.getStatusCode().equals(HttpStatus.ACCEPTED)) {
-                System.out.println(responseOne.getStatusCode().name());
+            	logger.debug(responseOne.getStatusCode().name());
                 throw new ConnectionFailureException(SmsCampaignConstants.SMS);
             }
         }

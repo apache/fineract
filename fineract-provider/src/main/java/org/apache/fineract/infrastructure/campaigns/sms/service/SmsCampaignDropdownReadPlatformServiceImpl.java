@@ -27,12 +27,9 @@ import java.util.Map;
 
 import org.apache.fineract.infrastructure.campaigns.constants.CampaignType;
 import org.apache.fineract.infrastructure.campaigns.helper.SmsConfigUtils;
-import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignConstants;
 import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignEnumerations;
 import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignTriggerType;
-import org.apache.fineract.infrastructure.campaigns.sms.data.CampaignTriggerWithSubTypes;
 import org.apache.fineract.infrastructure.campaigns.sms.data.SmsProviderData;
-import org.apache.fineract.infrastructure.campaigns.sms.data.TriggerTypeWithSubTypesData;
 import org.apache.fineract.infrastructure.campaigns.sms.exception.ConnectionFailureException;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.calendar.domain.CalendarWeekDaysType;
@@ -74,19 +71,20 @@ public class SmsCampaignDropdownReadPlatformServiceImpl implements SmsCampaignDr
     @Override
     public Collection<SmsProviderData> retrieveSmsProviders() {
         Collection<SmsProviderData> smsProviderOptions = new ArrayList<>();
+        String hostName = "" ;
         try {
             Map<String, Object> hostConfig = this.smsConfigUtils.getMessageGateWayRequestURI("smsbridges", null);
             URI uri = (URI) hostConfig.get("uri");
+            hostName = uri.getHost() ;
             HttpEntity<?> entity = (HttpEntity<?>) hostConfig.get("entity");
             ResponseEntity<Collection<SmsProviderData>> responseOne = restTemplate.exchange(uri, HttpMethod.GET, entity,
                     new ParameterizedTypeReference<Collection<SmsProviderData>>() {});
             smsProviderOptions = responseOne.getBody();
             if (!responseOne.getStatusCode().equals(HttpStatus.OK)) {
-                System.out.println(responseOne.getStatusCode().name());
-                throw new ConnectionFailureException(SmsCampaignConstants.SMS_BRIDGE);
+                throw new ConnectionFailureException(hostName);
             }
         } catch (Exception e) {
-            e.getStackTrace();
+        	 throw new ConnectionFailureException(hostName);
         }
         return smsProviderOptions;
     }
@@ -116,10 +114,5 @@ public class SmsCampaignDropdownReadPlatformServiceImpl implements SmsCampaignDr
         Collection<EnumOptionData> periodFrequencyTypes = SmsCampaignEnumerations
                 .calendarPeriodFrequencyTypes(PeriodFrequencyType.values());
         return periodFrequencyTypes;
-    }
-
-    @Override
-    public Collection<TriggerTypeWithSubTypesData> getTriggerTypeAndSubTypes() {
-        return CampaignTriggerWithSubTypes.getTriggerTypeAndSubTypes();
     }
 }

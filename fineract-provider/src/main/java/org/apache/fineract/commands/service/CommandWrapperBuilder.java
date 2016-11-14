@@ -2808,7 +2808,7 @@ public class CommandWrapperBuilder {
         this.actionName = "CREATE";
         this.entityName = "SMSCAMPAIGN";
         this.entityId = null;
-        this.href = "/smscampaign";
+        this.href = "/smscampaigns";
         return this;
     }
     
@@ -2816,7 +2816,7 @@ public class CommandWrapperBuilder {
         this.actionName = "UPDATE";
         this.entityName = "SMSCAMPAIGN";
         this.entityId = resourceId;
-        this.href = "/smscampaign/"+resourceId;
+        this.href = "/smscampaigns/"+resourceId;
         return this;
     }
     
@@ -2824,7 +2824,7 @@ public class CommandWrapperBuilder {
         this.actionName = "ACTIVATE";
         this.entityName = "SMSCAMPAIGN";
         this.entityId = resourceId;
-        this.href = "/smscampaign/"+resourceId + "?command=activate";
+        this.href = "/smscampaigns/"+resourceId + "?command=activate";
         return this;
     }
 
@@ -2832,14 +2832,14 @@ public class CommandWrapperBuilder {
         this.actionName = "CLOSE";
         this.entityName = "SMSCAMPAIGN";
         this.entityId = resourceId;
-        this.href = "/smscampaign/"+resourceId + "?command=close";
+        this.href = "/smscampaigns/"+resourceId + "?command=close";
         return this;
     }
     public CommandWrapperBuilder reactivateSmsCampaign(final Long resourceId) {
         this.actionName = "REACTIVATE";
         this.entityName = "SMSCAMPAIGN";
         this.entityId = resourceId;
-        this.href = "/smscampaign/"+resourceId + "?command=reactivate";
+        this.href = "/smscampaigns/"+resourceId + "?command=reactivate";
         return this;
     }
     
@@ -2847,7 +2847,7 @@ public class CommandWrapperBuilder {
         this.actionName = "DELETE";
         this.entityName = "SMSCAMPAIGN";
         this.entityId = resourceId;
-        this.href = "/smscampaign/"+resourceId;
+        this.href = "/smscampaigns/"+resourceId;
         return this;
     }
 }

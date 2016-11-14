@@ -21159,12 +21159,15 @@ Request Body:
 <a id="smscampaigns_retrieve" name="smscampaigns_retrieve" class="old-syle-anchor">&nbsp;</a>
     <div class="method-section">
         <div class="method-description">
-            <h4>Retrieve a Share Product</h4>
+            <h4>Retrieve a SMS Campaign</h4>
             <p>Example Requests: </p>
             <div class=apiClick>smscampaigns/1</div>
             <br><br>
             <div class=apiClick>smscampaigns/1?template=true</div>
+			<br><br>
+			<div class=apiClick>smscampaigns/template</div>
         </div>
+
         <div class="method-example">
 			<code class="method-declaration">GET https://Domain Name/api/v1/smscampaigns/1</code>
 			<code class="method-response">
@@ -21197,7 +21200,150 @@ Request Body:
 		"recurrenceStartDate":"22 Jan 2016",
 		"recurrence": "YEARLY"			
 }
-			</code>
+
+			
+	<B>smscampaigns/1?template=true</B>
+
+	{
+		"id": 1,
+		"campaignName": "Savings Deposit Campaign"
+		"campaignType": "SMS",
+		"triggerType": 3,
+		"providerId": 2,
+		"runReportId": 180,
+		"reportName" : "Savings Deposit",
+		"paramValue": "{"officeId":1,"loanOfficerId":-1,"transactionId":1,"reportName":"Savings Deposit"}",
+		"message": "Hello {fullName} your account is credited with {depositAmount} on {transactionDate}",
+		"status" : { "id":"","code":"","value":""}	
+		
+		"smsProviderOptions": [{
+		"id": 1,
+		"tenantId": "1",
+		"phoneNo": "+XXXXXXXXXX",
+		"providerName": "Twilio SMS Provider",
+		"providerDescription": "Twilio, just for testing"
+		}],
+		"businessRulesOptions": [
+			{
+			"reportId": 166,
+			"reportName": "Active Clients",
+			"reportType": "SMS",
+			"reportSubType": "NonTriggered",
+			"reportDescription": "All clients with the status ‘Active’",
+			"reportParamName": {
+				"Office": "OfficeIdSelectOne",
+				"Loan Officer": "loanOfficerIdSelectAll"
+			}
+			}
+		],
+		"triggerTypeOptions": [
+			{"id": 1,"code": "triggerType.direct", "value": "Direct"},
+			{"id": 2, "code": "triggerType.schedule","value": "Scheduled"},
+			{"id": 3,"code": "triggerType.triggered","value": "Triggered"}
+			],
+		"months": [
+		{ "id": 1, "code": "JANUARY", "value": "JANUARY" },
+		{ "id": 2, "code": "FEBRUARY", "value": "FEBRUARY" },
+		{ "id": 3, "code": "MARCH", "value": "MARCH" },
+		{ "id": 4, "code": "APRIL", "value": "APRIL" },
+		{ "id": 5, "code": "MAY", "value": "MAY" },
+		{ "id": 6, "code": "JUNE", "value": "JUNE" },
+		{ "id": 7, "code": "JULY", "value": "JULY" },
+		{ "id": 8, "code": "AUGUST", "value": "AUGUST" },
+		{ "id": 9, "code": "SEPTEMBER", "value": "SEPTEMBER"},
+		{ "id": 10, "code": "OCTOBER", "value": "OCTOBER"},
+		{ "id": 11, "code": "NOVEMBER", "value": "NOVEMBER" }
+	],
+	"weekDays": [
+		{ "id": 1, "code": "calendarWeekDaysType.monday", "value": "MO" },
+		{ "id": 2, "code": "calendarWeekDaysType.tuesday", "value": "TU" },
+		{ "id": 3, "code": "calendarWeekDaysType.wednesday", "value": "WE" },
+		{ "id": 4, "code": "calendarWeekDaysType.thursday", "value": "TH"},
+		{ "id": 5, "code": "calendarWeekDaysType.friday", "value": "FR" },
+		{ "id": 6, "code": "calendarWeekDaysType.saturday", "value": "SA" },
+		{ "id": 7, "code": "calendarWeekDaysType.sunday", "value": "SU" }
+	],
+	"frequencyTypeOptions": [
+		{ "id": 1, "code": "calendarFrequencyType.daily", "value": "DAILY" },
+		{ "id": 2, "code": "calendarFrequencyType.weekly", "value": "WEEKLY"},
+		{ "id": 3, "code": "calendarFrequencyType.monthly", "value": "MONTHLY"},
+		{ "id": 4, "code": "calendarFrequencyType.yearly", "value": "YEARLY" }
+	],
+	"periodFrequencyOptions": [
+		{ "id": 0, "code": "periodFrequencyType.days", "value": "DAYS" },
+		{ "id": 1, "code": "periodFrequencyType.weeks", "value": "WEEKS" },
+		{ "id": 2, "code": "periodFrequencyType.months", "value": "MONTHS" },
+		{ "id": 3, "code": "periodFrequencyType.years", "value": "YEARS" }
+	]
+}
+
+<B>smscampaigns/template</B>
+
+	{
+		"smsProviderOptions": [{
+		"id": 1,
+		"tenantId": "1",
+		"phoneNo": "+XXXXXXXXXX",
+		"providerName": "Twilio SMS Provider",
+		"providerDescription": "Twilio, just for testing"
+		}],
+		"businessRulesOptions": [
+			{
+			"reportId": 166,
+			"reportName": "Active Clients",
+			"reportType": "SMS",
+			"reportSubType": "NonTriggered",
+			"reportDescription": "All clients with the status ‘Active’",
+			"reportParamName": {
+				"Office": "OfficeIdSelectOne",
+				"Loan Officer": "loanOfficerIdSelectAll"
+			}
+			}
+		],
+		"triggerTypeOptions": [
+			{"id": 1,"code": "triggerType.direct", "value": "Direct"},
+			{"id": 2, "code": "triggerType.schedule","value": "Scheduled"},
+			{"id": 3,"code": "triggerType.triggered","value": "Triggered"}
+			],
+		"months": [
+		{ "id": 1, "code": "JANUARY", "value": "JANUARY" },
+		{ "id": 2, "code": "FEBRUARY", "value": "FEBRUARY" },
+		{ "id": 3, "code": "MARCH", "value": "MARCH" },
+		{ "id": 4, "code": "APRIL", "value": "APRIL" },
+		{ "id": 5, "code": "MAY", "value": "MAY" },
+		{ "id": 6, "code": "JUNE", "value": "JUNE" },
+		{ "id": 7, "code": "JULY", "value": "JULY" },
+		{ "id": 8, "code": "AUGUST", "value": "AUGUST" },
+		{ "id": 9, "code": "SEPTEMBER", "value": "SEPTEMBER"},
+		{ "id": 10, "code": "OCTOBER", "value": "OCTOBER"},
+		{ "id": 11, "code": "NOVEMBER", "value": "NOVEMBER" }
+	],
+	"weekDays": [
+		{ "id": 1, "code": "calendarWeekDaysType.monday", "value": "MO" },
+		{ "id": 2, "code": "calendarWeekDaysType.tuesday", "value": "TU" },
+		{ "id": 3, "code": "calendarWeekDaysType.wednesday", "value": "WE" },
+		{ "id": 4, "code": "calendarWeekDaysType.thursday", "value": "TH"},
+		{ "id": 5, "code": "calendarWeekDaysType.friday", "value": "FR" },
+		{ "id": 6, "code": "calendarWeekDaysType.saturday", "value": "SA" },
+		{ "id": 7, "code": "calendarWeekDaysType.sunday", "value": "SU" }
+	],
+	"frequencyTypeOptions": [
+		{ "id": 1, "code": "calendarFrequencyType.daily", "value": "DAILY" },
+		{ "id": 2, "code": "calendarFrequencyType.weekly", "value": "WEEKLY"},
+		{ "id": 3, "code": "calendarFrequencyType.monthly", "value": "MONTHLY"},
+		{ "id": 4, "code": "calendarFrequencyType.yearly", "value": "YEARLY" }
+	],
+	"periodFrequencyOptions": [
+		{ "id": 0, "code": "periodFrequencyType.days", "value": "DAYS" },
+		{ "id": 1, "code": "periodFrequencyType.weeks", "value": "WEEKS" },
+		{ "id": 2, "code": "periodFrequencyType.months", "value": "MONTHS" },
+		{ "id": 3, "code": "periodFrequencyType.years", "value": "YEARS" }
+	]
+}
+
+</code>
+			
+			
         </div>
 </div>
 
@@ -21279,7 +21425,7 @@ Request Body:
     "status": {
       "id": 300,
       "code": "smsCampaignStatus.active",
-      "value": "Activated",
+      "value": "active",
     },
     "locale": "en",
     "dateFormat": "dd MMMM yyyy",
@@ -21314,7 +21460,7 @@ Request Body:
     "status": {
       "id": 600,
       "code": "smsCampaignStatus.closed",
-      "value": "Activated",
+      "value": "closed",
     },
     "locale": "en",
     "dateFormat": "dd MMMM yyyy",
@@ -21350,7 +21496,7 @@ Request Body:
     "status": {
       "id": 300,
       "code": "smsCampaignStatus.active",
-      "value": "Activated",
+      "value": "active",
     },
     "locale": "en",
     "dateFormat": "dd MMMM yyyy",

@@ -73,7 +73,7 @@ public class SmsCampaignEnumerations {
     public static List<EnumOptionData> calendarMonthType() {
         final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final Month monthType : Month.values()) {
-            if (Month.DECEMBER.compareTo(monthType) != 0) {
+            if (Month.DECEMBER.compareTo(monthType) != 0) { //We are removing December because we are adding yearly frequency
                 optionDatas.add(calendarMonthType(monthType));
             }
         }
@@ -83,9 +83,11 @@ public class SmsCampaignEnumerations {
     public static List<EnumOptionData> calendarPeriodFrequencyTypes(final PeriodFrequencyType[] periodFrequencyTypes) {
         final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final PeriodFrequencyType periodFrequencyType : periodFrequencyTypes) {
-            final EnumOptionData optionData = new EnumOptionData(periodFrequencyType.getValue().longValue(), periodFrequencyType.getCode(),
-                    periodFrequencyType.toString());
-            optionDatas.add(optionData);
+        	if(!periodFrequencyType.getValue().equals(PeriodFrequencyType.INVALID.getValue())) {
+        		final EnumOptionData optionData = new EnumOptionData(periodFrequencyType.getValue().longValue(), periodFrequencyType.getCode(),
+                        periodFrequencyType.toString());
+                optionDatas.add(optionData);	
+        	}
         }
         return optionDatas;
     }

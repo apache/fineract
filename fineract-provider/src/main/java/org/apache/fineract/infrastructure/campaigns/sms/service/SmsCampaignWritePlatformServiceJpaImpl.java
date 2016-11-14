@@ -234,8 +234,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 }
             }
         } catch (final IOException e) {
-            // TODO throw something here
-            System.out.println(e.getMessage());
+        	logger.error(e.getMessage());
         }
 
     }
@@ -291,9 +290,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 }
             }
         } catch (final IOException e) {
-            System.out.println("IOException: " + e.getMessage());
+        	logger.error(e.getMessage()) ;
         } catch (final RuntimeException e) {
-            System.out.println("RuntimeException: " + e.getMessage());
+        	logger.error(e.getMessage()) ;
         }
     }
 
@@ -332,9 +331,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
 				}
 			}
         } catch (final IOException e) {
-            System.out.println("IOException: " + e.getMessage());
+        	logger.error(e.getMessage()) ;
         } catch (final RuntimeException e) {
-            System.out.println("RuntimeException: " + e.getMessage());
+        	logger.error(e.getMessage()) ;
         }
     }
     
@@ -372,9 +371,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
 				}
 			}
         } catch (final IOException e) {
-            System.out.println("IOException: " + e.getMessage());
+        	logger.error(e.getMessage()) ;
         } catch (final RuntimeException e) {
-            System.out.println("RuntimeException: " + e.getMessage());
+        	logger.error(e.getMessage()) ;
         }
     }
     
