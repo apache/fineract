@@ -223,7 +223,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
 
                 if (smsMessageInternalIds.getPageItems().size() > 0) {
                     // make request
-                	Map<String, Object> hostConfig = this.smsConfigUtils.getMessageGateWayRequestURI("sms", new Gson().toJson(smsMessageInternalIds.getPageItems())) ;
+                	Map<String, Object> hostConfig = this.smsConfigUtils.getMessageGateWayRequestURI("sms/report", new Gson().toJson(smsMessageInternalIds.getPageItems())) ;
                     URI uri = (URI)hostConfig.get("uri") ;
                     HttpEntity<?> entity = (HttpEntity<?>)hostConfig.get("entity") ;
                     ResponseEntity<Collection<SmsMessageDeliveryReportData>> responseOne = restTemplate.exchange(uri, HttpMethod.POST, entity,
