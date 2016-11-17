@@ -153,7 +153,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
         @Override
         public void run() {
             ThreadLocalContextUtil.setTenant(tenant);
-            connectAndSendToIntermediateServer(tenant.getTenantIdentifier(), apiQueueResourceDatas);
+            connectAndSendToIntermediateServer(apiQueueResourceDatas);
         }
 
         @Override
@@ -163,8 +163,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
         }
     }
 
-    private void connectAndSendToIntermediateServer(String tenantIdentifier,
-            Collection<SmsMessageApiQueueResourceData> apiQueueResourceDatas) {
+    private void connectAndSendToIntermediateServer(Collection<SmsMessageApiQueueResourceData> apiQueueResourceDatas) {
     	Map<String, Object> hostConfig = this.smsConfigUtils.getMessageGateWayRequestURI("sms", SmsMessageApiQueueResourceData.toJsonString(apiQueueResourceDatas)) ;
         URI uri = (URI)hostConfig.get("uri") ;
         HttpEntity<?> entity = (HttpEntity<?>)hostConfig.get("entity") ;
@@ -268,6 +267,9 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
 
                             // update the status Type enum
                             smsMessage.setStatusType(statusType);
+
+                            // update the externalId
+                            smsMessage.setExternalId(smsMessageDeliveryReportData.getExternalId());
 
                             // save the SmsMessage entity
                             this.smsMessageRepository.save(smsMessage);

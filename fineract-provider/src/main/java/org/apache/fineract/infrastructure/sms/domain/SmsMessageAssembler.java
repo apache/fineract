@@ -64,7 +64,7 @@ public class SmsMessageAssembler {
 
         String mobileNo = null;
         Group group = null;
-        Long externalId = null;
+        String externalId = null;
         if (this.fromApiJsonHelper.parameterExists(SmsApiConstants.groupIdParamName, element)) {
             final Long groupId = this.fromApiJsonHelper.extractLongNamed(SmsApiConstants.groupIdParamName, element);
             group = this.groupRepository.findOneWithNotFoundDetection(groupId);

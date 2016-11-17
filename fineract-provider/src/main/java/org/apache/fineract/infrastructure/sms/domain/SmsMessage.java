@@ -45,7 +45,7 @@ import org.joda.time.LocalDate;
 public class SmsMessage extends AbstractPersistableCustom<Long> {
 
     @Column(name = "external_id", nullable = true)
-    private Long externalId;
+    private String externalId;
 
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = true)
@@ -86,17 +86,17 @@ public class SmsMessage extends AbstractPersistableCustom<Long> {
     @Temporal(TemporalType.TIMESTAMP)
     private Date deliveredOnDate;
 
-    public static SmsMessage pendingSms(final Long externalId, final Group group, final Client client, final Staff staff,
+    public static SmsMessage pendingSms(final String externalId, final Group group, final Client client, final Staff staff,
             final String message, final String mobileNo, final SmsCampaign smsCampaign) {
         return new SmsMessage(externalId, group, client, staff, SmsMessageStatusType.PENDING, message, mobileNo, smsCampaign);
     }
 
-    public static SmsMessage sentSms(final Long externalId, final Group group, final Client client, final Staff staff,
+    public static SmsMessage sentSms(final String externalId, final Group group, final Client client, final Staff staff,
             final String message, final String mobileNo, final SmsCampaign smsCampaign) {
         return new SmsMessage(externalId, group, client, staff, SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT, message, mobileNo, smsCampaign);
     }
 
-    public static SmsMessage instance(Long externalId, final Group group, final Client client, final Staff staff,
+    public static SmsMessage instance(String externalId, final Group group, final Client client, final Staff staff,
             final SmsMessageStatusType statusType, final String message, final String mobileNo, final SmsCampaign smsCampaign) {
 
         return new SmsMessage(externalId, group, client, staff, statusType, message, mobileNo, smsCampaign);
@@ -106,7 +106,7 @@ public class SmsMessage extends AbstractPersistableCustom<Long> {
         //
     }
 
-    private SmsMessage(Long externalId, final Group group, final Client client, final Staff staff, final SmsMessageStatusType statusType,
+    private SmsMessage(String externalId, final Group group, final Client client, final Staff staff, final SmsMessageStatusType statusType,
             final String message, final String mobileNo, final SmsCampaign smsCampaign) {
         this.externalId = externalId;
         this.group = group;
@@ -132,7 +132,7 @@ public class SmsMessage extends AbstractPersistableCustom<Long> {
         return actualChanges;
     }
 
-    public Long getExternalId() {
+    public String getExternalId() {
         return this.externalId;
     }
 
@@ -164,7 +164,7 @@ public class SmsMessage extends AbstractPersistableCustom<Long> {
         return message;
     }
 
-    public void setExternalId(final Long externalId) {
+    public void setExternalId(final String externalId) {
         this.externalId = externalId;
     }
 

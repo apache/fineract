@@ -91,8 +91,6 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
         if (transactionBooleanValues.isRegularTransaction() && !account.allowWithdrawal()) { throw new DepositAccountTransactionNotAllowedException(
                 account.getId(), "withdraw", account.depositAccountType()); }
-        this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.SAVINGS_WITHDRAWAL,
-                constructEntityMap(BUSINESS_ENTITY.SAVING, account));
         final Set<Long> existingTransactionIds = new HashSet<>();
         final LocalDate postInterestOnDate = null;
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
@@ -122,7 +120,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, transactionBooleanValues.isAccountTransfer());
         this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.SAVINGS_WITHDRAWAL,
-                constructEntityMap(BUSINESS_ENTITY.SAVING, account));
+                constructEntityMap(BUSINESS_ENTITY.SAVINGS_TRANSACTION, withdrawal));
         return withdrawal;
     }
 
@@ -155,8 +153,6 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
 
         if (isRegularTransaction && !account.allowDeposit()) { throw new DepositAccountTransactionNotAllowedException(account.getId(),
                 "deposit", account.depositAccountType()); }
-        this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.SAVINGS_DEPOSIT,
-                constructEntityMap(BUSINESS_ENTITY.SAVING, account));
         boolean isInterestTransfer = false;
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
@@ -182,7 +178,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
         this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.SAVINGS_DEPOSIT,
-                constructEntityMap(BUSINESS_ENTITY.SAVING, account));
+                constructEntityMap(BUSINESS_ENTITY.SAVINGS_TRANSACTION, deposit));
         return deposit;
     }
 

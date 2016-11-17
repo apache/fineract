@@ -33,6 +33,7 @@ public class SmsApiConstants {
     // request parameters
     public static final String idParamName = "id";
     public static final String groupIdParamName = "groupId";
+    public static final String externalIdParamName = "externalId";
     public static final String clientIdParamName = "clientId";
     public static final String staffIdParamName = "staffId";
     public static final String messageParamName = "message";

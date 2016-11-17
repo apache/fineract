@@ -45,6 +45,7 @@ import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -141,7 +142,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         Report report = this.reportRepository.findOne(runReportId);
         if (report == null) { throw new ReportNotFoundException(runReportId); }
         SmsCampaign smsCampaign = SmsCampaign.instance(currentUser, report, command);
-
+        if (smsCampaign.getRecurrenceStartDate() != null && smsCampaign.getRecurrenceStartDate().isBefore(DateUtils.getLocalDateOfTenant())) { throw new GeneralPlatformDomainRuleException(
+                "error.msg.campaign.recurrenceStartDate.in.the.past", "Recurrence start date cannot be the past date.",
+                smsCampaign.getRecurrenceStartDate()); }
         this.smsCampaignRepository.save(smsCampaign);
 
         return new CommandProcessingResultBuilder() //
