@@ -391,3 +391,7 @@ springBoot {
 bootRepackage {
     mainClass = 'org.apache.fineract.ServerWithMariaDB4jApplication'
 }
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.10'
+}
