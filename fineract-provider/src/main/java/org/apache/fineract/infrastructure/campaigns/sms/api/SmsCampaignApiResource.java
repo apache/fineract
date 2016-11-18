@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.campaigns.sms.api;
 
-import java.util.Collection;
 import java.util.HashSet;
 
 import javax.ws.rs.Consumes;
@@ -50,6 +49,8 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.Page;
+import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -125,9 +126,12 @@ public class SmsCampaignApiResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllCampaigns(@Context final UriInfo uriInfo) {
+    public String retrieveAllCampaigns(@QueryParam("sqlSearch") final String sqlSearch,
+            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
+            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder, @Context final UriInfo uriInfo) {
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(SmsCampaignConstants.RESOURCE_NAME);
-        Collection<SmsCampaignData> smsCampaignDataCollection = this.smsCampaignReadPlatformService.retrieveAll();
+        final SearchParameters searchParameters = SearchParameters.forSMSCampaign(sqlSearch, offset, limit, orderBy, sortOrder);
+        Page<SmsCampaignData> smsCampaignDataCollection = this.smsCampaignReadPlatformService.retrieveAll(searchParameters);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, smsCampaignDataCollection);
     }
