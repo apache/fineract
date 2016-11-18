@@ -1,17 +1,16 @@
 -- --------------------------------------------------------
 -- Host:                         127.0.0.1
--- Server version:               5.5.34-log - MySQL Community Server (GPL)
+-- Server version:               5.6.33-log - MySQL Community Server (GPL)
 -- Server OS:                    Win64
--- HeidiSQL Version:             9.3.0.5117
+-- HeidiSQL Version:             9.3.0.4984
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET NAMES utf8 */;
-/*!50503 SET NAMES utf8mb4 */;
+/*!40101 SET NAMES utf8mb4 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
--- Dumping structure for table mifostenant-barebone.acc_accounting_rule
+-- Dumping structure for table mifostenant-default.acc_accounting_rule
 DROP TABLE IF EXISTS `acc_accounting_rule`;
 CREATE TABLE IF NOT EXISTS `acc_accounting_rule` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -33,11 +32,12 @@ CREATE TABLE IF NOT EXISTS `acc_accounting_rule` (
   CONSTRAINT `FK_acc_accounting_rule_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.acc_accounting_rule: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.acc_accounting_rule: ~0 rows (approximately)
 /*!40000 ALTER TABLE `acc_accounting_rule` DISABLE KEYS */;
 /*!40000 ALTER TABLE `acc_accounting_rule` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.acc_gl_account
+
+-- Dumping structure for table mifostenant-default.acc_gl_account
 DROP TABLE IF EXISTS `acc_gl_account`;
 CREATE TABLE IF NOT EXISTS `acc_gl_account` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -59,11 +59,12 @@ CREATE TABLE IF NOT EXISTS `acc_gl_account` (
   CONSTRAINT `FK_ACC_0000000001` FOREIGN KEY (`parent_id`) REFERENCES `acc_gl_account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.acc_gl_account: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.acc_gl_account: ~0 rows (approximately)
 /*!40000 ALTER TABLE `acc_gl_account` DISABLE KEYS */;
 /*!40000 ALTER TABLE `acc_gl_account` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.acc_gl_closure
+
+-- Dumping structure for table mifostenant-default.acc_gl_closure
 DROP TABLE IF EXISTS `acc_gl_closure`;
 CREATE TABLE IF NOT EXISTS `acc_gl_closure` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -85,11 +86,12 @@ CREATE TABLE IF NOT EXISTS `acc_gl_closure` (
   CONSTRAINT `FK_acc_gl_closure_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.acc_gl_closure: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.acc_gl_closure: ~0 rows (approximately)
 /*!40000 ALTER TABLE `acc_gl_closure` DISABLE KEYS */;
 /*!40000 ALTER TABLE `acc_gl_closure` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.acc_gl_financial_activity_account
+
+-- Dumping structure for table mifostenant-default.acc_gl_financial_activity_account
 DROP TABLE IF EXISTS `acc_gl_financial_activity_account`;
 CREATE TABLE IF NOT EXISTS `acc_gl_financial_activity_account` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -101,11 +103,12 @@ CREATE TABLE IF NOT EXISTS `acc_gl_financial_activity_account` (
   CONSTRAINT `FK_office_mapping_acc_gl_account` FOREIGN KEY (`gl_account_id`) REFERENCES `acc_gl_account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.acc_gl_financial_activity_account: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.acc_gl_financial_activity_account: ~0 rows (approximately)
 /*!40000 ALTER TABLE `acc_gl_financial_activity_account` DISABLE KEYS */;
 /*!40000 ALTER TABLE `acc_gl_financial_activity_account` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.acc_gl_journal_entry
+
+-- Dumping structure for table mifostenant-default.acc_gl_journal_entry
 DROP TABLE IF EXISTS `acc_gl_journal_entry`;
 CREATE TABLE IF NOT EXISTS `acc_gl_journal_entry` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -158,11 +161,12 @@ CREATE TABLE IF NOT EXISTS `acc_gl_journal_entry` (
   CONSTRAINT `FK_acc_gl_journal_entry_m_share_account_transaction` FOREIGN KEY (`share_transaction_id`) REFERENCES `m_share_account_transactions` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.acc_gl_journal_entry: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.acc_gl_journal_entry: ~0 rows (approximately)
 /*!40000 ALTER TABLE `acc_gl_journal_entry` DISABLE KEYS */;
 /*!40000 ALTER TABLE `acc_gl_journal_entry` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.acc_product_mapping
+
+-- Dumping structure for table mifostenant-default.acc_product_mapping
 DROP TABLE IF EXISTS `acc_product_mapping`;
 CREATE TABLE IF NOT EXISTS `acc_product_mapping` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -179,11 +183,12 @@ CREATE TABLE IF NOT EXISTS `acc_product_mapping` (
   CONSTRAINT `FK_acc_product_mapping_m_payment_type` FOREIGN KEY (`payment_type`) REFERENCES `m_payment_type` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.acc_product_mapping: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.acc_product_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `acc_product_mapping` DISABLE KEYS */;
 /*!40000 ALTER TABLE `acc_product_mapping` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.acc_rule_tags
+
+-- Dumping structure for table mifostenant-default.acc_rule_tags
 DROP TABLE IF EXISTS `acc_rule_tags`;
 CREATE TABLE IF NOT EXISTS `acc_rule_tags` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -198,11 +203,12 @@ CREATE TABLE IF NOT EXISTS `acc_rule_tags` (
   CONSTRAINT `FK_m_code_value_id` FOREIGN KEY (`tag_id`) REFERENCES `m_code_value` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.acc_rule_tags: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.acc_rule_tags: ~0 rows (approximately)
 /*!40000 ALTER TABLE `acc_rule_tags` DISABLE KEYS */;
 /*!40000 ALTER TABLE `acc_rule_tags` ENABLE KEYS */;
 
--- Dumping structure for procedure mifostenant-barebone.CashierTransactionSummary
+
+-- Dumping structure for procedure mifostenant-default.CashierTransactionSummary
 DROP PROCEDURE IF EXISTS `CashierTransactionSummary`;
 DELIMITER //
 CREATE DEFINER=`root`@`localhost` PROCEDURE `CashierTransactionSummary`(
@@ -490,7 +496,8 @@ DROP TEMPORARY TABLE IF EXISTS final_temp_cashier_report;
 END//
 DELIMITER ;
 
--- Dumping structure for table mifostenant-barebone.c_account_number_format
+
+-- Dumping structure for table mifostenant-default.c_account_number_format
 DROP TABLE IF EXISTS `c_account_number_format`;
 CREATE TABLE IF NOT EXISTS `c_account_number_format` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -500,11 +507,12 @@ CREATE TABLE IF NOT EXISTS `c_account_number_format` (
   UNIQUE KEY `account_type_enum` (`account_type_enum`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.c_account_number_format: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.c_account_number_format: ~0 rows (approximately)
 /*!40000 ALTER TABLE `c_account_number_format` DISABLE KEYS */;
 /*!40000 ALTER TABLE `c_account_number_format` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.c_cache
+
+-- Dumping structure for table mifostenant-default.c_cache
 DROP TABLE IF EXISTS `c_cache`;
 CREATE TABLE IF NOT EXISTS `c_cache` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -512,13 +520,14 @@ CREATE TABLE IF NOT EXISTS `c_cache` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.c_cache: ~1 rows (approximately)
+-- Dumping data for table mifostenant-default.c_cache: ~0 rows (approximately)
 /*!40000 ALTER TABLE `c_cache` DISABLE KEYS */;
 INSERT INTO `c_cache` (`id`, `cache_type_enum`) VALUES
 	(1, 1);
 /*!40000 ALTER TABLE `c_cache` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.c_configuration
+
+-- Dumping structure for table mifostenant-default.c_configuration
 DROP TABLE IF EXISTS `c_configuration`;
 CREATE TABLE IF NOT EXISTS `c_configuration` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -532,7 +541,7 @@ CREATE TABLE IF NOT EXISTS `c_configuration` (
   UNIQUE KEY `name_UNIQUE` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.c_configuration: ~27 rows (approximately)
+-- Dumping data for table mifostenant-default.c_configuration: ~27 rows (approximately)
 /*!40000 ALTER TABLE `c_configuration` DISABLE KEYS */;
 INSERT INTO `c_configuration` (`id`, `name`, `value`, `date_value`, `enabled`, `is_trap_door`, `description`) VALUES
 	(1, 'maker-checker', NULL, NULL, 0, 0, NULL),
@@ -564,7 +573,8 @@ INSERT INTO `c_configuration` (`id`, `name`, `value`, `date_value`, `enabled`, `
 	(32, 'Enable-Address', NULL, NULL, 0, 0, NULL);
 /*!40000 ALTER TABLE `c_configuration` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.c_external_service
+
+-- Dumping structure for table mifostenant-default.c_external_service
 DROP TABLE IF EXISTS `c_external_service`;
 CREATE TABLE IF NOT EXISTS `c_external_service` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -573,7 +583,7 @@ CREATE TABLE IF NOT EXISTS `c_external_service` (
   UNIQUE KEY `name_UNIQUE` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.c_external_service: ~3 rows (approximately)
+-- Dumping data for table mifostenant-default.c_external_service: ~3 rows (approximately)
 /*!40000 ALTER TABLE `c_external_service` DISABLE KEYS */;
 INSERT INTO `c_external_service` (`id`, `name`) VALUES
 	(3, 'MESSAGE_GATEWAY'),
@@ -581,7 +591,8 @@ INSERT INTO `c_external_service` (`id`, `name`) VALUES
 	(2, 'SMTP_Email_Account');
 /*!40000 ALTER TABLE `c_external_service` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.c_external_service_properties
+
+-- Dumping structure for table mifostenant-default.c_external_service_properties
 DROP TABLE IF EXISTS `c_external_service_properties`;
 CREATE TABLE IF NOT EXISTS `c_external_service_properties` (
   `name` varchar(150) NOT NULL,
@@ -591,7 +602,7 @@ CREATE TABLE IF NOT EXISTS `c_external_service_properties` (
   CONSTRAINT `FK_c_external_service_properties_c_external_service` FOREIGN KEY (`external_service_id`) REFERENCES `c_external_service` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.c_external_service_properties: ~12 rows (approximately)
+-- Dumping data for table mifostenant-default.c_external_service_properties: ~12 rows (approximately)
 /*!40000 ALTER TABLE `c_external_service_properties` DISABLE KEYS */;
 INSERT INTO `c_external_service_properties` (`name`, `value`, `external_service_id`) VALUES
 	('s3_access_key', NULL, 1),
@@ -608,7 +619,8 @@ INSERT INTO `c_external_service_properties` (`name`, `value`, `external_service_
 	('tenant_app_key', NULL, 3);
 /*!40000 ALTER TABLE `c_external_service_properties` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.job
+
+-- Dumping structure for table mifostenant-default.job
 DROP TABLE IF EXISTS `job`;
 CREATE TABLE IF NOT EXISTS `job` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -630,38 +642,39 @@ CREATE TABLE IF NOT EXISTS `job` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.job: ~26 rows (approximately)
+-- Dumping data for table mifostenant-default.job: ~26 rows (approximately)
 /*!40000 ALTER TABLE `job` DISABLE KEYS */;
 INSERT INTO `job` (`id`, `name`, `display_name`, `cron_expression`, `create_time`, `task_priority`, `group_name`, `previous_run_start_time`, `next_run_time`, `job_key`, `initializing_errorlog`, `is_active`, `currently_running`, `updates_allowed`, `scheduler_group`, `is_misfired`) VALUES
-	(1, 'Update loan Summary', 'Update loan Summary', '0 0 22 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-11-14 22:00:00', 'Update loan SummaryJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(2, 'Update Loan Arrears Ageing', 'Update Loan Arrears Ageing', '0 1 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-11-15 00:01:00', 'Update Loan Arrears AgeingJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(3, 'Update Loan Paid In Advance', 'Update Loan Paid In Advance', '0 5 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-11-15 00:05:00', 'Update Loan Paid In AdvanceJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(4, 'Apply Annual Fee For Savings', 'Apply Annual Fee For Savings', '0 20 22 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-11-14 22:20:00', 'Apply Annual Fee For SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(5, 'Apply Holidays To Loans', 'Apply Holidays To Loans', '0 0 12 * * ?', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-11-15 12:00:00', 'Apply Holidays To LoansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(6, 'Post Interest For Savings', 'Post Interest For Savings', '0 0 0 1/1 * ? *', '2015-06-03 02:56:58', 5, NULL, NULL, '2016-11-15 00:00:00', 'Post Interest For SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
-	(7, 'Transfer Fee For Loans From Savings', 'Transfer Fee For Loans From Savings', '0 1 0 1/1 * ? *', '2015-06-03 02:57:00', 5, NULL, NULL, '2016-11-15 00:01:00', 'Transfer Fee For Loans From SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(8, 'Pay Due Savings Charges', 'Pay Due Savings Charges', '0 0 12 * * ?', '2013-09-23 00:00:00', 5, NULL, NULL, '2016-11-15 12:00:00', 'Pay Due Savings ChargesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(9, 'Update Accounting Running Balances', 'Update Accounting Running Balances', '0 1 0 1/1 * ? *', '2015-06-03 02:57:00', 5, NULL, NULL, '2016-11-15 00:01:00', 'Update Accounting Running BalancesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(10, 'Execute Standing Instruction', 'Execute Standing Instruction', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 5, NULL, NULL, '2016-11-15 00:00:00', 'Execute Standing InstructionJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(11, 'Add Accrual Transactions', 'Add Accrual Transactions', '0 1 0 1/1 * ? *', '2015-06-03 02:57:04', 3, NULL, NULL, '2016-11-15 00:01:00', 'Add Accrual TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(12, 'Apply penalty to overdue loans', 'Apply penalty to overdue loans', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 5, NULL, NULL, '2016-11-15 00:00:00', 'Apply penalty to overdue loansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(13, 'Update Non Performing Assets', 'Update Non Performing Assets', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 6, NULL, NULL, '2016-11-15 00:00:00', 'Update Non Performing AssetsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(14, 'Transfer Interest To Savings', 'Transfer Interest To Savings', '0 2 0 1/1 * ? *', '2015-06-03 02:57:05', 4, NULL, NULL, '2016-11-15 00:02:00', 'Transfer Interest To SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
-	(15, 'Update Deposit Accounts Maturity details', 'Update Deposit Accounts Maturity details', '0 0 0 1/1 * ? *', '2015-06-03 02:57:05', 5, NULL, NULL, '2016-11-15 00:00:00', 'Update Deposit Accounts Maturity detailsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(16, 'Add Periodic Accrual Transactions', 'Add Periodic Accrual Transactions', '0 2 0 1/1 * ? *', '2015-06-03 02:57:06', 2, NULL, NULL, '2016-11-15 00:02:00', 'Add Periodic Accrual TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(17, 'Recalculate Interest For Loans', 'Recalculate Interest For Loans', '0 1 0 1/1 * ? *', '2015-06-03 02:57:07', 4, NULL, NULL, '2016-11-15 00:01:00', 'Recalculate Interest For LoansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(18, 'Generate Mandatory Savings Schedule', 'Generate Mandatory Savings Schedule', '0 5 0 1/1 * ? *', '2015-06-03 02:57:12', 5, NULL, NULL, '2016-11-15 00:05:00', 'Generate Mandatory Savings ScheduleJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(19, 'Generate Loan Loss Provisioning', 'Generate Loan Loss Provisioning', '0 0 0 1/1 * ? *', '2015-10-20 19:57:53', 5, NULL, NULL, '2016-11-15 00:00:00', 'Generate Loan Loss ProvisioningJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(20, 'Post Dividends For Shares', 'Post Dividends For Shares', '0 0 0 1/1 * ? *', '2016-04-13 20:19:14', 5, NULL, NULL, '2016-11-15 00:00:00', 'Post Dividends For SharesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(21, 'Update Savings Dormant Accounts', 'Update Savings Dormant Accounts', '0 0 0 1/1 * ? *', '2016-05-04 20:40:43', 3, NULL, NULL, '2016-11-15 00:00:00', 'Update Savings Dormant AccountsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
-	(22, 'Add Accrual Transactions For Loans With Income Posted As Transactions', 'Add Accrual Transactions For Loans With Income Posted As Transactions', '0 1 0 1/1 * ? *', '2016-05-04 20:40:45', 5, NULL, NULL, '2016-11-15 00:01:00', 'Add Accrual Transactions For Loans With Income Posted As TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(23, 'Execute Report Mailing Jobs', 'Execute Report Mailing Jobs', '0 0/15 * * * ?', '2016-08-16 17:14:22', 5, NULL, '2016-08-16 17:15:00', '2016-11-14 20:30:00', 'Execute Report Mailing JobsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(24, 'Update Sms Outbound with campaign message', 'Update Sms Outbound with campaign message', '0 0 0 1/1 * ? *', '2016-11-14 20:20:29', 3, NULL, NULL, NULL, 'Update Sms Outbound with campaign message1 _ DEFAULT', NULL, 0, 0, 1, 1, 0),
-	(25, 'Send messages to SMS gateway', 'Send messages to SMS gateway', '0 0 0 1/1 * ? *', '2016-11-14 20:20:29', 3, NULL, NULL, NULL, 'Send messages to SMS gateway1 _ DEFAULT', NULL, 0, 0, 1, 1, 0),
-	(26, 'Get delivery reports from SMS gateway', 'Get delivery reports from SMS gateway', '0 0 0 1/1 * ? *', '2016-11-14 20:20:29', 3, NULL, NULL, NULL, 'Get delivery reports from SMS gateway1 _ DEFAULT', NULL, 0, 0, 1, 1, 0);
+	(1, 'Update loan Summary', 'Update loan Summary', '0 0 22 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-11-18 22:00:00', 'Update loan SummaryJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(2, 'Update Loan Arrears Ageing', 'Update Loan Arrears Ageing', '0 1 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-11-19 00:01:00', 'Update Loan Arrears AgeingJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(3, 'Update Loan Paid In Advance', 'Update Loan Paid In Advance', '0 5 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-11-19 00:05:00', 'Update Loan Paid In AdvanceJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(4, 'Apply Annual Fee For Savings', 'Apply Annual Fee For Savings', '0 20 22 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-11-18 22:20:00', 'Apply Annual Fee For SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(5, 'Apply Holidays To Loans', 'Apply Holidays To Loans', '0 0 12 * * ?', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-11-19 12:00:00', 'Apply Holidays To LoansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(6, 'Post Interest For Savings', 'Post Interest For Savings', '0 0 0 1/1 * ? *', '2015-06-03 02:56:58', 5, NULL, NULL, '2016-11-19 00:00:00', 'Post Interest For SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
+	(7, 'Transfer Fee For Loans From Savings', 'Transfer Fee For Loans From Savings', '0 1 0 1/1 * ? *', '2015-06-03 02:57:00', 5, NULL, NULL, '2016-11-19 00:01:00', 'Transfer Fee For Loans From SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(8, 'Pay Due Savings Charges', 'Pay Due Savings Charges', '0 0 12 * * ?', '2013-09-23 00:00:00', 5, NULL, NULL, '2016-11-19 12:00:00', 'Pay Due Savings ChargesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(9, 'Update Accounting Running Balances', 'Update Accounting Running Balances', '0 1 0 1/1 * ? *', '2015-06-03 02:57:00', 5, NULL, NULL, '2016-11-19 00:01:00', 'Update Accounting Running BalancesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(10, 'Execute Standing Instruction', 'Execute Standing Instruction', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 5, NULL, NULL, '2016-11-19 00:00:00', 'Execute Standing InstructionJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(11, 'Add Accrual Transactions', 'Add Accrual Transactions', '0 1 0 1/1 * ? *', '2015-06-03 02:57:04', 3, NULL, NULL, '2016-11-19 00:01:00', 'Add Accrual TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(12, 'Apply penalty to overdue loans', 'Apply penalty to overdue loans', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 5, NULL, NULL, '2016-11-19 00:00:00', 'Apply penalty to overdue loansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(13, 'Update Non Performing Assets', 'Update Non Performing Assets', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 6, NULL, NULL, '2016-11-19 00:00:00', 'Update Non Performing AssetsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(14, 'Transfer Interest To Savings', 'Transfer Interest To Savings', '0 2 0 1/1 * ? *', '2015-06-03 02:57:05', 4, NULL, NULL, '2016-11-19 00:02:00', 'Transfer Interest To SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
+	(15, 'Update Deposit Accounts Maturity details', 'Update Deposit Accounts Maturity details', '0 0 0 1/1 * ? *', '2015-06-03 02:57:05', 5, NULL, NULL, '2016-11-19 00:00:00', 'Update Deposit Accounts Maturity detailsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(16, 'Add Periodic Accrual Transactions', 'Add Periodic Accrual Transactions', '0 2 0 1/1 * ? *', '2015-06-03 02:57:06', 2, NULL, NULL, '2016-11-19 00:02:00', 'Add Periodic Accrual TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(17, 'Recalculate Interest For Loans', 'Recalculate Interest For Loans', '0 1 0 1/1 * ? *', '2015-06-03 02:57:07', 4, NULL, NULL, '2016-11-19 00:01:00', 'Recalculate Interest For LoansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(18, 'Generate Mandatory Savings Schedule', 'Generate Mandatory Savings Schedule', '0 5 0 1/1 * ? *', '2015-06-03 02:57:12', 5, NULL, NULL, '2016-11-19 00:05:00', 'Generate Mandatory Savings ScheduleJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(19, 'Generate Loan Loss Provisioning', 'Generate Loan Loss Provisioning', '0 0 0 1/1 * ? *', '2015-10-20 19:57:53', 5, NULL, NULL, '2016-11-19 00:00:00', 'Generate Loan Loss ProvisioningJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(20, 'Post Dividends For Shares', 'Post Dividends For Shares', '0 0 0 1/1 * ? *', '2016-11-18 17:26:49', 5, NULL, NULL, '2016-11-19 00:00:00', 'Post Dividends For SharesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(21, 'Update Savings Dormant Accounts', 'Update Savings Dormant Accounts', '0 0 0 1/1 * ? *', '2016-11-18 17:26:55', 3, NULL, NULL, '2016-11-19 00:00:00', 'Update Savings Dormant AccountsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
+	(22, 'Add Accrual Transactions For Loans With Income Posted As Transactions', 'Add Accrual Transactions For Loans With Income Posted As Transactions', '0 1 0 1/1 * ? *', '2016-11-18 17:27:00', 5, NULL, NULL, '2016-11-19 00:01:00', 'Add Accrual Transactions For Loans With Income Posted As TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(23, 'Execute Report Mailing Jobs', 'Execute Report Mailing Jobs', '0 0/15 * * * ?', '2016-11-18 17:27:13', 5, NULL, NULL, '2016-11-18 17:30:00', 'Execute Report Mailing JobsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(24, 'Update SMS Outbound with Campaign Message', 'Update SMS Outbound with Campaign Message', '0 0 5 1/1 * ? *', '2016-11-18 17:27:19', 3, NULL, NULL, '2016-11-19 05:00:00', 'Update SMS Outbound with Campaign MessageJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 4, 0),
+	(25, 'Send Messages to SMS Gateway', 'Send Messages to SMS Gateway', '0 0 5 1/1 * ? *', '2016-11-18 17:27:19', 2, NULL, NULL, '2016-11-19 05:00:00', 'Send Messages to SMS GatewayJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 4, 0),
+	(26, 'Get Delivery Reports from SMS Gateway', 'Get Delivery Reports from SMS Gateway', '0 0 5 1/1 * ? *', '2016-11-18 17:27:19', 1, NULL, NULL, '2016-11-19 05:00:00', 'Get Delivery Reports from SMS GatewayJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 4, 0);
 /*!40000 ALTER TABLE `job` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.job_run_history
+
+-- Dumping structure for table mifostenant-default.job_run_history
 DROP TABLE IF EXISTS `job_run_history`;
 CREATE TABLE IF NOT EXISTS `job_run_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -676,15 +689,14 @@ CREATE TABLE IF NOT EXISTS `job_run_history` (
   PRIMARY KEY (`id`),
   KEY `scheduledjobsFK` (`job_id`),
   CONSTRAINT `scheduledjobsFK` FOREIGN KEY (`job_id`) REFERENCES `job` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.job_run_history: ~1 rows (approximately)
+-- Dumping data for table mifostenant-default.job_run_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `job_run_history` DISABLE KEYS */;
-INSERT INTO `job_run_history` (`id`, `job_id`, `version`, `start_time`, `end_time`, `status`, `error_message`, `trigger_type`, `error_log`) VALUES
-	(1, 23, 1, '2016-08-16 17:15:00', '2016-08-16 17:15:00', 'success', NULL, 'cron', NULL);
 /*!40000 ALTER TABLE `job_run_history` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.mix_taxonomy
+
+-- Dumping structure for table mifostenant-default.mix_taxonomy
 DROP TABLE IF EXISTS `mix_taxonomy`;
 CREATE TABLE IF NOT EXISTS `mix_taxonomy` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -697,7 +709,7 @@ CREATE TABLE IF NOT EXISTS `mix_taxonomy` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.mix_taxonomy: ~48 rows (approximately)
+-- Dumping data for table mifostenant-default.mix_taxonomy: ~48 rows (approximately)
 /*!40000 ALTER TABLE `mix_taxonomy` DISABLE KEYS */;
 INSERT INTO `mix_taxonomy` (`id`, `name`, `namespace_id`, `dimension`, `type`, `description`, `need_mapping`) VALUES
 	(1, 'AdministrativeExpense', 1, NULL, 3, NULL, 1),
@@ -750,7 +762,8 @@ INSERT INTO `mix_taxonomy` (`id`, `name`, `namespace_id`, `dimension`, `type`, `
 	(48, 'WriteOffsOnGrossLoanPortfolio', 3, NULL, 2, 'The value of loans that have been recognized as uncollectible for accounting purposes. A write-off is an accounting procedure that removes the outstanding balance of the loan from the gross loan portfolio and impairment loss allowance. Thus, the write-off does not affect the net loan portfolio, total assets, or any equity account. If the impairment loss allowance is insufficient to cover the amount written off, the excess amount will result in an additional impairment loss on loans recognised in profit or loss of the period.', NULL);
 /*!40000 ALTER TABLE `mix_taxonomy` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.mix_taxonomy_mapping
+
+-- Dumping structure for table mifostenant-default.mix_taxonomy_mapping
 DROP TABLE IF EXISTS `mix_taxonomy_mapping`;
 CREATE TABLE IF NOT EXISTS `mix_taxonomy_mapping` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -761,13 +774,14 @@ CREATE TABLE IF NOT EXISTS `mix_taxonomy_mapping` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.mix_taxonomy_mapping: ~1 rows (approximately)
+-- Dumping data for table mifostenant-default.mix_taxonomy_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `mix_taxonomy_mapping` DISABLE KEYS */;
 INSERT INTO `mix_taxonomy_mapping` (`id`, `identifier`, `config`, `last_update_date`, `currency`) VALUES
 	(1, 'default', NULL, NULL, '');
 /*!40000 ALTER TABLE `mix_taxonomy_mapping` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.mix_xbrl_namespace
+
+-- Dumping structure for table mifostenant-default.mix_xbrl_namespace
 DROP TABLE IF EXISTS `mix_xbrl_namespace`;
 CREATE TABLE IF NOT EXISTS `mix_xbrl_namespace` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -777,7 +791,7 @@ CREATE TABLE IF NOT EXISTS `mix_xbrl_namespace` (
   UNIQUE KEY `UNQUE` (`prefix`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.mix_xbrl_namespace: ~7 rows (approximately)
+-- Dumping data for table mifostenant-default.mix_xbrl_namespace: ~7 rows (approximately)
 /*!40000 ALTER TABLE `mix_xbrl_namespace` DISABLE KEYS */;
 INSERT INTO `mix_xbrl_namespace` (`id`, `prefix`, `url`) VALUES
 	(1, 'ifrs', 'http://xbrl.iasb.org/taxonomy/2009-04-01/ifrs'),
@@ -789,7 +803,8 @@ INSERT INTO `mix_xbrl_namespace` (`id`, `prefix`, `url`) VALUES
 	(7, 'dc-all', 'http://www.themix.org/int/fr/ifrs/basi/2010-08-31/dc-all');
 /*!40000 ALTER TABLE `mix_xbrl_namespace` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_account_transfer_details
+
+-- Dumping structure for table mifostenant-default.m_account_transfer_details
 DROP TABLE IF EXISTS `m_account_transfer_details`;
 CREATE TABLE IF NOT EXISTS `m_account_transfer_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -821,11 +836,12 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_details` (
   CONSTRAINT `FK_m_account_transfer_details_to_savings_account` FOREIGN KEY (`to_savings_account_id`) REFERENCES `m_savings_account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_account_transfer_details: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_account_transfer_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_account_transfer_details` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_account_transfer_details` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_account_transfer_standing_instructions
+
+-- Dumping structure for table mifostenant-default.m_account_transfer_standing_instructions
 DROP TABLE IF EXISTS `m_account_transfer_standing_instructions`;
 CREATE TABLE IF NOT EXISTS `m_account_transfer_standing_instructions` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -849,11 +865,12 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_standing_instructions` (
   CONSTRAINT `FK_m_standing_instructions_account_transfer_details` FOREIGN KEY (`account_transfer_details_id`) REFERENCES `m_account_transfer_details` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_account_transfer_standing_instructions: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_account_transfer_standing_instructions: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_account_transfer_standing_instructions` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_account_transfer_standing_instructions` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_account_transfer_standing_instructions_history
+
+-- Dumping structure for table mifostenant-default.m_account_transfer_standing_instructions_history
 DROP TABLE IF EXISTS `m_account_transfer_standing_instructions_history`;
 CREATE TABLE IF NOT EXISTS `m_account_transfer_standing_instructions_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -867,11 +884,12 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_standing_instructions_history` (
   CONSTRAINT `FK_m_account_transfer_standing_instructions_m_history` FOREIGN KEY (`standing_instruction_id`) REFERENCES `m_account_transfer_standing_instructions` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_account_transfer_standing_instructions_history: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_account_transfer_standing_instructions_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_account_transfer_standing_instructions_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_account_transfer_standing_instructions_history` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_account_transfer_transaction
+
+-- Dumping structure for table mifostenant-default.m_account_transfer_transaction
 DROP TABLE IF EXISTS `m_account_transfer_transaction`;
 CREATE TABLE IF NOT EXISTS `m_account_transfer_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -900,11 +918,12 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_transaction` (
   CONSTRAINT `FK_m_account_transfer_transaction_to_m_savings_transaction` FOREIGN KEY (`to_savings_transaction_id`) REFERENCES `m_savings_account_transaction` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_account_transfer_transaction: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_account_transfer_transaction: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_account_transfer_transaction` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_account_transfer_transaction` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_address
+
+-- Dumping structure for table mifostenant-default.m_address
 DROP TABLE IF EXISTS `m_address`;
 CREATE TABLE IF NOT EXISTS `m_address` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -931,11 +950,12 @@ CREATE TABLE IF NOT EXISTS `m_address` (
   CONSTRAINT `address_fields_codefk2` FOREIGN KEY (`country_id`) REFERENCES `m_code_value` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_address: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_address: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_address` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_address` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_appuser
+
+-- Dumping structure for table mifostenant-default.m_appuser
 DROP TABLE IF EXISTS `m_appuser`;
 CREATE TABLE IF NOT EXISTS `m_appuser` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -964,14 +984,15 @@ CREATE TABLE IF NOT EXISTS `m_appuser` (
   CONSTRAINT `fk_m_appuser_002` FOREIGN KEY (`staff_id`) REFERENCES `m_staff` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_appuser: ~2 rows (approximately)
+-- Dumping data for table mifostenant-default.m_appuser: ~2 rows (approximately)
 /*!40000 ALTER TABLE `m_appuser` DISABLE KEYS */;
 INSERT INTO `m_appuser` (`id`, `is_deleted`, `office_id`, `staff_id`, `username`, `firstname`, `lastname`, `password`, `email`, `firsttime_login_remaining`, `nonexpired`, `nonlocked`, `nonexpired_credentials`, `enabled`, `last_time_password_updated`, `password_never_expires`, `is_self_service_user`) VALUES
 	(1, 0, 1, NULL, 'mifos', 'App', 'Administrator', '5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a', 'demomfi@mifos.org', b'0', b'1', b'1', b'1', b'1', '2015-06-03', 0, b'0'),
 	(2, 0, 1, NULL, 'system', 'system', 'system', '5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a', 'demomfi@mifos.org', b'0', b'1', b'1', b'1', b'1', '2014-03-07', 0, b'0');
 /*!40000 ALTER TABLE `m_appuser` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_appuser_previous_password
+
+-- Dumping structure for table mifostenant-default.m_appuser_previous_password
 DROP TABLE IF EXISTS `m_appuser_previous_password`;
 CREATE TABLE IF NOT EXISTS `m_appuser_previous_password` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -983,11 +1004,12 @@ CREATE TABLE IF NOT EXISTS `m_appuser_previous_password` (
   CONSTRAINT `m_appuser_previous_password_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Dumping data for table mifostenant-barebone.m_appuser_previous_password: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_appuser_previous_password: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_appuser_previous_password` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_appuser_previous_password` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_appuser_role
+
+-- Dumping structure for table mifostenant-default.m_appuser_role
 DROP TABLE IF EXISTS `m_appuser_role`;
 CREATE TABLE IF NOT EXISTS `m_appuser_role` (
   `appuser_id` bigint(20) NOT NULL,
@@ -999,13 +1021,14 @@ CREATE TABLE IF NOT EXISTS `m_appuser_role` (
   CONSTRAINT `FK7662CE59B4100309` FOREIGN KEY (`appuser_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_appuser_role: ~1 rows (approximately)
+-- Dumping data for table mifostenant-default.m_appuser_role: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_appuser_role` DISABLE KEYS */;
 INSERT INTO `m_appuser_role` (`appuser_id`, `role_id`) VALUES
 	(1, 1);
 /*!40000 ALTER TABLE `m_appuser_role` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_calendar
+
+-- Dumping structure for table mifostenant-default.m_calendar
 DROP TABLE IF EXISTS `m_calendar`;
 CREATE TABLE IF NOT EXISTS `m_calendar` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1029,11 +1052,12 @@ CREATE TABLE IF NOT EXISTS `m_calendar` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_calendar: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_calendar: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_calendar` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_calendar` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_calendar_history
+
+-- Dumping structure for table mifostenant-default.m_calendar_history
 DROP TABLE IF EXISTS `m_calendar_history`;
 CREATE TABLE IF NOT EXISTS `m_calendar_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1055,11 +1079,12 @@ CREATE TABLE IF NOT EXISTS `m_calendar_history` (
   CONSTRAINT `FK_m_calendar_m_calendar_history` FOREIGN KEY (`calendar_id`) REFERENCES `m_calendar` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_calendar_history: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_calendar_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_calendar_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_calendar_history` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_calendar_instance
+
+-- Dumping structure for table mifostenant-default.m_calendar_instance
 DROP TABLE IF EXISTS `m_calendar_instance`;
 CREATE TABLE IF NOT EXISTS `m_calendar_instance` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1071,11 +1096,12 @@ CREATE TABLE IF NOT EXISTS `m_calendar_instance` (
   CONSTRAINT `FK_m_calendar_m_calendar_instance` FOREIGN KEY (`calendar_id`) REFERENCES `m_calendar` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_calendar_instance: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_calendar_instance: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_calendar_instance` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_calendar_instance` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_cashiers
+
+-- Dumping structure for table mifostenant-default.m_cashiers
 DROP TABLE IF EXISTS `m_cashiers`;
 CREATE TABLE IF NOT EXISTS `m_cashiers` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1094,11 +1120,12 @@ CREATE TABLE IF NOT EXISTS `m_cashiers` (
   CONSTRAINT `FK_m_cashiers_m_teller` FOREIGN KEY (`teller_id`) REFERENCES `m_tellers` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_cashiers: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_cashiers: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_cashiers` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_cashiers` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_cashier_transactions
+
+-- Dumping structure for table mifostenant-default.m_cashier_transactions
 DROP TABLE IF EXISTS `m_cashier_transactions`;
 CREATE TABLE IF NOT EXISTS `m_cashier_transactions` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1116,11 +1143,12 @@ CREATE TABLE IF NOT EXISTS `m_cashier_transactions` (
   CONSTRAINT `FK_m_teller_transactions_m_cashiers` FOREIGN KEY (`cashier_id`) REFERENCES `m_cashiers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_cashier_transactions: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_cashier_transactions: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_cashier_transactions` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_cashier_transactions` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_charge
+
+-- Dumping structure for table mifostenant-default.m_charge
 DROP TABLE IF EXISTS `m_charge`;
 CREATE TABLE IF NOT EXISTS `m_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1150,11 +1178,12 @@ CREATE TABLE IF NOT EXISTS `m_charge` (
   CONSTRAINT `FK_m_charge_m_tax_group` FOREIGN KEY (`tax_group_id`) REFERENCES `m_tax_group` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_charge: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_charge` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_client
+
+-- Dumping structure for table mifostenant-default.m_client
 DROP TABLE IF EXISTS `m_client`;
 CREATE TABLE IF NOT EXISTS `m_client` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1226,16 +1255,17 @@ CREATE TABLE IF NOT EXISTS `m_client` (
   CONSTRAINT `FK_m_client_m_savings_product` FOREIGN KEY (`default_savings_product`) REFERENCES `m_savings_product` (`id`),
   CONSTRAINT `FK_m_client_m_staff` FOREIGN KEY (`staff_id`) REFERENCES `m_staff` (`id`),
   CONSTRAINT `FK_m_client_substatus_m_code_value` FOREIGN KEY (`sub_status`) REFERENCES `m_code_value` (`id`),
-  CONSTRAINT `FK_m_client_type_mcode_value_reject` FOREIGN KEY (`reject_reason_cv_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `FK_m_client_type_m_code_value` FOREIGN KEY (`client_type_cv_id`) REFERENCES `m_code_value` (`id`),
-  CONSTRAINT `FK_m_client_type_m_code_value_withdraw` FOREIGN KEY (`withdraw_reason_cv_id`) REFERENCES `m_code_value` (`id`)
+  CONSTRAINT `FK_m_client_type_m_code_value_withdraw` FOREIGN KEY (`withdraw_reason_cv_id`) REFERENCES `m_code_value` (`id`),
+  CONSTRAINT `FK_m_client_type_mcode_value_reject` FOREIGN KEY (`reject_reason_cv_id`) REFERENCES `m_code_value` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_client: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_client: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_client` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_client_address
+
+-- Dumping structure for table mifostenant-default.m_client_address
 DROP TABLE IF EXISTS `m_client_address`;
 CREATE TABLE IF NOT EXISTS `m_client_address` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1251,11 +1281,12 @@ CREATE TABLE IF NOT EXISTS `m_client_address` (
   CONSTRAINT `clientaddressfk` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_client_address: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_client_address: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client_address` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_client_address` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_client_attendance
+
+-- Dumping structure for table mifostenant-default.m_client_attendance
 DROP TABLE IF EXISTS `m_client_attendance`;
 CREATE TABLE IF NOT EXISTS `m_client_attendance` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1269,11 +1300,12 @@ CREATE TABLE IF NOT EXISTS `m_client_attendance` (
   CONSTRAINT `FK_m_meeting_m_client_attendance` FOREIGN KEY (`meeting_id`) REFERENCES `m_meeting` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_client_attendance: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_client_attendance: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client_attendance` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_client_attendance` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_client_charge
+
+-- Dumping structure for table mifostenant-default.m_client_charge
 DROP TABLE IF EXISTS `m_client_charge`;
 CREATE TABLE IF NOT EXISTS `m_client_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1299,11 +1331,12 @@ CREATE TABLE IF NOT EXISTS `m_client_charge` (
   CONSTRAINT `FK_m_client_charge_m_client` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_client_charge: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_client_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_client_charge` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_client_charge_paid_by
+
+-- Dumping structure for table mifostenant-default.m_client_charge_paid_by
 DROP TABLE IF EXISTS `m_client_charge_paid_by`;
 CREATE TABLE IF NOT EXISTS `m_client_charge_paid_by` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1317,11 +1350,12 @@ CREATE TABLE IF NOT EXISTS `m_client_charge_paid_by` (
   CONSTRAINT `FK_m_client_charge_paid_by_m_client_transaction` FOREIGN KEY (`client_transaction_id`) REFERENCES `m_client_transaction` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_client_charge_paid_by: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_client_charge_paid_by: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client_charge_paid_by` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_client_charge_paid_by` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_client_identifier
+
+-- Dumping structure for table mifostenant-default.m_client_identifier
 DROP TABLE IF EXISTS `m_client_identifier`;
 CREATE TABLE IF NOT EXISTS `m_client_identifier` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1344,11 +1378,12 @@ CREATE TABLE IF NOT EXISTS `m_client_identifier` (
   CONSTRAINT `FK_m_client_document_m_code_value` FOREIGN KEY (`document_type_id`) REFERENCES `m_code_value` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_client_identifier: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_client_identifier: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client_identifier` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_client_identifier` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_client_non_person
+
+-- Dumping structure for table mifostenant-default.m_client_non_person
 DROP TABLE IF EXISTS `m_client_non_person`;
 CREATE TABLE IF NOT EXISTS `m_client_non_person` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1364,11 +1399,12 @@ CREATE TABLE IF NOT EXISTS `m_client_non_person` (
   CONSTRAINT `FK_client_id` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_client_non_person: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_client_non_person: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client_non_person` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_client_non_person` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_client_transaction
+
+-- Dumping structure for table mifostenant-default.m_client_transaction
 DROP TABLE IF EXISTS `m_client_transaction`;
 CREATE TABLE IF NOT EXISTS `m_client_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1391,11 +1427,12 @@ CREATE TABLE IF NOT EXISTS `m_client_transaction` (
   CONSTRAINT `FK_m_client_transaction_m_client` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_client_transaction: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_client_transaction: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client_transaction` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_client_transaction` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_code
+
+-- Dumping structure for table mifostenant-default.m_code
 DROP TABLE IF EXISTS `m_code`;
 CREATE TABLE IF NOT EXISTS `m_code` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -1405,7 +1442,7 @@ CREATE TABLE IF NOT EXISTS `m_code` (
   UNIQUE KEY `code_name` (`code_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_code: ~28 rows (approximately)
+-- Dumping data for table mifostenant-default.m_code: ~28 rows (approximately)
 /*!40000 ALTER TABLE `m_code` DISABLE KEYS */;
 INSERT INTO `m_code` (`id`, `code_name`, `is_system_defined`) VALUES
 	(1, 'Customer Identifier', 1),
@@ -1438,7 +1475,8 @@ INSERT INTO `m_code` (`id`, `code_name`, `is_system_defined`) VALUES
 	(29, 'ADDRESS_TYPE', 1);
 /*!40000 ALTER TABLE `m_code` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_code_value
+
+-- Dumping structure for table mifostenant-default.m_code_value
 DROP TABLE IF EXISTS `m_code_value`;
 CREATE TABLE IF NOT EXISTS `m_code_value` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -1455,7 +1493,7 @@ CREATE TABLE IF NOT EXISTS `m_code_value` (
   CONSTRAINT `FKCFCEA42640BE071Z` FOREIGN KEY (`code_id`) REFERENCES `m_code` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_code_value: ~13 rows (approximately)
+-- Dumping data for table mifostenant-default.m_code_value: ~13 rows (approximately)
 /*!40000 ALTER TABLE `m_code_value` DISABLE KEYS */;
 INSERT INTO `m_code_value` (`id`, `code_id`, `code_value`, `code_description`, `order_position`, `code_score`, `is_active`, `is_mandatory`) VALUES
 	(1, 1, 'Passport', NULL, 1, NULL, 1, 0),
@@ -1473,7 +1511,8 @@ INSERT INTO `m_code_value` (`id`, `code_id`, `code_value`, `code_description`, `
 	(13, 13, 'Leader', 'Group Leader Role', 1, NULL, 1, 0);
 /*!40000 ALTER TABLE `m_code_value` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_currency
+
+-- Dumping structure for table mifostenant-default.m_currency
 DROP TABLE IF EXISTS `m_currency`;
 CREATE TABLE IF NOT EXISTS `m_currency` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1487,7 +1526,7 @@ CREATE TABLE IF NOT EXISTS `m_currency` (
   UNIQUE KEY `code` (`code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=164 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_currency: ~163 rows (approximately)
+-- Dumping data for table mifostenant-default.m_currency: ~163 rows (approximately)
 /*!40000 ALTER TABLE `m_currency` DISABLE KEYS */;
 INSERT INTO `m_currency` (`id`, `code`, `decimal_places`, `currency_multiplesof`, `display_symbol`, `name`, `internationalized_name_code`) VALUES
 	(1, 'AED', 2, NULL, NULL, 'UAE Dirham', 'currency.AED'),
@@ -1655,7 +1694,8 @@ INSERT INTO `m_currency` (`id`, `code`, `decimal_places`, `currency_multiplesof`
 	(163, 'ZWD', 2, NULL, NULL, 'Zimbabwe Dollar', 'currency.ZWD');
 /*!40000 ALTER TABLE `m_currency` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_deposit_account_on_hold_transaction
+
+-- Dumping structure for table mifostenant-default.m_deposit_account_on_hold_transaction
 DROP TABLE IF EXISTS `m_deposit_account_on_hold_transaction`;
 CREATE TABLE IF NOT EXISTS `m_deposit_account_on_hold_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1670,11 +1710,12 @@ CREATE TABLE IF NOT EXISTS `m_deposit_account_on_hold_transaction` (
   CONSTRAINT `FK_deposit_on_hold_transaction_m_savings_account` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_deposit_account_on_hold_transaction: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_deposit_account_on_hold_transaction: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_deposit_account_on_hold_transaction` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_deposit_account_on_hold_transaction` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_deposit_account_recurring_detail
+
+-- Dumping structure for table mifostenant-default.m_deposit_account_recurring_detail
 DROP TABLE IF EXISTS `m_deposit_account_recurring_detail`;
 CREATE TABLE IF NOT EXISTS `m_deposit_account_recurring_detail` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1691,11 +1732,12 @@ CREATE TABLE IF NOT EXISTS `m_deposit_account_recurring_detail` (
   CONSTRAINT `FKDARD00000000000001` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_deposit_account_recurring_detail: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_deposit_account_recurring_detail: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_deposit_account_recurring_detail` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_deposit_account_recurring_detail` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_deposit_account_term_and_preclosure
+
+-- Dumping structure for table mifostenant-default.m_deposit_account_term_and_preclosure
 DROP TABLE IF EXISTS `m_deposit_account_term_and_preclosure`;
 CREATE TABLE IF NOT EXISTS `m_deposit_account_term_and_preclosure` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1722,11 +1764,12 @@ CREATE TABLE IF NOT EXISTS `m_deposit_account_term_and_preclosure` (
   CONSTRAINT `FKDATP00000000000001` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_deposit_account_term_and_preclosure: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_deposit_account_term_and_preclosure: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_deposit_account_term_and_preclosure` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_deposit_account_term_and_preclosure` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_deposit_product_interest_rate_chart
+
+-- Dumping structure for table mifostenant-default.m_deposit_product_interest_rate_chart
 DROP TABLE IF EXISTS `m_deposit_product_interest_rate_chart`;
 CREATE TABLE IF NOT EXISTS `m_deposit_product_interest_rate_chart` (
   `deposit_product_id` bigint(20) NOT NULL,
@@ -1737,11 +1780,12 @@ CREATE TABLE IF NOT EXISTS `m_deposit_product_interest_rate_chart` (
   CONSTRAINT `FKDPIRC00000000000002` FOREIGN KEY (`interest_rate_chart_id`) REFERENCES `m_interest_rate_chart` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_deposit_product_interest_rate_chart: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_deposit_product_interest_rate_chart: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_deposit_product_interest_rate_chart` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_deposit_product_interest_rate_chart` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_deposit_product_recurring_detail
+
+-- Dumping structure for table mifostenant-default.m_deposit_product_recurring_detail
 DROP TABLE IF EXISTS `m_deposit_product_recurring_detail`;
 CREATE TABLE IF NOT EXISTS `m_deposit_product_recurring_detail` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1754,11 +1798,12 @@ CREATE TABLE IF NOT EXISTS `m_deposit_product_recurring_detail` (
   CONSTRAINT `FKDPRD00000000000001` FOREIGN KEY (`savings_product_id`) REFERENCES `m_savings_product` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_deposit_product_recurring_detail: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_deposit_product_recurring_detail: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_deposit_product_recurring_detail` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_deposit_product_recurring_detail` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_deposit_product_term_and_preclosure
+
+-- Dumping structure for table mifostenant-default.m_deposit_product_term_and_preclosure
 DROP TABLE IF EXISTS `m_deposit_product_term_and_preclosure`;
 CREATE TABLE IF NOT EXISTS `m_deposit_product_term_and_preclosure` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1780,11 +1825,12 @@ CREATE TABLE IF NOT EXISTS `m_deposit_product_term_and_preclosure` (
   CONSTRAINT `FKDPTP00000000000001` FOREIGN KEY (`savings_product_id`) REFERENCES `m_savings_product` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_deposit_product_term_and_preclosure: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_deposit_product_term_and_preclosure: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_deposit_product_term_and_preclosure` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_deposit_product_term_and_preclosure` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_document
+
+-- Dumping structure for table mifostenant-default.m_document
 DROP TABLE IF EXISTS `m_document`;
 CREATE TABLE IF NOT EXISTS `m_document` (
   `id` int(20) NOT NULL AUTO_INCREMENT,
@@ -1800,11 +1846,12 @@ CREATE TABLE IF NOT EXISTS `m_document` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_document: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_document: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_document` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_document` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_entity_relation
+
+-- Dumping structure for table mifostenant-default.m_entity_relation
 DROP TABLE IF EXISTS `m_entity_relation`;
 CREATE TABLE IF NOT EXISTS `m_entity_relation` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1815,7 +1862,7 @@ CREATE TABLE IF NOT EXISTS `m_entity_relation` (
   UNIQUE KEY `from_entity_type_to_entity_type_code_name` (`from_entity_type`,`to_entity_type`,`code_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_entity_relation: ~5 rows (approximately)
+-- Dumping data for table mifostenant-default.m_entity_relation: ~5 rows (approximately)
 /*!40000 ALTER TABLE `m_entity_relation` DISABLE KEYS */;
 INSERT INTO `m_entity_relation` (`id`, `from_entity_type`, `to_entity_type`, `code_name`) VALUES
 	(1, 1, 2, 'office_access_to_loan_products'),
@@ -1825,7 +1872,8 @@ INSERT INTO `m_entity_relation` (`id`, `from_entity_type`, `to_entity_type`, `co
 	(5, 5, 3, 'role_access_to_savings_products');
 /*!40000 ALTER TABLE `m_entity_relation` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_entity_to_entity_access
+
+-- Dumping structure for table mifostenant-default.m_entity_to_entity_access
 DROP TABLE IF EXISTS `m_entity_to_entity_access`;
 CREATE TABLE IF NOT EXISTS `m_entity_to_entity_access` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1841,11 +1889,12 @@ CREATE TABLE IF NOT EXISTS `m_entity_to_entity_access` (
   CONSTRAINT `FK_access_type_code_m_code_value` FOREIGN KEY (`access_type_code_value_id`) REFERENCES `m_code_value` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_entity_to_entity_access: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_entity_to_entity_access: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_entity_to_entity_access` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_entity_to_entity_access` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_entity_to_entity_mapping
+
+-- Dumping structure for table mifostenant-default.m_entity_to_entity_mapping
 DROP TABLE IF EXISTS `m_entity_to_entity_mapping`;
 CREATE TABLE IF NOT EXISTS `m_entity_to_entity_mapping` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1859,11 +1908,12 @@ CREATE TABLE IF NOT EXISTS `m_entity_to_entity_mapping` (
   CONSTRAINT `FK__rel_id_m_entity_relation_id` FOREIGN KEY (`rel_id`) REFERENCES `m_entity_relation` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_entity_to_entity_mapping: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_entity_to_entity_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_entity_to_entity_mapping` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_entity_to_entity_mapping` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_field_configuration
+
+-- Dumping structure for table mifostenant-default.m_field_configuration
 DROP TABLE IF EXISTS `m_field_configuration`;
 CREATE TABLE IF NOT EXISTS `m_field_configuration` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1876,7 +1926,7 @@ CREATE TABLE IF NOT EXISTS `m_field_configuration` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_field_configuration: ~18 rows (approximately)
+-- Dumping data for table mifostenant-default.m_field_configuration: ~18 rows (approximately)
 /*!40000 ALTER TABLE `m_field_configuration` DISABLE KEYS */;
 INSERT INTO `m_field_configuration` (`id`, `entity`, `subentity`, `field`, `is_enabled`, `is_mandatory`, `validation_regex`) VALUES
 	(1, 'ADDRESS', 'CLIENT', 'addressType', 1, 0, ''),
@@ -1899,7 +1949,8 @@ INSERT INTO `m_field_configuration` (`id`, `entity`, `subentity`, `field`, `is_e
 	(18, 'ADDRESS', 'CLIENT', 'isActive', 1, 0, '');
 /*!40000 ALTER TABLE `m_field_configuration` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_floating_rates
+
+-- Dumping structure for table mifostenant-default.m_floating_rates
 DROP TABLE IF EXISTS `m_floating_rates`;
 CREATE TABLE IF NOT EXISTS `m_floating_rates` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1914,11 +1965,12 @@ CREATE TABLE IF NOT EXISTS `m_floating_rates` (
   UNIQUE KEY `unq_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_floating_rates: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_floating_rates: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_floating_rates` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_floating_rates` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_floating_rates_periods
+
+-- Dumping structure for table mifostenant-default.m_floating_rates_periods
 DROP TABLE IF EXISTS `m_floating_rates_periods`;
 CREATE TABLE IF NOT EXISTS `m_floating_rates_periods` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1936,11 +1988,12 @@ CREATE TABLE IF NOT EXISTS `m_floating_rates_periods` (
   CONSTRAINT `FK_mappings_m_floating_rates` FOREIGN KEY (`floating_rates_id`) REFERENCES `m_floating_rates` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_floating_rates_periods: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_floating_rates_periods: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_floating_rates_periods` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_floating_rates_periods` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_fund
+
+-- Dumping structure for table mifostenant-default.m_fund
 DROP TABLE IF EXISTS `m_fund`;
 CREATE TABLE IF NOT EXISTS `m_fund` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1951,11 +2004,12 @@ CREATE TABLE IF NOT EXISTS `m_fund` (
   UNIQUE KEY `fund_externalid_org` (`external_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_fund: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_fund: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_fund` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_fund` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_group
+
+-- Dumping structure for table mifostenant-default.m_group
 DROP TABLE IF EXISTS `m_group`;
 CREATE TABLE IF NOT EXISTS `m_group` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1991,11 +2045,12 @@ CREATE TABLE IF NOT EXISTS `m_group` (
   CONSTRAINT `m_group_ibfk_1` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_group: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_group: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_group` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_group` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_group_client
+
+-- Dumping structure for table mifostenant-default.m_group_client
 DROP TABLE IF EXISTS `m_group_client`;
 CREATE TABLE IF NOT EXISTS `m_group_client` (
   `group_id` bigint(20) NOT NULL,
@@ -2006,11 +2061,12 @@ CREATE TABLE IF NOT EXISTS `m_group_client` (
   CONSTRAINT `m_group_client_ibfk_2` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_group_client: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_group_client: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_group_client` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_group_client` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_group_level
+
+-- Dumping structure for table mifostenant-default.m_group_level
 DROP TABLE IF EXISTS `m_group_level`;
 CREATE TABLE IF NOT EXISTS `m_group_level` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -2024,14 +2080,15 @@ CREATE TABLE IF NOT EXISTS `m_group_level` (
   CONSTRAINT `Parent_levelId_reference` FOREIGN KEY (`parent_id`) REFERENCES `m_group_level` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_group_level: ~2 rows (approximately)
+-- Dumping data for table mifostenant-default.m_group_level: ~2 rows (approximately)
 /*!40000 ALTER TABLE `m_group_level` DISABLE KEYS */;
 INSERT INTO `m_group_level` (`id`, `parent_id`, `super_parent`, `level_name`, `recursable`, `can_have_clients`) VALUES
 	(1, NULL, 1, 'Center', 1, 0),
 	(2, 1, 0, 'Group', 0, 1);
 /*!40000 ALTER TABLE `m_group_level` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_group_roles
+
+-- Dumping structure for table mifostenant-default.m_group_roles
 DROP TABLE IF EXISTS `m_group_roles`;
 CREATE TABLE IF NOT EXISTS `m_group_roles` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2048,11 +2105,12 @@ CREATE TABLE IF NOT EXISTS `m_group_roles` (
   CONSTRAINT `FK_grouprole_m_codevalue` FOREIGN KEY (`role_cv_id`) REFERENCES `m_code_value` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_group_roles: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_group_roles: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_group_roles` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_group_roles` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_guarantor
+
+-- Dumping structure for table mifostenant-default.m_guarantor
 DROP TABLE IF EXISTS `m_guarantor`;
 CREATE TABLE IF NOT EXISTS `m_guarantor` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2080,11 +2138,12 @@ CREATE TABLE IF NOT EXISTS `m_guarantor` (
   CONSTRAINT `FK_m_guarantor_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_guarantor: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_guarantor: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_guarantor` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_guarantor` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_guarantor_funding_details
+
+-- Dumping structure for table mifostenant-default.m_guarantor_funding_details
 DROP TABLE IF EXISTS `m_guarantor_funding_details`;
 CREATE TABLE IF NOT EXISTS `m_guarantor_funding_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2102,11 +2161,12 @@ CREATE TABLE IF NOT EXISTS `m_guarantor_funding_details` (
   CONSTRAINT `FK_m_guarantor_fund_details_m_guarantor` FOREIGN KEY (`guarantor_id`) REFERENCES `m_guarantor` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_guarantor_funding_details: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_guarantor_funding_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_guarantor_funding_details` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_guarantor_funding_details` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_guarantor_transaction
+
+-- Dumping structure for table mifostenant-default.m_guarantor_transaction
 DROP TABLE IF EXISTS `m_guarantor_transaction`;
 CREATE TABLE IF NOT EXISTS `m_guarantor_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2123,11 +2183,12 @@ CREATE TABLE IF NOT EXISTS `m_guarantor_transaction` (
   CONSTRAINT `FK_guarantor_transaction_m_loan_transaction` FOREIGN KEY (`loan_transaction_id`) REFERENCES `m_loan_transaction` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_guarantor_transaction: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_guarantor_transaction: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_guarantor_transaction` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_guarantor_transaction` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_holiday
+
+-- Dumping structure for table mifostenant-default.m_holiday
 DROP TABLE IF EXISTS `m_holiday`;
 CREATE TABLE IF NOT EXISTS `m_holiday` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2142,11 +2203,12 @@ CREATE TABLE IF NOT EXISTS `m_holiday` (
   UNIQUE KEY `holiday_name` (`name`,`from_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_holiday: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_holiday: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_holiday` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_holiday` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_holiday_office
+
+-- Dumping structure for table mifostenant-default.m_holiday_office
 DROP TABLE IF EXISTS `m_holiday_office`;
 CREATE TABLE IF NOT EXISTS `m_holiday_office` (
   `holiday_id` bigint(20) NOT NULL,
@@ -2158,11 +2220,12 @@ CREATE TABLE IF NOT EXISTS `m_holiday_office` (
   CONSTRAINT `m_office_id_ibfk_2` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_holiday_office: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_holiday_office: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_holiday_office` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_holiday_office` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_hook
+
+-- Dumping structure for table mifostenant-default.m_hook
 DROP TABLE IF EXISTS `m_hook`;
 CREATE TABLE IF NOT EXISTS `m_hook` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2181,11 +2244,12 @@ CREATE TABLE IF NOT EXISTS `m_hook` (
   CONSTRAINT `fk_ugd_template_id` FOREIGN KEY (`ugd_template_id`) REFERENCES `m_template` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_hook: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_hook: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_hook` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_hook` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_hook_configuration
+
+-- Dumping structure for table mifostenant-default.m_hook_configuration
 DROP TABLE IF EXISTS `m_hook_configuration`;
 CREATE TABLE IF NOT EXISTS `m_hook_configuration` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2198,11 +2262,12 @@ CREATE TABLE IF NOT EXISTS `m_hook_configuration` (
   CONSTRAINT `fk_hook_id_cfg` FOREIGN KEY (`hook_id`) REFERENCES `m_hook` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_hook_configuration: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_hook_configuration: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_hook_configuration` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_hook_configuration` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_hook_registered_events
+
+-- Dumping structure for table mifostenant-default.m_hook_registered_events
 DROP TABLE IF EXISTS `m_hook_registered_events`;
 CREATE TABLE IF NOT EXISTS `m_hook_registered_events` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2214,11 +2279,12 @@ CREATE TABLE IF NOT EXISTS `m_hook_registered_events` (
   CONSTRAINT `fk_hook_idc` FOREIGN KEY (`hook_id`) REFERENCES `m_hook` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_hook_registered_events: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_hook_registered_events: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_hook_registered_events` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_hook_registered_events` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_hook_schema
+
+-- Dumping structure for table mifostenant-default.m_hook_schema
 DROP TABLE IF EXISTS `m_hook_schema`;
 CREATE TABLE IF NOT EXISTS `m_hook_schema` (
   `id` smallint(6) NOT NULL AUTO_INCREMENT,
@@ -2232,7 +2298,7 @@ CREATE TABLE IF NOT EXISTS `m_hook_schema` (
   CONSTRAINT `fk_hook_template_id` FOREIGN KEY (`hook_template_id`) REFERENCES `m_hook_templates` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_hook_schema: ~7 rows (approximately)
+-- Dumping data for table mifostenant-default.m_hook_schema: ~7 rows (approximately)
 /*!40000 ALTER TABLE `m_hook_schema` DISABLE KEYS */;
 INSERT INTO `m_hook_schema` (`id`, `hook_template_id`, `field_type`, `field_name`, `placeholder`, `optional`) VALUES
 	(1, 1, 'string', 'Payload URL', NULL, 0),
@@ -2244,7 +2310,8 @@ INSERT INTO `m_hook_schema` (`id`, `hook_template_id`, `field_type`, `field_name
 	(7, 2, 'string', 'SMS Provider Account Id', NULL, 0);
 /*!40000 ALTER TABLE `m_hook_schema` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_hook_templates
+
+-- Dumping structure for table mifostenant-default.m_hook_templates
 DROP TABLE IF EXISTS `m_hook_templates`;
 CREATE TABLE IF NOT EXISTS `m_hook_templates` (
   `id` smallint(6) NOT NULL AUTO_INCREMENT,
@@ -2252,14 +2319,15 @@ CREATE TABLE IF NOT EXISTS `m_hook_templates` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_hook_templates: ~2 rows (approximately)
+-- Dumping data for table mifostenant-default.m_hook_templates: ~2 rows (approximately)
 /*!40000 ALTER TABLE `m_hook_templates` DISABLE KEYS */;
 INSERT INTO `m_hook_templates` (`id`, `name`) VALUES
 	(1, 'Web'),
 	(2, 'SMS Bridge');
 /*!40000 ALTER TABLE `m_hook_templates` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_image
+
+-- Dumping structure for table mifostenant-default.m_image
 DROP TABLE IF EXISTS `m_image`;
 CREATE TABLE IF NOT EXISTS `m_image` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2268,11 +2336,12 @@ CREATE TABLE IF NOT EXISTS `m_image` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_image: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_image: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_image` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_image` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_interest_incentives
+
+-- Dumping structure for table mifostenant-default.m_interest_incentives
 DROP TABLE IF EXISTS `m_interest_incentives`;
 CREATE TABLE IF NOT EXISTS `m_interest_incentives` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2288,11 +2357,12 @@ CREATE TABLE IF NOT EXISTS `m_interest_incentives` (
   CONSTRAINT `FK_m_interest_incentives_m_interest_rate_slab` FOREIGN KEY (`interest_rate_slab_id`) REFERENCES `m_interest_rate_slab` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_interest_incentives: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_interest_incentives: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_interest_incentives` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_interest_incentives` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_interest_rate_chart
+
+-- Dumping structure for table mifostenant-default.m_interest_rate_chart
 DROP TABLE IF EXISTS `m_interest_rate_chart`;
 CREATE TABLE IF NOT EXISTS `m_interest_rate_chart` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2304,11 +2374,12 @@ CREATE TABLE IF NOT EXISTS `m_interest_rate_chart` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_interest_rate_chart: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_interest_rate_chart: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_interest_rate_chart` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_interest_rate_chart` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_interest_rate_slab
+
+-- Dumping structure for table mifostenant-default.m_interest_rate_slab
 DROP TABLE IF EXISTS `m_interest_rate_slab`;
 CREATE TABLE IF NOT EXISTS `m_interest_rate_slab` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2326,11 +2397,12 @@ CREATE TABLE IF NOT EXISTS `m_interest_rate_slab` (
   CONSTRAINT `FKIRS00000000000001` FOREIGN KEY (`interest_rate_chart_id`) REFERENCES `m_interest_rate_chart` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_interest_rate_slab: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_interest_rate_slab: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_interest_rate_slab` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_interest_rate_slab` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan
+
+-- Dumping structure for table mifostenant-default.m_loan
 DROP TABLE IF EXISTS `m_loan`;
 CREATE TABLE IF NOT EXISTS `m_loan` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2462,8 +2534,8 @@ CREATE TABLE IF NOT EXISTS `m_loan` (
   CONSTRAINT `FK_closedon_userid` FOREIGN KEY (`closedon_userid`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_disbursedon_userid` FOREIGN KEY (`disbursedon_userid`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_loan_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`),
-  CONSTRAINT `FK_m_loanpurpose_codevalue` FOREIGN KEY (`loanpurpose_cv_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `FK_m_loan_m_staff` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`),
+  CONSTRAINT `FK_m_loanpurpose_codevalue` FOREIGN KEY (`loanpurpose_cv_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `FK_rejectedon_userid` FOREIGN KEY (`rejectedon_userid`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_submittedon_userid` FOREIGN KEY (`submittedon_userid`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_withdrawnon_userid` FOREIGN KEY (`withdrawnon_userid`) REFERENCES `m_appuser` (`id`),
@@ -2471,11 +2543,12 @@ CREATE TABLE IF NOT EXISTS `m_loan` (
   CONSTRAINT `m_loan_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loanproduct_provisioning_entry
+
+-- Dumping structure for table mifostenant-default.m_loanproduct_provisioning_entry
 DROP TABLE IF EXISTS `m_loanproduct_provisioning_entry`;
 CREATE TABLE IF NOT EXISTS `m_loanproduct_provisioning_entry` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2508,11 +2581,12 @@ CREATE TABLE IF NOT EXISTS `m_loanproduct_provisioning_entry` (
   CONSTRAINT `m_loanproduct_provisioning_entry_ibfk_8` FOREIGN KEY (`expense_account`) REFERENCES `acc_gl_account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loanproduct_provisioning_entry: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loanproduct_provisioning_entry: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loanproduct_provisioning_entry` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loanproduct_provisioning_entry` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loanproduct_provisioning_mapping
+
+-- Dumping structure for table mifostenant-default.m_loanproduct_provisioning_mapping
 DROP TABLE IF EXISTS `m_loanproduct_provisioning_mapping`;
 CREATE TABLE IF NOT EXISTS `m_loanproduct_provisioning_mapping` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2525,11 +2599,12 @@ CREATE TABLE IF NOT EXISTS `m_loanproduct_provisioning_mapping` (
   CONSTRAINT `m_loanproduct_provisioning_mapping_ibfk_2` FOREIGN KEY (`criteria_id`) REFERENCES `m_provisioning_criteria` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loanproduct_provisioning_mapping: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loanproduct_provisioning_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loanproduct_provisioning_mapping` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loanproduct_provisioning_mapping` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_arrears_aging
+
+-- Dumping structure for table mifostenant-default.m_loan_arrears_aging
 DROP TABLE IF EXISTS `m_loan_arrears_aging`;
 CREATE TABLE IF NOT EXISTS `m_loan_arrears_aging` (
   `loan_id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2543,11 +2618,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_arrears_aging` (
   CONSTRAINT `m_loan_arrears_aging_ibfk_1` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_arrears_aging: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_arrears_aging: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_arrears_aging` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_arrears_aging` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_charge
+
+-- Dumping structure for table mifostenant-default.m_loan_charge
 DROP TABLE IF EXISTS `m_loan_charge`;
 CREATE TABLE IF NOT EXISTS `m_loan_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2578,11 +2654,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_charge` (
   CONSTRAINT `m_loan_charge_ibfk_2` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_charge: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_charge` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_charge_paid_by
+
+-- Dumping structure for table mifostenant-default.m_loan_charge_paid_by
 DROP TABLE IF EXISTS `m_loan_charge_paid_by`;
 CREATE TABLE IF NOT EXISTS `m_loan_charge_paid_by` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2597,11 +2674,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_charge_paid_by` (
   CONSTRAINT `FK__m_loan_transaction` FOREIGN KEY (`loan_transaction_id`) REFERENCES `m_loan_transaction` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_charge_paid_by: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_charge_paid_by: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_charge_paid_by` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_charge_paid_by` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_collateral
+
+-- Dumping structure for table mifostenant-default.m_loan_collateral
 DROP TABLE IF EXISTS `m_loan_collateral`;
 CREATE TABLE IF NOT EXISTS `m_loan_collateral` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2616,11 +2694,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_collateral` (
   CONSTRAINT `FK_collateral_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_collateral: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_collateral: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_collateral` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_collateral` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_disbursement_detail
+
+-- Dumping structure for table mifostenant-default.m_loan_disbursement_detail
 DROP TABLE IF EXISTS `m_loan_disbursement_detail`;
 CREATE TABLE IF NOT EXISTS `m_loan_disbursement_detail` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2633,11 +2712,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_disbursement_detail` (
   CONSTRAINT `FK_loan_disbursement_detail_loan_id` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_disbursement_detail: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_disbursement_detail: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_disbursement_detail` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_disbursement_detail` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_installment_charge
+
+-- Dumping structure for table mifostenant-default.m_loan_installment_charge
 DROP TABLE IF EXISTS `m_loan_installment_charge`;
 CREATE TABLE IF NOT EXISTS `m_loan_installment_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2659,11 +2739,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_installment_charge` (
   CONSTRAINT `FK_loan_schedule_id_charge_schedule` FOREIGN KEY (`loan_schedule_id`) REFERENCES `m_loan_repayment_schedule` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_installment_charge: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_installment_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_installment_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_installment_charge` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_interest_recalculation_additional_details
+
+-- Dumping structure for table mifostenant-default.m_loan_interest_recalculation_additional_details
 DROP TABLE IF EXISTS `m_loan_interest_recalculation_additional_details`;
 CREATE TABLE IF NOT EXISTS `m_loan_interest_recalculation_additional_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2675,11 +2756,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_interest_recalculation_additional_details` (
   CONSTRAINT `FK_additional_details_repayment_schedule_id` FOREIGN KEY (`loan_repayment_schedule_id`) REFERENCES `m_loan_repayment_schedule` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_interest_recalculation_additional_details: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_interest_recalculation_additional_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_interest_recalculation_additional_details` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_interest_recalculation_additional_details` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_officer_assignment_history
+
+-- Dumping structure for table mifostenant-default.m_loan_officer_assignment_history
 DROP TABLE IF EXISTS `m_loan_officer_assignment_history`;
 CREATE TABLE IF NOT EXISTS `m_loan_officer_assignment_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2698,11 +2780,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_officer_assignment_history` (
   CONSTRAINT `fk_m_loan_officer_assignment_history_0002` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_officer_assignment_history: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_officer_assignment_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_officer_assignment_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_officer_assignment_history` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_overdue_installment_charge
+
+-- Dumping structure for table mifostenant-default.m_loan_overdue_installment_charge
 DROP TABLE IF EXISTS `m_loan_overdue_installment_charge`;
 CREATE TABLE IF NOT EXISTS `m_loan_overdue_installment_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2716,11 +2799,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_overdue_installment_charge` (
   CONSTRAINT `FK_m_loan_overdue_installment_charge_m_loan_repayment_schedule` FOREIGN KEY (`loan_schedule_id`) REFERENCES `m_loan_repayment_schedule` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_overdue_installment_charge: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_overdue_installment_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_overdue_installment_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_overdue_installment_charge` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_paid_in_advance
+
+-- Dumping structure for table mifostenant-default.m_loan_paid_in_advance
 DROP TABLE IF EXISTS `m_loan_paid_in_advance`;
 CREATE TABLE IF NOT EXISTS `m_loan_paid_in_advance` (
   `loan_id` bigint(20) NOT NULL,
@@ -2733,11 +2817,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_paid_in_advance` (
   CONSTRAINT `m_loan_paid_in_advance_ibfk_1` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_paid_in_advance: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_paid_in_advance: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_paid_in_advance` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_paid_in_advance` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_recalculation_details
+
+-- Dumping structure for table mifostenant-default.m_loan_recalculation_details
 DROP TABLE IF EXISTS `m_loan_recalculation_details`;
 CREATE TABLE IF NOT EXISTS `m_loan_recalculation_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2761,11 +2846,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_recalculation_details` (
   CONSTRAINT `FK_m_loan_m_loan_recalculation_details` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Dumping data for table mifostenant-barebone.m_loan_recalculation_details: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_recalculation_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_recalculation_details` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_recalculation_details` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_repayment_schedule
+
+-- Dumping structure for table mifostenant-default.m_loan_repayment_schedule
 DROP TABLE IF EXISTS `m_loan_repayment_schedule`;
 CREATE TABLE IF NOT EXISTS `m_loan_repayment_schedule` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2805,11 +2891,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_repayment_schedule` (
   CONSTRAINT `FK488B92AA40BE0710` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_repayment_schedule: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_repayment_schedule: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_repayment_schedule` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_repayment_schedule` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_repayment_schedule_history
+
+-- Dumping structure for table mifostenant-default.m_loan_repayment_schedule_history
 DROP TABLE IF EXISTS `m_loan_repayment_schedule_history`;
 CREATE TABLE IF NOT EXISTS `m_loan_repayment_schedule_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2834,11 +2921,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_repayment_schedule_history` (
   CONSTRAINT `m_loan_repayment_schedule_history_ibfk_2` FOREIGN KEY (`loan_reschedule_request_id`) REFERENCES `m_loan_reschedule_request` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_repayment_schedule_history: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_repayment_schedule_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_repayment_schedule_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_repayment_schedule_history` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_reschedule_request
+
+-- Dumping structure for table mifostenant-default.m_loan_reschedule_request
 DROP TABLE IF EXISTS `m_loan_reschedule_request`;
 CREATE TABLE IF NOT EXISTS `m_loan_reschedule_request` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2868,11 +2956,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_reschedule_request` (
   CONSTRAINT `m_loan_reschedule_request_ibfk_5` FOREIGN KEY (`rejected_by_user_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_reschedule_request: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_reschedule_request: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_reschedule_request` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_reschedule_request` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_reschedule_request_term_variations_mapping
+
+-- Dumping structure for table mifostenant-default.m_loan_reschedule_request_term_variations_mapping
 DROP TABLE IF EXISTS `m_loan_reschedule_request_term_variations_mapping`;
 CREATE TABLE IF NOT EXISTS `m_loan_reschedule_request_term_variations_mapping` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2885,11 +2974,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_reschedule_request_term_variations_mapping` (
   CONSTRAINT `FK__m_loan_term_variations` FOREIGN KEY (`loan_term_variations_id`) REFERENCES `m_loan_term_variations` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_reschedule_request_term_variations_mapping: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_reschedule_request_term_variations_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_reschedule_request_term_variations_mapping` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_reschedule_request_term_variations_mapping` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_term_variations
+
+-- Dumping structure for table mifostenant-default.m_loan_term_variations
 DROP TABLE IF EXISTS `m_loan_term_variations`;
 CREATE TABLE IF NOT EXISTS `m_loan_term_variations` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2907,11 +2997,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_term_variations` (
   CONSTRAINT `FK_loan_id_m_loan_id` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_term_variations: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_term_variations: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_term_variations` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_term_variations` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_topup
+
+-- Dumping structure for table mifostenant-default.m_loan_topup
 DROP TABLE IF EXISTS `m_loan_topup`;
 CREATE TABLE IF NOT EXISTS `m_loan_topup` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2923,16 +3014,17 @@ CREATE TABLE IF NOT EXISTS `m_loan_topup` (
   KEY `m_loan_topup_FK_loan_id` (`loan_id`),
   KEY `m_loan_topup_FK_closure_loan_id` (`closure_loan_id`),
   KEY `m_loan_topup_FK_account_transfer_details_id` (`account_transfer_details_id`),
-  CONSTRAINT `m_loan_topup_FK_loan_id` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
+  CONSTRAINT `m_loan_topup_FK_account_transfer_details_id` FOREIGN KEY (`account_transfer_details_id`) REFERENCES `m_account_transfer_details` (`id`),
   CONSTRAINT `m_loan_topup_FK_closure_loan_id` FOREIGN KEY (`closure_loan_id`) REFERENCES `m_loan` (`id`),
-  CONSTRAINT `m_loan_topup_FK_account_transfer_details_id` FOREIGN KEY (`account_transfer_details_id`) REFERENCES `m_account_transfer_details` (`id`)
+  CONSTRAINT `m_loan_topup_FK_loan_id` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_topup: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_topup: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_topup` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_topup` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_tranche_charges
+
+-- Dumping structure for table mifostenant-default.m_loan_tranche_charges
 DROP TABLE IF EXISTS `m_loan_tranche_charges`;
 CREATE TABLE IF NOT EXISTS `m_loan_tranche_charges` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2945,11 +3037,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_tranche_charges` (
   CONSTRAINT `FK_m_loan_tranche_charges_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_tranche_charges: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_tranche_charges: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_tranche_charges` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_tranche_charges` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_tranche_disbursement_charge
+
+-- Dumping structure for table mifostenant-default.m_loan_tranche_disbursement_charge
 DROP TABLE IF EXISTS `m_loan_tranche_disbursement_charge`;
 CREATE TABLE IF NOT EXISTS `m_loan_tranche_disbursement_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2962,11 +3055,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_tranche_disbursement_charge` (
   CONSTRAINT `FK_m_loan_tranche_disbursement_charge_m_loan_disbursement_detail` FOREIGN KEY (`disbursement_detail_id`) REFERENCES `m_loan_disbursement_detail` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_tranche_disbursement_charge: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_tranche_disbursement_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_tranche_disbursement_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_tranche_disbursement_charge` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_transaction
+
+-- Dumping structure for table mifostenant-default.m_loan_transaction
 DROP TABLE IF EXISTS `m_loan_transaction`;
 CREATE TABLE IF NOT EXISTS `m_loan_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2999,11 +3093,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_transaction` (
   CONSTRAINT `FK_m_loan_transaction_m_payment_detail` FOREIGN KEY (`payment_detail_id`) REFERENCES `m_payment_detail` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_transaction: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_transaction: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_transaction` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_transaction` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_loan_transaction_repayment_schedule_mapping
+
+-- Dumping structure for table mifostenant-default.m_loan_transaction_repayment_schedule_mapping
 DROP TABLE IF EXISTS `m_loan_transaction_repayment_schedule_mapping`;
 CREATE TABLE IF NOT EXISTS `m_loan_transaction_repayment_schedule_mapping` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -3021,11 +3116,12 @@ CREATE TABLE IF NOT EXISTS `m_loan_transaction_repayment_schedule_mapping` (
   CONSTRAINT `FK_mappings_m_loan_transaction` FOREIGN KEY (`loan_transaction_id`) REFERENCES `m_loan_transaction` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_loan_transaction_repayment_schedule_mapping: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_loan_transaction_repayment_schedule_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_transaction_repayment_schedule_mapping` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_transaction_repayment_schedule_mapping` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_mandatory_savings_schedule
+
+-- Dumping structure for table mifostenant-default.m_mandatory_savings_schedule
 DROP TABLE IF EXISTS `m_mandatory_savings_schedule`;
 CREATE TABLE IF NOT EXISTS `m_mandatory_savings_schedule` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -3048,11 +3144,12 @@ CREATE TABLE IF NOT EXISTS `m_mandatory_savings_schedule` (
   CONSTRAINT `FKMSS0000000001` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_mandatory_savings_schedule: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_mandatory_savings_schedule: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_mandatory_savings_schedule` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_mandatory_savings_schedule` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_meeting
+
+-- Dumping structure for table mifostenant-default.m_meeting
 DROP TABLE IF EXISTS `m_meeting`;
 CREATE TABLE IF NOT EXISTS `m_meeting` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -3063,11 +3160,12 @@ CREATE TABLE IF NOT EXISTS `m_meeting` (
   CONSTRAINT `FK_m_calendar_instance_m_meeting` FOREIGN KEY (`calendar_instance_id`) REFERENCES `m_calendar_instance` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Dumping data for table mifostenant-barebone.m_meeting: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_meeting: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_meeting` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_meeting` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_note
+
+-- Dumping structure for table mifostenant-default.m_note
 DROP TABLE IF EXISTS `m_note`;
 CREATE TABLE IF NOT EXISTS `m_note` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -3101,11 +3199,12 @@ CREATE TABLE IF NOT EXISTS `m_note` (
   CONSTRAINT `FK_savings_account_id` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_note: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_note: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_note` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_note` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_office
+
+-- Dumping structure for table mifostenant-default.m_office
 DROP TABLE IF EXISTS `m_office`;
 CREATE TABLE IF NOT EXISTS `m_office` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -3121,13 +3220,14 @@ CREATE TABLE IF NOT EXISTS `m_office` (
   CONSTRAINT `FK2291C477E2551DCC` FOREIGN KEY (`parent_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_office: ~1 rows (approximately)
+-- Dumping data for table mifostenant-default.m_office: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_office` DISABLE KEYS */;
 INSERT INTO `m_office` (`id`, `parent_id`, `hierarchy`, `external_id`, `name`, `opening_date`) VALUES
 	(1, NULL, '.', '1', 'Head Office', '2009-01-01');
 /*!40000 ALTER TABLE `m_office` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_office_transaction
+
+-- Dumping structure for table mifostenant-default.m_office_transaction
 DROP TABLE IF EXISTS `m_office_transaction`;
 CREATE TABLE IF NOT EXISTS `m_office_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -3145,11 +3245,12 @@ CREATE TABLE IF NOT EXISTS `m_office_transaction` (
   CONSTRAINT `FK1E37728B93C6C1B6` FOREIGN KEY (`to_office_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_office_transaction: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_office_transaction: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_office_transaction` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_office_transaction` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_organisation_currency
+
+-- Dumping structure for table mifostenant-default.m_organisation_currency
 DROP TABLE IF EXISTS `m_organisation_currency`;
 CREATE TABLE IF NOT EXISTS `m_organisation_currency` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -3162,13 +3263,14 @@ CREATE TABLE IF NOT EXISTS `m_organisation_currency` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_organisation_currency: ~1 rows (approximately)
+-- Dumping data for table mifostenant-default.m_organisation_currency: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_organisation_currency` DISABLE KEYS */;
 INSERT INTO `m_organisation_currency` (`id`, `code`, `decimal_places`, `currency_multiplesof`, `name`, `display_symbol`, `internationalized_name_code`) VALUES
 	(21, 'USD', 2, NULL, 'US Dollar', '$', 'currency.USD');
 /*!40000 ALTER TABLE `m_organisation_currency` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_password_validation_policy
+
+-- Dumping structure for table mifostenant-default.m_password_validation_policy
 DROP TABLE IF EXISTS `m_password_validation_policy`;
 CREATE TABLE IF NOT EXISTS `m_password_validation_policy` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -3179,14 +3281,15 @@ CREATE TABLE IF NOT EXISTS `m_password_validation_policy` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_password_validation_policy: ~2 rows (approximately)
+-- Dumping data for table mifostenant-default.m_password_validation_policy: ~2 rows (approximately)
 /*!40000 ALTER TABLE `m_password_validation_policy` DISABLE KEYS */;
 INSERT INTO `m_password_validation_policy` (`id`, `regex`, `description`, `active`, `key`) VALUES
 	(1, '^.{1,50}$', 'Password most be at least 1 character and not more that 50 characters long', 1, 'simple'),
 	(2, '^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\\s).{6,50}$', 'Password must be at least 6 characters, no more than 50 characters long, must include at least one upper case letter, one lower case letter, one numeric digit and no space', 0, 'secure');
 /*!40000 ALTER TABLE `m_password_validation_policy` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_payment_detail
+
+-- Dumping structure for table mifostenant-default.m_payment_detail
 DROP TABLE IF EXISTS `m_payment_detail`;
 CREATE TABLE IF NOT EXISTS `m_payment_detail` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -3201,11 +3304,12 @@ CREATE TABLE IF NOT EXISTS `m_payment_detail` (
   CONSTRAINT `FK_m_payment_detail_m_payment_type` FOREIGN KEY (`payment_type_id`) REFERENCES `m_payment_type` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_payment_detail: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_payment_detail: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_payment_detail` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_payment_detail` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_payment_type
+
+-- Dumping structure for table mifostenant-default.m_payment_type
 DROP TABLE IF EXISTS `m_payment_type`;
 CREATE TABLE IF NOT EXISTS `m_payment_type` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -3216,11 +3320,12 @@ CREATE TABLE IF NOT EXISTS `m_payment_type` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_payment_type: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_payment_type: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_payment_type` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_payment_type` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_permission
+
+-- Dumping structure for table mifostenant-default.m_permission
 DROP TABLE IF EXISTS `m_permission`;
 CREATE TABLE IF NOT EXISTS `m_permission` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -3233,7 +3338,7 @@ CREATE TABLE IF NOT EXISTS `m_permission` (
   UNIQUE KEY `code` (`code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=765 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_permission: ~711 rows (approximately)
+-- Dumping data for table mifostenant-default.m_permission: ~742 rows (approximately)
 /*!40000 ALTER TABLE `m_permission` DISABLE KEYS */;
 INSERT INTO `m_permission` (`id`, `grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES
 	(1, 'special', 'ALL_FUNCTIONS', NULL, NULL, 0),
@@ -3967,20 +4072,21 @@ INSERT INTO `m_permission` (`id`, `grouping`, `code`, `entity_name`, `action_nam
 	(751, 'portfolio', 'UNDOREJECT_CLIENT_CHECKER', 'CLIENT', 'UNDOREJECT_CHECKER', 1),
 	(752, 'portfolio', 'UNDOWITHDRAWAL_CLIENT', 'CLIENT', 'UNDOWITHDRAWAL', 1),
 	(753, 'portfolio', 'UNDOWITHDRAWAL_CLIENT_CHECKER', 'CLIENT', 'UNDOWITHDRAWAL_CHECKER', 1),
-	(754, 'report', 'READ_Daily Teller Cash Report (Pentaho)', 'Daily Teller Cash Report (Pentaho)', 'READ', 0),
-	(755, 'organisation', 'READ_SMSCAMPAIGN', 'SMSCAMPAIGN', 'READ', 0),
-	(756, 'organisation', 'CREATE_SMSCAMPAIGN', 'SMSCAMPAIGN', 'CREATE', 0),
-	(757, 'organisation', 'CREATE_SMSCAMPAIGN_CHECKER', 'SMSCAMPAIGN', 'CREATE', 0),
-	(758, 'organisation', 'UPDATE_SMSCAMPAIGN', 'SMSCAMPAIGN', 'UPDATE', 0),
-	(759, 'organisation', 'UPDATE_SMSCAMPAIGN_CHECKER', 'SMSCAMPAIGN', 'UPDATE', 0),
-	(760, 'organisation', 'DELETE_SMSCAMPAIGN', 'SMSCAMPAIGN', 'DELETE', 0),
-	(761, 'organisation', 'DELETE_SMSCAMPAIGN_CHECKER', 'SMSCAMPAIGN', 'DELETE', 0),
-	(762, 'organisation', 'ACTIVATE_SMSCAMPAIGN', 'SMSCAMPAIGN', 'ACTIVATE', 0),
-	(763, 'organisation', 'CLOSE_SMSCAMPAIGN', 'SMSCAMPAIGN', 'CLOSE', 0),
-	(764, 'organisation', 'REACTIVATE_SMSCAMPAIGN', 'SMSCAMPAIGN', 'REACTIVATE', 0);
+	(754, 'organisation', 'READ_SMSCAMPAIGN', 'SMSCAMPAIGN', 'READ', 0),
+	(755, 'organisation', 'CREATE_SMSCAMPAIGN', 'SMSCAMPAIGN', 'CREATE', 0),
+	(756, 'organisation', 'CREATE_SMSCAMPAIGN_CHECKER', 'SMSCAMPAIGN', 'CREATE', 0),
+	(757, 'organisation', 'UPDATE_SMSCAMPAIGN', 'SMSCAMPAIGN', 'UPDATE', 0),
+	(758, 'organisation', 'UPDATE_SMSCAMPAIGN_CHECKER', 'SMSCAMPAIGN', 'UPDATE', 0),
+	(759, 'organisation', 'DELETE_SMSCAMPAIGN', 'SMSCAMPAIGN', 'DELETE', 0),
+	(760, 'organisation', 'DELETE_SMSCAMPAIGN_CHECKER', 'SMSCAMPAIGN', 'DELETE', 0),
+	(761, 'organisation', 'ACTIVATE_SMSCAMPAIGN', 'SMSCAMPAIGN', 'ACTIVATE', 0),
+	(762, 'organisation', 'CLOSE_SMSCAMPAIGN', 'SMSCAMPAIGN', 'CLOSE', 0),
+	(763, 'organisation', 'REACTIVATE_SMSCAMPAIGN', 'SMSCAMPAIGN', 'REACTIVATE', 0),
+	(764, 'report', 'READ_Daily Teller Cash Report (Pentaho)', 'Daily Teller Cash Report (Pentaho)', 'READ', 0);
 /*!40000 ALTER TABLE `m_permission` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_portfolio_account_associations
+
+-- Dumping structure for table mifostenant-default.m_portfolio_account_associations
 DROP TABLE IF EXISTS `m_portfolio_account_associations`;
 CREATE TABLE IF NOT EXISTS `m_portfolio_account_associations` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4001,11 +4107,12 @@ CREATE TABLE IF NOT EXISTS `m_portfolio_account_associations` (
   CONSTRAINT `linked_savings_fk` FOREIGN KEY (`linked_savings_account_id`) REFERENCES `m_savings_account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_portfolio_account_associations: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_portfolio_account_associations: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_portfolio_account_associations` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_portfolio_account_associations` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_portfolio_command_source
+
+-- Dumping structure for table mifostenant-default.m_portfolio_command_source
 DROP TABLE IF EXISTS `m_portfolio_command_source`;
 CREATE TABLE IF NOT EXISTS `m_portfolio_command_source` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4043,11 +4150,12 @@ CREATE TABLE IF NOT EXISTS `m_portfolio_command_source` (
   CONSTRAINT `FK_m_maker_m_appuser` FOREIGN KEY (`maker_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_portfolio_command_source: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_portfolio_command_source: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_portfolio_command_source` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_portfolio_command_source` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_product_loan
+
+-- Dumping structure for table mifostenant-default.m_product_loan
 DROP TABLE IF EXISTS `m_product_loan`;
 CREATE TABLE IF NOT EXISTS `m_product_loan` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4115,11 +4223,12 @@ CREATE TABLE IF NOT EXISTS `m_product_loan` (
   CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_product_loan: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_product_loan: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_loan` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_product_loan_charge
+
+-- Dumping structure for table mifostenant-default.m_product_loan_charge
 DROP TABLE IF EXISTS `m_product_loan_charge`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_charge` (
   `product_loan_id` bigint(20) NOT NULL,
@@ -4130,11 +4239,12 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_charge` (
   CONSTRAINT `m_product_loan_charge_ibfk_2` FOREIGN KEY (`product_loan_id`) REFERENCES `m_product_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_product_loan_charge: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_product_loan_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_loan_charge` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_product_loan_configurable_attributes
+
+-- Dumping structure for table mifostenant-default.m_product_loan_configurable_attributes
 DROP TABLE IF EXISTS `m_product_loan_configurable_attributes`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_configurable_attributes` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4152,11 +4262,12 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_configurable_attributes` (
   CONSTRAINT `fk_m_product_loan_configurable_attributes_0001` FOREIGN KEY (`loan_product_id`) REFERENCES `m_product_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_product_loan_configurable_attributes: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_product_loan_configurable_attributes: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan_configurable_attributes` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_loan_configurable_attributes` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_product_loan_floating_rates
+
+-- Dumping structure for table mifostenant-default.m_product_loan_floating_rates
 DROP TABLE IF EXISTS `m_product_loan_floating_rates`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_floating_rates` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4174,11 +4285,12 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_floating_rates` (
   CONSTRAINT `FK_mappings_m_product_loan_id` FOREIGN KEY (`loan_product_id`) REFERENCES `m_product_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_product_loan_floating_rates: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_product_loan_floating_rates: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan_floating_rates` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_loan_floating_rates` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_product_loan_guarantee_details
+
+-- Dumping structure for table mifostenant-default.m_product_loan_guarantee_details
 DROP TABLE IF EXISTS `m_product_loan_guarantee_details`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_guarantee_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4191,11 +4303,12 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_guarantee_details` (
   CONSTRAINT `FK_guarantee_details_loan_product` FOREIGN KEY (`loan_product_id`) REFERENCES `m_product_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_product_loan_guarantee_details: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_product_loan_guarantee_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan_guarantee_details` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_loan_guarantee_details` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_product_loan_recalculation_details
+
+-- Dumping structure for table mifostenant-default.m_product_loan_recalculation_details
 DROP TABLE IF EXISTS `m_product_loan_recalculation_details`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_recalculation_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4221,11 +4334,12 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_recalculation_details` (
   CONSTRAINT `FK_m_product_loan_m_product_loan_recalculation_details` FOREIGN KEY (`product_id`) REFERENCES `m_product_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Dumping data for table mifostenant-barebone.m_product_loan_recalculation_details: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_product_loan_recalculation_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan_recalculation_details` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_loan_recalculation_details` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_product_loan_variable_installment_config
+
+-- Dumping structure for table mifostenant-default.m_product_loan_variable_installment_config
 DROP TABLE IF EXISTS `m_product_loan_variable_installment_config`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_variable_installment_config` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4237,11 +4351,12 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_variable_installment_config` (
   CONSTRAINT `FK_mappings_m_variable_product_loan_id` FOREIGN KEY (`loan_product_id`) REFERENCES `m_product_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_product_loan_variable_installment_config: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_product_loan_variable_installment_config: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan_variable_installment_config` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_loan_variable_installment_config` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_product_loan_variations_borrower_cycle
+
+-- Dumping structure for table mifostenant-default.m_product_loan_variations_borrower_cycle
 DROP TABLE IF EXISTS `m_product_loan_variations_borrower_cycle`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_variations_borrower_cycle` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4257,11 +4372,12 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_variations_borrower_cycle` (
   CONSTRAINT `borrower_cycle_loan_product_FK` FOREIGN KEY (`loan_product_id`) REFERENCES `m_product_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_product_loan_variations_borrower_cycle: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_product_loan_variations_borrower_cycle: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan_variations_borrower_cycle` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_loan_variations_borrower_cycle` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_product_mix
+
+-- Dumping structure for table mifostenant-default.m_product_mix
 DROP TABLE IF EXISTS `m_product_mix`;
 CREATE TABLE IF NOT EXISTS `m_product_mix` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4274,11 +4390,12 @@ CREATE TABLE IF NOT EXISTS `m_product_mix` (
   CONSTRAINT `FK_m_product_mix_restricted_product_id_to_m_product_loan` FOREIGN KEY (`restricted_product_id`) REFERENCES `m_product_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_product_mix: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_product_mix: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_mix` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_mix` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_provisioning_criteria
+
+-- Dumping structure for table mifostenant-default.m_provisioning_criteria
 DROP TABLE IF EXISTS `m_provisioning_criteria`;
 CREATE TABLE IF NOT EXISTS `m_provisioning_criteria` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4295,11 +4412,12 @@ CREATE TABLE IF NOT EXISTS `m_provisioning_criteria` (
   CONSTRAINT `m_provisioning_criteria_ibfk_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_provisioning_criteria: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_provisioning_criteria: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_provisioning_criteria` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_provisioning_criteria` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_provisioning_criteria_definition
+
+-- Dumping structure for table mifostenant-default.m_provisioning_criteria_definition
 DROP TABLE IF EXISTS `m_provisioning_criteria_definition`;
 CREATE TABLE IF NOT EXISTS `m_provisioning_criteria_definition` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4321,11 +4439,12 @@ CREATE TABLE IF NOT EXISTS `m_provisioning_criteria_definition` (
   CONSTRAINT `m_provisioning_criteria_definition_ibfk_4` FOREIGN KEY (`expense_account`) REFERENCES `acc_gl_account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_provisioning_criteria_definition: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_provisioning_criteria_definition: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_provisioning_criteria_definition` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_provisioning_criteria_definition` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_provisioning_history
+
+-- Dumping structure for table mifostenant-default.m_provisioning_history
 DROP TABLE IF EXISTS `m_provisioning_history`;
 CREATE TABLE IF NOT EXISTS `m_provisioning_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4341,11 +4460,12 @@ CREATE TABLE IF NOT EXISTS `m_provisioning_history` (
   CONSTRAINT `m_provisioning_history_ibfk_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_provisioning_history: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_provisioning_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_provisioning_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_provisioning_history` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_provision_category
+
+-- Dumping structure for table mifostenant-default.m_provision_category
 DROP TABLE IF EXISTS `m_provision_category`;
 CREATE TABLE IF NOT EXISTS `m_provision_category` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4355,7 +4475,7 @@ CREATE TABLE IF NOT EXISTS `m_provision_category` (
   UNIQUE KEY `category_name` (`category_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_provision_category: ~4 rows (approximately)
+-- Dumping data for table mifostenant-default.m_provision_category: ~4 rows (approximately)
 /*!40000 ALTER TABLE `m_provision_category` DISABLE KEYS */;
 INSERT INTO `m_provision_category` (`id`, `category_name`, `description`) VALUES
 	(1, 'STANDARD', 'Punctual Payment without any dues'),
@@ -4364,7 +4484,8 @@ INSERT INTO `m_provision_category` (`id`, `category_name`, `description`) VALUES
 	(4, 'LOSS', 'Principal and/or Interest overdue by y days');
 /*!40000 ALTER TABLE `m_provision_category` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_report_mailing_job
+
+-- Dumping structure for table mifostenant-default.m_report_mailing_job
 DROP TABLE IF EXISTS `m_report_mailing_job`;
 CREATE TABLE IF NOT EXISTS `m_report_mailing_job` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4403,11 +4524,12 @@ CREATE TABLE IF NOT EXISTS `m_report_mailing_job` (
   CONSTRAINT `m_report_mailing_job_ibfk_4` FOREIGN KEY (`run_as_userid`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_report_mailing_job: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_report_mailing_job: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_report_mailing_job` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_report_mailing_job` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_report_mailing_job_configuration
+
+-- Dumping structure for table mifostenant-default.m_report_mailing_job_configuration
 DROP TABLE IF EXISTS `m_report_mailing_job_configuration`;
 CREATE TABLE IF NOT EXISTS `m_report_mailing_job_configuration` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -4417,7 +4539,7 @@ CREATE TABLE IF NOT EXISTS `m_report_mailing_job_configuration` (
   UNIQUE KEY `unique_name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_report_mailing_job_configuration: ~4 rows (approximately)
+-- Dumping data for table mifostenant-default.m_report_mailing_job_configuration: ~4 rows (approximately)
 /*!40000 ALTER TABLE `m_report_mailing_job_configuration` DISABLE KEYS */;
 INSERT INTO `m_report_mailing_job_configuration` (`id`, `name`, `value`) VALUES
 	(1, 'GMAIL_SMTP_SERVER', 'smtp.gmail.com'),
@@ -4426,7 +4548,8 @@ INSERT INTO `m_report_mailing_job_configuration` (`id`, `name`, `value`) VALUES
 	(4, 'GMAIL_SMTP_PASSWORD', '');
 /*!40000 ALTER TABLE `m_report_mailing_job_configuration` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_report_mailing_job_run_history
+
+-- Dumping structure for table mifostenant-default.m_report_mailing_job_run_history
 DROP TABLE IF EXISTS `m_report_mailing_job_run_history`;
 CREATE TABLE IF NOT EXISTS `m_report_mailing_job_run_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4441,11 +4564,12 @@ CREATE TABLE IF NOT EXISTS `m_report_mailing_job_run_history` (
   CONSTRAINT `m_report_mailing_job_run_history_ibfk_1` FOREIGN KEY (`job_id`) REFERENCES `m_report_mailing_job` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_report_mailing_job_run_history: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_report_mailing_job_run_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_report_mailing_job_run_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_report_mailing_job_run_history` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_role
+
+-- Dumping structure for table mifostenant-default.m_role
 DROP TABLE IF EXISTS `m_role`;
 CREATE TABLE IF NOT EXISTS `m_role` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4456,13 +4580,14 @@ CREATE TABLE IF NOT EXISTS `m_role` (
   UNIQUE KEY `unq_name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_role: ~1 rows (approximately)
+-- Dumping data for table mifostenant-default.m_role: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_role` DISABLE KEYS */;
 INSERT INTO `m_role` (`id`, `name`, `description`, `is_disabled`) VALUES
 	(1, 'Super user', 'This role provides all application permissions.', 0);
 /*!40000 ALTER TABLE `m_role` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_role_permission
+
+-- Dumping structure for table mifostenant-default.m_role_permission
 DROP TABLE IF EXISTS `m_role_permission`;
 CREATE TABLE IF NOT EXISTS `m_role_permission` (
   `role_id` bigint(20) NOT NULL,
@@ -4474,13 +4599,14 @@ CREATE TABLE IF NOT EXISTS `m_role_permission` (
   CONSTRAINT `FK8DEDB04815CEC7AB` FOREIGN KEY (`role_id`) REFERENCES `m_role` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_role_permission: ~1 rows (approximately)
+-- Dumping data for table mifostenant-default.m_role_permission: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_role_permission` DISABLE KEYS */;
 INSERT INTO `m_role_permission` (`role_id`, `permission_id`) VALUES
 	(1, 1);
 /*!40000 ALTER TABLE `m_role_permission` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_savings_account
+
+-- Dumping structure for table mifostenant-default.m_savings_account
 DROP TABLE IF EXISTS `m_savings_account`;
 CREATE TABLE IF NOT EXISTS `m_savings_account` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4556,11 +4682,12 @@ CREATE TABLE IF NOT EXISTS `m_savings_account` (
   CONSTRAINT `FK_savings_account_tax_group` FOREIGN KEY (`tax_group_id`) REFERENCES `m_tax_group` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_savings_account: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_savings_account: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_account` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_savings_account_charge
+
+-- Dumping structure for table mifostenant-default.m_savings_account_charge
 DROP TABLE IF EXISTS `m_savings_account_charge`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4591,11 +4718,12 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_charge` (
   CONSTRAINT `m_savings_account_charge_ibfk_2` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_savings_account_charge: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_savings_account_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_account_charge` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_savings_account_charge_paid_by
+
+-- Dumping structure for table mifostenant-default.m_savings_account_charge_paid_by
 DROP TABLE IF EXISTS `m_savings_account_charge_paid_by`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_charge_paid_by` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4609,11 +4737,12 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_charge_paid_by` (
   CONSTRAINT `FK__m_savings_account_transaction` FOREIGN KEY (`savings_account_transaction_id`) REFERENCES `m_savings_account_transaction` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_savings_account_charge_paid_by: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_savings_account_charge_paid_by: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account_charge_paid_by` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_account_charge_paid_by` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_savings_account_interest_rate_chart
+
+-- Dumping structure for table mifostenant-default.m_savings_account_interest_rate_chart
 DROP TABLE IF EXISTS `m_savings_account_interest_rate_chart`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_chart` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4628,11 +4757,12 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_chart` (
   CONSTRAINT `FKSAIRC00000000000001` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_savings_account_interest_rate_chart: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_savings_account_interest_rate_chart: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account_interest_rate_chart` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_account_interest_rate_chart` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_savings_account_interest_rate_slab
+
+-- Dumping structure for table mifostenant-default.m_savings_account_interest_rate_slab
 DROP TABLE IF EXISTS `m_savings_account_interest_rate_slab`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_slab` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4650,11 +4780,12 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_slab` (
   CONSTRAINT `FKSAIRS00000000000001` FOREIGN KEY (`savings_account_interest_rate_chart_id`) REFERENCES `m_savings_account_interest_rate_chart` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_savings_account_interest_rate_slab: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_savings_account_interest_rate_slab: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account_interest_rate_slab` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_account_interest_rate_slab` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_savings_account_transaction
+
+-- Dumping structure for table mifostenant-default.m_savings_account_transaction
 DROP TABLE IF EXISTS `m_savings_account_transaction`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4682,11 +4813,12 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_transaction` (
   CONSTRAINT `FK_m_savings_account_transaction_m_payment_detail` FOREIGN KEY (`payment_detail_id`) REFERENCES `m_payment_detail` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_savings_account_transaction: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_savings_account_transaction: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account_transaction` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_account_transaction` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_savings_account_transaction_tax_details
+
+-- Dumping structure for table mifostenant-default.m_savings_account_transaction_tax_details
 DROP TABLE IF EXISTS `m_savings_account_transaction_tax_details`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_transaction_tax_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4700,11 +4832,12 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_transaction_tax_details` (
   CONSTRAINT `FK_savings_account_transaction_tax_details_tax_component` FOREIGN KEY (`tax_component_id`) REFERENCES `m_tax_component` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_savings_account_transaction_tax_details: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_savings_account_transaction_tax_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account_transaction_tax_details` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_account_transaction_tax_details` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_savings_interest_incentives
+
+-- Dumping structure for table mifostenant-default.m_savings_interest_incentives
 DROP TABLE IF EXISTS `m_savings_interest_incentives`;
 CREATE TABLE IF NOT EXISTS `m_savings_interest_incentives` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4720,11 +4853,12 @@ CREATE TABLE IF NOT EXISTS `m_savings_interest_incentives` (
   CONSTRAINT `FK_m_savings_interest_incentives_m_savings_interest_rate_slab` FOREIGN KEY (`deposit_account_interest_rate_slab_id`) REFERENCES `m_savings_account_interest_rate_slab` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_savings_interest_incentives: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_savings_interest_incentives: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_interest_incentives` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_interest_incentives` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_savings_officer_assignment_history
+
+-- Dumping structure for table mifostenant-default.m_savings_officer_assignment_history
 DROP TABLE IF EXISTS `m_savings_officer_assignment_history`;
 CREATE TABLE IF NOT EXISTS `m_savings_officer_assignment_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4743,11 +4877,12 @@ CREATE TABLE IF NOT EXISTS `m_savings_officer_assignment_history` (
   CONSTRAINT `fk_m_savings_officer_assignment_history_0002` FOREIGN KEY (`savings_officer_id`) REFERENCES `m_staff` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_savings_officer_assignment_history: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_savings_officer_assignment_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_officer_assignment_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_officer_assignment_history` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_savings_product
+
+-- Dumping structure for table mifostenant-default.m_savings_product
 DROP TABLE IF EXISTS `m_savings_product`;
 CREATE TABLE IF NOT EXISTS `m_savings_product` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4790,11 +4925,12 @@ CREATE TABLE IF NOT EXISTS `m_savings_product` (
   CONSTRAINT `FK_savings_product_tax_group` FOREIGN KEY (`tax_group_id`) REFERENCES `m_tax_group` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_savings_product: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_savings_product: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_product` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_product` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_savings_product_charge
+
+-- Dumping structure for table mifostenant-default.m_savings_product_charge
 DROP TABLE IF EXISTS `m_savings_product_charge`;
 CREATE TABLE IF NOT EXISTS `m_savings_product_charge` (
   `savings_product_id` bigint(20) NOT NULL,
@@ -4805,11 +4941,12 @@ CREATE TABLE IF NOT EXISTS `m_savings_product_charge` (
   CONSTRAINT `m_savings_product_charge_ibfk_2` FOREIGN KEY (`savings_product_id`) REFERENCES `m_savings_product` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_savings_product_charge: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_savings_product_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_product_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_product_charge` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_selfservice_beneficiaries_tpt
+
+-- Dumping structure for table mifostenant-default.m_selfservice_beneficiaries_tpt
 DROP TABLE IF EXISTS `m_selfservice_beneficiaries_tpt`;
 CREATE TABLE IF NOT EXISTS `m_selfservice_beneficiaries_tpt` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4825,11 +4962,12 @@ CREATE TABLE IF NOT EXISTS `m_selfservice_beneficiaries_tpt` (
   UNIQUE KEY `name` (`name`,`app_user_id`,`is_active`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_selfservice_beneficiaries_tpt: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_selfservice_beneficiaries_tpt: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_selfservice_beneficiaries_tpt` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_selfservice_beneficiaries_tpt` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_selfservice_user_client_mapping
+
+-- Dumping structure for table mifostenant-default.m_selfservice_user_client_mapping
 DROP TABLE IF EXISTS `m_selfservice_user_client_mapping`;
 CREATE TABLE IF NOT EXISTS `m_selfservice_user_client_mapping` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4842,11 +4980,12 @@ CREATE TABLE IF NOT EXISTS `m_selfservice_user_client_mapping` (
   CONSTRAINT `m_selfservice_client_id` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_selfservice_user_client_mapping: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_selfservice_user_client_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_selfservice_user_client_mapping` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_selfservice_user_client_mapping` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_share_account
+
+-- Dumping structure for table mifostenant-default.m_share_account
 DROP TABLE IF EXISTS `m_share_account`;
 CREATE TABLE IF NOT EXISTS `m_share_account` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4900,11 +5039,12 @@ CREATE TABLE IF NOT EXISTS `m_share_account` (
   CONSTRAINT `m_share_account_ibfk_9` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_share_account: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_share_account: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_account` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_share_account` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_share_account_charge
+
+-- Dumping structure for table mifostenant-default.m_share_account_charge
 DROP TABLE IF EXISTS `m_share_account_charge`;
 CREATE TABLE IF NOT EXISTS `m_share_account_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4933,16 +5073,17 @@ CREATE TABLE IF NOT EXISTS `m_share_account_charge` (
   CONSTRAINT `m_share_account_charge_ibfk_2` FOREIGN KEY (`account_id`) REFERENCES `m_share_account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_share_account_charge: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_share_account_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_account_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_share_account_charge` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_share_account_charge_paid_by
+
+-- Dumping structure for table mifostenant-default.m_share_account_charge_paid_by
 DROP TABLE IF EXISTS `m_share_account_charge_paid_by`;
 CREATE TABLE IF NOT EXISTS `m_share_account_charge_paid_by` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `share_transaction_id` bigint(20) NOT NULL,
-  `charge_transaction_id` bigint(20) NOT NULL,
+  `share_transaction_id` bigint(20) DEFAULT NULL,
+  `charge_transaction_id` bigint(20) DEFAULT NULL,
   `amount` decimal(20,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `m_share_account_transactions_charge_mapping_ibfk1` (`share_transaction_id`),
@@ -4951,11 +5092,12 @@ CREATE TABLE IF NOT EXISTS `m_share_account_charge_paid_by` (
   CONSTRAINT `m_share_account_transactions_charge_mapping_ibfk2` FOREIGN KEY (`charge_transaction_id`) REFERENCES `m_share_account_charge` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_share_account_charge_paid_by: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_share_account_charge_paid_by: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_account_charge_paid_by` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_share_account_charge_paid_by` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_share_account_dividend_details
+
+-- Dumping structure for table mifostenant-default.m_share_account_dividend_details
 DROP TABLE IF EXISTS `m_share_account_dividend_details`;
 CREATE TABLE IF NOT EXISTS `m_share_account_dividend_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4971,11 +5113,12 @@ CREATE TABLE IF NOT EXISTS `m_share_account_dividend_details` (
   CONSTRAINT `FK_m_share_account_dividend_details_dividend_pay_out_id` FOREIGN KEY (`dividend_pay_out_id`) REFERENCES `m_share_product_dividend_pay_out` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_share_account_dividend_details: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_share_account_dividend_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_account_dividend_details` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_share_account_dividend_details` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_share_account_transactions
+
+-- Dumping structure for table mifostenant-default.m_share_account_transactions
 DROP TABLE IF EXISTS `m_share_account_transactions`;
 CREATE TABLE IF NOT EXISTS `m_share_account_transactions` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -4985,18 +5128,21 @@ CREATE TABLE IF NOT EXISTS `m_share_account_transactions` (
   `unit_price` decimal(10,2) DEFAULT NULL,
   `amount` decimal(20,2) DEFAULT NULL,
   `charge_amount` decimal(20,2) DEFAULT NULL,
+  `amount_paid` decimal(20,2) DEFAULT NULL,
   `status_enum` smallint(5) NOT NULL DEFAULT '300',
   `type_enum` smallint(5) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `m_share_account_purchased_shares_ibfk_1` (`account_id`),
   CONSTRAINT `m_share_account_purchased_shares_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `m_share_account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_share_account_transactions: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_share_account_transactions: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_account_transactions` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_share_account_transactions` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_share_product
+
+-- Dumping structure for table mifostenant-default.m_share_product
 DROP TABLE IF EXISTS `m_share_product`;
 CREATE TABLE IF NOT EXISTS `m_share_product` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5035,11 +5181,12 @@ CREATE TABLE IF NOT EXISTS `m_share_product` (
   CONSTRAINT `m_share_product_ibfk_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_share_product: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_share_product: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_product` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_share_product` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_share_product_charge
+
+-- Dumping structure for table mifostenant-default.m_share_product_charge
 DROP TABLE IF EXISTS `m_share_product_charge`;
 CREATE TABLE IF NOT EXISTS `m_share_product_charge` (
   `product_id` bigint(20) NOT NULL,
@@ -5050,11 +5197,12 @@ CREATE TABLE IF NOT EXISTS `m_share_product_charge` (
   CONSTRAINT `m_share_product_charge_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `m_share_product` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_share_product_charge: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_share_product_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_product_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_share_product_charge` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_share_product_dividend_pay_out
+
+-- Dumping structure for table mifostenant-default.m_share_product_dividend_pay_out
 DROP TABLE IF EXISTS `m_share_product_dividend_pay_out`;
 CREATE TABLE IF NOT EXISTS `m_share_product_dividend_pay_out` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5076,11 +5224,12 @@ CREATE TABLE IF NOT EXISTS `m_share_product_dividend_pay_out` (
   CONSTRAINT `FK_m_share_product_dividend_pay_out_product_id` FOREIGN KEY (`product_id`) REFERENCES `m_share_product` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_share_product_dividend_pay_out: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_share_product_dividend_pay_out: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_product_dividend_pay_out` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_share_product_dividend_pay_out` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_share_product_market_price
+
+-- Dumping structure for table mifostenant-default.m_share_product_market_price
 DROP TABLE IF EXISTS `m_share_product_market_price`;
 CREATE TABLE IF NOT EXISTS `m_share_product_market_price` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5092,11 +5241,12 @@ CREATE TABLE IF NOT EXISTS `m_share_product_market_price` (
   CONSTRAINT `m_share_product_market_price_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `m_share_product` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_share_product_market_price: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_share_product_market_price: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_product_market_price` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_share_product_market_price` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_staff
+
+-- Dumping structure for table mifostenant-default.m_staff
 DROP TABLE IF EXISTS `m_staff`;
 CREATE TABLE IF NOT EXISTS `m_staff` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5122,11 +5272,12 @@ CREATE TABLE IF NOT EXISTS `m_staff` (
   CONSTRAINT `FK_m_staff_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_staff: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_staff: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_staff` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_staff` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_staff_assignment_history
+
+-- Dumping structure for table mifostenant-default.m_staff_assignment_history
 DROP TABLE IF EXISTS `m_staff_assignment_history`;
 CREATE TABLE IF NOT EXISTS `m_staff_assignment_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5145,11 +5296,12 @@ CREATE TABLE IF NOT EXISTS `m_staff_assignment_history` (
   CONSTRAINT `FK_m_staff_assignment_history_m_staff` FOREIGN KEY (`staff_id`) REFERENCES `m_staff` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_staff_assignment_history: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_staff_assignment_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_staff_assignment_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_staff_assignment_history` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_surveys
+
+-- Dumping structure for table mifostenant-default.m_surveys
 DROP TABLE IF EXISTS `m_surveys`;
 CREATE TABLE IF NOT EXISTS `m_surveys` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5162,11 +5314,12 @@ CREATE TABLE IF NOT EXISTS `m_surveys` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_surveys: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_surveys: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_surveys` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_surveys` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_survey_components
+
+-- Dumping structure for table mifostenant-default.m_survey_components
 DROP TABLE IF EXISTS `m_survey_components`;
 CREATE TABLE IF NOT EXISTS `m_survey_components` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5180,11 +5333,12 @@ CREATE TABLE IF NOT EXISTS `m_survey_components` (
   CONSTRAINT `m_survey_components_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `m_surveys` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_survey_components: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_survey_components: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_survey_components` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_survey_components` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_survey_lookup_tables
+
+-- Dumping structure for table mifostenant-default.m_survey_lookup_tables
 DROP TABLE IF EXISTS `m_survey_lookup_tables`;
 CREATE TABLE IF NOT EXISTS `m_survey_lookup_tables` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5199,11 +5353,12 @@ CREATE TABLE IF NOT EXISTS `m_survey_lookup_tables` (
   CONSTRAINT `m_survey_lookup_tables_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `m_surveys` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_survey_lookup_tables: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_survey_lookup_tables: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_survey_lookup_tables` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_survey_lookup_tables` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_survey_questions
+
+-- Dumping structure for table mifostenant-default.m_survey_questions
 DROP TABLE IF EXISTS `m_survey_questions`;
 CREATE TABLE IF NOT EXISTS `m_survey_questions` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5218,11 +5373,12 @@ CREATE TABLE IF NOT EXISTS `m_survey_questions` (
   CONSTRAINT `m_survey_questions_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `m_surveys` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_survey_questions: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_survey_questions: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_survey_questions` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_survey_questions` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_survey_responses
+
+-- Dumping structure for table mifostenant-default.m_survey_responses
 DROP TABLE IF EXISTS `m_survey_responses`;
 CREATE TABLE IF NOT EXISTS `m_survey_responses` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5235,11 +5391,12 @@ CREATE TABLE IF NOT EXISTS `m_survey_responses` (
   CONSTRAINT `m_survey_responses_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `m_survey_questions` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_survey_responses: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_survey_responses: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_survey_responses` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_survey_responses` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_survey_scorecards
+
+-- Dumping structure for table mifostenant-default.m_survey_scorecards
 DROP TABLE IF EXISTS `m_survey_scorecards`;
 CREATE TABLE IF NOT EXISTS `m_survey_scorecards` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5263,11 +5420,12 @@ CREATE TABLE IF NOT EXISTS `m_survey_scorecards` (
   CONSTRAINT `m_survey_scorecards_ibfk_5` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_survey_scorecards: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_survey_scorecards: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_survey_scorecards` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_survey_scorecards` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_tax_component
+
+-- Dumping structure for table mifostenant-default.m_tax_component
 DROP TABLE IF EXISTS `m_tax_component`;
 CREATE TABLE IF NOT EXISTS `m_tax_component` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5293,11 +5451,12 @@ CREATE TABLE IF NOT EXISTS `m_tax_component` (
   CONSTRAINT `FK_tax_component_lastmodifiedby` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_tax_component: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_tax_component: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_tax_component` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_tax_component` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_tax_component_history
+
+-- Dumping structure for table mifostenant-default.m_tax_component_history
 DROP TABLE IF EXISTS `m_tax_component_history`;
 CREATE TABLE IF NOT EXISTS `m_tax_component_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5318,11 +5477,12 @@ CREATE TABLE IF NOT EXISTS `m_tax_component_history` (
   CONSTRAINT `FK_tax_component_history_tax_component_id` FOREIGN KEY (`tax_component_id`) REFERENCES `m_tax_component` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_tax_component_history: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_tax_component_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_tax_component_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_tax_component_history` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_tax_group
+
+-- Dumping structure for table mifostenant-default.m_tax_group
 DROP TABLE IF EXISTS `m_tax_group`;
 CREATE TABLE IF NOT EXISTS `m_tax_group` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5338,11 +5498,12 @@ CREATE TABLE IF NOT EXISTS `m_tax_group` (
   CONSTRAINT `FK_tax_group_lastmodifiedby` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_tax_group: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_tax_group: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_tax_group` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_tax_group` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_tax_group_mappings
+
+-- Dumping structure for table mifostenant-default.m_tax_group_mappings
 DROP TABLE IF EXISTS `m_tax_group_mappings`;
 CREATE TABLE IF NOT EXISTS `m_tax_group_mappings` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5365,11 +5526,12 @@ CREATE TABLE IF NOT EXISTS `m_tax_group_mappings` (
   CONSTRAINT `FK_tax_group_mappings_tax_group` FOREIGN KEY (`tax_group_id`) REFERENCES `m_tax_group` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_tax_group_mappings: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_tax_group_mappings: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_tax_group_mappings` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_tax_group_mappings` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_tellers
+
+-- Dumping structure for table mifostenant-default.m_tellers
 DROP TABLE IF EXISTS `m_tellers`;
 CREATE TABLE IF NOT EXISTS `m_tellers` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5391,11 +5553,12 @@ CREATE TABLE IF NOT EXISTS `m_tellers` (
   CONSTRAINT `FK_m_tellers_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_tellers: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_tellers: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_tellers` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_tellers` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_template
+
+-- Dumping structure for table mifostenant-default.m_template
 DROP TABLE IF EXISTS `m_template`;
 CREATE TABLE IF NOT EXISTS `m_template` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5407,11 +5570,12 @@ CREATE TABLE IF NOT EXISTS `m_template` (
   UNIQUE KEY `unq_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_template: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_template: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_template` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_template` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_templatemappers
+
+-- Dumping structure for table mifostenant-default.m_templatemappers
 DROP TABLE IF EXISTS `m_templatemappers`;
 CREATE TABLE IF NOT EXISTS `m_templatemappers` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5421,11 +5585,12 @@ CREATE TABLE IF NOT EXISTS `m_templatemappers` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_templatemappers: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_templatemappers: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_templatemappers` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_templatemappers` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_template_m_templatemappers
+
+-- Dumping structure for table mifostenant-default.m_template_m_templatemappers
 DROP TABLE IF EXISTS `m_template_m_templatemappers`;
 CREATE TABLE IF NOT EXISTS `m_template_m_templatemappers` (
   `m_template_id` bigint(20) NOT NULL,
@@ -5435,11 +5600,12 @@ CREATE TABLE IF NOT EXISTS `m_template_m_templatemappers` (
   KEY `m_template_id` (`m_template_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_template_m_templatemappers: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.m_template_m_templatemappers: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_template_m_templatemappers` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_template_m_templatemappers` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.m_working_days
+
+-- Dumping structure for table mifostenant-default.m_working_days
 DROP TABLE IF EXISTS `m_working_days`;
 CREATE TABLE IF NOT EXISTS `m_working_days` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5450,13 +5616,14 @@ CREATE TABLE IF NOT EXISTS `m_working_days` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.m_working_days: ~1 rows (approximately)
+-- Dumping data for table mifostenant-default.m_working_days: ~1 rows (approximately)
 /*!40000 ALTER TABLE `m_working_days` DISABLE KEYS */;
 INSERT INTO `m_working_days` (`id`, `recurrence`, `repayment_rescheduling_enum`, `extend_term_daily_repayments`, `extend_term_holiday_repayment`) VALUES
 	(1, 'FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU', 2, 0, 0);
 /*!40000 ALTER TABLE `m_working_days` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.oauth_access_token
+
+-- Dumping structure for table mifostenant-default.oauth_access_token
 DROP TABLE IF EXISTS `oauth_access_token`;
 CREATE TABLE IF NOT EXISTS `oauth_access_token` (
   `token_id` varchar(256) DEFAULT NULL,
@@ -5468,11 +5635,12 @@ CREATE TABLE IF NOT EXISTS `oauth_access_token` (
   `refresh_token` varchar(256) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.oauth_access_token: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.oauth_access_token: ~0 rows (approximately)
 /*!40000 ALTER TABLE `oauth_access_token` DISABLE KEYS */;
 /*!40000 ALTER TABLE `oauth_access_token` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.oauth_client_details
+
+-- Dumping structure for table mifostenant-default.oauth_client_details
 DROP TABLE IF EXISTS `oauth_client_details`;
 CREATE TABLE IF NOT EXISTS `oauth_client_details` (
   `client_id` varchar(128) NOT NULL,
@@ -5489,13 +5657,14 @@ CREATE TABLE IF NOT EXISTS `oauth_client_details` (
   PRIMARY KEY (`client_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.oauth_client_details: ~1 rows (approximately)
+-- Dumping data for table mifostenant-default.oauth_client_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `oauth_client_details` DISABLE KEYS */;
 INSERT INTO `oauth_client_details` (`client_id`, `resource_ids`, `client_secret`, `scope`, `authorized_grant_types`, `web_server_redirect_uri`, `authorities`, `access_token_validity`, `refresh_token_validity`, `additional_information`, `autoapprove`) VALUES
 	('community-app', NULL, '123', 'all', 'password,refresh_token', NULL, NULL, NULL, NULL, NULL, NULL);
 /*!40000 ALTER TABLE `oauth_client_details` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.oauth_refresh_token
+
+-- Dumping structure for table mifostenant-default.oauth_refresh_token
 DROP TABLE IF EXISTS `oauth_refresh_token`;
 CREATE TABLE IF NOT EXISTS `oauth_refresh_token` (
   `token_id` varchar(256) DEFAULT NULL,
@@ -5503,11 +5672,12 @@ CREATE TABLE IF NOT EXISTS `oauth_refresh_token` (
   `authentication` blob
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.oauth_refresh_token: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.oauth_refresh_token: ~0 rows (approximately)
 /*!40000 ALTER TABLE `oauth_refresh_token` DISABLE KEYS */;
 /*!40000 ALTER TABLE `oauth_refresh_token` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.ppi_likelihoods
+
+-- Dumping structure for table mifostenant-default.ppi_likelihoods
 DROP TABLE IF EXISTS `ppi_likelihoods`;
 CREATE TABLE IF NOT EXISTS `ppi_likelihoods` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5516,11 +5686,12 @@ CREATE TABLE IF NOT EXISTS `ppi_likelihoods` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.ppi_likelihoods: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.ppi_likelihoods: ~0 rows (approximately)
 /*!40000 ALTER TABLE `ppi_likelihoods` DISABLE KEYS */;
 /*!40000 ALTER TABLE `ppi_likelihoods` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.ppi_likelihoods_ppi
+
+-- Dumping structure for table mifostenant-default.ppi_likelihoods_ppi
 DROP TABLE IF EXISTS `ppi_likelihoods_ppi`;
 CREATE TABLE IF NOT EXISTS `ppi_likelihoods_ppi` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5530,11 +5701,12 @@ CREATE TABLE IF NOT EXISTS `ppi_likelihoods_ppi` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.ppi_likelihoods_ppi: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.ppi_likelihoods_ppi: ~0 rows (approximately)
 /*!40000 ALTER TABLE `ppi_likelihoods_ppi` DISABLE KEYS */;
 /*!40000 ALTER TABLE `ppi_likelihoods_ppi` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.ppi_scores
+
+-- Dumping structure for table mifostenant-default.ppi_scores
 DROP TABLE IF EXISTS `ppi_scores`;
 CREATE TABLE IF NOT EXISTS `ppi_scores` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5543,7 +5715,7 @@ CREATE TABLE IF NOT EXISTS `ppi_scores` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.ppi_scores: ~20 rows (approximately)
+-- Dumping data for table mifostenant-default.ppi_scores: ~20 rows (approximately)
 /*!40000 ALTER TABLE `ppi_scores` DISABLE KEYS */;
 INSERT INTO `ppi_scores` (`id`, `score_from`, `score_to`) VALUES
 	(1, 0, 4),
@@ -5568,7 +5740,8 @@ INSERT INTO `ppi_scores` (`id`, `score_from`, `score_to`) VALUES
 	(20, 95, 100);
 /*!40000 ALTER TABLE `ppi_scores` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.ref_loan_transaction_processing_strategy
+
+-- Dumping structure for table mifostenant-default.ref_loan_transaction_processing_strategy
 DROP TABLE IF EXISTS `ref_loan_transaction_processing_strategy`;
 CREATE TABLE IF NOT EXISTS `ref_loan_transaction_processing_strategy` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -5579,7 +5752,7 @@ CREATE TABLE IF NOT EXISTS `ref_loan_transaction_processing_strategy` (
   UNIQUE KEY `ltp_strategy_code` (`code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.ref_loan_transaction_processing_strategy: ~7 rows (approximately)
+-- Dumping data for table mifostenant-default.ref_loan_transaction_processing_strategy: ~7 rows (approximately)
 /*!40000 ALTER TABLE `ref_loan_transaction_processing_strategy` DISABLE KEYS */;
 INSERT INTO `ref_loan_transaction_processing_strategy` (`id`, `code`, `name`, `sort_order`) VALUES
 	(1, 'mifos-standard-strategy', 'Penalties, Fees, Interest, Principal order', 1),
@@ -5591,18 +5764,20 @@ INSERT INTO `ref_loan_transaction_processing_strategy` (`id`, `code`, `name`, `s
 	(7, 'early-repayment-strategy', 'Early Repayment Strategy', 5);
 /*!40000 ALTER TABLE `ref_loan_transaction_processing_strategy` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.rpt_sequence
+
+-- Dumping structure for table mifostenant-default.rpt_sequence
 DROP TABLE IF EXISTS `rpt_sequence`;
 CREATE TABLE IF NOT EXISTS `rpt_sequence` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.rpt_sequence: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.rpt_sequence: ~0 rows (approximately)
 /*!40000 ALTER TABLE `rpt_sequence` DISABLE KEYS */;
 /*!40000 ALTER TABLE `rpt_sequence` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.r_enum_value
+
+-- Dumping structure for table mifostenant-default.r_enum_value
 DROP TABLE IF EXISTS `r_enum_value`;
 CREATE TABLE IF NOT EXISTS `r_enum_value` (
   `enum_name` varchar(100) NOT NULL,
@@ -5615,7 +5790,7 @@ CREATE TABLE IF NOT EXISTS `r_enum_value` (
   UNIQUE KEY `enum_value` (`enum_name`,`enum_value`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.r_enum_value: ~160 rows (approximately)
+-- Dumping data for table mifostenant-default.r_enum_value: ~159 rows (approximately)
 /*!40000 ALTER TABLE `r_enum_value` DISABLE KEYS */;
 INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`, `enum_type`) VALUES
 	('account_type_type_enum', 0, 'INVALID', 'INVALID', 0),
@@ -5726,7 +5901,6 @@ INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `en
 	('loan_transaction_type_enum', 17, 'CHARGE_PAYMENT', 'CHARGE_PAYMENT', 0),
 	('loan_transaction_type_enum', 18, 'REFUND_FOR_ACTIVE_LOAN', 'REFUND_FOR_ACTIVE_LOAN', 0),
 	('loan_transaction_type_enum', 19, 'INCOME_POSTING', 'INCOME_POSTING', 0),
-	('loan_type_enum', -1, 'All', 'All', 0),
 	('loan_type_enum', 1, 'Individual Loan', 'Individual Loan', 0),
 	('loan_type_enum', 2, 'Group Loan', 'Group Loan', 0),
 	('portfolio_account_type_enum', 1, 'LOAN', 'LOAN', 0),
@@ -5780,7 +5954,8 @@ INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `en
 	('transaction_type_enum', 11, 'Apply Interest', 'Apply Interest', 0);
 /*!40000 ALTER TABLE `r_enum_value` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.scheduler_detail
+
+-- Dumping structure for table mifostenant-default.scheduler_detail
 DROP TABLE IF EXISTS `scheduler_detail`;
 CREATE TABLE IF NOT EXISTS `scheduler_detail` (
   `id` smallint(2) NOT NULL AUTO_INCREMENT,
@@ -5790,13 +5965,14 @@ CREATE TABLE IF NOT EXISTS `scheduler_detail` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.scheduler_detail: ~1 rows (approximately)
+-- Dumping data for table mifostenant-default.scheduler_detail: ~0 rows (approximately)
 /*!40000 ALTER TABLE `scheduler_detail` DISABLE KEYS */;
 INSERT INTO `scheduler_detail` (`id`, `is_suspended`, `execute_misfired_jobs`, `reset_scheduler_on_bootup`) VALUES
 	(1, 0, 1, 1);
 /*!40000 ALTER TABLE `scheduler_detail` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.schema_version
+
+-- Dumping structure for table mifostenant-default.schema_version
 DROP TABLE IF EXISTS `schema_version`;
 CREATE TABLE IF NOT EXISTS `schema_version` (
   `version_rank` int(11) NOT NULL,
@@ -5816,7 +5992,7 @@ CREATE TABLE IF NOT EXISTS `schema_version` (
   KEY `schema_version_s_idx` (`success`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.schema_version: ~393 rows (approximately)
+-- Dumping data for table mifostenant-default.schema_version: ~336 rows (approximately)
 /*!40000 ALTER TABLE `schema_version` DISABLE KEYS */;
 INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `description`, `type`, `script`, `checksum`, `installed_by`, `installed_on`, `execution_time`, `success`) VALUES
 	(1, 1, '1', 'mifosplatform-core-ddl-latest', 'SQL', 'V1__mifosplatform-core-ddl-latest.sql', 1800446512, 'root', '2015-06-03 15:26:50', 919, 1),
@@ -6050,37 +6226,37 @@ INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `desc
 	(306, 306, '293', 'interest rate chart support for amounts', 'SQL', 'V293__interest_rate_chart_support_for_amounts.sql', -1134261995, 'root', '2016-03-09 21:33:14', 2333, 1),
 	(307, 307, '294', 'configuration for paymnettype application forDisbursement charge', 'SQL', 'V294__configuration_for_paymnettype_application_forDisbursement_charge.sql', -1369433752, 'root', '2016-03-09 21:33:14', 56, 1),
 	(308, 308, '295', 'configuration for interest charged date same as disbursal date', 'SQL', 'V295__configuration_for_interest_charged_date_same_as_disbursal_date.sql', 772901568, 'root', '2016-03-23 15:15:04', 73, 1),
-	(309, 309, '296', 'skip repayment on first-day of month', 'SQL', 'V296__skip_repayment_on first-day_of_month.sql', 1675224847, 'root', '2016-04-13 20:19:10', 56, 1),
-	(310, 310, '297', 'Adding Meeting Time column', 'SQL', 'V297__Adding_Meeting_Time_column.sql', -173690634, 'root', '2016-04-13 20:19:10', 235, 1),
-	(311, 311, '298', 'savings interest tax', 'SQL', 'V298__savings_interest_tax.sql', 1441298172, 'root', '2016-04-13 20:19:12', 1324, 1),
-	(312, 312, '299', 'share products', 'SQL', 'V299__share_products.sql', -985543868, 'root', '2016-04-13 20:19:14', 1991, 1),
+	(309, 309, '296', 'skip repayment on first-day of month', 'SQL', 'V296__skip_repayment_on first-day_of_month.sql', -172630113, 'root', '2016-11-18 17:26:37', 89, 1),
+	(310, 310, '297', 'Adding Meeting Time column', 'SQL', 'V297__Adding_Meeting_Time_column.sql', -637673654, 'root', '2016-11-18 17:26:38', 754, 1),
+	(311, 311, '298', 'savings interest tax', 'SQL', 'V298__savings_interest_tax.sql', -1023309693, 'root', '2016-11-18 17:26:44', 5278, 1),
+	(312, 312, '299', 'share products', 'SQL', 'V299__share_products.sql', 1270845438, 'root', '2016-11-18 17:26:49', 5333, 1),
 	(3, 3, '3', 'mifosx-permissions-and-authorisation-utf8', 'SQL', 'V3__mifosx-permissions-and-authorisation-utf8.sql', 914436650, 'root', '2015-06-03 15:26:50', 14, 1),
 	(30, 30, '30', 'add-referenceNumber-to-acc gl journal entry', 'SQL', 'V30__add-referenceNumber-to-acc_gl_journal_entry.sql', 255130282, 'root', '2015-06-03 15:26:53', 59, 1),
-	(313, 313, '300', 'configuration for allow changing of emi amount', 'SQL', 'V300__configuration_for_allow_changing_of_emi_amount.sql', -244138054, 'root', '2016-05-04 20:40:42', 277, 1),
-	(314, 314, '301', 'recurring moratorium principal periods', 'SQL', 'V301__recurring_moratorium_principal_periods.sql', -484783519, 'root', '2016-05-04 20:40:43', 356, 1),
-	(315, 315, '302', 'add status to client identifier', 'SQL', 'V302__add_status_to_client_identifier.sql', 696724338, 'root', '2016-05-04 20:40:43', 137, 1),
-	(316, 316, '303', 'Savings Account Dormancy', 'SQL', 'V303__Savings_Account_Dormancy.sql', 2066326069, 'root', '2016-05-04 20:40:44', 376, 1),
-	(317, 317, '304', 'customer self service third party transfers', 'SQL', 'V304__customer_self_service_third_party_transfers.sql', 1313975379, 'root', '2016-05-04 20:40:44', 160, 1),
-	(318, 318, '305', 'compounding and rest frequency nth day freq and insertion script for accrual job', 'SQL', 'V305__compounding_and_rest_frequency_nth_day_freq_and_insertion_script_for_accrual_job.sql', -2096038246, 'root', '2016-05-04 20:40:45', 1447, 1),
-	(319, 319, '306', 'add domancy tracking job to savings group', 'SQL', 'V306__add_domancy_tracking_job_to_savings_group.sql', -321983911, 'root', '2016-05-13 15:34:20', 44, 1),
-	(320, 320, '307', 'add share notes', 'SQL', 'V307__add_share_notes.sql', -1464801706, 'root', '2016-06-13 19:21:28', 229, 1),
-	(321, 321, '308', 'add interest recalculation in savings account', 'SQL', 'V308__add_interest_recalculation_in_savings_account.sql', 1740162209, 'root', '2016-06-13 19:21:28', 238, 1),
-	(322, 322, '309', 'add loan write off reason code', 'SQL', 'V309__add_loan_write_off_reason_code.sql', -630554147, 'root', '2016-06-13 19:21:29', 285, 1),
+	(313, 313, '300', 'configuration for allow changing of emi amount', 'SQL', 'V300__configuration_for_allow_changing_of_emi_amount.sql', -490331317, 'root', '2016-11-18 17:26:50', 863, 1),
+	(314, 314, '301', 'recurring moratorium principal periods', 'SQL', 'V301__recurring_moratorium_principal_periods.sql', 816871436, 'root', '2016-11-18 17:26:52', 1694, 1),
+	(315, 315, '302', 'add status to client identifier', 'SQL', 'V302__add_status_to_client_identifier.sql', 1978862509, 'root', '2016-11-18 17:26:53', 839, 1),
+	(316, 316, '303', 'Savings Account Dormancy', 'SQL', 'V303__Savings_Account_Dormancy.sql', -533139714, 'root', '2016-11-18 17:26:55', 1425, 1),
+	(317, 317, '304', 'customer self service third party transfers', 'SQL', 'V304__customer_self_service_third_party_transfers.sql', -341614071, 'root', '2016-11-18 17:26:55', 338, 1),
+	(318, 318, '305', 'compounding and rest frequency nth day freq and insertion script for accrual job', 'SQL', 'V305__compounding_and_rest_frequency_nth_day_freq_and_insertion_script_for_accrual_job.sql', 710584648, 'root', '2016-11-18 17:27:00', 4710, 1),
+	(319, 319, '306', 'add domancy tracking job to savings group', 'SQL', 'V306__add_domancy_tracking_job_to_savings_group.sql', -2998873, 'root', '2016-11-18 17:27:00', 53, 1),
+	(320, 320, '307', 'add share notes', 'SQL', 'V307__add_share_notes.sql', -1950926410, 'root', '2016-11-18 17:27:01', 744, 1),
+	(321, 321, '308', 'add interest recalculation in savings account', 'SQL', 'V308__add_interest_recalculation_in_savings_account.sql', 1869901088, 'root', '2016-11-18 17:27:02', 567, 1),
+	(322, 322, '309', 'add loan write off reason code', 'SQL', 'V309__add_loan_write_off_reason_code.sql', 1221434865, 'root', '2016-11-18 17:27:03', 1582, 1),
 	(31, 31, '31', 'drop-autopostings', 'SQL', 'V31__drop-autopostings.sql', -2072166818, 'root', '2015-06-03 15:26:53', 5, 1),
-	(323, 323, '310', 'copy data from entitytoentityaccess to entitytoentitymapping', 'SQL', 'V310__copy_data_from_entitytoentityaccess_to_entitytoentitymapping.sql', -906927086, 'root', '2016-06-13 19:21:29', 3, 1),
-	(324, 324, '311', 'foreclosure details', 'SQL', 'V311__foreclosure_details.sql', 285313879, 'root', '2016-06-13 19:21:29', 239, 1),
-	(325, 325, '312', 'add is mandatory to code value', 'SQL', 'V312__add_is_mandatory_to_code_value.sql', -1943949742, 'root', '2016-08-16 17:14:19', 243, 1),
-	(326, 326, '313', 'multi rescheduling script', 'SQL', 'V313__multi_rescheduling_script.sql', -1003845274, 'root', '2016-08-16 17:14:21', 1084, 1),
-	(327, 327, '314', 'updating r enum table', 'SQL', 'V314__updating_r_enum_table.sql', 780881263, 'root', '2016-08-16 17:14:21', 127, 1),
-	(328, 328, '315', 'add sync expected with disbursement date in m product loan', 'SQL', 'V315__add_sync_expected_with_disbursement_date_in_m_product_loan.sql', 553617808, 'root', '2016-08-16 17:14:21', 220, 1),
-	(329, 329, '316', 'address module tables metadat', 'SQL', 'V316__address_module_tables_metadat.sql', -776128404, 'root', '2016-08-16 17:14:22', 303, 1),
-	(330, 330, '317', 'report mailing job module', 'SQL', 'V317__report_mailing_job_module.sql', -1917516805, 'root', '2016-08-16 17:14:22', 390, 1),
-	(331, 331, '318', 'topuploan', 'SQL', 'V318__topuploan.sql', 590465441, 'root', '2016-08-16 17:14:23', 586, 1),
-	(332, 332, '319', 'client undoreject', 'SQL', 'V319__client_undoreject.sql', -1615618857, 'root', '2016-08-16 17:14:23', 198, 1),
+	(323, 323, '310', 'copy data from entitytoentityaccess to entitytoentitymapping', 'SQL', 'V310__copy_data_from_entitytoentityaccess_to_entitytoentitymapping.sql', 1179078728, 'root', '2016-11-18 17:27:03', 5, 1),
+	(324, 324, '311', 'foreclosure details', 'SQL', 'V311__foreclosure_details.sql', 1236003234, 'root', '2016-11-18 17:27:04', 891, 1),
+	(325, 325, '312', 'add is mandatory to code value', 'SQL', 'V312__add_is_mandatory_to_code_value.sql', -1943949742, 'root', '2016-11-18 17:27:05', 668, 1),
+	(326, 326, '313', 'multi rescheduling script', 'SQL', 'V313__multi_rescheduling_script.sql', -1003845274, 'root', '2016-11-18 17:27:09', 3657, 1),
+	(327, 327, '314', 'updating r enum table', 'SQL', 'V314__updating_r_enum_table.sql', 780881263, 'root', '2016-11-18 17:27:09', 179, 1),
+	(328, 328, '315', 'add sync expected with disbursement date in m product loan', 'SQL', 'V315__add_sync_expected_with_disbursement_date_in_m_product_loan.sql', 553617808, 'root', '2016-11-18 17:27:10', 856, 1),
+	(329, 329, '316', 'address module tables metadat', 'SQL', 'V316__address_module_tables_metadat.sql', -776128404, 'root', '2016-11-18 17:27:12', 1322, 1),
+	(330, 330, '317', 'report mailing job module', 'SQL', 'V317__report_mailing_job_module.sql', -1917516805, 'root', '2016-11-18 17:27:13', 1186, 1),
+	(331, 331, '318', 'topuploan', 'SQL', 'V318__topuploan.sql', 590465441, 'root', '2016-11-18 17:27:15', 2112, 1),
+	(332, 332, '319', 'client undoreject', 'SQL', 'V319__client_undoreject.sql', -1615618857, 'root', '2016-11-18 17:27:17', 1028, 1),
 	(32, 32, '32', 'associate-disassociate-clients-from-group-permissions', 'SQL', 'V32__associate-disassociate-clients-from-group-permissions.sql', -947369256, 'root', '2015-06-03 15:26:53', 2, 1),
-	(333, 334, '320', 'add holiday payment reschedule', 'SQL', 'V320__add_holiday_payment_reschedule.sql', 1445492229, 'root', '2016-11-14 20:20:28', 271, 1),
-	(334, 335, '321', 'boolean field As Interest PostedOn', 'SQL', 'V321__boolean_field_As_Interest_PostedOn.sql', 1906735834, 'root', '2016-11-14 20:20:29', 165, 1),
-	(335, 336, '322', 'sms campaign', 'SQL', 'V322__sms_campaign.sql', -1983831355, 'root', '2016-11-14 20:20:29', 455, 1),
+	(333, 333, '320', 'add holiday payment reschedule', 'SQL', 'V320__add_holiday_payment_reschedule.sql', 1445492229, 'root', '2016-11-18 17:27:17', 545, 1),
+	(334, 334, '321', 'boolean field As Interest PostedOn', 'SQL', 'V321__boolean_field_As_Interest_PostedOn.sql', 1906735834, 'root', '2016-11-18 17:27:18', 732, 1),
+	(335, 335, '322', 'sms campaign', 'SQL', 'V322__sms_campaign.sql', -1316831815, 'root', '2016-11-18 17:27:20', 1561, 1),
 	(33, 33, '33', 'drop unique check on stretchy report parameter', 'SQL', 'V33__drop_unique_check_on_stretchy_report_parameter.sql', -1599579296, 'root', '2015-06-03 15:26:53', 23, 1),
 	(34, 34, '34', 'add unique check on stretchy report parameter', 'SQL', 'V34__add_unique_check_on_stretchy_report_parameter.sql', -1286928230, 'root', '2015-06-03 15:26:53', 22, 1),
 	(35, 35, '35', 'add hierarchy column for acc gl account', 'SQL', 'V35__add_hierarchy_column_for_acc_gl_account.sql', -1387013309, 'root', '2015-06-03 15:26:54', 49, 1),
@@ -6101,7 +6277,7 @@ INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `desc
 	(49, 49, '49', 'track-loan-charge-payment-transactions', 'SQL', 'V49__track-loan-charge-payment-transactions.sql', -1735511516, 'root', '2015-06-03 15:26:54', 24, 1),
 	(5, 5, '5', 'update-savings-product-and-account-tables', 'SQL', 'V5__update-savings-product-and-account-tables.sql', 1349701479, 'root', '2015-06-03 15:26:51', 122, 1),
 	(50, 50, '50', 'add-grace-settings-to-loan-product', 'SQL', 'V50__add-grace-settings-to-loan-product.sql', -1807166173, 'root', '2015-06-03 15:26:55', 140, 1),
-	(336, 333, '5000', 'Daily Teller Cash Report pentaho', 'SQL', 'V5000__Daily_Teller_Cash_Report_pentaho.sql', -638871297, 'root', '2016-09-29 11:48:40', 94, 1),
+	(336, 336, '5000', 'Daily Teller Cash Report pentaho', 'SQL', 'V5000__Daily_Teller_Cash_Report_pentaho.sql', -638871297, 'root', '2016-11-18 17:27:20', 145, 1),
 	(51, 51, '51', 'track-additional-details-related-to-installment-performance', 'SQL', 'V51__track-additional-details-related-to-installment-performance.sql', 729891777, 'root', '2015-06-03 15:26:55', 102, 1),
 	(52, 52, '52', 'add boolean support cols to acc accounting rule', 'SQL', 'V52__add_boolean_support_cols_to_acc_accounting_rule.sql', 1853745947, 'root', '2015-06-03 15:26:55', 71, 1),
 	(53, 53, '53', 'track-advance-and-late-payments-on-installment', 'SQL', 'V53__track-advance-and-late-payments-on-installment.sql', 1135041990, 'root', '2015-06-03 15:26:55', 45, 1),
@@ -6157,7 +6333,8 @@ INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `desc
 	(99, 99, '98', 'added currency roundof for multipleof', 'SQL', 'V98__added_currency_roundof_for_multipleof.sql', -107928515, 'root', '2015-06-03 15:26:58', 325, 1);
 /*!40000 ALTER TABLE `schema_version` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.sms_campaign
+
+-- Dumping structure for table mifostenant-default.sms_campaign
 DROP TABLE IF EXISTS `sms_campaign`;
 CREATE TABLE IF NOT EXISTS `sms_campaign` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -6185,11 +6362,12 @@ CREATE TABLE IF NOT EXISTS `sms_campaign` (
   CONSTRAINT `sms_campaign_ibfk_1` FOREIGN KEY (`report_id`) REFERENCES `stretchy_report` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.sms_campaign: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.sms_campaign: ~0 rows (approximately)
 /*!40000 ALTER TABLE `sms_campaign` DISABLE KEYS */;
 /*!40000 ALTER TABLE `sms_campaign` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.sms_messages_outbound
+
+-- Dumping structure for table mifostenant-default.sms_messages_outbound
 DROP TABLE IF EXISTS `sms_messages_outbound`;
 CREATE TABLE IF NOT EXISTS `sms_messages_outbound` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -6200,7 +6378,7 @@ CREATE TABLE IF NOT EXISTS `sms_messages_outbound` (
   `mobile_no` varchar(50) NOT NULL,
   `message` varchar(1000) NOT NULL,
   `campaign_id` bigint(20) NOT NULL,
-  `external_id` bigint(20) DEFAULT NULL,
+  `external_id` varchar(100) DEFAULT NULL,
   `submittedon_date` date DEFAULT NULL,
   `delivered_on_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -6214,11 +6392,12 @@ CREATE TABLE IF NOT EXISTS `sms_messages_outbound` (
   CONSTRAINT `FKSTAFF000000001` FOREIGN KEY (`staff_id`) REFERENCES `m_staff` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.sms_messages_outbound: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.sms_messages_outbound: ~0 rows (approximately)
 /*!40000 ALTER TABLE `sms_messages_outbound` DISABLE KEYS */;
 /*!40000 ALTER TABLE `sms_messages_outbound` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.stretchy_parameter
+
+-- Dumping structure for table mifostenant-default.stretchy_parameter
 DROP TABLE IF EXISTS `stretchy_parameter`;
 CREATE TABLE IF NOT EXISTS `stretchy_parameter` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -6239,7 +6418,7 @@ CREATE TABLE IF NOT EXISTS `stretchy_parameter` (
   CONSTRAINT `fk_stretchy_parameter_001` FOREIGN KEY (`parent_id`) REFERENCES `stretchy_parameter` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1026 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.stretchy_parameter: ~35 rows (approximately)
+-- Dumping data for table mifostenant-default.stretchy_parameter: ~35 rows (approximately)
 /*!40000 ALTER TABLE `stretchy_parameter` DISABLE KEYS */;
 INSERT INTO `stretchy_parameter` (`id`, `parameter_name`, `parameter_variable`, `parameter_label`, `parameter_displayType`, `parameter_FormatType`, `parameter_default`, `special`, `selectOne`, `selectAll`, `parameter_sql`, `parent_id`) VALUES
 	(1, 'startDateSelect', 'startDate', 'startDate', 'date', 'date', 'today', NULL, NULL, NULL, NULL, NULL),
@@ -6262,24 +6441,25 @@ INSERT INTO `stretchy_parameter` (`id`, `parameter_name`, `parameter_variable`, 
 	(1008, 'SelectGLAccountNO', 'GLAccountNO', 'GLAccountNO', 'select', 'number', '0', NULL, NULL, NULL, 'select id aid,name aname\r\nfrom acc_gl_account', NULL),
 	(1009, 'asOnDate', 'asOn', 'As On', 'date', 'date', 'today', NULL, NULL, NULL, NULL, NULL),
 	(1010, 'SavingsAccountSubStatus', 'subStatus', 'SavingsAccountDormancyStatus', 'select', 'number', '100', NULL, NULL, NULL, 'select * from\r\n(select 100 as id, "Inactive" as name  union all\r\nselect 200 as id, "Dormant" as  name union all \r\nselect 300 as id, "Escheat" as name) x\r\norder by x.`id`', NULL),
-	(1011, 'tellerIdSelectOne', 'tellerId', 'Teller', 'select', 'number', '0', NULL, 'Y', 'N', 'select id, name from m_tellers where office_id = ${officeId}', 5),
-	(1012, 'cashierIdSelectOne', 'cashierId', 'Cashier', 'select', 'number', '0', NULL, 'Y', 'N', 'select c.id, s.display_name from m_cashiers as c left join m_staff as s on c.staff_id = s.id where c.teller_id = ${tellerId}', 1011),
-	(1013, 'currencyCodeSelectOne', 'currencyCode', 'Currency', 'select', 'string', '0', NULL, 'Y', 'N', 'select `code`, `name` from m_organisation_currency order by `code`', NULL),
-	(1014, 'cycleXSelect', 'cycleX', 'Cycle X Number', 'text', 'number', 'n/a', NULL, NULL, NULL, NULL, NULL),
-	(1015, 'cycleYSelect', 'cycleY', 'Cycle Y Number', 'text', 'number', 'n/a', NULL, NULL, NULL, NULL, NULL),
-	(1016, 'fromXSelect', 'fromX', 'From X Number', 'text', 'number', 'n/a', NULL, NULL, NULL, NULL, NULL),
-	(1017, 'toYSelect', 'toY', 'To Y Number', 'text', 'number', 'n/a', NULL, NULL, NULL, NULL, NULL),
-	(1018, 'overdueXSelect', 'overdueX', 'Overdue X Number', 'text', 'number', 'n/a', NULL, NULL, NULL, NULL, NULL),
-	(1019, 'overdueYSelect', 'overdueY', 'Overdue Y Number', 'text', 'number', 'n/a', NULL, NULL, NULL, NULL, NULL),
-	(1020, 'DefaultLoan', 'loanId', 'Loan', 'none', 'number', '-1', NULL, NULL, 'Y', 'select ml.id \nfrom m_loan ml \nleft join m_client mc on mc.id = ml.client_id \nleft join m_office mo on mo.id = mc.office_id \nwhere mo.id = ${officeId} or ${officeId} = -1', 5),
-	(1021, 'DefaultClient', 'clientId', 'Client', 'none', 'number', '-1', NULL, NULL, 'Y', 'select mc.id \nfrom m_client mc\n left join m_office on mc.office_id = mo.id\n where mo.id = ${officeId} or ${officeId} = -1', 5),
-	(1022, 'DefaultGroup', 'groupId', 'Group', 'none', 'number', '-1', NULL, NULL, 'Y', 'select mg.id \nfrom m_group mg\nleft join m_office mo on mg.office_id = mo.id\nwhere mo.id = ${officeId} or ${officeId} = -1', 5),
-	(1023, 'SelectLoanType', 'loanType', 'Loan Type', 'select', 'number', '-1', NULL, NULL, 'Y', 'select\nenum_id as id,\nenum_value as value\nfrom r_enum_value\nwhere enum_name = \'loan_type_enum\'', NULL),
-	(1024, 'DefaultSavings', 'savingsId', 'Savings', 'none', 'number', '-1', NULL, NULL, 'Y', NULL, 5),
-	(1025, 'DefaultSavingsTransactionId', 'savingsTransactionId', 'Savings Transaction', 'none', 'number', '-1', NULL, NULL, 'Y', NULL, 5);
+	(1011, 'cycleXSelect', 'cycleX', 'Cycle X Number', 'text', 'number', 'n/a', NULL, NULL, NULL, NULL, NULL),
+	(1012, 'cycleYSelect', 'cycleY', 'Cycle Y Number', 'text', 'number', 'n/a', NULL, NULL, NULL, NULL, NULL),
+	(1013, 'fromXSelect', 'fromX', 'From X Number', 'text', 'number', 'n/a', NULL, NULL, NULL, NULL, NULL),
+	(1014, 'toYSelect', 'toY', 'To Y Number', 'text', 'number', 'n/a', NULL, NULL, NULL, NULL, NULL),
+	(1015, 'overdueXSelect', 'overdueX', 'Overdue X Number', 'text', 'number', 'n/a', NULL, NULL, NULL, NULL, NULL),
+	(1016, 'overdueYSelect', 'overdueY', 'Overdue Y Number', 'text', 'number', 'n/a', NULL, NULL, NULL, NULL, NULL),
+	(1017, 'DefaultLoan', 'loanId', 'Loan', 'none', 'number', '-1', NULL, NULL, 'Y', 'select ml.id \nfrom m_loan ml \nleft join m_client mc on mc.id = ml.client_id \nleft join m_office mo on mo.id = mc.office_id \nwhere mo.id = ${officeId} or ${officeId} = -1', 5),
+	(1018, 'DefaultClient', 'clientId', 'Client', 'none', 'number', '-1', NULL, NULL, 'Y', 'select mc.id \nfrom m_client mc\n left join m_office on mc.office_id = mo.id\n where mo.id = ${officeId} or ${officeId} = -1', 5),
+	(1019, 'DefaultGroup', 'groupId', 'Group', 'none', 'number', '-1', NULL, NULL, 'Y', 'select mg.id \nfrom m_group mg\nleft join m_office mo on mg.office_id = mo.id\nwhere mo.id = ${officeId} or ${officeId} = -1', 5),
+	(1020, 'SelectLoanType', 'loanType', 'Loan Type', 'select', 'number', '-1', NULL, NULL, 'Y', 'select\nenum_id as id,\nenum_value as value\nfrom r_enum_value\nwhere enum_name = \'loan_type_enum\'', NULL),
+	(1021, 'DefaultSavings', 'savingsId', 'Savings', 'none', 'number', '-1', NULL, NULL, 'Y', NULL, 5),
+	(1022, 'DefaultSavingsTransactionId', 'savingsTransactionId', 'Savings Transaction', 'none', 'number', '-1', NULL, NULL, 'Y', NULL, 5),
+	(1023, 'tellerIdSelectOne', 'tellerId', 'Teller', 'select', 'number', '0', NULL, 'Y', 'N', 'select id, name from m_tellers where office_id = ${officeId}', 5),
+	(1024, 'cashierIdSelectOne', 'cashierId', 'Cashier', 'select', 'number', '0', NULL, 'Y', 'N', 'select c.id, s.display_name from m_cashiers as c left join m_staff as s on c.staff_id = s.id where c.teller_id = ${tellerId}', 1023),
+	(1025, 'currencyCodeSelectOne', 'currencyCode', 'Currency', 'select', 'string', '0', NULL, 'Y', 'N', 'select `code`, `name` from m_organisation_currency order by `code`', NULL);
 /*!40000 ALTER TABLE `stretchy_parameter` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.stretchy_report
+
+-- Dumping structure for table mifostenant-default.stretchy_report
 DROP TABLE IF EXISTS `stretchy_report`;
 CREATE TABLE IF NOT EXISTS `stretchy_report` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -6295,7 +6475,7 @@ CREATE TABLE IF NOT EXISTS `stretchy_report` (
   UNIQUE KEY `report_name_UNIQUE` (`report_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=189 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.stretchy_report: ~199 rows (approximately)
+-- Dumping data for table mifostenant-default.stretchy_report: ~116 rows (approximately)
 /*!40000 ALTER TABLE `stretchy_report` DISABLE KEYS */;
 INSERT INTO `stretchy_report` (`id`, `report_name`, `report_type`, `report_subtype`, `report_category`, `report_sql`, `description`, `core_report`, `use_report`) VALUES
 	(1, 'Client Listing', 'Table', NULL, 'Client', 'select\nconcat(repeat("..",\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) as "Office/Branch",\n c.account_no as "Client Account No.",\nc.display_name as "Name",\nr.enum_message_property as "Status",\nc.activation_date as "Activation", c.external_id as "External Id"\nfrom m_office o\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \'%\')\nand ounder.hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\njoin m_client c on c.office_id = ounder.id\nleft join r_enum_value r on r.enum_name = \'status_enum\' and r.enum_id = c.status_enum\nwhere o.id = ${officeId}\norder by ounder.hierarchy, c.account_no', 'Individual Client Report\r\n\r\nLists the small number of defined fields on the client table.  Would expect to copy this \n\nreport and add any \'one to one\' additional data for specific tenant needs.\r\n\r\nCan be run for any size MFI but you\'d expect it only to be run within a branch for \n\nlarger ones.  Depending on how many columns are displayed, there is probably is a limit of about 20/50k clients returned for html display (export to excel doesn\'t \n\nhave that client browser/memory impact).', 1, 1),
@@ -6391,32 +6571,33 @@ INSERT INTO `stretchy_report` (`id`, `report_name`, `report_type`, `report_subty
 	(163, 'Collection Report', 'Pentaho', NULL, 'Loans', NULL, NULL, 0, 1),
 	(164, 'Disbursal Report', 'Pentaho', NULL, 'Loans', NULL, NULL, 0, 1),
 	(165, 'Savings Accounts Dormancy Report', 'Table', NULL, 'Savings', 'select cl.display_name as \'Client Display Name\',\r\nsa.account_no as \'Account Number\',\r\ncl.mobile_no as \'Mobile Number\',\r\n@lastdate:=(select IFNULL(max(sat.transaction_date),sa.activatedon_date) \r\n            from m_savings_account_transaction as sat \r\n            where sat.is_reversed = 0 \r\n            and sat.transaction_type_enum in (1,2) \r\n            and sat.savings_account_id = sa.id) as \'Date of Last Activity\',\r\nDATEDIFF(now(), @lastdate) as \'Days Since Last Activity\'\r\nfrom m_savings_account as sa \r\ninner join m_savings_product as sp on (sa.product_id = sp.id and sp.is_dormancy_tracking_active = 1) \r\nleft join m_client as cl on sa.client_id = cl.id \r\nwhere sa.sub_status_enum = ${subStatus}\r\nand cl.office_id = ${officeId}', NULL, 1, 1),
-	(166, 'Daily Teller Cash Report (Pentaho)', 'Pentaho', NULL, NULL, NULL, 'Daily Teller Cash Report', 1, 1),
-	(167, 'Active Clients', 'SMS', 'NonTriggered', 'Clients', 'SELECT c.id AS "id", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", CONCAT(REPEAT("..", ((LENGTH(ounder.`hierarchy`) - LENGTH(\r\nREPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) AS "officeName", \r\no.id AS "officeNumber"\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nLEFT JOIN r_enum_value r ON r.enum_name = \'status_enum\' AND r.enum_id = c.status_enum\r\nWHERE o.id = ${officeId} AND c.status_enum = 300 AND (IFNULL(c.staff_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId})\r\nGROUP BY c.id\r\nORDER BY ounder.hierarchy, c.account_no', 'All clients with the status ‘Active’', 0, 1),
-	(168, 'Prospective Clients', 'SMS', 'NonTriggered', 'Clients', 'SELECT c.id AS "id", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", CONCAT(REPEAT("..", ((LENGTH(ounder.`hierarchy`) - LENGTH(\r\nREPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) AS "officeName", \r\no.id AS "officeNumber"\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nLEFT JOIN r_enum_value r ON r.enum_name = \'status_enum\' AND r.enum_id = c.status_enum\r\nLEFT JOIN m_loan l ON l.client_id = c.id\r\nWHERE o.id = ${officeId} AND c.status_enum = 300 AND (IFNULL(c.staff_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND l.client_id IS NULL\r\nGROUP BY c.id\r\nORDER BY ounder.hierarchy, c.account_no', 'All clients with the status ‘Active’ who have never had a loan before', 0, 1),
-	(169, 'Active Loan Clients', 'SMS', 'NonTriggered', 'Clients', 'SELECT \r\nc.id AS "id", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", \r\nl.principal_amount AS "loanAmount", \r\n(IFNULL(l.principal_outstanding_derived, 0) + IFNULL(l.interest_outstanding_derived, 0) + IFNULL(l.fee_charges_outstanding_derived, 0) + IFNULL(l.penalty_charges_outstanding_derived, 0)) AS "loanOutstanding",\r\nl.principal_disbursed_derived AS "loanDisbursed",\r\nounder.id AS "officeNumber", \r\nl.account_no AS "loanAccountId", \r\ngua.lastname AS "guarantorLastName", COUNT(gua.id) AS "numberOfGuarantors",\r\ng.display_name AS "groupName"\r\n\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nJOIN m_loan l ON l.client_id = c.id\r\nJOIN m_product_loan pl ON pl.id = l.product_id\r\nLEFT JOIN m_group_client gc ON gc.client_id = c.id\r\nLEFT JOIN m_group g ON g.id = gc.group_id\r\nLEFT JOIN m_staff lo ON lo.id = l.loan_officer_id\r\nLEFT JOIN m_currency cur ON cur.code = l.currency_code\r\nLEFT JOIN m_guarantor gua ON gua.loan_id = l.id\r\nWHERE o.id = ${officeId} AND (IFNULL(l.loan_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND l.loan_status_id = 300 AND (DATEDIFF(CURDATE(), l.disbursedon_date) BETWEEN ${cycleX} AND ${cycleY})\r\nGROUP BY l.id\r\nORDER BY ounder.hierarchy, l.currency_code, c.account_no, l.account_no', 'All clients with an outstanding loan', 0, 1),
-	(170, 'Loan in arrears', 'SMS', 'NonTriggered', 'Loan', 'SELECT \r\nmc.id AS "id", \r\nmc.firstname AS "firstName",\r\nmc.middlename AS "middleName",\r\nmc.lastname AS "lastName",\r\nmc.display_name AS "fullName",\r\nmc.mobile_no AS "mobileNo", \r\nml.principal_amount AS "loanAmount", \r\n(IFNULL(ml.principal_outstanding_derived, 0) + IFNULL(ml.interest_outstanding_derived, 0) + IFNULL(ml.fee_charges_outstanding_derived, 0) + IFNULL(ml.penalty_charges_outstanding_derived, 0)) AS "loanOutstanding",\r\nml.principal_disbursed_derived AS "loanDisbursed",\r\nlaa.overdue_since_date_derived AS "paymentDueDate",\r\nIFNULL(laa.total_overdue_derived, 0) AS "totalDue",\r\nounder.id AS "officeNumber", \r\nml.account_no AS "loanAccountId", \r\ngua.lastname AS "guarantorLastName", \r\nCOUNT(gua.id) AS "numberOfGuarantors",\r\ng.display_name AS "groupName"\r\n\r\nFROM m_office mo\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\')\r\nINNER JOIN m_client mc ON mc.office_id=ounder.id\r\nINNER JOIN m_loan ml ON ml.client_id = mc.id\r\nINNER JOIN r_enum_value rev ON rev.enum_id=ml.loan_status_id AND rev.enum_name = \'loan_status_id\'\r\nINNER JOIN m_loan_arrears_aging laa ON laa.loan_id=ml.id\r\nLEFT JOIN m_currency cur ON cur.code = ml.currency_code\r\nLEFT JOIN m_group_client gc ON gc.client_id = mc.id\r\nLEFT JOIN m_group g ON g.id = gc.group_id\r\nLEFT JOIN m_staff lo ON lo.id = ml.loan_officer_id\r\nLEFT JOIN m_guarantor gua ON gua.loan_id = ml.id\r\nWHERE ml.loan_status_id=300 AND mo.id=${officeId} AND (IFNULL(ml.loan_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND (DATEDIFF(CURDATE(), laa.overdue_since_date_derived) BETWEEN ${fromX} AND ${toY})\r\nGROUP BY ml.id\r\nORDER BY ounder.hierarchy, ml.currency_code, mc.account_no, ml.account_no', 'All clients with an outstanding loan in arrears between X and Y days', 0, 1),
-	(171, 'Loan payments due', 'SMS', 'NonTriggered', 'Loan', 'SELECT \r\ncl.id AS "id", \r\ncl.firstname AS "firstName",\r\ncl.middlename AS "middleName",\r\ncl.lastname AS "lastName",\r\ncl.display_name AS "fullName",\r\ncl.mobile_no AS "mobileNo", \r\nl.principal_amount AS "loanAmount",\r\nof.id AS "officeNumber",\r\n(IFNULL(l.principal_outstanding_derived, 0) + IFNULL(l.interest_outstanding_derived, 0) + IFNULL(l.fee_charges_outstanding_derived, 0) + IFNULL(l.penalty_charges_outstanding_derived, 0)) AS "loanOutstanding",\r\nl.principal_disbursed_derived AS "loanDisbursed",\r\nls.duedate AS "paymentDueDate",\r\n(IFNULL(SUM(ls.principal_amount),0) - IFNULL(SUM(ls.principal_writtenoff_derived),0)\r\n + IFNULL(SUM(ls.interest_amount),0) - IFNULL(SUM(ls.interest_writtenoff_derived),0) \r\n - IFNULL(SUM(ls.interest_waived_derived),0)\r\n + IFNULL(SUM(ls.fee_charges_amount),0) - IFNULL(SUM(ls.fee_charges_writtenoff_derived),0) \r\n - IFNULL(SUM(ls.fee_charges_waived_derived),0)\r\n + IFNULL(SUM(ls.penalty_charges_amount),0) - IFNULL(SUM(ls.penalty_charges_writtenoff_derived),0) \r\n - IFNULL(SUM(ls.penalty_charges_waived_derived),0)\r\n) AS "totalDue",\r\nlaa.total_overdue_derived AS "totalOverdue",\r\nl.account_no AS "loanAccountId",\r\ngua.lastname AS "guarantorLastName",\r\nCOUNT(gua.id) AS "numberOfGuarantors",\r\ngp.display_name AS "groupName"\r\n\r\nFROM m_office of\r\nLEFT JOIN m_client cl ON of.id = cl.office_id\r\nLEFT JOIN m_loan l ON cl.id = l.client_id\r\nLEFT JOIN m_group_client gc ON gc.client_id = cl.id\r\nLEFT JOIN m_group gp ON gp.id = l.group_id\r\nLEFT JOIN m_loan_repayment_schedule ls ON l.id = ls.loan_id\r\nLEFT JOIN m_guarantor gua ON gua.loan_id = l.id\r\nINNER JOIN m_loan_arrears_aging laa ON laa.loan_id=l.id\r\nWHERE of.id = ${officeId} AND (IFNULL(l.loan_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND (DATEDIFF(CURDATE(), ls.duedate) BETWEEN ${fromX} AND ${toY}) \r\nAND (of.hierarchy LIKE CONCAT((\r\nSELECT ino.hierarchy\r\nFROM m_office ino\r\nWHERE ino.id = ${}),"%"))\r\nGROUP BY l.id\r\nORDER BY of.hierarchy, l.currency_code, cl.account_no, l.account_no', 'All clients with an unpaid installment due on their loan between X and Y days', 0, 1),
-	(172, 'Dormant Prospects', 'SMS', 'NonTriggered', 'Clients', 'SELECT CONCAT(REPEAT("..", ((LENGTH(ounder.`hierarchy`) - LENGTH(\r\nREPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) AS "officeName", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", \r\no.id AS "officeNumber", \r\nTIMESTAMPDIFF(MONTH, c.activation_date, CURDATE()) AS "dormant"\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nLEFT JOIN r_enum_value r ON r.enum_name = \'status_enum\' AND r.enum_id = c.status_enum\r\nLEFT JOIN m_loan l ON l.client_id = c.id\r\nWHERE o.id = ${officeId} AND c.status_enum = 300 AND (IFNULL(c.staff_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND l.client_id IS NULL AND (TIMESTAMPDIFF(MONTH, c.activation_date, CURDATE()) > 3)\r\nGROUP BY c.id\r\nORDER BY ounder.hierarchy, c.account_no', 'All individuals who have not yet received a loan but were also entered into the system more than 3 months', 0, 1),
-	(173, 'Active group leaders', 'SMS', 'NonTriggered', 'Clients', 'SELECT c.id AS "id", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", CONCAT(REPEAT("..", ((LENGTH(ounder.`hierarchy`) - LENGTH(\r\nREPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) AS "officeName", \r\no.id AS "officeNumber"\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_group g ON g.office_id = ounder.id\r\nJOIN m_client c ON c.office_id = ounder.id\r\nLEFT JOIN m_group_client gc ON gc.group_id = g.id AND gc.client_id = c.id\r\nLEFT JOIN m_group_roles gr ON gr.group_id = g.id AND gr.client_id = c.id\r\nLEFT JOIN m_staff ms ON ms.id = c.staff_id\r\nLEFT JOIN r_enum_value r ON r.enum_name = \'status_enum\' AND r.enum_id = c.status_enum\r\nLEFT JOIN m_code_value cv ON cv.id = gr.role_cv_id\r\nLEFT JOIN m_code code ON code.id = cv.code_id\r\nWHERE o.id = ${officeId} AND g.status_enum = 300 AND c.status_enum = 300  AND (IFNULL(c.staff_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND code.code_name = \'GROUPROLE\' AND cv.code_value = \'Leader\'\r\nGROUP BY c.id\r\nORDER BY ounder.hierarchy, c.account_no', 'All active group chairmen', 0, 1),
-	(174, 'Loan payments due (Overdue Loans)', 'SMS', 'NonTriggered', 'Loan', 'SELECT \r\nmc.id AS "id", \r\nmc.firstname AS "firstName",\r\nmc.middlename AS "middleName",\r\nmc.lastname AS "lastName",\r\nmc.display_name AS "fullName",\r\nmc.mobile_no AS "mobileNo", \r\nml.principal_amount AS "loanAmount", \r\n(IFNULL(ml.principal_outstanding_derived, 0) + IFNULL(ml.interest_outstanding_derived, 0) + IFNULL(ml.fee_charges_outstanding_derived, 0) + IFNULL(ml.penalty_charges_outstanding_derived, 0)) AS "loanOutstanding",\r\nml.principal_disbursed_derived AS "loanDisbursed",\r\nlaa.overdue_since_date_derived AS "paymentDueDate",\r\n(IFNULL(SUM(ls.principal_amount),0) - IFNULL(SUM(ls.principal_writtenoff_derived),0)\r\n + IFNULL(SUM(ls.interest_amount),0) - IFNULL(SUM(ls.interest_writtenoff_derived),0) \r\n - IFNULL(SUM(ls.interest_waived_derived),0)\r\n + IFNULL(SUM(ls.fee_charges_amount),0) - IFNULL(SUM(ls.fee_charges_writtenoff_derived),0) \r\n - IFNULL(SUM(ls.fee_charges_waived_derived),0)\r\n + IFNULL(SUM(ls.penalty_charges_amount),0) - IFNULL(SUM(ls.penalty_charges_writtenoff_derived),0) \r\n - IFNULL(SUM(ls.penalty_charges_waived_derived),0)\r\n) AS "totalDue",\r\nlaa.total_overdue_derived AS "totalOverdue",\r\nounder.id AS "officeNumber", \r\nml.account_no AS "loanAccountId", \r\ngua.lastname AS "guarantorLastName", \r\nCOUNT(gua.id) AS "numberOfGuarantors",\r\ng.display_name AS "groupName"\r\n\r\nFROM m_office mo\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\')\r\nINNER JOIN m_client mc ON mc.office_id=ounder.id\r\nINNER JOIN m_loan ml ON ml.client_id = mc.id\r\nINNER JOIN r_enum_value rev ON rev.enum_id=ml.loan_status_id AND rev.enum_name = \'loan_status_id\'\r\nINNER JOIN m_loan_arrears_aging laa ON laa.loan_id=ml.id\r\nLEFT JOIN m_loan_repayment_schedule ls ON ls.loan_id = ml.id\r\nLEFT JOIN m_currency cur ON cur.code = ml.currency_code\r\nLEFT JOIN m_group_client gc ON gc.client_id = mc.id\r\nLEFT JOIN m_group g ON g.id = gc.group_id\r\nLEFT JOIN m_staff lo ON lo.id = ml.loan_officer_id\r\nLEFT JOIN m_guarantor gua ON gua.loan_id = ml.id\r\nWHERE ml.loan_status_id=300 AND mo.id=${officeId} AND (IFNULL(ml.loan_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) \r\nAND (DATEDIFF(CURDATE(), ls.duedate) BETWEEN ${fromX} AND ${toY})\r\nAND (DATEDIFF(CURDATE(), laa.overdue_since_date_derived) BETWEEN ${overdueX} AND ${overdueY})\r\nGROUP BY ml.id\r\nORDER BY ounder.hierarchy, ml.currency_code, mc.account_no, ml.account_no', 'Loan Payments Due between X to Y days for clients in arrears between X and Y days', 0, 1),
-	(175, 'Loan payments received (Active Loans)', 'SMS', 'NonTriggered', 'Loan', 'SELECT \r\nmc.id AS "id", \r\nmc.firstname AS "firstName",\r\nmc.middlename AS "middleName",\r\nmc.lastname AS "lastName",\r\nmc.display_name AS "fullName",\r\nmc.mobile_no AS "mobileNo", \r\nml.principal_amount AS "loanAmount", \r\n(IFNULL(ml.principal_outstanding_derived, 0) + IFNULL(ml.interest_outstanding_derived, 0) + IFNULL(ml.fee_charges_outstanding_derived, 0) + IFNULL(ml.penalty_charges_outstanding_derived, 0)) AS "loanOutstanding",\r\nounder.id AS "officeNumber", \r\nml.account_no AS "loanAccountNumber",\r\nSUM(lt.amount) AS "repaymentAmount"\r\nFROM m_office mo\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\')\r\nINNER JOIN m_client mc ON mc.office_id=ounder.id\r\nINNER JOIN m_loan ml ON ml.client_id = mc.id\r\nINNER JOIN r_enum_value rev ON rev.enum_id=ml.loan_status_id AND rev.enum_name = \'loan_status_id\'\r\nINNER JOIN m_loan_transaction lt ON lt.loan_id = ml.id\r\nINNER JOIN m_appuser au ON au.id = lt.appuser_id\r\nLEFT JOIN m_loan_arrears_aging laa ON laa.loan_id=ml.id\r\nLEFT JOIN m_payment_detail mpd ON mpd.id=lt.payment_detail_id\r\nLEFT JOIN m_currency cur ON cur.code = ml.currency_code\r\nLEFT JOIN m_group_client gc ON gc.client_id = mc.id\r\nLEFT JOIN m_group g ON g.id = gc.group_id\r\nLEFT JOIN m_staff lo ON lo.id = ml.loan_officer_id\r\nLEFT JOIN m_guarantor gua ON gua.loan_id = ml.id\r\nWHERE ml.loan_status_id=300 AND mo.id=${officeId} AND (IFNULL(ml.loan_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND (DATEDIFF(CURDATE(), lt.transaction_date) BETWEEN ${fromX} AND ${toY}) AND lt.is_reversed=0 AND lt.transaction_type_enum=2 AND laa.loan_id IS NULL\r\nGROUP BY ml.id\r\nORDER BY ounder.hierarchy, ml.currency_code, mc.account_no, ml.account_no', 'Payments received in the last X to Y days for any loan with the status Active (on-time)', 0, 1),
-	(176, 'Loan payments received (Overdue Loans)', 'SMS', 'NonTriggered', 'Loan', 'SELECT \r\nml.id AS "loanId", \r\nmc.id AS "id", \r\nmc.firstname AS "firstName",\r\nmc.middlename AS "middleName",\r\nmc.lastname AS "lastName",\r\nmc.display_name AS "fullName",\r\nmc.mobile_no AS "mobileNo", \r\nml.principal_amount AS "loanAmount", \r\n(IFNULL(ml.principal_outstanding_derived, 0) + IFNULL(ml.interest_outstanding_derived, 0) + IFNULL(ml.fee_charges_outstanding_derived, 0) + IFNULL(ml.penalty_charges_outstanding_derived, 0)) AS "loanOutstanding",\r\nounder.id AS "officeNumber", \r\nml.account_no AS "loanAccountNumber",\r\nSUM(lt.amount) AS "repaymentAmount"\r\nFROM m_office mo\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\')\r\nINNER JOIN m_client mc ON mc.office_id=ounder.id\r\nINNER JOIN m_loan ml ON ml.client_id = mc.id\r\nINNER JOIN r_enum_value rev ON rev.enum_id=ml.loan_status_id AND rev.enum_name = \'loan_status_id\'\r\nINNER JOIN m_loan_arrears_aging laa ON laa.loan_id=ml.id\r\nINNER JOIN m_loan_transaction lt ON lt.loan_id = ml.id\r\nINNER JOIN m_appuser au ON au.id = lt.appuser_id\r\nLEFT JOIN m_payment_detail mpd ON mpd.id=lt.payment_detail_id\r\nLEFT JOIN m_currency cur ON cur.code = ml.currency_code\r\nLEFT JOIN m_group_client gc ON gc.client_id = mc.id\r\nLEFT JOIN m_group g ON g.id = gc.group_id\r\nLEFT JOIN m_staff lo ON lo.id = ml.loan_officer_id\r\nLEFT JOIN m_guarantor gua ON gua.loan_id = ml.id\r\nWHERE ml.loan_status_id=300 AND mo.id=${officeId} AND (IFNULL(ml.loan_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND (DATEDIFF(CURDATE(), lt.transaction_date) BETWEEN ${fromX} AND ${toY}) AND (DATEDIFF(CURDATE(), laa.overdue_since_date_derived) BETWEEN ${overdueX} AND ${overdueY}) AND lt.is_reversed=0 AND lt.transaction_type_enum=2\r\nGROUP BY ml.id\r\nORDER BY ounder.hierarchy, ml.currency_code, mc.account_no, ml.account_no', 'Payments received in the last X to Y days for any loan with the status Overdue (arrears) between X and Y days', 0, 1),
-	(177, 'Happy Birthday', 'SMS', 'NonTriggered', 'Clients', 'SELECT \r\nc.id AS "id", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", CONCAT(REPEAT("..", ((LENGTH(ounder.`hierarchy`) - LENGTH(\r\nREPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) AS "officeName", \r\no.id AS "officeNumber", \r\nc.date_of_birth AS "dateOfBirth",\r\nIF(c.date_of_birth IS NULL, 0, CEIL(DATEDIFF (NOW(), c.date_of_birth)/365)) AS "age"\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nLEFT JOIN r_enum_value r ON r.enum_name = \'status_enum\' AND r.enum_id = c.status_enum\r\nLEFT JOIN m_staff ms ON ms.id = c.staff_id\r\nWHERE o.id = ${officeId} AND c.status_enum = 300 AND (IFNULL(c.staff_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND c.date_of_birth IS NOT NULL AND c.date_of_birth = CURDATE()\r\nORDER BY ounder.hierarchy, c.account_no', 'This sends a message to all clients with the status Active on their Birthday', 0, 1),
-	(178, 'Loan fully repaid', 'SMS', 'NonTriggered', 'Loan', 'SELECT \r\nc.id AS "id", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", \r\nl.principal_amount AS "loanAmount",\r\n(IFNULL(l.principal_outstanding_derived, 0) + IFNULL(l.interest_outstanding_derived, 0) + IFNULL(l.fee_charges_outstanding_derived, 0) + IFNULL(l.penalty_charges_outstanding_derived, 0)) AS "loanOutstanding",\r\nl.principal_disbursed_derived AS "loanDisbursed",\r\no.id AS "officeNumber",\r\nl.account_no AS "loanAccountId",\r\ngua.lastname AS "guarantorLastName", COUNT(gua.id) AS "numberOfGuarantors",\r\nls.duedate AS "dueDate",\r\nlaa.total_overdue_derived AS "totalDue",\r\ngp.display_name AS "groupName",\r\nl.total_repayment_derived AS "totalFullyPaid"\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nJOIN m_loan l ON l.client_id = c.id\r\nLEFT JOIN m_staff lo ON lo.id = l.loan_officer_id\r\nLEFT JOIN m_currency cur ON cur.code = l.currency_code\r\nLEFT JOIN m_group_client gc ON gc.client_id = c.id\r\nLEFT JOIN m_group gp ON gp.id = l.group_id\r\nLEFT JOIN m_loan_repayment_schedule ls ON l.id = ls.loan_id\r\nLEFT JOIN m_guarantor gua ON gua.loan_id = l.id\r\nINNER JOIN m_loan_arrears_aging laa ON laa.loan_id=l.id\r\nWHERE o.id = ${officeId} AND (IFNULL(l.loan_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND \r\n(DATEDIFF(CURDATE(), l.closedon_date) BETWEEN ${fromX} AND ${toY})\r\n AND (l.loan_status_id = 600 OR l.loan_status_id = 700)\r\nGROUP BY l.id\r\nORDER BY ounder.hierarchy, l.currency_code, c.account_no, l.account_no', 'All loans that have been fully repaid (Closed or Overpaid) in the last X to Y days', 0, 1),
-	(179, 'Loan outstanding after final instalment date', 'SMS', 'NonTriggered', 'Loan', 'SELECT \r\nc.id AS "id", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", \r\nl.principal_amount AS "loanAmount",\r\no.id AS "officeNumber",\r\n(IFNULL(l.principal_outstanding_derived, 0) + IFNULL(l.interest_outstanding_derived, 0) + IFNULL(l.fee_charges_outstanding_derived, 0) + IFNULL(l.penalty_charges_outstanding_derived, 0)) AS "loanOutstanding",\r\nl.principal_disbursed_derived AS "loanDisbursed",\r\nls.duedate AS "paymentDueDate",\r\n(IFNULL(SUM(ls.principal_amount),0) - IFNULL(SUM(ls.principal_writtenoff_derived),0)\r\n + IFNULL(SUM(ls.interest_amount),0) - IFNULL(SUM(ls.interest_writtenoff_derived),0) \r\n - IFNULL(SUM(ls.interest_waived_derived),0)\r\n + IFNULL(SUM(ls.fee_charges_amount),0) - IFNULL(SUM(ls.fee_charges_writtenoff_derived),0) \r\n - IFNULL(SUM(ls.fee_charges_waived_derived),0)\r\n + IFNULL(SUM(ls.penalty_charges_amount),0) - IFNULL(SUM(ls.penalty_charges_writtenoff_derived),0) \r\n - IFNULL(SUM(ls.penalty_charges_waived_derived),0)\r\n) AS "totalDue",\r\nlaa.total_overdue_derived AS "totalOverdue",\r\nl.account_no AS "loanAccountId",\r\ngua.lastname AS "guarantorLastName",\r\nCOUNT(gua.id) AS "numberOfGuarantors",\r\ngp.display_name AS "groupName"\r\n\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nJOIN m_loan l ON l.client_id = c.id\r\nLEFT JOIN m_staff lo ON lo.id = l.loan_officer_id\r\nLEFT JOIN m_currency cur ON cur.code = l.currency_code\r\nLEFT JOIN m_loan_arrears_aging laa ON laa.loan_id = l.id\r\nLEFT JOIN m_group_client gc ON gc.client_id = c.id\r\nLEFT JOIN m_group gp ON gp.id = l.group_id\r\nLEFT JOIN m_loan_repayment_schedule ls ON l.id = ls.loan_id\r\nLEFT JOIN m_guarantor gua ON gua.loan_id = l.id\r\nWHERE o.id = ${officeId} AND (IFNULL(l.loan_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND l.loan_status_id = 300 AND l.expected_maturedon_date < CURDATE() \r\nAND (DATEDIFF(CURDATE(), l.expected_maturedon_date) BETWEEN ${fromX} AND ${toY})\r\nGROUP BY l.id\r\nORDER BY ounder.hierarchy, l.currency_code, c.account_no, l.account_no', 'All active loans (with an outstanding balance) between X to Y days after the final instalment date on their loan schedule', 0, 1),
-	(180, 'Loan Repayment', 'SMS', 'Triggered', NULL, 'select ml.id as loanId,mc.id, mc.firstname, ifnull(mc.middlename,\'\') as middlename, mc.lastname, mc.display_name as FullName, mobile_no as mobileNo, mc.group_name as GroupName, round(ml.principal_amount, ml.currency_digits) as LoanAmount, round(ml.`total_outstanding_derived`, ml.currency_digits) as LoanOutstanding,\nml.`account_no` as LoanAccountId, round(mlt.amountPaid, ml.currency_digits) as repaymentAmount\nFROM m_office mo\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\')\nAND ounder.hierarchy like CONCAT(\'.\', \'%\')\nLEFT JOIN (\n select \n ml.id as loanId, \n ifnull(mc.id,mc2.id) as id, \n ifnull(mc.firstname,mc2.firstname) as firstname, \n ifnull(mc.middlename,ifnull(mc2.middlename,(\'\'))) as middlename, \n ifnull(mc.lastname,mc2.lastname) as lastname, \n ifnull(mc.display_name,mc2.display_name) as display_name, \n ifnull(mc.status_enum,mc2.status_enum) as status_enum,\n ifnull(mc.mobile_no,mc2.mobile_no) as mobile_no,\n ifnull(mg.office_id,mc2.office_id) as office_id,\n ifnull(mg.staff_id,mc2.staff_id) as staff_id,\n mg.id as group_id, \nmg.display_name as group_name\n from\n m_loan ml\n left join m_group mg on mg.id = ml.group_id\n left join m_group_client mgc on mgc.group_id = mg.id\n left join m_client mc on mc.id = mgc.client_id\n left join m_client mc2 on mc2.id = ml.client_id\n order by loanId\n ) mc on mc.office_id = ounder.id\nright join m_loan as ml on mc.loanId = ml.id\nright join(\nselect mlt.amount as amountPaid,mlt.id,mlt.loan_id\nfrom m_loan_transaction mlt\nwhere mlt.is_reversed = 0 \ngroup by mlt.loan_id\n) as mlt on mlt.loan_id = ml.id\nright join m_loan_repayment_schedule as mls1 on ml.id = mls1.loan_id and mls1.`completed_derived` = 0\nand mls1.installment = (SELECT MIN(installment) from m_loan_repayment_schedule where loan_id = ml.id and duedate <= CURDATE() and completed_derived=0)\nwhere mc.status_enum = 300 and mobile_no is not null and ml.`loan_status_id` = 300\nand (mo.id = ${officeId} or ${officeId} = -1)\nand (mc.staff_id = ${loanOfficerId} or ${loanOfficerId} = -1)\nand (ml.loan_type_enum = ${loanType} or ${loanType} = -1)\nand ml.id in (select mla.loan_id from m_loan_arrears_aging mla)\ngroup by ml.id', 'Loan Repayment', 0, 0),
-	(181, 'Loan Approved', 'SMS', 'Triggered', NULL, 'SELECT mc.id, mc.firstname, mc.middlename as middlename, mc.lastname, mc.display_name as FullName, mc.mobile_no as mobileNo, mc.group_name as GroupName, mo.name as officename, ml.id as loanId, ml.account_no as accountnumber, ml.principal_amount_proposed as loanamount, ml.annual_nominal_interest_rate as annualinterestrate FROM m_office mo JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\') AND ounder.hierarchy like CONCAT(\'.\', \'%\') LEFT JOIN ( select  ml.id as loanId,  ifnull(mc.id,mc2.id) as id,  ifnull(mc.firstname,mc2.firstname) as firstname,  ifnull(mc.middlename,ifnull(mc2.middlename,(\'\'))) as middlename,  ifnull(mc.lastname,mc2.lastname) as lastname,  ifnull(mc.display_name,mc2.display_name) as display_name,  ifnull(mc.status_enum,mc2.status_enum) as status_enum, ifnull(mc.mobile_no,mc2.mobile_no) as mobile_no, ifnull(mg.office_id,mc2.office_id) as office_id, ifnull(mg.staff_id,mc2.staff_id) as staff_id, mg.id as group_id, mg.display_name as group_name from m_loan ml left join m_group mg on mg.id = ml.group_id left join m_group_client mgc on mgc.group_id = mg.id left join m_client mc on mc.id = mgc.client_id left join m_client mc2 on mc2.id = ml.client_id order by loanId ) mc on mc.office_id = ounder.id  left join m_loan ml on ml.id = mc.loanId WHERE mc.status_enum = 300 and mc.mobile_no is not null and (mo.id = ${officeId} or ${officeId} = -1) and (mc.staff_id = ${loanOfficerId} or ${loanOfficerId} = -1)and (ml.id = ${loanId} or ${loanId} = -1)and (mc.id = ${clientId} or ${clientId} = -1)and (mc.group_id = ${groupId} or ${groupId} = -1)and (ml.loan_type_enum = ${loanType} or ${loanType} = -1)', 'Loan and client data of approved loan', 0, 0),
-	(182, 'Loan Rejected', 'SMS', 'Triggered', NULL, 'SELECT mc.id, mc.firstname, mc.middlename as middlename, mc.lastname, mc.display_name as FullName, mc.mobile_no as mobileNo, mc.group_name as GroupName,  mo.name as officename, ml.id as loanId, ml.account_no as accountnumber, ml.principal_amount_proposed as loanamount, ml.annual_nominal_interest_rate as annualinterestrate  FROM  m_office mo  JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\')  AND ounder.hierarchy like CONCAT(\'.\', \'%\')  LEFT JOIN (  select   ml.id as loanId,   ifnull(mc.id,mc2.id) as id,   ifnull(mc.firstname,mc2.firstname) as firstname,   ifnull(mc.middlename,ifnull(mc2.middlename,(\'\'))) as middlename,   ifnull(mc.lastname,mc2.lastname) as lastname,   ifnull(mc.display_name,mc2.display_name) as display_name,   ifnull(mc.status_enum,mc2.status_enum) as status_enum,  ifnull(mc.mobile_no,mc2.mobile_no) as mobile_no,  ifnull(mg.office_id,mc2.office_id) as office_id,  ifnull(mg.staff_id,mc2.staff_id) as staff_id,  mg.id as group_id,  mg.display_name as group_name  from  m_loan ml  left join m_group mg on mg.id = ml.group_id  left join m_group_client mgc on mgc.group_id = mg.id  left join m_client mc on mc.id = mgc.client_id  left join m_client mc2 on mc2.id = ml.client_id  order by loanId  ) mc on mc.office_id = ounder.id  left join m_loan ml on ml.id = mc.loanId  WHERE mc.status_enum = 300 and mc.mobile_no is not null  and (mo.id = ${officeId} or ${officeId} = -1)  and (mc.staff_id = ${loanOfficerId} or ${loanOfficerId} = -1) and (ml.id = ${loanId} or ${loanId} = -1) and (mc.id = ${clientId} or ${clientId} = -1) and (mc.group_id = ${groupId} or ${groupId} = -1)  and (ml.loan_type_enum = ${loanType} or ${loanType} = -1)', 'Loan and client data of rejected loan', 0, 0),
-	(183, 'Client Rejected', 'SMS', 'Triggered', 'Clients', 'SELECT c.id AS "id", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", CONCAT(REPEAT("..", ((LENGTH(ounder.`hierarchy`) - LENGTH(\r\nREPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) AS "officeName", \r\no.id AS "officeNumber"\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nLEFT JOIN r_enum_value r ON r.enum_name = \'status_enum\' AND r.enum_id = c.status_enum\r\nWHERE o.id = ${officeId} AND c.id = ${clientId} AND (IFNULL(c.staff_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId})', 'Client Rejection', 0, 1),
-	(184, 'Client Activated', 'SMS', 'Triggered', 'Clients', 'SELECT c.id AS "id", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", CONCAT(REPEAT("..", ((LENGTH(ounder.`hierarchy`) - LENGTH(\r\nREPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) AS "officeName", \r\no.id AS "officeNumber"\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nLEFT JOIN r_enum_value r ON r.enum_name = \'status_enum\' AND r.enum_id = c.status_enum\r\nWHERE o.id = ${officeId} AND c.id = ${clientId} AND (IFNULL(c.staff_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId})', 'Client Activation', 0, 1),
-	(185, 'Savings Rejected', 'SMS', 'Triggered', 'Savings', 'SELECT \r\nc.id AS "id",\r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo",\r\ns.account_no AS "savingsAccountNo",\r\nounder.id AS "officeNumber",\r\nounder.name AS "officeName"\r\n\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nJOIN m_savings_account s ON s.client_id = c.id\r\nJOIN m_savings_product sp ON sp.id = s.product_id\r\nLEFT JOIN m_staff st ON st.id = s.field_officer_id\r\nLEFT JOIN m_currency cur ON cur.code = s.currency_code\r\nWHERE o.id = ${officeId} AND (IFNULL(s.field_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND s.id = ${savingsId}', 'Savings Rejected', 0, 1),
-	(186, 'Savings Activated', 'SMS', 'Triggered', 'Savings', 'SELECT \r\nc.id AS "id",\r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo",\r\ns.account_no AS "savingsAccountNo",\r\nounder.id AS "officeNumber",\r\nounder.name AS "officeName"\r\n\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nJOIN m_savings_account s ON s.client_id = c.id\r\nJOIN m_savings_product sp ON sp.id = s.product_id\r\nLEFT JOIN m_staff st ON st.id = s.field_officer_id\r\nLEFT JOIN m_currency cur ON cur.code = s.currency_code\r\nWHERE o.id = ${officeId} AND (IFNULL(s.field_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND s.id = ${savingsId}', 'Savings Activation', 0, 1),
-	(187, 'Savings Deposit', 'SMS', 'Triggered', NULL, 'SELECT sc.savingsId AS savingsId, sc.id AS clientId, sc.firstname, IFNULL(sc.middlename,\'\') AS middlename, sc.lastname, sc.display_name AS FullName, sc.mobile_no AS mobileNo,\r\nms.`account_no` AS savingsAccountNo, ROUND(mst.amountPaid, ms.currency_digits) AS depositAmount, ms.account_balance_derived AS balance, \r\nmst.transactionDate AS transactionDate\r\nFROM m_office mo\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\') AND ounder.hierarchy LIKE CONCAT(\'.\', \'%\')\r\nLEFT JOIN (\r\nSELECT \r\n sa.id AS savingsId, mc.id AS id, mc.firstname AS firstname, mc.middlename AS middlename, mc.lastname AS lastname, \r\n mc.display_name AS display_name, mc.status_enum AS status_enum, \r\n mc.mobile_no AS mobile_no, mc.office_id AS office_id, \r\n mc.staff_id AS staff_id\r\nFROM\r\nm_savings_account sa\r\nLEFT JOIN m_client mc ON mc.id = sa.client_id\r\nORDER BY savingsId) sc ON sc.office_id = ounder.id\r\nRIGHT JOIN m_savings_account AS ms ON sc.savingsId = ms.id\r\nRIGHT JOIN(\r\nSELECT st.amount AS amountPaid, st.id, st.savings_account_id, st.id AS savingsTransactionId, st.transaction_date AS transactionDate\r\nFROM m_savings_account_transaction st\r\nWHERE st.is_reversed = 0\r\nGROUP BY st.savings_account_id\r\n) AS mst ON mst.savings_account_id = ms.id\r\nWHERE sc.mobile_no IS NOT NULL AND (mo.id = ${officeId} OR ${officeId} = -1) AND (sc.staff_id = ${loanOfficerId} OR ${loanOfficerId} = -1) AND mst.savingsTransactionId = ${savingsTransactionId}', 'Savings Deposit', 0, 1),
-	(188, 'Savings Withdrawal', 'SMS', 'Triggered', NULL, 'SELECT sc.savingsId AS savingsId, sc.id AS clientId, sc.firstname, IFNULL(sc.middlename,\'\') AS middlename, sc.lastname, sc.display_name AS FullName, sc.mobile_no AS mobileNo,\r\nms.`account_no` AS savingsAccountNo, ROUND(mst.amountPaid, ms.currency_digits) AS withdrawAmount, ms.account_balance_derived AS balance, \r\nmst.transactionDate AS transactionDate\r\nFROM m_office mo\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\') AND ounder.hierarchy LIKE CONCAT(\'.\', \'%\')\r\nLEFT JOIN (\r\nSELECT \r\n sa.id AS savingsId, mc.id AS id, mc.firstname AS firstname, mc.middlename AS middlename, mc.lastname AS lastname, \r\n mc.display_name AS display_name, mc.status_enum AS status_enum, \r\n mc.mobile_no AS mobile_no, mc.office_id AS office_id, \r\n mc.staff_id AS staff_id\r\nFROM\r\nm_savings_account sa\r\nLEFT JOIN m_client mc ON mc.id = sa.client_id\r\nORDER BY savingsId) sc ON sc.office_id = ounder.id\r\nRIGHT JOIN m_savings_account AS ms ON sc.savingsId = ms.id\r\nRIGHT JOIN(\r\nSELECT st.amount AS amountPaid, st.id, st.savings_account_id, st.id AS savingsTransactionId, st.transaction_date AS transactionDate\r\nFROM m_savings_account_transaction st\r\nWHERE st.is_reversed = 0\r\nGROUP BY st.savings_account_id\r\n) AS mst ON mst.savings_account_id = ms.id\r\nWHERE sc.mobile_no IS NOT NULL AND (mo.id = ${officeId} OR ${officeId} = -1) AND (sc.staff_id = ${loanOfficerId} OR ${loanOfficerId} = -1) AND mst.savingsTransactionId = ${savingsTransactionId}', 'Savings Withdrawal', 0, 1);
+	(166, 'Active Clients', 'SMS', 'NonTriggered', 'Clients', 'SELECT c.id AS "id", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", CONCAT(REPEAT("..", ((LENGTH(ounder.`hierarchy`) - LENGTH(\r\nREPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) AS "officeName", \r\no.id AS "officeNumber"\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nLEFT JOIN r_enum_value r ON r.enum_name = \'status_enum\' AND r.enum_id = c.status_enum\r\nWHERE o.id = ${officeId} AND c.status_enum = 300 AND (IFNULL(c.staff_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId})\r\nGROUP BY c.id\r\nORDER BY ounder.hierarchy, c.account_no', 'All clients with the status ‘Active’', 0, 1),
+	(167, 'Prospective Clients', 'SMS', 'NonTriggered', 'Clients', 'SELECT c.id AS "id", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", CONCAT(REPEAT("..", ((LENGTH(ounder.`hierarchy`) - LENGTH(\r\nREPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) AS "officeName", \r\no.id AS "officeNumber"\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nLEFT JOIN r_enum_value r ON r.enum_name = \'status_enum\' AND r.enum_id = c.status_enum\r\nLEFT JOIN m_loan l ON l.client_id = c.id\r\nWHERE o.id = ${officeId} AND c.status_enum = 300 AND (IFNULL(c.staff_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND l.client_id IS NULL\r\nGROUP BY c.id\r\nORDER BY ounder.hierarchy, c.account_no', 'All clients with the status ‘Active’ who have never had a loan before', 0, 1),
+	(168, 'Active Loan Clients', 'SMS', 'NonTriggered', 'Clients', 'SELECT \r\nc.id AS "id", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", \r\nl.principal_amount AS "loanAmount", \r\n(IFNULL(l.principal_outstanding_derived, 0) + IFNULL(l.interest_outstanding_derived, 0) + IFNULL(l.fee_charges_outstanding_derived, 0) + IFNULL(l.penalty_charges_outstanding_derived, 0)) AS "loanOutstanding",\r\nl.principal_disbursed_derived AS "loanDisbursed",\r\nounder.id AS "officeNumber", \r\nl.account_no AS "loanAccountId", \r\ngua.lastname AS "guarantorLastName", COUNT(gua.id) AS "numberOfGuarantors",\r\ng.display_name AS "groupName"\r\n\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nJOIN m_loan l ON l.client_id = c.id\r\nJOIN m_product_loan pl ON pl.id = l.product_id\r\nLEFT JOIN m_group_client gc ON gc.client_id = c.id\r\nLEFT JOIN m_group g ON g.id = gc.group_id\r\nLEFT JOIN m_staff lo ON lo.id = l.loan_officer_id\r\nLEFT JOIN m_currency cur ON cur.code = l.currency_code\r\nLEFT JOIN m_guarantor gua ON gua.loan_id = l.id\r\nWHERE o.id = ${officeId} AND (IFNULL(l.loan_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND l.loan_status_id = 300 AND (DATEDIFF(CURDATE(), l.disbursedon_date) BETWEEN ${cycleX} AND ${cycleY})\r\nGROUP BY l.id\r\nORDER BY ounder.hierarchy, l.currency_code, c.account_no, l.account_no', 'All clients with an outstanding loan between cycleX and cycleY days', 0, 1),
+	(169, 'Loan in arrears', 'SMS', 'NonTriggered', 'Loan', 'SELECT \r\nmc.id AS "id", \r\nmc.firstname AS "firstName",\r\nmc.middlename AS "middleName",\r\nmc.lastname AS "lastName",\r\nmc.display_name AS "fullName",\r\nmc.mobile_no AS "mobileNo", \r\nml.principal_amount AS "loanAmount", \r\n(IFNULL(ml.principal_outstanding_derived, 0) + IFNULL(ml.interest_outstanding_derived, 0) + IFNULL(ml.fee_charges_outstanding_derived, 0) + IFNULL(ml.penalty_charges_outstanding_derived, 0)) AS "loanOutstanding",\r\nml.principal_disbursed_derived AS "loanDisbursed",\r\nlaa.overdue_since_date_derived AS "paymentDueDate",\r\nIFNULL(laa.total_overdue_derived, 0) AS "totalDue",\r\nounder.id AS "officeNumber", \r\nml.account_no AS "loanAccountId", \r\ngua.lastname AS "guarantorLastName", \r\nCOUNT(gua.id) AS "numberOfGuarantors",\r\ng.display_name AS "groupName"\r\n\r\nFROM m_office mo\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\')\r\nINNER JOIN m_client mc ON mc.office_id=ounder.id\r\nINNER JOIN m_loan ml ON ml.client_id = mc.id\r\nINNER JOIN r_enum_value rev ON rev.enum_id=ml.loan_status_id AND rev.enum_name = \'loan_status_id\'\r\nINNER JOIN m_loan_arrears_aging laa ON laa.loan_id=ml.id\r\nLEFT JOIN m_currency cur ON cur.code = ml.currency_code\r\nLEFT JOIN m_group_client gc ON gc.client_id = mc.id\r\nLEFT JOIN m_group g ON g.id = gc.group_id\r\nLEFT JOIN m_staff lo ON lo.id = ml.loan_officer_id\r\nLEFT JOIN m_guarantor gua ON gua.loan_id = ml.id\r\nWHERE ml.loan_status_id=300 AND mo.id=${officeId} AND (IFNULL(ml.loan_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND (DATEDIFF(CURDATE(), laa.overdue_since_date_derived) BETWEEN ${fromX} AND ${toY})\r\nGROUP BY ml.id\r\nORDER BY ounder.hierarchy, ml.currency_code, mc.account_no, ml.account_no', 'All clients with an outstanding loan in arrears between fromX and toY days', 0, 1),
+	(170, 'Loan payments due', 'SMS', 'NonTriggered', 'Loan', 'SELECT \r\ncl.id AS "id", \r\ncl.firstname AS "firstName",\r\ncl.middlename AS "middleName",\r\ncl.lastname AS "lastName",\r\ncl.display_name AS "fullName",\r\ncl.mobile_no AS "mobileNo", \r\nl.principal_amount AS "loanAmount",\r\nof.id AS "officeNumber",\r\n(IFNULL(l.principal_outstanding_derived, 0) + IFNULL(l.interest_outstanding_derived, 0) + IFNULL(l.fee_charges_outstanding_derived, 0) + IFNULL(l.penalty_charges_outstanding_derived, 0)) AS "loanOutstanding",\r\nl.principal_disbursed_derived AS "loanDisbursed",\r\nls.duedate AS "paymentDueDate",\r\n(IFNULL(SUM(ls.principal_amount),0) - IFNULL(SUM(ls.principal_writtenoff_derived),0)\r\n + IFNULL(SUM(ls.interest_amount),0) - IFNULL(SUM(ls.interest_writtenoff_derived),0) \r\n - IFNULL(SUM(ls.interest_waived_derived),0)\r\n + IFNULL(SUM(ls.fee_charges_amount),0) - IFNULL(SUM(ls.fee_charges_writtenoff_derived),0) \r\n - IFNULL(SUM(ls.fee_charges_waived_derived),0)\r\n + IFNULL(SUM(ls.penalty_charges_amount),0) - IFNULL(SUM(ls.penalty_charges_writtenoff_derived),0) \r\n - IFNULL(SUM(ls.penalty_charges_waived_derived),0)\r\n) AS "totalDue",\r\nlaa.total_overdue_derived AS "totalOverdue",\r\nl.account_no AS "loanAccountId",\r\ngua.lastname AS "guarantorLastName",\r\nCOUNT(gua.id) AS "numberOfGuarantors",\r\ngp.display_name AS "groupName"\r\n\r\nFROM m_office of\r\nLEFT JOIN m_client cl ON of.id = cl.office_id\r\nLEFT JOIN m_loan l ON cl.id = l.client_id\r\nLEFT JOIN m_group_client gc ON gc.client_id = cl.id\r\nLEFT JOIN m_group gp ON gp.id = l.group_id\r\nLEFT JOIN m_loan_repayment_schedule ls ON l.id = ls.loan_id\r\nLEFT JOIN m_guarantor gua ON gua.loan_id = l.id\r\nINNER JOIN m_loan_arrears_aging laa ON laa.loan_id=l.id\r\nWHERE of.id = ${officeId} AND (IFNULL(l.loan_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND (DATEDIFF(CURDATE(), ls.duedate) BETWEEN ${fromX} AND ${toY}) \r\nAND (of.hierarchy LIKE CONCAT((\r\nSELECT ino.hierarchy\r\nFROM m_office ino\r\nWHERE ino.id = ${officeId}),"%"))\r\nGROUP BY l.id\r\nORDER BY of.hierarchy, l.currency_code, cl.account_no, l.account_no', 'All clients with an unpaid installment due on their loan between fromX and toY days', 0, 1),
+	(171, 'Dormant Prospects', 'SMS', 'NonTriggered', 'Clients', 'SELECT c.id AS "id", CONCAT(REPEAT("..", ((LENGTH(ounder.`hierarchy`) - LENGTH(\r\nREPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) AS "officeName", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo",  \r\no.id AS "officeNumber", \r\nTIMESTAMPDIFF(MONTH, c.activation_date, CURDATE()) AS "dormant"\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nLEFT JOIN r_enum_value r ON r.enum_name = \'status_enum\' AND r.enum_id = c.status_enum\r\nLEFT JOIN m_loan l ON l.client_id = c.id\r\nWHERE o.id = ${officeId} AND c.status_enum = 300 AND (IFNULL(c.staff_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND l.client_id IS NULL AND (TIMESTAMPDIFF(MONTH, c.activation_date, CURDATE()) > 3)\r\nGROUP BY c.id\r\nORDER BY ounder.hierarchy, c.account_no', 'All individuals who have not yet received a loan but were also entered into the system more than 3 months', 0, 1),
+	(172, 'Active group leaders', 'SMS', 'NonTriggered', 'Clients', 'SELECT c.id AS "id", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", CONCAT(REPEAT("..", ((LENGTH(ounder.`hierarchy`) - LENGTH(\r\nREPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) AS "officeName", \r\no.id AS "officeNumber"\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_group g ON g.office_id = ounder.id\r\nJOIN m_client c ON c.office_id = ounder.id\r\nLEFT JOIN m_group_client gc ON gc.group_id = g.id AND gc.client_id = c.id\r\nLEFT JOIN m_group_roles gr ON gr.group_id = g.id AND gr.client_id = c.id\r\nLEFT JOIN m_staff ms ON ms.id = c.staff_id\r\nLEFT JOIN r_enum_value r ON r.enum_name = \'status_enum\' AND r.enum_id = c.status_enum\r\nLEFT JOIN m_code_value cv ON cv.id = gr.role_cv_id\r\nLEFT JOIN m_code code ON code.id = cv.code_id\r\nWHERE o.id = ${officeId} AND g.status_enum = 300 AND c.status_enum = 300  AND (IFNULL(c.staff_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND code.code_name = \'GROUPROLE\' AND cv.code_value = \'Leader\'\r\nGROUP BY c.id\r\nORDER BY ounder.hierarchy, c.account_no', 'All active group chairmen', 0, 1),
+	(173, 'Loan payments due (Overdue Loans)', 'SMS', 'NonTriggered', 'Loan', 'SELECT \r\nmc.id AS "id", \r\nmc.firstname AS "firstName",\r\nmc.middlename AS "middleName",\r\nmc.lastname AS "lastName",\r\nmc.display_name AS "fullName",\r\nmc.mobile_no AS "mobileNo", \r\nml.principal_amount AS "loanAmount", \r\n(IFNULL(ml.principal_outstanding_derived, 0) + IFNULL(ml.interest_outstanding_derived, 0) + IFNULL(ml.fee_charges_outstanding_derived, 0) + IFNULL(ml.penalty_charges_outstanding_derived, 0)) AS "loanOutstanding",\r\nml.principal_disbursed_derived AS "loanDisbursed",\r\nlaa.overdue_since_date_derived AS "paymentDueDate",\r\n(IFNULL(SUM(ls.principal_amount),0) - IFNULL(SUM(ls.principal_writtenoff_derived),0)\r\n + IFNULL(SUM(ls.interest_amount),0) - IFNULL(SUM(ls.interest_writtenoff_derived),0) \r\n - IFNULL(SUM(ls.interest_waived_derived),0)\r\n + IFNULL(SUM(ls.fee_charges_amount),0) - IFNULL(SUM(ls.fee_charges_writtenoff_derived),0) \r\n - IFNULL(SUM(ls.fee_charges_waived_derived),0)\r\n + IFNULL(SUM(ls.penalty_charges_amount),0) - IFNULL(SUM(ls.penalty_charges_writtenoff_derived),0) \r\n - IFNULL(SUM(ls.penalty_charges_waived_derived),0)\r\n) AS "totalDue",\r\nlaa.total_overdue_derived AS "totalOverdue",\r\nounder.id AS "officeNumber", \r\nml.account_no AS "loanAccountId", \r\ngua.lastname AS "guarantorLastName", \r\nCOUNT(gua.id) AS "numberOfGuarantors",\r\ng.display_name AS "groupName"\r\n\r\nFROM m_office mo\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\')\r\nINNER JOIN m_client mc ON mc.office_id=ounder.id\r\nINNER JOIN m_loan ml ON ml.client_id = mc.id\r\nINNER JOIN r_enum_value rev ON rev.enum_id=ml.loan_status_id AND rev.enum_name = \'loan_status_id\'\r\nINNER JOIN m_loan_arrears_aging laa ON laa.loan_id=ml.id\r\nLEFT JOIN m_loan_repayment_schedule ls ON ls.loan_id = ml.id\r\nLEFT JOIN m_currency cur ON cur.code = ml.currency_code\r\nLEFT JOIN m_group_client gc ON gc.client_id = mc.id\r\nLEFT JOIN m_group g ON g.id = gc.group_id\r\nLEFT JOIN m_staff lo ON lo.id = ml.loan_officer_id\r\nLEFT JOIN m_guarantor gua ON gua.loan_id = ml.id\r\nWHERE ml.loan_status_id=300 AND mo.id=${officeId} AND (IFNULL(ml.loan_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) \r\nAND (DATEDIFF(CURDATE(), ls.duedate) BETWEEN ${fromX} AND ${toY})\r\nAND (DATEDIFF(CURDATE(), laa.overdue_since_date_derived) BETWEEN ${overdueX} AND ${overdueY})\r\nGROUP BY ml.id\r\nORDER BY ounder.hierarchy, ml.currency_code, mc.account_no, ml.account_no', 'Loan Payments Due between fromX to toY days for clients in arrears between overdueX and overdueY days', 0, 1),
+	(174, 'Loan payments received (Active Loans)', 'SMS', 'NonTriggered', 'Loan', 'SELECT \r\nmc.id AS "id", \r\nmc.firstname AS "firstName",\r\nmc.middlename AS "middleName",\r\nmc.lastname AS "lastName",\r\nmc.display_name AS "fullName",\r\nmc.mobile_no AS "mobileNo", \r\nml.principal_amount AS "loanAmount", \r\n(IFNULL(ml.principal_outstanding_derived, 0) + IFNULL(ml.interest_outstanding_derived, 0) + IFNULL(ml.fee_charges_outstanding_derived, 0) + IFNULL(ml.penalty_charges_outstanding_derived, 0)) AS "loanOutstanding",\r\nounder.id AS "officeNumber", \r\nml.account_no AS "loanAccountNumber",\r\nSUM(lt.amount) AS "repaymentAmount"\r\nFROM m_office mo\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\')\r\nINNER JOIN m_client mc ON mc.office_id=ounder.id\r\nINNER JOIN m_loan ml ON ml.client_id = mc.id\r\nINNER JOIN r_enum_value rev ON rev.enum_id=ml.loan_status_id AND rev.enum_name = \'loan_status_id\'\r\nINNER JOIN m_loan_transaction lt ON lt.loan_id = ml.id\r\nINNER JOIN m_appuser au ON au.id = lt.appuser_id\r\nLEFT JOIN m_loan_arrears_aging laa ON laa.loan_id=ml.id\r\nLEFT JOIN m_payment_detail mpd ON mpd.id=lt.payment_detail_id\r\nLEFT JOIN m_currency cur ON cur.code = ml.currency_code\r\nLEFT JOIN m_group_client gc ON gc.client_id = mc.id\r\nLEFT JOIN m_group g ON g.id = gc.group_id\r\nLEFT JOIN m_staff lo ON lo.id = ml.loan_officer_id\r\nLEFT JOIN m_guarantor gua ON gua.loan_id = ml.id\r\nWHERE ml.loan_status_id=300 AND mo.id=${officeId} AND (IFNULL(ml.loan_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND (DATEDIFF(CURDATE(), lt.transaction_date) BETWEEN ${fromX} AND ${toY}) AND lt.is_reversed=0 AND lt.transaction_type_enum=2 AND laa.loan_id IS NULL\r\nGROUP BY ml.id\r\nORDER BY ounder.hierarchy, ml.currency_code, mc.account_no, ml.account_no', 'Payments received in the last fromX to toY days for any loan with the status Active (on-time)', 0, 1),
+	(175, 'Loan payments received (Overdue Loans)', 'SMS', 'NonTriggered', 'Loan', 'SELECT \r\nml.id AS "loanId", \r\nmc.id AS "id", \r\nmc.firstname AS "firstName",\r\nmc.middlename AS "middleName",\r\nmc.lastname AS "lastName",\r\nmc.display_name AS "fullName",\r\nmc.mobile_no AS "mobileNo", \r\nml.principal_amount AS "loanAmount", \r\n(IFNULL(ml.principal_outstanding_derived, 0) + IFNULL(ml.interest_outstanding_derived, 0) + IFNULL(ml.fee_charges_outstanding_derived, 0) + IFNULL(ml.penalty_charges_outstanding_derived, 0)) AS "loanOutstanding",\r\nounder.id AS "officeNumber", \r\nml.account_no AS "loanAccountNumber",\r\nSUM(lt.amount) AS "repaymentAmount"\r\nFROM m_office mo\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\')\r\nINNER JOIN m_client mc ON mc.office_id=ounder.id\r\nINNER JOIN m_loan ml ON ml.client_id = mc.id\r\nINNER JOIN r_enum_value rev ON rev.enum_id=ml.loan_status_id AND rev.enum_name = \'loan_status_id\'\r\nINNER JOIN m_loan_arrears_aging laa ON laa.loan_id=ml.id\r\nINNER JOIN m_loan_transaction lt ON lt.loan_id = ml.id\r\nINNER JOIN m_appuser au ON au.id = lt.appuser_id\r\nLEFT JOIN m_payment_detail mpd ON mpd.id=lt.payment_detail_id\r\nLEFT JOIN m_currency cur ON cur.code = ml.currency_code\r\nLEFT JOIN m_group_client gc ON gc.client_id = mc.id\r\nLEFT JOIN m_group g ON g.id = gc.group_id\r\nLEFT JOIN m_staff lo ON lo.id = ml.loan_officer_id\r\nLEFT JOIN m_guarantor gua ON gua.loan_id = ml.id\r\nWHERE ml.loan_status_id=300 AND mo.id=${officeId} AND (IFNULL(ml.loan_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND (DATEDIFF(CURDATE(), lt.transaction_date) BETWEEN ${fromX} AND ${toY}) AND (DATEDIFF(CURDATE(), laa.overdue_since_date_derived) BETWEEN ${overdueX} AND ${overdueY}) AND lt.is_reversed=0 AND lt.transaction_type_enum=2\r\nGROUP BY ml.id\r\nORDER BY ounder.hierarchy, ml.currency_code, mc.account_no, ml.account_no', 'Payments received in the last fromX to toY days for any loan with the status Overdue (arrears) between overdueX and overdueY days', 0, 1),
+	(176, 'Happy Birthday', 'SMS', 'NonTriggered', 'Clients', 'SELECT \r\nc.id AS "id", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", CONCAT(REPEAT("..", ((LENGTH(ounder.`hierarchy`) - LENGTH(\r\nREPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) AS "officeName", \r\no.id AS "officeNumber", \r\nc.date_of_birth AS "dateOfBirth",\r\nIF(c.date_of_birth IS NULL, 0, CEIL(DATEDIFF (NOW(), c.date_of_birth)/365)) AS "age"\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nLEFT JOIN r_enum_value r ON r.enum_name = \'status_enum\' AND r.enum_id = c.status_enum\r\nLEFT JOIN m_staff ms ON ms.id = c.staff_id\r\nWHERE o.id = ${officeId} AND c.status_enum = 300 AND (IFNULL(c.staff_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND c.date_of_birth IS NOT NULL AND (DAY(c.date_of_birth)=DAY(NOW())) AND (MONTH(c.date_of_birth)=MONTH(NOW()))\r\nORDER BY ounder.hierarchy, c.account_no', 'This sends a message to all clients with the status Active on their Birthday', 0, 1),
+	(177, 'Loan fully repaid', 'SMS', 'NonTriggered', 'Loan', 'SELECT \r\nc.id AS "id", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", \r\nl.principal_amount AS "loanAmount",\r\n(IFNULL(l.principal_outstanding_derived, 0) + IFNULL(l.interest_outstanding_derived, 0) + IFNULL(l.fee_charges_outstanding_derived, 0) + IFNULL(l.penalty_charges_outstanding_derived, 0)) AS "loanOutstanding",\r\nl.principal_disbursed_derived AS "loanDisbursed",\r\no.id AS "officeNumber",\r\nl.account_no AS "loanAccountId",\r\ngua.lastname AS "guarantorLastName", COUNT(gua.id) AS "numberOfGuarantors",\r\nls.duedate AS "dueDate",\r\nlaa.total_overdue_derived AS "totalDue",\r\ngp.display_name AS "groupName",\r\nl.total_repayment_derived AS "totalFullyPaid"\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nJOIN m_loan l ON l.client_id = c.id\r\nLEFT JOIN m_staff lo ON lo.id = l.loan_officer_id\r\nLEFT JOIN m_currency cur ON cur.code = l.currency_code\r\nLEFT JOIN m_group_client gc ON gc.client_id = c.id\r\nLEFT JOIN m_group gp ON gp.id = l.group_id\r\nLEFT JOIN m_loan_repayment_schedule ls ON l.id = ls.loan_id\r\nLEFT JOIN m_guarantor gua ON gua.loan_id = l.id\r\nLEFT JOIN m_loan_arrears_aging laa ON laa.loan_id=l.id\r\nWHERE o.id = ${officeId} AND (IFNULL(l.loan_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND \r\n(DATEDIFF(CURDATE(), l.closedon_date) BETWEEN ${fromX} AND ${toY})\r\n AND (l.loan_status_id IN (600, 700))\r\nGROUP BY l.id\r\nORDER BY ounder.hierarchy, l.currency_code, c.account_no, l.account_no', 'All loans that have been fully repaid (Closed or Overpaid) in the last fromX to toY days', 0, 1),
+	(178, 'Loan outstanding after final instalment date', 'SMS', 'NonTriggered', 'Loan', 'SELECT \r\nc.id AS "id", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", \r\nl.principal_amount AS "loanAmount",\r\no.id AS "officeNumber",\r\n(IFNULL(l.principal_outstanding_derived, 0) + IFNULL(l.interest_outstanding_derived, 0) + IFNULL(l.fee_charges_outstanding_derived, 0) + IFNULL(l.penalty_charges_outstanding_derived, 0)) AS "loanOutstanding",\r\nl.principal_disbursed_derived AS "loanDisbursed",\r\nls.duedate AS "paymentDueDate",\r\n(IFNULL(SUM(ls.principal_amount),0) - IFNULL(SUM(ls.principal_writtenoff_derived),0)\r\n + IFNULL(SUM(ls.interest_amount),0) - IFNULL(SUM(ls.interest_writtenoff_derived),0) \r\n - IFNULL(SUM(ls.interest_waived_derived),0)\r\n + IFNULL(SUM(ls.fee_charges_amount),0) - IFNULL(SUM(ls.fee_charges_writtenoff_derived),0) \r\n - IFNULL(SUM(ls.fee_charges_waived_derived),0)\r\n + IFNULL(SUM(ls.penalty_charges_amount),0) - IFNULL(SUM(ls.penalty_charges_writtenoff_derived),0) \r\n - IFNULL(SUM(ls.penalty_charges_waived_derived),0)\r\n) AS "totalDue",\r\nlaa.total_overdue_derived AS "totalOverdue",\r\nl.account_no AS "loanAccountId",\r\ngua.lastname AS "guarantorLastName",\r\nCOUNT(gua.id) AS "numberOfGuarantors",\r\ngp.display_name AS "groupName"\r\n\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nJOIN m_loan l ON l.client_id = c.id\r\nLEFT JOIN m_staff lo ON lo.id = l.loan_officer_id\r\nLEFT JOIN m_currency cur ON cur.code = l.currency_code\r\nLEFT JOIN m_loan_arrears_aging laa ON laa.loan_id = l.id\r\nLEFT JOIN m_group_client gc ON gc.client_id = c.id\r\nLEFT JOIN m_group gp ON gp.id = l.group_id\r\nLEFT JOIN m_loan_repayment_schedule ls ON l.id = ls.loan_id\r\nLEFT JOIN m_guarantor gua ON gua.loan_id = l.id\r\nWHERE o.id = ${officeId} AND (IFNULL(l.loan_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND l.loan_status_id = 300 AND l.expected_maturedon_date < CURDATE() \r\nAND (DATEDIFF(CURDATE(), l.expected_maturedon_date) BETWEEN ${fromX} AND ${toY})\r\nGROUP BY l.id\r\nORDER BY ounder.hierarchy, l.currency_code, c.account_no, l.account_no', 'All active loans (with an outstanding balance) between fromX to toY days after the final instalment date on their loan schedule', 0, 1),
+	(179, 'Loan Repayment', 'SMS', 'Triggered', NULL, 'select ml.id as loanId,mc.id, mc.firstname, ifnull(mc.middlename,\'\') as middlename, mc.lastname, mc.display_name as FullName, mobile_no as mobileNo, mc.group_name as GroupName, round(ml.principal_amount, ml.currency_digits) as LoanAmount, round(ml.`total_outstanding_derived`, ml.currency_digits) as LoanOutstanding,\nml.`account_no` as LoanAccountId, round(mlt.amountPaid, ml.currency_digits) as repaymentAmount\nFROM m_office mo\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\')\nAND ounder.hierarchy like CONCAT(\'.\', \'%\')\nLEFT JOIN (\n select \n ml.id as loanId, \n ifnull(mc.id,mc2.id) as id, \n ifnull(mc.firstname,mc2.firstname) as firstname, \n ifnull(mc.middlename,ifnull(mc2.middlename,(\'\'))) as middlename, \n ifnull(mc.lastname,mc2.lastname) as lastname, \n ifnull(mc.display_name,mc2.display_name) as display_name, \n ifnull(mc.status_enum,mc2.status_enum) as status_enum,\n ifnull(mc.mobile_no,mc2.mobile_no) as mobile_no,\n ifnull(mg.office_id,mc2.office_id) as office_id,\n ifnull(mg.staff_id,mc2.staff_id) as staff_id,\n mg.id as group_id, \nmg.display_name as group_name\n from\n m_loan ml\n left join m_group mg on mg.id = ml.group_id\n left join m_group_client mgc on mgc.group_id = mg.id\n left join m_client mc on mc.id = mgc.client_id\n left join m_client mc2 on mc2.id = ml.client_id\n order by loanId\n ) mc on mc.office_id = ounder.id\nright join m_loan as ml on mc.loanId = ml.id\nright join(\nselect mlt.amount as amountPaid,mlt.id,mlt.loan_id\nfrom m_loan_transaction mlt\nwhere mlt.is_reversed = 0 \ngroup by mlt.loan_id\n) as mlt on mlt.loan_id = ml.id\nright join m_loan_repayment_schedule as mls1 on ml.id = mls1.loan_id and mls1.`completed_derived` = 0\nand mls1.installment = (SELECT MIN(installment) from m_loan_repayment_schedule where loan_id = ml.id and duedate <= CURDATE() and completed_derived=0)\nwhere mc.status_enum = 300 and mobile_no is not null and ml.`loan_status_id` = 300\nand (mo.id = ${officeId} or ${officeId} = -1)\nand (mc.staff_id = ${loanOfficerId} or ${loanOfficerId} = -1)\nand (ml.loan_type_enum = ${loanType} or ${loanType} = -1)\nand ml.id in (select mla.loan_id from m_loan_arrears_aging mla)\ngroup by ml.id', 'Loan Repayment', 0, 0),
+	(180, 'Loan Approved', 'SMS', 'Triggered', NULL, 'SELECT mc.id, mc.firstname, mc.middlename as middlename, mc.lastname, mc.display_name as FullName, mc.mobile_no as mobileNo, mc.group_name as GroupName, mo.name as officename, ml.id as loanId, ml.account_no as accountnumber, ml.principal_amount_proposed as loanamount, ml.annual_nominal_interest_rate as annualinterestrate FROM m_office mo JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\') AND ounder.hierarchy like CONCAT(\'.\', \'%\') LEFT JOIN ( select  ml.id as loanId,  ifnull(mc.id,mc2.id) as id,  ifnull(mc.firstname,mc2.firstname) as firstname,  ifnull(mc.middlename,ifnull(mc2.middlename,(\'\'))) as middlename,  ifnull(mc.lastname,mc2.lastname) as lastname,  ifnull(mc.display_name,mc2.display_name) as display_name,  ifnull(mc.status_enum,mc2.status_enum) as status_enum, ifnull(mc.mobile_no,mc2.mobile_no) as mobile_no, ifnull(mg.office_id,mc2.office_id) as office_id, ifnull(mg.staff_id,mc2.staff_id) as staff_id, mg.id as group_id, mg.display_name as group_name from m_loan ml left join m_group mg on mg.id = ml.group_id left join m_group_client mgc on mgc.group_id = mg.id left join m_client mc on mc.id = mgc.client_id left join m_client mc2 on mc2.id = ml.client_id order by loanId ) mc on mc.office_id = ounder.id  left join m_loan ml on ml.id = mc.loanId WHERE mc.status_enum = 300 and mc.mobile_no is not null and (mo.id = ${officeId} or ${officeId} = -1) and (mc.staff_id = ${loanOfficerId} or ${loanOfficerId} = -1)and (ml.id = ${loanId} or ${loanId} = -1)and (mc.id = ${clientId} or ${clientId} = -1)and (mc.group_id = ${groupId} or ${groupId} = -1)and (ml.loan_type_enum = ${loanType} or ${loanType} = -1)', 'Loan and client data of approved loan', 0, 0),
+	(181, 'Loan Rejected', 'SMS', 'Triggered', NULL, 'SELECT mc.id, mc.firstname, mc.middlename as middlename, mc.lastname, mc.display_name as FullName, mc.mobile_no as mobileNo, mc.group_name as GroupName,  mo.name as officename, ml.id as loanId, ml.account_no as accountnumber, ml.principal_amount_proposed as loanamount, ml.annual_nominal_interest_rate as annualinterestrate  FROM  m_office mo  JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\')  AND ounder.hierarchy like CONCAT(\'.\', \'%\')  LEFT JOIN (  select   ml.id as loanId,   ifnull(mc.id,mc2.id) as id,   ifnull(mc.firstname,mc2.firstname) as firstname,   ifnull(mc.middlename,ifnull(mc2.middlename,(\'\'))) as middlename,   ifnull(mc.lastname,mc2.lastname) as lastname,   ifnull(mc.display_name,mc2.display_name) as display_name,   ifnull(mc.status_enum,mc2.status_enum) as status_enum,  ifnull(mc.mobile_no,mc2.mobile_no) as mobile_no,  ifnull(mg.office_id,mc2.office_id) as office_id,  ifnull(mg.staff_id,mc2.staff_id) as staff_id,  mg.id as group_id,  mg.display_name as group_name  from  m_loan ml  left join m_group mg on mg.id = ml.group_id  left join m_group_client mgc on mgc.group_id = mg.id  left join m_client mc on mc.id = mgc.client_id  left join m_client mc2 on mc2.id = ml.client_id  order by loanId  ) mc on mc.office_id = ounder.id  left join m_loan ml on ml.id = mc.loanId  WHERE mc.status_enum = 300 and mc.mobile_no is not null  and (mo.id = ${officeId} or ${officeId} = -1)  and (mc.staff_id = ${loanOfficerId} or ${loanOfficerId} = -1) and (ml.id = ${loanId} or ${loanId} = -1) and (mc.id = ${clientId} or ${clientId} = -1) and (mc.group_id = ${groupId} or ${groupId} = -1)  and (ml.loan_type_enum = ${loanType} or ${loanType} = -1)', 'Loan and client data of rejected loan', 0, 0),
+	(182, 'Client Rejected', 'SMS', 'Triggered', 'Clients', 'SELECT c.id AS "id", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", CONCAT(REPEAT("..", ((LENGTH(ounder.`hierarchy`) - LENGTH(\r\nREPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) AS "officeName", \r\no.id AS "officeNumber"\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nLEFT JOIN r_enum_value r ON r.enum_name = \'status_enum\' AND r.enum_id = c.status_enum\r\nWHERE o.id = ${officeId} AND c.id = ${clientId} AND (IFNULL(c.staff_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId})', 'Client Rejection', 0, 1),
+	(183, 'Client Activated', 'SMS', 'Triggered', 'Clients', 'SELECT c.id AS "id", \r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo", CONCAT(REPEAT("..", ((LENGTH(ounder.`hierarchy`) - LENGTH(\r\nREPLACE(ounder.`hierarchy`, \'.\', \'\')) - 1))), ounder.`name`) AS "officeName", \r\no.id AS "officeNumber"\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nLEFT JOIN r_enum_value r ON r.enum_name = \'status_enum\' AND r.enum_id = c.status_enum\r\nWHERE o.id = ${officeId} AND c.id = ${clientId} AND (IFNULL(c.staff_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId})', 'Client Activation', 0, 1),
+	(184, 'Savings Rejected', 'SMS', 'Triggered', 'Savings', 'SELECT \r\nc.id AS "id",\r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo",\r\ns.account_no AS "savingsAccountNo",\r\nounder.id AS "officeNumber",\r\nounder.name AS "officeName"\r\n\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nJOIN m_savings_account s ON s.client_id = c.id\r\nJOIN m_savings_product sp ON sp.id = s.product_id\r\nLEFT JOIN m_staff st ON st.id = s.field_officer_id\r\nLEFT JOIN m_currency cur ON cur.code = s.currency_code\r\nWHERE o.id = ${officeId} AND (IFNULL(s.field_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND s.id = ${savingsId}', 'Savings Rejected', 0, 1),
+	(185, 'Savings Activated', 'SMS', 'Triggered', 'Savings', 'SELECT \r\nc.id AS "id",\r\nc.firstname AS "firstName",\r\nc.middlename AS "middleName",\r\nc.lastname AS "lastName",\r\nc.display_name AS "fullName",\r\nc.mobile_no AS "mobileNo",\r\ns.account_no AS "savingsAccountNo",\r\nounder.id AS "officeNumber",\r\nounder.name AS "officeName"\r\n\r\nFROM m_office o\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, \'%\')\r\nJOIN m_client c ON c.office_id = ounder.id\r\nJOIN m_savings_account s ON s.client_id = c.id\r\nJOIN m_savings_product sp ON sp.id = s.product_id\r\nLEFT JOIN m_staff st ON st.id = s.field_officer_id\r\nLEFT JOIN m_currency cur ON cur.code = s.currency_code\r\nWHERE o.id = ${officeId} AND (IFNULL(s.field_officer_id, -10) = ${loanOfficerId} OR "-1" = ${loanOfficerId}) AND s.id = ${savingsId}', 'Savings Activation', 0, 1),
+	(186, 'Savings Deposit', 'SMS', 'Triggered', NULL, 'SELECT sc.savingsId AS savingsId, sc.id AS clientId, sc.firstname, IFNULL(sc.middlename,\'\') AS middlename, sc.lastname, sc.display_name AS FullName, sc.mobile_no AS mobileNo,\r\nms.`account_no` AS savingsAccountNo, ROUND(mst.amountPaid, ms.currency_digits) AS depositAmount, ms.account_balance_derived AS balance, \r\nmst.transactionDate AS transactionDate\r\nFROM m_office mo\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\') AND ounder.hierarchy LIKE CONCAT(\'.\', \'%\')\r\nLEFT JOIN (\r\nSELECT \r\n sa.id AS savingsId, mc.id AS id, mc.firstname AS firstname, mc.middlename AS middlename, mc.lastname AS lastname, \r\n mc.display_name AS display_name, mc.status_enum AS status_enum, \r\n mc.mobile_no AS mobile_no, mc.office_id AS office_id, \r\n mc.staff_id AS staff_id\r\nFROM\r\nm_savings_account sa\r\nLEFT JOIN m_client mc ON mc.id = sa.client_id\r\nORDER BY savingsId) sc ON sc.office_id = ounder.id\r\nRIGHT JOIN m_savings_account AS ms ON sc.savingsId = ms.id\r\nRIGHT JOIN(\r\nSELECT st.amount AS amountPaid, st.id, st.savings_account_id, st.id AS savingsTransactionId, st.transaction_date AS transactionDate\r\nFROM m_savings_account_transaction st\r\nWHERE st.is_reversed = 0\r\nGROUP BY st.savings_account_id\r\n) AS mst ON mst.savings_account_id = ms.id\r\nWHERE sc.mobile_no IS NOT NULL AND (mo.id = ${officeId} OR ${officeId} = -1) AND (sc.staff_id = ${loanOfficerId} OR ${loanOfficerId} = -1) AND mst.savingsTransactionId = ${savingsTransactionId}', 'Savings Deposit', 0, 1),
+	(187, 'Savings Withdrawal', 'SMS', 'Triggered', NULL, 'SELECT sc.savingsId AS savingsId, sc.id AS clientId, sc.firstname, IFNULL(sc.middlename,\'\') AS middlename, sc.lastname, sc.display_name AS FullName, sc.mobile_no AS mobileNo,\r\nms.`account_no` AS savingsAccountNo, ROUND(mst.amountPaid, ms.currency_digits) AS withdrawAmount, ms.account_balance_derived AS balance, \r\nmst.transactionDate AS transactionDate\r\nFROM m_office mo\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\') AND ounder.hierarchy LIKE CONCAT(\'.\', \'%\')\r\nLEFT JOIN (\r\nSELECT \r\n sa.id AS savingsId, mc.id AS id, mc.firstname AS firstname, mc.middlename AS middlename, mc.lastname AS lastname, \r\n mc.display_name AS display_name, mc.status_enum AS status_enum, \r\n mc.mobile_no AS mobile_no, mc.office_id AS office_id, \r\n mc.staff_id AS staff_id\r\nFROM\r\nm_savings_account sa\r\nLEFT JOIN m_client mc ON mc.id = sa.client_id\r\nORDER BY savingsId) sc ON sc.office_id = ounder.id\r\nRIGHT JOIN m_savings_account AS ms ON sc.savingsId = ms.id\r\nRIGHT JOIN(\r\nSELECT st.amount AS amountPaid, st.id, st.savings_account_id, st.id AS savingsTransactionId, st.transaction_date AS transactionDate\r\nFROM m_savings_account_transaction st\r\nWHERE st.is_reversed = 0\r\nGROUP BY st.savings_account_id\r\n) AS mst ON mst.savings_account_id = ms.id\r\nWHERE sc.mobile_no IS NOT NULL AND (mo.id = ${officeId} OR ${officeId} = -1) AND (sc.staff_id = ${loanOfficerId} OR ${loanOfficerId} = -1) AND mst.savingsTransactionId = ${savingsTransactionId}', 'Savings Withdrawal', 0, 1),
+	(188, 'Daily Teller Cash Report (Pentaho)', 'Pentaho', NULL, NULL, NULL, 'Daily Teller Cash Report', 1, 1);
 /*!40000 ALTER TABLE `stretchy_report` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.stretchy_report_parameter
+
+-- Dumping structure for table mifostenant-default.stretchy_report_parameter
 DROP TABLE IF EXISTS `stretchy_report_parameter`;
 CREATE TABLE IF NOT EXISTS `stretchy_report_parameter` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -6431,7 +6612,7 @@ CREATE TABLE IF NOT EXISTS `stretchy_report_parameter` (
   CONSTRAINT `fk_report_parameter_002` FOREIGN KEY (`parameter_id`) REFERENCES `stretchy_parameter` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=527 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.stretchy_report_parameter: ~439 rows (approximately)
+-- Dumping data for table mifostenant-default.stretchy_report_parameter: ~420 rows (approximately)
 /*!40000 ALTER TABLE `stretchy_report_parameter` DISABLE KEYS */;
 INSERT INTO `stretchy_report_parameter` (`id`, `report_id`, `parameter_id`, `report_parameter_name`) VALUES
 	(1, 1, 5, NULL),
@@ -6771,92 +6952,93 @@ INSERT INTO `stretchy_report_parameter` (`id`, `report_id`, `parameter_id`, `rep
 	(441, 165, 1010, NULL),
 	(442, 165, 5, NULL),
 	(443, 166, 5, 'officeId'),
-	(444, 166, 1011, 'tellerId'),
-	(445, 166, 1012, 'cashierId'),
-	(446, 166, 1013, 'currencyCode'),
-	(447, 166, 1009, 'asOnDate'),
-	(448, 167, 5, 'officeId'),
-	(449, 167, 6, 'loanOfficerId'),
-	(450, 168, 5, 'officeId'),
-	(451, 168, 6, 'loanOfficerId'),
-	(452, 169, 5, 'officeId'),
-	(453, 169, 6, 'loanOfficerId'),
-	(454, 169, 1014, 'cycleX'),
-	(455, 169, 1015, 'cycleY'),
-	(456, 170, 5, 'officeId'),
-	(457, 170, 6, 'loanOfficerId'),
-	(458, 170, 1016, 'fromX'),
-	(459, 170, 1017, 'toY'),
-	(460, 171, 5, 'officeId'),
-	(461, 171, 6, 'loanOfficerId'),
-	(462, 171, 1016, 'fromX'),
-	(463, 171, 1017, 'toY'),
-	(464, 172, 5, 'officeId'),
-	(465, 172, 6, 'loanOfficerId'),
-	(466, 173, 5, 'officeId'),
-	(467, 173, 6, 'loanOfficerId'),
-	(468, 174, 5, 'officeId'),
-	(469, 174, 6, 'loanOfficerId'),
-	(470, 174, 1016, 'fromX'),
-	(471, 174, 1017, 'toY'),
-	(472, 174, 1018, 'overdueX'),
-	(473, 174, 1019, 'overdueY'),
-	(474, 175, 5, 'officeId'),
-	(475, 175, 6, 'loanOfficerId'),
-	(476, 175, 1016, 'fromX'),
-	(477, 175, 1017, 'toY'),
-	(478, 176, 5, 'officeId'),
-	(479, 176, 6, 'loanOfficerId'),
-	(480, 176, 1016, 'fromX'),
-	(481, 176, 1017, 'toY'),
-	(482, 176, 1018, 'overdueX'),
-	(483, 176, 1019, 'overdueY'),
-	(484, 177, 5, 'officeId'),
-	(485, 177, 6, 'loanOfficerId'),
-	(486, 178, 5, 'officeId'),
-	(487, 178, 6, 'loanOfficerId'),
-	(488, 178, 1016, 'fromX'),
-	(489, 178, 1017, 'toY'),
-	(490, 179, 5, 'officeId'),
-	(491, 179, 6, 'loanOfficerId'),
-	(492, 179, 1016, 'fromX'),
-	(493, 179, 1017, 'toY'),
-	(494, 182, 5, 'officeId'),
-	(495, 181, 5, 'officeId'),
-	(496, 180, 5, 'officeId'),
-	(497, 182, 6, 'loanOfficerId'),
-	(498, 181, 6, 'loanOfficerId'),
-	(499, 180, 6, 'loanOfficerId'),
-	(500, 182, 1020, 'loanId'),
-	(501, 181, 1020, 'loanId'),
-	(502, 182, 1021, 'clientId'),
-	(503, 181, 1021, 'clientId'),
-	(504, 182, 1022, 'groupId'),
-	(505, 181, 1022, 'groupId'),
-	(506, 182, 1023, 'loanType'),
-	(507, 181, 1023, 'loanType'),
-	(508, 180, 1023, 'loanType'),
-	(509, 183, 5, 'officeId'),
+	(444, 166, 6, 'loanOfficerId'),
+	(445, 167, 5, 'officeId'),
+	(446, 167, 6, 'loanOfficerId'),
+	(447, 168, 5, 'officeId'),
+	(448, 168, 6, 'loanOfficerId'),
+	(449, 168, 1011, 'cycleX'),
+	(450, 168, 1012, 'cycleY'),
+	(451, 169, 5, 'officeId'),
+	(452, 169, 6, 'loanOfficerId'),
+	(453, 169, 1013, 'fromX'),
+	(454, 169, 1014, 'toY'),
+	(455, 170, 5, 'officeId'),
+	(456, 170, 6, 'loanOfficerId'),
+	(457, 170, 1013, 'fromX'),
+	(458, 170, 1014, 'toY'),
+	(459, 171, 5, 'officeId'),
+	(460, 171, 6, 'loanOfficerId'),
+	(461, 172, 5, 'officeId'),
+	(462, 172, 6, 'loanOfficerId'),
+	(463, 173, 5, 'officeId'),
+	(464, 173, 6, 'loanOfficerId'),
+	(465, 173, 1013, 'fromX'),
+	(466, 173, 1014, 'toY'),
+	(467, 173, 1015, 'overdueX'),
+	(468, 173, 1016, 'overdueY'),
+	(469, 174, 5, 'officeId'),
+	(470, 174, 6, 'loanOfficerId'),
+	(471, 174, 1013, 'fromX'),
+	(472, 174, 1014, 'toY'),
+	(473, 175, 5, 'officeId'),
+	(474, 175, 6, 'loanOfficerId'),
+	(475, 175, 1013, 'fromX'),
+	(476, 175, 1014, 'toY'),
+	(477, 175, 1015, 'overdueX'),
+	(478, 175, 1016, 'overdueY'),
+	(479, 176, 5, 'officeId'),
+	(480, 176, 6, 'loanOfficerId'),
+	(481, 177, 5, 'officeId'),
+	(482, 177, 6, 'loanOfficerId'),
+	(483, 177, 1013, 'fromX'),
+	(484, 177, 1014, 'toY'),
+	(485, 178, 5, 'officeId'),
+	(486, 178, 6, 'loanOfficerId'),
+	(487, 178, 1013, 'fromX'),
+	(488, 178, 1014, 'toY'),
+	(489, 181, 5, 'officeId'),
+	(490, 180, 5, 'officeId'),
+	(491, 179, 5, 'officeId'),
+	(492, 181, 6, 'loanOfficerId'),
+	(493, 180, 6, 'loanOfficerId'),
+	(494, 179, 6, 'loanOfficerId'),
+	(495, 181, 1017, 'loanId'),
+	(496, 180, 1017, 'loanId'),
+	(497, 181, 1018, 'clientId'),
+	(498, 180, 1018, 'clientId'),
+	(499, 181, 1019, 'groupId'),
+	(500, 180, 1019, 'groupId'),
+	(501, 181, 1020, 'loanType'),
+	(502, 180, 1020, 'loanType'),
+	(503, 179, 1020, 'loanType'),
+	(504, 182, 5, 'officeId'),
+	(505, 183, 5, 'officeId'),
+	(506, 182, 6, 'loanOfficerId'),
+	(507, 183, 6, 'loanOfficerId'),
+	(508, 182, 1018, 'clientId'),
+	(509, 183, 1018, 'clientId'),
 	(510, 184, 5, 'officeId'),
-	(511, 183, 6, 'loanOfficerId'),
-	(512, 184, 6, 'loanOfficerId'),
-	(513, 183, 1021, 'clientId'),
-	(514, 184, 1021, 'clientId'),
-	(515, 185, 5, 'officeId'),
-	(516, 185, 6, 'loanOfficerId'),
-	(517, 185, 1024, 'savingsId'),
-	(518, 186, 5, 'officeId'),
-	(519, 186, 6, 'loanOfficerId'),
-	(520, 186, 1024, 'savingsId'),
-	(521, 187, 5, 'officeId'),
-	(522, 187, 6, 'loanOfficerId'),
-	(523, 187, 1025, 'savingsTransactionId'),
-	(524, 188, 5, 'officeId'),
-	(525, 188, 6, 'loanOfficerId'),
-	(526, 188, 1025, 'savingsTransactionId');
+	(511, 184, 6, 'loanOfficerId'),
+	(512, 184, 1021, 'savingsId'),
+	(513, 185, 5, 'officeId'),
+	(514, 185, 6, 'loanOfficerId'),
+	(515, 185, 1021, 'savingsId'),
+	(516, 186, 5, 'officeId'),
+	(517, 186, 6, 'loanOfficerId'),
+	(518, 186, 1022, 'savingsTransactionId'),
+	(519, 187, 5, 'officeId'),
+	(520, 187, 6, 'loanOfficerId'),
+	(521, 187, 1022, 'savingsTransactionId'),
+	(522, 188, 5, 'officeId'),
+	(523, 188, 1023, 'tellerId'),
+	(524, 188, 1024, 'cashierId'),
+	(525, 188, 1025, 'currencyCode'),
+	(526, 188, 1009, 'asOnDate');
 /*!40000 ALTER TABLE `stretchy_report_parameter` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.x_registered_table
+
+-- Dumping structure for table mifostenant-default.x_registered_table
 DROP TABLE IF EXISTS `x_registered_table`;
 CREATE TABLE IF NOT EXISTS `x_registered_table` (
   `registered_table_name` varchar(50) NOT NULL,
@@ -6865,11 +7047,12 @@ CREATE TABLE IF NOT EXISTS `x_registered_table` (
   PRIMARY KEY (`registered_table_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.x_registered_table: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.x_registered_table: ~0 rows (approximately)
 /*!40000 ALTER TABLE `x_registered_table` DISABLE KEYS */;
 /*!40000 ALTER TABLE `x_registered_table` ENABLE KEYS */;
 
--- Dumping structure for table mifostenant-barebone.x_table_column_code_mappings
+
+-- Dumping structure for table mifostenant-default.x_table_column_code_mappings
 DROP TABLE IF EXISTS `x_table_column_code_mappings`;
 CREATE TABLE IF NOT EXISTS `x_table_column_code_mappings` (
   `column_alias_name` varchar(50) NOT NULL,
@@ -6879,10 +7062,9 @@ CREATE TABLE IF NOT EXISTS `x_table_column_code_mappings` (
   CONSTRAINT `FK_x_code_id` FOREIGN KEY (`code_id`) REFERENCES `m_code` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-barebone.x_table_column_code_mappings: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.x_table_column_code_mappings: ~0 rows (approximately)
 /*!40000 ALTER TABLE `x_table_column_code_mappings` DISABLE KEYS */;
 /*!40000 ALTER TABLE `x_table_column_code_mappings` ENABLE KEYS */;
-
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
