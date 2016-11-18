@@ -54,9 +54,9 @@ ALTER TABLE `sms_messages_outbound`
 
 
 INSERT INTO `job` (`name`, `display_name`, `cron_expression`, `create_time`, `task_priority`, `group_name`, `previous_run_start_time`, `next_run_time`, `job_key`, `initializing_errorlog`, `is_active`, `currently_running`, `updates_allowed`, `scheduler_group`, `is_misfired`) VALUES 
-('Update Sms Outbound with campaign message', 'Update Sms Outbound with campaign message', '0 0 0 1/1 * ? *', NOW(), 3, NULL, NULL, NULL, 'Update Sms Outbound with campaign message1 _ DEFAULT', NULL, 0, 0, 1, 1, 0), 
-('Send messages to SMS gateway', 'Send messages to SMS gateway', '0 0 0 1/1 * ? *', NOW(), 3, NULL, NULL, NULL, 'Send messages to SMS gateway1 _ DEFAULT', NULL, 0, 0, 1, 1, 0), 
-('Get delivery reports from SMS gateway', 'Get delivery reports from SMS gateway', '0 0 0 1/1 * ? *', NOW(), 3, NULL, NULL, NULL, 'Get delivery reports from SMS gateway1 _ DEFAULT', NULL, 0, 0, 1, 1, 0);
+('Update SMS Outbound with Campaign Message', 'Update SMS Outbound with Campaign Message', '0 0 5 1/1 * ? *', NOW(), 3, NULL, NULL, NULL, 'Update SMS Outbound with Campaign Message1 _ DEFAULT', NULL, 1, 0, 1, 4, 0), 
+('Send Messages to SMS Gateway', 'Send Messages to SMS Gateway', '0 0 5 1/1 * ? *', NOW(), 2, NULL, NULL, NULL, 'Send Messages to SMS Gateway1 _ DEFAULT', NULL, 1, 0, 1, 4, 0), 
+('Get Delivery Reports from SMS Gateway', 'Get Delivery Reports from SMS Gateway', '0 0 5 1/1 * ? *', NOW(), 1, NULL, NULL, NULL, 'Get Delivery Reports from SMS Gateway1 _ DEFAULT', NULL, 1, 0, 1, 4, 0);
 
 INSERT INTO  `m_permission` 
 (`grouping` ,`code` ,`entity_name`, `action_name`, `can_maker_checker`) VALUES 

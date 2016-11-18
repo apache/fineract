@@ -37,7 +37,10 @@ import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaignStatus
 import org.apache.fineract.infrastructure.campaigns.sms.exception.SmsCampaignNotFound;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.service.Page;
+import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.portfolio.calendar.service.CalendarDropdownReadPlatformService;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -57,6 +60,7 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
     private final SmsCampaignDropdownReadPlatformService smsCampaignDropdownReadPlatformService;
     private final SmsCampaignMapper smsCampaignMapper;
     private final CalendarDropdownReadPlatformService calendarDropdownReadPlatformService;
+    private final PaginationHelper<SmsCampaignData> paginationHelper = new PaginationHelper<>();
 
     @Autowired
     public SmsCampaignReadPlatformServiceImpl(final RoutingDataSource dataSource,
@@ -81,10 +85,20 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
     }
 
     @Override
-    public List<SmsCampaignData> retrieveAll() {
+    public Page<SmsCampaignData> retrieveAll(final SearchParameters searchParameters) {
         final Integer visible = 1;
-        final String sql = "select " + this.smsCampaignMapper.schema() + " where sc.is_visible = ?";
-        return this.jdbcTemplate.query(sql, this.smsCampaignMapper, new Object[] {visible});
+        final StringBuilder sqlBuilder = new StringBuilder(200);
+        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append(this.smsCampaignMapper.schema() + " where sc.is_visible = ? ");
+        if (searchParameters.isLimited()) {
+            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+            if (searchParameters.isOffset()) {
+                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+            }
+        }
+        final String sqlCountRows = "SELECT FOUND_ROWS()";
+        return this.paginationHelper.fetchPage(jdbcTemplate, sqlCountRows, sqlBuilder.toString(), new Object[] { visible },
+                this.smsCampaignMapper);
     }
 
     @Override
