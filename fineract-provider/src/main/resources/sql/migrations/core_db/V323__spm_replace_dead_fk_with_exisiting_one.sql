@@ -17,33 +17,22 @@
 -- under the License.
 --
 
-DROP PROCEDURE IF EXISTS remove_anonymous_fk;
-
-DELIMITER $$
-
-CREATE PROCEDURE remove_anonymous_fk (IN referencee VARCHAR(255), IN referenced VARCHAR(255))
-  BEGIN
-	  DECLARE fk2drop VARCHAR(255);
-
-	  SELECT
-	    CONSTRAINT_NAME
-	  FROM
-	    INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-	  WHERE
-	    TABLE_NAME = referencee
-	    AND REFERENCED_TABLE_NAME = referenced
-	  INTO fk2drop;
-
-	  SET @alter_stmt = concat('ALTER TABLE ',referencee,' DROP FOREIGN KEY ',fk2drop);
-    PREPARE pstmt FROM @alter_stmt;
-    EXECUTE pstmt;
-    DEALLOCATE PREPARE pstmt;
-  END $$
-
-DELIMITER ;
-
-CALL remove_anonymous_fk('m_survey_scorecards', 'm_appusers');
-
-ALTER TABLE `m_survey_scorecards` ADD FOREIGN KEY `m_appuser` (`user_id`);
-
-DROP PROCEDURE IF EXISTS remove_anonymous_fk;
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS `m_survey_scorecards`;
+CREATE TABLE `m_survey_scorecards` (
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+  `survey_id` BIGINT(20) NOT NULL,
+  `question_id` BIGINT(20) NOT NULL,
+  `response_id` BIGINT(20) NOT NULL,
+  `user_id` BIGINT(20) NOT NULL,
+  `client_id` BIGINT(20) NOT NULL,
+  `created_on` DATETIME NULL DEFAULT NULL,
+  `a_value` INT(4) NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`survey_id`) REFERENCES `m_surveys` (`id`),
+  FOREIGN KEY (`question_id`) REFERENCES `m_survey_questions` (`id`),
+  FOREIGN KEY (`response_id`) REFERENCES `m_survey_responses` (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `m_appuser` (`id`),
+  FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
+);
+SET FOREIGN_KEY_CHECKS = 1;
