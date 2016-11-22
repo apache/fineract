@@ -76,7 +76,7 @@ public class ScorecardApiResource {
 
         final List<Scorecard> scorecards = this.scorecardService.findBySurvey(survey);
 
-        if (scorecards == null) {
+        if (scorecards != null) {
             return ScorecardMapper.map(scorecards);
         }
 
@@ -105,7 +105,7 @@ public class ScorecardApiResource {
         final Survey survey = findSurvey(surveyId);
         final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
         final List<Scorecard> scorecards = this.scorecardService.findBySurveyAndClient(survey, client);
-        if (scorecards == null) {
+        if (scorecards != null) {
             return ScorecardMapper.map(scorecards);
         }
         return Collections.EMPTY_LIST;
