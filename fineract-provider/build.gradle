@@ -24,6 +24,7 @@ buildscript {
   repositories {
   	 jcenter()
   	 mavenCentral()
+  	 maven { url "https://plugins.gradle.org/m2/" }
   }
 
   dependencies {
@@ -33,9 +34,11 @@ buildscript {
                'org.springframework.boot:spring-boot-gradle-plugin:1.1.6.RELEASE' // also change springDataJpaVersion below
      classpath 'org.apache.openjpa:openjpa-all:2.4.1'
      classpath 'at.schmutterer.oss.gradle:gradle-openjpa:0.2.0'
+     classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.2.2'
   }
 }
 
+apply plugin: "org.nosphere.apache.rat"
 apply plugin: 'rebel'
 apply plugin: 'license'
 apply plugin: 'war'
@@ -75,6 +78,76 @@ openjpa {
 		
     }
     enforcePropertyRestrictions = true
+}
+
+rat {
+  xmlOutput = false
+  htmlOutput = false
+  plainOutput = true
+  verbose = true 
+  inputDir = './..'
+ excludes = [
+	'**/licenses/**',
+	'**/*.md',
+	'**/*.txt',
+	'**/*.log',
+	'**/fineractdev-eclipse-preferences.epf',
+	'**/template-expected.html',
+	'**/template.mustache',
+	'**/.classpath',
+	'**/.project',
+	'.idea/**',
+	'**/.settings/**',
+	'**/bin/**',
+	'.git/**',
+    '**/.gitignore',
+    '**/.gitkeep',
+		
+    // gradle
+    '**/.gradle/**',
+    '**/gradlew',
+    '**/gradlew.bat',
+    '**/gradle/wrapper/gradle-wrapper.properties',
+    '**/caches/**',
+    '**/daemon/**',
+    '**/native/**',
+    '**/wrapper/**',
+	'**/build/**',
+	
+	//Api Docs 
+	'**/api-docs/*.*',
+	'**/docs/system-architecture/.htaccess',
+	'**/docs/system-architecture/404.html',
+	'**/docs/system-architecture/index.html',
+	'**/docs/system-architecture/**/*.xml',
+	'**/bootstrap-3.0.0/assets/application.js',
+	'**/system-architecture/js/plugins.js',
+	
+	//Apache License
+	'**/bootstrap-3.0.0/assets/less.js',
+	'**/css/bootstrap-3.0.0/**/*.*',
+	
+	//Public Domain See http://www.JSON.org/js.html
+	'**/bootstrap-3.0.0/assets/json2.js.htm',
+	
+	// MIT License
+	'**/modernizr-2.6.2.min.js',
+	'**/css/normalize.css',
+	'**/assets/filesaver.js',
+	'**/css/fonts/glyphicons-halflings-regular.svg',
+	'**/assets/jszip.js',
+	'**/assets/jquery.js',
+	'**/api-docs/jquery-1.7.min.js',
+	'**/css/toc-0.1.2/**/*.*',
+	'**/docs/system-architecture/css/main.css',
+	'**/system-architecture/js/vendor/jquery-1.9.1.min.js',
+	'**/system-architecture/js/vendor/toc-0.1.2/jquery.toc.min.js',
+	'**/assets/respond.min.js',
+	'**/assets/html5shiv.js',
+	
+	//BSD License
+	'**/assets/uglify.js'
+	]
 }
 
 configurations {
@@ -143,6 +216,10 @@ task dist(type:Zip){
     
     from war.outputs.files
     into(baseName + '-' + version)
+}
+
+compileJava{
+    dependsOn rat
 }
 
 war {
