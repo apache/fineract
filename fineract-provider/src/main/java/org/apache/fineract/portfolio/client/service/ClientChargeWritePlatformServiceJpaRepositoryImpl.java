@@ -118,8 +118,19 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
             }
 
             final ClientCharge clientCharge = ClientCharge.createNew(client, charge, command);
-
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat());
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                    .resource(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
+            LocalDate activationDate = client.getActivationLocalDate();
+            LocalDate dueDate = clientCharge.getDueLocalDate();
+            if(dueDate.isBefore(activationDate)){
+                baseDataValidator.reset().parameter(ClientApiConstants.dueAsOfDateParamName).value(dueDate.toString(fmt))
+                .failWithCodeNoParameterAddedToErrorCode("dueDate.before.activationDate");
+
+                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            }
+
             validateDueDateOnWorkingDay(clientCharge, fmt);
             this.clientChargeRepository.saveAndFlush(clientCharge);
 
