@@ -154,7 +154,26 @@ configurations {
 	providedRuntime // needed for Spring Boot executable WAR
     providedCompile
 	compile() {
-		exclude module: 'hibernate-entitymanager'		
+		exclude module: 'hibernate-entitymanager'
+		exclude module: 'hibernate-validator'
+		exclude module: 'activation'
+		exclude module: 'bcmail-jdk14'
+		exclude module: 'bcprov-jdk14'
+		exclude module: 'bctsp-jdk14'
+		exclude module: 'bval-core'
+		exclude module: 'org.apache.bval.bundle'
+		exclude module: 'bval-jsr303'
+		exclude module: 'c3p0'
+		exclude module: 'stax-api'
+		exclude module: 'jaxb-api'
+		exclude module: 'jaxb-impl'
+		exclude module: 'jboss-logging'
+		exclude module: 'itext-rtf'
+		exclude module: 'classworlds'
+		exclude module: 'jcl-over-slf4j'
+		exclude module: 'jul-to-slf4j'
+		exclude module: 'serp'
+		//exclude module: 'slf4j-api' 
 	}
 	runtime
 	all*.exclude group: 'commons-logging'
@@ -223,6 +242,15 @@ compileJava{
 }
 
 war {
+	from('../licenses') { // notice the parens
+		into "WEB-INF/licenses/" // no leading slash
+	}
+	from('../LICENSE') { // notice the parens
+		into "WEB-INF/" // no leading slash
+	}
+	from('../NOTICE') { // notice the parens
+		into "WEB-INF/" // no leading slash
+	}
     war.finalizedBy(bootRepackage)
 }
 
