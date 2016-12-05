@@ -19,6 +19,7 @@
 package org.apache.fineract.batch.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -43,8 +44,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.google.gson.Gson;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * Implementation for {@link BatchApiService} to iterate through all the
