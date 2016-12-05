@@ -43,8 +43,8 @@ dependencies {
 	       		[group: 'org.springframework.security.oauth', name: 'spring-security-oauth2', version: springOauthVersion],
 
                 [group: 'org.apache.openjpa', name:'openjpa-all', version:'2.4.1'],
-                [group: 'org.apache.openjpa', name:'openjpa-maven-plugin', version:'2.4.1'],
-                [group: 'javax.ws.rs', name: 'jsr311-api', version: '1.1.1'],
+                //[group: 'org.apache.openjpa', name:'openjpa-maven-plugin', version:'2.4.1'],
+                //[group: 'javax.ws.rs', name: 'jsr311-api', version: '1.1.1'],
                 [group: 'com.sun.jersey', name: 'jersey-core', version: jerseyVersion],
                 [group: 'com.sun.jersey', name: 'jersey-servlet', version: jerseyVersion],
                 [group: 'com.sun.jersey', name: 'jersey-server', version: jerseyVersion],
@@ -77,7 +77,7 @@ dependencies {
                 [group: 'org.apache.poi',name: 'poi-ooxml-schemas', version: '3.9'],
 
                 [group: 'com.lowagie', name: 'itext', version: '2.1.7'],
-                [group: 'com.lowagie', name: 'itext-rtf', version: '2.1.7'],
+                //[group: 'com.lowagie', name: 'itext-rtf', version: '2.1.7'],
                 [group: 'org.mnode.ical4j', name: 'ical4j', version: '1.0.4'],
                 [group: 'com.googlecode.flyway', name: 'flyway-core', version: '2.1.1'],
                 [group: 'org.quartz-scheduler', name: 'quartz', version: '2.1.7'],
