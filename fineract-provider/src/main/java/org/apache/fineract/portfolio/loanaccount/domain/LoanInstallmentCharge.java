@@ -32,7 +32,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 
 @Entity
 @Table(name = "m_loan_installment_charge")
-public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> {
+public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> implements Comparable {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_charge_id", referencedColumnName = "id", nullable = false)
@@ -78,6 +78,10 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> {
         this.amountPaid = null;
         this.amountWaived = null;
         this.amountWrittenOff = null;
+    }
+
+    public int compareTo(Object o) {
+        return this.installment.compareTo(((LoanInstallmentCharge)o).installment);
     }
 
     public void copyFrom(final LoanInstallmentCharge loanChargePerInstallment) {
