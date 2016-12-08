@@ -20,12 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.api;
 
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestType;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -58,6 +53,10 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
+import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
+import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -139,7 +138,8 @@ public class LoansApiResource {
             "loanOfficerOptions", "loanPurposeOptions", "loanCollateralOptions", "chargeTemplate", "calendarOptions",
             "syncDisbursementWithMeeting", "loanCounter", "loanProductCounter", "notes", "accountLinkingOptions", "linkedAccount",
             "interestRateDifferential", "isFloatingInterestRate", "interestRatesPeriods", LoanApiConstants.canUseForTopup,
-            LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose, LoanApiConstants.topupAmount, LoanApiConstants.clientActiveLoanOptions));
+            LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose, LoanApiConstants.topupAmount, LoanApiConstants.clientActiveLoanOptions,
+            LoanApiConstants.datatables));
 
     private final Set<String> LOAN_APPROVAL_DATA_PARAMETERS = new HashSet<>(Arrays.asList("approvalDate", "approvalAmount"));
     private final String resourceNameForPermissions = "LOAN";
@@ -168,6 +168,7 @@ public class LoansApiResource {
     private final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
     private final LoanScheduleHistoryReadPlatformService loanScheduleHistoryReadPlatformService;
     private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
+    private final EntityDatatableChecksReadService entityDatatableChecksReadService;
 
     @Autowired
     public LoansApiResource(final PlatformSecurityContext context, final LoanReadPlatformService loanReadPlatformService,
@@ -187,7 +188,8 @@ public class LoansApiResource {
             final PortfolioAccountReadPlatformService portfolioAccountReadPlatformServiceImpl,
             final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
             final LoanScheduleHistoryReadPlatformService loanScheduleHistoryReadPlatformService,
-            final AccountDetailsReadPlatformService accountDetailsReadPlatformService) {
+            final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
+            final EntityDatatableChecksReadService entityDatatableChecksReadService) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
@@ -212,6 +214,7 @@ public class LoansApiResource {
         this.accountAssociationsReadPlatformService = accountAssociationsReadPlatformService;
         this.loanScheduleHistoryReadPlatformService = loanScheduleHistoryReadPlatformService;
         this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
+        this.entityDatatableChecksReadService = entityDatatableChecksReadService;
     }
 
     /*
@@ -347,6 +350,10 @@ public class LoansApiResource {
             newLoanAccount = LoanAccountData.associationsAndTemplate(newLoanAccount, productOptions, allowedLoanOfficers, calendarOptions,
                     accountLinkingOptions);
         }
+        final List<DatatableData> datatableTemplates = this.entityDatatableChecksReadService
+                .retrieveTemplates(StatusEnum.CREATE.getCode().longValue(), EntityTables.LOAN.getName(), productId);
+        newLoanAccount.setDatatables(datatableTemplates);
+
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, newLoanAccount, this.LOAN_DATA_PARAMETERS);
     }

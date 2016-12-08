@@ -212,6 +212,11 @@ public class SavingsAccountDataValidator {
             baseDataValidator.reset().parameter(withHoldTaxParamName).value(withHoldTax).ignoreIfNull().validateForBooleanValue();
         }
 
+        if(this.fromApiJsonHelper.parameterExists(SavingsApiConstants.datatables, element)){
+            final JsonArray datatables = this.fromApiJsonHelper.extractJsonArrayNamed(SavingsApiConstants.datatables, element);
+            baseDataValidator.reset().parameter(SavingsApiConstants.datatables).value(datatables).notNull().jsonArrayNotEmpty();
+        }
+
         validateSavingsCharges(element, baseDataValidator);
 
         validateOverdraftParams(baseDataValidator, element);

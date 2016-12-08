@@ -177,16 +177,18 @@ public class ClientApiConstants {
     public static final String officeOptionsParamName = "officeOptions";
     public static final String staffOptionsParamName = "staffOptions";
 
+    public static final String datatables = "datatables";
+
     public static final Set<String> CLIENT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(address,localeParamName, dateFormatParamName, groupIdParamName, accountNoParamName, externalIdParamName,
                     mobileNoParamName, firstnameParamName, middlenameParamName, lastnameParamName, fullnameParamName, officeIdParamName,
                     activeParamName, activationDateParamName, staffIdParamName, submittedOnDateParamName, savingsProductIdParamName,
                     dateOfBirthParamName, genderIdParamName, clientTypeIdParamName, clientClassificationIdParamName, 
-                    clientNonPersonDetailsParamName, displaynameParamName, legalFormIdParamName));
+                    clientNonPersonDetailsParamName, displaynameParamName, legalFormIdParamName, datatables));
     
     public static final Set<String> CLIENT_NON_PERSON_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(address,localeParamName, dateFormatParamName, incorpNumberParamName, remarksParamName, incorpValidityTillParamName, 
-            		constitutionIdParamName, mainBusinessLineIdParamName));
+            		constitutionIdParamName, mainBusinessLineIdParamName, datatables));
 
     public static final Set<String> CLIENT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, accountNoParamName, externalIdParamName, mobileNoParamName, firstnameParamName, middlenameParamName,

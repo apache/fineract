@@ -20,9 +20,11 @@ package org.apache.fineract.portfolio.group.data;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
@@ -62,6 +64,8 @@ public class CenterData {
     private final BigDecimal totalOverdue;
     private final BigDecimal totaldue;
     private final BigDecimal installmentDue;
+
+    private List<DatatableData> datatables = null;
 
     public static CenterData template(final Long officeId, final String accountNo, final LocalDate activationDate,
             final Collection<OfficeData> officeOptions, final Collection<StaffData> staffOptions,
@@ -203,5 +207,9 @@ public class CenterData {
 
     public String getStaffName() {
         return this.staffName;
+    }
+
+    public void setDatatables(final List<DatatableData> datatables) {
+        this.datatables = datatables;
     }
 }

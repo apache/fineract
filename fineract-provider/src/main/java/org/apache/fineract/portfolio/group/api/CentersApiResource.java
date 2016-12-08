@@ -18,11 +18,7 @@
  */
 package org.apache.fineract.portfolio.group.api;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -54,6 +50,10 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
+import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
+import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.accountdetails.data.AccountSummaryCollectionData;
 import org.apache.fineract.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
@@ -92,6 +92,7 @@ public class CentersApiResource {
     private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final MeetingReadPlatformService meetingReadPlatformService;
+    private final EntityDatatableChecksReadService entityDatatableChecksReadService;
 
     @Autowired
     public CentersApiResource(final PlatformSecurityContext context, final CenterReadPlatformService centerReadPlatformService,
@@ -101,7 +102,8 @@ public class CentersApiResource {
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final CollectionSheetReadPlatformService collectionSheetReadPlatformService, final FromJsonHelper fromJsonHelper,
             final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
-            final CalendarReadPlatformService calendarReadPlatformService, final MeetingReadPlatformService meetingReadPlatformService) {
+            final CalendarReadPlatformService calendarReadPlatformService, final MeetingReadPlatformService meetingReadPlatformService,
+            final EntityDatatableChecksReadService entityDatatableChecksReadService) {
         this.context = context;
         this.centerReadPlatformService = centerReadPlatformService;
         this.centerApiJsonSerializer = centerApiJsonSerializer;
@@ -114,6 +116,7 @@ public class CentersApiResource {
         this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
         this.calendarReadPlatformService = calendarReadPlatformService;
         this.meetingReadPlatformService = meetingReadPlatformService;
+        this.entityDatatableChecksReadService = entityDatatableChecksReadService;
     }
 
     @GET
@@ -134,6 +137,9 @@ public class CentersApiResource {
         }
 
         final CenterData template = this.centerReadPlatformService.retrieveTemplate(officeId, staffInSelectedOfficeOnly);
+        final List<DatatableData> datatableTemplates = this.entityDatatableChecksReadService
+                .retrieveTemplates(StatusEnum.CREATE.getCode().longValue(), EntityTables.GROUP.getName(), null);
+        template.setDatatables(datatableTemplates);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.centerApiJsonSerializer.serialize(settings, template, GroupingTypesApiConstants.CENTER_RESPONSE_DATA_PARAMETERS);

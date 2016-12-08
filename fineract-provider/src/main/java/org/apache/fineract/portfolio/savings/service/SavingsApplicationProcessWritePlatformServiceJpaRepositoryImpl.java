@@ -20,13 +20,7 @@ package org.apache.fineract.portfolio.savings.service;
 
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.persistence.PersistenceException;
 
@@ -46,6 +40,9 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
+import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
+import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -67,14 +64,7 @@ import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountDataDTO;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountDataValidator;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountChargeAssembler;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountDomainService;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
-import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
-import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
+import org.apache.fineract.portfolio.savings.domain.*;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
@@ -106,7 +96,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
-    
+    private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
+	
     @Autowired
     public SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final SavingsAccountRepositoryWrapper savingAccountRepository, final SavingsAccountAssembler savingAccountAssembler,
@@ -119,7 +110,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final SavingsAccountDomainService savingsAccountDomainService,
             final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
-            final BusinessEventNotifierService businessEventNotifierService) {
+            final BusinessEventNotifierService businessEventNotifierService,
+            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.savingAccountAssembler = savingAccountAssembler;
@@ -137,6 +129,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.accountNumberFormatRepository = accountNumberFormatRepository;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.businessEventNotifierService = businessEventNotifierService ;
+        this.entityDatatableChecksWritePlatformService = entityDatatableChecksWritePlatformService;
     }
 
     /*
@@ -179,6 +172,15 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             generateAccountNumber(account);
 
             final Long savingsId = account.getId();
+            if(command.parameterExists(SavingsApiConstants.datatables)){
+                this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getCode().longValue(),
+                        EntityTables.SAVING.getName(), savingsId, account.productId(),
+                        command.arrayOfParameterNamed(SavingsApiConstants.datatables));
+            }
+            this.entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId,
+                    EntityTables.SAVING.getName(), StatusEnum.CREATE.getCode().longValue(),
+                    EntityTables.SAVING.getForeignKeyColumnNameOnDatatable(), account.productId());
+
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withEntityId(savingsId) //
@@ -343,6 +345,11 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId);
         checkClientOrGroupActive(savingsAccount);
 
+        entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVING.getName(),
+                StatusEnum.APPROVE.getCode().longValue(),EntityTables.SAVING.getForeignKeyColumnNameOnDatatable(),
+                savingsAccount.productId());
+
+
         final Map<String, Object> changes = savingsAccount.approveApplication(currentUser, command, DateUtils.getLocalDateOfTenant());
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
@@ -411,6 +418,10 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId);
         checkClientOrGroupActive(savingsAccount);
 
+        entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVING.getName(),
+                StatusEnum.REJECTED.getCode().longValue(),EntityTables.SAVING.getForeignKeyColumnNameOnDatatable(),
+                savingsAccount.productId());
+
         final Map<String, Object> changes = savingsAccount.rejectApplication(currentUser, command, DateUtils.getLocalDateOfTenant());
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(savingsAccount);
@@ -444,6 +455,10 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
         final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId);
         checkClientOrGroupActive(savingsAccount);
+
+        entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVING.getName(),
+                StatusEnum.WITHDRAWN.getCode().longValue(),EntityTables.SAVING.getForeignKeyColumnNameOnDatatable(),
+                savingsAccount.productId());
 
         final Map<String, Object> changes = savingsAccount.applicantWithdrawsFromApplication(currentUser, command,
                 DateUtils.getLocalDateOfTenant());

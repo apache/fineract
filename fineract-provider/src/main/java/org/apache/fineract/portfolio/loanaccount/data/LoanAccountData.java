@@ -19,15 +19,13 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.persistence.Transient;
 
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
@@ -213,6 +211,8 @@ public class LoanAccountData {
     private final Boolean isVariableInstallmentsAllowed;
     private final Integer minimumGap;
     private final Integer maximumGap;
+
+    private List<DatatableData> datatables = null;
 
     /**
      * Used to produce a {@link LoanAccountData} with only collateral options
@@ -1617,5 +1617,9 @@ public class LoanAccountData {
     
     public BigDecimal getInterestRateDifferential() {
         return this.interestRateDifferential;
+    }
+
+    public void setDatatables(final List<DatatableData> datatables) {
+            this.datatables = datatables;
     }
 }

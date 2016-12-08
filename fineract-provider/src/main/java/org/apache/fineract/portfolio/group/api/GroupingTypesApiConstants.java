@@ -87,13 +87,15 @@ public class GroupingTypesApiConstants {
     // staff centres parameters
     public static final String meetingFallCenters = "meetingFallCenters";
 
+    public static final String datatables = "datatables";
+
     public static final Set<String> CENTER_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, idParamName, nameParamName, externalIdParamName, officeIdParamName, staffIdParamName, activeParamName,
-            activationDateParamName, groupMembersParamName, submittedOnDateParamName));
+            activationDateParamName, groupMembersParamName, submittedOnDateParamName, datatables));
 
     public static final Set<String> GROUP_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName, dateFormatParamName,
             idParamName, nameParamName, externalIdParamName, centerIdParamName, officeIdParamName, staffIdParamName, activeParamName,
-            activationDateParamName, clientMembersParamName, collectionMeetingCalendar, submittedOnDateParamName));
+            activationDateParamName, clientMembersParamName, collectionMeetingCalendar, submittedOnDateParamName, datatables));
 
     public static final Set<String> GROUP_ROLES_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(roleParamName,
             clientIdParamName));
@@ -106,16 +108,16 @@ public class GroupingTypesApiConstants {
     public static final Set<String> CENTER_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName, nameParamName,
             externalIdParamName, officeIdParamName, officeNameParamName, staffIdParamName, staffNameParamName, hierarchyParamName,
             officeOptionsParamName, staffOptionsParamName, statusParamName, activeParamName, activationDateParamName, timeLine,
-            groupMembersParamName, collectionMeetingCalendar, closureReasons));
+            groupMembersParamName, collectionMeetingCalendar, closureReasons, datatables));
 
     public static final Set<String> CENTER_GROUP_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName, nameParamName,
             externalIdParamName, officeIdParamName, officeNameParamName, staffIdParamName, staffNameParamName, hierarchyParamName,
-            officeOptionsParamName, staffOptionsParamName, clientOptionsParamName));
+            officeOptionsParamName, staffOptionsParamName, clientOptionsParamName, datatables));
 
     public static final Set<String> GROUP_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName, nameParamName,
             externalIdParamName, officeIdParamName, officeNameParamName, "parentId", "parentName", staffIdParamName, staffNameParamName,
             hierarchyParamName, officeOptionsParamName, statusParamName, activeParamName, activationDateParamName, staffOptionsParamName,
-            clientOptionsParamName, timeLine));
+            clientOptionsParamName, timeLine, datatables));
 
     public static final Set<String> ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, activationDateParamName));

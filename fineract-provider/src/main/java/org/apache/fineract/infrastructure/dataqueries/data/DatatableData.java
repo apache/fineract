@@ -45,4 +45,19 @@ public class DatatableData {
         this.columnHeaderData = columnHeaderData;
 
     }
+
+    public boolean hasColumn(final String columnName){
+
+        for(ResultsetColumnHeaderData c : this.columnHeaderData){
+
+            if(c.getColumnName().equals(columnName)) return true;
+        }
+
+        return false;
+    }
+
+    public String getRegisteredTableName(){
+        return registeredTableName;
+    }
+    
 }

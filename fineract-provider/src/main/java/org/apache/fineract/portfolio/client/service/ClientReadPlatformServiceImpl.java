@@ -36,6 +36,10 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
+import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
+import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
@@ -81,6 +85,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     
     private final AddressReadPlatformService addressReadPlatformService;
     private final ConfigurationReadPlatformService configurationReadPlatformService;
+    private final EntityDatatableChecksReadService entityDatatableChecksReadService;
 
     @Autowired
     public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -88,7 +93,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final CodeValueReadPlatformService codeValueReadPlatformService,
             final SavingsProductReadPlatformService savingsProductReadPlatformService,
             final AddressReadPlatformService addressReadPlatformService,
-            final ConfigurationReadPlatformService configurationReadPlatformService) {
+            final ConfigurationReadPlatformService configurationReadPlatformService,
+            final EntityDatatableChecksReadService entityDatatableChecksReadService) {
         this.context = context;
         this.officeReadPlatformService = officeReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -97,6 +103,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         this.savingsProductReadPlatformService = savingsProductReadPlatformService;
         this.addressReadPlatformService=addressReadPlatformService;
         this.configurationReadPlatformService=configurationReadPlatformService;
+        this.entityDatatableChecksReadService = entityDatatableChecksReadService;
     }
 
     @Override
@@ -149,9 +156,12 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         
         final List<EnumOptionData> clientLegalFormOptions = ClientEnumerations.legalForm(LegalForm.values());
 
+        final List<DatatableData> datatableTemplates = this.entityDatatableChecksReadService
+                .retrieveTemplates(StatusEnum.CREATE.getCode().longValue(), EntityTables.CLIENT.getName(), null);
+
         return ClientData.template(defaultOfficeId, new LocalDate(), offices, staffOptions, null, genderOptions, savingsProductDatas,
                 clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions,
-                clientLegalFormOptions,address,isAddressEnabled);
+                clientLegalFormOptions,address,isAddressEnabled, datatableTemplates);
     }
 
     @Override
@@ -782,7 +792,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final Collection<CodeValueData> clientNonPersonMainBusinessLineOptions = null;
         final List<EnumOptionData> clientLegalFormOptions = null;
         return ClientData.template(null, null, null, null, narrations, null, null, clientTypeOptions, clientClassificationOptions, 
-        		clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions, clientLegalFormOptions,null,null);
+        		clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions, clientLegalFormOptions,null,null, null);
     }
 
 }

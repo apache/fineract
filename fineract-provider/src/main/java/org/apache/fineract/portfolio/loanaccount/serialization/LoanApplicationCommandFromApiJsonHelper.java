@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterExc
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
+import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -92,7 +93,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.linkAccountIdParameterName, LoanApiConstants.disbursementDataParameterName,
             LoanApiConstants.emiAmountParameterName, LoanApiConstants.maxOutstandingBalanceParameterName,
             LoanProductConstants.graceOnArrearsAgeingParameterName, LoanApiConstants.createStandingInstructionAtDisbursementParameterName,
-            LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose));
+            LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose, LoanApiConstants.datatables));
 
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
@@ -482,6 +483,11 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                 }
             }
         }
+        if(this.fromApiJsonHelper.parameterExists(LoanApiConstants.datatables, element)){
+            final JsonArray datatables = this.fromApiJsonHelper.extractJsonArrayNamed(LoanApiConstants.datatables, element);
+            baseDataValidator.reset().parameter(LoanApiConstants.datatables).value(datatables).notNull().jsonArrayNotEmpty();
+        }
+
         validateLoanMultiDisbursementdate(element, baseDataValidator, expectedDisbursementDate, principal);
         validatePartialPeriodSupport(interestCalculationPeriodType, baseDataValidator, element, loanProduct);
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }

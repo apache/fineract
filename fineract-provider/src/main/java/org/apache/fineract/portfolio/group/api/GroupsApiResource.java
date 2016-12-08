@@ -53,6 +53,10 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
+import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
+import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.accountdetails.data.AccountSummaryCollectionData;
 import org.apache.fineract.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
@@ -99,6 +103,7 @@ public class GroupsApiResource {
     private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final MeetingReadPlatformService meetingReadPlatformService;
+    private final EntityDatatableChecksReadService entityDatatableChecksReadService;
 
     @Autowired
     public GroupsApiResource(final PlatformSecurityContext context, final GroupReadPlatformService groupReadPlatformService,
@@ -111,7 +116,8 @@ public class GroupsApiResource {
             final CollectionSheetReadPlatformService collectionSheetReadPlatformService, final FromJsonHelper fromJsonHelper,
             final GroupRolesReadPlatformService groupRolesReadPlatformService,
             final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
-            final CalendarReadPlatformService calendarReadPlatformService, final MeetingReadPlatformService meetingReadPlatformService) {
+            final CalendarReadPlatformService calendarReadPlatformService, final MeetingReadPlatformService meetingReadPlatformService,
+            final EntityDatatableChecksReadService entityDatatableChecksReadService) {
 
         this.context = context;
         this.groupReadPlatformService = groupReadPlatformService;
@@ -128,6 +134,7 @@ public class GroupsApiResource {
         this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
         this.calendarReadPlatformService = calendarReadPlatformService;
         this.meetingReadPlatformService = meetingReadPlatformService;
+        this.entityDatatableChecksReadService = entityDatatableChecksReadService;
     }
 
     @GET
@@ -148,8 +155,11 @@ public class GroupsApiResource {
                     GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
         }
 
+        final List<DatatableData> datatableTemplates = this.entityDatatableChecksReadService
+                .retrieveTemplates(StatusEnum.CREATE.getCode().longValue(), EntityTables.GROUP.getName(), null);
         if (centerId != null) {
             final GroupGeneralData centerGroupTemplate = this.centerReadPlatformService.retrieveCenterGroupTemplate(centerId);
+            centerGroupTemplate.setDatatables(datatableTemplates);
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
             return this.groupGeneralApiJsonSerializer.serialize(settings, centerGroupTemplate,
                     GroupingTypesApiConstants.CENTER_GROUP_RESPONSE_DATA_PARAMETERS);
@@ -157,6 +167,8 @@ public class GroupsApiResource {
 
         final GroupGeneralData groupTemplate = this.groupReadPlatformService.retrieveTemplate(officeId, isCenterGroup,
                 staffInSelectedOfficeOnly);
+        groupTemplate.setDatatables(datatableTemplates);
+
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.groupGeneralApiJsonSerializer.serialize(settings, groupTemplate,
                 GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);

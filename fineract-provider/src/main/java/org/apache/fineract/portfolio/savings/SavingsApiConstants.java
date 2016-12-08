@@ -167,6 +167,8 @@ public class SavingsApiConstants {
     public static final String daysToInactiveParamName = "daysToInactive";
     public static final String daysToDormancyParamName = "daysToDormancy";
     public static final String daysToEscheatParamName = "daysToEscheat";
+
+    public static final String datatables = "datatables";
     
 
     public static final Set<String> SAVINGS_PRODUCT_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
@@ -220,7 +222,7 @@ public class SavingsApiConstants {
             // withdrawalFeeAmountParamName, withdrawalFeeTypeParamName,
             withdrawalFeeForTransfersParamName, feeAmountParamName, feeOnMonthDayParamName, chargesParamName, allowOverdraftParamName,
             overdraftLimitParamName, minRequiredBalanceParamName, enforceMinRequiredBalanceParamName,
-            nominalAnnualInterestRateOverdraftParamName, minOverdraftForInterestCalculationParamName, withHoldTaxParamName));
+            nominalAnnualInterestRateOverdraftParamName, minOverdraftForInterestCalculationParamName, withHoldTaxParamName,datatables));
 
     /**
      * These parameters will match the class level parameters of
@@ -236,7 +238,7 @@ public class SavingsApiConstants {
             feeOnMonthDayParamName, "summary", "transactions", "productOptions", "interestCompoundingPeriodTypeOptions",
             "interestPostingPeriodTypeOptions", "interestCalculationTypeOptions", "interestCalculationDaysInYearTypeOptions",
             "lockinPeriodFrequencyTypeOptions", "withdrawalFeeTypeOptions", "withdrawalFee", "annualFee", onHoldFundsParamName,
-            nominalAnnualInterestRateOverdraftParamName, minOverdraftForInterestCalculationParamName));
+            nominalAnnualInterestRateOverdraftParamName, minOverdraftForInterestCalculationParamName, datatables));
 
     public static final Set<String> SAVINGS_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, transactionDateParamName, transactionAmountParamName, paymentTypeIdParamName,
