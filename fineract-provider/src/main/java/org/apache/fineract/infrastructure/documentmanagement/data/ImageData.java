@@ -25,6 +25,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -35,8 +36,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils;
 import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 import org.apache.poi.util.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ImageData {
+
+    private final static Logger logger = LoggerFactory.getLogger(ImageData.class);
 
     @SuppressWarnings("unused")
     private final Long imageId;
@@ -56,17 +61,17 @@ public class ImageData {
     }
 
     public byte[] getContent() {
-        // TODO Vishwas Fix error handling
         try {
-            if (this.inputStream == null) {
+            if (this.storageType.equals(StorageType.S3.getValue()) && this.inputStream != null) {
+                return IOUtils.toByteArray(this.inputStream);
+            } else if (this.storageType.equals(StorageType.FILE_SYSTEM.getValue()) && this.file != null) {
                 final FileInputStream fileInputStream = new FileInputStream(this.file);
                 return IOUtils.toByteArray(fileInputStream);
             }
-
-            return IOUtils.toByteArray(this.inputStream);
-        } catch (final IOException e) {
-            return null;
+        } catch (IOException e) {
+            logger.error(e.getMessage());
         }
+        return null;
     }
 
     public byte[] resizeImage(InputStream in, int maxWidth, int maxHeight) throws IOException {
@@ -102,22 +107,33 @@ public class ImageData {
     }
 
     public byte[] getContentOfSize(Integer maxWidth, Integer maxHeight) {
-        if (maxWidth == null && maxHeight == null) { return getContent(); }
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(this.file);
-            byte[] out = resizeImage(fis, maxWidth != null ? maxWidth : Integer.MAX_VALUE, maxHeight != null ? maxHeight
-                    : Integer.MAX_VALUE);
-            return out;
-        } catch (IOException ex) {
-            return null;
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException ex) {}
+        if (maxWidth == null && maxHeight != null) { return getContent(); }
+        byte[] out = null;
+        if (this.storageType.equals(StorageType.S3.getValue()) && this.inputStream != null) {
+            try {
+                out = resizeImage(this.inputStream, maxWidth != null ? maxWidth : Integer.MAX_VALUE,
+                        maxHeight != null ? maxHeight : Integer.MAX_VALUE);
+            } catch (IOException e) {
+                logger.error(e.getMessage());
+            }
+        } else if (this.storageType.equals(StorageType.FILE_SYSTEM.getValue()) && this.file != null) {
+            FileInputStream fis = null;
+            try {
+                fis = new FileInputStream(this.file);
+                out = resizeImage(fis, maxWidth != null ? maxWidth : Integer.MAX_VALUE, maxHeight != null ? maxHeight : Integer.MAX_VALUE);
+            } catch (IOException ex) {
+                logger.error(ex.getMessage());
+            } finally {
+                if (fis != null) {
+                    try {
+                        fis.close();
+                    } catch (IOException ex) {
+                        logger.error(ex.getMessage());
+                    }
+                }
             }
         }
+        return out;
     }
 
     private void setImageContentType(String filename) {
@@ -161,4 +177,34 @@ public class ImageData {
         return this.entityDisplayName;
     }
 
+    public boolean available() {
+        int available = -1; // not -1
+        if (this.storageType.equals(StorageType.S3.getValue()) && this.inputStream != null) {
+            try {
+                available = this.inputStream.available();
+            } catch (IOException e) {
+                logger.error(e.getMessage());
+            }
+        } else if (this.storageType.equals(StorageType.FILE_SYSTEM.getValue()) && this.file != null) {
+            FileInputStream fileInputStream = null;
+            try {
+                fileInputStream = new FileInputStream(this.file);
+                available = fileInputStream.available();
+                fileInputStream.close();
+            } catch (FileNotFoundException e) {
+                logger.error(e.getMessage());
+            } catch (IOException e) {
+                logger.error(e.getMessage());
+            } finally {
+                if (fileInputStream != null) {
+                    try {
+                        fileInputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return available >= 0;
+    }
 }
