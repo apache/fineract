@@ -13,9 +13,8 @@ Instructions to build war file
 ============
 
 1. Extract the archive file to your local directory
-2. Download gradle-wrapper.jar version 2.10 and place it in fineract-provider/gradle/wrapper folder
-3. Change current working directory to fineract-provider
-4. Run './gradlew clean war' or './gradlew build' to build deployable war file which will be created at fineract-provider/build/libs directory. 
+2. Change current working directory to fineract-provider
+3. Run './gradlew clean war' or './gradlew build' to build deployable war file which will be created at fineract-provider/build/libs directory.
 
 
 Instructions to execute Integration tests
