@@ -6285,10 +6285,14 @@ public class Loan extends AbstractPersistableCustom<Long> {
         final MonetaryCurrency currency = getCurrency();
         Money totalPrincipal = Money.zero(currency);
         Money [] balances = retriveIncomeForOverlappingPeriod(transactionDate);
+        boolean isInterestComponent = true;
         for (final LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
             if (!installment.getDueDate().isBefore(transactionDate)) {
                     totalPrincipal = totalPrincipal.plus(installment.getPrincipal(currency));
                     newInstallments.remove(installment);
+				if (installment.getDueDate().isEqual(transactionDate)) {
+					isInterestComponent = false;
+				}
             }   
             
         }
@@ -6303,12 +6307,18 @@ public class Loan extends AbstractPersistableCustom<Long> {
 
         if (newInstallments.size() > 0) {
             installmentStartDate = newInstallments.get((newInstallments.size() - 1)).getDueDate();
-        }        
+        }
         
+		int installmentNumber = newInstallments.size();
+
+		if (!isInterestComponent) {
+			installmentNumber++;
+		}
+  
         
-        LoanRepaymentScheduleInstallment newInstallment = new LoanRepaymentScheduleInstallment(null, newInstallments.size() + 1,
+		LoanRepaymentScheduleInstallment newInstallment = new LoanRepaymentScheduleInstallment(null, newInstallments.size() + 1,
                 installmentStartDate, transactionDate, totalPrincipal.getAmount(),
-                balances[0].getAmount(), balances[1].getAmount(), balances[2].getAmount(), true, null);
+                balances[0].getAmount(), balances[1].getAmount(), balances[2].getAmount(), isInterestComponent, null);
         newInstallment.updateInstallmentNumber(newInstallments.size() + 1);
         newInstallments.add(newInstallment);        
         updateLoanScheduleOnForeclosure(newInstallments);
@@ -6321,8 +6331,26 @@ public class Loan extends AbstractPersistableCustom<Long> {
                 loanCharge.setActive(false);
             } else if (loanCharge.getDueLocalDate() == null) {
                 recalculateLoanCharge(loanCharge, penaltyWaitPeriod);
+                loanCharge.updateWaivedAmount(currency);
             }
         }
+        
+		for (LoanTransaction loanTransaction : getLoanTransactions()) {
+			if (loanTransaction.isChargesWaiver()) {
+				for (LoanChargePaidBy chargePaidBy : loanTransaction
+						.getLoanChargesPaid()) {
+					if ((chargePaidBy.getLoanCharge().isDueDateCharge() && chargePaidBy
+							.getLoanCharge().getDueLocalDate()
+							.isAfter(transactionDate))
+							|| (chargePaidBy.getLoanCharge().isInstalmentFee() && (chargePaidBy
+									.getInstallmentNumber() != null && chargePaidBy
+									.getInstallmentNumber() > installmentNumber))) {
+						loanTransaction.reverse();
+					}
+				}
+
+			}
+		}
     }
 
     public void updateLoanScheduleOnForeclosure(final Collection<LoanRepaymentScheduleInstallment> installments) {
