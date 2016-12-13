@@ -18,28 +18,15 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.exception;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * A {@link RuntimeException} thrown when datatable resources are not found.
+ * A {@link AbstractPlatformDomainRuleException} thrown when datatable resources are not found.
  */
-public class DatatabaleEntryRequiredException extends RuntimeException {
+public class DatatabaleEntryRequiredException extends AbstractPlatformDomainRuleException{
 
-	public DatatabaleEntryRequiredException(final String datatableName) {
-
-		final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-
-		final String defaultMessage = "The datatable " + datatableName
-				+ " needs to be filled in before the current action can be proceeded";
-		final String messageCode = "error.msg.entry.required.in.datatable." + datatableName;
-		final ApiParameterError error = ApiParameterError.parameterError(messageCode, defaultMessage, "", 1, 0);
-		dataValidationErrors.add(error);
-
-		throw new PlatformApiDataValidationException(dataValidationErrors);
-	}
-
+	public DatatabaleEntryRequiredException(String datatableName) {
+	    super("error.msg.entry.required.in.datatable." + datatableName, "The datatable " + datatableName
+                    + " needs to be filled in before the current action can be proceeded", datatableName);
+    }
 }
