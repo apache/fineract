@@ -2756,6 +2756,24 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createEntityDatatableChecks(final String json) {
+        this.actionName = "CREATE";
+        this.entityName = "ENTITY_DATATABLE_CHECK";
+        this.entityId = null;
+        this.href = "/entityDatatableChecks/";
+        this.json = json;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteEntityDatatableChecks(final long entityDatatableCheckId, final String json) {
+        this.actionName = "DELETE";
+        this.entityName = "ENTITY_DATATABLE_CHECK";
+        this.entityId = entityDatatableCheckId;
+        this.href = "/entityDatatableChecks/" + entityDatatableCheckId;
+        this.json = json;
+        return this;
+    }
+
 	public CommandWrapperBuilder addSelfServiceBeneficiaryTPT() {
         this.actionName = "CREATE";
         this.entityName = "SSBENEFICIARYTPT";

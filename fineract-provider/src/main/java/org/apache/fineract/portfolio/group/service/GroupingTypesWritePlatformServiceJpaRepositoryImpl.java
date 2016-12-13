@@ -18,13 +18,7 @@
  */
 package org.apache.fineract.portfolio.group.service;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.persistence.PersistenceException;
 
@@ -43,33 +37,24 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
+import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
+import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.exception.InvalidOfficeException;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
+import org.apache.fineract.portfolio.calendar.domain.*;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
-import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
-import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
-import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
-import org.apache.fineract.portfolio.calendar.domain.CalendarType;
 import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.service.LoanStatusMapper;
 import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
-import org.apache.fineract.portfolio.group.domain.Group;
-import org.apache.fineract.portfolio.group.domain.GroupLevel;
-import org.apache.fineract.portfolio.group.domain.GroupLevelRepository;
-import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
-import org.apache.fineract.portfolio.group.domain.GroupTypes;
-import org.apache.fineract.portfolio.group.exception.GroupAccountExistsException;
-import org.apache.fineract.portfolio.group.exception.GroupHasNoStaffException;
-import org.apache.fineract.portfolio.group.exception.GroupMemberCountNotInPermissibleRangeException;
-import org.apache.fineract.portfolio.group.exception.GroupMustBePendingToBeDeletedException;
-import org.apache.fineract.portfolio.group.exception.InvalidGroupLevelException;
-import org.apache.fineract.portfolio.group.exception.InvalidGroupStateTransitionException;
+import org.apache.fineract.portfolio.group.domain.*;
+import org.apache.fineract.portfolio.group.exception.*;
 import org.apache.fineract.portfolio.group.serialization.GroupingTypesDataValidator;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
@@ -109,6 +94,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     private final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
     private final AccountNumberGenerator accountNumberGenerator;
+    private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
 
     @Autowired
     public GroupingTypesWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -119,7 +105,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final CodeValueRepositoryWrapper codeValueRepository, final CommandProcessingService commandProcessingService,
             final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
             final LoanRepositoryWrapper loanRepositoryWrapper, 
-            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final AccountNumberGenerator accountNumberGenerator) {
+            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final AccountNumberGenerator accountNumberGenerator,
+            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService) {
         this.context = context;
         this.groupRepository = groupRepository;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
@@ -136,6 +123,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.accountNumberFormatRepository = accountNumberFormatRepository;
         this.accountNumberGenerator = accountNumberGenerator;
+        this.entityDatatableChecksWritePlatformService = entityDatatableChecksWritePlatformService;
     }
 
     private CommandProcessingResult createGroupingType(final JsonCommand command, final GroupTypes groupingType, final Long centerId) {
@@ -219,6 +207,16 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
             this.groupRepository.saveAndFlush(newGroup);
             newGroup.captureStaffHistoryDuringCenterCreation(staff, activationDate);
+
+            if(command.parameterExists(GroupingTypesApiConstants.datatables)){
+                this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getCode().longValue(),
+                        EntityTables.GROUP.getName(), newGroup.getId(), null,
+                        command.arrayOfParameterNamed(GroupingTypesApiConstants.datatables));
+            }
+
+            this.entityDatatableChecksWritePlatformService.runTheCheck(newGroup.getId(), EntityTables.GROUP.getName(),
+                    StatusEnum.CREATE.getCode().longValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
+
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withOfficeId(groupOffice.getId()) //
@@ -296,6 +294,10 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final LocalDate activationDate = command.localDateValueOfParameterNamed("activationDate");
 
             validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(group.getOffice(), group.getGroupLevel(), activationDate);
+
+            entityDatatableChecksWritePlatformService.runTheCheck(groupId, EntityTables.GROUP.getName(),
+                    StatusEnum.ACTIVATE.getCode().longValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
+
             group.activate(currentUser, activationDate);
 
             this.groupRepository.saveAndFlush(group);
@@ -585,6 +587,9 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         validateLoansAndSavingsForGroupOrCenterClose(group, closureDate);
 
+        entityDatatableChecksWritePlatformService.runTheCheck(groupId, EntityTables.GROUP.getName(),
+                StatusEnum.CLOSE.getCode().longValue(),EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
+
         group.close(currentUser, closureReason, closureDate);
 
         this.groupRepository.saveAndFlush(group);
@@ -656,6 +661,10 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         }
 
         validateLoansAndSavingsForGroupOrCenterClose(center, closureDate);
+
+        entityDatatableChecksWritePlatformService.runTheCheck(centerId, EntityTables.GROUP.getName(),
+                StatusEnum.ACTIVATE.getCode().longValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
+
 
         center.close(currentUser, closureReason, closureDate);
 

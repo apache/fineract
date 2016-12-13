@@ -18,12 +18,7 @@
  */
 package org.apache.fineract.portfolio.client.service;
 
-
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import javax.persistence.PersistenceException;
 
@@ -44,6 +39,9 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
+import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
+import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
@@ -52,18 +50,8 @@ import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.address.service.AddressWritePlatformService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.data.ClientDataValidator;
-import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
-import org.apache.fineract.portfolio.client.domain.Client;
-import org.apache.fineract.portfolio.client.domain.ClientNonPerson;
-import org.apache.fineract.portfolio.client.domain.ClientNonPersonRepositoryWrapper;
-import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
-import org.apache.fineract.portfolio.client.domain.ClientStatus;
-import org.apache.fineract.portfolio.client.domain.LegalForm;
-import org.apache.fineract.portfolio.client.exception.ClientActiveForUpdateException;
-import org.apache.fineract.portfolio.client.exception.ClientHasNoStaffException;
-import org.apache.fineract.portfolio.client.exception.ClientMustBePendingToBeDeletedException;
-import org.apache.fineract.portfolio.client.exception.InvalidClientSavingProductException;
-import org.apache.fineract.portfolio.client.exception.InvalidClientStateTransitionException;
+import org.apache.fineract.portfolio.client.domain.*;
+import org.apache.fineract.portfolio.client.exception.*;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
@@ -121,7 +109,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final ConfigurationReadPlatformService configurationReadPlatformService;
     private final AddressWritePlatformService addressWritePlatformService;
     private final BusinessEventNotifierService businessEventNotifierService;
-
+    private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final ClientRepositoryWrapper clientRepository, final ClientNonPersonRepositoryWrapper clientNonPersonRepository,
@@ -134,7 +122,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final CommandProcessingService commandProcessingService, final ConfigurationDomainService configurationDomainService,
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final FromJsonHelper fromApiJsonHelper,
             final ConfigurationReadPlatformService configurationReadPlatformService,
-            final AddressWritePlatformService addressWritePlatformService, final BusinessEventNotifierService businessEventNotifierService) {
+            final AddressWritePlatformService addressWritePlatformService, final BusinessEventNotifierService businessEventNotifierService,
+            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.clientNonPersonRepository = clientNonPersonRepository;
@@ -156,6 +145,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.configurationReadPlatformService = configurationReadPlatformService;
         this.addressWritePlatformService = addressWritePlatformService;
         this.businessEventNotifierService = businessEventNotifierService;
+        this.entityDatatableChecksWritePlatformService = entityDatatableChecksWritePlatformService;
     }
 
     @Transactional
@@ -313,6 +303,15 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             if (isAddressEnabled) {
                 this.addressWritePlatformService.addNewClientAddress(newClient, command);
             }
+
+            if(command.parameterExists(ClientApiConstants.datatables)){
+                this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getCode().longValue(),
+                        EntityTables.CLIENT.getName(), newClient.getId(), null,
+                        command.arrayOfParameterNamed(ClientApiConstants.datatables));
+            }
+
+            this.entityDatatableChecksWritePlatformService.runTheCheck(newClient.getId(), EntityTables.CLIENT.getName(),
+                    StatusEnum.CREATE.getCode().longValue(), EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable());
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -534,6 +533,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
             final LocalDate activationDate = command.localDateValueOfParameterNamed("activationDate");
 
+            entityDatatableChecksWritePlatformService.runTheCheck(clientId, EntityTables.CLIENT.getName(),
+                    StatusEnum.ACTIVATE.getCode().longValue(), EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable());
+
             final AppUser currentUser = this.context.authenticatedUser();
             client.activate(currentUser, fmt, activationDate);
             CommandProcessingResult result = openSavingsAccount(client, fmt);
@@ -668,6 +670,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 throw new InvalidClientStateTransitionException("close", "date.cannot.before.client.actvation.date", errorMessage,
                         closureDate, client.getActivationLocalDate());
             }
+            entityDatatableChecksWritePlatformService.runTheCheck(clientId,EntityTables.CLIENT.getName(),
+                    StatusEnum.CLOSE.getCode().longValue(),EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable());
+
             final List<Loan> clientLoans = this.loanRepositoryWrapper.findLoanByClientId(clientId);
             for (final Loan loan : clientLoans) {
                 final LoanStatusMapper loanStatus = new LoanStatusMapper(loan.status().getValue());

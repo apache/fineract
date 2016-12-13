@@ -20,13 +20,7 @@ package org.apache.fineract.infrastructure.dataqueries.service;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
@@ -50,11 +44,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
-import org.apache.fineract.infrastructure.dataqueries.data.DataTableValidator;
-import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
-import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
-import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
-import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
+import org.apache.fineract.infrastructure.dataqueries.data.*;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableSystemErrorException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -359,7 +349,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     @Transactional
     @Override
     public CommandProcessingResult createNewDatatableEntry(final String dataTableName, final Long appTableId, final JsonCommand command) {
+        return createNewDatatableEntry(dataTableName, appTableId, command.json());
+    }
 
+    @Transactional
+    @Override
+    public CommandProcessingResult createNewDatatableEntry(final String dataTableName, final Long appTableId, final String json) {
         try {
             final String appTable = queryForApplicationTableName(dataTableName);
             final CommandProcessingResult commandProcessingResult = checkMainResourceExistsWithinScope(appTable, appTableId);
@@ -367,7 +362,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final List<ResultsetColumnHeaderData> columnHeaders = this.genericDataService.fillResultsetColumnHeaders(dataTableName);
 
             final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
-            final Map<String, String> dataParams = this.fromJsonHelper.extractDataMap(typeOfMap, command.json());
+            final Map<String, String> dataParams = this.fromJsonHelper.extractDataMap(typeOfMap, json);
 
             final String sql = getAddSql(columnHeaders, dataTableName, getFKField(appTable), appTableId, dataParams);
 
@@ -378,29 +373,32 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         } catch (final DataAccessException dve) {
             final Throwable cause = dve.getCause() ;
             final Throwable realCause = dve.getMostSpecificCause();
-            if (realCause.getMessage()
-                    .contains("Duplicate entry") || cause.getMessage()
-                    .contains("Duplicate entry")) { throw new PlatformDataIntegrityException(
-                            "error.msg.datatable.entry.duplicate", "An entry already exists for datatable `" + dataTableName
-                                    + "` and application table with identifier `" + appTableId + "`.",
-                            "dataTableName", dataTableName, appTableId); }
+            if (realCause.getMessage().contains("Duplicate entry") || cause.getMessage().contains("Duplicate entry")) {
+                throw new PlatformDataIntegrityException("error.msg.datatable.entry.duplicate", "An entry already exists for datatable `"
+                        + dataTableName + "` and application table with identifier `" + appTableId + "`.", "dataTableName", dataTableName,
+                        appTableId);
+            } else if (realCause.getMessage().contains("doesn't have a default value")
+                    || cause.getMessage().contains("doesn't have a default value")) { throw new PlatformDataIntegrityException(
+                    "error.msg.datatable.no.value.provided.for.required.fields", "No values provided for the datatable `" + dataTableName
+                            + "` and application table with identifier `" + appTableId + "`.", "dataTableName", dataTableName, appTableId); }
 
             logAsErrorUnexpectedDataIntegrityException(dve);
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
-        }catch(final PersistenceException e) {
-        	final Throwable cause = e.getCause() ;
-            if (cause.getMessage()
-                    .contains("Duplicate entry")) { 
-            	throw new PlatformDataIntegrityException(
-                            "error.msg.datatable.entry.duplicate", "An entry already exists for datatable `" + dataTableName
-                                    + "` and application table with identifier `" + appTableId + "`.",
-                            "dataTableName", dataTableName, appTableId); }
+        } catch (final PersistenceException e) {
+            final Throwable cause = e.getCause();
+            if (cause.getMessage().contains("Duplicate entry")) {
+                throw new PlatformDataIntegrityException("error.msg.datatable.entry.duplicate", "An entry already exists for datatable `"
+                        + dataTableName + "` and application table with identifier `" + appTableId + "`.", "dataTableName", dataTableName,
+                        appTableId);
+            } else if (cause.getMessage().contains("doesn't have a default value")) { throw new PlatformDataIntegrityException(
+                    "error.msg.datatable.no.value.provided.for.required.fields", "No values provided for the datatable `" + dataTableName
+                            + "` and application table with identifier `" + appTableId + "`.", "dataTableName", dataTableName, appTableId); }
 
             logAsErrorUnexpectedDataIntegrityException(e);
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
-        	
+
         }
     }
 
@@ -1722,4 +1720,14 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         return true;
     }
+
+    @Override
+    public Long countDatatableEntries(final String datatableName, final Long appTableId, String foreignKeyColumn) {
+
+        final String sqlString = "SELECT COUNT(`" + foreignKeyColumn + "`) FROM `" + datatableName + "` WHERE `" + foreignKeyColumn + "`="
+                + appTableId;
+        final Long count = this.jdbcTemplate.queryForObject(sqlString, Long.class);
+        return count;
+    }
+
 }

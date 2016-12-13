@@ -18,25 +18,11 @@
  */
 package org.apache.fineract.portfolio.savings.service;
 
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.amountParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargeIdParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawBalanceParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.*;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
@@ -49,13 +35,12 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
+import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
+import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
-import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
-import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
-import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
-import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.organisation.monetary.domain.*;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
@@ -87,25 +72,9 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeDataValida
 import org.apache.fineract.portfolio.savings.data.SavingsAccountDataValidator;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDataValidator;
-import org.apache.fineract.portfolio.savings.domain.DepositAccountOnHoldTransaction;
-import org.apache.fineract.portfolio.savings.domain.DepositAccountOnHoldTransactionRepository;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountChargeRepositoryWrapper;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountDomainService;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
-import org.apache.fineract.portfolio.savings.exception.PostInterestAsOnDateException;
+import org.apache.fineract.portfolio.savings.domain.*;
+import org.apache.fineract.portfolio.savings.exception.*;
 import org.apache.fineract.portfolio.savings.exception.PostInterestAsOnDateException.PostInterestAsOnException_TYPE;
-import org.apache.fineract.portfolio.savings.exception.PostInterestClosingDateException;
-import org.apache.fineract.portfolio.savings.exception.SavingsAccountClosingNotAllowedException;
-import org.apache.fineract.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
-import org.apache.fineract.portfolio.savings.exception.SavingsOfficerAssignmentException;
-import org.apache.fineract.portfolio.savings.exception.SavingsOfficerUnassignmentException;
-import org.apache.fineract.portfolio.savings.exception.TransactionUpdateNotAllowedException;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.joda.time.LocalDate;
@@ -140,6 +109,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
     private final ConfigurationDomainService configurationDomainService;
     private final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository;
+    private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
     private final AppUserRepositoryWrapper appuserRepository;
     private final StandingInstructionRepository standingInstructionRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
@@ -162,6 +132,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final SavingsAccountDataValidator fromApiJsonDeserializer, 
             final StaffRepositoryWrapper staffRepository, final ConfigurationDomainService configurationDomainService,
             final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
+            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService, 
             final AppUserRepositoryWrapper appuserRepository, 
             final StandingInstructionRepository standingInstructionRepository, 
             final BusinessEventNotifierService businessEventNotifierService) {
@@ -186,6 +157,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.staffRepository = staffRepository;
         this.configurationDomainService = configurationDomainService;
         this.depositAccountOnHoldTransactionRepository = depositAccountOnHoldTransactionRepository;
+        this.entityDatatableChecksWritePlatformService = entityDatatableChecksWritePlatformService;
         this.appuserRepository = appuserRepository;
         this.standingInstructionRepository = standingInstructionRepository;
         this.businessEventNotifierService = businessEventNotifierService;
@@ -205,6 +177,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         final Map<String, Object> changes = account.activate(user, command, DateUtils.getLocalDateOfTenant());
+
+        entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVING.getName(),
+                StatusEnum.ACTIVATE.getCode().longValue(),EntityTables.SAVING.getForeignKeyColumnNameOnDatatable(),
+                account.productId());
+
         if (!changes.isEmpty()) {
             final Locale locale = command.extractLocale();
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
@@ -643,8 +620,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                     + " is not allowed, since it is linked with one of the active accounts";
             throw new SavingsAccountClosingNotAllowedException("linked", defaultUserMessage, savingsId);
         }
-        
-       
+
+        entityDatatableChecksWritePlatformService.runTheCheckForProduct(savingsId, EntityTables.SAVING.getName(),
+                StatusEnum.CLOSE.getCode().longValue(),EntityTables.SAVING.getForeignKeyColumnNameOnDatatable(),
+                account.productId());
 
         final boolean isWithdrawBalance = command.booleanPrimitiveValueOfParameterNamed(withdrawBalanceParamName);
 

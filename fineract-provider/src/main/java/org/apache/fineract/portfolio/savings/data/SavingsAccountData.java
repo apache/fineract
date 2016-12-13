@@ -21,10 +21,12 @@ package org.apache.fineract.portfolio.savings.data;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
@@ -99,6 +101,8 @@ public class SavingsAccountData {
     private final SavingsAccountChargeData annualFee;
     private final BigDecimal nominalAnnualInterestRateOverdraft;
     private final BigDecimal minOverdraftForInterestCalculation;
+
+    private List<DatatableData> datatables = null;
 
     public static SavingsAccountData instance(final Long id, final String accountNo, final EnumOptionData depositType,
             final String externalId, final Long groupId, final String groupName, final Long clientId, final String clientName,
@@ -556,5 +560,9 @@ public class SavingsAccountData {
 
     public Collection<SavingsAccountChargeData> charges() {
         return (this.charges == null) ? new HashSet<SavingsAccountChargeData>() : this.charges;
+    }
+
+    public void setDatatables(final List<DatatableData> datatables) {
+        this.datatables = datatables;
     }
 }

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gson.JsonArray;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -116,6 +117,11 @@ public final class GroupingTypesDataValidator {
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.submittedOnDateParamName).value(submittedOnDate).notNull();
         }
 
+        if(this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.datatables, element)){
+            final JsonArray datatables = this.fromApiJsonHelper.extractJsonArrayNamed(GroupingTypesApiConstants.datatables, element);
+            baseDataValidator.reset().parameter(GroupingTypesApiConstants.datatables).value(datatables).notNull().jsonArrayNotEmpty();
+        }
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -180,6 +186,11 @@ public final class GroupingTypesDataValidator {
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.submittedOnDateParamName).value(submittedOnDate).notNull();
         }
 
+        if(this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.datatables, element)){
+            final JsonArray datatables = this.fromApiJsonHelper.extractJsonArrayNamed(GroupingTypesApiConstants.datatables, element);
+            baseDataValidator.reset().parameter(GroupingTypesApiConstants.datatables).value(datatables).notNull().jsonArrayNotEmpty();
+        }
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -238,6 +249,11 @@ public final class GroupingTypesDataValidator {
             final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(
                     GroupingTypesApiConstants.submittedOnDateParamName, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.submittedOnDateParamName).value(submittedOnDate).notNull();
+        }
+
+        if(this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.datatables, element)){
+            final JsonArray datatables = this.fromApiJsonHelper.extractJsonArrayNamed(GroupingTypesApiConstants.datatables, element);
+            baseDataValidator.reset().parameter(GroupingTypesApiConstants.datatables).value(datatables).notNull().jsonArrayNotEmpty();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

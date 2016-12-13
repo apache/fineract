@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gson.JsonArray;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -94,6 +95,13 @@ public final class ClientDataValidator {
             final Long savingsProductId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.savingsProductIdParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.savingsProductIdParamName).value(savingsProductId).ignoreIfNull()
                     .longGreaterThanZero();
+            /*if (savingsProductId != null && this.fromApiJsonHelper.parameterExists(ClientApiConstants.datatables, element)) {
+                final JsonArray datatables = this.fromApiJsonHelper.extractJsonArrayNamed(ClientApiConstants.datatables, element);
+                if (datatables.size() > 0) {
+                    baseDataValidator.reset().parameter(ClientApiConstants.savingsProductIdParamName).value(savingsProductId)
+                            .failWithCodeNoParameterAddedToErrorCode("should.not.be.used.with.datatables.parameter");
+                }
+            }*/
         }
 
         if (isFullnameProvided(element) || isIndividualNameProvided(element)) {
@@ -154,6 +162,10 @@ public final class ClientDataValidator {
                 final LocalDate joinedDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.activationDateParamName,
                         element);
                 baseDataValidator.reset().parameter(ClientApiConstants.activationDateParamName).value(joinedDate).notNull();
+                /*if(this.fromApiJsonHelper.parameterExists(ClientApiConstants.datatables,element)){
+                    baseDataValidator.reset().parameter(ClientApiConstants.activeParamName).value(active)
+                            .failWithCodeNoParameterAddedToErrorCode("should.not.be.used.with.datatables.parameter");
+                }*/
             }
         } else {
             baseDataValidator.reset().parameter(ClientApiConstants.activeParamName).value(active).trueOrFalseRequired(false);
@@ -193,8 +205,13 @@ public final class ClientDataValidator {
         	final Integer legalFormId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.legalFormIdParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.legalFormIdParamName).value(legalFormId).ignoreIfNull().inMinMaxRange(1, 2);
         }
-        
-        List<ApiParameterError> dataValidationErrorsForClientNonPerson = getDataValidationErrorsForCreateOnClientNonPerson(element.getAsJsonObject().get(ClientApiConstants.clientNonPersonDetailsParamName));        
+
+        if(this.fromApiJsonHelper.parameterExists(ClientApiConstants.datatables, element)){
+            final JsonArray datatables = this.fromApiJsonHelper.extractJsonArrayNamed(ClientApiConstants.datatables, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.datatables).value(datatables).notNull().jsonArrayNotEmpty();
+        }
+
+        List<ApiParameterError> dataValidationErrorsForClientNonPerson = getDataValidationErrorsForCreateOnClientNonPerson(element.getAsJsonObject().get(ClientApiConstants.clientNonPersonDetailsParamName));
         dataValidationErrors.addAll(dataValidationErrorsForClientNonPerson);
         
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -236,8 +253,8 @@ public final class ClientDataValidator {
                     element);
             baseDataValidator.reset().parameter(ClientApiConstants.mainBusinessLineIdParamName).value(mainBusinessLine).integerGreaterThanZero();
         }
-    	
-		return dataValidationErrors;    	
+
+		return dataValidationErrors;
     }
 
     private void validateIndividualNamePartsCannotBeUsedWithFullname(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
