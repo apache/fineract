@@ -3,6 +3,7 @@ Changelog
 
 Releases
 ===============
+1. 14 Dec 2016 - 16.12.01.RELEASE
 1. 14 Nov 2016 - 16.11.01.RELEASE
 1. 22 Sep 2016 - 16.09.01.RELEASE
 1. 16 Aug 2016 - 16.08.01.RELEASE
@@ -91,6 +92,38 @@ Releases
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
 
+16.12.01.RELEASE
+================
+
+This release adds Workflow as a new major feature along with below additional enhancements.
+ 
+Platform & API
+New Features & Improvements
+
+ - Workflow implementation for clients, loans, savings
+ - [MIFOSX-2799] - Better E-mail for new user 
+ - [FINERACT-245] - Introduce RAT checks
+ - [FINERACT-266] - Handling License issues for both source and 
+   binary distributions
+ - Update the README File
+ 
+Bugs
+
+ - [FINERACT-267] - Installment Fee fix on Foreclosure
+ - [FINERACT-288] - Client's Image Uploaded Not Showing on UI in Amazon S3
+ - Fix for resolving scorecards, and replacing dead fk relation
+ - [FINERACT-260] - Validation need to be added if the client charge is    applied before client activation date
+ 
+Community-app
+New Features & Improvements
+
+ - Workflow UI for clients, loans, savings
+ - Localisation updates from https://translatewiki.net
+  
+ Bugs
+ 
+ - [MIFOSX-2753] - Improvements in "Add Client Identifier" page
+  
 16.11.01.RELEASE
 =============
 
