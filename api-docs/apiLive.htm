@@ -2072,7 +2072,7 @@
 								<td></td>
 								<td></td>
 							</tr>
-							tr>
+							<tr>
 								<td></td>
 								<td>smscampaigns/{campaignId}</td>
 								<td></td>
@@ -2104,6 +2104,38 @@
 								<td></td>
 								<td></td>
 							</tr>
+                            <tr>
+                                <td><a href="#entitydatatablechecks">Entity-Datatable Checks</a></td>
+                                <td>entityDatatableChecks</td>
+                                <td><a href="#entitydatatablechecks_create">Create an Entity-Datatable Check</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>entityDatatableChecks?limit=15&offset=0</td>
+                                <td></td>
+                                <td><a href="#entitydatatablechecks_list">List Entity-Datatable Checks</a></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>entityDatatableChecks/template</td>
+                                <td></td>
+                                <td><a href="#entitydatatablechecks_template">Retrieves an Entity-Datatable Check template</a></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>entityDatatableChecks/{entityDatatableCheckId}</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><a href="#entitydatatablechecks_delete">Delete an Entity-Datatable Check</a></td>
+                            </tr>
 							<tr>
 								<td><a href="#configs">Currency</a></td>
 								<td>currencies</td>
@@ -4492,6 +4524,13 @@ Successful transaction response:
 							<td class=fielddesc>Optional: Default overdraft savings account of client
 							</td>
 						</tr>
+                        <tr class=alt>
+                            <td>datatables</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Facility to enrich client details.
+                            </td>
+                        </tr>
 					</table>
 				</div>
 			</div>
@@ -4559,7 +4598,65 @@ GET https://DomainName/api/v1/clients/template
 		"name":"account overdraft",
 		"withdrawalFeeForTransfers":false,
 		"allowOverdraft":false
-	}]
+	}],
+        "datatables": [{
+            "applicationTableName": "m_client",
+            "registeredTableName": "Address Details",
+            "columnHeaderData": [{
+            "columnName": "client_id",
+            "columnType": "bigint",
+            "columnLength": 0,
+            "columnDisplayType": "INTEGER",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": true,
+            "columnValues": []
+        },
+        {
+            "columnName": "State",
+            "columnType": "varchar",
+            "columnLength": 25,
+            "columnDisplayType": "STRING",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "COUNTRY_cd_Country",
+            "columnType": "int",
+            "columnLength": 0,
+            "columnDisplayType": "CODELOOKUP",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": [{
+            "id": 17,
+            "value": "India",
+            "score": 0
+            }],
+            "columnCode": "COUNTRY"
+        }]
+        },
+        {
+            "applicationTableName": "m_client",
+            "registeredTableName": "Client Timeline",
+            "columnHeaderData": [{
+            "columnName": "client_id",
+            "columnType": "bigint",
+            "columnLength": 0,
+            "columnDisplayType": "INTEGER",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": true,
+            "columnValues": []
+        },
+        {
+            "columnName": "Approval Data",
+            "columnType": "date",
+            "columnLength": 0,
+            "columnDisplayType": "DATE",
+            "isColumnNullable": true,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        }]
+    }]
 }
 					</code>
 				</div>
@@ -4592,6 +4689,64 @@ GET https://DomainName/api/v1/clients/template
                         "name":"account overdraft",
                         "withdrawalFeeForTransfers":false,
                         "allowOverdraft":false
+                        }],
+                        "datatables": [{
+                        "applicationTableName": "m_client",
+                        "registeredTableName": "Address Details",
+                        "columnHeaderData": [{
+                        "columnName": "client_id",
+                        "columnType": "bigint",
+                        "columnLength": 0,
+                        "columnDisplayType": "INTEGER",
+                        "isColumnNullable": false,
+                        "isColumnPrimaryKey": true,
+                        "columnValues": []
+                        },
+                        {
+                        "columnName": "State",
+                        "columnType": "varchar",
+                        "columnLength": 25,
+                        "columnDisplayType": "STRING",
+                        "isColumnNullable": false,
+                        "isColumnPrimaryKey": false,
+                        "columnValues": []
+                        },
+                        {
+                        "columnName": "COUNTRY_cd_Country",
+                        "columnType": "int",
+                        "columnLength": 0,
+                        "columnDisplayType": "CODELOOKUP",
+                        "isColumnNullable": false,
+                        "isColumnPrimaryKey": false,
+                        "columnValues": [{
+                        "id": 17,
+                        "value": "India",
+                        "score": 0
+                        }],
+                        "columnCode": "COUNTRY"
+                        }]
+                        },
+                        {
+                        "applicationTableName": "m_client",
+                        "registeredTableName": "Client Timeline",
+                        "columnHeaderData": [{
+                        "columnName": "client_id",
+                        "columnType": "bigint",
+                        "columnLength": 0,
+                        "columnDisplayType": "INTEGER",
+                        "isColumnNullable": false,
+                        "isColumnPrimaryKey": true,
+                        "columnValues": []
+                        },
+                        {
+                        "columnName": "Approval Data",
+                        "columnType": "date",
+                        "columnLength": 0,
+                        "columnDisplayType": "DATE",
+                        "isColumnNullable": true,
+                        "isColumnPrimaryKey": false,
+                        "columnValues": []
+                        }]
                         }]
                         }
                     </code>
@@ -4739,7 +4894,65 @@ GET https://DomainName/api/v1/clients/template
                         ]
                         },
                         "isAddressEnabled": true
-                        }
+                        },
+                        "datatables": [{
+                        "applicationTableName": "m_client",
+                        "registeredTableName": "Address Details",
+                        "columnHeaderData": [{
+                        "columnName": "client_id",
+                        "columnType": "bigint",
+                        "columnLength": 0,
+                        "columnDisplayType": "INTEGER",
+                        "isColumnNullable": false,
+                        "isColumnPrimaryKey": true,
+                        "columnValues": []
+                        },
+                        {
+                        "columnName": "State",
+                        "columnType": "varchar",
+                        "columnLength": 25,
+                        "columnDisplayType": "STRING",
+                        "isColumnNullable": false,
+                        "isColumnPrimaryKey": false,
+                        "columnValues": []
+                        },
+                        {
+                        "columnName": "COUNTRY_cd_Country",
+                        "columnType": "int",
+                        "columnLength": 0,
+                        "columnDisplayType": "CODELOOKUP",
+                        "isColumnNullable": false,
+                        "isColumnPrimaryKey": false,
+                        "columnValues": [{
+                        "id": 17,
+                        "value": "India",
+                        "score": 0
+                        }],
+                        "columnCode": "COUNTRY"
+                        }]
+                        },
+                        {
+                        "applicationTableName": "m_client",
+                        "registeredTableName": "Client Timeline",
+                        "columnHeaderData": [{
+                        "columnName": "client_id",
+                        "columnType": "bigint",
+                        "columnLength": 0,
+                        "columnDisplayType": "INTEGER",
+                        "isColumnNullable": false,
+                        "isColumnPrimaryKey": true,
+                        "columnValues": []
+                        },
+                        {
+                        "columnName": "Approval Data",
+                        "columnType": "date",
+                        "columnLength": 0,
+                        "columnDisplayType": "DATE",
+                        "isColumnNullable": true,
+                        "isColumnPrimaryKey": false,
+                        "columnValues": []
+                        }]
+                        }]
 
 
                     </code>
@@ -4796,7 +5009,31 @@ Content-Type: application/json Request Body:
 	"active": true,
 	"activationDate": "04 March 2009",
     "submittedOnDate":"04 March 2009",
-    "savingsProductId" : 4
+    "savingsProductId" : 4,
+    "datatables": [{
+        "registeredTableName": "Family Details",
+        "data": {
+        "locale": "en",
+        "Number of members": "5",
+        "Number of dependents": "3",
+        "No of Children": "2",
+        "Date of verification": "14 December 2016",
+        "dateFormat": "dd MMMM yyyy"
+        }
+    },
+    {
+        "registeredTableName": "Residency Address",
+        "data": {
+        "locale": "en",
+        "Address Line": "Basavana Gudi Road",
+        "Street": "Gandhi Bazaar",
+        "Landmark": "Aashrama",
+        "COUNTRY_cd_Country": 17,
+        "STATE_cd_State": "7",
+        "DISTRICT_cd_District": "13",
+        "Pincode": "560040"
+        }
+    }]
 }
 					</code>
 					<code class="method-response">
@@ -7592,6 +7829,13 @@ GET https://DomainName/fineract-provider/api/v1/centers?paged=true
 						<tr>
 							<td class=fielddesc>The details of any bulk disbursement transactions.</td>
 						</tr>
+                        <tr class=alt>
+                            <td>datatables</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Facility to enrich group details.
+                            </td>
+                        </tr>
 					</table>
 				</div>
 			</div>
@@ -7676,7 +7920,66 @@ GET https://DomainName/fineract-provider/api/v1/groups/template
       "officeId": 1,
       "officeName": "Head Office"
     }
-  ]
+  ],
+    "datatables": [{
+        "applicationTableName": "m_group",
+        "registeredTableName": "Group Activation Data",
+        "columnHeaderData": [{
+        "columnName": "group_id",
+        "columnType": "bigint",
+        "columnLength": 0,
+        "columnDisplayType": "INTEGER",
+        "isColumnNullable": false,
+        "isColumnPrimaryKey": true,
+        "columnValues": []
+        },
+    {
+        "columnName": "GROUPROLE_cd_Ctry",
+        "columnType": "int",
+        "columnLength": 0,
+        "columnDisplayType": "CODELOOKUP",
+        "isColumnNullable": false,
+        "isColumnPrimaryKey": false,
+        "columnValues": [{
+        "id": 13,
+        "value": "Leader",
+        "score": 0
+        },
+        {
+        "id": 16,
+        "value": "Leader1",
+        "score": 0
+        },
+        {
+        "id": 14,
+        "value": "Collector",
+        "score": 0
+        }],
+        "columnCode": "GROUPROLE"
+        }]
+        },
+    {
+        "applicationTableName": "m_group",
+        "registeredTableName": "Group Enrichment",
+        "columnHeaderData": [{
+        "columnName": "group_id",
+        "columnType": "bigint",
+        "columnLength": 0,
+        "columnDisplayType": "INTEGER",
+        "isColumnNullable": false,
+        "isColumnPrimaryKey": true,
+        "columnValues": []
+        },
+    {
+        "columnName": "name",
+        "columnType": "varchar",
+        "columnLength": 15,
+        "columnDisplayType": "STRING",
+        "isColumnNullable": false,
+        "isColumnPrimaryKey": false,
+        "columnValues": []
+        }]
+    }]
 }
 					</code>
 				</div>
@@ -7778,7 +8081,23 @@ Content-Type: application/json Request Body:
 	"locale": "en",
 	"active": true,
 	"activationDate": "04 March 2009",
-      "submittedOnDate":"04 March 2009"
+    "submittedOnDate":"04 March 2009",
+    "datatables": [{
+    "registeredTableName": "Address Details",
+    "data": {
+        "locale": "en",
+        "COUNTRY_cd_Country": 17
+        }
+    },
+    {
+    "registeredTableName": "Group Activation Data",
+    "data": {
+        "locale": "en",
+        "GROUPROLE_cd_Ctry": 13,
+        "Date": "01 December 2016",
+        "dateFormat": "dd MMMM yyyy"
+        }
+    }]
 }
 					</code>
 					<code class="method-response">
@@ -9478,7 +9797,60 @@ GET https://DomainName/api/v1/loans/template?templateType=individual&clientId=1&
   		"fieldOfficerId":0,
   		"currency":{"code":"USD","name":"US Dollar","decimalPlaces":2,"displaySymbol":"$","nameCode":"currency.USD","displayLabel":"US Dollar ($)"}
   	}
-  ]
+  ],
+    "datatables": [{
+        "applicationTableName": "m_loan",
+        "registeredTableName": "loan_balance",
+        "columnHeaderData": [{
+        "columnName": "loan_id",
+        "columnType": "bigint",
+        "columnLength": 0,
+        "columnDisplayType": "INTEGER",
+        "isColumnNullable": false,
+        "isColumnPrimaryKey": true,
+        "columnValues": []
+    },
+    {
+        "columnName": "account_number",
+        "columnType": "varchar",
+        "columnLength": 25,
+        "columnDisplayType": "STRING",
+        "isColumnNullable": false,
+        "isColumnPrimaryKey": false,
+        "columnValues": []
+    },
+    {
+        "columnName": "Balance",
+        "columnType": "decimal",
+        "columnLength": 0,
+        "columnDisplayType": "DECIMAL",
+        "isColumnNullable": true,
+        "isColumnPrimaryKey": false,
+        "columnValues": []
+    }]
+    },
+    {
+        "applicationTableName": "m_loan",
+        "registeredTableName": "Loan Enrichment",
+        "columnHeaderData": [{
+        "columnName": "loan_id",
+        "columnType": "bigint",
+        "columnLength": 0,
+        "columnDisplayType": "INTEGER",
+        "isColumnNullable": false,
+        "isColumnPrimaryKey": true,
+        "columnValues": []
+    },
+    {
+        "columnName": "Activation Date",
+        "columnType": "date",
+        "columnLength": 0,
+        "columnDisplayType": "DATE",
+        "isColumnNullable": false,
+        "isColumnPrimaryKey": false,
+        "columnValues": []
+        }]
+    }]
 }
 					</code>
 				</div>
@@ -10245,6 +10617,14 @@ Request Body:
 							<td>recalculationCompoundingFrequencyDate</td>
 						</tr>
 					</table>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG">
+                            <td><div class="fineractHeading2">Additional Mandatory Field if Entity-Datatable Check is enabled for the entity of type loan.</div></td>
+                        </tr>
+                        <tr class=alt>
+                            <td>datatables</td>
+                        </tr>
+                    </table>
 					<br/>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
@@ -10288,7 +10668,26 @@ Request Body:
     "fixedEmiAmount":1100,
     "maxOutstandingLoanBalance":"35000",
     "disbursementData":[{"expectedDisbursementDate":"01 November 2013",
-    					"principal":22000,"approvedPrincipal":22000}]
+    					"principal":22000,"approvedPrincipal":22000}],
+    "datatables": [{
+        "registeredTableName": "loan_balance",
+        "data": {
+        "locale": "en",
+        "account_number": "0000001",
+        "Balance": "3300.00",
+        "DateField": "01 December 2016 00:00",
+        "dateFormat": "dd MMMM yyyy HH:mm",
+        "DateTimeField": "01 December 2016 12:00"
+        }
+    },
+        {
+            "registeredTableName": "Date Loan Field",
+            "data": {
+            "locale": "en",
+            "Activation Date": "01 December 2016 00:00",
+            "dateFormat": "dd MMMM yyyy HH:mm"
+        }
+    }]
 }
 					</code>
 					<code class="method-response">
@@ -21077,6 +21476,312 @@ Content-Type: application/json
         </div>
     </div>
 
+    <a id="entitydatatablechecks" name="entitydatatablechecks" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h3>Entity-Datatable Checks</h3>
+            <p>This defines Entity-Datatable Check.</p>
+
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Field Descriptions</div></td></tr>
+
+                <tr class=alt><td>entity</td></tr>
+                <tr><td class=fielddesc>The entity to which the Entity-Datatable Check to be attached.</td></tr>
+
+                <tr class=alt><td>status</td></tr>
+                <tr><td class=fielddesc>The action to be attached to an Entity-Datatable Check.</td></tr>
+
+                <tr class=alt><td>datatableName</td></tr>
+                <tr><td class=fielddesc>Name of the datatable on which the Entity-Datatable Check to be imposed.</td></tr>
+
+                <tr class=alt><td>productId</td></tr>
+                <tr><td class=fielddesc>Optional: The product to be associated with an entity.</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <a id="entitydatatablechecks_create" name="entitydatatablechecks_create" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Create Entity-Datatable Checks</h4>
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields</div></td></tr>
+                <tr class=alt>
+                    <td>entity, status, datatableName</td>
+                </tr>
+            </table>
+            <br/>
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Non-Mandatory Fields</div></td></tr>
+                <tr class=alt>
+                    <td>productId</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="method-example">
+            <code class="method-declaration">POST https://Domain Name/api/v1/entityDatatableChecks</code>
+            <code class="method-request">POST entitydatatablechecks
+Content-Type: application/json
+Request Body:
+{
+"entity": "m_loan",
+"status": 100,
+"datatableName": "Additional Details",
+"productId": 1
+}
+
+            </code>
+            <code class="method-response">
+{
+"resourceId": 1
+}
+            </code>
+
+        </div>
+    </div>
+
+    <a id="entitydatatablechecks_list" name="entitydatatablechecks_list" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>List Entity-Datatable Checks</h4>
+            <p>The <i>list</i> capability of Entity-Datatable Checks can support <b>pagination</b>.</p>
+            <h5>Optional Arguments</h5>
+            <dl class="argument-list">
+                <dt>offset</dt>
+                <dd>
+                    Integer <span>optional</span>, defaults to 0
+                </dd>
+                <dd>Indicates the result from which pagination starts</dd>
+
+                <dt>limit</dt>
+                <dd>
+                    Integer <span>optional</span>, defaults to 200
+                </dd>
+                <dd>Restricts the size of results returned. To override the default and return all entries you must explicitly pass a non-positive integer value for limit e.g. limit=0, or limit=-1</dd>
+            </dl>
+            <p>Example Request:</p>
+            <div class=apiClick>entityDatatableChecks?offset=0&limit=15</div>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">GET https://DomainName/api/v1/entityDatatableChecks?offset=0&limit=15
+            </code>
+            <code class="method-response">
+{
+"totalFilteredRecords": 15,
+"pageItems": [{
+"id": 45,
+"entity": "m_client",
+"status": {
+"id": 100,
+"code": "CREATE",
+"value": "CREATE"
+},
+"datatableName": "Client Personal Details",
+"systemDefined": false,
+"order": 45
+},
+{
+"id": 48,
+"entity": "m_group",
+"status": {
+"id": 100,
+"code": "CREATE",
+"value": "CREATE"
+},
+"datatableName": "Group Activation Details",
+"systemDefined": false,
+"order": 48
+}, ...]
+}
+            </code>
+        </div>
+    </div>
+
+    <a id="entitydatatablechecks_template" name="entitydatatablechecks_template"
+       class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Retrieve Entity-Datatable Checks Template</h4>
+            <p>This is a convenience resource useful for
+                building maintenance user interface screens for Entity-Datatable Checks
+                applications. The template data returned consists of:
+            <ul>
+                <li class=normalli>Allowed Value Lists</li>
+            </ul>
+            </p>
+            <p>Example Request:</p>
+            <div class=apiClick>entityDatatableChecks/template</div>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">GET https://DomainName/api/v1/entityDatatableChecks/template
+            </code>
+            <code class="method-response">
+{
+"entities": ["m_client",
+"m_loan",
+"m_group",
+"m_savings_account"],
+"statusClient": [{
+"name": "CREATE",
+"code": 100
+},
+{
+"name": "ACTIVATE",
+"code": 300
+},
+{
+"name": "CLOSE",
+"code": 600
+}],
+"statusGroup": [{
+"name": "CREATE",
+"code": 100
+},
+{
+"name": "ACTIVATE",
+"code": 300
+},
+{
+"name": "CLOSE",
+"code": 600
+}],
+"statusSavings": [{
+"name": "CREATE",
+"code": 100
+},
+{
+"name": "APPROVE",
+"code": 200
+},
+{
+"name": "ACTIVATE",
+"code": 300
+},
+{
+"name": "WITHDRAWN",
+"code": 400
+},
+{
+"name": "REJECTED",
+"code": 500
+},
+{
+"name": "CLOSE",
+"code": 600
+}],
+"statusLoans": [{
+"name": "CREATE",
+"code": 100
+},
+{
+"name": "APPROVE",
+"code": 200
+},
+{
+"name": "ACTIVATE",
+"code": 300
+},
+{
+"name": "WITHDRAWN",
+"code": 400
+},
+{
+"name": "REJECTED",
+"code": 500
+},
+{
+"name": "WRITE_OFF",
+"code": 601
+}],
+"datatables": [{
+"entity": "m_group",
+"dataTableName": "Address Details"
+},
+{
+"entity": "m_client",
+"dataTableName": "CACT"
+},
+{
+"entity": "m_client",
+"dataTableName": "Family_Details"
+}],
+"loanProductDatas": [{
+"id": 1,
+"name": "Sakhi Shakthi",
+"includeInBorrowerCycle": false,
+"useBorrowerCycle": false,
+"isLinkedToFloatingInterestRates": false,
+"isFloatingInterestRateCalculationAllowed": false,
+"allowVariableInstallments": false,
+"isInterestRecalculationEnabled": false,
+"canDefineInstallmentAmount": false,
+"principalVariationsForBorrowerCycle": [],
+"interestRateVariationsForBorrowerCycle": [],
+"numberOfRepaymentVariationsForBorrowerCycle": [],
+"canUseForTopup": false,
+"holdGuaranteeFunds": false,
+"accountMovesOutOfNPAOnlyOnArrearsCompletion": false,
+"syncExpectedWithDisbursementDate": false
+},
+{
+"id": 2,
+"name": "MEL One",
+"includeInBorrowerCycle": false,
+"useBorrowerCycle": false,
+"isLinkedToFloatingInterestRates": false,
+"isFloatingInterestRateCalculationAllowed": false,
+"allowVariableInstallments": false,
+"isInterestRecalculationEnabled": false,
+"canDefineInstallmentAmount": false,
+"principalVariationsForBorrowerCycle": [],
+"interestRateVariationsForBorrowerCycle": [],
+"numberOfRepaymentVariationsForBorrowerCycle": [],
+"canUseForTopup": false,
+"holdGuaranteeFunds": false,
+"accountMovesOutOfNPAOnlyOnArrearsCompletion": false,
+"syncExpectedWithDisbursementDate": false
+}],
+"savingsProductDatas": [{
+"id": 1,
+"name": "Deposit Account",
+"withdrawalFeeForTransfers": false,
+"allowOverdraft": false,
+"enforceMinRequiredBalance": false,
+"withHoldTax": false
+},
+{
+"id": 2,
+"name": "Savings Account One",
+"withdrawalFeeForTransfers": false,
+"allowOverdraft": false,
+"enforceMinRequiredBalance": false,
+"withHoldTax": false
+}]
+}
+            </code>
+        </div>
+    </div>
+
+    <a id="entitydatatablechecks_delete" name="entitydatatablechecks_delete" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Delete Entity-Datatable Checks</h4>
+            <p>
+                Deletes an existing Entity-Datatable Check
+            </p>
+        </div>
+
+        <div class="method-example">
+            <code class="method-declaration">DELETE https://Domain Name/api/v1/entityDatatableChecks/{entityDatatableCheckId}</code>
+            <code class="method-response">
+{
+"resourceId": 1
+}
+            </code>
+        </div>
+    </div>
+
 	<a id="smscampaigns_create" name="smscampaigns_create" class="old-syle-anchor">&nbsp;</a>
     <div class="method-section">
         <div class="method-description">
@@ -24600,6 +25305,8 @@ No Request Body:
 				<tr class=alt><td>withHoldTax</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If tax group provided at product level, will allow to Enable or disable withhold tax on interest posting for savings account </td></tr>
 
+                <tr class=alt><td>datatables</td></tr>
+                <tr><td class=fielddesc> Additional Mandatory Field if Entity-Datatable Check is enabled for the entity of type Savings. </td></tr>
 
 	        </table>
 	    </div>
@@ -24941,7 +25648,43 @@ No Request Body:
       ],
       "feeInterval": 4
     }
-  ]
+  ],
+    "datatables": [{
+        "applicationTableName": "m_savings_account",
+        "registeredTableName": "Savings Address Enrichment",
+        "columnHeaderData": [{
+        "columnName": "savings_account_id",
+        "columnType": "bigint",
+        "columnLength": 0,
+        "columnDisplayType": "INTEGER",
+        "isColumnNullable": false,
+        "isColumnPrimaryKey": true,
+        "columnValues": []
+    },
+    {
+        "columnName": "Name",
+        "columnType": "varchar",
+        "columnLength": 25,
+        "columnDisplayType": "STRING",
+        "isColumnNullable": false,
+        "isColumnPrimaryKey": false,
+        "columnValues": []
+    },
+    {
+        "columnName": "COUNTRY_cd_country details",
+        "columnType": "int",
+        "columnLength": 0,
+        "columnDisplayType": "CODELOOKUP",
+        "isColumnNullable": false,
+        "isColumnPrimaryKey": false,
+        "columnValues": [{
+        "id": 17,
+        "value": "India",
+        "score": 0
+        }],
+        "columnCode": "COUNTRY"
+    }]
+    }]
 }
 			</code>
 	    </div>
@@ -24967,6 +25710,15 @@ No Request Body:
 	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, allowOverdraft, overdraftLimit, withHoldTax</td>
 	       		</tr>
 	        </table>
+            <br/>
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG">
+                    <td><div class="fineractHeading2">Additional Mandatory Field if Entity-Datatable Check is enabled for the entity of type Savings.</div></td>
+                </tr>
+                <tr class=alt>
+                    <td>datatables</td>
+                </tr>
+            </table>
 	    </div>
 	    <div class="method-example">
 	    	<p>Minimal request: accountNo auto generated, remaining details inherited from savings product.</p>
@@ -25019,7 +25771,25 @@ Request Body:
   "lockinPeriodFrequencyType": 2,
   "allowOverdraft":true,
   "overdraftLimit":5000,
-  "charges":[{"id":"1"}]
+  "charges":[{"id":"1"}],
+    "datatables": [{
+        "registeredTableName": "Savings Enrichment",
+        "data": {
+        "locale": "en",
+        "Name": "Raj",
+        "COUNTRY_cd_country details": 17
+        }
+    },
+    {
+        "registeredTableName": "SavingsDataTableCreate",
+        "data": {
+        "locale": "en",
+        "Volume": "25",
+        "CurrentTimestamp": "01 December 2016 12:44",
+        "dateFormat": "dd MMMM yyyy HH:mm",
+        "DateData": "01 December 2016 00:00"
+        }
+    }]
 }
 			</code>
 	        <code class="method-response">
@@ -47009,7 +47779,7 @@ No Request Body:
 					<td><a href="#search">Search</a></td>
 					<td>search</td>
 					<td></td>
-					<td><a href="#search_resource">Search Resources</td>
+					<td><a href="#search_resource">Search Resources</a></td>
 					<td></td>
 					<td></td>
 				</tr>
