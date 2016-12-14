@@ -645,32 +645,32 @@ CREATE TABLE IF NOT EXISTS `job` (
 -- Dumping data for table mifostenant-default.job: ~26 rows (approximately)
 /*!40000 ALTER TABLE `job` DISABLE KEYS */;
 INSERT INTO `job` (`id`, `name`, `display_name`, `cron_expression`, `create_time`, `task_priority`, `group_name`, `previous_run_start_time`, `next_run_time`, `job_key`, `initializing_errorlog`, `is_active`, `currently_running`, `updates_allowed`, `scheduler_group`, `is_misfired`) VALUES
-	(1, 'Update loan Summary', 'Update loan Summary', '0 0 22 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-11-18 22:00:00', 'Update loan SummaryJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(2, 'Update Loan Arrears Ageing', 'Update Loan Arrears Ageing', '0 1 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-11-19 00:01:00', 'Update Loan Arrears AgeingJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(3, 'Update Loan Paid In Advance', 'Update Loan Paid In Advance', '0 5 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-11-19 00:05:00', 'Update Loan Paid In AdvanceJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(4, 'Apply Annual Fee For Savings', 'Apply Annual Fee For Savings', '0 20 22 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-11-18 22:20:00', 'Apply Annual Fee For SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(5, 'Apply Holidays To Loans', 'Apply Holidays To Loans', '0 0 12 * * ?', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-11-19 12:00:00', 'Apply Holidays To LoansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(6, 'Post Interest For Savings', 'Post Interest For Savings', '0 0 0 1/1 * ? *', '2015-06-03 02:56:58', 5, NULL, NULL, '2016-11-19 00:00:00', 'Post Interest For SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
-	(7, 'Transfer Fee For Loans From Savings', 'Transfer Fee For Loans From Savings', '0 1 0 1/1 * ? *', '2015-06-03 02:57:00', 5, NULL, NULL, '2016-11-19 00:01:00', 'Transfer Fee For Loans From SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(8, 'Pay Due Savings Charges', 'Pay Due Savings Charges', '0 0 12 * * ?', '2013-09-23 00:00:00', 5, NULL, NULL, '2016-11-19 12:00:00', 'Pay Due Savings ChargesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(9, 'Update Accounting Running Balances', 'Update Accounting Running Balances', '0 1 0 1/1 * ? *', '2015-06-03 02:57:00', 5, NULL, NULL, '2016-11-19 00:01:00', 'Update Accounting Running BalancesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(10, 'Execute Standing Instruction', 'Execute Standing Instruction', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 5, NULL, NULL, '2016-11-19 00:00:00', 'Execute Standing InstructionJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(11, 'Add Accrual Transactions', 'Add Accrual Transactions', '0 1 0 1/1 * ? *', '2015-06-03 02:57:04', 3, NULL, NULL, '2016-11-19 00:01:00', 'Add Accrual TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(12, 'Apply penalty to overdue loans', 'Apply penalty to overdue loans', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 5, NULL, NULL, '2016-11-19 00:00:00', 'Apply penalty to overdue loansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(13, 'Update Non Performing Assets', 'Update Non Performing Assets', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 6, NULL, NULL, '2016-11-19 00:00:00', 'Update Non Performing AssetsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(14, 'Transfer Interest To Savings', 'Transfer Interest To Savings', '0 2 0 1/1 * ? *', '2015-06-03 02:57:05', 4, NULL, NULL, '2016-11-19 00:02:00', 'Transfer Interest To SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
-	(15, 'Update Deposit Accounts Maturity details', 'Update Deposit Accounts Maturity details', '0 0 0 1/1 * ? *', '2015-06-03 02:57:05', 5, NULL, NULL, '2016-11-19 00:00:00', 'Update Deposit Accounts Maturity detailsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(16, 'Add Periodic Accrual Transactions', 'Add Periodic Accrual Transactions', '0 2 0 1/1 * ? *', '2015-06-03 02:57:06', 2, NULL, NULL, '2016-11-19 00:02:00', 'Add Periodic Accrual TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(17, 'Recalculate Interest For Loans', 'Recalculate Interest For Loans', '0 1 0 1/1 * ? *', '2015-06-03 02:57:07', 4, NULL, NULL, '2016-11-19 00:01:00', 'Recalculate Interest For LoansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(18, 'Generate Mandatory Savings Schedule', 'Generate Mandatory Savings Schedule', '0 5 0 1/1 * ? *', '2015-06-03 02:57:12', 5, NULL, NULL, '2016-11-19 00:05:00', 'Generate Mandatory Savings ScheduleJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(19, 'Generate Loan Loss Provisioning', 'Generate Loan Loss Provisioning', '0 0 0 1/1 * ? *', '2015-10-20 19:57:53', 5, NULL, NULL, '2016-11-19 00:00:00', 'Generate Loan Loss ProvisioningJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(20, 'Post Dividends For Shares', 'Post Dividends For Shares', '0 0 0 1/1 * ? *', '2016-11-18 17:26:49', 5, NULL, NULL, '2016-11-19 00:00:00', 'Post Dividends For SharesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(21, 'Update Savings Dormant Accounts', 'Update Savings Dormant Accounts', '0 0 0 1/1 * ? *', '2016-11-18 17:26:55', 3, NULL, NULL, '2016-11-19 00:00:00', 'Update Savings Dormant AccountsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
-	(22, 'Add Accrual Transactions For Loans With Income Posted As Transactions', 'Add Accrual Transactions For Loans With Income Posted As Transactions', '0 1 0 1/1 * ? *', '2016-11-18 17:27:00', 5, NULL, NULL, '2016-11-19 00:01:00', 'Add Accrual Transactions For Loans With Income Posted As TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(23, 'Execute Report Mailing Jobs', 'Execute Report Mailing Jobs', '0 0/15 * * * ?', '2016-11-18 17:27:13', 5, NULL, NULL, '2016-11-18 17:30:00', 'Execute Report Mailing JobsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(24, 'Update SMS Outbound with Campaign Message', 'Update SMS Outbound with Campaign Message', '0 0 5 1/1 * ? *', '2016-11-18 17:27:19', 3, NULL, NULL, '2016-11-19 05:00:00', 'Update SMS Outbound with Campaign MessageJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 4, 0),
-	(25, 'Send Messages to SMS Gateway', 'Send Messages to SMS Gateway', '0 0 5 1/1 * ? *', '2016-11-18 17:27:19', 2, NULL, NULL, '2016-11-19 05:00:00', 'Send Messages to SMS GatewayJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 4, 0),
-	(26, 'Get Delivery Reports from SMS Gateway', 'Get Delivery Reports from SMS Gateway', '0 0 5 1/1 * ? *', '2016-11-18 17:27:19', 1, NULL, NULL, '2016-11-19 05:00:00', 'Get Delivery Reports from SMS GatewayJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 4, 0);
+	(1, 'Update loan Summary', 'Update loan Summary', '0 0 22 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-12-14 22:00:00', 'Update loan SummaryJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(2, 'Update Loan Arrears Ageing', 'Update Loan Arrears Ageing', '0 1 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-12-15 00:01:00', 'Update Loan Arrears AgeingJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(3, 'Update Loan Paid In Advance', 'Update Loan Paid In Advance', '0 5 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-12-15 00:05:00', 'Update Loan Paid In AdvanceJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(4, 'Apply Annual Fee For Savings', 'Apply Annual Fee For Savings', '0 20 22 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-12-14 22:20:00', 'Apply Annual Fee For SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(5, 'Apply Holidays To Loans', 'Apply Holidays To Loans', '0 0 12 * * ?', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-12-14 12:00:00', 'Apply Holidays To LoansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(6, 'Post Interest For Savings', 'Post Interest For Savings', '0 0 0 1/1 * ? *', '2015-06-03 02:56:58', 5, NULL, NULL, '2016-12-15 00:00:00', 'Post Interest For SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
+	(7, 'Transfer Fee For Loans From Savings', 'Transfer Fee For Loans From Savings', '0 1 0 1/1 * ? *', '2015-06-03 02:57:00', 5, NULL, NULL, '2016-12-15 00:01:00', 'Transfer Fee For Loans From SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(8, 'Pay Due Savings Charges', 'Pay Due Savings Charges', '0 0 12 * * ?', '2013-09-23 00:00:00', 5, NULL, NULL, '2016-12-14 12:00:00', 'Pay Due Savings ChargesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(9, 'Update Accounting Running Balances', 'Update Accounting Running Balances', '0 1 0 1/1 * ? *', '2015-06-03 02:57:00', 5, NULL, NULL, '2016-12-15 00:01:00', 'Update Accounting Running BalancesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(10, 'Execute Standing Instruction', 'Execute Standing Instruction', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 5, NULL, NULL, '2016-12-15 00:00:00', 'Execute Standing InstructionJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(11, 'Add Accrual Transactions', 'Add Accrual Transactions', '0 1 0 1/1 * ? *', '2015-06-03 02:57:04', 3, NULL, NULL, '2016-12-15 00:01:00', 'Add Accrual TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(12, 'Apply penalty to overdue loans', 'Apply penalty to overdue loans', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 5, NULL, NULL, '2016-12-15 00:00:00', 'Apply penalty to overdue loansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(13, 'Update Non Performing Assets', 'Update Non Performing Assets', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 6, NULL, NULL, '2016-12-15 00:00:00', 'Update Non Performing AssetsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(14, 'Transfer Interest To Savings', 'Transfer Interest To Savings', '0 2 0 1/1 * ? *', '2015-06-03 02:57:05', 4, NULL, NULL, '2016-12-15 00:02:00', 'Transfer Interest To SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
+	(15, 'Update Deposit Accounts Maturity details', 'Update Deposit Accounts Maturity details', '0 0 0 1/1 * ? *', '2015-06-03 02:57:05', 5, NULL, NULL, '2016-12-15 00:00:00', 'Update Deposit Accounts Maturity detailsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(16, 'Add Periodic Accrual Transactions', 'Add Periodic Accrual Transactions', '0 2 0 1/1 * ? *', '2015-06-03 02:57:06', 2, NULL, NULL, '2016-12-15 00:02:00', 'Add Periodic Accrual TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(17, 'Recalculate Interest For Loans', 'Recalculate Interest For Loans', '0 1 0 1/1 * ? *', '2015-06-03 02:57:07', 4, NULL, NULL, '2016-12-15 00:01:00', 'Recalculate Interest For LoansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(18, 'Generate Mandatory Savings Schedule', 'Generate Mandatory Savings Schedule', '0 5 0 1/1 * ? *', '2015-06-03 02:57:12', 5, NULL, NULL, '2016-12-15 00:05:00', 'Generate Mandatory Savings ScheduleJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(19, 'Generate Loan Loss Provisioning', 'Generate Loan Loss Provisioning', '0 0 0 1/1 * ? *', '2015-10-20 19:57:53', 5, NULL, NULL, '2016-12-15 00:00:00', 'Generate Loan Loss ProvisioningJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(20, 'Post Dividends For Shares', 'Post Dividends For Shares', '0 0 0 1/1 * ? *', '2016-11-18 17:26:49', 5, NULL, NULL, '2016-12-15 00:00:00', 'Post Dividends For SharesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(21, 'Update Savings Dormant Accounts', 'Update Savings Dormant Accounts', '0 0 0 1/1 * ? *', '2016-11-18 17:26:55', 3, NULL, NULL, '2016-12-15 00:00:00', 'Update Savings Dormant AccountsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
+	(22, 'Add Accrual Transactions For Loans With Income Posted As Transactions', 'Add Accrual Transactions For Loans With Income Posted As Transactions', '0 1 0 1/1 * ? *', '2016-11-18 17:27:00', 5, NULL, NULL, '2016-12-15 00:01:00', 'Add Accrual Transactions For Loans With Income Posted As TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(23, 'Execute Report Mailing Jobs', 'Execute Report Mailing Jobs', '0 0/15 * * * ?', '2016-11-18 17:27:13', 5, NULL, '2016-12-14 11:30:00', '2016-12-14 11:45:00', 'Execute Report Mailing JobsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(24, 'Update SMS Outbound with Campaign Message', 'Update SMS Outbound with Campaign Message', '0 0 5 1/1 * ? *', '2016-11-18 17:27:19', 3, NULL, NULL, '2016-12-15 05:00:00', 'Update SMS Outbound with Campaign MessageJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 4, 0),
+	(25, 'Send Messages to SMS Gateway', 'Send Messages to SMS Gateway', '0 0 5 1/1 * ? *', '2016-11-18 17:27:19', 2, NULL, NULL, '2016-12-15 05:00:00', 'Send Messages to SMS GatewayJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 4, 0),
+	(26, 'Get Delivery Reports from SMS Gateway', 'Get Delivery Reports from SMS Gateway', '0 0 5 1/1 * ? *', '2016-11-18 17:27:19', 1, NULL, NULL, '2016-12-15 05:00:00', 'Get Delivery Reports from SMS GatewayJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 4, 0);
 /*!40000 ALTER TABLE `job` ENABLE KEYS */;
 
 
@@ -689,10 +689,12 @@ CREATE TABLE IF NOT EXISTS `job_run_history` (
   PRIMARY KEY (`id`),
   KEY `scheduledjobsFK` (`job_id`),
   CONSTRAINT `scheduledjobsFK` FOREIGN KEY (`job_id`) REFERENCES `job` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 -- Dumping data for table mifostenant-default.job_run_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `job_run_history` DISABLE KEYS */;
+INSERT INTO `job_run_history` (`id`, `job_id`, `version`, `start_time`, `end_time`, `status`, `error_message`, `trigger_type`, `error_log`) VALUES
+	(1, 23, 1, '2016-12-14 11:30:00', '2016-12-14 11:30:00', 'success', NULL, 'cron', NULL);
 /*!40000 ALTER TABLE `job_run_history` ENABLE KEYS */;
 
 
@@ -3336,7 +3338,7 @@ CREATE TABLE IF NOT EXISTS `m_permission` (
   `can_maker_checker` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=765 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=768 DEFAULT CHARSET=utf8;
 
 -- Dumping data for table mifostenant-default.m_permission: ~742 rows (approximately)
 /*!40000 ALTER TABLE `m_permission` DISABLE KEYS */;
@@ -4082,7 +4084,10 @@ INSERT INTO `m_permission` (`id`, `grouping`, `code`, `entity_name`, `action_nam
 	(761, 'organisation', 'ACTIVATE_SMSCAMPAIGN', 'SMSCAMPAIGN', 'ACTIVATE', 0),
 	(762, 'organisation', 'CLOSE_SMSCAMPAIGN', 'SMSCAMPAIGN', 'CLOSE', 0),
 	(763, 'organisation', 'REACTIVATE_SMSCAMPAIGN', 'SMSCAMPAIGN', 'REACTIVATE', 0),
-	(764, 'report', 'READ_Daily Teller Cash Report (Pentaho)', 'Daily Teller Cash Report (Pentaho)', 'READ', 0);
+	(764, 'report', 'READ_Daily Teller Cash Report (Pentaho)', 'Daily Teller Cash Report (Pentaho)', 'READ', 0),
+	(765, 'datatable', 'READ_ENTITY_DATATABLE_CHECK', 'ENTITY_DATATABLE_CHECK', 'READ', 0),
+	(766, 'datatable', 'CREATE_ENTITY_DATATABLE_CHECK', 'ENTITY_DATATABLE_CHECK', 'CREATE', 0),
+	(767, 'datatable', 'DELETE_ENTITY_DATATABLE_CHECK', 'ENTITY_DATATABLE_CHECK', 'DELETE', 0);
 /*!40000 ALTER TABLE `m_permission` ENABLE KEYS */;
 
 
@@ -5416,7 +5421,7 @@ CREATE TABLE IF NOT EXISTS `m_survey_scorecards` (
   CONSTRAINT `m_survey_scorecards_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `m_surveys` (`id`),
   CONSTRAINT `m_survey_scorecards_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `m_survey_questions` (`id`),
   CONSTRAINT `m_survey_scorecards_ibfk_3` FOREIGN KEY (`response_id`) REFERENCES `m_survey_responses` (`id`),
-  CONSTRAINT `m_survey_scorecards_ibfk_4` FOREIGN KEY (`user_id`) REFERENCES `m_appusers` (`id`),
+  CONSTRAINT `m_survey_scorecards_ibfk_4` FOREIGN KEY (`user_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `m_survey_scorecards_ibfk_5` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -5616,7 +5621,7 @@ CREATE TABLE IF NOT EXISTS `m_working_days` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-default.m_working_days: ~1 rows (approximately)
+-- Dumping data for table mifostenant-default.m_working_days: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_working_days` DISABLE KEYS */;
 INSERT INTO `m_working_days` (`id`, `recurrence`, `repayment_rescheduling_enum`, `extend_term_daily_repayments`, `extend_term_holiday_repayment`) VALUES
 	(1, 'FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU', 2, 0, 0);
@@ -6257,6 +6262,8 @@ INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `desc
 	(333, 333, '320', 'add holiday payment reschedule', 'SQL', 'V320__add_holiday_payment_reschedule.sql', 1445492229, 'root', '2016-11-18 17:27:17', 545, 1),
 	(334, 334, '321', 'boolean field As Interest PostedOn', 'SQL', 'V321__boolean_field_As_Interest_PostedOn.sql', 1906735834, 'root', '2016-11-18 17:27:18', 732, 1),
 	(335, 335, '322', 'sms campaign', 'SQL', 'V322__sms_campaign.sql', -1316831815, 'root', '2016-11-18 17:27:20', 1561, 1),
+	(336, 337, '323', 'spm replace dead fk with exisiting one', 'SQL', 'V323__spm_replace_dead_fk_with_exisiting_one.sql', 656055500, 'root', '2016-12-14 11:21:55', 576, 1),
+	(337, 338, '324', 'datatable checks', 'SQL', 'V324__datatable_checks.sql', -142308095, 'root', '2016-12-14 11:21:55', 676, 1),
 	(33, 33, '33', 'drop unique check on stretchy report parameter', 'SQL', 'V33__drop_unique_check_on_stretchy_report_parameter.sql', -1599579296, 'root', '2015-06-03 15:26:53', 23, 1),
 	(34, 34, '34', 'add unique check on stretchy report parameter', 'SQL', 'V34__add_unique_check_on_stretchy_report_parameter.sql', -1286928230, 'root', '2015-06-03 15:26:53', 22, 1),
 	(35, 35, '35', 'add hierarchy column for acc gl account', 'SQL', 'V35__add_hierarchy_column_for_acc_gl_account.sql', -1387013309, 'root', '2015-06-03 15:26:54', 49, 1),
@@ -6277,7 +6284,7 @@ INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `desc
 	(49, 49, '49', 'track-loan-charge-payment-transactions', 'SQL', 'V49__track-loan-charge-payment-transactions.sql', -1735511516, 'root', '2015-06-03 15:26:54', 24, 1),
 	(5, 5, '5', 'update-savings-product-and-account-tables', 'SQL', 'V5__update-savings-product-and-account-tables.sql', 1349701479, 'root', '2015-06-03 15:26:51', 122, 1),
 	(50, 50, '50', 'add-grace-settings-to-loan-product', 'SQL', 'V50__add-grace-settings-to-loan-product.sql', -1807166173, 'root', '2015-06-03 15:26:55', 140, 1),
-	(336, 336, '5000', 'Daily Teller Cash Report pentaho', 'SQL', 'V5000__Daily_Teller_Cash_Report_pentaho.sql', -638871297, 'root', '2016-11-18 17:27:20', 145, 1),
+	(338, 336, '5000', 'Daily Teller Cash Report pentaho', 'SQL', 'V5000__Daily_Teller_Cash_Report_pentaho.sql', -638871297, 'root', '2016-11-18 17:27:20', 145, 1),
 	(51, 51, '51', 'track-additional-details-related-to-installment-performance', 'SQL', 'V51__track-additional-details-related-to-installment-performance.sql', 729891777, 'root', '2015-06-03 15:26:55', 102, 1),
 	(52, 52, '52', 'add boolean support cols to acc accounting rule', 'SQL', 'V52__add_boolean_support_cols_to_acc_accounting_rule.sql', 1853745947, 'root', '2015-06-03 15:26:55', 71, 1),
 	(53, 53, '53', 'track-advance-and-late-payments-on-installment', 'SQL', 'V53__track-advance-and-late-payments-on-installment.sql', 1135041990, 'root', '2015-06-03 15:26:55', 45, 1),
