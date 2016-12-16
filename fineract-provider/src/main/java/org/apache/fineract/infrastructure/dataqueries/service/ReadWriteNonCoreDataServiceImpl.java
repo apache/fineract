@@ -45,6 +45,7 @@ import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
 import org.apache.fineract.infrastructure.dataqueries.data.*;
+import org.apache.fineract.infrastructure.dataqueries.exception.DatatableEntryRequiredException;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableSystemErrorException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -1121,9 +1122,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     @Override
     public CommandProcessingResult deleteDatatableEntries(final String dataTableName, final Long appTableId) {
 
+        if (isDatatableAttachedToEntityDatatableCheck(dataTableName)) { throw new DatatableEntryRequiredException(dataTableName, appTableId); }
         final String appTable = queryForApplicationTableName(dataTableName);
         final CommandProcessingResult commandProcessingResult = checkMainResourceExistsWithinScope(appTable, appTableId);
-
         final String deleteOneToOneEntrySql = getDeleteEntriesSql(dataTableName, getFKField(appTable), appTableId);
 
         final int rowsDeleted = this.jdbcTemplate.update(deleteOneToOneEntrySql);
@@ -1135,7 +1136,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     @Transactional
     @Override
     public CommandProcessingResult deleteDatatableEntry(final String dataTableName, final Long appTableId, final Long datatableId) {
-
+        if (isDatatableAttachedToEntityDatatableCheck(dataTableName)) { throw new DatatableEntryRequiredException(dataTableName, appTableId); }
         final String appTable = queryForApplicationTableName(dataTableName);
         final CommandProcessingResult commandProcessingResult = checkMainResourceExistsWithinScope(appTable, appTableId);
 
@@ -1728,6 +1729,15 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 + appTableId;
         final Long count = this.jdbcTemplate.queryForObject(sqlString, Long.class);
         return count;
+    }
+
+    public boolean isDatatableAttachedToEntityDatatableCheck(final String datatableName) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(" SELECT COUNT(edc.`x_registered_table_name`) FROM `x_registered_table` xrt ");
+        builder.append(" JOIN m_entity_datatable_check edc ON edc.`x_registered_table_name` = xrt.`registered_table_name`");
+        builder.append(" WHERE edc.`x_registered_table_name` = '" + datatableName + "'");
+        final Long count = this.jdbcTemplate.queryForObject(builder.toString(), Long.class);
+        return (count > 0) ? true : false;
     }
 
 }
