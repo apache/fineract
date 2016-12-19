@@ -209,14 +209,16 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             this.groupRepository.saveAndFlush(newGroup);
             newGroup.captureStaffHistoryDuringCenterCreation(staff, activationDate);
 
-            if(command.parameterExists(GroupingTypesApiConstants.datatables)){
-                this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getCode().longValue(),
-                        EntityTables.GROUP.getName(), newGroup.getId(), null,
-                        command.arrayOfParameterNamed(GroupingTypesApiConstants.datatables));
-            }
+            if (newGroup.isGroup()) {
+                if (command.parameterExists(GroupingTypesApiConstants.datatables)) {
+                    this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getCode().longValue(),
+                            EntityTables.GROUP.getName(), newGroup.getId(), null,
+                            command.arrayOfParameterNamed(GroupingTypesApiConstants.datatables));
+                }
 
-            this.entityDatatableChecksWritePlatformService.runTheCheck(newGroup.getId(), EntityTables.GROUP.getName(),
-                    StatusEnum.CREATE.getCode().longValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
+                this.entityDatatableChecksWritePlatformService.runTheCheck(newGroup.getId(), EntityTables.GROUP.getName(),
+                        StatusEnum.CREATE.getCode().longValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
+            }
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
