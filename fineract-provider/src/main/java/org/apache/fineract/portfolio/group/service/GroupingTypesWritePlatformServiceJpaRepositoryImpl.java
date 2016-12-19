@@ -174,6 +174,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
             boolean rollbackTransaction = false;
             if (newGroup.isActive()) {
+                this.groupRepository.save(newGroup);
                 // validate Group creation rules for Group
                 if (newGroup.isGroup()) {
                     validateGroupRulesBeforeActivation(newGroup);
@@ -208,14 +209,16 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             this.groupRepository.saveAndFlush(newGroup);
             newGroup.captureStaffHistoryDuringCenterCreation(staff, activationDate);
 
-            if(command.parameterExists(GroupingTypesApiConstants.datatables)){
-                this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getCode().longValue(),
-                        EntityTables.GROUP.getName(), newGroup.getId(), null,
-                        command.arrayOfParameterNamed(GroupingTypesApiConstants.datatables));
-            }
+            if (newGroup.isGroup()) {
+                if (command.parameterExists(GroupingTypesApiConstants.datatables)) {
+                    this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getCode().longValue(),
+                            EntityTables.GROUP.getName(), newGroup.getId(), null,
+                            command.arrayOfParameterNamed(GroupingTypesApiConstants.datatables));
+                }
 
-            this.entityDatatableChecksWritePlatformService.runTheCheck(newGroup.getId(), EntityTables.GROUP.getName(),
-                    StatusEnum.CREATE.getCode().longValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
+                this.entityDatatableChecksWritePlatformService.runTheCheck(newGroup.getId(), EntityTables.GROUP.getName(),
+                        StatusEnum.CREATE.getCode().longValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
+            }
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -295,9 +298,6 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
             validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(group.getOffice(), group.getGroupLevel(), activationDate);
 
-            entityDatatableChecksWritePlatformService.runTheCheck(groupId, EntityTables.GROUP.getName(),
-                    StatusEnum.ACTIVATE.getCode().longValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
-
             group.activate(currentUser, activationDate);
 
             this.groupRepository.saveAndFlush(group);
@@ -323,6 +323,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         Integer maxClients = configurationDomainService.retrieveMaxAllowedClientsInGroup();
         boolean isGroupClientCountValid = group.isGroupsClientCountWithinMinMaxRange(minClients, maxClients);
         if (!isGroupClientCountValid) { throw new GroupMemberCountNotInPermissibleRangeException(group.getId(), minClients, maxClients); }
+        entityDatatableChecksWritePlatformService.runTheCheck(group.getId(), EntityTables.GROUP.getName(),
+                StatusEnum.ACTIVATE.getCode().longValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
     }
 
     public void validateGroupRulesBeforeClientAssociation(final Group group) {
@@ -549,21 +551,28 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     @Transactional
     @Override
     public CommandProcessingResult deleteGroup(final Long groupId) {
+        try {
 
-        final Group groupForDelete = this.groupRepository.findOneWithNotFoundDetection(groupId);
+            final Group groupForDelete = this.groupRepository.findOneWithNotFoundDetection(groupId);
 
-        if (groupForDelete.isNotPending()) { throw new GroupMustBePendingToBeDeletedException(groupId); }
+            if (groupForDelete.isNotPending()) { throw new GroupMustBePendingToBeDeletedException(groupId); }
 
-        final List<Note> relatedNotes = this.noteRepository.findByGroupId(groupId);
-        this.noteRepository.deleteInBatch(relatedNotes);
+            final List<Note> relatedNotes = this.noteRepository.findByGroupId(groupId);
+            this.noteRepository.deleteInBatch(relatedNotes);
 
-        this.groupRepository.delete(groupForDelete);
-
-        return new CommandProcessingResultBuilder() //
-                .withOfficeId(groupForDelete.getId()) //
-                .withGroupId(groupForDelete.officeId()) //
-                .withEntityId(groupForDelete.getId()) //
-                .build();
+            this.groupRepository.delete(groupForDelete);
+            this.groupRepository.flush();
+            return new CommandProcessingResultBuilder() //
+                    .withOfficeId(groupForDelete.getId()) //
+                    .withGroupId(groupForDelete.officeId()) //
+                    .withEntityId(groupForDelete.getId()) //
+                    .build();
+        } catch (DataIntegrityViolationException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+            logger.error(throwable.getMessage());
+            throw new PlatformDataIntegrityException("error.msg.group.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.");
+        }
     }
 
     @Override

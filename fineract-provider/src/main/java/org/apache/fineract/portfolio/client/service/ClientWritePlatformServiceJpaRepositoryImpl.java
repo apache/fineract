@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.portfolio.client.service;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import javax.persistence.PersistenceException;
 
@@ -50,8 +54,18 @@ import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.address.service.AddressWritePlatformService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.data.ClientDataValidator;
-import org.apache.fineract.portfolio.client.domain.*;
-import org.apache.fineract.portfolio.client.exception.*;
+import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
+import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.client.domain.ClientNonPerson;
+import org.apache.fineract.portfolio.client.domain.ClientNonPersonRepositoryWrapper;
+import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
+import org.apache.fineract.portfolio.client.domain.ClientStatus;
+import org.apache.fineract.portfolio.client.domain.LegalForm;
+import org.apache.fineract.portfolio.client.exception.ClientActiveForUpdateException;
+import org.apache.fineract.portfolio.client.exception.ClientHasNoStaffException;
+import org.apache.fineract.portfolio.client.exception.ClientMustBePendingToBeDeletedException;
+import org.apache.fineract.portfolio.client.exception.InvalidClientSavingProductException;
+import org.apache.fineract.portfolio.client.exception.InvalidClientStateTransitionException;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
 import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
@@ -151,23 +165,29 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     @Transactional
     @Override
     public CommandProcessingResult deleteClient(final Long clientId) {
+        try {
+            final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
-        final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+            if (client.isNotPending()) { throw new ClientMustBePendingToBeDeletedException(clientId); }
+            final List<Note> relatedNotes = this.noteRepository.findByClientId(clientId);
+            this.noteRepository.deleteInBatch(relatedNotes);
 
-        if (client.isNotPending()) { throw new ClientMustBePendingToBeDeletedException(clientId); }
-        final List<Note> relatedNotes = this.noteRepository.findByClientId(clientId);
-        this.noteRepository.deleteInBatch(relatedNotes);
+            final ClientNonPerson clientNonPerson = this.clientNonPersonRepository.findOneByClientId(clientId);
+            if (clientNonPerson != null) this.clientNonPersonRepository.delete(clientNonPerson);
 
-        final ClientNonPerson clientNonPerson = this.clientNonPersonRepository.findOneByClientId(clientId);
-        if(clientNonPerson != null)
-        	this.clientNonPersonRepository.delete(clientNonPerson);
-        
-        this.clientRepository.delete(client);
-        return new CommandProcessingResultBuilder() //
-                .withOfficeId(client.officeId()) //
-                .withClientId(clientId) //
-                .withEntityId(clientId) //
-                .build();
+            this.clientRepository.delete(client);
+            this.clientRepository.flush();
+            return new CommandProcessingResultBuilder() //
+                    .withOfficeId(client.officeId()) //
+                    .withClientId(clientId) //
+                    .withEntityId(clientId) //
+                    .build();
+        } catch (DataIntegrityViolationException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            logger.error(throwable.getMessage());
+            throw new PlatformDataIntegrityException("error.msg.client.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.");
+        }
     }
 
     /*
@@ -270,9 +290,11 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             
             final Client newClient = Client.createNew(currentUser, clientOffice, clientParentGroup, staff, savingsProductId, gender,
                     clientType, clientClassification, legalFormValue, command);
+            this.clientRepository.save(newClient);
             boolean rollbackTransaction = false;
             if (newClient.isActive()) {
                 validateParentGroupRulesBeforeClientActivation(newClient);
+                runEntityDatatableCheck(newClient.getId());
                 final CommandWrapper commandWrapper = new CommandWrapperBuilder().activateClient(null).build();
                 rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, currentUser);
             }
@@ -533,8 +555,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
             final LocalDate activationDate = command.localDateValueOfParameterNamed("activationDate");
 
-            entityDatatableChecksWritePlatformService.runTheCheck(clientId, EntityTables.CLIENT.getName(),
-                    StatusEnum.ACTIVATE.getCode().longValue(), EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable());
+            runEntityDatatableCheck(clientId);
 
             final AppUser currentUser = this.context.authenticatedUser();
             client.activate(currentUser, fmt, activationDate);
@@ -764,6 +785,11 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                         maxNumberOfClients); }
             }
         }
+    }
+
+    private void runEntityDatatableCheck(final Long clientId) {
+        entityDatatableChecksWritePlatformService.runTheCheck(clientId, EntityTables.CLIENT.getName(), StatusEnum.ACTIVATE.getCode()
+                .longValue(), EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable());
     }
 
     @Override

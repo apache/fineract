@@ -74,6 +74,10 @@ public class ClientRepositoryWrapper {
     public void delete(final Client client) {
         this.repository.delete(client);
     }
+    
+    public void flush() {
+        this.repository.flush();
+    }
 
     public Client getActiveClientInUserScope(Long clientId) {
         final Client client = this.findOneWithNotFoundDetection(clientId);

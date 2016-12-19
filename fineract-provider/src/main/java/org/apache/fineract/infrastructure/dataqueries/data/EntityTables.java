@@ -33,7 +33,7 @@ public enum EntityTables {
     LOAN("m_loan",
         new Integer[]{StatusEnum.CREATE.getCode(),
                 StatusEnum.APPROVE.getCode(),
-                StatusEnum.ACTIVATE.getCode(),
+                StatusEnum.DISBURSE.getCode(),
                 StatusEnum.WITHDRAWN.getCode(),
                 StatusEnum.REJECTED.getCode(),
                 StatusEnum.WRITE_OFF.getCode()},
