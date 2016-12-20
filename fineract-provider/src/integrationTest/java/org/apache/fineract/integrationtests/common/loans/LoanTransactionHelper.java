@@ -55,6 +55,8 @@ public class LoanTransactionHelper {
     private static final String MAKE_REFUND_BY_CASH_COMMAND = "refundByCash";
     private static final String FORECLOSURE_COMMAND = "foreclosure";
 
+    public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
+
     public LoanTransactionHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
@@ -66,6 +68,10 @@ public class LoanTransactionHelper {
 
     public Integer getLoanId(final String loanApplicationJSON) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, APPLY_LOAN_URL, loanApplicationJSON, "loanId");
+    }
+
+    public Object getLoanError(final String loanApplicationJSON, final String responseAttribute) {
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, APPLY_LOAN_URL, loanApplicationJSON, responseAttribute);
     }
 
     public Integer getLoanOfficerId(final String loanId) {
@@ -671,5 +677,21 @@ public class LoanTransactionHelper {
         String json = new Gson().toJson(map);
         System.out.println(json);
         return json;
+    }
+
+    public static List<HashMap<String, Object>> getTestDatatableAsJson(final String registeredTableName) {
+        List<HashMap<String, Object>> datatablesListMap = new ArrayList<>();
+        HashMap<String, Object> datatableMap = new HashMap<>();
+        HashMap<String, Object> dataMap = new HashMap<>();
+        dataMap.put("locale", "en");
+        dataMap.put("Spouse Name", Utils.randomNameGenerator("Spouse_name", 4));
+        dataMap.put("Number of Dependents", 5);
+        dataMap.put("Time of Visit", "01 December 2016 04:03");
+        dataMap.put("dateFormat", DATE_TIME_FORMAT);
+        dataMap.put("Date of Approval", "02 December 2016 00:00");
+        datatableMap.put("registeredTableName", registeredTableName);
+        datatableMap.put("data", dataMap);
+        datatablesListMap.add(datatableMap);
+        return datatablesListMap;
     }
 }

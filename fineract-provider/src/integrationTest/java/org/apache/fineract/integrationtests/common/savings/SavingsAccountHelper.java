@@ -63,6 +63,8 @@ public class SavingsAccountHelper {
     public static final String LAST_TRANSACTION_DATE = "01 March 2013";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
 
+    public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
+
     public SavingsAccountHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
         this.responseSpec = responseSpec;
@@ -87,6 +89,27 @@ public class SavingsAccountHelper {
                 .build(ID.toString(), savingsProductID.toString(), accountType);
         return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
                 savingsApplicationJSON, "savingsId");
+    }
+
+    public Integer applyForSavingsApplicationWithDatatables(final Integer ID, final Integer savingsProductID, final String accountType,
+            final String submittedOnDate, final String datatableName) {
+        System.out.println("----------------------------APPLYING FOR SAVINGS APPLICATION WITH DATATABLES----------------------------");
+        final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
+                .withSubmittedOnDate(submittedOnDate) //
+                .withDatatables(getTestDatatableAsJson(datatableName)) //
+                .build(ID.toString(), savingsProductID.toString(), accountType);
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
+                savingsApplicationJSON, "savingsId");
+    }
+
+    public Object applyForSavingsApplicationWithFailure(final Integer ID, final Integer savingsProductID, final String accountType,
+            final String submittedOnDate, final String responseAttribute) {
+        System.out.println("----------------------------APPLYING FOR SAVINGS APPLICATION WITH ERROR----------------------------");
+        final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
+                .withSubmittedOnDate(submittedOnDate) //
+                .build(ID.toString(), savingsProductID.toString(), accountType);
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
+                savingsApplicationJSON, responseAttribute);
     }
 
     public HashMap updateSavingsAccount(final Integer ID, final Integer savingsProductID, final Integer savingsId, final String accountType) {
@@ -536,4 +559,19 @@ public class SavingsAccountHelper {
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
     }
 
+    public static List<HashMap<String, Object>> getTestDatatableAsJson(final String registeredTableName) {
+        List<HashMap<String, Object>> datatablesListMap = new ArrayList<>();
+        HashMap<String, Object> datatableMap = new HashMap<>();
+        HashMap<String, Object> dataMap = new HashMap<>();
+        dataMap.put("locale", "en");
+        dataMap.put("Spouse Name", Utils.randomNameGenerator("Spouse_name", 4));
+        dataMap.put("Number of Dependents", 5);
+        dataMap.put("Time of Visit", "01 December 2016 04:03");
+        dataMap.put("dateFormat", DATE_TIME_FORMAT);
+        dataMap.put("Date of Approval", "02 December 2016 00:00");
+        datatableMap.put("registeredTableName", registeredTableName);
+        datatableMap.put("data", dataMap);
+        datatablesListMap.add(datatableMap);
+        return datatablesListMap;
+    }
 }
