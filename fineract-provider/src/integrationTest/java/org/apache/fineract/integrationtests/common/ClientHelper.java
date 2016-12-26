@@ -22,8 +22,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
-import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
 
 import com.google.gson.Gson;
@@ -53,7 +53,7 @@ public class ClientHelper {
     public static final String TRANSACTION_DATE = "01 March 2013";
     public static final String LAST_TRANSACTION_DATE = "01 March 2013";
     public static final String DATE_FORMAT = "dd MMMM yyyy";
-    
+    public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
 
     public ClientHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
@@ -93,9 +93,20 @@ public class ClientHelper {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestClientAsJSONPending(submittedOnDate, officeId),
                 "clientId");
     }
-   
-    
-    
+
+    public Object createClientPendingWithError(final String jsonAttributeToGetBack) {
+        System.out.println("---------------------------------CREATING A CLIENT IN PENDING WITH ERROR---------------------------------------------");
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_CLIENT_URL,
+                getTestClientAsJSONPending("04 March 2014", "1"), jsonAttributeToGetBack);
+    }
+
+    public static Integer createClientPendingWithDatatable(final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, final String registeredTableName) {
+        System.out.println("-------------------------- CREATING A CLIENT IN PENDING WITH DATATABLES --------------------------------");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL,
+                getTestPendingClientWithDatatableAsJson(registeredTableName), "clientId");
+    }
+
     public static Integer createClientAsPerson(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return createClientAsPerson(requestSpec, responseSpec, "04 March 2011");
     }
@@ -184,10 +195,39 @@ public class ClientHelper {
 		System.out.println("map : " + map);
 		return new Gson().toJson(map);
     }
-    
-    
-    
-    
+
+    public static String getTestPendingClientWithDatatableAsJson(final String registeredTableName) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("officeId", "1");
+        map.put("firstname", Utils.randomNameGenerator("Client_FirstName_", 5));
+        map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));
+        map.put("externalId", randomIDGenerator("ID_", 7));
+        map.put("dateFormat", DATE_FORMAT);
+        map.put("locale", "en");
+        map.put("active", "false");
+        map.put("submittedOnDate", "04 March 2014");
+        String requestJson = getTestDatatableAsJson(map, registeredTableName);
+        System.out.println("map : " + requestJson);
+        return requestJson;
+    }
+
+    public static String getTestDatatableAsJson(HashMap<String, Object> map, final String registeredTableName) {
+        List<HashMap<String, Object>> datatablesListMap = new ArrayList<>();
+        HashMap<String, Object> datatableMap = new HashMap<>();
+        HashMap<String, Object> dataMap = new HashMap<>();
+        dataMap.put("locale", "en");
+        dataMap.put("Spouse Name", Utils.randomNameGenerator("Spouse_name", 4));
+        dataMap.put("Number of Dependents", 5);
+        dataMap.put("Time of Visit", "01 December 2016 04:03");
+        dataMap.put("dateFormat", DATE_TIME_FORMAT);
+        dataMap.put("Date of Approval", "02 December 2016 00:00");
+        datatableMap.put("registeredTableName", registeredTableName);
+        datatableMap.put("data", dataMap);
+        datatablesListMap.add(datatableMap);
+        map.put("datatables", datatablesListMap);
+        return new Gson().toJson(map);
+    }
+
     public static String getTestPersonClientAsJSON(final String dateOfJoining, final String officeId) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("officeId", officeId);
