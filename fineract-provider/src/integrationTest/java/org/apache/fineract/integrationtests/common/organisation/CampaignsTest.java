@@ -26,6 +26,7 @@ import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.jayway.restassured.builder.RequestSpecBuilder;
@@ -34,6 +35,7 @@ import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
+@Ignore
 public class CampaignsTest {
 
     private RequestSpecification requestSpec;
