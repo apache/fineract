@@ -235,7 +235,10 @@ This product bundles jszip, copyright Stuart Knightley,
 David Duponchel, Franz Buchinger and António Afonso, which is available under a MIT license.
 For details, see licenses/source/jszip.MIT
 
-This product bundles jQuery v1.7, v1.7.1, v1.9.1, v1.10.2, copyright jQuery Foundation, Inc. which is available under a MIT license.
+This product bundles jQuery v1.7, v1.7.1, Copyright (c) 2011 John Resig, which is available under a MIT license.
+For details, see licenses/source/jQuery1.MIT
+
+This product bundles jQuery v1.9.1, v1.10.2, copyright jQuery Foundation, Inc. which is available under a MIT license.
 For details, see licenses/source/jQuery.MIT
 
 This product bundles Respond v1.1.0, copyright Scott Jehl,
