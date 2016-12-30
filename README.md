@@ -9,6 +9,13 @@ Requirements
 * gradle-wrapper.jar version 2.10
 * MySQL 5.5
 
+Instructions to run Apache RAT (Release Audit Tool)
+============
+1. Extract the archive file to your local directory.
+2. Download gradle-wrapper.jar version 2.10 and place it in the fineract-provider/gradle/wrapper folder.
+3. Change the current working directory to fineract-provider
+4. Run `./gradlew rat`. Report will be generated under fineract-provider/build/reports/rat/rat-report.txt
+
 Instructions to build war file
 ============
 
