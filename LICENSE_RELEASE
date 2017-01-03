@@ -300,4 +300,8 @@ This product bundles Backport Util Concurrent v3.1 written by Dawid Kurzyniec,
 which is avilable under Public Domain license. 
 For details see licenses/binary/Backport.PL
 
+This product bundles JarAnalyzer v1.2 written by Kirk Knoernschild,
+which is available under BSD license.
+For details see licences/binary/JarAnalyzer.BSD
+
 ******************************************
