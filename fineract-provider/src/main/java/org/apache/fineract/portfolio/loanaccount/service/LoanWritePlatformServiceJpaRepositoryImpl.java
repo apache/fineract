@@ -127,6 +127,7 @@ import org.springframework.util.CollectionUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
+
 @Service
 public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatformService {
 
@@ -1157,7 +1158,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanAccountDomainService.recalculateAccruals(loan);
         this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_CLOSE,
                 constructEntityMap(BUSINESS_ENTITY.LOAN, loan));
-        
+
         // disable all active standing instructions linked to the loan
         this.loanAccountDomainService.disableStandingInstructionsLinkedToClosedLoan(loan);
         
