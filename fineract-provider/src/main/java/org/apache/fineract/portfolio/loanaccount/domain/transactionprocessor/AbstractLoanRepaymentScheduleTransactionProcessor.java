@@ -497,7 +497,11 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             if (loanTransaction.isRepayment() || loanTransaction.isInterestWaiver() || loanTransaction.isRecoveryRepayment()) {
                 loanTransaction.resetDerivedComponents();
             }
-            unProcessed = processTransaction(loanTransaction, currency, installments, amountToProcess);
+            if (loanTransaction.isInterestWaiver()) {
+                processTransaction(loanTransaction, currency, installments, amountToProcess);
+            } else {
+                unProcessed = processTransaction(loanTransaction, currency, installments, amountToProcess);
+            }
         }
         return unProcessed;
     }
@@ -621,6 +625,92 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
 
         return latestPaidCharge;
+    }
+
+    @Override
+    public void processTransactionsFromDerivedFields(List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges) {
+        for (final LoanTransaction loanTransaction : transactionsPostDisbursement) {
+            if (!loanTransaction.isAccrualTransaction()) {
+                processTransactionFromDerivedFields(loanTransaction, currency, installments, charges);
+            }
+        }
+    }
+
+    private void processTransactionFromDerivedFields(final LoanTransaction loanTransaction, MonetaryCurrency currency,
+            List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges) {
+        Money principal = loanTransaction.getPrincipalPortion(currency);
+        Money interest = loanTransaction.getInterestPortion(currency);
+        if (loanTransaction.isInterestWaiver()) {
+            interest = loanTransaction.getAmount(currency);
+        }
+        Money feeCharges = loanTransaction.getFeeChargesPortion(currency);
+        Money penaltyCharges = loanTransaction.getPenaltyChargesPortion(currency);
+        final LocalDate transactionDate = loanTransaction.getTransactionDate();
+        if (principal.isGreaterThanZero() || interest.isGreaterThanZero() || feeCharges.isGreaterThanZero()
+                || penaltyCharges.isGreaterThanZero()) {
+            for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
+                if (currentInstallment.isNotFullyPaidOff()) {
+                    if (penaltyCharges.isGreaterThanZero()) {
+                        Money penaltyChargesPortion = Money.zero(currency);
+                        if (loanTransaction.isWaiver()) {
+                            penaltyChargesPortion = currentInstallment.waivePenaltyChargesComponent(transactionDate, penaltyCharges);
+                        } else {
+                            penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, penaltyCharges);
+                        }
+                        penaltyCharges = penaltyCharges.minus(penaltyChargesPortion);
+                    }
+
+                    if (feeCharges.isGreaterThanZero()) {
+                        Money feeChargesPortion = Money.zero(currency);
+                        if (loanTransaction.isWaiver()) {
+                            feeChargesPortion = currentInstallment.waiveFeeChargesComponent(transactionDate, feeCharges);
+                        } else {
+                            feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, feeCharges);
+                        }
+                        feeCharges = feeCharges.minus(feeChargesPortion);
+                    }
+
+                    if (interest.isGreaterThanZero()) {
+                        Money interestPortion = Money.zero(currency);
+                        if (loanTransaction.isWaiver()) {
+                            interestPortion = currentInstallment.waiveInterestComponent(transactionDate, interest);
+                        } else {
+                            interestPortion = currentInstallment.payInterestComponent(transactionDate, interest);
+                        }
+                        interest = interest.minus(interestPortion);
+                    }
+
+                    if (principal.isGreaterThanZero()) {
+                        Money principalPortion = currentInstallment.payPrincipalComponent(transactionDate, principal);
+                        principal = principal.minus(principalPortion);
+                    }
+                }
+                if (!(principal.isGreaterThanZero() || interest.isGreaterThanZero() || feeCharges.isGreaterThanZero() || penaltyCharges
+                        .isGreaterThanZero())) {
+                    break;
+                }
+            }
+        }
+
+        final Set<LoanCharge> loanFees = extractFeeCharges(charges);
+        final Set<LoanCharge> loanPenalties = extractPenaltyCharges(charges);
+        Integer installmentNumber = null;
+        if (loanTransaction.isChargePayment() && installments.size() == 1) {
+            installmentNumber = installments.get(0).getInstallmentNumber();
+        }
+
+        if (loanTransaction.isNotWaiver()) {
+            feeCharges = loanTransaction.getFeeChargesPortion(currency);
+            penaltyCharges = loanTransaction.getPenaltyChargesPortion(currency);
+            if (feeCharges.isGreaterThanZero()) {
+                updateChargesPaidAmountBy(loanTransaction, feeCharges, loanFees, installmentNumber);
+            }
+
+            if (penaltyCharges.isGreaterThanZero()) {
+                updateChargesPaidAmountBy(loanTransaction, penaltyCharges, loanPenalties, installmentNumber);
+            }
+        }
     }
 
 }

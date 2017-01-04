@@ -89,6 +89,12 @@ public class RecurringDepositAccountStatusChecker {
                 getStatus(recurringDepositStatusHashMap, "prematureClosed"));
         System.out.println(recurringDepositStatusHashMap);
     }
+    
+    public static void verifyRecurringDepositAccountIsMatured(HashMap recurringDepositStatusHashMap) {
+        System.out.println("--------------------- VERIFYING RECURRING DEPOSIT APPLICATION IS MATURED ---------------------");
+        assertTrue("ERROR IN MATURITY JOB OF THE RECURRING DEPOSIT ACCOUNT", getStatus(recurringDepositStatusHashMap, "matured"));
+        System.out.println(recurringDepositStatusHashMap);
+    }
 
     private static boolean getStatus(final HashMap recurringDepositStatusMap, final String recurringDepositStatusString) {
         return (Boolean) recurringDepositStatusMap.get(recurringDepositStatusString);

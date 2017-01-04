@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.domain;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -47,9 +49,8 @@ import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.apache.fineract.portfolio.savings.domain.interest.EndOfDayBalance;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
+import org.apache.fineract.portfolio.tax.domain.TaxComponent;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 import org.springframework.util.CollectionUtils;
@@ -100,8 +101,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     @Column(name = "balance_number_of_days_derived", nullable = false)
     private Integer balanceNumberOfDays;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccountTransaction", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccountTransaction", orphanRemoval = true, fetch=FetchType.EAGER)
     private final Set<SavingsAccountChargePaidBy> savingsAccountChargesPaid = new HashSet<>();
 
     @Column(name = "overdraft_amount_derived", scale = 6, precision = 19, nullable = true)
@@ -115,6 +115,10 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     @JoinColumn(name = "appuser_id", nullable = true)
     private AppUser appUser;
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
+    @JoinColumn(name = "savings_transaction_id", referencedColumnName = "id", nullable = false)
+    private final List<SavingsAccountTransactionTaxDetails> taxDetails = new ArrayList<>();
+
     protected SavingsAccountTransaction() {
         this.dateOf = null;
         this.typeOf = null;
@@ -125,6 +129,14 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
             final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser) {
         final boolean isReversed = false;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, SavingsAccountTransactionType.DEPOSIT.getValue(), date,
+                createdDate, amount, isReversed, appUser);
+    }
+
+    public static SavingsAccountTransaction deposit(final SavingsAccount savingsAccount, final Office office,
+            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser,
+            final SavingsAccountTransactionType savingsAccountTransactionType) {
+        final boolean isReversed = false;
+        return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, savingsAccountTransactionType.getValue(), date,
                 createdDate, amount, isReversed, appUser);
     }
 
@@ -142,14 +154,14 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
                 amount, isReversed, null);
     }
 
-	public static SavingsAccountTransaction overdraftInterest(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
-            final Money amount) {
+    public static SavingsAccountTransaction overdraftInterest(final SavingsAccount savingsAccount, final Office office,
+            final LocalDate date, final Money amount) {
         final boolean isReversed = false;
         return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue(), date,
                 amount, isReversed, null);
-	}
+    }
 
-	public static SavingsAccountTransaction withdrawalFee(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
+    public static SavingsAccountTransaction withdrawalFee(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
             final Money amount, final AppUser appUser) {
         final boolean isReversed = false;
         return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.WITHDRAWAL_FEE.getValue(), date, amount,
@@ -202,6 +214,32 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
                 SavingsAccountTransactionType.WITHDRAW_TRANSFER.getValue(), date, new Date(), savingsAccount.getSummary()
                         .getAccountBalance(), isReversed, appUser);
+    }
+
+    public static SavingsAccountTransaction withHoldTax(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
+            final Money amount, final Map<TaxComponent, BigDecimal> taxDetails) {
+        final boolean isReversed = false;
+        SavingsAccountTransaction accountTransaction = new SavingsAccountTransaction(savingsAccount, office,
+                SavingsAccountTransactionType.WITHHOLD_TAX.getValue(), date, amount, isReversed, null);
+        updateTaxDetails(taxDetails, accountTransaction);
+        return accountTransaction;
+    }
+
+    public static SavingsAccountTransaction escheat(final SavingsAccount savingsAccount, final LocalDate date,
+            final AppUser appUser) {
+        final boolean isReversed = false;
+        final PaymentDetail paymentDetail = null;
+        return new SavingsAccountTransaction(savingsAccount, savingsAccount.office(), paymentDetail,
+                SavingsAccountTransactionType.ESCHEAT.getValue(), date, new Date(), savingsAccount.getSummary()
+                        .getAccountBalance(), isReversed, appUser);
+    }
+
+    public static void updateTaxDetails(final Map<TaxComponent, BigDecimal> taxDetails, final SavingsAccountTransaction accountTransaction) {
+        if (taxDetails != null) {
+            for (Map.Entry<TaxComponent, BigDecimal> mapEntry : taxDetails.entrySet()) {
+                accountTransaction.getTaxDetails().add(new SavingsAccountTransactionTaxDetails(mapEntry.getKey(), mapEntry.getValue()));
+            }
+        }
     }
 
     public static SavingsAccountTransaction copyTransaction(SavingsAccountTransaction accountTransaction) {
@@ -259,12 +297,20 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isDeposit() && isNotReversed();
     }
 
+    public boolean isDividendPayout() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isDividendPayout();
+    }
+
+    public boolean isDividendPayoutAndNotReversed() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isDividendPayout() && isNotReversed();
+    }
+
     public boolean isWithdrawal() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isWithdrawal();
     }
 
     public boolean isPostInterestCalculationRequired() {
-        return this.isDeposit() || this.isChargeTransaction();
+        return this.isDeposit() || this.isChargeTransaction() || this.isDividendPayout();
     }
 
     public boolean isInterestPostingAndNotReversed() {
@@ -405,6 +451,19 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
             thisTransactionData.put("savingsChargesPaid", savingsChargesPaidData);
         }
 
+        if (!this.taxDetails.isEmpty()) {
+            final List<Map<String, Object>> taxData = new ArrayList<>();
+            for (final SavingsAccountTransactionTaxDetails taxDetails : this.taxDetails) {
+                final Map<String, Object> taxDetailsData = new HashMap<>();
+                taxDetailsData.put("amount", taxDetails.getAmount());
+                if (taxDetails.getTaxComponent().getCreditAcount() != null) {
+                    taxDetailsData.put("creditAccountId", taxDetails.getTaxComponent().getCreditAcount().getId());
+                }
+                taxData.add(taxDetailsData);
+            }
+            thisTransactionData.put("taxDetails", taxData);
+        }
+
         return thisTransactionData;
     }
 
@@ -433,7 +492,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
         final MonetaryCurrency currency = openingBalance.getCurrency();
         Money endOfDayBalance = openingBalance.copy();
-        if (isDeposit()) {
+        if (isDeposit() || isDividendPayoutAndNotReversed()) {
             endOfDayBalance = openingBalance.plus(getAmount(currency));
         } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
             endOfDayBalance = openingBalance.minus(getAmount(currency));
@@ -449,7 +508,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     public EndOfDayBalance toEndOfDayBalance(final Money openingBalance) {
         final MonetaryCurrency currency = openingBalance.getCurrency();
         Money endOfDayBalance = openingBalance.copy();
-        if (isDeposit()) {
+        if (isDeposit() || isDividendPayoutAndNotReversed()) {
             endOfDayBalance = openingBalance.plus(getAmount(currency));
         } else if (isWithdrawal() || isChargeTransactionAndNotReversed()) {
 
@@ -478,7 +537,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
             final LocalDateInterval spanOfBalance = LocalDateInterval.create(balanceStartDate, balanceEndDate);
             numberOfDaysOfBalance = spanOfBalance.daysInPeriodInclusiveOfEndDate();
         } else {
-            if (isDeposit()) {
+            if (isDeposit() || isDividendPayoutAndNotReversed()) {
                 // endOfDayBalance = openingBalance.plus(getAmount(currency));
                 // if (endOfDayBalance.isLessThanZero()) {
                 endOfDayBalance = endOfDayBalance.plus(getAmount(currency));
@@ -521,22 +580,23 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     }
 
     public boolean isCredit() {
-        return isDeposit() || isInterestPostingAndNotReversed();
+        return isDeposit() || isInterestPostingAndNotReversed() || isDividendPayoutAndNotReversed();
     }
 
     public boolean isDebit() {
-        return isWithdrawal() 
-        		|| isWithdrawalFeeAndNotReversed() 
-        		|| isAnnualFeeAndNotReversed() 
-        		|| isPayCharge()
-        		|| isOverdraftInterestAndNotReversed();
+        return isWithdrawal() || isWithdrawalFeeAndNotReversed() || isAnnualFeeAndNotReversed() || isPayCharge()
+                || isOverdraftInterestAndNotReversed() || isWithHoldTaxAndNotReversed();
+    }
+
+    public boolean isWithHoldTaxAndNotReversed() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isWithHoldTax() && isNotReversed();
     }
 
     public boolean isOverdraftInterestAndNotReversed() {
-    	return SavingsAccountTransactionType.fromInt(this.typeOf).isIncomeFromInterest() && isNotReversed();
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isIncomeFromInterest() && isNotReversed();
     }
 
-	public boolean isPayCharge() {
+    public boolean isPayCharge() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isPayCharge();
     }
 
@@ -635,6 +695,14 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
     public BigDecimal getAmount() {
         return this.amount;
+    }
+
+    public List<SavingsAccountTransactionTaxDetails> getTaxDetails() {
+        return this.taxDetails;
+    }
+
+    public void updateAmount(final Money amount) {
+        this.amount = amount.getAmount();
     }
 
 }

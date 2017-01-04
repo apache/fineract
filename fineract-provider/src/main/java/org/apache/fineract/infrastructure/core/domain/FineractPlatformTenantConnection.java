@@ -77,11 +77,13 @@ public class FineractPlatformTenantConnection {
         this.testOnBorrow=tesOnBorrow;
     }
 
-    public String databaseURL() {
-        final String url = new StringBuilder("jdbc:mysql://").append(this.schemaServer).append(':').append(this.schemaServerPort)
+    //The Connection Protocol should be built based on jdbc.properties. We can't hard code this here and also, constructing protocol is not this class
+    //responsibility
+    /*public String databaseURL() {
+        final String url = new StringBuilder("jdbc:mysql:thin://").append(this.schemaServer).append(':').append(this.schemaServerPort)
                 .append('/').append(this.schemaName).toString();
         return url;
-    }
+    }*/
     
     /**
      * @return the schemaServer

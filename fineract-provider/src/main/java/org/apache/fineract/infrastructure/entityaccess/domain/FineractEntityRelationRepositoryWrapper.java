@@ -38,5 +38,11 @@ public class FineractEntityRelationRepositoryWrapper {
         if (fineractEntityRelation == null) { throw new FineractEntityAccessNotFoundException(id); }
         return fineractEntityRelation;
     }
+    
+    public FineractEntityRelation findOneByCodeName(final String codeName) {
+    	    	 final FineractEntityRelation fineractEntityRelation = this.fineractEntityRelationRepository.findOneByCodeName(codeName) ;
+    	    	 if (fineractEntityRelation == null) { throw new FineractEntityAccessNotFoundException(codeName); }
+    	         return fineractEntityRelation;
+    	    }
 
 }

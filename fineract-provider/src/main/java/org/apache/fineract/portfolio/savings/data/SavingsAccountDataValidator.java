@@ -42,6 +42,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalA
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.productIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
 import java.lang.reflect.Type;
@@ -204,6 +205,11 @@ public class SavingsAccountDataValidator {
                     withdrawalFeeForTransfersParamName, element);
             baseDataValidator.reset().parameter(withdrawalFeeForTransfersParamName).value(isWithdrawalFeeApplicableForTransfers)
                     .ignoreIfNull().validateForBooleanValue();
+        }
+        
+        if (this.fromApiJsonHelper.parameterExists(withHoldTaxParamName, element)) {
+            final String withHoldTax = this.fromApiJsonHelper.extractStringNamed(withHoldTaxParamName, element);
+            baseDataValidator.reset().parameter(withHoldTaxParamName).value(withHoldTax).ignoreIfNull().validateForBooleanValue();
         }
 
         validateSavingsCharges(element, baseDataValidator);
@@ -383,6 +389,11 @@ public class SavingsAccountDataValidator {
                     withdrawalFeeForTransfersParamName, element);
             baseDataValidator.reset().parameter(withdrawalFeeForTransfersParamName).value(isWithdrawalFeeApplicableForTransfers)
                     .ignoreIfNull().validateForBooleanValue();
+        }
+        
+        if (this.fromApiJsonHelper.parameterExists(withHoldTaxParamName, element)) {
+            final String withHoldTax = this.fromApiJsonHelper.extractStringNamed(withHoldTaxParamName, element);
+            baseDataValidator.reset().parameter(withHoldTaxParamName).value(withHoldTax).ignoreIfNull().validateForBooleanValue();
         }
 
         validateOverdraftParams(baseDataValidator, element);

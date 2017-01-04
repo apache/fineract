@@ -36,8 +36,10 @@ import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsWithdrawalFeesType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountStatusEnumData;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountSubStatusEnumData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountSubStatusEnum;
 
 public class SavingsEnumerations {
 
@@ -179,6 +181,18 @@ public class SavingsEnumerations {
                 optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue().longValue(),
                         SavingsAccountTransactionType.OVERDRAFT_INTEREST.getCode(), "Overdraft Interest");
             break;
+            case WITHHOLD_TAX:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.WITHHOLD_TAX.getValue().longValue(),
+                        SavingsAccountTransactionType.WITHHOLD_TAX.getCode(), "Withhold Tax");
+            break;
+            case DIVIDEND_PAYOUT:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.DIVIDEND_PAYOUT.getValue().longValue(),
+                        SavingsAccountTransactionType.DIVIDEND_PAYOUT.getCode(), "Dividend Payout");
+                break;
+            case ESCHEAT:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.ESCHEAT.getValue().longValue(),
+                        SavingsAccountTransactionType.ESCHEAT.getCode(), "Escheat");
+                break;
         }
         return optionData;
     }
@@ -198,70 +212,104 @@ public class SavingsEnumerations {
         final boolean isPrematureClosed = type.isPreMatureClosure();
         final boolean isTransferInProgress = type.isTransferInProgress();
         final boolean isTransferOnHold = type.isTransferOnHold();
+        final boolean matured = type.isMatured();
 
         SavingsAccountStatusEnumData optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.INVALID.getValue().longValue(),
                 SavingsAccountStatusType.INVALID.getCode(), "Invalid", submittedAndPendingApproval, isApproved, isRejected,
-                isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
+                isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold, matured);
 
         switch (type) {
             case INVALID:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.INVALID.getValue().longValue(),
                         SavingsAccountStatusType.INVALID.getCode(), "Invalid", submittedAndPendingApproval, isApproved, isRejected,
-                        isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
+                        isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold, matured);
             break;
             case SUBMITTED_AND_PENDING_APPROVAL:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.getValue()
                         .longValue(), SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.getCode(), "Submitted and pending approval",
                         submittedAndPendingApproval, isApproved, isRejected, isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed,
-                        isTransferInProgress, isTransferOnHold);
+                        isTransferInProgress, isTransferOnHold, matured);
             break;
             case REJECTED:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.REJECTED.getValue().longValue(),
                         SavingsAccountStatusType.REJECTED.getCode(), "Rejected", submittedAndPendingApproval, isApproved, isRejected,
-                        isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
+                        isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold, matured);
             break;
             case WITHDRAWN_BY_APPLICANT:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.WITHDRAWN_BY_APPLICANT.getValue().longValue(),
                         SavingsAccountStatusType.WITHDRAWN_BY_APPLICANT.getCode(), "Withdrawn by applicant", submittedAndPendingApproval,
                         isApproved, isRejected, isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress,
-                        isTransferOnHold);
+                        isTransferOnHold, matured);
             break;
             case APPROVED:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.APPROVED.getValue().longValue(),
                         SavingsAccountStatusType.APPROVED.getCode(), "Approved", submittedAndPendingApproval, isApproved, isRejected,
-                        isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
+                        isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold, matured);
             break;
             case ACTIVE:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.ACTIVE.getValue().longValue(),
                         SavingsAccountStatusType.ACTIVE.getCode(), "Active", submittedAndPendingApproval, isApproved, isRejected,
-                        isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
+                        isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold, matured);
             break;
             case CLOSED:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.CLOSED.getValue().longValue(),
                         SavingsAccountStatusType.CLOSED.getCode(), "Closed", submittedAndPendingApproval, isApproved, isRejected,
-                        isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
+                        isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold, matured);
             break;
             case TRANSFER_IN_PROGRESS:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.TRANSFER_IN_PROGRESS.getValue().longValue(),
                         SavingsAccountStatusType.TRANSFER_IN_PROGRESS.getCode(), "Transfer in progress", submittedAndPendingApproval,
                         isApproved, isRejected, isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress,
-                        isTransferOnHold);
+                        isTransferOnHold, matured);
             break;
             case TRANSFER_ON_HOLD:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.TRANSFER_ON_HOLD.getValue().longValue(),
                         SavingsAccountStatusType.TRANSFER_ON_HOLD.getCode(), "Transfer on hold", submittedAndPendingApproval,
                         isApproved, isRejected, isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress,
-                        isTransferOnHold);
+                        isTransferOnHold, matured);
             break;
             case PRE_MATURE_CLOSURE:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.PRE_MATURE_CLOSURE.getValue().longValue(),
                         SavingsAccountStatusType.PRE_MATURE_CLOSURE.getCode(), "Premature Closed", submittedAndPendingApproval, isApproved,
-                        isRejected, isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
+                        isRejected, isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold, matured);
             break;
             case MATURED:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.MATURED.getValue().longValue(),
                         SavingsAccountStatusType.MATURED.getCode(), "Matured", submittedAndPendingApproval, isApproved, isRejected,
-                        isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold);
+                        isWithdrawnByApplicant, isActive, isClosed, isPrematureClosed, isTransferInProgress, isTransferOnHold, matured);
+            break;
+            default:
+            break;
+        }
+        return optionData;
+    }
+
+    public static SavingsAccountSubStatusEnumData subStatus(final Integer subStatusEnum) {
+        return subStatus(SavingsAccountSubStatusEnum.fromInt(subStatusEnum));
+    }
+
+    public static SavingsAccountSubStatusEnumData subStatus(final SavingsAccountSubStatusEnum type) {
+
+        final boolean none = type.isSubStatusNone();
+        final boolean inactive = type.isSubStatusInactive();
+        final boolean dormant = type.isSubStatusDormant();
+        final boolean escheat = type.isSubStatusEscheat();
+
+        SavingsAccountSubStatusEnumData optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.NONE.getValue().longValue(),
+        		SavingsAccountSubStatusEnum.NONE.getCode(), "None", true, inactive, dormant, escheat);
+
+        switch (type) {
+            case INACTIVE:
+                optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.INACTIVE.getValue().longValue(),
+                		SavingsAccountSubStatusEnum.INACTIVE.getCode(), "Inactive", none, inactive, dormant, escheat);
+            break;
+            case DORMANT:
+                optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.DORMANT.getValue().longValue(),
+                		SavingsAccountSubStatusEnum.DORMANT.getCode(), "Dormant", none, inactive, dormant, escheat);
+            break;
+            case ESCHEAT:
+                optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.ESCHEAT.getValue().longValue(),
+                		SavingsAccountSubStatusEnum.ESCHEAT.getCode(), "Escheat", none, inactive, dormant, escheat);
             break;
             default:
             break;

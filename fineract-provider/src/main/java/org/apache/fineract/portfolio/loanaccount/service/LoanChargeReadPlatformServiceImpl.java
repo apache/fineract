@@ -41,6 +41,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -156,11 +157,13 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
         final List<EnumOptionData> feeFrequencyOptions = this.dropdownReadPlatformService.retrievePeriodFrequencyTypeOptions();
         // this field is applicable only for client charges
         final Map<String, List<GLAccountData>> incomeOrLiabilityAccountOptions = null;
-
+        final List<EnumOptionData> shareChargeCalculationTypeOptions = null ;
+        final List<EnumOptionData> shareChargeTimeTypeOptions = null ;
+        final Collection<TaxGroupData> taxGroupOptions = null;
         return ChargeData.template(null, allowedChargeCalculationTypeOptions, null, allowedChargeTimeOptions, null,
                 loansChargeCalculationTypeOptions, loansChargeTimeTypeOptions, savingsChargeCalculationTypeOptions,
                 savingsChargeTimeTypeOptions, clientChargeCalculationTypeOptions, clientChargeTimeTypeOptions, feeFrequencyOptions,
-                incomeOrLiabilityAccountOptions);
+                incomeOrLiabilityAccountOptions, taxGroupOptions, shareChargeCalculationTypeOptions, shareChargeTimeTypeOptions);
     }
 
     @Override
@@ -271,7 +274,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
                 + " order by lc.charge_time_enum ASC, lc.due_for_collection_as_of_date ASC, lc.is_penalty ASC";
 
         Collection<LoanChargeData> charges = this.jdbcTemplate.query(sql, rm,
-                new Object[] { LoanTransactionType.ACCRUAL.getValue(), loanId });
+                new Object[] { LoanTransactionType.ACCRUAL.getValue(), loanId, loanId });
         charges = updateLoanChargesWithUnrecognizedIncome(loanId, charges);
 
         Collection<LoanChargeData> removeCharges = new ArrayList<>();
@@ -311,7 +314,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             sb.append("select lcp.loan_charge_id, lcp.amount");
             sb.append(" from m_loan_charge_paid_by lcp ");
             sb.append(
-                    "inner join m_loan_transaction lt on lt.id = lcp.loan_transaction_id and lt.is_reversed = 0 and lt.transaction_type_enum = ?");
+                    "inner join m_loan_transaction lt on lt.id = lcp.loan_transaction_id and lt.is_reversed = 0 and lt.transaction_type_enum = ? and lt.loan_id = ?");
             sb.append(") cp on  cp.loan_charge_id= lc.id  ");
 
             schemaSql = sb.toString();
@@ -348,7 +351,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
         final String sql = "select " + rm.schema() + " where lc.loan_id=? AND lc.is_active = 1 group by  lc.id "
                 + " order by lc.charge_time_enum ASC, lc.due_for_collection_as_of_date ASC, lc.is_penalty ASC";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { LoanTransactionType.WAIVE_CHARGES.getValue(), loanId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { LoanTransactionType.WAIVE_CHARGES.getValue(), loanId, loanId });
 
     }
 
@@ -371,7 +374,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             sb.append("select cpb.loan_charge_id, lt.unrecognized_income_portion");
             sb.append(" from m_loan_charge_paid_by cpb ");
             sb.append(
-                    "inner join m_loan_transaction lt on lt.id = cpb.loan_transaction_id and lt.is_reversed = 0 and lt.transaction_type_enum = ?");
+                    "inner join m_loan_transaction lt on lt.id = cpb.loan_transaction_id and lt.is_reversed = 0 and lt.transaction_type_enum = ?  and lt.loan_id = ? ");
             sb.append(") wt on  wt.loan_charge_id= lc.id  ");
 
             schemaSql = sb.toString();

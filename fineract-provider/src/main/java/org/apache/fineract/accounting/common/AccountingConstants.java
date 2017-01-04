@@ -151,7 +151,7 @@ public class AccountingConstants {
     /*** Accounting placeholders for cash based accounting for savings products ***/
     public static enum CASH_ACCOUNTS_FOR_SAVINGS {
         SAVINGS_REFERENCE(1), SAVINGS_CONTROL(2), INTEREST_ON_SAVINGS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), TRANSFERS_SUSPENSE(
-                10), OVERDRAFT_PORTFOLIO_CONTROL(11), INCOME_FROM_INTEREST(12), LOSSES_WRITTEN_OFF(13);
+                10), OVERDRAFT_PORTFOLIO_CONTROL(11), INCOME_FROM_INTEREST(12), LOSSES_WRITTEN_OFF(13), ESCHEAT_LIABILITY(14);
 
         private final Integer value;
 
@@ -192,7 +192,7 @@ public class AccountingConstants {
                 "paymentTypeId"), FUND_SOURCE("fundSourceAccountId"), TRANSFERS_SUSPENSE("transfersInSuspenseAccountId"), FEE_INCOME_ACCOUNT_MAPPING(
                 "feeToIncomeAccountMappings"), PENALTY_INCOME_ACCOUNT_MAPPING("penaltyToIncomeAccountMappings"), CHARGE_ID("chargeId"), INCOME_ACCOUNT_ID(
                 "incomeAccountId"), OVERDRAFT_PORTFOLIO_CONTROL("overdraftPortfolioControlId"), INCOME_FROM_INTEREST("incomeFromInterestId"), LOSSES_WRITTEN_OFF(
-                "writeOffAccountId");
+                "writeOffAccountId"), ESCHEAT_LIABILITY("escheatLiabilityId");
 
         private final String value;
 
@@ -215,7 +215,8 @@ public class AccountingConstants {
                 "incomeFromPenaltyAccount"), INTEREST_ON_SAVINGS("interestOnSavingsAccount"), PAYMENT_TYPE("paymentType"), FUND_SOURCE(
                 "fundSourceAccount"), TRANSFERS_SUSPENSE("transfersInSuspenseAccount"), PENALTY_INCOME_ACCOUNT_MAPPING(
                 "penaltyToIncomeAccountMappings"), CHARGE_ID("charge"), INCOME_ACCOUNT_ID("incomeAccount"), OVERDRAFT_PORTFOLIO_CONTROL(
-                "overdraftPortfolioControl"), INCOME_FROM_INTEREST("incomeFromInterest"), LOSSES_WRITTEN_OFF("writeOffAccount");
+                "overdraftPortfolioControl"), INCOME_FROM_INTEREST("incomeFromInterest"), LOSSES_WRITTEN_OFF("writeOffAccount"),
+                ESCHEAT_LIABILITY("escheatLiabilityAccount");
 
         private final String value;
 
@@ -234,10 +235,10 @@ public class AccountingConstants {
     }
 
     public static enum FINANCIAL_ACTIVITY {
-        ASSET_TRANSFER(100, "assetTransfer", GLAccountType.ASSET), LIABILITY_TRANSFER(200, "liabilityTransfer", GLAccountType.LIABILITY),
-        CASH_AT_MAINVAULT (101, "cashAtMainVault", GLAccountType.ASSET),
-        CASH_AT_TELLER (102, "cashAtTeller", GLAccountType.ASSET),OPENING_BALANCES_TRANSFER_CONTRA (300,"openingBalancesTransferContra",GLAccountType.EQUITY),
-        ASSET_FUND_SOURCE(103, "fundSource", GLAccountType.ASSET);
+        ASSET_TRANSFER(100, "assetTransfer", GLAccountType.ASSET), LIABILITY_TRANSFER(200, "liabilityTransfer", GLAccountType.LIABILITY), CASH_AT_MAINVAULT(
+                101, "cashAtMainVault", GLAccountType.ASSET), CASH_AT_TELLER(102, "cashAtTeller", GLAccountType.ASSET), OPENING_BALANCES_TRANSFER_CONTRA(
+                300, "openingBalancesTransferContra", GLAccountType.EQUITY), ASSET_FUND_SOURCE(103, "fundSource", GLAccountType.ASSET), PAYABLE_DIVIDENDS(
+                201, "payableDividends", GLAccountType.LIABILITY);
 
         private final Integer value;
         private final String code;
@@ -302,6 +303,62 @@ public class AccountingConstants {
         private static FinancialActivityData convertToFinancialActivityData(final FINANCIAL_ACTIVITY type) {
             FinancialActivityData financialActivityData = new FinancialActivityData(type.value, type.code, type.getMappedGLAccountType());
             return financialActivityData;
+        }
+    }
+
+    /*** Accounting placeholders for cash based accounting for Share products ***/
+    public static enum CASH_ACCOUNTS_FOR_SHARES {
+        SHARES_REFERENCE(1), SHARES_SUSPENSE(2), INCOME_FROM_FEES(3), SHARES_EQUITY(4);
+
+        private final Integer value;
+
+        private CASH_ACCOUNTS_FOR_SHARES(final Integer value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return name().toString().replaceAll("_", " ");
+        }
+
+        public Integer getValue() {
+            return this.value;
+        }
+
+        private static final Map<Integer, CASH_ACCOUNTS_FOR_SHARES> intToEnumMap = new HashMap<>();
+        static {
+            for (final CASH_ACCOUNTS_FOR_SHARES type : CASH_ACCOUNTS_FOR_SHARES.values()) {
+                intToEnumMap.put(type.value, type);
+            }
+        }
+
+        public static CASH_ACCOUNTS_FOR_SHARES fromInt(final int i) {
+            final CASH_ACCOUNTS_FOR_SHARES type = intToEnumMap.get(Integer.valueOf(i));
+            return type;
+        }
+    }
+
+    /***
+     * Enum of all accounting related input parameter names used while
+     * creating/updating a savings product
+     ***/
+    public static enum SHARES_PRODUCT_ACCOUNTING_PARAMS {
+        SHARES_REFERENCE("shareReferenceId"), SHARES_SUSPENSE("shareSuspenseId"), INCOME_FROM_FEES("incomeFromFeeAccountId"), SHARES_EQUITY(
+                "shareEquityId");
+
+        private final String value;
+
+        private SHARES_PRODUCT_ACCOUNTING_PARAMS(final String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return name().toString().replaceAll("_", " ");
+        }
+
+        public String getValue() {
+            return this.value;
         }
     }
 

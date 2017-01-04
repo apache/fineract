@@ -1,8 +1,25 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 description = '''\
 Run as:
 gradle clean tomcatrunwar
 '''
-
 buildscript {
   repositories {
   	 jcenter()
@@ -27,9 +44,9 @@ apply plugin: 'project-report'
 apply plugin: 'java'
 
 /* define the valid syntax level for source files */
-sourceCompatibility = JavaVersion.VERSION_1_7
+sourceCompatibility = JavaVersion.VERSION_1_8
 /* define binary compatibility version */
-targetCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_8
 
 project.ext.springBootVersion = '1.1.6.RELEASE'
 project.ext.springVersion = '4.0.7.RELEASE'
@@ -49,9 +66,12 @@ repositories {
 }
 
 configurations {
+	hibernateDependencies
 	providedRuntime // needed for Spring Boot executable WAR
     providedCompile
-	compile
+	compile() {
+		exclude module: 'hibernate-entitymanager'		
+	}
 	runtime
 	all*.exclude group: 'commons-logging'
 }
@@ -116,13 +136,23 @@ task dist(type:Zip){
 
 war {
     war.finalizedBy(bootRepackage)
+	if (project.hasProperty('buildType') && project.getProperty('buildType') == 'TEST') {
+		from(configurations.hibernateDependencies) { // notice the parens
+        	into "WEB-INF/lib/" // no leading slash
+    }
+	}
 }
 
 license {
     header rootProject.file('../LICENSE.md')
-    excludes(["**/*.html", "**/*.mustache", "**/*.sql", "**/package-info.java", "**/keystore.jks"])
+    excludes(["**/*.html", "**/*.mustache", "**/package-info.java", "**/keystore.jks"])
     strictCheck true
 }
+
+task licenseFormatBuildScripts (type:nl.javadude.gradle.plugins.license.License) {
+    source = fileTree(dir: '../', includes: ['**/*.bat', '**/*.sh', '**/*.sql'])
+}
+licenseFormat.dependsOn licenseFormatBuildScripts
 
 tomcatRun {
     httpPort = 8080
@@ -170,6 +200,7 @@ sourceSets {
  integrationTest {
     	compileClasspath += main.output + test.output
         runtimeClasspath += main.output + test.output
+        runtimeClasspath += configurations.hibernateDependencies
     }
 }
 
@@ -185,8 +216,6 @@ task integrationTest(type:Test){
         tomcatRunWar.daemon = true
         tomcatRunWar.execute()
     }
-
-
     testClassesDir = project.sourceSets.integrationTest.output.classesDir
     classpath = project.sourceSets.integrationTest.runtimeClasspath
 }
@@ -201,7 +230,17 @@ configurations {
     driver
 }
 dependencies {
-    driver 'mysql:mysql-connector-java:5.1.16'
+    driver 'org.drizzle.jdbc:drizzle-jdbc:1.3'
+    hibernateDependencies(
+    [group:'org.springframework.boot', name:'spring-boot-starter-data-jpa', version:'1.1.6.RELEASE'],
+    ) 
+}
+
+test {
+	filter {
+        //includeTestsMatching "org.apache.fineract.infrastructure.configuration.spring.SpringConfigurationTest.*"
+        includeTestsMatching "org.apache.fineract.template.TemplateMergeServiceTest.*"
+    }
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
@@ -211,17 +250,17 @@ configurations.driver.each {File file ->
 
 task createDB<<{
     description= "Creates the Database. Needs database name to be passed (like: -PdbName=someDBname)"
-    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
+    sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
     sql.execute( 'create database '+"`$dbName`" )
 }
 
 task dropDB<<{
     description= "Drops the specified database. The database name has to be passed (like: -PdbName=someDBname)"
-    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
+    sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
     sql.execute( 'DROP DATABASE '+"`$dbName`")
 }
 task setBlankPassword<<{
-    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
+    sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
     sql.execute('USE `mifosplatform-tenants`')
     sql.execute('UPDATE mifosplatform-tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
 }
@@ -235,13 +274,14 @@ buildscript {
 
     dependencies {
         classpath "org.flywaydb:flyway-gradle-plugin:3.0" // version upgraded during Spring Boot & MariaDB4j work, as prev. used v0.2 didn't work well after *.sql moved from fineract-db to fineract-provider/src/main/resources (new version also has clearer errors, e.g. in case of missing DB)
-        classpath 'mysql:mysql-connector-java:5.1.22'
+        classpath 'org.drizzle.jdbc:drizzle-jdbc:1.3'
     }
 }
 
 
 flyway {
-    url = "jdbc:mysql://localhost:3306/mifostenant-default"
+    url = "jdbc:mysql:thin://localhost:3306/mifostenant-default"
+	driver = "org.drizzle.jdbc.DrizzleDriver"
     user = mysqlUser
     password = mysqlPassword
 }
@@ -255,7 +295,8 @@ task migrateTenantDB<<{
 		tenantDbName = rootProject.getProperty("dbName")
 	}
 	
-    flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
+    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantDbName"
+	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
     /**We use ${ as the prefix for strecthy reporting, do not want them to be interpreted by Flyway**/
     flyway.placeholderPrefix = "\$\${"
@@ -271,7 +312,8 @@ task showTenantDBInfo<<{
 		tenantDbName = rootProject.getProperty("dbName")
 	}
 	
-    flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
+    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantDbName"
+	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
     flywayInfo.execute()
 }
@@ -286,7 +328,8 @@ task migrateTenantListDB<<{
 		tenantsDbName = rootProject.getProperty("dbName")
 	}
 	
-    flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
+    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
+	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
 
     flywayMigrate.execute()
@@ -301,7 +344,8 @@ task showTenantListDBInfo<<{
 		tenantsDbName = rootProject.getProperty("dbName")
 	}
     
-    flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
+    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
+	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
     flywayInfo.execute()
 }
@@ -315,7 +359,8 @@ task repairTenantDB<<{
         tenantsDbName = rootProject.getProperty("dbName")
     }
     
-    flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
+    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
+	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
     flywayRepair.execute()
 }

@@ -59,6 +59,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minRequi
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.productIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -120,6 +121,7 @@ public class DepositAccountDataValidator {
         validatePreClosureDetailForSubmit(element, baseDataValidator);
         validateDepositTermDeatilForSubmit(element, baseDataValidator, DepositAccountType.FIXED_DEPOSIT);
         validateSavingsCharges(element, baseDataValidator);
+        validateWithHoldTax(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -140,6 +142,7 @@ public class DepositAccountDataValidator {
         validatePreClosureDetailForUpdate(element, baseDataValidator);
         validateDepositTermDeatilForUpdate(element, baseDataValidator, DepositAccountType.FIXED_DEPOSIT);
         // validateSavingsCharges(element, baseDataValidator);
+        validateWithHoldTax(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -161,7 +164,8 @@ public class DepositAccountDataValidator {
         validateDepositTermDeatilForSubmit(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         validateRecurringDetailForSubmit(element, baseDataValidator);
         validateSavingsCharges(element, baseDataValidator);
-
+        validateWithHoldTax(element, baseDataValidator);
+        
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -182,6 +186,7 @@ public class DepositAccountDataValidator {
         validateDepositTermDeatilForUpdate(element, baseDataValidator, DepositAccountType.RECURRING_DEPOSIT);
         validateRecurringDetailForUpdate(element, baseDataValidator);
         // validateSavingsCharges(element, baseDataValidator);
+        validateWithHoldTax(element, baseDataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
@@ -712,6 +717,13 @@ public class DepositAccountDataValidator {
                     }
                 }
             }
+        }
+    }
+    
+    private void validateWithHoldTax(final JsonElement element, final DataValidatorBuilder baseDataValidator){
+        if (this.fromApiJsonHelper.parameterExists(withHoldTaxParamName, element)) {
+            final String withHoldTax = this.fromApiJsonHelper.extractStringNamed(withHoldTaxParamName, element);
+            baseDataValidator.reset().parameter(withHoldTaxParamName).value(withHoldTax).ignoreIfNull().validateForBooleanValue();
         }
     }
 

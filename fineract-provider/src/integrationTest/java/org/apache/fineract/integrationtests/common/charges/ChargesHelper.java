@@ -37,7 +37,8 @@ public class ChargesHelper {
     private static final Integer CHARGE_APPLIES_TO_LOAN = 1;
     private static final Integer CHARGE_APPLIES_TO_SAVINGS = 2;
     private static final Integer CHARGE_APPLIES_TO_CLIENT = 3;
-
+    private static final Integer CHARGE_APPLIES_TO_SHARES = 4;
+    
     private static final Integer CHARGE_DISBURSEMENT_FEE = 1;
     private static final Integer CHARGE_SPECIFIED_DUE_DATE = 2;
     private static final Integer CHARGE_SAVINGS_ACTIVATION_FEE = 3;
@@ -48,6 +49,11 @@ public class ChargesHelper {
     private static final Integer CHARGE_OVERDUE_INSTALLMENT_FEE = 9;
     private static final Integer CHARGE_OVERDRAFT_FEE = 10;
     private static final Integer WEEKLY_FEE = 11;
+    private static final Integer SHAREACCOUNT_ACTIVATION = 13 ;
+    private static final Integer SHARE_PURCHASE = 14 ;
+    private static final Integer SHARE_REDEEM = 15 ;
+    
+    private static final Integer CHARGE_SAVINGS_NO_ACTIVITY_FEE = 16;
     
     private static final Integer CHARGE_CLIENT_SPECIFIED_DUE_DATE = 1;
 
@@ -83,6 +89,14 @@ public class ChargesHelper {
     public static String getSavingsActivationFeeJSON() {
         final HashMap<String, Object> map = populateDefaultsForSavings();
         map.put("chargeTimeType", CHARGE_SAVINGS_ACTIVATION_FEE);
+        String chargesCreateJson = new Gson().toJson(map);
+        System.out.println(chargesCreateJson);
+        return chargesCreateJson;
+    }
+
+    public static String getSavingsNoActivityFeeJSON() {
+        final HashMap<String, Object> map = populateDefaultsForSavings();
+        map.put("chargeTimeType", CHARGE_SAVINGS_NO_ACTIVITY_FEE);
         String chargesCreateJson = new Gson().toJson(map);
         System.out.println(chargesCreateJson);
         return chargesCreateJson;
@@ -226,6 +240,27 @@ public class ChargesHelper {
         return getLoanInstallmentJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, ChargesHelper.amount, ChargesHelper.penalty);
     }
 
+    public static String getShareAccountActivationChargeJson() {
+        HashMap<String, Object> map = populateDefaultsShareActivationCharge() ;
+        String chargesCreateJson = new Gson().toJson(map);
+        System.out.println(chargesCreateJson);
+        return chargesCreateJson;
+    }
+    
+    public static String getShareAccountPurchaseChargeJson() {
+        HashMap<String, Object> map = populateDefaultsSharePurchaseFlatCharge() ;
+        String chargesCreateJson = new Gson().toJson(map);
+        System.out.println(chargesCreateJson);
+        return chargesCreateJson;
+    }
+    
+    public static String getShareAccountRedeemChargeJson() {
+        HashMap<String, Object> map = populateDefaultsShareRedeemFlatCharge() ;
+        String chargesCreateJson = new Gson().toJson(map);
+        System.out.println(chargesCreateJson);
+        return chargesCreateJson;
+    }
+    
     public static String getLoanOverdueFeeJSON() {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("penalty", ChargesHelper.penalty);
@@ -278,6 +313,45 @@ public class ChargesHelper {
         return map;
     }
 
+    public static HashMap<String, Object> populateDefaultsShareActivationCharge() {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("active", ChargesHelper.active);
+        map.put("amount", ChargesHelper.amount);
+        map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_SHARES);
+        map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
+        map.put("chargeTimeType",ChargesHelper.SHAREACCOUNT_ACTIVATION);
+        map.put("currencyCode", ChargesHelper.currencyCode);
+        map.put("locale", CommonConstants.locale);
+        map.put("name", Utils.randomNameGenerator("Charge_Share_Activation_", 8));
+        return map;
+    }
+    
+    public static HashMap<String, Object> populateDefaultsSharePurchaseFlatCharge() {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("active", ChargesHelper.active);
+        map.put("amount", ChargesHelper.amount);
+        map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_SHARES);
+        map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
+        map.put("chargeTimeType",ChargesHelper.SHARE_PURCHASE);
+        map.put("currencyCode", ChargesHelper.currencyCode);
+        map.put("locale", CommonConstants.locale);
+        map.put("name", Utils.randomNameGenerator("Charge_Share_Purchase_", 8));
+        return map;
+    }
+    
+    public static HashMap<String, Object> populateDefaultsShareRedeemFlatCharge() {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("active", ChargesHelper.active);
+        map.put("amount", ChargesHelper.amount);
+        map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_SHARES);
+        map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
+        map.put("chargeTimeType",ChargesHelper.SHARE_REDEEM);
+        map.put("currencyCode", ChargesHelper.currencyCode);
+        map.put("locale", CommonConstants.locale);
+        map.put("name", Utils.randomNameGenerator("Charge_Share_Redeem_", 8));
+        return map;
+    }
+    
     public static Integer createCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String request) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CHARGES_URL, request, "resourceId");

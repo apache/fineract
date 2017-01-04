@@ -24,6 +24,7 @@ import static org.apache.fineract.portfolio.interestratechart.InterestRateChartA
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.fromDateParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.localeParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.nameParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.isPrimaryGroupingByAmountParamName;
 
 import java.util.Date;
 import java.util.Map;
@@ -56,19 +57,24 @@ public class InterestRateChartFields {
     @Column(name = "end_date", nullable = false)
     private Date endDate;
 
+    @Column(name = "is_primary_grouping_by_amount", nullable = false)
+    private boolean isPrimaryGroupingByAmount;
+
     protected InterestRateChartFields() {
         //
     }
 
-    public static InterestRateChartFields createNew(String name, String description, LocalDate fromDate, LocalDate toDate) {
-        return new InterestRateChartFields(name, description, fromDate, toDate);
+    public static InterestRateChartFields createNew(String name, String description, LocalDate fromDate, LocalDate toDate,
+            boolean isPrimaryGroupingByAmount) {
+        return new InterestRateChartFields(name, description, fromDate, toDate, isPrimaryGroupingByAmount);
     }
 
-    private InterestRateChartFields(String name, String description, LocalDate fromDate, LocalDate toDate) {
+    private InterestRateChartFields(String name, String description, LocalDate fromDate, LocalDate toDate, boolean isPrimaryGroupingByAmount) {
         this.name = name;
         this.description = description;
         this.fromDate = fromDate.toDate();
         this.endDate = (toDate == null) ? null : toDate.toDate();
+        this.isPrimaryGroupingByAmount = isPrimaryGroupingByAmount;
     }
 
     public void update(JsonCommand command, final Map<String, Object> actualChanges, final DataValidatorBuilder baseDataValidator) {
@@ -104,6 +110,12 @@ public class InterestRateChartFields {
             actualChanges.put(localeParamName, localeAsInput);
             actualChanges.put(dateFormatParamName, dateFormat);
             this.endDate = newValue.toDate();
+        }
+
+        if (command.isChangeInBooleanParameterNamed(isPrimaryGroupingByAmountParamName, this.isPrimaryGroupingByAmount)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isPrimaryGroupingByAmountParamName);
+            actualChanges.put(isPrimaryGroupingByAmountParamName, newValue);
+            this.isPrimaryGroupingByAmount = newValue;
         }
 
         if (isFromDateAfterToDate()) {
@@ -144,20 +156,22 @@ public class InterestRateChartFields {
         final LocalDate thatFromDate = that.getFromDateAsLocalDate();
         LocalDate thatEndDate = that.getEndDateAsLocalDate();
         thatEndDate = thatEndDate == null ? DateUtils.getLocalDateOfTenant() : thatEndDate;
-        
+
         final LocalDateInterval thisInterval = LocalDateInterval.create(thisFromDate, thisEndDate);
         final LocalDateInterval thatInterval = LocalDateInterval.create(thatFromDate, thatEndDate);
-        
-        if(thisInterval.containsPortionOf(thatInterval) || thatInterval.containsPortionOf(thisInterval)){
-            return true;
-        }
+
+        if (thisInterval.containsPortionOf(thatInterval) || thatInterval.containsPortionOf(thisInterval)) { return true; }
         return false;// no overlapping
     }
-    
-    public boolean isApplicableChartFor(final LocalDate target){
+
+    public boolean isApplicableChartFor(final LocalDate target) {
         final LocalDate endDate = this.endDate == null ? DateUtils.getLocalDateOfTenant() : this.getEndDateAsLocalDate();
         final LocalDateInterval interval = LocalDateInterval.create(getFromDateAsLocalDate(), endDate);
         return interval.contains(target);
+    }
+
+    public boolean isPrimaryGroupingByAmount() {
+        return this.isPrimaryGroupingByAmount;
     }
 
 }

@@ -53,22 +53,27 @@ public class CodeValue extends AbstractPersistable<Long> {
 
     @Column(name = "is_active")
     private boolean isActive;
+    
+    @Column(name = "is_mandatory")
+    private boolean mandatory;
 
     public static CodeValue createNew(final Code code, final String label, final int position, final String description,
-            final boolean isActive) {
-        return new CodeValue(code, label, position, description, isActive);
+            final boolean isActive, final boolean mandatory) {
+        return new CodeValue(code, label, position, description, isActive, mandatory);
     }
 
     protected CodeValue() {
         //
     }
 
-    private CodeValue(final Code code, final String label, final int position, final String description, final boolean isActive) {
+    private CodeValue(final Code code, final String label, final int position, final String description, 
+            final boolean isActive, final boolean mandatory) {
         this.code = code;
         this.label = StringUtils.defaultIfEmpty(label, null);
         this.position = position;
         this.description = description;
         this.isActive = isActive;
+        this.mandatory = mandatory;
     }
 
     public String label() {
@@ -92,7 +97,16 @@ public class CodeValue extends AbstractPersistable<Long> {
         if (position == null) {
             position = new Integer(0);
         }
-        return new CodeValue(code, label, position.intValue(), description, isActive);
+        
+        Boolean mandatory = command.booleanPrimitiveValueOfParameterNamed(
+                CODEVALUE_JSON_INPUT_PARAMS.IS_MANDATORY.getValue());
+        
+        // if the "mandatory" Boolean object is null, then set it to false by default
+        if (mandatory == null) {
+            mandatory = false;
+        }
+        
+        return new CodeValue(code, label, position.intValue(), description, isActive, mandatory);
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -131,6 +145,6 @@ public class CodeValue extends AbstractPersistable<Long> {
     }
 
     public CodeValueData toData() {
-        return CodeValueData.instance(getId(), this.label, this.position, this.isActive);
+        return CodeValueData.instance(getId(), this.label, this.position, this.isActive, this.mandatory);
     }
 }

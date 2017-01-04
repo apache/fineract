@@ -51,6 +51,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants;
+import org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.joda.time.LocalDate;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -82,12 +83,11 @@ public class InterestRateChart extends AbstractPersistable<Long> {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(INTERESTRATE_CHART_RESOURCE_NAME);
-
+        this.chartFields = chartFields;
         // validate before setting the other fields
         this.validateChartSlabs(baseDataValidator);
         this.throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
-        this.chartFields = chartFields;
         this.addChartSlabs(interestRateChartSlabs);
 
     }
@@ -97,22 +97,85 @@ public class InterestRateChart extends AbstractPersistable<Long> {
 
         Integer tmpPeriodType = null;
         List<InterestRateChartSlab> chartSlabsList = new ArrayList<>(chartSlabs);
+        boolean isPrimaryGroupingByAmount = this.chartFields.isPrimaryGroupingByAmount();
+        chartSlabsList.sort(new InterestRateChartSlabComparator<InterestRateChartSlab>(isPrimaryGroupingByAmount));
+        boolean isPeriodChart = !isPrimaryGroupingByAmount;
+        boolean isAmountChart = isPrimaryGroupingByAmount;
 
         for (int i = 0; i < chartSlabsList.size(); i++) {
             InterestRateChartSlab iSlabs = chartSlabsList.get(i);
-            if (tmpPeriodType == null) {
+            if (!iSlabs.slabFields().isValidChart(isPrimaryGroupingByAmount)) {
+                if (isPrimaryGroupingByAmount) {
+                    baseDataValidator.parameter(InterestRateChartSlabApiConstants.amountRangeFromParamName).failWithCode("cannot.be.blank");
+                } else {
+                    baseDataValidator.parameter(InterestRateChartSlabApiConstants.fromPeriodParamName).failWithCode("cannot.be.blank");
+                }
+
+            } else if (i > 0) {
+                if (isPeriodChart ^ iSlabs.slabFields().fromPeriod() != null) {
+                    baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.period.range.incomplete");
+                    isPeriodChart = isPeriodChart || iSlabs.slabFields().fromPeriod() != null;
+                }
+                if (isAmountChart ^ iSlabs.slabFields().getAmountRangeFrom() != null) {
+                    baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.amount.range.incomplete");
+                    isAmountChart = isAmountChart || iSlabs.slabFields().getAmountRangeFrom() != null;
+                }
+            }
+
+            if (i == 0) {
                 tmpPeriodType = iSlabs.slabFields().periodType();
-            } else if (!iSlabs.slabFields().periodType().equals(tmpPeriodType)) {
+                if (iSlabs.slabFields().isNotProperChartStart()) {
+                    baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.start.incorrect", iSlabs.slabFields()
+                            .fromPeriod(), iSlabs.slabFields().getAmountRangeFrom());
+                }
+                isAmountChart = isAmountChart || iSlabs.slabFields().getAmountRangeFrom() != null;
+                isPeriodChart = isPeriodChart || iSlabs.slabFields().fromPeriod() != null;
+            } else if (iSlabs.slabFields().periodType() != null && !iSlabs.slabFields().periodType().equals(tmpPeriodType)) {
                 baseDataValidator.parameter(periodTypeParamName).value(iSlabs.slabFields().periodType())
                         .failWithCode("period.type.is.not.same", tmpPeriodType);
             }
-            for (int j = i + 1; j < chartSlabsList.size(); j++) {
-                InterestRateChartSlab jSlabs = chartSlabsList.get(j);
-                if (iSlabs.slabFields().isPeriodOverlapping(jSlabs.slabFields())) {
-                    baseDataValidator
-                            .failWithCodeNoParameterAddedToErrorCode("chart.slabs.period.overlapping", iSlabs.slabFields().fromPeriod(),
-                                    iSlabs.slabFields().toPeriod(), jSlabs.slabFields().fromPeriod(), jSlabs.slabFields().toPeriod());
+            if (i + 1 < chartSlabsList.size()) {
+                InterestRateChartSlab nextSlabs = chartSlabsList.get(i + 1);
+                if (iSlabs.slabFields().isValidChart(isPrimaryGroupingByAmount)
+                        && nextSlabs.slabFields().isValidChart(isPrimaryGroupingByAmount)) {
+                    if (iSlabs.slabFields().isRateChartOverlapping(nextSlabs.slabFields(), isPrimaryGroupingByAmount)) {
+                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.overlapping", iSlabs.slabFields()
+                                .fromPeriod(), iSlabs.slabFields().toPeriod(), nextSlabs.slabFields().fromPeriod(), nextSlabs.slabFields()
+                                .toPeriod(), iSlabs.slabFields().getAmountRangeFrom(), iSlabs.slabFields().getAmountRangeTo(), nextSlabs
+                                .slabFields().getAmountRangeFrom(), nextSlabs.slabFields().getAmountRangeTo());
+                    } else if (iSlabs.slabFields().isRateChartHasGap(nextSlabs.slabFields(), isPrimaryGroupingByAmount)) {
+                        baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.has.gap", iSlabs.slabFields()
+                                .fromPeriod(), iSlabs.slabFields().toPeriod(), nextSlabs.slabFields().fromPeriod(), nextSlabs.slabFields()
+                                .toPeriod(), iSlabs.slabFields().getAmountRangeFrom(), iSlabs.slabFields().getAmountRangeTo(), nextSlabs
+                                .slabFields().getAmountRangeFrom(), nextSlabs.slabFields().getAmountRangeTo());
+                    }
+                    if (isPrimaryGroupingByAmount) {
+                        if (!iSlabs.slabFields().isAmountSame(nextSlabs.slabFields())) {
+                            if (InterestRateChartSlabFields.isNotProperPeriodStart(nextSlabs.slabFields())) {
+                                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.period.range.start.incorrect",
+                                        nextSlabs.slabFields().toPeriod());
+                            }
+                            if (iSlabs.slabFields().toPeriod() != null) {
+                                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.period.range.end.incorrect", iSlabs
+                                        .slabFields().toPeriod());
+                            }
+
+                        }
+                    } else if (!iSlabs.slabFields().isPeriodsSame(nextSlabs.slabFields())) {
+                        if (InterestRateChartSlabFields.isNotProperAmountStart(nextSlabs.slabFields())) {
+                            baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.amount.range.start.incorrect", nextSlabs
+                                    .slabFields().getAmountRangeFrom());
+                        }
+                        if (iSlabs.slabFields().getAmountRangeTo() != null) {
+                            baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.amount.range.end.incorrect", iSlabs
+                                    .slabFields().getAmountRangeTo());
+                        }
+
+                    }
                 }
+            } else if (iSlabs.slabFields().isNotProperPriodEnd()) {
+                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("chart.slabs.range.end.incorrect",
+                        iSlabs.slabFields().toPeriod(), iSlabs.slabFields().getAmountRangeTo());
             }
         }
     }

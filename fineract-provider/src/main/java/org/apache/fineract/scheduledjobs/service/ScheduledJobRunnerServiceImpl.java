@@ -19,6 +19,7 @@
 package org.apache.fineract.scheduledjobs.service;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -40,6 +41,8 @@ import org.apache.fineract.portfolio.savings.service.DepositAccountReadPlatformS
 import org.apache.fineract.portfolio.savings.service.DepositAccountWritePlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
+import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountDividendReadPlatformService;
+import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountSchedularService;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -62,18 +65,24 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     private final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService;
     private final DepositAccountReadPlatformService depositAccountReadPlatformService;
     private final DepositAccountWritePlatformService depositAccountWritePlatformService;
+    private final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService;
+    private final ShareAccountSchedularService shareAccountSchedularService;
 
     @Autowired
     public ScheduledJobRunnerServiceImpl(final RoutingDataSourceServiceFactory dataSourceServiceFactory,
             final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
             final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService,
             final DepositAccountReadPlatformService depositAccountReadPlatformService,
-            final DepositAccountWritePlatformService depositAccountWritePlatformService) {
+            final DepositAccountWritePlatformService depositAccountWritePlatformService,
+            final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService,
+            final ShareAccountSchedularService shareAccountSchedularService) {
         this.dataSourceServiceFactory = dataSourceServiceFactory;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
         this.depositAccountReadPlatformService = depositAccountReadPlatformService;
         this.depositAccountWritePlatformService = depositAccountWritePlatformService;
+        this.shareAccountDividendReadPlatformService = shareAccountDividendReadPlatformService;
+        this.shareAccountSchedularService = shareAccountSchedularService;
     }
 
     @Transactional
@@ -362,6 +371,42 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             jdbcTemplate.update(insertSql + sb.toString());
         }
 
+    }
+
+    @Override
+    @CronTarget(jobName = JobName.POST_DIVIDENTS_FOR_SHARES)
+    public void postDividends() throws JobExecutionException {
+        List<Map<String, Object>> dividendDetails = this.shareAccountDividendReadPlatformService.retriveDividendDetailsForPostDividents();
+        StringBuilder errorMsg = new StringBuilder();
+        for (Map<String, Object> dividendMap : dividendDetails) {
+        	Long id = null ;
+        	Long savingsId = null ;
+        	if(dividendMap.get("id") instanceof BigInteger) { //Drizzle is returning BigInteger
+        		id = ((BigInteger)dividendMap.get("id")).longValue() ;
+        		savingsId = ((BigInteger)dividendMap.get("savingsAccountId")).longValue() ;
+        	}else { //MySQL connector is returning Long
+        		id = (Long) dividendMap.get("id") ;
+        		savingsId = (Long) dividendMap.get("savingsAccountId") ;
+        	}
+            try {
+                this.shareAccountSchedularService.postDividend(id, savingsId);
+            } catch (final PlatformApiDataValidationException e) {
+                final List<ApiParameterError> errors = e.getErrors();
+                for (final ApiParameterError error : errors) {
+                    logger.error("Post Dividends to savings failed for Divident detail Id:" + id + " and savings Id: " + savingsId
+                            + " with message " + error.getDeveloperMessage());
+                    errorMsg.append("Post Dividends to savings failed for Divident detail Id:").append(id).append(" and savings Id:")
+                            .append(savingsId).append(" with message ").append(error.getDeveloperMessage());
+                }
+            } catch (final Exception e) {
+                logger.error("Post Dividends to savings failed for Divident detail Id:" + id + " and savings Id: " + savingsId
+                        + " with message " + e.getLocalizedMessage());
+                errorMsg.append("Post Dividends to savings failed for Divident detail Id:").append(id).append(" and savings Id:")
+                        .append(savingsId).append(" with message ").append(e.getLocalizedMessage());
+            }
+        }
+
+        if (errorMsg.length() > 0) { throw new JobExecutionException(errorMsg.toString()); }
     }
 
 }

@@ -86,8 +86,21 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
     @Override
     public Collection<InterestRateChartData> retrieveAllWithSlabs(Long productId) {
         this.context.authenticatedUser();
-        String sql = "select " + this.chartExtractor.schema() + " where sp.id = ? order by irc.id, ircd.id";
-        return this.jdbcTemplate.query(sql, this.chartExtractor, new Object[] { productId });
+        StringBuilder sql = new StringBuilder();
+        sql.append("select ");
+        sql.append(this.chartExtractor.schema());
+        sql.append(" where sp.id = ? order by irc.id, ");
+        sql.append("CASE ");
+        sql.append("WHEN isPrimaryGroupingByAmount then ircd.amount_range_from ");
+        sql.append("WHEN isPrimaryGroupingByAmount then ircd.amount_range_to ");
+        sql.append("END,");
+        sql.append("ircd.from_period, ircd.to_period,");
+        sql.append("CASE ");
+        sql.append("WHEN !isPrimaryGroupingByAmount then ircd.amount_range_from ");
+        sql.append("WHEN !isPrimaryGroupingByAmount then ircd.amount_range_to ");
+        sql.append("END");
+        
+        return this.jdbcTemplate.query(sql.toString(), this.chartExtractor, new Object[] { productId });
     }
 
     @Override
@@ -177,6 +190,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
             sqlBuilder
                     .append("irc.id as ircId, irc.name as ircName, irc.description as ircDescription,")
                     .append("irc.from_date as ircFromDate, irc.end_date as ircEndDate, ")
+                    .append("irc.is_primary_grouping_by_amount as isPrimaryGroupingByAmount, ")
                     .append("ircd.id as ircdId, ircd.description as ircdDescription, ircd.period_type_enum ircdPeriodTypeId, ")
                     .append("ircd.from_period as ircdFromPeriod, ircd.to_period as ircdToPeriod, ircd.amount_range_from as ircdAmountRangeFrom, ")
                     .append("ircd.amount_range_to as ircdAmountRangeTo, ircd.annual_interest_rate as ircdAnnualInterestRate, ")
@@ -239,6 +253,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
 
             sqlBuilder.append("irc.id as ircId, irc.name as ircName, irc.description as ircDescription, ")
                     .append("irc.from_date as ircFromDate, irc.end_date as ircEndDate, ")
+                    .append("irc.is_primary_grouping_by_amount as isPrimaryGroupingByAmount, ")
                     .append("sp.id as savingsProductId, sp.name as savingsProductName ").append("from ")
                     .append("m_interest_rate_chart irc ")
                     .append("left join m_deposit_product_interest_rate_chart dpirc on irc.id=dpirc.interest_rate_chart_id ")
@@ -253,10 +268,11 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
             final String description = rs.getString("ircDescription");
             final LocalDate fromDate = JdbcSupport.getLocalDate(rs, "ircFromDate");
             final LocalDate endDate = JdbcSupport.getLocalDate(rs, "ircEndDate");
+            final boolean isPrimaryGroupingByAmount = rs.getBoolean("isPrimaryGroupingByAmount");
             final Long savingsProductId = JdbcSupport.getLongDefaultToNullIfZero(rs, "savingsProductId");
             final String savingsProductName = rs.getString("savingsProductName");
 
-            return InterestRateChartData.instance(id, name, description, fromDate, endDate, savingsProductId, savingsProductName);
+            return InterestRateChartData.instance(id, name, description, fromDate, endDate, isPrimaryGroupingByAmount, savingsProductId, savingsProductName);
         }
 
     }
@@ -299,7 +315,10 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
             final Integer fromPeriod = JdbcSupport.getInteger(rs, "ircdFromPeriod");
             final Integer toPeriod = JdbcSupport.getInteger(rs, "ircdToPeriod");
             final Integer periodTypeId = JdbcSupport.getInteger(rs, "ircdPeriodTypeId");
-            final EnumOptionData periodType = InterestRateChartEnumerations.periodType(periodTypeId);
+            EnumOptionData periodType = null;
+            if (periodTypeId != null) {
+                periodType = InterestRateChartEnumerations.periodType(periodTypeId);
+            }
             final BigDecimal amountRangeFrom = rs.getBigDecimal("ircdAmountRangeFrom");
             final BigDecimal amountRangeTo = rs.getBigDecimal("ircdAmountRangeTo");
             final BigDecimal annualInterestRate = rs.getBigDecimal("ircdAnnualInterestRate");

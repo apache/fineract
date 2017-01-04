@@ -44,6 +44,7 @@ public class InterestRateChartApiConstants {
     public static final String endDateParamName = "endDate";
     public static final String productIdParamName = "productId";
     public static final String productNameParamName = "productName";
+    public static final String isPrimaryGroupingByAmountParamName = "isPrimaryGroupingByAmount";
 
     // interest rate chart Slabs parameters
 //    public static final String periodTypeParamName = "periodType";
@@ -63,13 +64,14 @@ public class InterestRateChartApiConstants {
     public static final String deleteParamName = "delete";
 
     public static final Set<String> INTERESTRATE_CHART_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
-            dateFormatParamName, nameParamName, descriptionParamName, fromDateParamName, endDateParamName, productIdParamName,
-            chartSlabs));
+            dateFormatParamName, nameParamName, descriptionParamName, fromDateParamName, endDateParamName, productIdParamName, chartSlabs,
+            isPrimaryGroupingByAmountParamName));
 
     public static final Set<String> INTERESTRATE_CHART_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, idParamName, nameParamName, descriptionParamName, fromDateParamName, endDateParamName, chartSlabs,
-            deleteParamName));
+            deleteParamName, isPrimaryGroupingByAmountParamName));
 
     public static final Set<String> INTERESTRATE_CHART_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
-            dateFormatParamName, idParamName, nameParamName, descriptionParamName, fromDateParamName, endDateParamName, chartSlabs));
+            dateFormatParamName, idParamName, nameParamName, descriptionParamName, fromDateParamName, endDateParamName, chartSlabs,
+            isPrimaryGroupingByAmountParamName));
 }

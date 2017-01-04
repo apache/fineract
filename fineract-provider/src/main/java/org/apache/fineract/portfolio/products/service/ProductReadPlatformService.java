@@ -21,15 +21,18 @@ package org.apache.fineract.portfolio.products.service;
 import java.util.Collection;
 import java.util.Set;
 
+import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.portfolio.products.data.ProductData;
 
 public interface ProductReadPlatformService {
 
-    public Collection<ProductData> retrieveAllProducts();
+    public Page<ProductData> retrieveAllProducts(Integer offSet, Integer limit);
 
-    public ProductData retrieveOne(final Long productId);
+    public ProductData retrieveOne(final Long productId, boolean includeTemplate);
 
     public ProductData retrieveTemplate();
 
     public Set<String> getResponseDataParams();
+    
+    public Collection<ProductData> retrieveAllForLookup() ;
 }

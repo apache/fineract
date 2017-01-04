@@ -178,7 +178,9 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
     @Override
     public CommandProcessingResult delete(final Long id) {
         AccountTransferStandingInstruction standingInstructionsForUpdate = this.standingInstructionRepository.findOne(id);
-        standingInstructionsForUpdate.updateStatus(StandingInstructionStatus.DELETED.getValue());
+        // update the "deleted" and "name" properties of the standing instruction
+        standingInstructionsForUpdate.delete();
+        
         final Map<String, Object> actualChanges = new HashMap<>();
         actualChanges.put(statusParamName, StandingInstructionStatus.DELETED.getValue());
         return new CommandProcessingResultBuilder() //
@@ -231,17 +233,21 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
             }
 
             if (isDueForTransfer && transactionAmount != null && transactionAmount.compareTo(BigDecimal.ZERO) > 0) {
-                final AccountTransferDetails accountTransferDetails = this.accountTransferDetailRepository.findOne(data.accountDetailId());
                 final SavingsAccount fromSavingsAccount = null;
                 final boolean isRegularTransaction = true;
                 final boolean isExceptionForBalanceCheck = false;
-                accountTransferDetails.accountTransferStandingInstruction().updateLatsRunDate(transactionDate.toDate());
                 AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, transactionAmount, data.fromAccountType(),
                         data.toAccountType(), data.fromAccount().accountId(), data.toAccount().accountId(), data.name()
                                 + " Standing instruction trasfer ", null, null, null, null, data.toTransferType(), null, null, data
-                                .transferType().getValue(), accountTransferDetails, null, null, null, null, fromSavingsAccount,
+                                .transferType().getValue(), null, null, null, null, null, fromSavingsAccount,
                         isRegularTransaction, isExceptionForBalanceCheck);
-                transferAmount(sb, accountTransferDTO, data.getId());
+                final boolean transferCompleted = transferAmount(sb, accountTransferDTO, data.getId());
+
+                if(transferCompleted){
+                    final String updateQuery = "UPDATE m_account_transfer_standing_instructions SET last_run_date = ? where id = ?";
+                    this.jdbcTemplate.update(updateQuery, transactionDate.toDate(), data.getId());
+                }
+
             }
         }
         if (sb.length() > 0) { throw new JobExecutionException(sb.toString()); }
@@ -252,7 +258,8 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
      * @param sb
      * @param accountTransferDTO
      */
-    private void transferAmount(final StringBuilder sb, final AccountTransferDTO accountTransferDTO, final Long instructionId) {
+    private boolean transferAmount(final StringBuilder sb, final AccountTransferDTO accountTransferDTO, final Long instructionId) {
+        boolean transferCompleted = true;
         StringBuffer errorLog = new StringBuffer();
         StringBuffer updateQuery = new StringBuffer(
                 "INSERT INTO `m_account_transfer_standing_instructions_history` (`standing_instruction_id`, `status`, `amount`,`execution_time`, `error_log`) VALUES (");
@@ -282,6 +289,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         }
         updateQuery.append(instructionId).append(",");
         if (errorLog.length() > 0) {
+            transferCompleted = false;
             updateQuery.append("'failed'").append(",");
         } else {
             updateQuery.append("'success'").append(",");
@@ -290,6 +298,6 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         updateQuery.append(", now(),");
         updateQuery.append("'").append(errorLog.toString()).append("')");
         this.jdbcTemplate.update(updateQuery.toString());
-
+        return transferCompleted;
     }
 }

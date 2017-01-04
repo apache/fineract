@@ -31,6 +31,7 @@ public class SavingsAccountTransactionEnumData {
     private final String value;
 
     private final boolean deposit;
+    private final boolean dividendPayout;
     private final boolean withdrawal;
     private final boolean interestPosting;
     private final boolean feeDeduction;
@@ -41,12 +42,15 @@ public class SavingsAccountTransactionEnumData {
     private final boolean overdraftInterest;
     private final boolean writtenoff;
     private final boolean overdraftFee = true;
+    private final boolean withholdTax;
+    private final boolean escheat;
 
     public SavingsAccountTransactionEnumData(final Long id, final String code, final String value) {
         this.id = id;
         this.code = code;
         this.value = value;
         this.deposit = Long.valueOf(SavingsAccountTransactionType.DEPOSIT.getValue()).equals(this.id);
+        this.dividendPayout = Long.valueOf(SavingsAccountTransactionType.DIVIDEND_PAYOUT.getValue()).equals(this.id);
         this.withdrawal = Long.valueOf(SavingsAccountTransactionType.WITHDRAWAL.getValue()).equals(this.id);
         this.interestPosting = Long.valueOf(SavingsAccountTransactionType.INTEREST_POSTING.getValue()).equals(this.id);
         this.feeDeduction = Long.valueOf(SavingsAccountTransactionType.ANNUAL_FEE.getValue()).equals(this.id)
@@ -58,6 +62,8 @@ public class SavingsAccountTransactionEnumData {
         this.rejectTransfer = Long.valueOf(SavingsAccountTransactionType.REJECT_TRANSFER.getValue()).equals(this.id);
         this.writtenoff = Long.valueOf(SavingsAccountTransactionType.WRITTEN_OFF.getValue()).equals(this.id);
         this.overdraftInterest = Long.valueOf(SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue()).equals(this.id);
+        this.withholdTax = Long.valueOf(SavingsAccountTransactionType.WITHHOLD_TAX.getValue()).equals(this.id);
+        this.escheat = Long.valueOf(SavingsAccountTransactionType.ESCHEAT.getValue()).equals(this.id);
         // this.overdraftFee =
         // Long.valueOf(SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue()).equals(this.id);
     }
@@ -120,6 +126,18 @@ public class SavingsAccountTransactionEnumData {
 
     public boolean isOverdraftFee() {
         return this.overdraftFee;
+    }
+
+    public boolean isWithholdTax() {
+        return this.withholdTax;
+    }
+    
+    public boolean isDividendPayout() {
+        return this.dividendPayout;
+    }
+    
+    public boolean isEscheat() {
+    	return this.escheat;
     }
 
 }

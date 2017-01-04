@@ -55,4 +55,8 @@ public class CalendarDropdownReadPlatformServiceImpl implements CalendarDropdown
     public List<EnumOptionData> retrieveCalendarWeekDaysTypeOptions() {
         return CalendarEnumerations.calendarWeekDaysType(CalendarWeekDaysType.values());
     }
+    @Override
+    public List<EnumOptionData> retrieveCalendarFrequencyNthDayTypeOptions() {
+        return CalendarEnumerations.calendarFrequencyNthDayType();
+    }
 }

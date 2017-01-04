@@ -57,8 +57,6 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -134,8 +132,7 @@ public final class Client extends AbstractPersistable<Long> {
     @JoinColumn(name = "staff_id")
     private Staff staff;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @ManyToMany
+    @ManyToMany(fetch=FetchType.EAGER)
     @JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "client_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
     private Set<Group> groups;
 
@@ -224,6 +221,14 @@ public final class Client extends AbstractPersistable<Long> {
     
     @Column(name = "legal_form_enum", nullable = true)
     private Integer legalForm;
+
+	@Column(name = "reopened_on_date", nullable = true)
+	@Temporal(TemporalType.DATE)
+	private Date reopenedDate;
+
+	@ManyToOne(optional = true, fetch=FetchType.LAZY)
+	@JoinColumn(name = "reopened_by_userid", nullable = true)
+	private AppUser reopenedBy;
 
     public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff,
             final SavingsProduct savingsProduct, final CodeValue gender, final CodeValue clientType, final CodeValue clientClassification,
@@ -412,6 +417,11 @@ public final class Client extends AbstractPersistable<Long> {
         this.activatedBy = currentUser;
         this.officeJoiningDate = this.activationDate;
         this.status = ClientStatus.ACTIVE.getValue();
+        
+        // in case a closed client is being re open
+        this.closureDate = null;
+        this.closureReason = null;
+        this.closedBy = null;
 
         validate();
     }
@@ -451,7 +461,15 @@ public final class Client extends AbstractPersistable<Long> {
     private boolean isDateInTheFuture(final LocalDate localDate) {
         return localDate.isAfter(DateUtils.getLocalDateOfTenant());
     }
-
+    
+    public boolean isRejected() {
+        return ClientStatus.fromInt(this.status).isRejected();
+    }
+    
+    public boolean isWithdrawn() {
+        return ClientStatus.fromInt(this.status).isWithdrawn();
+    }
+    
     public Map<String, Object> update(final JsonCommand command) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
@@ -642,6 +660,17 @@ public final class Client extends AbstractPersistable<Long> {
             dataValidationErrors.add(error);
         }
 
+		if (getReopenedDate() != null && getActivationLocalDate() != null
+				&& getReopenedDate().isAfter(getActivationLocalDate())) {
+
+			final String defaultUserMessage = "reopened date cannot be after the submittedon date";
+			final ApiParameterError error = ApiParameterError.parameterError(
+					"error.msg.clients.submittedOnDate.after.reopened.date", defaultUserMessage,
+					ClientApiConstants.reopenedDateParamName, this.reopenedDate);
+
+			dataValidationErrors.add(error);
+		}
+
         if (getActivationLocalDate() != null && isDateInTheFuture(getActivationLocalDate())) {
 
             final String defaultUserMessage = "Activation date cannot be in the future.";
@@ -678,6 +707,10 @@ public final class Client extends AbstractPersistable<Long> {
 
             if (StringUtils.isNotBlank(this.lastname)) {
                 nameBuilder.append(this.lastname);
+            }
+            
+            if (StringUtils.isNotBlank(this.fullname)) {
+                nameBuilder = new StringBuilder(this.fullname);
             }
         }
         else if(LegalForm.fromInt(legalForm).isEntity())
@@ -887,8 +920,18 @@ public final class Client extends AbstractPersistable<Long> {
     public LocalDate getClosureDate() {
         return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.closureDate), null);
     }
+    public LocalDate getRejectedDate() {
+        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.rejectionDate), null);
+    }
+    public LocalDate getWithdrawalDate() {
+        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.withdrawalDate), null);
+	}
 
-    public CodeValue gender() {
+	public LocalDate getReopenedDate() {
+		return this.reopenedDate == null ? null : new LocalDate(this.reopenedDate);
+	}
+
+	public CodeValue gender() {
         return this.gender;
     }
 
@@ -954,6 +997,15 @@ public final class Client extends AbstractPersistable<Long> {
         this.status = ClientStatus.PENDING.getValue();
 
     }
+    
+	public void reOpened(AppUser currentUser, Date reopenedDate) {
+		this.reopenedDate = reopenedDate;
+		this.reopenedBy = currentUser;
+		this.updatedBy = currentUser;
+		this.updatedOnDate = reopenedDate;
+		this.status = ClientStatus.PENDING.getValue();
+
+	}
 
 	public Integer getLegalForm() {
 		return legalForm;

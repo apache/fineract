@@ -19,9 +19,13 @@
 package org.apache.fineract.integrationtests.common;
 
 import java.util.ArrayList;
+
 import static org.junit.Assert.assertEquals;
+
 import java.util.HashMap;
+
 import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -38,7 +42,8 @@ public class CenterHelper {
     public static CenterDomain retrieveByID(int id, final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         final String GET_CENTER_BY_ID_URL = CENTERS_URL + "/" + id + "?associations=groupMembers&" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RETRIEVING CENTER AT " + id + "-------------------------");
-        final String jsonData = new Gson().toJson(Utils.performServerGet(requestSpec, responseSpec, GET_CENTER_BY_ID_URL, ""));
+        Object get = Utils.performServerGet(requestSpec, responseSpec, GET_CENTER_BY_ID_URL, "");
+		final String jsonData = new Gson().toJson(get);
         return new Gson().fromJson(jsonData, new TypeToken<CenterDomain>() {}.getType());
     }
 
@@ -46,14 +51,16 @@ public class CenterHelper {
             final ResponseSpecification responseSpec) {
         final String GET_CENTER = CENTERS_URL + "?paged=true&limit=-1&" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RETRIEVING CENTERS-------------------------");
-        final String jsonData = new Gson().toJson(Utils.performServerGet(requestSpec, responseSpec, GET_CENTER, "pageItems"));
+        Object get = Utils.performServerGet(requestSpec, responseSpec, GET_CENTER, "pageItems");
+        final String jsonData = new Gson().toJson(get);
         return new Gson().fromJson(jsonData, new TypeToken<ArrayList<CenterDomain>>() {}.getType());
     }
 
     public static ArrayList<CenterDomain> listCenters(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         final String GET_CENTER = CENTERS_URL + "?limit=-1&" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RETRIEVING CENTERS-------------------------");
-        final String jsonData = new Gson().toJson(Utils.performServerGet(requestSpec, responseSpec, GET_CENTER, ""));
+        Object get = Utils.performServerGet(requestSpec, responseSpec, GET_CENTER, "");
+        final String jsonData = new Gson().toJson(get);
         return new Gson().fromJson(jsonData, new TypeToken<ArrayList<CenterDomain>>() {}.getType());
     }
 

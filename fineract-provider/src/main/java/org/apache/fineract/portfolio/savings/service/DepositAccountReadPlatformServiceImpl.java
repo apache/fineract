@@ -83,6 +83,7 @@ import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.apache.fineract.portfolio.savings.exception.DepositAccountNotFoundException;
+import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -580,8 +581,12 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             selectFieldsSqlBuilder.append("sa.account_balance_derived as accountBalance, ");
             selectFieldsSqlBuilder.append("sa.total_fees_charge_derived as totalFeeCharge, ");
             selectFieldsSqlBuilder.append("sa.total_penalty_charge_derived as totalPenaltyCharge, ");
+            selectFieldsSqlBuilder.append("sa.total_withhold_tax_derived as totalWithholdTax,");
             selectFieldsSqlBuilder.append("sa.deposit_type_enum as depositTypeId, ");
-            selectFieldsSqlBuilder.append("sa.min_balance_for_interest_calculation as minBalanceForInterestCalculation ");
+            selectFieldsSqlBuilder.append("sa.min_balance_for_interest_calculation as minBalanceForInterestCalculation, ");
+            selectFieldsSqlBuilder.append("sa.withhold_tax as withHoldTax,");
+            selectFieldsSqlBuilder.append("tg.id as taxGroupId, tg.name as taxGroupName ");
+            
 
             this.selectFieldsSql = selectFieldsSqlBuilder.toString();
 
@@ -599,6 +604,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             selectTablesSqlBuilder.append("left join m_appuser abu on abu.id = sa.approvedon_userid ");
             selectTablesSqlBuilder.append("left join m_appuser avbu on rbu.id = sa.activatedon_userid ");
             selectTablesSqlBuilder.append("left join m_appuser cbu on cbu.id = sa.closedon_userid ");
+            selectTablesSqlBuilder.append("left join m_tax_group tg on tg.id = sa.tax_group_id  ");
 
             this.selectTablesSql = selectTablesSqlBuilder.toString();
         }
@@ -722,17 +728,26 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final BigDecimal accountBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "accountBalance");
             final BigDecimal totalFeeCharge = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalFeeCharge");
             final BigDecimal totalPenaltyCharge = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalPenaltyCharge");
+            final BigDecimal totalWithholdTax = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalWithholdTax");
             final BigDecimal totalOverdraftInterestDerived = null;
+            
+            final boolean withHoldTax = rs.getBoolean("withHoldTax");
+            final Long taxGroupId = JdbcSupport.getLong(rs, "taxGroupId");
+            final String taxGroupName = rs.getString("taxGroupName");
+            TaxGroupData taxGroupData = null;
+            if (taxGroupId != null) {
+                taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
+            }
 
             final SavingsAccountSummaryData summary = new SavingsAccountSummaryData(currency, totalDeposits, totalWithdrawals,
                     totalWithdrawalFees, totalAnnualFees, totalInterestEarned, totalInterestPosted, accountBalance, totalFeeCharge,
-                    totalPenaltyCharge, totalOverdraftInterestDerived);
+                    totalPenaltyCharge, totalOverdraftInterestDerived, totalWithholdTax, null, null);
 
             return DepositAccountData.instance(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                     fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                     lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, depositType,
-                    minBalanceForInterestCalculation);
+                    minBalanceForInterestCalculation, withHoldTax, taxGroupData);
         }
     }
 
@@ -1068,7 +1083,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             selectFieldsSqlBuilder.append("sa.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
             selectFieldsSqlBuilder.append("sa.withdrawal_fee_for_transfer as withdrawalFeeForTransfers, ");
             selectFieldsSqlBuilder.append("sa.deposit_type_enum as depositTypeId, ");
-            selectFieldsSqlBuilder.append("sa.min_balance_for_interest_calculation as minBalanceForInterestCalculation ");
+            selectFieldsSqlBuilder.append("sa.min_balance_for_interest_calculation as minBalanceForInterestCalculation, ");
+            selectFieldsSqlBuilder.append("sa.withhold_tax as withHoldTax,");
+            selectFieldsSqlBuilder.append("tg.id as taxGroupId, tg.name as taxGroupName ");
 
             this.selectFieldsSql = selectFieldsSqlBuilder.toString();
 
@@ -1076,6 +1093,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             selectTablesSqlBuilder.append("from m_savings_product sa ");
             selectTablesSqlBuilder.append("left join m_deposit_product_term_and_preclosure dptp on sa.id = dptp.savings_product_id ");
             selectTablesSqlBuilder.append("join m_currency curr on curr.code = sa.currency_code ");
+            selectTablesSqlBuilder.append("left join m_tax_group tg on tg.id = sa.tax_group_id  ");
+            
 
             this.selectTablesSql = selectTablesSqlBuilder.toString();
         }
@@ -1158,12 +1177,20 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final SavingsAccountStatusEnumData status = null;
             final SavingsAccountSummaryData summary = null;
             final SavingsAccountApplicationTimelineData timeline = SavingsAccountApplicationTimelineData.templateDefault();
+            
+            final boolean withHoldTax = rs.getBoolean("withHoldTax");
+            final Long taxGroupId = JdbcSupport.getLong(rs, "taxGroupId");
+            final String taxGroupName = rs.getString("taxGroupName");
+            TaxGroupData taxGroupData = null;
+            if (taxGroupId != null) {
+                taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
+            }
 
             return DepositAccountData.instance(null, null, null, groupId, groupName, clientId, clientName, productId, productName,
                     fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualIterestRate, interestCompoundingPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                     lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, summary, depositType,
-                    minBalanceForInterestCalculation);
+                    minBalanceForInterestCalculation, withHoldTax, taxGroupData);
         }
     }
 

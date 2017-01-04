@@ -27,7 +27,6 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.localePa
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -225,7 +224,8 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
         populateDerivedFields(transactionAmount, chargeAmount);
 
-        if (this.isWithdrawalFee()) {
+        if (this.isWithdrawalFee()
+        		|| this.isSavingsNoActivity()) {
             this.amountOutstanding = BigDecimal.ZERO;
         }
 
@@ -656,6 +656,10 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
     public boolean isSavingsActivation() {
         return ChargeTimeType.fromInt(this.chargeTime).isSavingsActivation();
     }
+    
+    public boolean isSavingsNoActivity(){
+    	return ChargeTimeType.fromInt(this.chargeTime).isSavingsNoActivityFee();
+    }
 
     public boolean isSavingsClosure() {
         return ChargeTimeType.fromInt(this.chargeTime).isSavingsClosure();
@@ -704,7 +708,7 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
     public int hashCode() {
         return new HashCodeBuilder(3, 5) //
                 .append(getId()) //
-                .append(this.charge.getId()) //
+                //.append(this.charge.getId()) //
                 .append(this.amount).append(getDueLocalDate()) //
                 .toHashCode();
     }

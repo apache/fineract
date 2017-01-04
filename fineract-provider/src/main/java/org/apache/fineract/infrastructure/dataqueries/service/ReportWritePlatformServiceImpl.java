@@ -61,18 +61,20 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
     private final ReportParameterUsageRepository reportParameterUsageRepository;
     private final ReportParameterRepository reportParameterRepository;
     private final PermissionRepository permissionRepository;
+    private final ReadReportingService readReportingService;
 
     @Autowired
     public ReportWritePlatformServiceImpl(final PlatformSecurityContext context,
             final ReportCommandFromApiJsonDeserializer fromApiJsonDeserializer, final ReportRepository reportRepository,
             final ReportParameterRepository reportParameterRepository, final ReportParameterUsageRepository reportParameterUsageRepository,
-            final PermissionRepository permissionRepository) {
+            final PermissionRepository permissionRepository, final ReadReportingService readReportingService) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.reportRepository = reportRepository;
         this.reportParameterRepository = reportParameterRepository;
         this.reportParameterUsageRepository = reportParameterUsageRepository;
         this.permissionRepository = permissionRepository;
+        this.readReportingService = readReportingService;
     }
 
     @Transactional
@@ -84,7 +86,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
 
             this.fromApiJsonDeserializer.validate(command.json());
 
-            final Report report = Report.fromJson(command);
+            final Report report = Report.fromJson(command, this.readReportingService.getAllowedReportTypes());
             final Set<ReportParameterUsage> reportParameterUsages = assembleSetOfReportParameterUsages(report, command);
             report.update(reportParameterUsages);
 
@@ -115,7 +117,7 @@ public class ReportWritePlatformServiceImpl implements ReportWritePlatformServic
             final Report report = this.reportRepository.findOne(reportId);
             if (report == null) { throw new ReportNotFoundException(reportId); }
 
-            final Map<String, Object> changes = report.update(command);
+            final Map<String, Object> changes = report.update(command, this.readReportingService.getAllowedReportTypes());
 
             if (changes.containsKey("reportParameters")) {
                 final Set<ReportParameterUsage> reportParameterUsages = assembleSetOfReportParameterUsages(report, command);

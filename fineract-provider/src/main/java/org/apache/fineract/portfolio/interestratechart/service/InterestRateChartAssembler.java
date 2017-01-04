@@ -22,6 +22,7 @@ import static org.apache.fineract.portfolio.interestratechart.InterestRateChartA
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.descriptionParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.endDateParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.fromDateParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.isPrimaryGroupingByAmountParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.nameParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.currencyCodeParamName;
 
@@ -65,33 +66,38 @@ public class InterestRateChartAssembler {
      * request
      */
     public InterestRateChart assembleFrom(final JsonCommand command) {
-
-        final JsonElement element = command.parsedJson();
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        @SuppressWarnings("unused")
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(INTERESTRATE_CHART_RESOURCE_NAME);
+        final JsonElement element = command.parsedJson();
         final String currencyCode = this.fromApiJsonHelper.extractStringNamed(currencyCodeParamName, element);
-        final InterestRateChart newChart = this.assembleFrom(element, currencyCode);
-
+        final InterestRateChart newChart = this.assembleFrom(element, currencyCode, baseDataValidator);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
         return newChart;
     }
 
-    public InterestRateChart assembleFrom(final JsonElement element, final String currencyCode) {
+    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    }
+
+    public InterestRateChart assembleFrom(final JsonElement element, final String currencyCode, final DataValidatorBuilder baseDataValidator) {
 
         final String name = this.fromApiJsonHelper.extractStringNamed(nameParamName, element);
         final String description = this.fromApiJsonHelper.extractStringNamed(descriptionParamName, element);
         final LocalDate fromDate = this.fromApiJsonHelper.extractLocalDateNamed(fromDateParamName, element);
         final LocalDate toDate = this.fromApiJsonHelper.extractLocalDateNamed(endDateParamName, element);
-        
+        Boolean isPrimaryGroupingByAmount = this.fromApiJsonHelper.extractBooleanNamed(isPrimaryGroupingByAmountParamName, element);
+        if (isPrimaryGroupingByAmount == null) {
+            isPrimaryGroupingByAmount = false;
+        }
 
         // assemble chart Slabs
-        final Collection<InterestRateChartSlab> newChartSlabs = this.chartSlabAssembler.assembleChartSlabsFrom(element,
-                currencyCode);
+        final Collection<InterestRateChartSlab> newChartSlabs = this.chartSlabAssembler.assembleChartSlabsFrom(element, currencyCode);
 
-        final InterestRateChartFields fields = InterestRateChartFields.createNew(name, description, fromDate, toDate);
+        final InterestRateChartFields fields = InterestRateChartFields.createNew(name, description, fromDate, toDate,
+                isPrimaryGroupingByAmount);
         final InterestRateChart newChart = InterestRateChart.createNew(fields, newChartSlabs);
+        newChart.validateChartSlabs(baseDataValidator);
         return newChart;
     }
 
@@ -99,9 +105,5 @@ public class InterestRateChartAssembler {
         final InterestRateChart interestRateChart = this.interestRateChartRepositoryWrapper
                 .findOneWithNotFoundDetection(interestRateChartId);
         return interestRateChart;
-    }
-
-    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 }

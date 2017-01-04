@@ -51,14 +51,22 @@ public class InterestRateChartSlabFields {
     @Column(name = "period_type_enum", nullable = false)
     private Integer periodType;
 
-    @Column(name = "from_period", nullable = false)
+    @Column(name = "from_period")
     private Integer fromPeriod;
 
-    @Column(name = "to_period", nullable = true)
+    @Column(name = "to_period")
     private Integer toPeriod;
 
     @Column(name = "amount_range_from", scale = 6, precision = 19)
     private BigDecimal amountRangeFrom;
+
+    public BigDecimal getAmountRangeFrom() {
+        return this.amountRangeFrom;
+    }
+
+    public BigDecimal getAmountRangeTo() {
+        return this.amountRangeTo;
+    }
 
     @Column(name = "amount_range_to", scale = 6, precision = 19)
     private BigDecimal amountRangeTo;
@@ -84,7 +92,7 @@ public class InterestRateChartSlabFields {
             final Integer fromPeriod, final Integer toPeriod, final BigDecimal amountRangeFrom, final BigDecimal amountRangeTo,
             final BigDecimal annualInterestRate, final String currencyCode) {
         this.description = description;
-        this.periodType = (periodFrequencyType == null) ? null : periodFrequencyType.getValue();
+        this.periodType = (periodFrequencyType == null || periodFrequencyType.isInvalid()) ? null : periodFrequencyType.getValue();
         this.fromPeriod = fromPeriod;
         this.toPeriod = toPeriod;
         this.amountRangeFrom = amountRangeFrom;
@@ -183,17 +191,129 @@ public class InterestRateChartSlabFields {
         return this.toPeriod;
     }
 
-    public boolean isPeriodOverlapping(final InterestRateChartSlabFields that) {
-        if (that.toPeriod == null) {
-            if (this.toPeriod == null) { return true; }
-            return that.fromPeriod <= this.toPeriod;
+    public boolean isRateChartHasGap(final InterestRateChartSlabFields that, final boolean isPrimaryGroupingByAmount) {
+        boolean isPeriodSame = isPeriodsSame(that);
+        boolean isAmountSame = isAmountSame(that);
+        boolean hasPeriods = this.fromPeriod != null || that.fromPeriod != null;
+        boolean hasAmounts = this.amountRangeFrom != null || that.amountRangeFrom != null;
+        if (isPrimaryGroupingByAmount) {
+            if (isAmountSame) {
+                if (hasPeriods) {
+                    if (this.toPeriod == null) { return true; }
+                    return isNotProperPeriodStart(that.fromPeriod);
+                }
+            } else {
+                return isNotProperAmountStart(that.amountRangeFrom) || isNotProperPeriodStart(that);
+            }
+        } else {
+            if (isPeriodSame) {
+                if (hasAmounts) {
+                    if (this.amountRangeTo == null) { return true; }
+                    return isNotProperAmountStart(that.amountRangeFrom);
+                }
+            } else {
+                return isNotProperPeriodStart(that.fromPeriod) || isNotProperAmountStart(that);
+            }
         }
+        return false;
+    }
+
+    public boolean isValidChart(boolean isPrimaryGroupingByAmount) {
+        return (!isPrimaryGroupingByAmount && this.fromPeriod != null) || (isPrimaryGroupingByAmount && this.amountRangeFrom != null);
+    }
+
+    public boolean isNotProperChartStart() {
+        return isNotProperPeriodStart(this) || isNotProperAmountStart(this);
+    }
+
+    public static boolean isNotProperAmountStart(final InterestRateChartSlabFields interestRateChartSlabFields) {
+        return interestRateChartSlabFields.amountRangeFrom != null
+                && (interestRateChartSlabFields.amountRangeFrom.compareTo(BigDecimal.ONE) != 0 && interestRateChartSlabFields.amountRangeFrom
+                        .compareTo(BigDecimal.ZERO) != 0);
+    }
+
+    private boolean isNotProperAmountStart(final BigDecimal amount) {
+        return this.amountRangeTo == null || (amount != null && amount.compareTo(this.amountRangeTo.add(BigDecimal.ONE)) != 0);
+    }
+
+    private boolean isNotProperPeriodStart(final Integer period) {
+        return this.toPeriod == null || (period != null && period.compareTo(this.toPeriod + 1) != 0);
+    }
+
+    public static boolean isNotProperPeriodStart(InterestRateChartSlabFields interestRateChartSlabFields) {
+        return interestRateChartSlabFields.fromPeriod != null
+                && !(interestRateChartSlabFields.fromPeriod.equals(1) || interestRateChartSlabFields.fromPeriod.equals(0));
+    }
+
+    public boolean isNotProperPriodEnd() {
+        return !(this.toPeriod == null && this.amountRangeTo == null);
+
+    }
+
+    public boolean isRateChartOverlapping(final InterestRateChartSlabFields that, final boolean isPrimaryGroupingByAmount) {
+        boolean isPeriodOverLapping = isPeriodOverlapping(that);
+        boolean isAmountOverLapping = isAmountOverlapping(that);
+        boolean isPeriodSame = isPeriodsSame(that);
+        boolean isAmountSame = isAmountSame(that);
+        boolean isOverlapping = false;
+        if (isPrimaryGroupingByAmount) {
+            isOverlapping = (isAmountOverLapping && !isAmountSame) || (isPeriodOverLapping && isAmountSame);
+        } else {
+            isOverlapping = (isPeriodOverLapping && !isPeriodSame) || (isAmountOverLapping && isPeriodSame);
+        }
+
+        return isOverlapping;
+    }
+
+    private boolean isPeriodOverlapping(final InterestRateChartSlabFields that) {
+        if (isIntegerSame(that.toPeriod, this.toPeriod)) {
+            return true;
+        } else if (isIntegerSame(that.fromPeriod, this.fromPeriod)) {
+            return true;
+        } else if (this.toPeriod == null) {
+            return true;
+        } else if (that.toPeriod == null) { return that.fromPeriod <= this.toPeriod; }
         return this.fromPeriod <= that.toPeriod && that.fromPeriod <= this.toPeriod;
+    }
+
+    private boolean isAmountOverlapping(final InterestRateChartSlabFields that) {
+        if (isBigDecimalSame(that.amountRangeFrom, this.amountRangeFrom)) {
+            return true;
+        } else if (isBigDecimalSame(that.amountRangeTo, this.amountRangeTo)) {
+            return true;
+        } else if (this.amountRangeTo == null) {
+            return true;
+        } else if (that.amountRangeTo == null) { return that.amountRangeFrom.compareTo(this.amountRangeTo) < 1; }
+        return this.amountRangeFrom.compareTo(that.amountRangeTo) < 1 && that.amountRangeFrom.compareTo(this.amountRangeTo) < 1;
+    }
+
+    public boolean isAmountSame(final InterestRateChartSlabFields that) {
+        return isBigDecimalSame(this.amountRangeFrom, that.amountRangeFrom) && isBigDecimalSame(this.amountRangeTo, that.amountRangeTo);
+    }
+
+    public boolean isPeriodsSame(final InterestRateChartSlabFields that) {
+        return isIntegerSame(this.fromPeriod, that.fromPeriod) && isIntegerSame(this.toPeriod, that.toPeriod);
+    }
+
+    public boolean isIntegerSame(final Integer obj1, final Integer obj2) {
+        if (obj1 == null || obj2 == null) {
+            if (obj1 == obj2) { return true; }
+            return false;
+        }
+        return obj1.equals(obj2);
+    }
+
+    public boolean isBigDecimalSame(final BigDecimal obj1, final BigDecimal obj2) {
+        if (obj1 == null || obj2 == null) {
+            if (obj1 == obj2) { return true; }
+            return false;
+        }
+        return obj1.compareTo(obj2) == 0;
     }
 
     public boolean isBetweenPeriod(final LocalDate periodStartDate, final LocalDate periodEndDate) {
         final Integer compare = depositPeriod(periodStartDate, periodEndDate);
-        return (compare < this.fromPeriod || (this.toPeriod != null && compare > this.toPeriod)) ? false : true;
+        return isPeriodBetween(compare);
     }
 
     public boolean isAmountRangeProvided() {
@@ -233,8 +353,16 @@ public class InterestRateChartSlabFields {
             returnValue = depositAmount.compareTo(amountRangeFrom) >= 0 && depositAmount.compareTo(amountRangeTo) <= 0;
         } else if (amountRangeFrom != null) {
             returnValue = depositAmount.compareTo(amountRangeFrom) >= 0;
-        } else if (amountRangeTo != null) {
-            returnValue = depositAmount.compareTo(amountRangeTo) <= 0;
+        }
+        return returnValue;
+    }
+
+    public boolean isPeriodBetween(final Integer periods) {
+        boolean returnValue = true;
+        if (fromPeriod != null && toPeriod != null) {
+            returnValue = periods.compareTo(fromPeriod) >= 0 && periods.compareTo(toPeriod) <= 0;
+        } else if (fromPeriod != null) {
+            returnValue = periods.compareTo(fromPeriod) >= 0;
         }
         return returnValue;
     }

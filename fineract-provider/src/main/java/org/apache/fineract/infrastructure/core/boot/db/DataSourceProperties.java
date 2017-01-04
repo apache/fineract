@@ -60,17 +60,15 @@ public class DataSourceProperties extends PoolProperties {
     @Value("${" + PROTOCOL + ":jdbc}")
     private volatile @NotNull String jdbcProtocol;
 
-    @Value("${" + SUBPROTOCOL + ":mysql}")
+    @Value("${" + SUBPROTOCOL + ":mysql:thin}")
     private volatile @NotNull String jdbcSubprotocol;
 
-
-    public DataSourceProperties() {
+    public DataSourceProperties(String driverClassName, String protocol, String subProtocol, Integer port) {
         super();
-
-        // default to save us from re-specifying this; note that it can still be
-        // overridden
-        setDriverClassName(com.mysql.jdbc.Driver.class.getName());
-
+        setDriverClassName(driverClassName);
+        this.jdbcProtocol = protocol ;
+        this.jdbcSubprotocol = subProtocol ;
+        this.port = port ;
         setDefaults();
     }
 

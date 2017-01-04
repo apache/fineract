@@ -22,7 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum PortfolioProductType {
-    LOAN(1, "productType.loan"), SAVING(2, "productType.saving"), CLIENT(2, "productType.client"), PROVISIONING(3, "productType.provisioning");
+    LOAN(1, "productType.loan"), SAVING(2, "productType.saving"), CLIENT(2, "productType.client"), PROVISIONING(3,
+            "productType.provisioning"), SHARES(4, "productType.shares");
 
     private final Integer value;
     private final String code;
@@ -68,6 +69,10 @@ public enum PortfolioProductType {
 
     public boolean isClient() {
         return this.value.equals(PortfolioProductType.CLIENT.getValue());
+    }
+
+    public boolean isShareProduct() {
+        return this.value.equals(PortfolioProductType.SHARES.getValue());
     }
 
 }

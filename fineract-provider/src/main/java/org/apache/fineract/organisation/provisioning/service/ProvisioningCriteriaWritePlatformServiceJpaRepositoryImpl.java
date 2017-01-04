@@ -104,19 +104,23 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
 
     @Override
     public CommandProcessingResult updateProvisioningCriteria(final Long criteriaId, JsonCommand command) {
-        this.fromApiJsonDeserializer.validateForUpdate(command.json());
-        ProvisioningCriteria provisioningCriteria = provisioningCriteriaRepository.findOne(criteriaId) ;
-        if(provisioningCriteria == null) {
-            throw new ProvisioningCategoryNotFoundException(criteriaId) ;
+    	try {
+    		this.fromApiJsonDeserializer.validateForUpdate(command.json());
+            ProvisioningCriteria provisioningCriteria = provisioningCriteriaRepository.findOne(criteriaId) ;
+            if(provisioningCriteria == null) {
+                throw new ProvisioningCategoryNotFoundException(criteriaId) ;
+            }
+            List<LoanProduct> products = this.provisioningCriteriaAssembler.parseLoanProducts(command.parsedJson()) ;
+            final Map<String, Object> changes = provisioningCriteria.update(command, products) ;
+            if(!changes.isEmpty()) {
+                updateProvisioningCriteriaDefinitions(provisioningCriteria, command) ;
+                provisioningCriteriaRepository.save(provisioningCriteria) ;    
+            }
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCriteria.getId()).build();	
+    	} catch (final DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve);
+            return CommandProcessingResult.empty();
         }
-        List<LoanProduct> products = this.provisioningCriteriaAssembler.parseLoanProducts(command.parsedJson()) ;
-        
-        final Map<String, Object> changes = provisioningCriteria.update(command, products) ;
-        if(!changes.isEmpty()) {
-            updateProvisioningCriteriaDefinitions(provisioningCriteria, command) ;
-            provisioningCriteriaRepository.save(provisioningCriteria) ;    
-        }
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCriteria.getId()).build();
     }
 
     private void updateProvisioningCriteriaDefinitions(ProvisioningCriteria provisioningCriteria, JsonCommand command) {
@@ -156,7 +160,11 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             final String name = command.stringValueOfParameterNamed("criteria_name");
             throw new PlatformDataIntegrityException("error.msg.provisioning.duplicate.criterianame", "Provisioning Criteria with name `"
                     + name + "` already exists", "category name", name);
-        }
+        }else if (realCause.getMessage().contains("product_id")) {
+			throw new PlatformDataIntegrityException(
+					"error.msg.provisioning.product.id(s).already.associated.existing.criteria",
+					"The selected products already associated with another Provisioning Criteria");
+		}
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.provisioning.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());

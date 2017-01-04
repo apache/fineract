@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.data;
 import java.math.BigDecimal;
 
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.joda.time.LocalDate;
 
 /**
  * Immutable data object representing Savings Account summary information.
@@ -39,11 +40,15 @@ public class SavingsAccountSummaryData {
     private final BigDecimal totalFeeCharge;
     private final BigDecimal totalPenaltyCharge;
     private final BigDecimal totalOverdraftInterestDerived;
+    private final BigDecimal totalWithholdTax;
+    private final BigDecimal interestNotPosted;
+    private final LocalDate lastInterestCalculationDate;
 
     public SavingsAccountSummaryData(final CurrencyData currency, final BigDecimal totalDeposits, final BigDecimal totalWithdrawals,
             final BigDecimal totalWithdrawalFees, final BigDecimal totalAnnualFees, final BigDecimal totalInterestEarned,
             final BigDecimal totalInterestPosted, final BigDecimal accountBalance, final BigDecimal totalFeeCharge,
-            final BigDecimal totalPenaltyCharge, final BigDecimal totalOverdraftInterestDerived) {
+            final BigDecimal totalPenaltyCharge, final BigDecimal totalOverdraftInterestDerived,final BigDecimal totalWithholdTax,
+            final BigDecimal interestNotPosted, final LocalDate lastInterestCalculationDate) {
         this.currency = currency;
         this.totalDeposits = totalDeposits;
         this.totalWithdrawals = totalWithdrawals;
@@ -55,5 +60,8 @@ public class SavingsAccountSummaryData {
         this.totalFeeCharge = totalFeeCharge;
         this.totalPenaltyCharge = totalPenaltyCharge;
         this.totalOverdraftInterestDerived = totalOverdraftInterestDerived;
+        this.totalWithholdTax = totalWithholdTax;
+        this.interestNotPosted = interestNotPosted;
+        this.lastInterestCalculationDate = lastInterestCalculationDate;
     }
 }

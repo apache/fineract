@@ -26,6 +26,7 @@ import static org.apache.fineract.portfolio.interestratechart.InterestRateChartA
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.endDateParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.fromDateParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.idParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.isPrimaryGroupingByAmountParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.nameParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.productIdParamName;
 
@@ -98,6 +99,11 @@ public class InterestRateChartDataValidator {
             toDate = this.fromApiJsonHelper.extractLocalDateNamed(endDateParamName, element);
             baseDataValidator.reset().parameter(endDateParamName).value(toDate).notNull();
         }
+        
+        Boolean isPrimaryGroupingByAmount = this.fromApiJsonHelper.extractBooleanNamed(isPrimaryGroupingByAmountParamName, element);
+        if (isPrimaryGroupingByAmount == null) {
+            isPrimaryGroupingByAmount = false;
+        }
 
         if (fromDate != null && toDate != null) {
             if (fromDate.isAfter(toDate)) {
@@ -106,7 +112,7 @@ public class InterestRateChartDataValidator {
         }
 
         // validate chart Slabs
-        validateChartSlabs(element, baseDataValidator);
+        validateChartSlabs(element, baseDataValidator, isPrimaryGroupingByAmount);
     }
 
     public void validateUpdate(final String json) {
@@ -151,6 +157,11 @@ public class InterestRateChartDataValidator {
             toDate = this.fromApiJsonHelper.extractLocalDateNamed(endDateParamName, element);
             baseDataValidator.reset().parameter(endDateParamName).value(toDate).notNull();
         }
+        
+        Boolean isPrimaryGroupingByAmount = this.fromApiJsonHelper.extractBooleanNamed(isPrimaryGroupingByAmountParamName, element);
+        if (isPrimaryGroupingByAmount == null) {
+            isPrimaryGroupingByAmount = false;
+        }
 
         if (fromDate != null && toDate != null) {
             if (fromDate.isAfter(toDate)) {
@@ -158,7 +169,7 @@ public class InterestRateChartDataValidator {
             }
         }
 
-        validateChartSlabs(element, baseDataValidator);
+        validateChartSlabs(element, baseDataValidator, isPrimaryGroupingByAmount);
 
     }
 
@@ -166,7 +177,7 @@ public class InterestRateChartDataValidator {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
-    private void validateChartSlabs(JsonElement element, DataValidatorBuilder baseDataValidator) {
+    private void validateChartSlabs(JsonElement element, DataValidatorBuilder baseDataValidator,final boolean isPrimaryGroupingByAmount) {
 
         if (element.isJsonObject()) {
             final JsonObject topLevelJsonElement = element.getAsJsonObject();
@@ -178,9 +189,9 @@ public class InterestRateChartDataValidator {
                     if (this.fromApiJsonHelper.parameterExists(idParamName, interstRateChartElement)) {
                         final Long id = this.fromApiJsonHelper.extractLongNamed(idParamName, interstRateChartElement);
                         baseDataValidator.reset().parameter(idParamName).value(id).notNull().integerGreaterThanZero();
-                        this.chartSlabDataValidator.validateChartSlabsUpdate(interstRateChartElement, baseDataValidator, locale);
+                        this.chartSlabDataValidator.validateChartSlabsUpdate(interstRateChartElement, baseDataValidator, locale, isPrimaryGroupingByAmount);
                     } else {
-                        this.chartSlabDataValidator.validateChartSlabsCreate(interstRateChartElement, baseDataValidator, locale);
+                        this.chartSlabDataValidator.validateChartSlabsCreate(interstRateChartElement, baseDataValidator, locale, isPrimaryGroupingByAmount);
                     }
                 }
             }

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.report.provider;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,6 +57,11 @@ public class ReportingProcessServiceProvider implements ApplicationContextAware 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
         this.initializeRegistry();
+    }
+
+    public Collection<String> findAllReportingTypes() {
+        return this.reportingProcessServices.keySet();
+
     }
 
     private void initializeRegistry() {

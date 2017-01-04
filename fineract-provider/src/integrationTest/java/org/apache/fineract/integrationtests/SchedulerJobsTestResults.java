@@ -126,7 +126,7 @@ public class SchedulerJobsTestResults {
                 ChargesHelper.getSavingsAnnualFeeJSON());
         Assert.assertNotNull(annualFeeChargeId);
 
-        this.savingsAccountHelper.addChargesForSavings(savingsId, annualFeeChargeId);
+        this.savingsAccountHelper.addChargesForSavings(savingsId, annualFeeChargeId, true);
         ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsId);
         Assert.assertEquals(1, chargesPendingState.size());
 
@@ -347,7 +347,7 @@ public class SchedulerJobsTestResults {
                 ChargesHelper.getSavingsSpecifiedDueDateJSON());
         Assert.assertNotNull(specifiedDueDateChargeId);
 
-        this.savingsAccountHelper.addChargesForSavings(savingsId, specifiedDueDateChargeId);
+        this.savingsAccountHelper.addChargesForSavings(savingsId, specifiedDueDateChargeId, true);
         ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsId);
         Assert.assertEquals(1, chargesPendingState.size());
 
@@ -892,6 +892,7 @@ public class SchedulerJobsTestResults {
         FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         final String fixedDepositProductJSON = fixedDepositProductHelper //
                 // .withAccountingRuleAsCashBased(accounts)
+                .withPeriodRangeChart()//
                 .build(validFrom, validTo);
         return FixedDepositProductHelper.createFixedDepositProduct(fixedDepositProductJSON, requestSpec, responseSpec);
     }
@@ -904,7 +905,7 @@ public class SchedulerJobsTestResults {
                 //
                 .withSubmittedOnDate(submittedOnDate).withSavings(savingsId).transferInterest(true)
                 .withLockinPeriodFrequency("1", FixedDepositAccountHelper.DAYS)
-                .build(clientID, productID, validFrom, validTo, penalInterestType);
+                .build(clientID, productID, penalInterestType);
         return fixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, this.requestSpec, this.responseSpec);
     }
 

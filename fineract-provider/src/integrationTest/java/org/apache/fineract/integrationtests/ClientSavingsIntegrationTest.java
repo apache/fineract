@@ -26,6 +26,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -33,12 +34,17 @@ import java.util.Locale;
 
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
+import org.apache.fineract.integrationtests.common.TaxComponentHelper;
+import org.apache.fineract.integrationtests.common.TaxGroupHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -232,7 +238,7 @@ public class ClientSavingsIntegrationTest {
                 ChargesHelper.getSavingsActivationFeeJSON());
         Assert.assertNotNull(savingsActivationChargeId);
 
-        this.savingsAccountHelper.addChargesForSavings(savingsId, savingsActivationChargeId);
+        this.savingsAccountHelper.addChargesForSavings(savingsId, savingsActivationChargeId, true);
 
         savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
@@ -515,7 +521,7 @@ public class ClientSavingsIntegrationTest {
                 ChargesHelper.getSavingsWithdrawalFeeJSON());
         Assert.assertNotNull(withdrawalChargeId);
 
-        this.savingsAccountHelper.addChargesForSavings(savingsId, withdrawalChargeId);
+        this.savingsAccountHelper.addChargesForSavings(savingsId, withdrawalChargeId, false);
         ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsId);
         Assert.assertEquals(1, chargesPendingState.size());
 
@@ -541,7 +547,7 @@ public class ClientSavingsIntegrationTest {
         ArrayList<HashMap> charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
         Assert.assertTrue(charges == null || charges.size() == 0);
 
-        this.savingsAccountHelper.addChargesForSavings(savingsId, chargeId);
+        this.savingsAccountHelper.addChargesForSavings(savingsId, chargeId, true);
         charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
         Assert.assertEquals(1, charges.size());
 
@@ -586,7 +592,7 @@ public class ClientSavingsIntegrationTest {
                 ChargesHelper.getSavingsMonthlyFeeJSON());
         Assert.assertNotNull(monthlyFeechargeId);
 
-        this.savingsAccountHelper.addChargesForSavings(savingsId, monthlyFeechargeId);
+        this.savingsAccountHelper.addChargesForSavings(savingsId, monthlyFeechargeId, true);
         charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
         Assert.assertEquals(2, charges.size());
 
@@ -612,7 +618,7 @@ public class ClientSavingsIntegrationTest {
                 ChargesHelper.getSavingsWeeklyFeeJSON());
         Assert.assertNotNull(weeklyFeeId);
 
-        this.savingsAccountHelper.addChargesForSavings(savingsId, weeklyFeeId);
+        this.savingsAccountHelper.addChargesForSavings(savingsId, weeklyFeeId, true);
         charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
         Assert.assertEquals(3, charges.size());
 
@@ -789,7 +795,252 @@ public class ClientSavingsIntegrationTest {
         assertEquals("validation.msg.savingsaccount.close.results.in.balance.not.zero",
                 savingsAccountErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
     }
+    
+    @Test
+    public void testSavingsAccount_WITH_WITHHOLD_TAX() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
 
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientID);
+        final String minBalanceForInterestCalculation = null;
+        final String minRequiredBalance = null;
+        final String enforceMinRequiredBalance = "false";
+        final boolean allowOverdraft = false;
+        final String percentage = "10";
+        final Integer taxGroupId = createTaxGroup(percentage);
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft, String.valueOf(taxGroupId), false);
+        Assert.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertNotNull(savingsProductID);
+
+        HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(clientID, savingsProductID, savingsId,
+                ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        final HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        this.savingsAccountHelper.calculateInterestForSavings(savingsId);
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        assertEquals(summaryBefore, summary);
+
+        this.savingsAccountHelper.postInterestForSavings(savingsId);
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        Assert.assertFalse(summaryBefore.equals(summary));
+        Assert.assertNotNull(summary.get("totalWithholdTax"));
+        Float expected = (Float) summary.get("totalDeposits") + (Float) summary.get("totalInterestPosted")
+                - (Float) summary.get("totalWithholdTax");
+        Float actual = (Float) summary.get("accountBalance");
+        Assert.assertEquals(expected, actual, 1);
+
+    }
+
+    @Test
+    public void testSavingsAccount_WITH_WITHHOLD_TAX_DISABLE_AT_ACCOUNT_LEVEL() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientID);
+        final String minBalanceForInterestCalculation = null;
+        final String minRequiredBalance = null;
+        final String enforceMinRequiredBalance = "false";
+        final boolean allowOverdraft = false;
+        final String percentage = "10";
+        final Integer taxGroupId = createTaxGroup(percentage);
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft, String.valueOf(taxGroupId), false);
+        Assert.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertNotNull(savingsProductID);
+
+        HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(clientID, savingsProductID, savingsId,
+                ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        final HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        this.savingsAccountHelper.calculateInterestForSavings(savingsId);
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        assertEquals(summaryBefore, summary);
+
+        final HashMap changes = this.savingsAccountHelper.updateSavingsAccountWithHoldTaxStatus(savingsId, false);
+        Assert.assertTrue(changes.containsKey("withHoldTax"));
+
+        this.savingsAccountHelper.postInterestForSavings(savingsId);
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        Assert.assertFalse(summaryBefore.equals(summary));
+        Assert.assertNull(summary.get("totalWithholdTax"));
+        Float expected = (Float) summary.get("totalDeposits") + (Float) summary.get("totalInterestPosted");
+        Float actual = (Float) summary.get("accountBalance");
+        Assert.assertEquals(expected, actual, 1);
+
+    }
+    
+    @Test
+    public void testSavingsAccount_DormancyTracking() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientID);
+        final String minBalanceForInterestCalculation = null;
+        final String minRequiredBalance = null;
+        final String enforceMinRequiredBalance = "false";
+        final boolean allowOverdraft = false;
+        final String percentage = "10";
+        final Integer taxGroupId = createTaxGroup(percentage);
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft, String.valueOf(taxGroupId), true);
+        Assert.assertNotNull(savingsProductID);
+        
+        final Integer savingsChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+                ChargesHelper.getSavingsNoActivityFeeJSON());
+        Assert.assertNotNull(savingsChargeId);
+
+        ArrayList<Integer> savingsList = new ArrayList<>();
+
+        for(int i=0; i< 5; i++){
+            final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+            Assert.assertNotNull(savingsProductID);
+
+            HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(clientID, savingsProductID, savingsId,
+                    ACCOUNT_TYPE_INDIVIDUAL);
+            Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+
+            this.savingsAccountHelper.addChargesForSavings(savingsId, savingsChargeId, false);
+
+            HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+            SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+            savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+            SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+            savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+            SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+            savingsList.add(savingsId);
+        }
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertNotNull(savingsProductID);
+
+        HashMap modifications = this.savingsAccountHelper.updateSavingsAccount(clientID, savingsProductID, savingsId,
+                ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertTrue(modifications.containsKey("submittedOnDate"));
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        savingsList.add(savingsId);
+
+        final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMMM yyyy");
+        LocalDate transactionDate = new LocalDate();
+        for(int i=0; i< 4; i++){
+        	String TRANSACTION_DATE = formatter.print(transactionDate);
+            Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(i), DEPOSIT_AMOUNT,
+                    TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        	transactionDate = transactionDate.minusDays(30);
+        }
+        
+        SchedulerJobHelper jobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
+        try {
+			jobHelper.executeJob("Update Savings Dormant Accounts");
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+        
+        //VERIFY WITHIN PROVIDED RANGE DOESN'T INACTIVATE
+        savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(0));
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        savingsStatusHashMap = SavingsStatusChecker.getSubStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(0));
+        SavingsStatusChecker.verifySavingsSubStatusNone(savingsStatusHashMap);
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsList.get(0));
+        Float balance = 3000f;
+        Float chargeAmt = 0f;
+        balance -= chargeAmt;
+        assertEquals("Verifying account Balance", balance, summary.get("accountBalance"));
+
+
+        //VERIFY INACTIVE
+        savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(1));
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        savingsStatusHashMap = SavingsStatusChecker.getSubStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(1));
+        SavingsStatusChecker.verifySavingsSubStatusInactive(savingsStatusHashMap);
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsList.get(1));
+        balance = 3000f;
+        chargeAmt = 100f;
+        balance -= chargeAmt;
+        assertEquals("Verifying account Balance", balance, summary.get("accountBalance"));
+
+    	String TRANSACTION_DATE = formatter.print(new LocalDate());
+        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(1), DEPOSIT_AMOUNT,
+                TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(1));
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        savingsStatusHashMap = SavingsStatusChecker.getSubStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(1));
+        SavingsStatusChecker.verifySavingsSubStatusNone(savingsStatusHashMap);
+
+        //VERIFY DORMANT
+        savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(2));
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        savingsStatusHashMap = SavingsStatusChecker.getSubStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(2));
+        SavingsStatusChecker.verifySavingsSubStatusDormant(savingsStatusHashMap);
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsList.get(2));
+        balance = 3000f;
+        chargeAmt = 100f;
+        balance -= chargeAmt;
+        assertEquals("Verifying account Balance", balance, summary.get("accountBalance"));
+        
+        TRANSACTION_DATE = formatter.print(new LocalDate());
+        depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsList.get(2), DEPOSIT_AMOUNT,
+                TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(2));
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        savingsStatusHashMap = SavingsStatusChecker.getSubStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(2));
+        SavingsStatusChecker.verifySavingsSubStatusNone(savingsStatusHashMap);
+        
+        //VERIFY ESCHEAT DUE TO OLD TRANSACTION
+        savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(3));
+        SavingsStatusChecker.verifySavingsAccountIsClosed(savingsStatusHashMap);
+        savingsStatusHashMap = SavingsStatusChecker.getSubStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(3));
+        SavingsStatusChecker.verifySavingsSubStatusEscheat(savingsStatusHashMap);
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsList.get(3));
+        assertEquals("Verifying account Balance", 2900f, summary.get("accountBalance"));
+        
+        //VERIFY ESCHEAT DUE NO TRANSACTION FROM ACTIVATION
+        savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(4));
+        SavingsStatusChecker.verifySavingsAccountIsClosed(savingsStatusHashMap);
+        savingsStatusHashMap = SavingsStatusChecker.getSubStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(4));
+        SavingsStatusChecker.verifySavingsSubStatusEscheat(savingsStatusHashMap);
+        summary = this.savingsAccountHelper.getSavingsSummary(savingsList.get(4));
+        assertEquals("Verifying account Balance", 900f, summary.get("accountBalance"));
+        
+        //VERIFY NON ACTIVE ACCOUNTS ARE NOT AFFECTED
+        savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(5));
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+        savingsStatusHashMap = SavingsStatusChecker.getSubStatusOfSavings(this.requestSpec, this.responseSpec, savingsList.get(5));
+        SavingsStatusChecker.verifySavingsSubStatusNone(savingsStatusHashMap);
+        
+
+    }
+
+    
     private HashMap activateSavingsAccount(final Integer savingsId, final String activationDate) {
         final HashMap status = this.savingsAccountHelper.activateSavingsAccount(savingsId, activationDate);
         return status;
@@ -798,11 +1049,22 @@ public class ClientSavingsIntegrationTest {
     private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String minOpenningBalance, String minBalanceForInterestCalculation, String minRequiredBalance,
             String enforceMinRequiredBalance, final boolean allowOverdraft) {
+        final String taxGroupId = null;
+        return createSavingsProduct(requestSpec, responseSpec, minOpenningBalance, minBalanceForInterestCalculation, minRequiredBalance,
+                enforceMinRequiredBalance, allowOverdraft, taxGroupId, false);
+    }
+    
+    private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String minOpenningBalance, String minBalanceForInterestCalculation, String minRequiredBalance,
+            String enforceMinRequiredBalance, final boolean allowOverdraft, final String taxGroupId, boolean withDormancy) {
         System.out.println("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         if (allowOverdraft) {
             final String overDraftLimit = "2000.0";
             savingsProductHelper = savingsProductHelper.withOverDraft(overDraftLimit);
+        }
+        if(withDormancy){
+        	savingsProductHelper = savingsProductHelper.withDormancy();
         }
 
         final String savingsProductJSON = savingsProductHelper
@@ -816,9 +1078,16 @@ public class ClientSavingsIntegrationTest {
                 .withMinBalanceForInterestCalculation(minBalanceForInterestCalculation)
                 //
                 .withMinRequiredBalance(minRequiredBalance).withEnforceMinRequiredBalance(enforceMinRequiredBalance)
-                .withMinimumOpenningBalance(minOpenningBalance).build();
+                .withMinimumOpenningBalance(minOpenningBalance).withWithHoldTax(taxGroupId).build();
         return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
     }
+    
+    private Integer createTaxGroup(final String percentage){
+        final Integer liabilityAccountId = null;
+        final Integer taxComponentId = TaxComponentHelper.createTaxComponent(this.requestSpec, this.responseSpec, percentage, liabilityAccountId);
+        return TaxGroupHelper.createTaxGroup(this.requestSpec, this.responseSpec, Arrays.asList(taxComponentId));
+    }
+
 
     /*
      * private void verifySavingsInterest(final Object savingsInterest) {

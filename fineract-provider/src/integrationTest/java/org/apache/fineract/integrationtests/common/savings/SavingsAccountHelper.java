@@ -48,6 +48,7 @@ public class SavingsAccountHelper {
     private static final String CALCULATE_INTEREST_SAVINGS_COMMAND = "calculateInterest";
     private static final String POST_INTEREST_SAVINGS_COMMAND = "postInterest";
     private static final String CLOSE_SAVINGS_COMMAND = "close";
+    private static final String UPDATE_WITHHOLD_TAX_STATUS = "updateWithHoldTax";
 
     private static final String DEPOSIT_SAVINGS_COMMAND = "deposit";
     private static final String WITHDRAW_SAVINGS_COMMAND = "withdrawal";
@@ -94,6 +95,15 @@ public class SavingsAccountHelper {
 
         return Utils.performServerPut(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "/" + savingsId + "?"
                 + Utils.TENANT_IDENTIFIER, savingsApplicationJSON, CommonConstants.RESPONSE_CHANGES);
+    }
+
+    public HashMap updateSavingsAccountWithHoldTaxStatus(final Integer savingsId, final boolean value) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("withHoldTax", value);
+        String json = new Gson().toJson(map);
+
+        return Utils.performServerPut(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "/" + savingsId + "?command="
+                + UPDATE_WITHHOLD_TAX_STATUS + "&" + Utils.TENANT_IDENTIFIER, json, CommonConstants.RESPONSE_CHANGES);
     }
 
     public HashMap approveSavings(final Integer savingsID) {
@@ -186,10 +196,10 @@ public class SavingsAccountHelper {
                 getCalculatedInterestForSavingsApplicationAsJSON(), "");
     }
 
-    public Integer addChargesForSavings(final Integer savingsId, final Integer chargeId) {
+    public Integer addChargesForSavings(final Integer savingsId, final Integer chargeId, boolean addDueDate) {
         System.out.println("--------------------------------- ADD CHARGES FOR SAVINGS --------------------------------");
         return (Integer) performSavingActions(SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges?" + Utils.TENANT_IDENTIFIER,
-                getPeriodChargeRequestJSON(chargeId), CommonConstants.RESPONSE_RESOURCE_ID);
+                getPeriodChargeRequestJSON(chargeId, addDueDate), CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public Integer payCharge(final Integer chargeId, final Integer savingsId, String amount, String dueDate) {
@@ -341,9 +351,9 @@ public class SavingsAccountHelper {
         final ArrayList<HashMap> response = Utils.performServerGet(requestSpec, responseSpec, URL, jSONAttribute);
         return response;
     }
-    
-    public Object getSavingsAccountDetail(final Integer savingsID, final String jsonAttribute){
-    	final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "?associations=all&" + Utils.TENANT_IDENTIFIER;
+
+    public Object getSavingsAccountDetail(final Integer savingsID, final String jsonAttribute) {
+        final String URL = SAVINGS_ACCOUNT_URL + "/" + savingsID + "?associations=all&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerGet(requestSpec, responseSpec, URL, jsonAttribute);
     }
 
@@ -409,7 +419,7 @@ public class SavingsAccountHelper {
                 getCloseAccountJSON(withdrawBalance, closedOnDate), jsonAttributeToGetBack);
     }
 
-    private String getPeriodChargeRequestJSON(Integer chargeId) {
+    private String getPeriodChargeRequestJSON(Integer chargeId, boolean addDueDate) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("chargeId", chargeId);
         map.put("amount", 100);
@@ -417,7 +427,9 @@ public class SavingsAccountHelper {
         map.put("locale", CommonConstants.locale);
         map.put("monthDayFormat", "dd MMMM");
         map.put("dateFormat", "dd MMMM yyy");
-        map.put("dueDate", "10 January 2013");
+        if(addDueDate){
+            map.put("dueDate", "10 January 2013");
+        }
         String json = new Gson().toJson(map);
         return json;
     }

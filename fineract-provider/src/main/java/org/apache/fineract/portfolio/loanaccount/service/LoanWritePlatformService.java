@@ -98,12 +98,14 @@ public interface LoanWritePlatformService {
 
     CommandProcessingResult makeLoanRefund(Long loanId, JsonCommand command);
 
-	CommandProcessingResult addAndDeleteLoanDisburseDetails(Long loanId, JsonCommand command);
+    CommandProcessingResult addAndDeleteLoanDisburseDetails(Long loanId, JsonCommand command);
 
     void applyOverdueChargesForLoan(Long loanId, Collection<OverdueLoanScheduleData> overdueLoanScheduleDatas);
 
     void recalculateInterest(long loanId);
 
-	CommandProcessingResult undoLastLoanDisbursal(Long loanId, JsonCommand command);
+    CommandProcessingResult undoLastLoanDisbursal(Long loanId, JsonCommand command);
+
+    CommandProcessingResult forecloseLoan(final Long loanId, JsonCommand command);
 
 }
