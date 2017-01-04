@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.client.domain;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
@@ -38,13 +39,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class AccountNumberGenerator {
 
-    private final static int maxLength = 9;
+    private final static int maxLength = 6;
 
     private final static String ID = "id";
     private final static String CLIENT_TYPE = "clientType";
     private final static String OFFICE_NAME = "officeName";
     private final static String LOAN_PRODUCT_SHORT_NAME = "loanProductShortName";
     private final static String SAVINGS_PRODUCT_SHORT_NAME = "savingsProductShortName";
+    private final static String SAVINGS_EXTERNAL_SHORT_NAME = "savingsExternalShortName";
 
     public String generate(Client client, AccountNumberFormat accountNumberFormat) {
         Map<String, String> propertyMap = new HashMap<>();
@@ -61,15 +63,16 @@ public class AccountNumberGenerator {
         Map<String, String> propertyMap = new HashMap<>();
         propertyMap.put(ID, loan.getId().toString());
         propertyMap.put(OFFICE_NAME, loan.getOffice().getName());
-        propertyMap.put(LOAN_PRODUCT_SHORT_NAME, loan.loanProduct().getShortName());
+        propertyMap.put(LOAN_PRODUCT_SHORT_NAME, loan.loanProduct().getShortName().concat("-"));
         return generateAccountNumber(propertyMap, accountNumberFormat);
     }
 
     public String generate(SavingsAccount savingsAccount, AccountNumberFormat accountNumberFormat) {
         Map<String, String> propertyMap = new HashMap<>();
-        propertyMap.put(ID, savingsAccount.getId().toString());
+        propertyMap.put(ID, savingsAccount.getClient().getExternalId());
         propertyMap.put(OFFICE_NAME, savingsAccount.office().getName());
         propertyMap.put(SAVINGS_PRODUCT_SHORT_NAME, savingsAccount.savingsProduct().getShortName());
+        propertyMap.put(SAVINGS_EXTERNAL_SHORT_NAME, savingsAccount.savingsProduct().getShortName().concat("-"));
         return generateAccountNumber(propertyMap, accountNumberFormat);
     }
 
@@ -95,11 +98,20 @@ public class AccountNumberGenerator {
                     prefix = propertyMap.get(SAVINGS_PRODUCT_SHORT_NAME);
                 break;
 
+                case SAVINGS_EXTERNAL_SHORT_NAME:
+                    prefix = propertyMap.get(SAVINGS_EXTERNAL_SHORT_NAME);
+
                 default:
                 break;
 
             }
-            accountNumber = StringUtils.overlay(accountNumber, prefix, 0, 0);
+            if("accountNumberPrefixType.savingsExternalShortName".equals(accountNumberPrefixType.getCode()) || "accountNumberPrefixType.loanProductShortName".equals(accountNumberPrefixType.getCode())) {
+                Random r = new Random();
+                int Result = r.nextInt(9-0);
+                accountNumber = StringUtils.overlay(accountNumber, prefix, 0, 0).concat("-").concat(Integer.toString(Result));
+            }
+            else
+                accountNumber = StringUtils.overlay(accountNumber, prefix, 0, 0);
         }
         return accountNumber;
     }

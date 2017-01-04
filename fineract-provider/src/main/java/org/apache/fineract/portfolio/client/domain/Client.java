@@ -734,6 +734,8 @@ public final class Client extends AbstractPersistable<Long> {
         this.mobileNo = mobileNo;
     }
 
+    public String getExternalId() { return this.externalId; }
+
     public String getDisplayName() {
         return this.displayName;
     }
