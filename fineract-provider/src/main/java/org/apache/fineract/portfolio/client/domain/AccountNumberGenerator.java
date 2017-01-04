@@ -47,13 +47,10 @@ public class AccountNumberGenerator {
     private final static String OFFICE_NAME = "officeName";
     private final static String LOAN_PRODUCT_SHORT_NAME = "loanProductShortName";
     private final static String SAVINGS_PRODUCT_SHORT_NAME = "savingsProductShortName";
-<<<<<<< HEAD
     private final static String SAVINGS_EXTERNAL_SHORT_NAME = "savingsExternalShortName";
-
-=======
     private final static String SHARE_PRODUCT_SHORT_NAME = "sharesProductShortName" ;
+
     
->>>>>>> 272b84f5dbfc9fc211fb27741f54772eb1b1106a
     public String generate(Client client, AccountNumberFormat accountNumberFormat) {
         Map<String, String> propertyMap = new HashMap<>();
         propertyMap.put(ID, client.getId().toString());
