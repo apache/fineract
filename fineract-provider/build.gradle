@@ -103,7 +103,9 @@ rat {
     '**/.gitignore',
     '**/.gitkeep',
 	'**/*.iml',
-		
+	//Notice files
+	'**/NOTICE_RELEASE',
+	'**/NOTICE_SOURCE',	
     // gradle
     '**/.gradle/**',
     '**/gradlew',
@@ -242,13 +244,19 @@ compileJava{
 }
 
 war {
-	from('../licenses') { // notice the parens
-		into "WEB-INF/licenses/" // no leading slash
+	from('../licenses/binary/') { // notice the parens
+		into "WEB-INF/licenses/binary/" // no leading slash
 	}
-	from('../LICENSE') { // notice the parens
+	from('../LICENSE_RELEASE') { // notice the parens
 		into "WEB-INF/" // no leading slash
 	}
-	from('../NOTICE') { // notice the parens
+	from('../NOTICE_RELEASE') { // notice the parens
+		into "WEB-INF/" // no leading slash
+	}
+	rename ('LICENSE_RELEASE', 'LICENSE')
+	rename ('NOTICE_RELEASE', 'NOTICE')
+	
+	from('../DISCLAIMER') { // notice the parens
 		into "WEB-INF/" // no leading slash
 	}
     war.finalizedBy(bootRepackage)
