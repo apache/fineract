@@ -263,7 +263,7 @@ war {
 }
 
 license {
-    header rootProject.file('../LICENSE.md')
+    header rootProject.file('../APACHE_LICENSETEXT.md')
     excludes(["**/*.html", "**/*.mustache", "**/package-info.java", "**/keystore.jks"])
     strictCheck true
 }
