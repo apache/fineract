@@ -295,6 +295,8 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             sqlBuilder.append("dprd.is_mandatory as isMandatoryDeposit, ");
             sqlBuilder.append("dprd.allow_withdrawal as allowWithdrawal, ");
             sqlBuilder.append("dprd.adjust_advance_towards_future_payments as adjustAdvanceTowardsFuturePayments, ");
+            sqlBuilder.append("dprd.recurring_frequency as recurringFrequency, ");
+            sqlBuilder.append("dprd.recurring_frequency_type_enum as recurringFrequencyType, ");
             sqlBuilder.append("dptp.min_deposit_term as minDepositTerm, ");
             sqlBuilder.append("dptp.max_deposit_term as maxDepositTerm, ");
             sqlBuilder.append("dptp.min_deposit_term_type_enum as minDepositTermTypeId, ");
@@ -343,11 +345,16 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             final Integer inMultiplesOfDepositTermTypeId = JdbcSupport.getInteger(rs, "inMultiplesOfDepositTermTypeId");
             final EnumOptionData inMultiplesOfDepositTermType = (inMultiplesOfDepositTermTypeId == null) ? null : SavingsEnumerations
                     .depositTermFrequencyType(inMultiplesOfDepositTermTypeId);
+            final Integer recurringFrequency = JdbcSupport.getInteger(rs, "recurringFrequency");
+            final Integer recurringFrequencyTypeId = JdbcSupport.getInteger(rs, "recurringFrequencyType");
+            final EnumOptionData recurringFrequencyType = (recurringFrequencyTypeId == null) ? null : SavingsEnumerations
+                    .depositTermFrequencyType(recurringFrequencyTypeId);
 
             return RecurringDepositProductData.instance(depositProductData, preClosurePenalApplicable, preClosurePenalInterest,
                     preClosurePenalInterestOnType, minDepositTerm, maxDepositTerm, minDepositTermType, maxDepositTermType,
                     inMultiplesOfDepositTerm, inMultiplesOfDepositTermType, isMandatoryDeposit, allowWithdrawal,
-                    adjustAdvanceTowardsFuturePayments, minDepositAmount, depositAmount, maxDepositAmount);
+                    adjustAdvanceTowardsFuturePayments, minDepositAmount, depositAmount, maxDepositAmount, 
+                    recurringFrequency, recurringFrequencyType);
         }
     }
 

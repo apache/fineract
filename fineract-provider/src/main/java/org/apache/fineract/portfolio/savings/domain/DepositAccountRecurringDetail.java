@@ -90,8 +90,7 @@ public class DepositAccountRecurringDetail extends AbstractPersistableCustom<Lon
      * @param account
      */
     protected DepositAccountRecurringDetail(final BigDecimal mandatoryRecommendedDepositAmount, final BigDecimal totalOverdueAmount,
-            final Integer noOfOverdueInstallments, final DepositRecurringDetail recurringDetail, final SavingsAccount account,
-            final boolean isCalendarInherited) {
+            final Integer noOfOverdueInstallments, final DepositRecurringDetail recurringDetail, final SavingsAccount account, final boolean isCalendarInherited) {
         this.mandatoryRecommendedDepositAmount = mandatoryRecommendedDepositAmount;
         this.totalOverdueAmount = totalOverdueAmount;
         this.noOfOverdueInstallments = noOfOverdueInstallments;
@@ -155,7 +154,15 @@ public class DepositAccountRecurringDetail extends AbstractPersistableCustom<Lon
     public boolean adjustAdvanceTowardsFuturePayments() {
         return this.recurringDetail.adjustAdvanceTowardsFuturePayments();
     }
-
+    
+    public Integer recurringFrequency() {
+      return this.recurringDetail.recurringFrequency();
+    }
+    
+    public Integer recurringFrequencyType() {
+      return this.recurringDetail.recurringFrequencyType();
+    }
+    
     public BigDecimal mandatoryRecommendedDepositAmount() {
         return this.mandatoryRecommendedDepositAmount;
     }
@@ -168,6 +175,7 @@ public class DepositAccountRecurringDetail extends AbstractPersistableCustom<Lon
         final BigDecimal mandatoryRecommendedDepositAmount = this.mandatoryRecommendedDepositAmount;
         final DepositRecurringDetail recurringDetail = this.recurringDetail.copy();
         final boolean isCalendarInherited = this.isCalendarInherited;
+
         return DepositAccountRecurringDetail.createNew(mandatoryRecommendedDepositAmount, recurringDetail, null, isCalendarInherited);
     }
 
