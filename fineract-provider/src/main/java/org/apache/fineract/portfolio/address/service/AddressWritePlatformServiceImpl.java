@@ -142,7 +142,13 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 			final Long addressid = add.getId();
 			final Address addobj = this.addressRepository.getOne(addressid);
 
-			final boolean isActive = jsonObject.get("isActive").getAsBoolean();
+			//final boolean isActive = jsonObject.get("isActive").getAsBoolean();
+			boolean isActive=false;
+			if(jsonObject.get("isActive")!= null)
+			{
+				isActive= jsonObject.get("isActive").getAsBoolean();
+			}
+			
 
 			clientAddressobj = ClientAddress.fromJson(isActive, client, addobj, addressTypeIdObj);
 			this.clientAddressRepository.save(clientAddressobj);
