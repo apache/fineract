@@ -151,9 +151,15 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(groupOffice, groupLevel, activationDate);
 
             Staff staff = null;
-            final Long staffId = command.longValueOfParameterNamed(GroupingTypesApiConstants.staffIdParamName);
-            if (staffId != null) {
-                staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, groupOffice.getHierarchy());
+            if ((GroupTypes.GROUP).equals(groupingType)) {
+            	if (parentGroup != null) {
+            		staff = parentGroup.getStaff();
+            	}
+            } else if ((GroupTypes.CENTER).equals(groupingType)) {
+            	final Long staffId = command.longValueOfParameterNamed(GroupingTypesApiConstants.staffIdParamName);
+            	if (staffId != null) {
+            		staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, groupOffice.getHierarchy());
+            	}
             }
 
             final Set<Client> clientMembers = assembleSetOfClients(officeId, command);
@@ -231,7 +237,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         } catch (final DataIntegrityViolationException dve) {
             handleGroupDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, groupingType);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException dve) {
+        } catch (final PersistenceException dve) {
         	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleGroupDataIntegrityIssues(command, throwable, dve, groupingType);
          	return CommandProcessingResult.empty();
@@ -247,13 +253,12 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             	accountNumberFormat = this.accountNumberFormatRepository
                         .findByAccountType(entityAccountType);
                 newGroup.updateAccountNo(this.accountNumberGenerator.generateCenterAccountNumber(newGroup, accountNumberFormat));
-        	}else {
+        	} else {
             	entityAccountType = EntityAccountType.GROUP;
             	accountNumberFormat = this.accountNumberFormatRepository
                         .findByAccountType(entityAccountType);
                 newGroup.updateAccountNo(this.accountNumberGenerator.generateGroupAccountNumber(newGroup, accountNumberFormat));
         	}
-            
         }
     }
     @Transactional
@@ -373,8 +378,14 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 final Long newValue = command.longValueOfParameterNamed(GroupingTypesApiConstants.staffIdParamName);
 
                 Staff newStaff = null;
-                if (newValue != null) {
-                    newStaff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(newValue, groupHierarchy);
+                if ((GroupTypes.GROUP).equals(groupingType)) {
+                	if (groupForUpdate.getParent() != null) {
+                		newStaff = groupForUpdate.getParent().getStaff();
+                	}
+                } else if ((GroupTypes.CENTER).equals(groupingType)) {
+                	if (newValue != null) {
+                		newStaff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(newValue, groupHierarchy);
+                	}
                 }
                 groupForUpdate.updateStaff(newStaff);
             }
