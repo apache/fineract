@@ -1030,6 +1030,12 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final List<Note> relatedNotes = this.noteRepository.findByLoanId(loan.getId());
         this.noteRepository.deleteInBatch(relatedNotes);
 
+        final AccountAssociations accountAssociations = this.accountAssociationsRepository.findByLoanIdAndType(loanId,
+				AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
+		if (accountAssociations != null) {
+			this.accountAssociationsRepository.delete(accountAssociations);
+		}
+		
         this.loanRepositoryWrapper.delete(loanId);
 
         return new CommandProcessingResultBuilder() //
