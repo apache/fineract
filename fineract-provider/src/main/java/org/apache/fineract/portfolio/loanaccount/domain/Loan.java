@@ -4617,7 +4617,6 @@ public class Loan extends AbstractPersistableCustom<Long> {
     private void validateActivityNotBeforeLastTransactionDate(final LoanEvent event, final LocalDate activityDate) {
         if (!(this.repaymentScheduleDetail().isInterestRecalculationEnabled() || this.loanProduct().isHoldGuaranteeFundsEnabled())) { return; }
         LocalDate lastTransactionDate = getLastUserTransactionDate();
-        final LocalDate clientOfficeJoiningDate = this.client.getOfficeJoiningLocalDate();
         if (lastTransactionDate.isAfter(activityDate)) {
             String errorMessage = null;
             String action = null;
@@ -4641,7 +4640,7 @@ public class Loan extends AbstractPersistableCustom<Long> {
                 default:
                 break;
             }
-            throw new InvalidLoanStateTransitionException(action, postfix, errorMessage, clientOfficeJoiningDate);
+            throw new InvalidLoanStateTransitionException(action, postfix, errorMessage, lastTransactionDate);
         }
     }
 
