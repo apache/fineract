@@ -1077,7 +1077,6 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.disbursementDataParameterName, element) && expectedDisbursement != null
                 && totalPrincipal != null) {
             BigDecimal tatalDisbursement = BigDecimal.ZERO;
-            boolean isFirstinstallmentOnExpectedDisbursementDate = false;
             final JsonArray variationArray = this.fromApiJsonHelper.extractJsonArrayNamed(LoanApiConstants.disbursementDataParameterName,
                     element);
             List<LocalDate> expectedDisbursementDates = new ArrayList<>();
@@ -1085,17 +1084,22 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                 int i = 0;
                 do {
                     final JsonObject jsonObject = variationArray.get(i).getAsJsonObject();
-                    if (jsonObject.has(LoanApiConstants.disbursementDateParameterName)
-                            && jsonObject.has(LoanApiConstants.disbursementPrincipalParameterName)) {
                         LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed(
                                 LoanApiConstants.disbursementDateParameterName, jsonObject, dateFormat, locale);
-                        if (expectedDisbursementDates.contains(expectedDisbursementDate)) {
+                        baseDataValidator.reset().parameter(LoanApiConstants.disbursementDataParameterName)
+                        .parameterAtIndexArray(LoanApiConstants.disbursementDateParameterName, i).value(expectedDisbursementDate)
+                        .notNull();
+                        if(i == 0 && expectedDisbursementDate != null && !expectedDisbursement.equals(expectedDisbursementDate)) {
+                        	 baseDataValidator.reset().parameter(LoanApiConstants.disbursementDateParameterName)
+                             .failWithCode(LoanApiConstants.DISBURSEMENT_DATE_START_WITH_ERROR);
+                        }else if(i > 0 && expectedDisbursementDate != null && expectedDisbursementDate.isBefore(expectedDisbursement)) {
+                        	baseDataValidator.reset().parameter(LoanApiConstants.disbursementDataParameterName)
+                            .failWithCode(LoanApiConstants.DISBURSEMENT_DATE_BEFORE_ERROR);
+                        }
+                        
+                        if (expectedDisbursementDate != null && expectedDisbursementDates.contains(expectedDisbursementDate)) {
                             baseDataValidator.reset().parameter(LoanApiConstants.disbursementDateParameterName)
                                     .failWithCode(LoanApiConstants.DISBURSEMENT_DATE_UNIQUE_ERROR);
-                        }
-                        if (expectedDisbursementDate.isBefore(expectedDisbursement)) {
-                            baseDataValidator.reset().parameter(LoanApiConstants.disbursementDataParameterName)
-                                    .failWithCode(LoanApiConstants.DISBURSEMENT_DATE_BEFORE_ERROR);
                         }
                         expectedDisbursementDates.add(expectedDisbursementDate);
 
@@ -1106,22 +1110,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                         if (principal != null) {
                             tatalDisbursement = tatalDisbursement.add(principal);
                         }
-
-                        baseDataValidator.reset().parameter(LoanApiConstants.disbursementDataParameterName)
-                                .parameterAtIndexArray(LoanApiConstants.disbursementDateParameterName, i).value(expectedDisbursementDate)
-                                .notNull();
-
-                        if (expectedDisbursement.equals(expectedDisbursementDate)) {
-                            isFirstinstallmentOnExpectedDisbursementDate = true;
-                        }
-
-                    }
                     i++;
                 } while (i < variationArray.size());
-                if (!isFirstinstallmentOnExpectedDisbursementDate) {
-                    baseDataValidator.reset().parameter(LoanApiConstants.disbursementDateParameterName)
-                            .failWithCode(LoanApiConstants.DISBURSEMENT_DATE_START_WITH_ERROR);
-                }
 
                 if (tatalDisbursement.compareTo(totalPrincipal) == 1) {
                     baseDataValidator.reset().parameter(LoanApiConstants.disbursementPrincipalParameterName)
