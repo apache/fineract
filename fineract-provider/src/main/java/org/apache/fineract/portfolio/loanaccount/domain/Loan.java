@@ -1268,9 +1268,14 @@ public class Loan extends AbstractPersistableCustom<Long> {
     }
 
     public Map<String, Object> loanApplicationModification(final JsonCommand command, final Set<LoanCharge> possiblyModifedLoanCharges,
-            final Set<LoanCollateral> possiblyModifedLoanCollateralItems, final AprCalculator aprCalculator, boolean isChargesModified) {
+            final Set<LoanCollateral> possiblyModifedLoanCollateralItems, final AprCalculator aprCalculator, boolean isChargesModified,
+            final LoanProduct loanProduct) {
 
         final Map<String, Object> actualChanges = this.loanRepaymentScheduleDetail.updateLoanApplicationAttributes(command, aprCalculator);
+        final MonetaryCurrency currency = new MonetaryCurrency(loanProduct.getCurrency().getCode(), loanProduct.getCurrency().getDigitsAfterDecimal(),
+        		loanProduct.getCurrency().getCurrencyInMultiplesOf());
+        this.loanRepaymentScheduleDetail.updateCurrency(currency);
+        
         if (!actualChanges.isEmpty()) {
             final boolean recalculateLoanSchedule = !(actualChanges.size() == 1 && actualChanges.containsKey("inArrearsTolerance"));
             actualChanges.put("recalculateLoanSchedule", recalculateLoanSchedule);
