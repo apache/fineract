@@ -605,7 +605,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
 
             final Map<String, Object> changes = existingLoanApplication.loanApplicationModification(command, possiblyModifedLoanCharges,
-                    possiblyModifedLoanCollateralItems, this.aprCalculator, isChargeModified);
+                    possiblyModifedLoanCollateralItems, this.aprCalculator, isChargeModified, loanProductForValidations);
 
             if (changes.containsKey("expectedDisbursementDate")) {
                 this.loanAssembler.validateExpectedDisbursementForHolidayAndNonWorkingDay(existingLoanApplication);
