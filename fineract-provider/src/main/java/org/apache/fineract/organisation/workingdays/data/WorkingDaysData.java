@@ -24,18 +24,14 @@ import java.util.Collection;
 
 public class WorkingDaysData {
 
-    @SuppressWarnings("unused")
     private final Long id;
-    @SuppressWarnings("unused")
+    
     private final String recurrence;
 
-    @SuppressWarnings("unused")
     private final EnumOptionData repaymentRescheduleType;
 
-    @SuppressWarnings("unused")
     private final Boolean extendTermForDailyRepayments;
 
-    @SuppressWarnings("unused")
     private final Boolean extendTermForRepaymentsOnHolidays;
 
     // template date
@@ -59,5 +55,14 @@ public class WorkingDaysData {
         this.repaymentRescheduleOptions = repaymentRescheduleOptions;
         this.extendTermForDailyRepayments = extendTermForDailyRepayments;
         this.extendTermForRepaymentsOnHolidays = extendTermForRepaymentsOnHolidays;
+    }
+    
+    public WorkingDaysData(WorkingDaysData data, Collection<EnumOptionData> repaymentRescheduleOptions) {
+        this.id = data.id;
+        this.recurrence = data.recurrence;
+        this.repaymentRescheduleType = data.repaymentRescheduleType;
+        this.repaymentRescheduleOptions = repaymentRescheduleOptions;
+        this.extendTermForDailyRepayments = data.extendTermForDailyRepayments;
+        this.extendTermForRepaymentsOnHolidays = data.extendTermForRepaymentsOnHolidays;
     }
 }
