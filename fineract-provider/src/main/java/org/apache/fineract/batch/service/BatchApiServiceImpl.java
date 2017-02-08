@@ -32,6 +32,7 @@ import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.command.CommandStrategyProvider;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.batch.exception.ClientDetailsNotFoundException;
 import org.apache.fineract.batch.exception.ErrorHandler;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.batch.service.ResolutionHelper.BatchRequestNode;
@@ -95,7 +96,14 @@ public class BatchApiServiceImpl implements BatchApiService {
 
         final List<BatchRequestNode> batchRequestNodes = this.resolutionHelper.getDependingRequests(requestList);
         checkList.clear();
-
+        if(batchRequestNodes.isEmpty()) {
+        	 final BatchResponse response = new BatchResponse();
+        	 ErrorInfo ex = ErrorHandler.handler(new ClientDetailsNotFoundException());
+             response.setStatusCode(500);
+             response.setBody(ex.getMessage());
+             responseList.add(response) ;
+             return responseList ;
+        }
         for (BatchRequestNode rootNode : batchRequestNodes) {
             final BatchRequest rootRequest = rootNode.getRequest();
             final CommandStrategy commandStrategy = this.strategyProvider.getCommandStrategy(CommandContext
