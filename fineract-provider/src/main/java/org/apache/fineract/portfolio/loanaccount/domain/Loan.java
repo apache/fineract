@@ -1191,7 +1191,9 @@ public class Loan extends AbstractPersistableCustom<Long> {
                     penality = penality.plus(loanTransaction.getPenaltyChargesPortion(getCurrency()));
                     if (installment.getFeeChargesCharged(getCurrency()).isLessThan(fee)
                             || installment.getInterestCharged(getCurrency()).isLessThan(interest)
-                            || installment.getPenaltyChargesCharged(getCurrency()).isLessThan(penality)) {
+                            || installment.getPenaltyChargesCharged(getCurrency()).isLessThan(penality)
+                            || (getAccruedTill().isEqual(loanTransaction.getTransactionDate()) && !installment.getDueDate().isEqual(
+                                    getAccruedTill()))) {
                         interest = interest.minus(loanTransaction.getInterestPortion(getCurrency()));
                         fee = fee.minus(loanTransaction.getFeeChargesPortion(getCurrency()));
                         penality = penality.minus(loanTransaction.getPenaltyChargesPortion(getCurrency()));
