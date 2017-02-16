@@ -351,6 +351,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sqlBuilder.append("c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, ");
             sqlBuilder.append("c.fullname as fullname, c.display_name as displayName, ");
             sqlBuilder.append("c.mobile_no as mobileNo, ");
+			sqlBuilder.append("c.email_address as emailAddress, ");
             sqlBuilder.append("c.date_of_birth as dateOfBirth, ");
             sqlBuilder.append("c.gender_cv_id as genderId, ");
             sqlBuilder.append("cv.code_value as genderValue, ");
@@ -439,6 +440,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String displayName = rs.getString("displayName");
             final String externalId = rs.getString("externalId");
             final String mobileNo = rs.getString("mobileNo");
+			final String emailAddress = rs.getString("emailAddress");
             final LocalDate dateOfBirth = JdbcSupport.getLocalDate(rs, "dateOfBirth");
             final Long genderId = JdbcSupport.getLong(rs, "genderId");
             final String genderValue = rs.getString("genderValue");
@@ -498,7 +500,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                     closedByUsername, closedByFirstname, closedByLastname);
 
             return ClientData.instance(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id,
-                    firstname, middlename, lastname, fullname, displayName, externalId, mobileNo, dateOfBirth, gender, activationDate,
+                    firstname, middlename, lastname, fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender, activationDate,
                     imageId, staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId, clienttype,
                     classification, legalForm, clientNonPerson);
 
@@ -533,6 +535,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, ");
             builder.append("c.fullname as fullname, c.display_name as displayName, ");
             builder.append("c.mobile_no as mobileNo, ");
+			builder.append("c.email_address as emailAddress, ");
             builder.append("c.date_of_birth as dateOfBirth, ");
             builder.append("c.gender_cv_id as genderId, ");
             builder.append("cv.code_value as genderValue, ");
@@ -620,6 +623,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String displayName = rs.getString("displayName");
             final String externalId = rs.getString("externalId");
             final String mobileNo = rs.getString("mobileNo");
+			final String emailAddress = rs.getString("emailAddress");
             final LocalDate dateOfBirth = JdbcSupport.getLocalDate(rs, "dateOfBirth");
             final Long genderId = JdbcSupport.getLong(rs, "genderId");
             final String genderValue = rs.getString("genderValue");
@@ -678,7 +682,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                     closedByUsername, closedByFirstname, closedByLastname);
 
             return ClientData.instance(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id,
-                    firstname, middlename, lastname, fullname, displayName, externalId, mobileNo, dateOfBirth, gender, activationDate,
+                    firstname, middlename, lastname, fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender, activationDate,
                     imageId, staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId, clienttype,
                     classification, legalForm, clientNonPerson);
 
