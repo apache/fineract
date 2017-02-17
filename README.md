@@ -12,7 +12,10 @@ Requirements
 Instructions to run Apache RAT (Release Audit Tool)
 ============
 1. Extract the archive file to your local directory.
-2. Download gradle-wrapper.jar version 2.10 and place it in the fineract-provider/gradle/wrapper folder.
+2. Download gradle-wrapper.jar version 2.10 and place it in the fineract-provider/gradle/wrapper folder. You can download this jar from Fineract git repository
+wget --no-check-certificate -P fineract-provider/gradle/wrapper https://github.com/apache/incubator-fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar
+(or)
+curl --insecure -L https://github.com/apache/incubator-fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar > fineract-provider/gradle/wrapper/gradle-wrapper.jar
 3. Change the current working directory to fineract-provider
 4. Run `./gradlew rat`. Report will be generated under fineract-provider/build/reports/rat/rat-report.txt
 
@@ -20,7 +23,10 @@ Instructions to build war file
 ============
 
 1. Extract the archive file to your local directory.
-2. Download gradle-wrapper.jar version 2.10 and place it in the fineract-provider/gradle/wrapper folder.
+2. Download gradle-wrapper.jar version 2.10 and place it in the fineract-provider/gradle/wrapper folder. You can download this jar from Fineract git repository
+wget --no-check-certificate -P fineract-provider/gradle/wrapper https://github.com/apache/incubator-fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar
+(or)
+curl --insecure -L https://github.com/apache/incubator-fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar > fineract-provider/gradle/wrapper/gradle-wrapper.jar
 3. Change the current working directory to fineract-provider.
 4. Run `./gradlew clean war` or `./gradlew build` to build deployable war file which will be created at fineract-provider/build/libs directory.
 
