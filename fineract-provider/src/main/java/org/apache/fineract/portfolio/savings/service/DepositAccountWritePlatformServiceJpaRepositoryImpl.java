@@ -433,7 +433,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
         final SavingsAccountTransaction deposit = this.depositAccountDomainService.handleRDDeposit(account, fmt, transactionDate,
                 transactionAmount, paymentDetail, isRegularTransaction);
-
+        
         return new CommandProcessingResultBuilder() //
                 .withEntityId(deposit.getId()) //
                 .withOfficeId(account.officeId()) //
