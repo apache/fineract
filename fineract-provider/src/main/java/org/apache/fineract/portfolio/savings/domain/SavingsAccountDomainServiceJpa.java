@@ -174,7 +174,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
 
         saveTransactionToGenerateTransactionId(deposit);
 
-        this.savingsAccountRepository.save(account);
+        this.savingsAccountRepository.saveAndFlush(account);
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
         this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.SAVINGS_DEPOSIT,

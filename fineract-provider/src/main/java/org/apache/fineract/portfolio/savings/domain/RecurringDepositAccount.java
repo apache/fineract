@@ -370,11 +370,21 @@ public class RecurringDepositAccount extends SavingsAccount {
         List<SavingsAccountTransaction> allTransactions = new ArrayList<>();
         // add existing transactions
         allTransactions.addAll(retreiveOrderedNonInterestPostingTransactions());
+        LocalDate latestTransactionDate = null;
+        for (final SavingsAccountTransaction installment : allTransactions) {
+            if(latestTransactionDate == null || latestTransactionDate.isBefore(installment.getTransactionLocalDate())){
+                latestTransactionDate = installment.getTransactionLocalDate();
+            }
+        }
         if (generateFutureTransactions) {
             for (RecurringDepositScheduleInstallment installment : depositScheduleInstallments()) {
                 if (installment.isPrincipalNotCompleted(getCurrency())) {
+                    LocalDate dueDate = installment.dueDate();
+                    if(latestTransactionDate != null && dueDate.isBefore(latestTransactionDate)){
+                        dueDate = latestTransactionDate;
+                    }
                     final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(null, office(), null,
-                            installment.dueDate(), installment.getDepositAmountOutstanding(getCurrency()), installment.dueDate().toDate(),
+                            dueDate, installment.getDepositAmountOutstanding(getCurrency()), installment.dueDate().toDate(),
                             null);
                     allTransactions.add(transaction);
                 }
