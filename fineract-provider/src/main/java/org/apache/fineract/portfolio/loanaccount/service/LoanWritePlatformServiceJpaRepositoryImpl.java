@@ -317,7 +317,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                             "Loan to be closed with this topup is not active.");
                 }
                 final LocalDate lastUserTransactionOnLoanToClose = loanToClose.getLastUserTransactionDate();
-                if(!loan.getDisbursementDate().isAfter(lastUserTransactionOnLoanToClose)){
+                if(loan.getDisbursementDate().isBefore(lastUserTransactionOnLoanToClose)){
                     throw new GeneralPlatformDomainRuleException(
                             "error.msg.loan.disbursal.date.should.be.after.last.transaction.date.of.loan.to.be.closed",
                             "Disbursal date of this loan application "+loan.getDisbursementDate()
