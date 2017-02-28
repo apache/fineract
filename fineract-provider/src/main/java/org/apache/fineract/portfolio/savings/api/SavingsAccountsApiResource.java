@@ -277,13 +277,21 @@ public class SavingsAccountsApiResource {
             final CommandWrapper commandRequest = builder.unassignSavingsOfficer(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return this.toApiJsonSerializer.serialize(result);
+		} else if (is(commandParam, "undoReject")){
+            final CommandWrapper commandRequest = builder.undoSavingsAccountRejection(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
+        } else if (is(commandParam, "reopen")){
+            final CommandWrapper commandRequest = builder.reopenSavingsAccount(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
         }
 
         if (result == null) {
             //
             throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "reject", "withdrawnByApplicant", "approve",
                     "undoapproval", "activate", "calculateInterest", "postInterest", "close", "assignSavingsOfficer",
-                    "unassignSavingsOfficer" });
+                    "unassignSavingsOfficer", "undoReject", "reopen" });
         }
 
         return this.toApiJsonSerializer.serialize(result);

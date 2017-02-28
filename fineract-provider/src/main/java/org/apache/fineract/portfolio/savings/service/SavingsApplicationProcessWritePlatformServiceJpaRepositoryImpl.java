@@ -446,6 +446,72 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 .build();
     }
 
+	@Transactional
+    @Override
+    public CommandProcessingResult undoApplicationRejection(final Long savingsId, final JsonCommand command) {
+        this.context.authenticatedUser();
+
+        this.savingsAccountApplicationTransitionApiJsonValidator.validateForUndo(command.json());
+
+        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId);
+        checkClientOrGroupActive(savingsAccount);
+
+        final Map<String, Object> changes = savingsAccount.undoApplicationRejection();
+        if (!changes.isEmpty()) {
+            this.savingAccountRepository.save(savingsAccount);
+
+            final String noteText = command.stringValueOfParameterNamed("note");
+            if (StringUtils.isNotBlank(noteText)) {
+                final Note note = Note.savingNote(savingsAccount, noteText);
+                changes.put("note", noteText);
+                this.noteRepository.save(note);
+            }
+        }
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(savingsId) //
+                .withOfficeId(savingsAccount.officeId()) //
+                .withClientId(savingsAccount.clientId()) //
+                .withGroupId(savingsAccount.groupId()) //
+                .withSavingsId(savingsId) //
+                .with(changes) //
+                .build();
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult reopen(final Long savingsId, final JsonCommand command) {
+        this.context.authenticatedUser();
+
+        this.savingsAccountApplicationTransitionApiJsonValidator.validateForUndo(command.json());
+
+        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId);
+        checkClientOrGroupActive(savingsAccount);
+
+        final Map<String, Object> changes = savingsAccount.reopen();
+        if (!changes.isEmpty()) {
+            this.savingAccountRepository.save(savingsAccount);
+
+            final String noteText = command.stringValueOfParameterNamed("note");
+            if (StringUtils.isNotBlank(noteText)) {
+                final Note note = Note.savingNote(savingsAccount, noteText);
+                changes.put("note", noteText);
+                this.noteRepository.save(note);
+            }
+        }
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(savingsId) //
+                .withOfficeId(savingsAccount.officeId()) //
+                .withClientId(savingsAccount.clientId()) //
+                .withGroupId(savingsAccount.groupId()) //
+                .withSavingsId(savingsId) //
+                .with(changes) //
+                .build();
+    }
+	
     @Transactional
     @Override
     public CommandProcessingResult applicantWithdrawsFromApplication(final Long savingsId, final JsonCommand command) {
