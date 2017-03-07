@@ -149,14 +149,27 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                 transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction);
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
-        updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
-        account.processAccountUponActivation(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, user);
-        this.savingsAccountRepository.saveAndFlush(account);
+        final boolean isAnyActivationChargesDue = isAnyActivationChargesDue(account);
+        if(isAnyActivationChargesDue){
+            updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
+            account.processAccountUponActivation(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, user);
+            this.savingsAccountRepository.saveAndFlush(account);
+        }
         account.handleScheduleInstallments(deposit);
         account.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
         account.updateOverduePayments(DateUtils.getLocalDateOfTenant());
-        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
+        if(isAnyActivationChargesDue){
+            postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
+        }
         return deposit;
+    }
+
+    private boolean isAnyActivationChargesDue(final RecurringDepositAccount account) {
+        for (final SavingsAccountCharge savingsAccountCharge : account.charges()) {
+            if (savingsAccountCharge.isSavingsActivation() && savingsAccountCharge.amoutOutstanding() != null
+                    && savingsAccountCharge.amoutOutstanding().compareTo(BigDecimal.ZERO) > 0) { return true; }
+        }
+        return false;
     }
 
     @Transactional
