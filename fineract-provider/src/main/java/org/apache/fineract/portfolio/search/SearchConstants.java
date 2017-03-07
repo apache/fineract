@@ -85,7 +85,7 @@ public class SearchConstants {
     }
 
     public static enum SEARCH_SUPPORTED_RESOURCES {
-        CLIENTS("clients"), GROUPS("groups"), LOANS("loans"), SAVINGS("savings"), CLIENTIDENTIFIERS("clientIdentifiers");
+        CLIENTS("clients"), GROUPS("groups"), LOANS("loans"), SAVINGS("savings"), SHARES("shares"), CLIENTIDENTIFIERS("clientIdentifiers");
 
         private final String value;
 
