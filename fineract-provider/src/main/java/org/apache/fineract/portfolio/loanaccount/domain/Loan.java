@@ -2570,14 +2570,15 @@ public class Loan extends AbstractPersistableCustom<Long> {
      * Ability to regenerate the repayment schedule based on the loans current
      * details/state.
      */
-    public void regenerateRepaymentSchedule(final ScheduleGeneratorDTO scheduleGeneratorDTO, AppUser currentUser) {
-
+    public void regenerateRepaymentSchedule(final ScheduleGeneratorDTO scheduleGeneratorDTO, final AppUser currentUser) {
         final LoanScheduleModel loanSchedule = regenerateScheduleModel(scheduleGeneratorDTO);
-
+        if (loanSchedule == null) { return; }
         updateLoanSchedule(loanSchedule, currentUser);
-        Set<LoanCharge> charges = this.charges();
-        for (LoanCharge loanCharge : charges) {
-            recalculateLoanCharge(loanCharge, scheduleGeneratorDTO.getPenaltyWaitPeriod());
+        final Set<LoanCharge> charges = this.charges();
+        for (final LoanCharge loanCharge : charges) {
+            if (!loanCharge.isWaived()) {
+                recalculateLoanCharge(loanCharge, scheduleGeneratorDTO.getPenaltyWaitPeriod());
+            }
         }
     }
 
