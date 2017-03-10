@@ -562,6 +562,13 @@ public final class Client extends AbstractPersistableCustom<Long> {
             	{
             		actualChanges.put(ClientApiConstants.legalFormIdParamName, ClientEnumerations.legalForm(newValue));
                     this.setLegalForm(legalForm.getValue());
+                    if(legalForm.isPerson()){
+                        this.fullname = null;
+                    }else if(legalForm.isEntity()){
+                        this.firstname = null;
+                        this.lastname = null;
+                        this.displayName = null;
+                    }
             	}
             	else
             	{
