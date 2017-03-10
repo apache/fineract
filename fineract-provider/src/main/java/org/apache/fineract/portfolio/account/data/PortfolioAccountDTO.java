@@ -22,6 +22,7 @@ public class PortfolioAccountDTO {
 
     private final Integer accountTypeId;
     private final Long clientId;
+    private Long groupId;
     private final String currencyCode;
     private final long[] accountStatus;
     private final Integer depositType;
@@ -78,6 +79,14 @@ public class PortfolioAccountDTO {
 
     public boolean isExcludeOverDraftAccounts() {
         return this.excludeOverDraftAccounts;
+    }
+    
+    public Long getGroupId() {
+        return this.groupId;
+    }
+    
+    public void setGroupId(final Long groupId) {
+        this.groupId = groupId;
     }
 
 }
