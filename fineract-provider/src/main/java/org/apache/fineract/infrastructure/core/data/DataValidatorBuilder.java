@@ -145,7 +145,7 @@ public class DataValidatorBuilder {
      * param and if it has invalid value or value not passed then call this
      * method, this method is always used with input as false
      */
-    public DataValidatorBuilder trueOrFalseRequired(final boolean trueOfFalseFieldProvided) {
+    public DataValidatorBuilder trueOrFalseRequired1(final boolean trueOfFalseFieldProvided) {
         if (!trueOfFalseFieldProvided && !this.ignoreNullValue) {
             final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                     .append(this.parameter).append(".must.be.true.or.false");
@@ -156,6 +156,27 @@ public class DataValidatorBuilder {
             this.dataValidationErrors.add(error);
         }
         return this;
+    }
+    
+    
+    public DataValidatorBuilder trueOrFalseRequired(final Object trueOfFalseField)
+    {
+    	
+    	if(trueOfFalseField!=null)
+    	{
+    		if((!trueOfFalseField.toString().equalsIgnoreCase("true")) && (!trueOfFalseField.toString().equalsIgnoreCase("false")) )
+    		{
+    			  final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
+    	                    .append(this.parameter).append(".must.be.true.or.false");
+    	            final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(this.parameter).append(
+    	                    " must be set as true or false.");
+    	            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+    	                    defaultEnglishMessage.toString(), this.parameter);
+    	            this.dataValidationErrors.add(error);	
+    		}
+    	}
+    	
+    	  return this;
     }
 
     public DataValidatorBuilder notNull() {

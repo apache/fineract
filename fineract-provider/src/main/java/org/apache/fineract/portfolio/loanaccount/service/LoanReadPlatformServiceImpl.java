@@ -213,6 +213,22 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             throw new LoanNotFoundException(loanId);
         }
     }
+    
+    @Override
+    public LoanAccountData retrieveLoanByLoanAccount(String loanAccountNumber)
+    {
+
+       
+            //final AppUser currentUser = this.context.authenticatedUser();
+    		this.context.authenticatedUser();
+            final LoanMapper rm = new LoanMapper();
+
+            String sql="select "+rm.loanSchema()+" where l.account_no=?"; 
+            
+
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanAccountNumber });
+       
+    }
 
     @Override
     public LoanScheduleData retrieveRepaymentSchedule(final Long loanId,
@@ -231,6 +247,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             throw new LoanNotFoundException(loanId);
         }
     }
+    
+    
 
     @Override
     public Collection<LoanTransactionData> retrieveLoanTransactions(final Long loanId) {
