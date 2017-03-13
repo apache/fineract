@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
@@ -111,6 +112,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             AccountAssociations accountAssociations = null;
             if (guarantorCommand.getSavingsId() != null) {
                 final SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(guarantorCommand.getSavingsId());
+                validateGuarantorSavingsAccountActivationDateWithLoanSubmittedOnDate(loan,savingsAccount);
                 accountAssociations = AccountAssociations.associateSavingsAccount(loan, savingsAccount,
                         AccountAssociationType.GUARANTOR_ACCOUNT_ASSOCIATION.getValue(), true);
 
@@ -177,6 +179,14 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             handleGuarantorDataIntegrityIssues(dve);
             return CommandProcessingResult.empty();
         }
+    }
+
+    private void validateGuarantorSavingsAccountActivationDateWithLoanSubmittedOnDate(final Loan loan, final SavingsAccount savingsAccount) {
+        if (loan.getSubmittedOnDate().isBefore(savingsAccount.getActivationLocalDate())) { throw new GeneralPlatformDomainRuleException(
+                "error.msg.guarantor.saving.account.activation.date.is.on.or.before.loan.submitted.on.date",
+                "Guarantor saving account activation date [" + savingsAccount.getActivationLocalDate()
+                        + "] is on or before the loan submitted on date [" + loan.getSubmittedOnDate() + "]",
+                savingsAccount.getActivationLocalDate(), loan.getSubmittedOnDate()); }
     }
 
     @Override
