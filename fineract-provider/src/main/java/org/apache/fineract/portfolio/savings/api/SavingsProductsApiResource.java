@@ -18,10 +18,13 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -31,6 +34,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
@@ -46,6 +50,7 @@ import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
+import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -63,6 +68,8 @@ import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYea
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
+import org.apache.fineract.portfolio.savingsproductmix.data.SavingsProductMixData;
+import org.apache.fineract.portfolio.savingsproductmix.service.SavingsProductMixReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsDropdownReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
@@ -90,6 +97,11 @@ public class SavingsProductsApiResource {
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
     private final TaxReadPlatformService taxReadPlatformService;
+	private final DefaultToApiJsonSerializer<SavingsProductMixData> savingsProductMixDataApiJsonSerializer;
+    private final SavingsProductMixReadPlatformService savingsProductMixReadPlatformService;
+	
+	private final Set<String> SAVINGSPRODUCT_MIX_DATA_PARAMETERS = new HashSet<>(Arrays.asList("productId", "productName", "restrictedProducts",
+            "allowedProducts", "productOptions"));
 
     @Autowired
     public SavingsProductsApiResource(final SavingsProductReadPlatformService savingProductReadPlatformService,
@@ -101,7 +113,9 @@ public class SavingsProductsApiResource {
             final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
             final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService,
             final ChargeReadPlatformService chargeReadPlatformService, PaymentTypeReadPlatformService paymentTypeReadPlatformService,
-            final TaxReadPlatformService taxReadPlatformService) {
+            final TaxReadPlatformService taxReadPlatformService, 
+			final DefaultToApiJsonSerializer<SavingsProductMixData> savingsProductMixDataApiJsonSerializer,
+            final SavingsProductMixReadPlatformService savingsProductMixReadPlatformService) {
         this.savingProductReadPlatformService = savingProductReadPlatformService;
         this.dropdownReadPlatformService = dropdownReadPlatformService;
         this.currencyReadPlatformService = currencyReadPlatformService;
@@ -114,6 +128,8 @@ public class SavingsProductsApiResource {
         this.chargeReadPlatformService = chargeReadPlatformService;
         this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
         this.taxReadPlatformService = taxReadPlatformService;
+		this.savingsProductMixDataApiJsonSerializer = savingsProductMixDataApiJsonSerializer;
+        this.savingsProductMixReadPlatformService = savingsProductMixReadPlatformService;
     }
 
     @POST
@@ -150,9 +166,18 @@ public class SavingsProductsApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME);
 
-        final Collection<SavingsProductData> products = this.savingProductReadPlatformService.retrieveAll();
-
+		final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+
+        if (!associationParameters.isEmpty()) {
+            if (associationParameters.contains("savingsProductMixes")) {
+                this.context.authenticatedUser().validateHasReadPermission("SAVINGSPRODUCTMIX");
+                final Collection<SavingsProductMixData> savingsProductMixes = this.savingsProductMixReadPlatformService.retrieveAllSavingsProductMixes();
+                return this.savingsProductMixDataApiJsonSerializer.serialize(settings, savingsProductMixes, this.SAVINGSPRODUCT_MIX_DATA_PARAMETERS);
+            }
+        }
+		
+        final Collection<SavingsProductData> products = this.savingProductReadPlatformService.retrieveAll();
         return this.toApiJsonSerializer.serialize(settings, products, SavingsApiConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
     }
 
@@ -197,13 +222,21 @@ public class SavingsProductsApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveTemplate(@Context final UriInfo uriInfo) {
+	public String retrieveTemplate(@Context final UriInfo uriInfo, @QueryParam("isSavingsProductMixTemplate") final boolean isSavingsProductMixTemplate) {
 
         this.context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME);
 
-        final SavingsProductData savingProduct = handleTemplateRelatedData(null);
+		final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        if (isSavingsProductMixTemplate) {
+            this.context.authenticatedUser().validateHasReadPermission("SAVINGSPRODUCTMIX");
+
+            final Collection<SavingsProductData> productOptions = this.savingProductReadPlatformService.retrieveAvailableSavingsProductsForMix();
+            final SavingsProductMixData savingsProductMixData = SavingsProductMixData.template(productOptions);
+            return this.savingsProductMixDataApiJsonSerializer.serialize(settings, savingsProductMixData, this.SAVINGSPRODUCT_MIX_DATA_PARAMETERS);
+        }
+		
+        final SavingsProductData savingProduct = handleTemplateRelatedData(null);
         return this.toApiJsonSerializer.serialize(settings, savingProduct, SavingsApiConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
     }
 

@@ -16,28 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.savings.service;
+package org.apache.fineract.portfolio.savings.exception;
 
-import java.util.Collection;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-import org.apache.fineract.portfolio.savings.data.SavingsProductData;
+public class SavingsAccountCreationException extends AbstractPlatformDomainRuleException {
 
-public interface SavingsProductReadPlatformService {
-
-    Collection<SavingsProductData> retrieveAll();
-
-    Collection<SavingsProductData> retrieveAllForLookup();
-
-    Collection<SavingsProductData> retrieveAllForLookupByType(Boolean isOverdraftType);
-
-    Collection<SavingsProductData> retrieveAllForCurrency(String currencyCode);
-
-    SavingsProductData retrieveOne(Long productId);
-	
-	Collection<SavingsProductData> retrieveAvailableSavingsProductsForMix();
-
-    Collection<SavingsProductData> retrieveRestrictedSavingsProductsForMix(Long productId);
-    
-    Collection<SavingsProductData> retrieveAllowedSavingsProductsForMix(Long productId);
-
+    public SavingsAccountCreationException(final String currentProduct, final String restrictedProduct) {
+        super("error.msg.savings.creation.failed", "This savings account not be created as `" + currentProduct + "` and `" + restrictedProduct
+                + "` are not allowed to co-exist", new Object[] { currentProduct, restrictedProduct });
+    }
 }

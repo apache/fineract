@@ -16,28 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.savings.service;
+package org.apache.fineract.portfolio.savingsproductmix.service;
 
 import java.util.Collection;
 
-import org.apache.fineract.portfolio.savings.data.SavingsProductData;
+import org.apache.fineract.portfolio.savingsproductmix.data.SavingsProductMixData;
 
-public interface SavingsProductReadPlatformService {
+public interface SavingsProductMixReadPlatformService {
 
-    Collection<SavingsProductData> retrieveAll();
+    SavingsProductMixData retrieveSavingsProductMixDetails(Long productId);
 
-    Collection<SavingsProductData> retrieveAllForLookup();
-
-    Collection<SavingsProductData> retrieveAllForLookupByType(Boolean isOverdraftType);
-
-    Collection<SavingsProductData> retrieveAllForCurrency(String currencyCode);
-
-    SavingsProductData retrieveOne(Long productId);
-	
-	Collection<SavingsProductData> retrieveAvailableSavingsProductsForMix();
-
-    Collection<SavingsProductData> retrieveRestrictedSavingsProductsForMix(Long productId);
-    
-    Collection<SavingsProductData> retrieveAllowedSavingsProductsForMix(Long productId);
-
+    Collection<SavingsProductMixData> retrieveAllSavingsProductMixes();
 }

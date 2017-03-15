@@ -1841,6 +1841,33 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createSavingsProductMix(final Long productId) {
+        this.actionName = "CREATE";
+        this.entityName = "SAVINGSPRODUCTMIX";
+        this.entityId = null;
+        this.productId = productId;
+        this.href = "/savingsproducts/" + productId + "/savingsproductmix";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateSavingsProductMix(final Long productId) {
+        this.actionName = "UPDATE";
+        this.entityName = "SAVINGSPRODUCTMIX";
+        this.entityId = null;
+        this.productId = productId;
+        this.href = "/savingsproducts/" + productId + "/savingsproductmix";
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteSavingsProductMix(final Long productId) {
+        this.actionName = "DELETE";
+        this.entityName = "SAVINGSPRODUCTMIX";
+        this.entityId = null;
+        this.productId = productId;
+        this.href = "/savingsproducts/" + productId + "/savingsproductmix";
+        return this;
+    }
+	
     public CommandWrapperBuilder withProduct(final Long productId) {
         this.productId = productId;
         return this;

@@ -235,6 +235,19 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             return " sp.id as id, sp.name as name from m_savings_product sp";
         }
 
+		public String savingsProductMixSchema() {
+            return "sp.id as id, sp.name as name FROM m_savings_product sp left join m_savings_product_mix pm on pm.product_id=sp.id where sp.id not IN("
+                    + "select sp.id from m_savings_product sp inner join m_savings_product_mix pm on pm.product_id=sp.id)";
+        }
+
+        public String restrictedSavingsProductsSchema() {
+            return "pm.restricted_product_id as id, rp.name as name from m_savings_product_mix pm join m_savings_product rp on rp.id = pm.restricted_product_id ";
+        }
+
+        public String derivedRestrictedSavingsProductsSchema() {
+            return "pm.product_id as id, sp.name as name from m_savings_product_mix pm join m_savings_product sp on sp.id=pm.product_id";
+        }
+		
         @Override
         public SavingsProductData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
@@ -289,5 +302,77 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         }
 
         return this.jdbcTemplate.query(sql, this.savingsProductRowMapper);
+    }
+	
+	    @Override
+    public Collection<SavingsProductData> retrieveAvailableSavingsProductsForMix() {
+
+        this.context.authenticatedUser();
+
+        final SavingProductLookupMapper rm = new SavingProductLookupMapper();
+
+        String sql = "Select " + rm.savingsProductMixSchema();
+
+        // Check if branch specific products are enabled. If yes, fetch only
+        // products mapped to current user's office
+        String inClause = fineractEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
+        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+            sql += " and sp.id in ( " + inClause + " ) ";
+        }
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+    }
+
+    @Override
+    public Collection<SavingsProductData> retrieveRestrictedSavingsProductsForMix(final Long productId) {
+
+        this.context.authenticatedUser();
+
+        final SavingProductLookupMapper rm = new SavingProductLookupMapper();
+
+        String sql = "Select " + rm.restrictedSavingsProductsSchema() + " where pm.product_id=? ";
+        // Check if branch specific products are enabled. If yes, fetch only
+        // products mapped to current user's office
+        String inClause1 = fineractEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
+        if ((inClause1 != null) && (!(inClause1.trim().isEmpty()))) {
+            sql += " and rp.id in ( " + inClause1 + " ) ";
+        }
+
+        sql += " UNION Select " + rm.derivedRestrictedSavingsProductsSchema() + " where pm.restricted_product_id=?";
+
+        // Check if branch specific products are enabled. If yes, fetch only
+        // products mapped to current user's office
+        String inClause2 = fineractEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
+        if ((inClause2 != null) && (!(inClause2.trim().isEmpty()))) {
+            sql += " and sp.id in ( " + inClause2 + " ) ";
+        }
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId });
+    }
+
+    @Override
+    public Collection<SavingsProductData> retrieveAllowedSavingsProductsForMix(final Long productId) {
+
+        this.context.authenticatedUser();
+
+        final SavingProductLookupMapper rm = new SavingProductLookupMapper();
+
+        String sql = "Select " + rm.schema() + " where ";
+
+        // Check if branch specific products are enabled. If yes, fetch only
+        // products mapped to current user's office
+        String inClause = fineractEntityAccessUtil
+                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
+        if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
+            sql += " sp.id in ( " + inClause + " ) and ";
+        }
+
+        sql += "sp.id not in (" + "Select pm.restricted_product_id from m_savings_product_mix pm where pm.product_id=? " + "UNION "
+                + "Select pm.product_id from m_savings_product_mix pm where pm.restricted_product_id=?)";
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId });
     }
 }
