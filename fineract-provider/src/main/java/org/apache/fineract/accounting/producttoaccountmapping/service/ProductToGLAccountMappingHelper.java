@@ -92,8 +92,9 @@ public class ProductToGLAccountMappingHelper {
         if (accountId != null) {
             final ProductToGLAccountMapping accountMapping = this.accountMappingRepository.findCoreProductToFinAccountMapping(productId,
                     portfolioProductType.getValue(), accountTypeId);
-            if (accountMapping == null) { throw new ProductToGLAccountMappingNotFoundException(portfolioProductType, productId,
-                    accountTypeName); }
+			if (accountMapping == null) {
+				throw new ProductToGLAccountMappingNotFoundException(portfolioProductType, productId, accountTypeName);
+			}
             if (accountMapping.getGlAccount().getId() != accountId) {
                 final GLAccount glAccount = getAccountByIdAndType(paramName, expectedAccountType, accountId);
                 changes.put(paramName, accountId);
@@ -427,9 +428,10 @@ public class ProductToGLAccountMappingHelper {
         final GLAccount glAccount = this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountId);
 
         // validate account is of the expected Type
-        if (glAccount.getType().intValue() != expectedAccountType.getValue()) { throw new ProductToGLAccountMappingInvalidException(
-                paramName, glAccount.getName(), accountId, GLAccountType.fromInt(glAccount.getType()).toString(),
-                expectedAccountType.toString()); }
+		if (glAccount.getType().intValue() != expectedAccountType.getValue()) {
+			throw new ProductToGLAccountMappingInvalidException(paramName, glAccount.getName(), accountId,
+					GLAccountType.fromInt(glAccount.getType()).toString(), expectedAccountType.toString());
+		}
         return glAccount;
     }
 
@@ -440,8 +442,10 @@ public class ProductToGLAccountMappingHelper {
         for (GLAccountType glAccountType : expectedAccountTypes) {
             glAccountTypeValues.add(glAccountType.getValue());
         }
-        if (!glAccountTypeValues.contains(glAccount.getType())) { throw new ProductToGLAccountMappingInvalidException(paramName,
-                glAccount.getName(), accountId, GLAccountType.fromInt(glAccount.getType()).toString(), glAccountTypeValues.toString()); }
+		if (!glAccountTypeValues.contains(glAccount.getType())) {
+			throw new ProductToGLAccountMappingInvalidException(paramName, glAccount.getName(), accountId,
+					GLAccountType.fromInt(glAccount.getType()).toString(), glAccountTypeValues.toString());
+		}
         return glAccount;
     }
 

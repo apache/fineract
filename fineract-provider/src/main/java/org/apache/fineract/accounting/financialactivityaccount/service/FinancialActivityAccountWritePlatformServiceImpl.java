@@ -95,8 +95,9 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
     private void validateFinancialActivityAndAccountMapping(FinancialActivityAccount financialActivityAccount) {
         FINANCIAL_ACTIVITY financialActivity = FINANCIAL_ACTIVITY.fromInt(financialActivityAccount.getFinancialActivityType());
         GLAccount glAccount = financialActivityAccount.getGlAccount();
-        if (!financialActivity.getMappedGLAccountType().getValue().equals(glAccount.getType())) { throw new FinancialActivityAccountInvalidException(
-                financialActivity, glAccount); }
+		if (!financialActivity.getMappedGLAccountType().getValue().equals(glAccount.getType())) {
+			throw new FinancialActivityAccountInvalidException(financialActivity, glAccount);
+		}
     }
 
     @Override

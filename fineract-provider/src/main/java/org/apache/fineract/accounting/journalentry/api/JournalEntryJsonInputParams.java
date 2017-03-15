@@ -31,12 +31,12 @@ public enum JournalEntryJsonInputParams {
             "checkNumber"), ROUTING_CODE("routingCode"), RECEIPT_NUMBER("receiptNumber"), BANK_NUMBER("bankNumber");
 
     private final String value;
+    private static final Set<String> values = new HashSet<>();
 
     private JournalEntryJsonInputParams(final String value) {
         this.value = value;
     }
 
-    private static final Set<String> values = new HashSet<>();
     static {
         for (final JournalEntryJsonInputParams type : JournalEntryJsonInputParams.values()) {
             values.add(type.value);
@@ -49,7 +49,7 @@ public enum JournalEntryJsonInputParams {
 
     @Override
     public String toString() {
-        return name().toString().replaceAll("_", " ");
+        return name().replaceAll("_", " ");
     }
 
     public String getValue() {

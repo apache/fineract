@@ -148,7 +148,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
         for (Map<String, Object> entries : officesRunningBalanceList) {
             Long accountId = Long.parseLong(entries.get("accountId").toString());
             Long officeId = Long.parseLong(entries.get("officeId").toString());
-            Map<Long, BigDecimal> runningBalance = null;
+            Map<Long, BigDecimal> runningBalance;
             if (officesRunningBalance.containsKey(officeId)) {
                 runningBalance = officesRunningBalance.get(officeId);
             } else {
@@ -169,7 +169,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
             int batchIndex = 0;
             for (int index = 0 ; index < entryDatas.size() ; index++) {
             	JournalEntryData entryData = entryDatas.get(index) ;
-                Map<Long, BigDecimal> officeRunningBalanceMap = null;
+                Map<Long, BigDecimal> officeRunningBalanceMap;
                 if (officesRunningBalance.containsKey(entryData.getOfficeId())) {
                     officeRunningBalanceMap = officesRunningBalance.get(entryData.getOfficeId());
                 } else {

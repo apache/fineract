@@ -125,14 +125,14 @@ public class GLAccount extends AbstractPersistableCustom<Long> {
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
             final Integer propertyToBeUpdated, final boolean sansLocale) {
-        boolean changeDetected = false;
+        boolean changeDetected;
         if (sansLocale) {
             changeDetected = command.isChangeInIntegerSansLocaleParameterNamed(paramName, propertyToBeUpdated);
         } else {
             changeDetected = command.isChangeInIntegerParameterNamed(paramName, propertyToBeUpdated);
         }
         if (changeDetected) {
-            Integer newValue = null;
+            Integer newValue;
             if (sansLocale) {
                 newValue = command.integerValueSansLocaleOfParameterNamed(paramName);
             } else {

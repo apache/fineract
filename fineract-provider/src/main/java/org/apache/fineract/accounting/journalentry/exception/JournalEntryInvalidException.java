@@ -32,43 +32,47 @@ public class JournalEntryInvalidException extends AbstractPlatformDomainRuleExce
         FUTURE_DATE, ACCOUNTING_CLOSED, NO_DEBITS_OR_CREDITS, DEBIT_CREDIT_SUM_MISMATCH_WITH_AMOUNT, DEBIT_CREDIT_SUM_MISMATCH, DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, GL_ACCOUNT_DISABLED, GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED, INVALID_DEBIT_OR_CREDIT_ACCOUNTS;
 
         public String errorMessage() {
-            if (name().toString().equalsIgnoreCase("FUTURE_DATE")) {
+            if ("FUTURE_DATE".equalsIgnoreCase(name())) {
                 return "The journal entry cannot be made for a future date";
-            } else if (name().toString().equalsIgnoreCase("ACCOUNTING_CLOSED")) {
+            } else if ("ACCOUNTING_CLOSED".equalsIgnoreCase(name())) {
                 return "Journal entry cannot be made prior to last account closing date for the branch";
-            } else if (name().toString().equalsIgnoreCase("NO_DEBITS_OR_CREDITS")) {
+            } else if ("NO_DEBITS_OR_CREDITS".equalsIgnoreCase(name())) {
                 return "Journal Entry must have atleast one Debit and one Credit";
-            } else if (name().toString().equalsIgnoreCase("DEBIT_CREDIT_SUM_MISMATCH_WITH_AMOUNT")) {
+            } else if ("DEBIT_CREDIT_SUM_MISMATCH_WITH_AMOUNT".equalsIgnoreCase(name())) {
                 return "Sum of All Debits OR Credits must equal the Amount for a Journal Entry";
-            } else if (name().toString().equalsIgnoreCase("DEBIT_CREDIT_SUM_MISMATCH")) {
+            } else if ("DEBIT_CREDIT_SUM_MISMATCH".equalsIgnoreCase(name())) {
                 return "Sum of All Debits must equal the sum of all Credits for a Journal Entry";
-            } else if (name().toString().equalsIgnoreCase("DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY")) {
+            } else if ("DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY".equalsIgnoreCase(name())) {
                 return "Both account and amount must be specified for all Debits and Credits";
-            } else if (name().toString().equalsIgnoreCase("GL_ACCOUNT_DISABLED")) {
+            } else if ("GL_ACCOUNT_DISABLED".equalsIgnoreCase(name())) {
                 return "Target account has been disabled";
-            } else if (name().toString().equalsIgnoreCase("INVALID_DEBIT_OR_CREDIT_ACCOUNTS")) {
+            } else if ("INVALID_DEBIT_OR_CREDIT_ACCOUNTS".equalsIgnoreCase(name())) {
                 return "Invalid debit or credit accounts are passed";
-            } else if (name().toString().equalsIgnoreCase("GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED")) { return "Target account does not allow maual adjustments"; }
-            return name().toString();
+			} else if ("GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED".equalsIgnoreCase(name())) {
+				return "Target account does not allow maual adjustments";
+			}
+			return name();
         }
 
         public String errorCode() {
-            if (name().toString().equalsIgnoreCase("FUTURE_DATE")) {
+            if ("FUTURE_DATE".equalsIgnoreCase(name())) {
                 return "error.msg.glJournalEntry.invalid.future.date";
-            } else if (name().toString().equalsIgnoreCase("ACCOUNTING_CLOSED")) {
+            } else if ("ACCOUNTING_CLOSED".equalsIgnoreCase(name())) {
                 return "error.msg.glJournalEntry.invalid.accounting.closed";
-            } else if (name().toString().equalsIgnoreCase("NO_DEBITS_OR_CREDITS")) {
+            } else if ("NO_DEBITS_OR_CREDITS".equalsIgnoreCase(name())) {
                 return "error.msg.glJournalEntry.invalid.no.debits.or.credits";
-            } else if (name().toString().equalsIgnoreCase("DEBIT_CREDIT_SUM_MISMATCH")) {
+            } else if ("DEBIT_CREDIT_SUM_MISMATCH".equalsIgnoreCase(name())) {
                 return "error.msg.glJournalEntry.invalid.mismatch.debits.credits";
-            } else if (name().toString().equalsIgnoreCase("DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY")) {
+            } else if ("DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY".equalsIgnoreCase(name())) {
                 return "error.msg.glJournalEntry.invalid.empty.account.or.amount";
-            } else if (name().toString().equalsIgnoreCase("GL_ACCOUNT_DISABLED")) {
+            } else if ("GL_ACCOUNT_DISABLED".equalsIgnoreCase(name())) {
                 return "error.msg.glJournalEntry.invalid.account.disabled";
-            } else if (name().toString().equalsIgnoreCase("INVALID_DEBIT_OR_CREDIT_ACCOUNTS")) {
+            } else if ("INVALID_DEBIT_OR_CREDIT_ACCOUNTS".equalsIgnoreCase(name())) {
                 return "error.msg.glJournalEntry.invalid.debit.or.credit.accounts";
-            } else if (name().toString().equalsIgnoreCase("GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED")) { return "error.msg.glJournalEntry.invalid.account.manual.adjustments.not.permitted"; }
-            return name().toString();
+			} else if ("GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED".equalsIgnoreCase(name())) {
+				return "error.msg.glJournalEntry.invalid.account.manual.adjustments.not.permitted";
+			}
+			return name();
         }
     }
 

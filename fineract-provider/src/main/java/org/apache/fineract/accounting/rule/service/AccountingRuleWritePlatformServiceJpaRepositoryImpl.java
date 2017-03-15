@@ -88,7 +88,9 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
         final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("accounting_rule_name_unique")) {
             throw new AccountingRuleDuplicateException(command.stringValueOfParameterNamed(AccountingRuleJsonInputParams.NAME.getValue()));
-        } else if (realCause.getMessage().contains("UNIQUE_ACCOUNT_RULE_TAGS")) { throw new AccountingRuleDuplicateException(); }
+		} else if (realCause.getMessage().contains("UNIQUE_ACCOUNT_RULE_TAGS")) {
+			throw new AccountingRuleDuplicateException();
+		}
 
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.accounting.rule.unknown.data.integrity.issue",
@@ -196,12 +198,15 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
                 creditTags = command.arrayValueOfParameterNamed(AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue());
             }
 
-            if (accountToDebitId != null && debitTags != null) { throw new AccountingRuleDataException(
-                    AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue(), AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue()); }
+			if (accountToDebitId != null && debitTags != null) {
+				throw new AccountingRuleDataException(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue(),
+						AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue());
+			}
 
-            if (accountToCreditId != null && creditTags != null) { throw new AccountingRuleDataException(
-                    AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue(),
-                    AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue()); }
+			if (accountToCreditId != null && creditTags != null) {
+				throw new AccountingRuleDataException(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue(),
+						AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue());
+			}
 
             boolean allowMultipleCreditEntries = false;
             if (command.parameterExists(AccountingRuleJsonInputParams.ALLOW_MULTIPLE_CREDIT_ENTRIES.getValue())) {
@@ -336,7 +341,9 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
             if (creditOrDebitTag != null && StringUtils.isNotBlank(creditOrDebitTag)) {
                 final Long creditOrDebitTagIdLongValue = Long.valueOf(creditOrDebitTag);
                 final CodeValue creditOrDebitAccount = this.codeValueRepository.findOne(creditOrDebitTagIdLongValue);
-                if (creditOrDebitAccount == null) { throw new CodeValueNotFoundException(creditOrDebitTagIdLongValue); }
+				if (creditOrDebitAccount == null) {
+					throw new CodeValueNotFoundException(creditOrDebitTagIdLongValue);
+				}
                 final AccountingTagRule accountingTagRule = AccountingTagRule.create(creditOrDebitAccount, transactionType.getValue());
                 accountingTagRules.add(accountingTagRule);
             }

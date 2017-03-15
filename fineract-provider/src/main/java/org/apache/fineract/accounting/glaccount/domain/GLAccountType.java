@@ -27,6 +27,9 @@ public enum GLAccountType {
 
     private final Integer value;
     private final String code;
+    private static final Map<Integer, GLAccountType> intToEnumMap = new HashMap<>();
+    private static int minValue;
+    private static int maxValue;
 
     private GLAccountType(final Integer value, final String code) {
         this.value = value;
@@ -41,9 +44,7 @@ public enum GLAccountType {
         return this.code;
     }
 
-    private static final Map<Integer, GLAccountType> intToEnumMap = new HashMap<>();
-    private static int minValue;
-    private static int maxValue;
+
     static {
         int i = 0;
         for (final GLAccountType type : GLAccountType.values()) {
@@ -76,7 +77,7 @@ public enum GLAccountType {
 
     @Override
     public String toString() {
-        return name().toString();
+        return name();
     }
 
     public boolean isAssetType() {

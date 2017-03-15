@@ -42,13 +42,17 @@ public class FinancialActivityAccountRepositoryWrapper {
 
     public FinancialActivityAccount findOneWithNotFoundDetection(final Long id) {
         final FinancialActivityAccount financialActivityAccount = this.repository.findOne(id);
-        if (financialActivityAccount == null) { throw new FinancialActivityAccountNotFoundException(id); }
+		if (financialActivityAccount == null) {
+			throw new FinancialActivityAccountNotFoundException(id);
+		}
         return financialActivityAccount;
     }
 
     public FinancialActivityAccount findByFinancialActivityTypeWithNotFoundDetection(final int financialActivityType) {
         FinancialActivityAccount financialActivityAccount = this.repository.findByFinancialActivityType(financialActivityType);
-        if (financialActivityAccount == null) { throw new FinancialActivityAccountNotFoundException(financialActivityType); }
+		if (financialActivityAccount == null) {
+			throw new FinancialActivityAccountNotFoundException(financialActivityType);
+		}
         return financialActivityAccount;
     }
 

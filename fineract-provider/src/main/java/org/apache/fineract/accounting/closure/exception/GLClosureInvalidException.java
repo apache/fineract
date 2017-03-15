@@ -32,17 +32,21 @@ public class GLClosureInvalidException extends AbstractPlatformDomainRuleExcepti
         FUTURE_DATE, ACCOUNTING_CLOSED;
 
         public String errorMessage() {
-            if (name().toString().equalsIgnoreCase("FUTURE_DATE")) {
-                return "Accounting closures cannot be made for a future date";
-            } else if (name().toString().equalsIgnoreCase("ACCOUNTING_CLOSED")) { return "Accounting Closure for this branch has already been defined for a greater date"; }
-            return name().toString();
+			if ("FUTURE_DATE".equalsIgnoreCase(name())) {
+				return "Accounting closures cannot be made for a future date";
+			} else if ("ACCOUNTING_CLOSED".equalsIgnoreCase(name())) {
+				return "Accounting Closure for this branch has already been defined for a greater date";
+			}
+			return name();
         }
 
         public String errorCode() {
-            if (name().toString().equalsIgnoreCase("FUTURE_DATE")) {
-                return "error.msg.glclosure.invalid.future.date";
-            } else if (name().toString().equalsIgnoreCase("ACCOUNTING_CLOSED")) { return "error.msg.glclosure.invalid.accounting.closed"; }
-            return name().toString();
+			if ("FUTURE_DATE".equalsIgnoreCase(name())) {
+				return "error.msg.glclosure.invalid.future.date";
+			} else if ("ACCOUNTING_CLOSED".equalsIgnoreCase(name())) {
+				return "error.msg.glclosure.invalid.accounting.closed";
+			}
+			return name();
         }
     }
 

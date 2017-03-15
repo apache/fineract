@@ -30,14 +30,6 @@ public class JournalEntryIdentifier {
     @SuppressWarnings("unused")
     private Long makerCheckerId;
 
-    public static JournalEntryIdentifier makerChecker(final Long makerCheckerId) {
-        return new JournalEntryIdentifier(null, makerCheckerId);
-    }
-
-    public static JournalEntryIdentifier makerChecker(final String resourceId, final Long makerCheckerId) {
-        return new JournalEntryIdentifier(resourceId, makerCheckerId);
-    }
-
     public JournalEntryIdentifier() {
         //
     }
@@ -49,6 +41,14 @@ public class JournalEntryIdentifier {
     private JournalEntryIdentifier(final String entityId, final Long makerCheckerId) {
         this.entityId = entityId;
         this.makerCheckerId = makerCheckerId;
+    }
+
+    public static JournalEntryIdentifier makerChecker(final Long makerCheckerId) {
+        return new JournalEntryIdentifier(null, makerCheckerId);
+    }
+
+    public static JournalEntryIdentifier makerChecker(final String resourceId, final Long makerCheckerId) {
+        return new JournalEntryIdentifier(resourceId, makerCheckerId);
     }
 
     public String getEntityId() {

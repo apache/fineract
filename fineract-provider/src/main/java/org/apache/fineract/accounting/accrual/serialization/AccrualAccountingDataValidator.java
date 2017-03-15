@@ -20,7 +20,7 @@ package org.apache.fineract.accounting.accrual.serialization;
 
 import static org.apache.fineract.accounting.accrual.api.AccrualAccountingConstants.LOAN_PERIODIC_REQUEST_DATA_PARAMETERS;
 import static org.apache.fineract.accounting.accrual.api.AccrualAccountingConstants.PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME;
-import static org.apache.fineract.accounting.accrual.api.AccrualAccountingConstants.accrueTillParamName;
+import static org.apache.fineract.accounting.accrual.api.AccrualAccountingConstants.ACCRUE_TILL_PARAM_NAME;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -58,7 +58,9 @@ public final class AccrualAccountingDataValidator {
     }
 
     public void validateLoanPeriodicAccrualData(final String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, LOAN_PERIODIC_REQUEST_DATA_PARAMETERS);
 
@@ -67,14 +69,16 @@ public final class AccrualAccountingDataValidator {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME);
 
-        final LocalDate date = this.fromApiJsonHelper.extractLocalDateNamed(accrueTillParamName, element);
-        baseDataValidator.reset().parameter(accrueTillParamName).value(date).notNull().validateDateBefore(DateUtils.getLocalDateOfTenant());
+        final LocalDate date = this.fromApiJsonHelper.extractLocalDateNamed(ACCRUE_TILL_PARAM_NAME, element);
+        baseDataValidator.reset().parameter(ACCRUE_TILL_PARAM_NAME).value(date).notNull().validateDateBefore(DateUtils.getLocalDateOfTenant());
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
     }
 
     public void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 }

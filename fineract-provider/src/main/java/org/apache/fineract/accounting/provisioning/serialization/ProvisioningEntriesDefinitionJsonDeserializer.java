@@ -50,11 +50,10 @@ public class ProvisioningEntriesDefinitionJsonDeserializer implements Provisioni
     }
 
     public void validateForCreate(final String json) {
-        if (StringUtils.isBlank(json)) { throw new ProvisioningCriteriaCannotBeCreatedException(
-                "error.msg.provisioningentry.cannot.be.created",
-                "locale, dateformat, date, createjournalentries params are missing in the request");
-
-        }
+		if (StringUtils.isBlank(json)) {
+			throw new ProvisioningCriteriaCannotBeCreatedException("error.msg.provisioningentry.cannot.be.created",
+					"locale, dateformat, date, createjournalentries params are missing in the request");
+		}
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -71,6 +70,8 @@ public class ProvisioningEntriesDefinitionJsonDeserializer implements Provisioni
             Boolean bool = this.fromApiJsonHelper.extractBooleanNamed(JSON_CREATEJOURNALENTRIES_PARAM, element) ;
             baseDataValidator.reset().parameter(JSON_CREATEJOURNALENTRIES_PARAM).value(bool).validateForBooleanValue() ;
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+		if (!dataValidationErrors.isEmpty()) {
+			throw new PlatformApiDataValidationException(dataValidationErrors);
+		}
     }
 }

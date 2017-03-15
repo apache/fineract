@@ -20,6 +20,8 @@ package org.apache.fineract.accounting.glaccount.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
+import static org.apache.fineract.accounting.common.AccountingConstants.TRANSANCTIONS_LOGGED_TAG;
+
 /**
  * A {@link RuntimeException} thrown when an error is encountered during
  * updating a GL Account
@@ -31,13 +33,18 @@ public class GLAccountInvalidUpdateException extends AbstractPlatformDomainRuleE
         TRANSANCTIONS_LOGGED;
 
         public String errorMessage() {
-            if (name().toString().equalsIgnoreCase("TRANSANCTIONS_LOGGED")) { return "This Usage of this (detail) GL Account as it already has transactions logged against it"; }
-            return name().toString();
+			if (TRANSANCTIONS_LOGGED_TAG.equalsIgnoreCase(name())) {
+				return "This Usage of this (detail) GL Account as it already has transactions logged against it";
+			}
+			return name();
         }
 
         public String errorCode() {
-            if (name().toString().equalsIgnoreCase("TRANSANCTIONS_LOGGED")) { return "error.msg.glaccount.glcode.invalid.update.transactions.logged"; }
-            return name().toString();
+			if (TRANSANCTIONS_LOGGED_TAG.equalsIgnoreCase(name())) {
+				return "error.msg.glaccount.glcode.invalid.update.transactions.logged";
+			}
+
+			return name();
         }
     }
 

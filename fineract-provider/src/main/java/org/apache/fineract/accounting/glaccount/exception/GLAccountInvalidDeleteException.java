@@ -20,6 +20,9 @@ package org.apache.fineract.accounting.glaccount.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
+import static org.apache.fineract.accounting.common.AccountingConstants.HAS_CHILDREN_TAG;
+import static org.apache.fineract.accounting.common.AccountingConstants.TRANSANCTIONS_LOGGED_TAG;
+
 /**
  * A {@link RuntimeException} thrown when a GL Account with a given GL Code of
  * the particular type is already present
@@ -31,17 +34,21 @@ public class GLAccountInvalidDeleteException extends AbstractPlatformDomainRuleE
         TRANSANCTIONS_LOGGED, HAS_CHILDREN;
 
         public String errorMessage() {
-            if (name().toString().equalsIgnoreCase("TRANSANCTIONS_LOGGED")) {
-                return "This GL Account cannot be deleted as it has transactions logged against it";
-            } else if (name().toString().equalsIgnoreCase("HAS_CHILDREN")) { return "Cannot delete this Header GL Account without first deleting or reassinging its children"; }
-            return name().toString();
+			if (TRANSANCTIONS_LOGGED_TAG.equalsIgnoreCase(name())) {
+				return "This GL Account cannot be deleted as it has transactions logged against it";
+			} else if (HAS_CHILDREN_TAG.equalsIgnoreCase(name())) {
+				return "Cannot delete this Header GL Account without first deleting or reassinging its children";
+			}
+			return name();
         }
 
         public String errorCode() {
-            if (name().toString().equalsIgnoreCase("TRANSANCTIONS_LOGGED")) {
-                return "error.msg.glaccount.glcode.invalid.delete.transactions.logged";
-            } else if (name().toString().equalsIgnoreCase("HAS_CHILDREN")) { return "error.msg.glaccount.glcode.invalid.delete.has.children"; }
-            return name().toString();
+			if (TRANSANCTIONS_LOGGED_TAG.equalsIgnoreCase(name())) {
+				return "error.msg.glaccount.glcode.invalid.delete.transactions.logged";
+			} else if (HAS_CHILDREN_TAG.equalsIgnoreCase(name())) {
+				return "error.msg.glaccount.glcode.invalid.delete.has.children";
+			}
+			return name();
         }
     }
 

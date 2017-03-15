@@ -24,7 +24,7 @@ import org.apache.fineract.accounting.closure.data.GLClosureData;
 
 public interface GLClosureReadPlatformService {
 
-    List<GLClosureData> retrieveAllGLClosures(Long OfficeId);
+    List<GLClosureData> retrieveAllGLClosures(Long officeId);
 
     GLClosureData retrieveGLClosureById(long glClosureId);
 

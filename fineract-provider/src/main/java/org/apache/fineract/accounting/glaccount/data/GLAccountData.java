@@ -191,7 +191,9 @@ public class GLAccountData {
     }
 
     public Integer getTypeId() {
-        if (this.type != null) { return this.type.getId().intValue(); }
+		if (this.type != null) {
+			return this.type.getId().intValue();
+		}
         return null;
     }
 

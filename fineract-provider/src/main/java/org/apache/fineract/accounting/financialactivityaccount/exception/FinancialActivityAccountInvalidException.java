@@ -28,10 +28,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
  */
 public class FinancialActivityAccountInvalidException extends AbstractPlatformDomainRuleException {
 
-    private final static String errorCode = "error.msg.financialActivityAccount.invalid";
+    private final static String ERROR_CODE = "error.msg.financialActivityAccount.invalid";
 
     public FinancialActivityAccountInvalidException(final FINANCIAL_ACTIVITY financialActivity, final GLAccount glAccount) {
-        super(errorCode, "Financial Activity '" + financialActivity.getCode() + "' with Id :" + financialActivity.getValue()
+        super(ERROR_CODE, "Financial Activity '" + financialActivity.getCode() + "' with Id :" + financialActivity.getValue()
                 + "' can only be associated with a Ledger Account of Type " + financialActivity.getMappedGLAccountType().getCode()
                 + " the provided Ledger Account '" + glAccount.getName() + "(" + glAccount.getGlCode()
                 + ")'  does not of the required type", financialActivity.getCode(), financialActivity.getValue(), financialActivity
@@ -39,6 +39,6 @@ public class FinancialActivityAccountInvalidException extends AbstractPlatformDo
     }
 
     public static String getErrorcode() {
-        return errorCode;
+        return ERROR_CODE;
     }
 }

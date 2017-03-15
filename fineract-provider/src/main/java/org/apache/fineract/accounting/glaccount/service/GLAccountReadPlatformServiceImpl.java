@@ -46,7 +46,8 @@ import org.springframework.stereotype.Service;
 public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-    private final static String nameDecoratedBaseOnHierarchy = "concat(substring('........................................', 1, ((LENGTH(hierarchy) - LENGTH(REPLACE(hierarchy, '.', '')) - 1) * 4)), name)";
+    private static final  String NAME_DECORATED_BASE_ON_HIERARCHY = "concat(substring" +
+            "('........................................', 1, ((LENGTH(hierarchy) - LENGTH(REPLACE(hierarchy, '.', '')) - 1) * 4)), name)";
 
     @Autowired
     public GLAccountReadPlatformServiceImpl(final RoutingDataSource dataSource) {
@@ -70,7 +71,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             sb.append(
                     " gl.id as id, name as name, parent_id as parentId, gl_code as glCode, disabled as disabled, manual_journal_entries_allowed as manualEntriesAllowed, ")
                     .append("classification_enum as classification, account_usage as accountUsage, gl.description as description, ")
-                    .append(nameDecoratedBaseOnHierarchy).append(" as nameDecorated, ")
+                    .append(NAME_DECORATED_BASE_ON_HIERARCHY).append(" as nameDecorated, ")
                     .append("cv.id as codeId, cv.code_value as codeValue ");
             if (this.associationParametersData.isRunningBalanceRequired()) {
                 sb.append(",gl_j.organization_running_balance as organizationRunningBalance ");
@@ -112,13 +113,13 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
     @Override
     public List<GLAccountData> retrieveAllGLAccounts(final Integer accountClassification, final String searchParam, final Integer usage,
             final Boolean manualTransactionsAllowed, final Boolean disabled, JournalEntryAssociationParametersData associationParametersData) {
-        if (accountClassification != null) {
-            if (!checkValidGLAccountType(accountClassification)) { throw new GLAccountInvalidClassificationException(accountClassification); }
-        }
+		if (accountClassification != null && !checkValidGLAccountType(accountClassification)) {
+			throw new GLAccountInvalidClassificationException(accountClassification);
+		}
 
-        if (usage != null) {
-            if (!checkValidGLAccountUsage(usage)) { throw new GLAccountInvalidClassificationException(accountClassification); }
-        }
+		if (usage != null && !checkValidGLAccountUsage(usage)) {
+			throw new GLAccountInvalidClassificationException(accountClassification);
+		}
 
         final GLAccountMapper rm = new GLAccountMapper(associationParametersData);
         String sql = "select " + rm.schema();
@@ -233,14 +234,18 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
     private static boolean checkValidGLAccountType(final int type) {
         for (final GLAccountType accountType : GLAccountType.values()) {
-            if (accountType.getValue().equals(type)) { return true; }
+			if (accountType.getValue().equals(type)) {
+				return true;
+			}
         }
         return false;
     }
 
     private static boolean checkValidGLAccountUsage(final int type) {
         for (final GLAccountUsage accountUsage : GLAccountUsage.values()) {
-            if (accountUsage.getValue().equals(type)) { return true; }
+			if (accountUsage.getValue().equals(type)) {
+				return true;
+			}
         }
         return false;
     }
