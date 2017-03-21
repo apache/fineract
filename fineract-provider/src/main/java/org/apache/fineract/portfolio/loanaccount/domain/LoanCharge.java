@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -489,26 +490,35 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
 
     private void updateInstallmentCharges() {
         final Collection<LoanInstallmentCharge> remove = new HashSet<>();
-        final Set<LoanInstallmentCharge> chargePerInstallments = this.loan.generateInstallmentLoanCharges(this);
+        final List<LoanInstallmentCharge> newChargeInstallments = this.loan.generateInstallmentLoanCharges(this);
         if (this.loanInstallmentCharge.isEmpty()) {
-            this.loanInstallmentCharge.addAll(chargePerInstallments);
+            this.loanInstallmentCharge.addAll(newChargeInstallments);
         } else {
             int index = 0;
-            final LoanInstallmentCharge[] loanChargePerInstallments = new LoanInstallmentCharge[chargePerInstallments.size()];
-            final LoanInstallmentCharge[] loanChargePerInstallmentArray = chargePerInstallments.toArray(loanChargePerInstallments);
-            for (final LoanInstallmentCharge chargePerInstallment : this.loanInstallmentCharge) {
+            final List<LoanInstallmentCharge> oldChargeInstallments = new ArrayList<>();
+            if(this.loanInstallmentCharge != null && !this.loanInstallmentCharge.isEmpty()){
+                oldChargeInstallments.addAll(this.loanInstallmentCharge);
+            }
+            Collections.sort(oldChargeInstallments);
+            final LoanInstallmentCharge[] loanChargePerInstallmentArray = newChargeInstallments.toArray(new LoanInstallmentCharge[newChargeInstallments.size()]);
+            for (final LoanInstallmentCharge chargePerInstallment : oldChargeInstallments) {
                 if (index == loanChargePerInstallmentArray.length) {
                     remove.add(chargePerInstallment);
-                    //chargePerInstallment.updateInstallment(null);
+                    chargePerInstallment.updateInstallment(null);
                 } else {
                     chargePerInstallment.copyFrom(loanChargePerInstallmentArray[index++]);
                 }
             }
             this.loanInstallmentCharge.removeAll(remove);
-            while (index < loanChargePerInstallmentArray.length - 1) {
+            while (index < loanChargePerInstallmentArray.length) {
                 this.loanInstallmentCharge.add(loanChargePerInstallmentArray[index++]);
             }
         }
+        Money amount = Money.zero(this.loan.getCurrency());
+        for(LoanInstallmentCharge charge:this.loanInstallmentCharge){
+            amount =amount.plus(charge.getAmount());
+        }
+        this.amount =amount.getAmount();
     }
 
     public boolean isDueAtDisbursement() {

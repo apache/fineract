@@ -4706,8 +4706,8 @@ public class Loan extends AbstractPersistableCustom<Long> {
         return loanCharges;
     }
 
-    public Set<LoanInstallmentCharge> generateInstallmentLoanCharges(final LoanCharge loanCharge) {
-        final Set<LoanInstallmentCharge> loanChargePerInstallments = new HashSet<>();
+    public List<LoanInstallmentCharge> generateInstallmentLoanCharges(final LoanCharge loanCharge) {
+        final List<LoanInstallmentCharge> loanChargePerInstallments = new ArrayList<>();
         if (loanCharge.isInstalmentFee()) {
             List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments() ;
             for (final LoanRepaymentScheduleInstallment installment : installments) {
@@ -5070,11 +5070,11 @@ public class Loan extends AbstractPersistableCustom<Long> {
         this.interestRecalculatedOn = DateUtils.getDateOfTenant();
         LocalDate lastRepaymentDate = this.getLastRepaymentPeriodDueDate(true);
         Set<LoanCharge> charges = this.charges();
-        for (LoanCharge loanCharge : charges) {
+        for (final LoanCharge loanCharge : charges) {
             if (!loanCharge.isDueAtDisbursement()) {
                 updateOverdueScheduleInstallment(loanCharge);
                 if (loanCharge.getDueLocalDate() == null || (!lastRepaymentDate.isBefore(loanCharge.getDueLocalDate()))) {
-                    if (!loanCharge.isWaived()
+                    if ((loanCharge.isInstalmentFee() || !loanCharge.isWaived())
                             && (loanCharge.getDueLocalDate() == null || !lastTransactionDate.isAfter(loanCharge.getDueLocalDate()))) {
                         recalculateLoanCharge(loanCharge, generatorDTO.getPenaltyWaitPeriod());
                         loanCharge.updateWaivedAmount(getCurrency());

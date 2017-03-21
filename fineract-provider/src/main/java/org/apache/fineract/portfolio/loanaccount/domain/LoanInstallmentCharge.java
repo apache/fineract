@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -32,13 +33,13 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 
 @Entity
 @Table(name = "m_loan_installment_charge")
-public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> {
+public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> implements Comparable<LoanInstallmentCharge> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_charge_id", referencedColumnName = "id", nullable = false)
     private LoanCharge loancharge;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "loan_schedule_id", referencedColumnName = "id", nullable = false)
     private LoanRepaymentScheduleInstallment installment;
 
@@ -70,6 +71,11 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> {
         // TODO Auto-generated constructor stub
     }
 
+    @Override
+    public int compareTo(LoanInstallmentCharge o) {
+        return this.installment.getInstallmentNumber().compareTo(o.installment.getInstallmentNumber());
+    }
+    
     public LoanInstallmentCharge(final BigDecimal amount, final LoanCharge loanCharge, final LoanRepaymentScheduleInstallment installment) {
         this.loancharge = loanCharge;
         this.installment = installment;
@@ -294,4 +300,6 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> {
 	public LoanRepaymentScheduleInstallment getInstallment() {
 		return this.installment;
 	}
+
+    
 }

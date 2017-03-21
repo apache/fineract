@@ -226,6 +226,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
         if (onlyPaymentPendingCharges) {
             sql = sql + "and lic.waived =0 and lic.is_paid_derived=0";
         }
+        sql = sql + " order by lsi.installment";
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanChargeId });
     }
 
