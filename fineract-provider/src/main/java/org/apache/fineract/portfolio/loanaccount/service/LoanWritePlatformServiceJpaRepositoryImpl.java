@@ -2395,15 +2395,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Long penaltyPostingWaitPeriodValue = this.configurationDomainService.retrieveGraceOnPenaltyPostingPeriod();
         final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
         Long diff = penaltyWaitPeriodValue + 1 - penaltyPostingWaitPeriodValue;
-        if (diff < 0) {
-            diff = 0L;
+        if (diff < 1) {
+            diff = 1L;
         }
         LocalDate startDate = dueDate.plusDays(penaltyWaitPeriodValue.intValue() + 1);
         Integer frequencyNunber = 1;
         if (feeFrequency == null) {
             scheduleDates.put(frequencyNunber++, startDate.minusDays(diff.intValue()));
         } else {
-            while (DateUtils.getLocalDateOfTenant().isAfter(startDate)) {
+            while (!startDate.isAfter(DateUtils.getLocalDateOfTenant())) {
                 scheduleDates.put(frequencyNunber++, startDate.minusDays(diff.intValue()));
                 LocalDate scheduleDate = scheduledDateGenerator.getRepaymentPeriodDate(PeriodFrequencyType.fromInt(feeFrequency),
                         chargeDefinition.feeInterval(), startDate, null, null);
