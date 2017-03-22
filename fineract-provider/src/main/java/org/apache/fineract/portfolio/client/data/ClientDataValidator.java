@@ -246,13 +246,7 @@ public final class ClientDataValidator {
             final LocalDate incorpValidityTill = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.incorpValidityTillParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.incorpValidityTillParamName).value(incorpValidityTill).ignoreIfNull();
         }
-        
-        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.constitutionIdParamName, element)) {
-            final Integer constitution = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.constitutionIdParamName,
-                    element);
-            baseDataValidator.reset().parameter(ClientApiConstants.constitutionIdParamName).value(constitution).notNull().integerGreaterThanZero();
-        }
-        
+                
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.mainBusinessLineIdParamName, element)) {
             final Integer mainBusinessLine = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.mainBusinessLineIdParamName,
                     element);
@@ -529,11 +523,6 @@ public final class ClientDataValidator {
             baseDataValidator.reset().parameter(ClientApiConstants.incorpValidityTillParamName).value(incorpValidityTill);
         }
     	
-    	if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.constitutionIdParamName, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-            final Integer constitutionId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.constitutionIdParamName, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.constitutionIdParamName).value(constitutionId).notNull().integerGreaterThanZero();
-        }
     	
     	if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.mainBusinessLineIdParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;

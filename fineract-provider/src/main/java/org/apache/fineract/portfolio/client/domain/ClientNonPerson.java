@@ -53,7 +53,7 @@ public class ClientNonPerson extends AbstractPersistableCustom<Long> {
     private Client client;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "constitution_cv_id", nullable = false)
+    @JoinColumn(name = "constitution_cv_id", nullable = true)
     private CodeValue constitution;
 	
 	@Column(name = "incorp_no", length = 50, nullable = true)
@@ -164,7 +164,6 @@ public class ClientNonPerson extends AbstractPersistableCustom<Long> {
 	public Map<String, Object> update(final JsonCommand command) {
 		
 		final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
-		
 		if (command.isChangeInStringParameterNamed(ClientApiConstants.incorpNumberParamName, this.incorpNumber)) {
             final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.incorpNumberParamName);
             actualChanges.put(ClientApiConstants.incorpNumberParamName, newValue);
@@ -205,4 +204,5 @@ public class ClientNonPerson extends AbstractPersistableCustom<Long> {
         return actualChanges;
 			
 	}
+	
 }
