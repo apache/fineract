@@ -40,8 +40,8 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.PaginationParametersDataValidator;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -549,9 +549,12 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         validateForGenerateCollectionSheet(staffId);
         LocalDate localDate = new LocalDate(meetingDate);
         final CenterCalendarDataMapper centerCalendarMapper = new CenterCalendarDataMapper();
+        String passeddate = formatter.print(localDate);
+        if (!isCentersHavingMeetingFrequencyBasedOnOfficeIdAndMeetingDate(officeId, passeddate, staffId)) { throw new GeneralPlatformDomainRuleException(
+                "error.msg.collection.sheet.can.not.be.selected.meeting.date.not.attached.to.any.center",
+                "Collection sheet can not be generated without meeting date " + passeddate + " attached to any center ", passeddate); }
         String sql = centerCalendarMapper.schema();
         Collection<CenterData> centerDataArray = null;
-        String passeddate = formatter.print(localDate);
         if (staffId != null) {
             sql += " and g.staff_id=? ";
             sql += "and lrs.duedate<='" + passeddate + "' and l.loan_type_enum=3";
@@ -598,6 +601,27 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             }
         }
         return staffCenterDataArray;
+    }
+
+    @SuppressWarnings("deprecation")
+    private boolean isCentersHavingMeetingFrequencyBasedOnOfficeIdAndMeetingDate(final Long officeId, final String passeddate,
+            final Long staffId) {
+        final StringBuilder sb = new StringBuilder(100);
+        sb.append("SELECT COUNT(*) ");
+        sb.append("FROM m_calendar c ");
+        sb.append("JOIN m_calendar_instance ci ON ci.calendar_id=c.id AND ci.entity_type_enum=4 ");
+        sb.append("JOIN m_group ce ON ce.id = ci.entity_id ");
+        sb.append("JOIN m_group g ON g.parent_id = ce.id ");
+        sb.append("WHERE c.start_date = ? AND g.office_id= ? ");
+        int i = 0;
+        if (staffId != null) {
+            sb.append(" AND g.staff_id = ? ");
+            i = this.jdbcTemplate.queryForInt(sb.toString(), new Object[] { passeddate, officeId, staffId });
+        } else {
+            i = this.jdbcTemplate.queryForInt(sb.toString(), new Object[] { passeddate, officeId });
+        }
+        if (i > 0) { return true; }
+        return false;
     }
 
     public void validateForGenerateCollectionSheet(final Long staffId) {
