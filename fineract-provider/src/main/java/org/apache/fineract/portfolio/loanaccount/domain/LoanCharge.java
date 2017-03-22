@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -489,14 +490,20 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
 
     private void updateInstallmentCharges() {
         final Collection<LoanInstallmentCharge> remove = new HashSet<>();
-        final Set<LoanInstallmentCharge> chargePerInstallments = this.loan.generateInstallmentLoanCharges(this);
+        final List<LoanInstallmentCharge> newChargeInstallments = this.loan.generateInstallmentLoanCharges(this);
         if (this.loanInstallmentCharge.isEmpty()) {
-            this.loanInstallmentCharge.addAll(chargePerInstallments);
+            this.loanInstallmentCharge.addAll(newChargeInstallments);
         } else {
             int index = 0;
-            final LoanInstallmentCharge[] loanChargePerInstallments = new LoanInstallmentCharge[chargePerInstallments.size()];
-            final LoanInstallmentCharge[] loanChargePerInstallmentArray = chargePerInstallments.toArray(loanChargePerInstallments);
-            for (final LoanInstallmentCharge chargePerInstallment : this.loanInstallmentCharge) {
+            //FINERACT-7: NB: this is really overkill and slow, without changing the Entities this is the most
+            //locally safe way to fix this issue
+            ArrayList<LoanInstallmentCharge> oldChargeInstallments = new ArrayList<LoanInstallmentCharge>();
+            oldChargeInstallments.addAll(this.loanInstallmentCharge);
+            Collections.sort(oldChargeInstallments);
+            
+            final LoanInstallmentCharge[] loanChargePerInstallmentArray = newChargeInstallments.toArray(new LoanInstallmentCharge[newChargeInstallments.size()]);
+            //update new schedule with new schedule ids, retain the waived flags set in the old schedules
+            for (final LoanInstallmentCharge chargePerInstallment : oldChargeInstallments) {
                 if (index == loanChargePerInstallmentArray.length) {
                     remove.add(chargePerInstallment);
                     //chargePerInstallment.updateInstallment(null);
@@ -504,7 +511,10 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
                     chargePerInstallment.copyFrom(loanChargePerInstallmentArray[index++]);
                 }
             }
-            this.loanInstallmentCharge.removeAll(remove);
+            oldChargeInstallments.removeAll(remove);
+            this.loanInstallmentCharge.clear();
+            this.loanInstallmentCharge.addAll(oldChargeInstallments);
+            //NB: this corner case looks suspiciously redundant but leaving as is
             while (index < loanChargePerInstallmentArray.length - 1) {
                 this.loanInstallmentCharge.add(loanChargePerInstallmentArray[index++]);
             }
