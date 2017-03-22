@@ -325,6 +325,19 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         final boolean useDefaultComment = StringUtils.isBlank(reversalComment);
 
         validateCommentForReversal(reversalComment);
+        
+        //Before reversal validate accounting closure is done for that branch or not.
+        final Date journalEntriesTransactionDate = journalEntries.get(0).getTransactionDate();
+        final GLClosure latestGLClosureByBranch = this.glClosureRepository.getLatestGLClosureByBranch(officeId);
+        if (latestGLClosureByBranch != null) {
+            if (latestGLClosureByBranch.getClosingDate().after(journalEntriesTransactionDate)
+                    || latestGLClosureByBranch.getClosingDate().equals(journalEntriesTransactionDate)) {
+                final String accountName = null;
+                final String accountGLCode = null;
+                throw new JournalEntryInvalidException(GL_JOURNAL_ENTRY_INVALID_REASON.ACCOUNTING_CLOSED,
+                        latestGLClosureByBranch.getClosingDate(), accountName, accountGLCode);
+            }
+        }
 
         for (final JournalEntry journalEntry : journalEntries) {
             JournalEntry reversalJournalEntry;
