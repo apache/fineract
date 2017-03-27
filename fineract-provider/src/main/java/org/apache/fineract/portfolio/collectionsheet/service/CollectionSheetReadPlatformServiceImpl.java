@@ -34,7 +34,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
@@ -66,7 +65,6 @@ import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.meeting.attendance.service.AttendanceDropdownReadPlatformService;
 import org.apache.fineract.portfolio.meeting.attendance.service.AttendanceEnumerations;
-import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
@@ -239,6 +237,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     .append("ln.principal_repaid_derived As principalPaid, ")
                     .append("sum(ifnull(if(ln.loan_status_id = 300, ls.interest_amount, 0.0), 0.0) - ifnull(if(ln.loan_status_id = 300, ls.interest_completed_derived, 0.0), 0.0)) As interestDue, ")
                     .append("ln.interest_repaid_derived As interestPaid, ")
+                    .append("sum(ifnull(if(ln.loan_status_id = 300, ls.fee_charges_amount, 0.0), 0.0) - ifnull(if(ln.loan_status_id = 300, ls.fee_charges_completed_derived, 0.0), 0.0)) As feeDue, ")
+                    .append("ln.fee_charges_repaid_derived As feePaid, ")
                     .append("ca.attendance_type_enum as attendanceTypeId ")
                     .append("FROM m_group gp ")
                     .append("LEFT JOIN m_office of ON of.id = gp.office_id AND of.hierarchy like :officeHierarchy ")
@@ -308,13 +308,15 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final BigDecimal interestDue = rs.getBigDecimal("interestDue");
             final BigDecimal interestPaid = rs.getBigDecimal("interestPaid");
             final BigDecimal chargesDue = rs.getBigDecimal("chargesDue");
+            final BigDecimal feeDue = rs.getBigDecimal("feeDue");
+            final BigDecimal feePaid = rs.getBigDecimal("feePaid");
 
             final Integer attendanceTypeId = rs.getInt("attendanceTypeId");
             final EnumOptionData attendanceType = AttendanceEnumerations.attendanceType(attendanceTypeId);
 
             return new JLGCollectionSheetFlatData(groupName, groupId, staffId, staffName, levelId, levelName, clientName, clientId, loanId,
                     accountId, accountStatusId, productShortName, productId, currencyData, disbursementAmount, principalDue, principalPaid,
-                    interestDue, interestPaid, chargesDue, attendanceType);
+                    interestDue, interestPaid, chargesDue, attendanceType, feeDue, feePaid);
         }
 
     }
@@ -740,7 +742,9 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             sb.append("sum(ifnull(if(ln.loan_status_id = 300, ls.principal_amount, 0.0), 0.0) - ifnull(if(ln.loan_status_id = 300, ls.principal_completed_derived, 0.0), 0.0)) As principalDue, ");
             sb.append("ln.principal_repaid_derived As principalPaid, ");
             sb.append("sum(ifnull(if(ln.loan_status_id = 300, ls.interest_amount, 0.0), 0.0) - ifnull(if(ln.loan_status_id = 300, ls.interest_completed_derived, 0.0), 0.0)) As interestDue, ");
-            sb.append("ln.interest_repaid_derived As interestPaid ");
+            sb.append("ln.interest_repaid_derived As interestPaid, ");
+            sb.append("sum(ifnull(if(ln.loan_status_id = 300, ls.fee_charges_amount, 0.0), 0.0) - ifnull(if(ln.loan_status_id = 300, ls.fee_charges_completed_derived, 0.0), 0.0)) As feeDue, ");
+            sb.append("ln.fee_charges_repaid_derived As feePaid ");
             sb.append("FROM m_loan ln ");
             sb.append("JOIN m_client cl ON cl.id = ln.client_id  ");
             sb.append("LEFT JOIN m_office of ON of.id = cl.office_id  AND of.hierarchy like :officeHierarchy ");
@@ -794,9 +798,12 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final BigDecimal interestDue = rs.getBigDecimal("interestDue");
             final BigDecimal interestPaid = rs.getBigDecimal("interestPaid");
             final BigDecimal chargesDue = rs.getBigDecimal("chargesDue");
+            final BigDecimal feeDue = rs.getBigDecimal("feeDue");
+            final BigDecimal feePaid = rs.getBigDecimal("feePaid");
 
             return new IndividualCollectionSheetLoanFlatData(clientName, clientId, loanId, accountId, accountStatusId, productShortName,
-                    productId, currencyData, disbursementAmount, principalDue, principalPaid, interestDue, interestPaid, chargesDue);
+                    productId, currencyData, disbursementAmount, principalDue, principalPaid, interestDue, interestPaid, chargesDue,
+                    feeDue, feePaid);
         }
 
     }
