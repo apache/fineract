@@ -6065,12 +6065,24 @@ public class Loan extends AbstractPersistableCustom<Long> {
         return nextRepaymentDate;
     }
 
-    public BigDecimal getDerivedAmountForCharge(LoanCharge loanCharge) {
+    public BigDecimal getDerivedAmountForCharge(final LoanCharge loanCharge) {
         BigDecimal amount = BigDecimal.ZERO;
         if (isMultiDisburmentLoan() && (loanCharge.getCharge().getChargeTimeType() == ChargeTimeType.DISBURSEMENT.getValue())) {
             amount = getApprovedPrincipal();
         } else {
-            amount = getPrincpal().getAmount();
+            // If charge type is specified due date and loan is multi disburment
+            // loan.
+            // Then we need to get as of this loan charge due date how much
+            // amount disbursed.
+            if (loanCharge.isSpecifiedDueDate() && this.isMultiDisburmentLoan()) {
+                for (final LoanDisbursementDetails loanDisbursementDetails : this.getDisbursementDetails()) {
+                    if (!loanDisbursementDetails.expectedDisbursementDate().after(loanCharge.getDueDate())) {
+                        amount = amount.add(loanDisbursementDetails.principal());
+                    }
+                }
+            } else {
+                amount = getPrincpal().getAmount();
+            }
         }
         return amount;
     }

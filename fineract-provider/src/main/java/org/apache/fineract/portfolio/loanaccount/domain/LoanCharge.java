@@ -182,6 +182,19 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
                     percentage);
         }
 
+        // If charge type is specified due date and loan is multi disburment
+        // loan.
+        // Then we need to get as of this loan charge due date how much amount
+        // disbursed.
+        if (chargeDefinition.getChargeTimeType().equals(ChargeTimeType.SPECIFIED_DUE_DATE.getValue()) && loan.isMultiDisburmentLoan()) {
+            amountPercentageAppliedTo = BigDecimal.ZERO;
+            for (final LoanDisbursementDetails loanDisbursementDetails : loan.getDisbursementDetails()) {
+                if (!loanDisbursementDetails.expectedDisbursementDate().after(dueDate.toDate())) {
+                    amountPercentageAppliedTo = amountPercentageAppliedTo.add(loanDisbursementDetails.principal());
+                }
+            }
+        }
+        
         return new LoanCharge(loan, chargeDefinition, amountPercentageAppliedTo, amount, chargeTime, chargeCalculation, dueDate,
                 chargePaymentMode, null, loanCharge);
     }
@@ -408,7 +421,19 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
         if (this.loan != null) {
             switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
                 case PERCENT_OF_AMOUNT:
-                    amountPercentageAppliedTo = this.loan.getPrincpal().getAmount();
+                    // If charge type is specified due date and loan is multi
+                    // disburment loan.
+                    // Then we need to get as of this loan charge due date how
+                    // much amount disbursed.
+                    if (this.loan.isMultiDisburmentLoan() && this.isSpecifiedDueDate()) {
+                        for (final LoanDisbursementDetails loanDisbursementDetails : this.loan.getDisbursementDetails()) {
+                            if (!loanDisbursementDetails.expectedDisbursementDate().after(this.getDueDate())) {
+                                amountPercentageAppliedTo = amountPercentageAppliedTo.add(loanDisbursementDetails.principal());
+                            }
+                        }
+                    } else {
+                        amountPercentageAppliedTo = this.loan.getPrincpal().getAmount();
+                    }
                 break;
                 case PERCENT_OF_AMOUNT_AND_INTEREST:
                     amountPercentageAppliedTo = this.loan.getPrincpal().getAmount().add(this.loan.getTotalInterest());
@@ -552,6 +577,10 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
             dueDate = new LocalDate(this.dueDate);
         }
         return dueDate;
+    }
+    
+    public Date getDueDate() {
+        return this.dueDate;
     }
 
     private boolean determineIfFullyPaid() {
