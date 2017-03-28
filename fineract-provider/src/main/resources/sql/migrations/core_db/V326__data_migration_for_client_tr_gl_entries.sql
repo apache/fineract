@@ -1,0 +1,1 @@
+UPDATE acc_gl_journal_entry g SET g.entity_type_enum = 5 WHERE g.client_transaction_id IS NOT NULL AND g.entity_type_enum = 2;
