@@ -305,7 +305,7 @@ public class ProductToGLAccountMappingHelper {
          * Fund Sources in the system
          **/
         final Set<Long> existingPaymentTypes = new HashSet<>();
-        if (paymentChannelMappingArray != null && paymentChannelMappingArray.size() > 0) {
+        if (paymentChannelMappingArray != null) {
             if (changes != null) {
                 changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(),
                         command.jsonFragment(LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue()));
