@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fineract-provider.iml" filepath="$PROJECT_DIR$/.idea/modules/fineract-provider.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fineract-provider_integrationTest.iml" filepath="$PROJECT_DIR$/.idea/modules/fineract-provider_integrationTest.iml" group="fineract-provider" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fineract-provider_main.iml" filepath="$PROJECT_DIR$/.idea/modules/fineract-provider_main.iml" group="fineract-provider" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fineract-provider_test.iml" filepath="$PROJECT_DIR$/.idea/modules/fineract-provider_test.iml" group="fineract-provider" />
+    </modules>
+  </component>
+</project>

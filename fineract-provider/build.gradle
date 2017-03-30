@@ -106,6 +106,9 @@ rat {
     '**/.gitignore',
     '**/.gitkeep',
 	'**/*.iml',
+    '**/build/reports/rat/rat-report.txt',
+    '**/fineract-provider.ipr',
+    '**/fineract-provider.iws',
 	//Notice files
 	'**/NOTICE_RELEASE',
 	'**/NOTICE_SOURCE',	
