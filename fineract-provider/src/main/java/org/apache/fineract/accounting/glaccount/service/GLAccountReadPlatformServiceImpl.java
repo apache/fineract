@@ -194,6 +194,8 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             }
         }
 
+        sql+=" ORDER BY gl_code ASC";
+
         final Object[] finalObjectArray = Arrays.copyOf(paramaterArray, arrayPos);
         return this.jdbcTemplate.query(sql, rm, finalObjectArray);
     }
