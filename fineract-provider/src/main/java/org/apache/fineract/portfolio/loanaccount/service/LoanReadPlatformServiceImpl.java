@@ -44,6 +44,7 @@ import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
@@ -281,6 +282,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         String sqlQueryCriteria = searchParameters.getSqlSearch();
         if (StringUtils.isNotBlank(sqlQueryCriteria)) {
+        	SQLInjectionValidator.validateSQLInput(sqlQueryCriteria);
             sqlQueryCriteria = sqlQueryCriteria.replaceAll("accountNo", "l.account_no");
             sqlBuilder.append(" and (").append(sqlQueryCriteria).append(")");
         }

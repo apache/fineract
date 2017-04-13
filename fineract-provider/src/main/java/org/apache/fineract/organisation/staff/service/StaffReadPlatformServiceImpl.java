@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.exception.StaffNotFoundException;
 import org.apache.fineract.portfolio.client.domain.ClientStatus;
@@ -221,6 +222,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         final StringBuffer extraCriteria = new StringBuffer(200);
 
         if (sqlSearch != null) {
+        	SQLInjectionValidator.validateSQLInput(sqlSearch);
             extraCriteria.append(" and (").append(sqlSearch).append(")");
         }
         if (officeId != null) {
