@@ -189,7 +189,7 @@ public final class ClientDataValidator {
             final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
             final LocalDate maxClientDateOfBirth = currentDate.minusYears(18);
             baseDataValidator.reset().parameter(ClientApiConstants.dateOfBirthParamName).value(dateOfBirth).notNull()
-                    .validateDateBefore(maxClientDateOfBirth);
+                    .validateMinimumClientAge(maxClientDateOfBirth);
         }
 
 
