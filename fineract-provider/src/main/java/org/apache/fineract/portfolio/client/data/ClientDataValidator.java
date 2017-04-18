@@ -181,7 +181,18 @@ public final class ClientDataValidator {
             final LocalDate dateOfBirth = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.dateOfBirthParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.dateOfBirthParamName).value(dateOfBirth).notNull()
                     .validateDateBefore(DateUtils.getLocalDateOfTenant());
+        } 
+
+        //condition for setting minimum age of client at 18
+          if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.dateOfBirthParamName, element)) {
+            final LocalDate dateOfBirth = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.dateOfBirthParamName, element); 
+            final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
+            final LocalDate maxClientDateOfBirth = currentDate.minusYears(18);
+            baseDataValidator.reset().parameter(ClientApiConstants.dateOfBirthParamName).value(dateOfBirth).notNull()
+                    .validateDateBefore(maxClientDateOfBirth);
         }
+
+
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.genderIdParamName, element)) {
             final Integer genderId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.genderIdParamName, element);
