@@ -51,6 +51,7 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
+import org.apache.fineract.organisation.teller.data.CashierTransactionDataValidator;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
@@ -170,6 +171,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
     private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessingStrategy;
     private final CodeValueRepositoryWrapper codeValueRepository;
+    private final CashierTransactionDataValidator cashierTransactionDataValidator;
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -200,7 +202,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
             final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessingStrategy,
             final CodeValueRepositoryWrapper codeValueRepository,
-            final LoanRepositoryWrapper loanRepositoryWrapper) {
+            final LoanRepositoryWrapper loanRepositoryWrapper,
+            final CashierTransactionDataValidator cashierTransactionDataValidator) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanAssembler = loanAssembler;
@@ -239,6 +242,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.entityDatatableChecksWritePlatformService = entityDatatableChecksWritePlatformService;
         this.codeValueRepository = codeValueRepository;
+        this.cashierTransactionDataValidator = cashierTransactionDataValidator;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -293,7 +297,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Map<String, Object> changes = new LinkedHashMap<>();
 
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
-
+		if (paymentDetail != null && paymentDetail.getPaymentType() != null
+				&& paymentDetail.getPaymentType().isCashPayment()) {
+			BigDecimal transactionAmount = command
+					.bigDecimalValueOfParameterNamed("transactionAmount");
+			this.cashierTransactionDataValidator.validateOnLoanDisbursal(
+					currentUser, loan.getCurrencyCode(), transactionAmount);
+		}     
         final Boolean isPaymnetypeApplicableforDisbursementCharge = configurationDomainService
                 .isPaymnetypeApplicableforDisbursementCharge();
 
@@ -406,7 +416,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
         }
-
+        
         updateRecurringCalendarDatesForInterestRecalculation(loan);
         this.loanAccountDomainService.recalculateAccruals(loan);
         this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_DISBURSAL,
