@@ -39,6 +39,8 @@ import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
+import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -70,6 +72,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private final AllGroupTypesDataMapper allGroupTypesDataMapper = new AllGroupTypesDataMapper();
     private final PaginationHelper<GroupGeneralData> paginationHelper = new PaginationHelper<>();
     private final PaginationParametersDataValidator paginationParametersDataValidator;
+    private final ColumnValidator columnValidator;
 
     private final static Set<String> supportedOrderByValues = new HashSet<>(Arrays.asList("id", "name", "officeId", "officeName"));
 
@@ -78,7 +81,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             final CenterReadPlatformService centerReadPlatformService,
             final OfficeReadPlatformService officeReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
             final CodeValueReadPlatformService codeValueReadPlatformService,
-            final PaginationParametersDataValidator paginationParametersDataValidator) {
+            final PaginationParametersDataValidator paginationParametersDataValidator,
+            final ColumnValidator columnValidator) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.centerReadPlatformService = centerReadPlatformService;
@@ -86,6 +90,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         this.staffReadPlatformService = staffReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.paginationParametersDataValidator = paginationParametersDataValidator;
+        this.columnValidator = columnValidator;
     }
 
     @Override
@@ -149,7 +154,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         sqlBuilder.append(" where o.hierarchy like ?");
 
         final String extraCriteria = getGroupExtraCriteria(searchParameters);
-
+        this.columnValidator.validateSqlInjection(sqlBuilder.toString(), extraCriteria);
         if (StringUtils.isNotBlank(extraCriteria)) {
             sqlBuilder.append(" and (").append(extraCriteria).append(")");
         }
@@ -182,7 +187,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         sqlBuilder.append(" where o.hierarchy like ?");
 
         final String extraCriteria = getGroupExtraCriteria(searchParameters);
-
+        this.columnValidator.validateSqlInjection(sqlBuilder.toString(), extraCriteria);
         if (StringUtils.isNotBlank(extraCriteria)) {
             sqlBuilder.append(" and (").append(extraCriteria).append(")");
         }
@@ -207,6 +212,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         extraCriteria.append(" and g.level_Id = ").append(GroupTypes.GROUP.getId());
         String sqlSearch = searchCriteria.getSqlSearch();
         if (sqlSearch != null) {
+        	SQLInjectionValidator.validateSQLInput(sqlSearch);
             sqlSearch = sqlSearch.replaceAll(" display_name ", " g.display_name ");
             sqlSearch = sqlSearch.replaceAll("display_name ", "g.display_name ");
             extraCriteria.append(" and ( ").append(sqlSearch).append(") ");

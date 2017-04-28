@@ -41,6 +41,7 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -91,6 +92,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     private final PaginationParametersDataValidator paginationParametersDataValidator;
     private final SavingsProductReadPlatformService savingsProductReadPlatformService;
     private final DepositProductReadPlatformService depositProductReadPlatformService;
+    private final ColumnValidator columnValidator;
 
     @Autowired
     public AuditReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -99,7 +101,8 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             final LoanProductReadPlatformService loanProductReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
             final PaginationParametersDataValidator paginationParametersDataValidator,
             final SavingsProductReadPlatformService savingsProductReadPlatformService,
-            final DepositProductReadPlatformService depositProductReadPlatformService) {
+            final DepositProductReadPlatformService depositProductReadPlatformService,
+            final ColumnValidator columnValidator) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.fromApiJsonHelper = fromApiJsonHelper;
@@ -111,6 +114,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         this.paginationParametersDataValidator = paginationParametersDataValidator;
         this.savingsProductReadPlatformService = savingsProductReadPlatformService;
         this.depositProductReadPlatformService = depositProductReadPlatformService;
+        this.columnValidator = columnValidator;
     }
 
     private static final class AuditMapper implements RowMapper<AuditData> {
@@ -203,7 +207,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
         String updatedExtraCriteria = "";
         if (StringUtils.isNotBlank(extraCriteria)) {
-            updatedExtraCriteria = " where (" + extraCriteria + ")";
+            updatedExtraCriteria = " where (" + extraCriteria + ")";            
         }
 
         final AuditMapper rm = new AuditMapper();
@@ -211,7 +215,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(rm.schema(includeJson, hierarchy));
         sqlBuilder.append(' ').append(updatedExtraCriteria);
-
+        this.columnValidator.validateSqlInjection(sqlBuilder.toString(), extraCriteria);
         if (parameters.isOrderByRequested()) {
             sqlBuilder.append(' ').append(parameters.orderBySql());
         } else {
@@ -253,7 +257,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
         final AuditMapper rm = new AuditMapper();
         String sql = "select " + rm.schema(includeJson, hierarchy);
-
+        this.columnValidator.validateSqlInjection(sql, extraCriteria);
         Boolean isLimitedChecker = false;
         if (useType.equals("makerchecker")) {
             if (currentUser.hasNotPermissionForAnyOf("ALL_FUNCTIONS", "CHECKER_SUPER_USER")) {
@@ -267,7 +271,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
                     + " join m_appuser_role ur on ur.role_id = r.id and ur.appuser_id = " + currentUser.getId();
         }
         sql += extraCriteria;
-
+        
         logger.info("sql: " + sql);
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});

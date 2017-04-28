@@ -278,16 +278,17 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
         this.context.authenticatedUser();
 
-        String sql = "select " + this.savingsProductRowMapper.schema() + " where sp.currency_code='" + currencyCode + "'";
+        String sql = "select " + this.savingsProductRowMapper.schema() + " where sp.currency_code= ? ";
 
         // Check if branch specific products are enabled. If yes, fetch only
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
         if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
-            sql += " and id in ( " + inClause + " ) ";
+            sql += " and id in ( ? ) ";
+            return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] {currencyCode, inClause});
         }
 
-        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper);
+        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] {currencyCode});
     }
 }

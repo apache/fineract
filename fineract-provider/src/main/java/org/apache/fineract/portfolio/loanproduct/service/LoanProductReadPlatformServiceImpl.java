@@ -121,7 +121,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         String sql = "select " + rm.schema();
 
         if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
-            sql += " where lp.id in ( " + inClause + " ) ";
+            sql += " where lp.id in ( ? ) ";
+            return this.jdbcTemplate.query(sql, rm, new Object[] {inClause});
         }
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
@@ -533,17 +534,18 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         final LoanProductMapper rm = new LoanProductMapper(null, null);
 
-        String sql = "select " + rm.loanProductSchema() + " where lp.currency_code='" + currencyCode + "'";
+        String sql = "select " + rm.loanProductSchema() + " where lp.currency_code= ? ";
 
         // Check if branch specific products are enabled. If yes, fetch only
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
         if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
-            sql += " and id in ( " + inClause + " ) ";
+            sql += " and id in ( ? ) ";
+            return this.jdbcTemplate.query(sql, rm, new Object[] {currencyCode, inClause});
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm, new Object[] {currencyCode});
     }
 
     @Override

@@ -47,6 +47,8 @@ import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
+import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -90,6 +92,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     private final ConfigurationDomainService configurationDomainService;
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
+    private final ColumnValidator columnValidator;
 
     // data mappers
     private final CenterDataMapper centerMapper = new CenterDataMapper();
@@ -104,7 +107,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
             final StaffReadPlatformService staffReadPlatformService, final CodeValueReadPlatformService codeValueReadPlatformService,
             final PaginationParametersDataValidator paginationParametersDataValidator, final ConfigurationDomainService configurationDomainService,
-            final CalendarReadPlatformService calendarReadPlatformService) {
+            final CalendarReadPlatformService calendarReadPlatformService, final ColumnValidator columnValidator) {
         this.context = context;
         this.clientReadPlatformService = clientReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -114,6 +117,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         this.paginationParametersDataValidator = paginationParametersDataValidator;
         this.configurationDomainService = configurationDomainService;
         this.calendarReadPlatformService = calendarReadPlatformService;
+        this.columnValidator = columnValidator;
     }
 
     // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where
@@ -126,6 +130,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         String sqlQueryCriteria = searchCriteria.getSqlSearch();
         if (StringUtils.isNotBlank(sqlQueryCriteria)) {
+        	SQLInjectionValidator.validateSQLInput(sqlQueryCriteria);
             sqlQueryCriteria = sqlQueryCriteria.replaceAll(" display_name ", " g.display_name ");
             sqlQueryCriteria = sqlQueryCriteria.replaceAll("display_name ", "g.display_name ");
             extraCriteria.append(" and (").append(sqlQueryCriteria).append(") ");
@@ -374,7 +379,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         sqlBuilder.append(" where o.hierarchy like ?");
 
         final String extraCriteria = getCenterExtraCriteria(searchParameters);
-
+        this.columnValidator.validateSqlInjection(sqlBuilder.toString(), extraCriteria);
         if (StringUtils.isNotBlank(extraCriteria)) {
             sqlBuilder.append(" and (").append(extraCriteria).append(")");
         }
@@ -409,7 +414,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         sqlBuilder.append(" where o.hierarchy like ?");
 
         final String extraCriteria = getCenterExtraCriteria(searchParameters);
-
+        this.columnValidator.validateSqlInjection(sqlBuilder.toString(), extraCriteria);
         if (StringUtils.isNotBlank(extraCriteria)) {
             sqlBuilder.append(" and (").append(extraCriteria).append(")");
         }
