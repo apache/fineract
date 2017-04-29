@@ -16,5 +16,6 @@
 -- specific language governing permissions and limitations
 -- under the License.
 --
+
 ALTER TABLE `m_client`
 	ADD COLUMN `is_staff` TINYINT(1) NOT NULL DEFAULT '0' AFTER `mobile_no`;
