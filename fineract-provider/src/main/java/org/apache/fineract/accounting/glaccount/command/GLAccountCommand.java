@@ -88,8 +88,10 @@ public class GLAccountCommand {
         baseDataValidator.reset().parameter(GLAccountJsonInputParams.TAGID.getValue()).value(this.tagId).ignoreIfNull()
                 .longGreaterThanZero();
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+		if (!dataValidationErrors.isEmpty()) {
+			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+					"Validation errors exist.", dataValidationErrors);
+		}
     }
 
     public void validateForUpdate() {
@@ -118,10 +120,12 @@ public class GLAccountCommand {
 
         baseDataValidator.reset().anyOfNotNull(this.name, this.glCode, this.parentId, this.type, this.description, this.disabled);
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
-        baseDataValidator.reset().parameter(GLAccountJsonInputParams.TAGID.getValue()).value(this.tagId).ignoreIfNull()
-                .longGreaterThanZero();
+		if (!dataValidationErrors.isEmpty()) {
+			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+					"Validation errors exist.", dataValidationErrors);
+		}
+		baseDataValidator.reset().parameter(GLAccountJsonInputParams.TAGID.getValue()).value(this.tagId).ignoreIfNull()
+				.longGreaterThanZero();
     }
 
     public boolean isHeaderAccount() {

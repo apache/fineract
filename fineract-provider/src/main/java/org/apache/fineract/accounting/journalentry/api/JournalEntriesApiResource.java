@@ -142,7 +142,7 @@ public class JournalEntriesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createGLJournalEntry(final String jsonRequestBody, @QueryParam("command") final String commandParam) {
 
-        CommandProcessingResult result = null;
+        CommandProcessingResult result;
         if (is(commandParam, "updateRunningBalance")) {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().updateRunningBalanceForJournalEntry()
                     .withJson(jsonRequestBody).build();
@@ -164,7 +164,7 @@ public class JournalEntriesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createReversalJournalEntry(final String jsonRequestBody, @PathParam("transactionId") final String transactionId,
             @QueryParam("command") final String commandParam) {
-        CommandProcessingResult result = null;
+        CommandProcessingResult result;
         if (is(commandParam, "reverse")) {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().reverseJournalEntry(transactionId).withJson(jsonRequestBody)
                     .build();

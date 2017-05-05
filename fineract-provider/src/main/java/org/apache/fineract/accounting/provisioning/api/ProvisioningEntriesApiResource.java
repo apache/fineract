@@ -78,7 +78,7 @@ public class ProvisioningEntriesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String createProvisioningEntries(final String apiRequestBodyAsJson) {
-        CommandWrapper commandWrapper = null;
+        CommandWrapper commandWrapper;
         this.platformSecurityContext.authenticatedUser();
         commandWrapper = new CommandWrapperBuilder().createProvisioningEntries().withJson(apiRequestBodyAsJson).build();
         final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
@@ -91,7 +91,7 @@ public class ProvisioningEntriesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String modifyProvisioningEntry(@PathParam("entryId") final Long entryId, @QueryParam("command") final String commandParam,
             final String apiRequestBodyAsJson) {
-        CommandWrapper commandWrapper = null;
+        CommandWrapper commandWrapper;
         this.platformSecurityContext.authenticatedUser();
         if ("createjournalentry".equals(commandParam)) {
             commandWrapper = new CommandWrapperBuilder().createProvisioningJournalEntries(entryId).withJson(apiRequestBodyAsJson).build();

@@ -29,6 +29,8 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public class AccountingEnumerations {
 
+    private AccountingEnumerations(){}
+    
     public static EnumOptionData gLAccountType(final int id) {
         return gLAccountType(GLAccountType.fromInt(id));
     }

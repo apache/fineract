@@ -34,6 +34,7 @@ public class AccountingConstants {
                 10), OVERPAYMENT(11), INCOME_FROM_RECOVERY(12);
 
         private final Integer value;
+        private static final Map<Integer, CASH_ACCOUNTS_FOR_LOAN> intToEnumMap = new HashMap<>();
 
         private CASH_ACCOUNTS_FOR_LOAN(final Integer value) {
             this.value = value;
@@ -41,14 +42,13 @@ public class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public Integer getValue() {
             return this.value;
         }
 
-        private static final Map<Integer, CASH_ACCOUNTS_FOR_LOAN> intToEnumMap = new HashMap<>();
         static {
             for (final CASH_ACCOUNTS_FOR_LOAN type : CASH_ACCOUNTS_FOR_LOAN.values()) {
                 intToEnumMap.put(type.value, type);
@@ -67,6 +67,7 @@ public class AccountingConstants {
                 7), FEES_RECEIVABLE(8), PENALTIES_RECEIVABLE(9), TRANSFERS_SUSPENSE(10), OVERPAYMENT(11), INCOME_FROM_RECOVERY(12);
 
         private final Integer value;
+        private static final Map<Integer, ACCRUAL_ACCOUNTS_FOR_LOAN> intToEnumMap = new HashMap<>();
 
         private ACCRUAL_ACCOUNTS_FOR_LOAN(final Integer value) {
             this.value = value;
@@ -74,14 +75,13 @@ public class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public Integer getValue() {
             return this.value;
         }
 
-        private static final Map<Integer, ACCRUAL_ACCOUNTS_FOR_LOAN> intToEnumMap = new HashMap<>();
         static {
             for (final ACCRUAL_ACCOUNTS_FOR_LOAN type : ACCRUAL_ACCOUNTS_FOR_LOAN.values()) {
                 intToEnumMap.put(type.value, type);
@@ -101,12 +101,12 @@ public class AccountingConstants {
      ***/
     public static enum LOAN_PRODUCT_ACCOUNTING_PARAMS {
         FUND_SOURCE("fundSourceAccountId"), LOAN_PORTFOLIO("loanPortfolioAccountId"), INTEREST_ON_LOANS("interestOnLoanAccountId"), INCOME_FROM_FEES(
-                "incomeFromFeeAccountId"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccountId"), LOSSES_WRITTEN_OFF("writeOffAccountId"), OVERPAYMENT(
+                INCOME_FROM_FEE_ACCOUNT_ID), INCOME_FROM_PENALTIES("incomeFromPenaltyAccountId"), LOSSES_WRITTEN_OFF("writeOffAccountId"), OVERPAYMENT(
                 "overpaymentLiabilityAccountId"), INTEREST_RECEIVABLE("receivableInterestAccountId"), FEES_RECEIVABLE(
                 "receivableFeeAccountId"), PENALTIES_RECEIVABLE("receivablePenaltyAccountId"), TRANSFERS_SUSPENSE(
                 "transfersInSuspenseAccountId"), PAYMENT_CHANNEL_FUND_SOURCE_MAPPING("paymentChannelToFundSourceMappings"), PAYMENT_TYPE(
                 "paymentTypeId"), FEE_INCOME_ACCOUNT_MAPPING("feeToIncomeAccountMappings"), PENALTY_INCOME_ACCOUNT_MAPPING(
-                "penaltyToIncomeAccountMappings"), CHARGE_ID("chargeId"), INCOME_ACCOUNT_ID("incomeAccountId"), INCOME_FROM_RECOVERY(
+                PENALTY_TO_ACCOUNT_MAP), CHARGE_ID("chargeId"), INCOME_ACCOUNT_ID("incomeAccountId"), INCOME_FROM_RECOVERY(
                 "incomeFromRecoveryAccountId");
 
         private final String value;
@@ -117,7 +117,7 @@ public class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public String getValue() {
@@ -140,7 +140,7 @@ public class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public String getValue() {
@@ -154,6 +154,7 @@ public class AccountingConstants {
                 10), OVERDRAFT_PORTFOLIO_CONTROL(11), INCOME_FROM_INTEREST(12), LOSSES_WRITTEN_OFF(13), ESCHEAT_LIABILITY(14);
 
         private final Integer value;
+        private static final Map<Integer, CASH_ACCOUNTS_FOR_SAVINGS> intToEnumMap = new HashMap<>();
 
         private CASH_ACCOUNTS_FOR_SAVINGS(final Integer value) {
             this.value = value;
@@ -161,14 +162,13 @@ public class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public Integer getValue() {
             return this.value;
         }
 
-        private static final Map<Integer, CASH_ACCOUNTS_FOR_SAVINGS> intToEnumMap = new HashMap<>();
         static {
             for (final CASH_ACCOUNTS_FOR_SAVINGS type : CASH_ACCOUNTS_FOR_SAVINGS.values()) {
                 intToEnumMap.put(type.value, type);
@@ -187,10 +187,10 @@ public class AccountingConstants {
      ***/
     public static enum SAVINGS_PRODUCT_ACCOUNTING_PARAMS {
         SAVINGS_REFERENCE("savingsReferenceAccountId"), SAVINGS_CONTROL("savingsControlAccountId"), INCOME_FROM_FEES(
-                "incomeFromFeeAccountId"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccountId"), INTEREST_ON_SAVINGS(
+                INCOME_FROM_FEE_ACCOUNT_ID), INCOME_FROM_PENALTIES("incomeFromPenaltyAccountId"), INTEREST_ON_SAVINGS(
                 "interestOnSavingsAccountId"), PAYMENT_CHANNEL_FUND_SOURCE_MAPPING("paymentChannelToFundSourceMappings"), PAYMENT_TYPE(
                 "paymentTypeId"), FUND_SOURCE("fundSourceAccountId"), TRANSFERS_SUSPENSE("transfersInSuspenseAccountId"), FEE_INCOME_ACCOUNT_MAPPING(
-                "feeToIncomeAccountMappings"), PENALTY_INCOME_ACCOUNT_MAPPING("penaltyToIncomeAccountMappings"), CHARGE_ID("chargeId"), INCOME_ACCOUNT_ID(
+                "feeToIncomeAccountMappings"), PENALTY_INCOME_ACCOUNT_MAPPING(PENALTY_TO_ACCOUNT_MAP), CHARGE_ID("chargeId"), INCOME_ACCOUNT_ID(
                 "incomeAccountId"), OVERDRAFT_PORTFOLIO_CONTROL("overdraftPortfolioControlId"), INCOME_FROM_INTEREST("incomeFromInterestId"), LOSSES_WRITTEN_OFF(
                 "writeOffAccountId"), ESCHEAT_LIABILITY("escheatLiabilityId");
 
@@ -202,7 +202,7 @@ public class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public String getValue() {
@@ -214,7 +214,7 @@ public class AccountingConstants {
         SAVINGS_REFERENCE("savingsReferenceAccount"), SAVINGS_CONTROL("savingsControlAccount"), INCOME_FROM_FEES("incomeFromFeeAccount"), INCOME_FROM_PENALTIES(
                 "incomeFromPenaltyAccount"), INTEREST_ON_SAVINGS("interestOnSavingsAccount"), PAYMENT_TYPE("paymentType"), FUND_SOURCE(
                 "fundSourceAccount"), TRANSFERS_SUSPENSE("transfersInSuspenseAccount"), PENALTY_INCOME_ACCOUNT_MAPPING(
-                "penaltyToIncomeAccountMappings"), CHARGE_ID("charge"), INCOME_ACCOUNT_ID("incomeAccount"), OVERDRAFT_PORTFOLIO_CONTROL(
+                PENALTY_TO_ACCOUNT_MAP), CHARGE_ID("charge"), INCOME_ACCOUNT_ID("incomeAccount"), OVERDRAFT_PORTFOLIO_CONTROL(
                 "overdraftPortfolioControl"), INCOME_FROM_INTEREST("incomeFromInterest"), LOSSES_WRITTEN_OFF("writeOffAccount"),
                 ESCHEAT_LIABILITY("escheatLiabilityAccount");
 
@@ -226,7 +226,7 @@ public class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public String getValue() {
@@ -244,6 +244,7 @@ public class AccountingConstants {
         private final String code;
         private final GLAccountType mappedGLAccountType;
         private static List<FinancialActivityData> financialActivities;
+        private static final Map<Integer, FINANCIAL_ACTIVITY> intToEnumMap = new HashMap<>();
 
         private FINANCIAL_ACTIVITY(final Integer value, final String code, final GLAccountType mappedGLAccountType) {
             this.value = value;
@@ -253,7 +254,7 @@ public class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public Integer getValue() {
@@ -272,7 +273,6 @@ public class AccountingConstants {
             return this.value.toString();
         }
 
-        private static final Map<Integer, FINANCIAL_ACTIVITY> intToEnumMap = new HashMap<>();
         static {
             for (final FINANCIAL_ACTIVITY type : FINANCIAL_ACTIVITY.values()) {
                 intToEnumMap.put(type.value, type);
@@ -318,7 +318,7 @@ public class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public Integer getValue() {
@@ -343,8 +343,8 @@ public class AccountingConstants {
      * creating/updating a savings product
      ***/
     public static enum SHARES_PRODUCT_ACCOUNTING_PARAMS {
-        SHARES_REFERENCE("shareReferenceId"), SHARES_SUSPENSE("shareSuspenseId"), INCOME_FROM_FEES("incomeFromFeeAccountId"), SHARES_EQUITY(
-                "shareEquityId");
+		SHARES_REFERENCE("shareReferenceId"), SHARES_SUSPENSE("shareSuspenseId"), INCOME_FROM_FEES(
+				INCOME_FROM_FEE_ACCOUNT_ID), SHARES_EQUITY("shareEquityId");
 
         private final String value;
 
@@ -354,7 +354,7 @@ public class AccountingConstants {
 
         @Override
         public String toString() {
-            return name().toString().replaceAll("_", " ");
+            return name().replaceAll("_", " ");
         }
 
         public String getValue() {
@@ -367,5 +367,11 @@ public class AccountingConstants {
     public static final String EQUITY_TAG_OPTION_CODE_NAME = "EquityAccountTags";
     public static final String INCOME_TAG_OPTION_CODE_NAME = "IncomeAccountTags";
     public static final String EXPENSES_TAG_OPTION_CODE_NAME = "ExpenseAccountTags";
+    public static final String INCOME_FROM_FEE_ACCOUNT_ID = "incomeFromFeeAccountId";
+    public static final String PENALTY_TO_ACCOUNT_MAP = "penaltyToIncomeAccountMappings";
+    public static final String TRANSANCTIONS_LOGGED_TAG = "TRANSANCTIONS_LOGGED";
+    public static final String HAS_CHILDREN_TAG = "HAS_CHILDREN";
+
+    private AccountingConstants(){}
 
 }

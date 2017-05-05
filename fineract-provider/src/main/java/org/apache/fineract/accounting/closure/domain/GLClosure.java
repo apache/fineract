@@ -82,9 +82,9 @@ public class GLClosure extends AbstractAuditableCustom<AppUser, Long> {
         return actualChanges;
     }
 
-    private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            final String propertyToBeUpdated) {
-        if (command.isChangeInStringParameterNamed(paramName, propertyToBeUpdated)) {
+	private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges,
+			final String paramName, final String propertyToBeUpdated) {
+		if (command.isChangeInStringParameterNamed(paramName, propertyToBeUpdated)) {
             final String newValue = command.stringValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
             // now update actual property

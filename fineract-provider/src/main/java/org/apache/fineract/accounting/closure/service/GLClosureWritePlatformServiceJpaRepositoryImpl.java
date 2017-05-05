@@ -76,13 +76,15 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
             // ensure closure date is not in the future
             final Date todaysDate = new Date();
             final Date closureDate = command.DateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue());
-            if (closureDate.after(todaysDate)) { throw new GLClosureInvalidException(GL_CLOSURE_INVALID_REASON.FUTURE_DATE, closureDate); }
+			if (closureDate.after(todaysDate)) {
+				throw new GLClosureInvalidException(GL_CLOSURE_INVALID_REASON.FUTURE_DATE, closureDate);
+			}
             // shouldn't be before an existing accounting closure
             final GLClosure latestGLClosure = this.glClosureRepository.getLatestGLClosureByBranch(officeId);
-            if (latestGLClosure != null) {
-                if (latestGLClosure.getClosingDate().after(closureDate)) { throw new GLClosureInvalidException(
-                        GL_CLOSURE_INVALID_REASON.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate()); }
-            }
+			if (latestGLClosure != null && latestGLClosure.getClosingDate().after(closureDate)) {
+				throw new GLClosureInvalidException(GL_CLOSURE_INVALID_REASON.ACCOUNTING_CLOSED,
+						latestGLClosure.getClosingDate());
+			}
             final GLClosure glClosure = GLClosure.fromJson(office, command);
 
             this.glClosureRepository.saveAndFlush(glClosure);
@@ -103,7 +105,9 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
 
         // is the glClosure valid
         final GLClosure glClosure = this.glClosureRepository.findOne(glClosureId);
-        if (glClosure == null) { throw new GLClosureNotFoundException(glClosureId); }
+		if (glClosure == null) {
+			throw new GLClosureNotFoundException(glClosureId);
+		}
 
         final Map<String, Object> changesOnly = glClosure.update(command);
 
@@ -120,7 +124,9 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
     public CommandProcessingResult deleteGLClosure(final Long glClosureId) {
         final GLClosure glClosure = this.glClosureRepository.findOne(glClosureId);
 
-        if (glClosure == null) { throw new GLClosureNotFoundException(glClosureId); }
+		if (glClosure == null) {
+			throw new GLClosureNotFoundException(glClosureId);
+		}
 
         /**
          * check if any closures are present for this branch at a later date
@@ -128,8 +134,10 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
          **/
         final Date closureDate = glClosure.getClosingDate();
         final GLClosure latestGLClosure = this.glClosureRepository.getLatestGLClosureByBranch(glClosure.getOffice().getId());
-        if (latestGLClosure.getClosingDate().after(closureDate)) { throw new GLClosureInvalidDeleteException(latestGLClosure.getOffice()
-                .getId(), latestGLClosure.getOffice().getName(), latestGLClosure.getClosingDate()); }
+		if (latestGLClosure.getClosingDate().after(closureDate)) {
+			throw new GLClosureInvalidDeleteException(latestGLClosure.getOffice().getId(),
+					latestGLClosure.getOffice().getName(), latestGLClosure.getClosingDate());
+		}
 
         this.glClosureRepository.delete(glClosure);
 
@@ -142,9 +150,11 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
      */
     private void handleGLClosureIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
         final Throwable realCause = dve.getMostSpecificCause();
-        if (realCause.getMessage().contains("office_id_closing_date")) { throw new GLClosureDuplicateException(
-                command.longValueOfParameterNamed(GLClosureJsonInputParams.OFFICE_ID.getValue()), new LocalDate(
-                        command.DateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue()))); }
+		if (realCause.getMessage().contains("office_id_closing_date")) {
+			throw new GLClosureDuplicateException(
+					command.longValueOfParameterNamed(GLClosureJsonInputParams.OFFICE_ID.getValue()),
+					new LocalDate(command.DateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue())));
+		}
 
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.glClosure.unknown.data.integrity.issue",

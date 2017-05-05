@@ -128,10 +128,14 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
 				validateForAttachedProduct(glAccountId);
 			}
             final Long parentId = command.longValueOfParameterNamed(GLAccountJsonInputParams.PARENT_ID.getValue());
-            if (glAccountId.equals(parentId)) { throw new InvalidParentGLAccountHeadException(glAccountId, parentId); }
+			if (glAccountId.equals(parentId)) {
+				throw new InvalidParentGLAccountHeadException(glAccountId, parentId);
+			}
             // is the glAccount valid
             final GLAccount glAccount = this.glAccountRepository.findOne(glAccountId);
-            if (glAccount == null) { throw new GLAccountNotFoundException(glAccountId); }
+			if (glAccount == null) {
+				throw new GLAccountNotFoundException(glAccountId);
+			}
 
             final Map<String, Object> changesOnly = glAccount.update(command);
 
@@ -155,14 +159,14 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
              * a detail account cannot be changed to a header account if
              * transactions are already logged against it
              **/
-            if (changesOnly.containsKey(GLAccountJsonInputParams.USAGE.getValue())) {
-                if (glAccount.isHeaderAccount()) {
-                    final List<JournalEntry> journalEntriesForAccount = this.glJournalEntryRepository
-                            .findFirstJournalEntryForAccount(glAccountId);
-                    if (journalEntriesForAccount.size() > 0) { throw new GLAccountInvalidUpdateException(
-                            GL_ACCOUNT_INVALID_UPDATE_REASON.TRANSANCTIONS_LOGGED, glAccountId); }
-                }
-            }
+			if (changesOnly.containsKey(GLAccountJsonInputParams.USAGE.getValue()) && glAccount.isHeaderAccount()) {
+				final List<JournalEntry> journalEntriesForAccount = this.glJournalEntryRepository
+						.findFirstJournalEntryForAccount(glAccountId);
+				if (journalEntriesForAccount.size() > 0) {
+					throw new GLAccountInvalidUpdateException(GL_ACCOUNT_INVALID_UPDATE_REASON.TRANSANCTIONS_LOGGED,
+							glAccountId);
+				}
+			}
 
             if (!changesOnly.isEmpty()) {
                 this.glAccountRepository.saveAndFlush(glAccount);
@@ -189,16 +193,21 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
     public CommandProcessingResult deleteGLAccount(final Long glAccountId) {
         final GLAccount glAccount = this.glAccountRepository.findOne(glAccountId);
 
-        if (glAccount == null) { throw new GLAccountNotFoundException(glAccountId); }
+		if (glAccount == null) {
+			throw new GLAccountNotFoundException(glAccountId);
+		}
 
         // validate this isn't a header account that has children
-        if (glAccount.isHeaderAccount() && glAccount.getChildren().size() > 0) { throw new GLAccountInvalidDeleteException(
-                GL_ACCOUNT_INVALID_DELETE_REASON.HAS_CHILDREN, glAccountId); }
+		if (glAccount.isHeaderAccount() && glAccount.getChildren().size() > 0) {
+			throw new GLAccountInvalidDeleteException(GL_ACCOUNT_INVALID_DELETE_REASON.HAS_CHILDREN, glAccountId);
+		}
 
         // does this account have transactions logged against it
         final List<JournalEntry> journalEntriesForAccount = this.glJournalEntryRepository.findFirstJournalEntryForAccount(glAccountId);
-        if (journalEntriesForAccount.size() > 0) { throw new GLAccountInvalidDeleteException(
-                GL_ACCOUNT_INVALID_DELETE_REASON.TRANSANCTIONS_LOGGED, glAccountId); }
+		if (journalEntriesForAccount.size() > 0) {
+			throw new GLAccountInvalidDeleteException(GL_ACCOUNT_INVALID_DELETE_REASON.TRANSANCTIONS_LOGGED,
+					glAccountId);
+		}
         this.glAccountRepository.delete(glAccount);
 
         return new CommandProcessingResultBuilder().withEntityId(glAccountId).build();
@@ -212,9 +221,13 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
         GLAccount parentGLAccount = null;
         if (parentAccountId != null) {
             parentGLAccount = this.glAccountRepository.findOne(parentAccountId);
-            if (parentGLAccount == null) { throw new GLAccountNotFoundException(parentAccountId); }
+			if (parentGLAccount == null) {
+				throw new GLAccountNotFoundException(parentAccountId);
+			}
             // ensure parent is not a detail account
-            if (parentGLAccount.isDetailAccount()) { throw new GLAccountInvalidParentException(parentAccountId); }
+			if (parentGLAccount.isDetailAccount()) {
+				throw new GLAccountInvalidParentException(parentAccountId);
+			}
         }
         return parentGLAccount;
     }

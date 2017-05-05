@@ -27,6 +27,9 @@ public enum GLAccountUsage {
 
     private final Integer value;
     private final String code;
+    private static final Map<Integer, GLAccountUsage> intToEnumMap = new HashMap<>();
+    private static int minValue;
+    private static int maxValue;
 
     private GLAccountUsage(final Integer value, final String code) {
         this.value = value;
@@ -41,9 +44,6 @@ public enum GLAccountUsage {
         return this.code;
     }
 
-    private static final Map<Integer, GLAccountUsage> intToEnumMap = new HashMap<>();
-    private static int minValue;
-    private static int maxValue;
     static {
         int i = 0;
         for (final GLAccountUsage type : GLAccountUsage.values()) {
@@ -76,7 +76,7 @@ public enum GLAccountUsage {
 
     @Override
     public String toString() {
-        return name().toString();
+        return name();
     }
 
 }

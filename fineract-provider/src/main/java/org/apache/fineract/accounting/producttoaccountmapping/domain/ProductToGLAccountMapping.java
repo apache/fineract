@@ -56,37 +56,37 @@ public class ProductToGLAccountMapping extends AbstractPersistableCustom<Long> {
     @Column(name = "financial_account_type", nullable = true)
     private int financialAccountType;
 
-    public static ProductToGLAccountMapping createNew(final GLAccount glAccount, final Long productId, final int productType,
-            final int financialAccountType) {
-        return new ProductToGLAccountMapping(glAccount, productId, productType, financialAccountType);
-    }
-
-    protected ProductToGLAccountMapping() {
-        //
-    }
-
     public ProductToGLAccountMapping(final GLAccount glAccount, final Long productId, final int productType, final int financialAccountType) {
         this(glAccount, productId, productType, financialAccountType, null, null);
     }
 
     public ProductToGLAccountMapping(final GLAccount glAccount, final Long productId, final int productType,
-            final int financialAccountType, final Charge charge) {
+                                     final int financialAccountType, final Charge charge) {
         this(glAccount, productId, productType, financialAccountType, null, charge);
     }
 
     public ProductToGLAccountMapping(final GLAccount glAccount, final Long productId, final int productType,
-            final int financialAccountType, final PaymentType paymentType) {
+                                     final int financialAccountType, final PaymentType paymentType) {
         this(glAccount, productId, productType, financialAccountType, paymentType, null);
     }
 
     private ProductToGLAccountMapping(final GLAccount glAccount, final Long productId, final int productType,
-            final int financialAccountType, final PaymentType paymentType, final Charge charge) {
+                                      final int financialAccountType, final PaymentType paymentType, final Charge charge) {
         this.glAccount = glAccount;
         this.productId = productId;
         this.productType = productType;
         this.financialAccountType = financialAccountType;
         this.paymentType = paymentType;
         this.charge = charge;
+    }
+
+    protected ProductToGLAccountMapping() {
+        //
+    }
+
+    public static ProductToGLAccountMapping createNew(final GLAccount glAccount, final Long productId, final int productType,
+            final int financialAccountType) {
+        return new ProductToGLAccountMapping(glAccount, productId, productType, financialAccountType);
     }
 
     public GLAccount getGlAccount() {

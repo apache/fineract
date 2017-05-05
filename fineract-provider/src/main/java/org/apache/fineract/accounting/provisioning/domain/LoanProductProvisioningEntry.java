@@ -118,11 +118,14 @@ public class LoanProductProvisioningEntry extends AbstractPersistableCustom<Long
     
     @Override
     public boolean equals(Object obj) {
-        if (!obj.getClass().equals(getClass())) return false;
-        LoanProductProvisioningEntry entry = (LoanProductProvisioningEntry) obj;
-        return entry.loanProduct.getId().equals(this.loanProduct.getId())
-                && entry.provisioningCategory.getId().equals(this.provisioningCategory.getId())
-                && entry.office.getId().equals(this.office.getId())
-                && entry.getCurrencyCode().equals(this.getCurrencyCode());
+		if (obj == null)
+			return false;
+		if (!obj.getClass().equals(getClass()))
+			return false;
+        LoanProductProvisioningEntry provisioningEntry = (LoanProductProvisioningEntry) obj;
+        return provisioningEntry.loanProduct.getId().equals(this.loanProduct.getId())
+                && provisioningEntry.provisioningCategory.getId().equals(this.provisioningCategory.getId())
+                && provisioningEntry.office.getId().equals(this.office.getId())
+                && provisioningEntry.getCurrencyCode().equals(this.getCurrencyCode());
     }
 }

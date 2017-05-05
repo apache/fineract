@@ -107,7 +107,7 @@ public class BatchApiResource {
         final List<BatchRequest> requestList = this.batchRequestJsonHelper.extractList(jsonRequestString);
 
         // Gets back the consolidated BatchResponse from BatchApiservice
-        List<BatchResponse> result = new ArrayList<>();
+        List<BatchResponse> result;
 
         // If the request is to be handled as a Transaction. All requests will
         // be rolled back on error

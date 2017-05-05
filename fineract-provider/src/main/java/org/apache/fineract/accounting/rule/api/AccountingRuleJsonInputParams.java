@@ -30,12 +30,12 @@ public enum AccountingRuleJsonInputParams {
             "allowMultipleCreditEntries"), ALLOW_MULTIPLE_DEBIT_ENTRIES("allowMultipleDebitEntries");
 
     private final String value;
+    private static final Set<String> values = new HashSet<>();
 
     private AccountingRuleJsonInputParams(final String value) {
         this.value = value;
     }
 
-    private static final Set<String> values = new HashSet<>();
     static {
         for (final AccountingRuleJsonInputParams type : AccountingRuleJsonInputParams.values()) {
             values.add(type.value);
@@ -48,7 +48,7 @@ public enum AccountingRuleJsonInputParams {
 
     @Override
     public String toString() {
-        return name().toString().replaceAll("_", " ");
+        return name().replaceAll("_", " ");
     }
 
     public String getValue() {

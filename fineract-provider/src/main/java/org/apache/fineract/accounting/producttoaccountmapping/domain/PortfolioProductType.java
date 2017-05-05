@@ -27,6 +27,7 @@ public enum PortfolioProductType {
 
     private final Integer value;
     private final String code;
+    private static final Map<Integer, PortfolioProductType> intToEnumMap = new HashMap<>();
 
     private PortfolioProductType(final Integer value, final String code) {
         this.value = value;
@@ -35,7 +36,7 @@ public enum PortfolioProductType {
 
     @Override
     public String toString() {
-        return name().toString().replaceAll("_", " ");
+        return name().replaceAll("_", " ");
     }
 
     public Integer getValue() {
@@ -45,8 +46,6 @@ public enum PortfolioProductType {
     public String getCode() {
         return this.code;
     }
-
-    private static final Map<Integer, PortfolioProductType> intToEnumMap = new HashMap<>();
 
     static {
         for (final PortfolioProductType type : PortfolioProductType.values()) {

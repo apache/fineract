@@ -329,13 +329,11 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             }
         }
 
-        if (onlyManualEntries != null) {
-            if (onlyManualEntries) {
-                sqlBuilder.append(whereClose + " journalEntry.manual_entry = 1");
+		if (onlyManualEntries != null && onlyManualEntries) {
+			sqlBuilder.append(whereClose + " journalEntry.manual_entry = 1");
 
-                whereClose = " and ";
-            }
-        }
+			whereClose = " and ";
+		}
 
         if (searchParameters.isLoanIdPassed()) {
             sqlBuilder.append(whereClose + " journalEntry.loan_transaction_id  in (select id from m_loan_transaction where loan_id = ?)");
@@ -398,9 +396,12 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         final FinancialActivityAccount financialActivityAccountId = this.financialActivityAccountRepositoryWrapper
                 .findByFinancialActivityTypeWithNotFoundDetection(300);
         final Long contraId = financialActivityAccountId.getGlAccount().getId();
-        if (contraId == null) { throw new GeneralPlatformDomainRuleException(
-                "error.msg.financial.activity.mapping.opening.balance.contra.account.cannot.be.null",
-                "office-opening-balances-contra-account value can not be null", "office-opening-balances-contra-account"); }
+		if (contraId == null) {
+			throw new GeneralPlatformDomainRuleException(
+					"error.msg.financial.activity.mapping.opening.balance.contra.account.cannot.be.null",
+					"office-opening-balances-contra-account value can not be null",
+					"office-opening-balances-contra-account");
+		}
 
         final JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData();
         final GLAccountData contraAccount = this.glAccountReadPlatformService.retrieveGLAccountById(contraId, associationParametersData);
