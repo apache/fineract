@@ -3874,7 +3874,11 @@ public class Loan extends AbstractPersistableCustom<Long> {
         return disbursementDate;
     }
 
-    public LocalDate getWrittenOffDate() {
+	public void setActualDisbursementDate(Date actualDisbursementDate) {
+		this.actualDisbursementDate = actualDisbursementDate;
+	}
+
+	public LocalDate getWrittenOffDate() {
         LocalDate writtenOffDate = null;
         if (this.writtenOffOnDate != null) {
             writtenOffDate = new LocalDate(this.writtenOffOnDate);
