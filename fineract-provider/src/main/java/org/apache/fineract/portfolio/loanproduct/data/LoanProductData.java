@@ -187,7 +187,7 @@ public class LoanProductData {
     /**
      * Used when returning lookup information about loan product for dropdowns.
      */
-    public static LoanProductData lookup(final Long id, final String name) {
+    public static LoanProductData lookup(final Long id, final String name, final Boolean multiDisburseLoan ) {
         final String shortName = null;
         final String description = null;
         final CurrencyData currency = null;
@@ -241,7 +241,6 @@ public class LoanProductData {
         final LocalDate closeDate = null;
         final String status = null;
         final String externalId = null;
-        final Boolean multiDisburseLoan = null;
         final Integer maxTrancheCount = null;
         final BigDecimal outstandingLoanBalance = null;
         final LoanProductGuaranteeData productGuaranteeData = null;

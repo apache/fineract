@@ -469,7 +469,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     private static final class LoanProductLookupMapper implements RowMapper<LoanProductData> {
 
         public String schema() {
-            return "lp.id as id, lp.name as name from m_product_loan lp";
+            return "lp.id as id, lp.name as name, lp.allow_multiple_disbursals as multiDisburseLoan from m_product_loan lp";
         }
 
         public String activeOnlySchema() {
@@ -494,8 +494,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
             final Long id = rs.getLong("id");
             final String name = rs.getString("name");
+            final Boolean multiDisburseLoan = rs.getBoolean("multiDisburseLoan");
 
-            return LoanProductData.lookup(id, name);
+            return LoanProductData.lookup(id, name, multiDisburseLoan);
         }
     }
 
