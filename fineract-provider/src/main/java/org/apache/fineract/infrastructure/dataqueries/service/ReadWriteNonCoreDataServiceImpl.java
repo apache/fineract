@@ -49,6 +49,7 @@ import org.apache.fineract.infrastructure.dataqueries.exception.DatatableEntryRe
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableNotFoundException;
 import org.apache.fineract.infrastructure.dataqueries.exception.DatatableSystemErrorException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -134,6 +135,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         if (appTable == null) {
             andClause = "";
         } else {
+        	SQLInjectionValidator.validateSQLInput(appTable);
             andClause = " and application_table_name = '" + appTable + "'";
         }
 
@@ -164,6 +166,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     public DatatableData retrieveDatatable(final String datatable) {
 
         // PERMITTED datatables
+    	SQLInjectionValidator.validateSQLInput(datatable);
         final String sql = "select application_table_name, registered_table_name" + " from x_registered_table " + " where exists"
                 + " (select 'f'" + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"
                 + " left join m_role_permission rp on rp.role_id = r.id" + " left join m_permission p on p.id = rp.permission_id"
@@ -1161,7 +1164,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         // id only used for reading a specific entry in a one to many datatable
         // (when updating)
         if (id == null) {
-            sql = sql + "select * from `" + dataTableName + "` where " + getFKField(appTable) + " = " + appTableId;
+        	String whereClause = getFKField(appTable) + " = " + appTableId;
+        	SQLInjectionValidator.validateSQLInput(whereClause);
+            sql = sql + "select * from `" + dataTableName + "` where " + whereClause;
         } else {
             sql = sql + "select * from `" + dataTableName + "` where id = " + id;
         }
@@ -1185,7 +1190,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         // id only used for reading a specific entry in a one to many datatable
         // (when updating)
         if (id == null) {
-            sql = sql + "select * from `" + dataTableName + "` where " + getFKField(appTable) + " = " + appTableId;
+        	String whereClause = getFKField(appTable) + " = " + appTableId;
+        	SQLInjectionValidator.validateSQLInput(whereClause);
+            sql = sql + "select * from `" + dataTableName + "` where " + whereClause;
         } else {
             sql = sql + "select * from `" + dataTableName + "` where id = " + id;
         }
@@ -1333,6 +1340,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     private String queryForApplicationTableName(final String datatable) {
+    	SQLInjectionValidator.validateSQLInput(datatable);
         final String sql = "SELECT application_table_name FROM x_registered_table where registered_table_name = '" + datatable + "'";
 
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);

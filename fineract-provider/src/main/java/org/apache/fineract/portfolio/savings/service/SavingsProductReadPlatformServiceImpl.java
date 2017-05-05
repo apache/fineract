@@ -278,7 +278,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
         this.context.authenticatedUser();
 
-        String sql = "select " + this.savingsProductRowMapper.schema() + " where sp.currency_code='" + currencyCode + "'";
+        String sql = "select " + this.savingsProductRowMapper.schema() + " where sp.currency_code= ? ";
 
         // Check if branch specific products are enabled. If yes, fetch only
         // products mapped to current user's office
@@ -288,6 +288,6 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sql += " and id in ( " + inClause + " ) ";
         }
 
-        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper);
+        return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] {currencyCode});
     }
 }
