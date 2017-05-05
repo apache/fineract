@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.organisation.office.data.OfficeData;
@@ -70,16 +71,18 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
     private final StaffReadPlatformService staffReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final PaginationHelper<CashierTransactionData> paginationHelper = new PaginationHelper<>();
+    private final ColumnValidator columnValidator;
 
     @Autowired
     public TellerManagementReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final OfficeReadPlatformService officeReadPlatformService, StaffReadPlatformService staffReadPlatformService,
-            final CurrencyReadPlatformService currencyReadPlatformService) {
+            final CurrencyReadPlatformService currencyReadPlatformService, final ColumnValidator columnValidator) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.officeReadPlatformService = officeReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
         this.currencyReadPlatformService = currencyReadPlatformService;
+        this.columnValidator = columnValidator;
     }
 
     private static final class TellerMapper implements RowMapper<TellerData> {
@@ -223,7 +226,9 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     @Override
     public Collection<TellerData> retrieveAllTellers(final String sqlSearch, final Long officeId, final String status) {
-        final String extraCriteria = getTellerCriteria(sqlSearch, officeId, status);
+    	final TellerMapper tm = new TellerMapper();
+        String schemaSql = "select " + tm.schema();
+    	final String extraCriteria = getTellerCriteria(schemaSql, sqlSearch, officeId, status);
         return retrieveAllTeller(extraCriteria);
     }
 
@@ -238,11 +243,12 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         return this.jdbcTemplate.query(sql, tm, new Object[] {});
     }
 
-    private String getTellerCriteria(final String sqlSearch, final Long officeId, final String status) {
+    private String getTellerCriteria(final String schemaSql, final String sqlSearch, final Long officeId, final String status) {
 
         final StringBuffer extraCriteria = new StringBuffer(200);
 
         if (sqlSearch != null) {
+        	this.columnValidator.validateSqlInjection(schemaSql, sqlSearch);
             extraCriteria.append(" and (").append(sqlSearch).append(")");
         }
         if (officeId != null) {
@@ -278,15 +284,18 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     @Override
     public Collection<CashierData> retrieveCashiersForTellers(final String sqlSearch, final Long tellerId) {
-        final String extraCriteria = getTellerCriteria(sqlSearch, tellerId);
+    	final CashierMapper cm = new CashierMapper();
+        String schemaSql = "select " + cm.schema();
+    	final String extraCriteria = getTellerCriteria(schemaSql, sqlSearch, tellerId);
         return fetchCashiers(extraCriteria);
     }
 
-    private String getTellerCriteria(final String sqlSearch, final Long tellerId) {
+    private String getTellerCriteria(final String schemaSql, final String sqlSearch, final Long tellerId) {
 
         final StringBuffer extraCriteria = new StringBuffer(200);
 
         if (sqlSearch != null) {
+        	this.columnValidator.validateSqlInjection(schemaSql, sqlSearch);
             extraCriteria.append(" and (").append(sqlSearch).append(")");
         }
         if (tellerId != null) {

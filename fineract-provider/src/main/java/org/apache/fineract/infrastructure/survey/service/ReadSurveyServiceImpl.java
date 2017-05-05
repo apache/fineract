@@ -127,13 +127,13 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
     @Override
     public List<ClientScoresOverview> retrieveClientSurveyScoreOverview(String surveyName, Long clientId) {
 
-        final String sql = "SELECT  tz.id, lkh.name, lkh.code, poverty_line, tz.date, tz.score FROM " + surveyName + " tz"
-                + " JOIN ppi_likelihoods_ppi lkp on lkp.ppi_name = '" + surveyName + "' AND enabled = '" + LikelihoodStatus.ENABLED
-                + "' JOIN ppi_scores sc on score_from  <= tz.score AND score_to >=tz.score"
+        final String sql = "SELECT  tz.id, lkh.name, lkh.code, poverty_line, tz.date, tz.score FROM ? tz"
+                + " JOIN ppi_likelihoods_ppi lkp on lkp.ppi_name = ? AND enabled = ? " 
+                + " JOIN ppi_scores sc on score_from  <= tz.score AND score_to >=tz.score"
                 + " JOIN ppi_poverty_line pvl on pvl.likelihood_ppi_id = lkp.id AND pvl.score_id = sc.id"
-                + " JOIN ppi_likelihoods lkh on lkh.id = lkp.likelihood_id " + " WHERE  client_id = " + clientId;
+                + " JOIN ppi_likelihoods lkh on lkh.id = lkp.likelihood_id " + " WHERE  client_id = ? ";
 
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql, new Object[] { surveyName, surveyName, LikelihoodStatus.ENABLED, clientId });
 
         List<ClientScoresOverview> scoresOverviews = new ArrayList<>();
 

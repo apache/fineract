@@ -123,7 +123,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where
     // clause is ambiguous
     // caused by the same name of columns in m_office and m_group tables
-    private String getCenterExtraCriteria(final SearchParameters searchCriteria) {
+    private String getCenterExtraCriteria(String schemaSl, List<Object> paramList,final SearchParameters searchCriteria) {
 
         StringBuffer extraCriteria = new StringBuffer(200);
         extraCriteria.append(" and g.level_id = " + GroupTypes.CENTER.getId());
@@ -134,26 +134,31 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             sqlQueryCriteria = sqlQueryCriteria.replaceAll(" display_name ", " g.display_name ");
             sqlQueryCriteria = sqlQueryCriteria.replaceAll("display_name ", "g.display_name ");
             extraCriteria.append(" and (").append(sqlQueryCriteria).append(") ");
+            this.columnValidator.validateSqlInjection(schemaSl, sqlQueryCriteria);
         }
 
         final Long officeId = searchCriteria.getOfficeId();
         if (officeId != null) {
-            extraCriteria.append(" and g.office_id = ").append(officeId);
+            extraCriteria.append(" and g.office_id = ? ");
+            paramList.add(officeId);
         }
 
         final String externalId = searchCriteria.getExternalId();
         if (externalId != null) {
-            extraCriteria.append(" and g.external_id = ").append(ApiParameterHelper.sqlEncodeString(externalId));
+        	paramList.add(ApiParameterHelper.sqlEncodeString(externalId));
+            extraCriteria.append(" and g.external_id = ? ");
         }
 
         final String name = searchCriteria.getName();
         if (name != null) {
-            extraCriteria.append(" and g.display_name like ").append(ApiParameterHelper.sqlEncodeString(name + "%"));
+        	paramList.add(ApiParameterHelper.sqlEncodeString(name + "%"));
+            extraCriteria.append(" and g.display_name like ? ");
         }
 
         final String hierarchy = searchCriteria.getHierarchy();
         if (hierarchy != null) {
-            extraCriteria.append(" and o.hierarchy like ").append(ApiParameterHelper.sqlEncodeString(hierarchy + "%"));
+        	paramList.add(ApiParameterHelper.sqlEncodeString(hierarchy + "%"));
+            extraCriteria.append(" and o.hierarchy like ? ");
         }
 
         if (StringUtils.isNotBlank(extraCriteria.toString())) {
@@ -162,7 +167,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         final Long staffId = searchCriteria.getStaffId();
         if (staffId != null) {
-            extraCriteria.append(" and g.staff_id = ").append(staffId);
+        	paramList.add(staffId);
+            extraCriteria.append(" and g.staff_id = ? ");
         }
 
         return extraCriteria.toString();
@@ -377,8 +383,9 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(this.centerMapper.schema());
         sqlBuilder.append(" where o.hierarchy like ?");
-
-        final String extraCriteria = getCenterExtraCriteria(searchParameters);
+        List<Object> paramList = new ArrayList<>(
+                Arrays.asList(hierarchySearchString));
+        final String extraCriteria = getCenterExtraCriteria(this.centerMapper.schema(), paramList, searchParameters);
         this.columnValidator.validateSqlInjection(sqlBuilder.toString(), extraCriteria);
         if (StringUtils.isNotBlank(extraCriteria)) {
             sqlBuilder.append(" and (").append(extraCriteria).append(")");
@@ -397,7 +404,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
-                new Object[] { hierarchySearchString }, this.centerMapper);
+        		paramList.toArray(), this.centerMapper);
     }
 
     @Override
@@ -412,8 +419,10 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         sqlBuilder.append("select ");
         sqlBuilder.append(this.centerMapper.schema());
         sqlBuilder.append(" where o.hierarchy like ?");
-
-        final String extraCriteria = getCenterExtraCriteria(searchParameters);
+        List<Object> paramList = new ArrayList<>(
+                Arrays.asList(hierarchySearchString));
+        
+        final String extraCriteria = getCenterExtraCriteria(this.centerMapper.schema(), paramList, searchParameters);
         this.columnValidator.validateSqlInjection(sqlBuilder.toString(), extraCriteria);
         if (StringUtils.isNotBlank(extraCriteria)) {
             sqlBuilder.append(" and (").append(extraCriteria).append(")");
@@ -430,7 +439,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             }
         }
 
-        return this.jdbcTemplate.query(sqlBuilder.toString(), this.centerMapper, new Object[] { hierarchySearchString });
+        return this.jdbcTemplate.query(sqlBuilder.toString(), this.centerMapper, paramList.toArray());
     }
 
     @Override

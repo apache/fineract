@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
@@ -121,8 +122,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         String sql = "select " + rm.schema();
 
         if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
-            sql += " where lp.id in ( ? ) ";
-            return this.jdbcTemplate.query(sql, rm, new Object[] {inClause});
+            sql += " where lp.id in ("+inClause+") ";
+            SQLInjectionValidator.validateSQLInput(inClause);
         }
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
@@ -541,8 +542,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
         if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
-            sql += " and id in ( ? ) ";
-            return this.jdbcTemplate.query(sql, rm, new Object[] {currencyCode, inClause});
+            sql += " and id in (" + inClause + ") ";
         }
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {currencyCode});

@@ -285,8 +285,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.SAVINGS_PRODUCT);
         if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
-            sql += " and id in ( ? ) ";
-            return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] {currencyCode, inClause});
+            sql += " and id in ( " + inClause + " ) ";
         }
 
         return this.jdbcTemplate.query(sql, this.savingsProductRowMapper, new Object[] {currencyCode});

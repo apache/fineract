@@ -58,9 +58,9 @@ public class NamespaceReadPlatformServiceImpl implements NamespaceReadPlatformSe
 
     @Override
     public NamespaceData retrieveNamespaceById(final Long id) {
-        final String sql = this.namespaceMapper.schema() + " where id=" + id;
+        final String sql = this.namespaceMapper.schema() + " where id= ? ";
 
-        return this.jdbcTemplate.queryForObject(sql, this.namespaceMapper);
+        return this.jdbcTemplate.queryForObject(sql, this.namespaceMapper, new Object[] { id });
     }
 
     @Override

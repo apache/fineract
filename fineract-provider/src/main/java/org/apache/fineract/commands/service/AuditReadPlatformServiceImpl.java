@@ -285,9 +285,9 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
         final AuditMapper rm = new AuditMapper();
 
-        final String sql = "select " + rm.schema(true, hierarchy) + " where aud.id = " + auditId;
+        final String sql = "select " + rm.schema(true, hierarchy) + " where aud.id = ? ";
 
-        final AuditData auditResult = this.jdbcTemplate.queryForObject(sql, rm, new Object[] {});
+        final AuditData auditResult = this.jdbcTemplate.queryForObject(sql, rm, new Object[] {auditId});
 
         return replaceIdsOnAuditData(auditResult);
     }

@@ -241,21 +241,20 @@ public class SavingsAccountChargeReadPlatformServiceImpl implements SavingsAccou
 
     @Override
     public Collection<SavingsAccountAnnualFeeData> retrieveChargesWithAnnualFeeDue() {
-        final String sql = "select " + this.chargeDueMapper.schema() + " where sac.charge_due_date is not null and sac.charge_time_enum = "
-                + ChargeTimeType.ANNUAL_FEE.getValue() + " and sac.charge_due_date <= NOW() and sa.status_enum = "
-                + SavingsAccountStatusType.ACTIVE.getValue();
+        final String sql = "select " + this.chargeDueMapper.schema() + " where sac.charge_due_date is not null and sac.charge_time_enum = ? "
+                + " and sac.charge_due_date <= NOW() and sa.status_enum = ? ";
 
-        return this.jdbcTemplate.query(sql, this.chargeDueMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.chargeDueMapper, new Object[] {ChargeTimeType.ANNUAL_FEE.getValue(), SavingsAccountStatusType.ACTIVE.getValue()});
     }
 
     @Override
     public Collection<SavingsAccountAnnualFeeData> retrieveChargesWithDue() {
         final String sql = "select "
                 + this.chargeDueMapper.schema()
-                + " where sac.charge_due_date is not null and sac.charge_due_date <= NOW() and sac.waived = 0 and sac.is_paid_derived=0 and sac.is_active=1 and sa.status_enum = "
-                + SavingsAccountStatusType.ACTIVE.getValue() + " order by sac.charge_due_date ";
+                + " where sac.charge_due_date is not null and sac.charge_due_date <= NOW() and sac.waived = 0 and sac.is_paid_derived=0 and sac.is_active=1 and sa.status_enum = ? "
+                + " order by sac.charge_due_date ";
 
-        return this.jdbcTemplate.query(sql, this.chargeDueMapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.chargeDueMapper, new Object[] {SavingsAccountStatusType.ACTIVE.getValue()});
 
     }
 
