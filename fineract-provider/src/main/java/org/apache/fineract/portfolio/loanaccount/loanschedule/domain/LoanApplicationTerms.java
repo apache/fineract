@@ -1112,6 +1112,12 @@ public final class LoanApplicationTerms {
             }
         }
         Integer periodsRemaining = totalNumberOfRepaymentPeriods - periodsElapsed - principalFeePeriods;
+        /**
+         * if grace period available then need to be subtracted
+         */
+        if(this.interestChargingGrace != null){
+        	periodsRemaining = periodsRemaining - this.interestChargingGrace;
+        }
         return periodsRemaining;
     }
     
