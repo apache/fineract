@@ -82,7 +82,8 @@ public class MeetingReadPlatformServiceImpl implements MeetingReadPlatformServic
         final MeetingDataMapper rm = new MeetingDataMapper();
         String sql = rm.schema() + " where ci.entity_id = ? and ci.entity_type_enum = ? ";
         if (limit != null && limit > 0) {
-            sql = sql + " order by m.meeting_date desc " + " limit " + limit;
+            sql = sql + " order by m.meeting_date desc " + " limit ? ";
+            return this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId, limit });
         }
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
