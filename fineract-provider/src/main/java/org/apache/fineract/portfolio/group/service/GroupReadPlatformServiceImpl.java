@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -207,6 +208,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         extraCriteria.append(" and g.level_Id = ").append(GroupTypes.GROUP.getId());
         String sqlSearch = searchCriteria.getSqlSearch();
         if (sqlSearch != null) {
+        	SQLInjectionValidator.validateSQLInput(sqlSearch);
             sqlSearch = sqlSearch.replaceAll(" display_name ", " g.display_name ");
             sqlSearch = sqlSearch.replaceAll("display_name ", "g.display_name ");
             extraCriteria.append(" and ( ").append(sqlSearch).append(") ");
