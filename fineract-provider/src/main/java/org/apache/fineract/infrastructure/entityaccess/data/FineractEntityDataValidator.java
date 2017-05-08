@@ -20,8 +20,11 @@ package org.apache.fineract.infrastructure.entityaccess.data;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -41,12 +44,15 @@ import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundExc
 import org.apache.fineract.useradministration.domain.Role;
 import org.apache.fineract.useradministration.domain.RoleRepository;
 import org.apache.fineract.useradministration.exception.RoleNotFoundException;
+import org.apache.fineract.infrastructure.entityaccess.api.FineractEntityApiResourceConstants;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
+
+
 
 @Component
 public class FineractEntityDataValidator {
@@ -57,6 +63,16 @@ public class FineractEntityDataValidator {
     private final SavingsProductRepository savingsProductRepository;
     private final ChargeRepositoryWrapper chargeRepositoryWrapper;
     private final RoleRepository roleRepository;
+	private static final Set<String> CREATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+			FineractEntityApiResourceConstants.fromEnityType, FineractEntityApiResourceConstants.toEntityType,
+			FineractEntityApiResourceConstants.startDate, FineractEntityApiResourceConstants.LOCALE,
+			FineractEntityApiResourceConstants.DATE_FORMAT, FineractEntityApiResourceConstants.endDate));
+
+	private static final Set<String> UPDATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(FineractEntityApiResourceConstants.relId, FineractEntityApiResourceConstants.fromEnityType,
+					FineractEntityApiResourceConstants.toEntityType, FineractEntityApiResourceConstants.startDate,
+					FineractEntityApiResourceConstants.LOCALE, FineractEntityApiResourceConstants.DATE_FORMAT,
+					FineractEntityApiResourceConstants.endDate));
 
     @Autowired
     public FineractEntityDataValidator(final FromJsonHelper fromApiJsonHelper, final OfficeRepositoryWrapper officeRepositoryWrapper,
@@ -75,8 +91,8 @@ public class FineractEntityDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                FineractEntityApiResourceConstants.CREATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS);
+		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+				CREATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -172,8 +188,8 @@ public class FineractEntityDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                FineractEntityApiResourceConstants.UPDATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS);
+		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+				UPDATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

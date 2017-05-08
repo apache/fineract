@@ -18,20 +18,18 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.data;
 
-import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.CATEGORY_DEFAULT;
-import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.CATEGORY_PPI;
-import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.DATATABLE_RESOURCE_NAME;
-import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.REGISTER_PARAMS;
-import static org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant.categoryParamName;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -43,6 +41,8 @@ import com.google.gson.reflect.TypeToken;
 public class DataTableValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
+	private final Set<String> REGISTER_PARAMS = new HashSet<>(
+			Arrays.asList(DataTableApiConstant.categoryParamName, DataTableApiConstant.localParamName));
 
     @Autowired
     public DataTableValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -55,14 +55,14 @@ public class DataTableValidator {
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, REGISTER_PARAMS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(DATATABLE_RESOURCE_NAME);
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(DataTableApiConstant.DATATABLE_RESOURCE_NAME);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        if (this.fromApiJsonHelper.parameterExists(categoryParamName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(DataTableApiConstant.categoryParamName, element)) {
 
-            final Integer category = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(categoryParamName, element);
-            Object[] objectArray = new Integer[] { CATEGORY_PPI, CATEGORY_DEFAULT };
-            baseDataValidator.reset().parameter(categoryParamName).value(category).isOneOfTheseValues(objectArray);
+            final Integer category = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(DataTableApiConstant.categoryParamName, element);
+            Object[] objectArray = new Integer[] { DataTableApiConstant.CATEGORY_PPI, DataTableApiConstant.CATEGORY_DEFAULT };
+            baseDataValidator.reset().parameter(DataTableApiConstant.categoryParamName).value(category).isOneOfTheseValues(objectArray);
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }

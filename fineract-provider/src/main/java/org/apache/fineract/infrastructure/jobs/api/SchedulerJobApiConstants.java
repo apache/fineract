@@ -45,19 +45,6 @@ public class SchedulerJobApiConstants {
     public static final String cronExpressionParamName = "cronExpression";
     public static final String schedulerStatusParamName = "active";
 
-    public static final Set<String> JOB_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(jobIdentifierParamName,
-            displayNameParamName, nextRunTimeParamName, initializingErrorParamName, cronExpressionParamName, jobActiveStatusParamName,
-            currentlyRunningParamName, lastRunHistoryObjParamName));
-
-    public static final Set<String> JOB_HISTORY_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(versionParamName,
-            jobRunStartTimeParamName, jobRunEndTimeParamName, statusParamName, jobRunErrorMessageParamName, triggerTypeParamName,
-            jobRunErrorLogParamName));
-
-    public static final Set<String> JOB_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(displayNameParamName,
-            jobActiveStatusParamName, cronExpressionParamName));
-
-    public static final Set<String> SCHEDULER_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(schedulerStatusParamName));
-
     public static final String COMMAND_EXECUTE_JOB = "executeJob";
     public static final String COMMAND_STOP_SCHEDULER = "stop";
     public static final String COMMAND_START_SCHEDULER = "start";
@@ -65,4 +52,17 @@ public class SchedulerJobApiConstants {
     public static final String JOB_ID = "jobId";
     public static final String JOB_RUN_HISTORY = "runhistory";
     public static final String SCHEDULER_STATUS_PATH = "scheduler";
+
+    protected static final Set<String> JOB_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList
+            (jobIdentifierParamName,
+            displayNameParamName, nextRunTimeParamName, initializingErrorParamName, cronExpressionParamName, jobActiveStatusParamName,
+            currentlyRunningParamName, lastRunHistoryObjParamName));
+
+    protected static final Set<String> JOB_HISTORY_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList
+            (versionParamName,
+            jobRunStartTimeParamName, jobRunEndTimeParamName, statusParamName, jobRunErrorMessageParamName, triggerTypeParamName,
+            jobRunErrorLogParamName));
+
+    protected static final Set<String> SCHEDULER_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList
+            (schedulerStatusParamName));
 }

@@ -32,7 +32,7 @@ import org.apache.fineract.infrastructure.documentmanagement.exception.ContentMa
 
 public class ContentRepositoryUtils {
 
-    public static Random random = new Random();
+    private static final Random random = new Random();
 
     public static enum IMAGE_MIME_TYPE {
         GIF("image/gif"), JPEG("image/jpeg"), PNG("image/png");
