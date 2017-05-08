@@ -44,6 +44,8 @@ import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
+import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
@@ -153,6 +155,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final LoanUtilService loanUtilService;
     private final ConfigurationDomainService configurationDomainService;
     private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
+    private final ColumnValidator columnValidator;
 
     @Autowired
     public LoanReadPlatformServiceImpl(final PlatformSecurityContext context, final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
@@ -166,7 +169,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final FloatingRatesReadPlatformService floatingRatesReadPlatformService, final LoanUtilService loanUtilService,
             final ConfigurationDomainService configurationDomainService,
             final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
-            final LoanRepositoryWrapper loanRepositoryWrapper) {
+            final LoanRepositoryWrapper loanRepositoryWrapper, final ColumnValidator columnValidator) {
         this.context = context;
         this.loanRepositoryWrapper = loanRepositoryWrapper ;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
@@ -187,6 +190,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.loanUtilService = loanUtilService;
         this.configurationDomainService = configurationDomainService;
         this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
+        this.columnValidator = columnValidator;
     }
 
     @Override
@@ -281,7 +285,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         String sqlQueryCriteria = searchParameters.getSqlSearch();
         if (StringUtils.isNotBlank(sqlQueryCriteria)) {
+        	SQLInjectionValidator.validateSQLInput(sqlQueryCriteria);
             sqlQueryCriteria = sqlQueryCriteria.replaceAll("accountNo", "l.account_no");
+            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), sqlQueryCriteria);
             sqlBuilder.append(" and (").append(sqlQueryCriteria).append(")");
         }
 

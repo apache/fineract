@@ -20,7 +20,10 @@ package org.apache.fineract.portfolio.note.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -86,14 +89,16 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
         final NoteType noteType = NoteType.fromInt(noteTypeId);
         try {
             final NoteMapper rm = new NoteMapper();
-            String conditionSql = getResourceCondition(noteType);
+            List<Object> paramList = new ArrayList<>(
+                    Arrays.asList(noteId, resourceId));
+            String conditionSql = getResourceCondition(noteType, paramList);
             if (StringUtils.isNotBlank(conditionSql)) {
                 conditionSql = " and " + conditionSql;
             }
 
             final String sql = rm.schema() + " where n.id = ? " + conditionSql + " order by n.created_date DESC";
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { noteId, resourceId });
+            return this.jdbcTemplate.queryForObject(sql, rm, paramList.toArray());
         } catch (final EmptyResultDataAccessException e) {
             throw new NoteNotFoundException(noteId, resourceId, noteType.name().toLowerCase());
         }
@@ -103,22 +108,26 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
     public Collection<NoteData> retrieveNotesByResource(final Long resourceId, final Integer noteTypeId) {
         final NoteType noteType = NoteType.fromInt(noteTypeId);
         final NoteMapper rm = new NoteMapper();
-        final String conditionSql = getResourceCondition(noteType);
+        List<Object> paramList = new ArrayList<>(
+                Arrays.asList(resourceId));
+        final String conditionSql = getResourceCondition(noteType, paramList);
 
         final String sql = rm.schema() + " where " + conditionSql + " order by n.created_date DESC";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { resourceId });
+        return this.jdbcTemplate.query(sql, rm, paramList.toArray());
     }
 
-    public static String getResourceCondition(final NoteType noteType) {
+    public static String getResourceCondition(final NoteType noteType, List<Object> paramList) {
         String conditionSql = "";
         switch (noteType) {
             case CLIENT:
-                conditionSql = " n.client_id = ? and note_type_enum = " + NoteType.CLIENT.getValue();
+            	paramList.add(NoteType.CLIENT.getValue());
+                conditionSql = " n.client_id = ? and note_type_enum = ?";
             break;
             case LOAN:
-                conditionSql = " n.loan_id = ? and ( n.note_type_enum = " + NoteType.LOAN.getValue() + " or n.note_type_enum = "
-                        + NoteType.LOAN_TRANSACTION.getValue() + " )";
+            	paramList.add(NoteType.LOAN.getValue());
+            	paramList.add(NoteType.LOAN_TRANSACTION.getValue());
+                conditionSql = " n.loan_id = ? and ( n.note_type_enum = ? or n.note_type_enum = ? )";
             break;
             case LOAN_TRANSACTION:
                 conditionSql = " n.loan_transaction_id = ? ";
