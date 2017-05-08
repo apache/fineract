@@ -27,6 +27,7 @@ import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.accountdetails.data.AccountSummaryCollectionData;
 import org.apache.fineract.portfolio.accountdetails.data.LoanAccountSummaryData;
@@ -56,13 +57,16 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
     private final JdbcTemplate jdbcTemplate;
     private final ClientReadPlatformService clientReadPlatformService;
     private final GroupReadPlatformService groupReadPlatformService;
+    private final ColumnValidator columnValidator;
 
     @Autowired
     public AccountDetailsReadPlatformServiceJpaRepositoryImpl(final ClientReadPlatformService clientReadPlatformService,
-            final RoutingDataSource dataSource, final GroupReadPlatformService groupReadPlatformService) {
+            final RoutingDataSource dataSource, final GroupReadPlatformService groupReadPlatformService,
+            final ColumnValidator columnValidator) {
         this.clientReadPlatformService = clientReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.groupReadPlatformService = groupReadPlatformService;
+        this.columnValidator = columnValidator;
     }
 
     @Override
@@ -119,6 +123,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
     private List<LoanAccountSummaryData> retrieveLoanAccountDetails(final String loanwhereClause, final Object[] inputs) {
         final LoanAccountSummaryDataMapper rm = new LoanAccountSummaryDataMapper();
         final String sql = "select " + rm.loanAccountSummarySchema() + loanwhereClause;
+        this.columnValidator.validateSqlInjection(rm.loanAccountSummarySchema(), loanwhereClause);
         return this.jdbcTemplate.query(sql, rm, inputs);
     }
 
@@ -129,6 +134,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
     private List<SavingsAccountSummaryData> retrieveAccountDetails(final String savingswhereClause, final Object[] inputs) {
         final SavingsAccountSummaryDataMapper savingsAccountSummaryDataMapper = new SavingsAccountSummaryDataMapper();
         final String savingsSql = "select " + savingsAccountSummaryDataMapper.schema() + savingswhereClause;
+        this.columnValidator.validateSqlInjection(savingsAccountSummaryDataMapper.schema() , savingswhereClause);
         return this.jdbcTemplate.query(savingsSql, savingsAccountSummaryDataMapper, inputs);
     }
 
