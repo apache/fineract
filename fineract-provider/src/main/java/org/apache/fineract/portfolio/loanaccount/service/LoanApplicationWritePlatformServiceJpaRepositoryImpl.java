@@ -824,7 +824,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     final CalendarInstance calendarInstance = ciList.get(0);
                     final boolean isCalendarAssociatedWithEntity = this.calendarReadPlatformService.isCalendarAssociatedWithEntity(calendarInstance
                             .getEntityId(), calendarInstance.getCalendar().getId(), CalendarEntityType.LOANS.getValue().longValue());
-                    if (isCalendarAssociatedWithEntity) {
+                    if (isCalendarAssociatedWithEntity && calendarId == null) {
                         this.calendarRepository.delete(calendarInstance.getCalendar());
                     }
                     if (calendarInstance.getCalendar().getId() != calendar.getId()) {

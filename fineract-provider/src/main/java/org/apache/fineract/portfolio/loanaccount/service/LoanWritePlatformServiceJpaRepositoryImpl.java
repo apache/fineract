@@ -279,7 +279,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         checkForProductMixRestrictions(loan);
         
         LocalDate recalculateFrom = null;
-        loan.setActualDisbursementDate(actualDisbursementDate.toDate());
+        if(!loan.isMultiDisburmentLoan()){
+        	loan.setActualDisbursementDate(actualDisbursementDate.toDate());
+        }        
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
 
         // validate actual disbursement date against meeting date
