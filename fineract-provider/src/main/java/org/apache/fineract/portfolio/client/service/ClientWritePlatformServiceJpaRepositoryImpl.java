@@ -365,7 +365,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     {    	
     	final JsonElement clientNonPersonElement = this.fromApiJsonHelper.parse(command.jsonFragment(ClientApiConstants.clientNonPersonDetailsParamName));
 
-		if(clientNonPersonElement != null)
+		if(clientNonPersonElement != null && !isEmpty(clientNonPersonElement))
 		{
 			final String incorpNumber = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.incorpNumberParamName, clientNonPersonElement);
 	        final String remarks = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.remarksParamName, clientNonPersonElement);                
@@ -390,6 +390,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 	    	
 	    	this.clientNonPersonRepository.save(newClientNonPerson);
 		}
+    }
+    
+    public boolean isEmpty(final JsonElement element){
+    	return element.toString().trim().length()<4;
     }
 
     @Transactional
