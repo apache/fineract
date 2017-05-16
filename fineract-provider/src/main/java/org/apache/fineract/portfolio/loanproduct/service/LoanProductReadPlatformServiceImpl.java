@@ -32,7 +32,6 @@ import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
@@ -123,7 +122,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
             sql += " where lp.id in ("+inClause+") ";
-            SQLInjectionValidator.validateSQLInput(inClause);
+            //Here no need to check injection as this is internal where clause
+           // SQLInjectionValidator.validateSQLInput(inClause);
         }
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
