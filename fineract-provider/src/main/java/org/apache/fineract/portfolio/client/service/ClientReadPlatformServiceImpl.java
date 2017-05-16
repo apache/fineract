@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.client.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -41,6 +42,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -86,6 +88,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final AddressReadPlatformService addressReadPlatformService;
     private final ConfigurationReadPlatformService configurationReadPlatformService;
     private final EntityDatatableChecksReadService entityDatatableChecksReadService;
+    private final ColumnValidator columnValidator;
 
     @Autowired
     public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -94,7 +97,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final SavingsProductReadPlatformService savingsProductReadPlatformService,
             final AddressReadPlatformService addressReadPlatformService,
             final ConfigurationReadPlatformService configurationReadPlatformService,
-            final EntityDatatableChecksReadService entityDatatableChecksReadService) {
+            final EntityDatatableChecksReadService entityDatatableChecksReadService,
+            final ColumnValidator columnValidator) {
         this.context = context;
         this.officeReadPlatformService = officeReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -104,6 +108,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         this.addressReadPlatformService=addressReadPlatformService;
         this.configurationReadPlatformService=configurationReadPlatformService;
         this.entityDatatableChecksReadService = entityDatatableChecksReadService;
+        this.columnValidator = columnValidator;
     }
 
     @Override
@@ -165,6 +170,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     }
 
     @Override
+   // @Transactional(readOnly=true)
     public Page<ClientData> retrieveAll(final SearchParameters searchParameters) {
 
         final String userOfficeHierarchy = this.context.officeHierarchy();
@@ -175,7 +181,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         // this.context.validateAccessRights(searchParameters.getHierarchy());
         // underHierarchySearchString = searchParameters.getHierarchy() + "%";
         // }
-
+        List<Object> paramList = new ArrayList<>(Arrays.asList(underHierarchySearchString, underHierarchySearchString));
         final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(this.clientMapper.schema());
@@ -183,10 +189,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         
         if(searchParameters.isSelfUser()){
         	sqlBuilder.append(" and c.id in (select umap.client_id from m_selfservice_user_client_mapping as umap where umap.appuser_id = ? ) ");
+        	paramList.add(appUserID);
         }
 
-        final String extraCriteria = buildSqlStringFromClientCriteria(searchParameters);
-
+        final String extraCriteria = buildSqlStringFromClientCriteria(this.clientMapper.schema(), searchParameters, paramList);
+        
         if (StringUtils.isNotBlank(extraCriteria)) {
             sqlBuilder.append(" and (").append(extraCriteria).append(")");
         }
@@ -207,14 +214,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
-        Object[] params = new Object[] {underHierarchySearchString, underHierarchySearchString };
-        if(searchParameters.isSelfUser()){
-            params = new Object[] {underHierarchySearchString, underHierarchySearchString, appUserID };
-        }
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), params, this.clientMapper);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), paramList.toArray(), this.clientMapper);
     }
 
-    private String buildSqlStringFromClientCriteria(final SearchParameters searchParameters) {
+    private String buildSqlStringFromClientCriteria(String schemaSql, final SearchParameters searchParameters, List<Object> paramList) {
 
         String sqlSearch = searchParameters.getSqlSearch();
         final Long officeId = searchParameters.getOfficeId();
@@ -228,32 +231,38 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sqlSearch = sqlSearch.replaceAll(" display_name ", " c.display_name ");
             sqlSearch = sqlSearch.replaceAll("display_name ", "c.display_name ");
             extraCriteria = " and (" + sqlSearch + ")";
+            this.columnValidator.validateSqlInjection(schemaSql, sqlSearch);
         }
 
         if (officeId != null) {
-            extraCriteria += " and c.office_id = " + officeId;
+            extraCriteria += " and c.office_id = ? ";
+            paramList.add(officeId);
         }
 
         if (externalId != null) {
-            extraCriteria += " and c.external_id like " + ApiParameterHelper.sqlEncodeString(externalId);
+        	paramList.add(ApiParameterHelper.sqlEncodeString(externalId));
+            extraCriteria += " and c.external_id like ? " ;
         }
 
         if (displayName != null) {
             //extraCriteria += " and concat(ifnull(c.firstname, ''), if(c.firstname > '',' ', '') , ifnull(c.lastname, '')) like "
-			extraCriteria += " and c.display_name like "
-                    + ApiParameterHelper.sqlEncodeString("%" + displayName + "%");
+        	paramList.add(ApiParameterHelper.sqlEncodeString(ApiParameterHelper.sqlEncodeString("%" + displayName + "%")));
+        	extraCriteria += " and c.display_name like ? ";
         }
 
         if (firstname != null) {
-            extraCriteria += " and c.firstname like " + ApiParameterHelper.sqlEncodeString(firstname);
+        	paramList.add(ApiParameterHelper.sqlEncodeString(firstname));
+            extraCriteria += " and c.firstname like ? " ;
         }
 
         if (lastname != null) {
-            extraCriteria += " and c.lastname like " + ApiParameterHelper.sqlEncodeString(lastname);
+        	paramList.add(ApiParameterHelper.sqlEncodeString(lastname));
+            extraCriteria += " and c.lastname like ? ";
         }
 
         if (searchParameters.isScopedByOfficeHierarchy()) {
-            extraCriteria += " and o.hierarchy like " + ApiParameterHelper.sqlEncodeString(searchParameters.getHierarchy() + "%");
+        	paramList.add(ApiParameterHelper.sqlEncodeString(searchParameters.getHierarchy() + "%"));
+            extraCriteria += " and o.hierarchy like ? ";
         }
         
         if(searchParameters.isOrphansOnly()){
@@ -263,7 +272,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         if (StringUtils.isNotBlank(extraCriteria)) {
             extraCriteria = extraCriteria.substring(4);
         }
-
         return extraCriteria;
     }
 
@@ -297,8 +305,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         if (StringUtils.isNotBlank(extraCriteria)) {
             sql += " and (" + extraCriteria + ")";
-        }
-
+            this.columnValidator.validateSqlInjection(sql, extraCriteria);
+        }        
         return this.jdbcTemplate.query(sql, this.lookupMapper, new Object[] {});
     }
 

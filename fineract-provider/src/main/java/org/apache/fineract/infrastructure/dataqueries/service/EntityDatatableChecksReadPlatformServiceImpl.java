@@ -86,17 +86,20 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
         if (status != null || entity != null || productId != null) {
             sqlBuilder.append(" where ");
         }
-
+        List<Object> paramList = new ArrayList<>();
         if (status != null) {
-            sqlBuilder.append(" status_enum = " + status);
+            sqlBuilder.append(" status_enum = ? ");
+            paramList.add(status);
         }
 
         if (entity != null) {
-            sqlBuilder.append(" and t.application_table_name = '" + entity + "'");
+            sqlBuilder.append(" and t.application_table_name = ? ");
+            paramList.add(entity);
         }
 
         if (productId != null) {
-            sqlBuilder.append(" and t.product_id = " + productId);
+            sqlBuilder.append(" and t.product_id = ? ");
+            paramList.add(productId);
         }
         if (searchParameters.isLimited()) {
             sqlBuilder.append(" limit ").append(searchParameters.getLimit());
@@ -105,7 +108,7 @@ public class EntityDatatableChecksReadPlatformServiceImpl implements EntityDatat
             }
         }
         final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(jdbcTemplate, sqlCountRows, sqlBuilder.toString(), new Object[] {},
+        return this.paginationHelper.fetchPage(jdbcTemplate, sqlCountRows, sqlBuilder.toString(),paramList.toArray(),
                 entityDataTableChecksMapper);
 
     }
