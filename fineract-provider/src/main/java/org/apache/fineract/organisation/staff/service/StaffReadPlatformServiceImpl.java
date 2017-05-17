@@ -31,7 +31,6 @@ import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamE
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
-import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.exception.StaffNotFoundException;
 import org.apache.fineract.portfolio.client.domain.ClientStatus;
@@ -162,7 +161,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
     @Override
     public Collection<StaffData> retrieveAllLoanOfficersInOfficeById(final Long officeId) {
-        return retrieveAllStaff(" office_id = ? and is_loan_officer=1", officeId);
+        return retrieveAllStaff(" office_id = ? and is_loan_officer=1 and o.hierarchy like ?", officeId);
     }
 
     @Override
