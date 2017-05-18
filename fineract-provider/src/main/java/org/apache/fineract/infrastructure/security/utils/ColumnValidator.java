@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.security.utils;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,6 +33,7 @@ import java.util.Set;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -45,9 +47,11 @@ public class ColumnValidator {
 	}
 
 	private void validateColumn(Map<String, Set<String>> tableColumnMap) {
+		Connection connection = null ;
 		try {
-			DatabaseMetaData dbMetaData = this.jdbcTemplate.getDataSource()
-					.getConnection().getMetaData();
+			connection = this.jdbcTemplate.getDataSource()
+					.getConnection() ;
+			DatabaseMetaData dbMetaData = connection.getMetaData();
 			ResultSet resultSet = null;
 			for (HashMap.Entry<String, Set<String>> entry : tableColumnMap
 					.entrySet()) {
@@ -66,6 +70,11 @@ public class ColumnValidator {
 			}
 		} catch (SQLException e) {
 			throw new SQLInjectionException();
+		}finally {
+			if(connection != null) {
+				DataSourceUtils.releaseConnection(connection, jdbcTemplate.getDataSource());
+			}
+			connection = null ;
 		}
 	}
 
