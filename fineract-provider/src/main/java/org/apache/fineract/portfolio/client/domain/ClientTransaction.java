@@ -144,8 +144,8 @@ public class ClientTransaction extends AbstractPersistableCustom<Long> {
      * Converts the content of this Client Transaction to a map which can be
      * passed to the accounting module
      * 
-     * @param currencyData
-     * @return
+     * 
+     * 
      */
     public Map<String, Object> toMapData() {
         final Map<String, Object> thisTransactionData = new LinkedHashMap<>();

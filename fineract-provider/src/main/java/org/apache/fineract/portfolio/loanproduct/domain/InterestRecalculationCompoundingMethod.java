@@ -22,9 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /***
- * <ul>
+ * 
  * People typically use either of the following settings when defining interest
  * recalculation method:
+ * <ul>
  * <li>NONE</li>
  * <li>INTEREST</li>
  * <li>FEE</li>

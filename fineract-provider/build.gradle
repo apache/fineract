@@ -92,6 +92,7 @@ rat {
  excludes = [
 	'**/licenses/**',
 	'**/*.md',
+	'**/MANIFEST.MF',
 	'**/*.txt',
 	'**/*.log',
 	'**/fineractdev-eclipse-preferences.epf',

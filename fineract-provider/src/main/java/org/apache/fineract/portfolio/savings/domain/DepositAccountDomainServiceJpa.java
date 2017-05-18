@@ -191,7 +191,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
          */
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         /*
-         * <<<<<<< HEAD final SavingsAccountTransactionDTO transactionDTO = new
+         *  final SavingsAccountTransactionDTO transactionDTO = new
          * SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
          * paymentDetail, new Date()); final SavingsAccountTransaction deposit =
          * account.deposit(transactionDTO); boolean isInterestTransfer = false;

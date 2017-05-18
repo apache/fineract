@@ -25,7 +25,7 @@ import java.util.Date;
  * {@code TellerJournalData} represents an immutable journal data object.
  *
  * @version 1.0.0
-<<<<<<< HEAD
+
  * @since 2.0.0
  * @see java.io.Serializable
  * @since 2.0.0

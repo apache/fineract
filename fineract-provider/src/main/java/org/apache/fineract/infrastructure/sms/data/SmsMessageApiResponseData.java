@@ -30,7 +30,7 @@ public class SmsMessageApiResponseData {
 	/** 
 	 * SmsMessageApiResponseData constructor
 	 * 
-	 * @return void 
+	 *  
 	 **/
 	private SmsMessageApiResponseData(Integer httpStatusCode, List<SmsMessageDeliveryReportData> data) {
 		this.httpStatusCode = httpStatusCode;
@@ -40,7 +40,7 @@ public class SmsMessageApiResponseData {
 	/** 
 	 * Default SmsMessageApiResponseData constructor 
 	 * 
-	 * @return void
+	 * 
 	 **/
 	protected SmsMessageApiResponseData() {}
 	

@@ -31,7 +31,7 @@ import com.google.gson.GsonBuilder;
 
 /**
  * <p>
- * A google gson implementation of {@link ExcludeNothingJsonSerializer}
+ * A google gson implementation of 
  * contract.
  * </p>
  * 

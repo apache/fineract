@@ -34,7 +34,7 @@ import org.joda.time.LocalDate;
  * information, teller, and more.
  *
  * @author Markus Geiss
-<<<<<<< HEAD
+
  * @since 2.0.0
  * @see org.apache.fineract.organisation.teller.domain.Cashier
  * @since 2.0.0
@@ -86,24 +86,27 @@ public final class CashierData implements Serializable {
 
     /**
      * Creates a new cashier.
-     * <p/>
+     * 
      * <p>The valid from/to dates may be used to define a time period in which
      * the cashier is assignable to a teller.</p>
-     * <p/>
+     * 
      * <p>The start/end times may be used to define a time period in which
      * the cashier works part time.</p>
      *
-     * @param id          the primary key of this cashier
-     * @param officeId    the primary key of the related office
-     * @param staffId     the primary key of the related staff
-     * @param tellerId    the primary key of the related teller
+     * @param id the primary key of this cashier
+     * @param officeId the primary key of the related office
+     * @param officeName the primary key of the related staff
+     * @param staffId the primary key of the related teller
+     * @param staffName
+     * @param tellerId the primary key of the related teller
+     * @param tellerName
      * @param description the description of this cashier
-     * @param validFrom   the valid from date of this cashier
-     * @param validTo     the valid to date of this cashier
-     * @param partTime    the part time flag of this cashier
-     * @param startTime   the start time of this cashier
-     * @param endTime     the end time of this cashier
-     * @return the cashier
+     * @param startDate the valid from date of this cashier
+     * @param endDate  the valid to date of this cashier
+     * @param isFullDay the part time flag of this cashier
+     * @param startTime the start time of this cashier
+     * @param endTime  the end time of this cashier
+     * @return
      */
     public static CashierData instance(final Long id, final Long officeId, String officeName, 
     		final Long staffId, final String staffName, final Long tellerId, final String tellerName,
@@ -169,7 +172,7 @@ public final class CashierData implements Serializable {
 
     /**
      * Returns the valid from date of this cashier.
-     * <p/>
+     * 
      * <p>The valid from/to dates may be used to define a time period in which
      * the cashier is assignable to a teller.</p>
      *
@@ -181,7 +184,7 @@ public final class CashierData implements Serializable {
 
     /**
      * Returns the valid to date of this cashier.
-     * <p/>
+     * 
      * <p>The valid from/to dates may be used to define a time period in which
      * the cashier is assignable to a teller.</p>
      *
@@ -202,7 +205,7 @@ public final class CashierData implements Serializable {
 
     /**
      * Returns the start time of this cashier.
-     * <p/>
+     * 
      * <p>The start/end times may be used to define a time period in which
      * the cashier works part time.</p>
      *
@@ -214,7 +217,7 @@ public final class CashierData implements Serializable {
 
     /**
      * Returns the end time of this cashier.
-     * <p/>
+     * 
      * <p>The start/end times may be used to define a time period in which
      * the cashier works part time.</p>
      *
