@@ -52,6 +52,8 @@ import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.service.LoanStatusMapper;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
+import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
 import org.apache.fineract.portfolio.group.domain.*;
 import org.apache.fineract.portfolio.group.exception.*;
@@ -72,6 +74,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
 
 @Service
 public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements GroupingTypesWritePlatformService {
@@ -95,6 +99,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
     private final AccountNumberGenerator accountNumberGenerator;
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Autowired
     public GroupingTypesWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -106,7 +111,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
             final LoanRepositoryWrapper loanRepositoryWrapper, 
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final AccountNumberGenerator accountNumberGenerator,
-            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService) {
+            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
+            final BusinessEventNotifierService businessEventNotifierService) {
         this.context = context;
         this.groupRepository = groupRepository;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
@@ -124,6 +130,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         this.accountNumberFormatRepository = accountNumberFormatRepository;
         this.accountNumberGenerator = accountNumberGenerator;
         this.entityDatatableChecksWritePlatformService = entityDatatableChecksWritePlatformService;
+        this.businessEventNotifierService = businessEventNotifierService;
     }
 
     private CommandProcessingResult createGroupingType(final JsonCommand command, final GroupTypes groupingType, final Long centerId) {
@@ -263,7 +270,13 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         this.fromApiJsonDeserializer.validateForCreateCenter(command);
 
         final Long centerId = null;
-        return createGroupingType(command, GroupTypes.CENTER, centerId);
+
+        CommandProcessingResult commandProcessingResult = createGroupingType(command, GroupTypes.CENTER, centerId);
+
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.CENTERS_CREATE,
+                constructEntityMap(BUSINESS_ENTITY.GROUP, commandProcessingResult));
+
+        return commandProcessingResult;
     }
 
     @Transactional
@@ -276,7 +289,12 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             this.fromApiJsonDeserializer.validateForCreateGroup(command);
         }
 
-        return createGroupingType(command, GroupTypes.GROUP, centerId);
+        CommandProcessingResult commandProcessingResult = createGroupingType(command, GroupTypes.GROUP, centerId);
+
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BusinessEventNotificationConstants.BUSINESS_EVENTS.GROUPS_CREATE,
+                constructEntityMap(BUSINESS_ENTITY.GROUP, commandProcessingResult));
+
+        return commandProcessingResult;
     }
 
     @Transactional
@@ -960,5 +978,11 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                                 + " meeting recurrence doesnot matched with center meeting recurrence", group.getId()); }
             }
         }
+    }
+
+    private Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> constructEntityMap(final BUSINESS_ENTITY entityEvent, Object entity) {
+        Map<BUSINESS_ENTITY, Object> map = new HashMap<>(1);
+        map.put(entityEvent, entity);
+        return map;
     }
 }
