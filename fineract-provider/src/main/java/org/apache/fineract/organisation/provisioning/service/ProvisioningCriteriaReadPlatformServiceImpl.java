@@ -27,10 +27,13 @@ import java.util.List;
 
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.service.GLAccountReadPlatformService;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCategoryData;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaData;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaDefinitionData;
+import org.apache.fineract.organisation.provisioning.domain.ProvisioningAmountType;
 import org.apache.fineract.organisation.provisioning.exception.ProvisioningCriteriaNotFoundException;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
@@ -70,8 +73,11 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
         final Collection<LoanProductData> allLoanProducts = this.loanProductReadPlatformService
                 .retrieveAllLoanProductsForLookup(onlyActive);
         final Collection<GLAccountData> glAccounts = this.glAccountReadPlatformService.retrieveAllEnabledDetailGLAccounts();
-        return ProvisioningCriteriaData.toTemplate(constructCriteriaTemplate(categories), allLoanProducts, glAccounts);
-    }
+		final Collection<EnumOptionData> provisioningAmountTypeOptions = ProvisioningEnumerations
+				.provisioningAmount(ProvisioningAmountType.values());
+		return ProvisioningCriteriaData.toTemplate(constructCriteriaTemplate(categories), allLoanProducts, glAccounts,
+				provisioningAmountTypeOptions);
+	}
 
     @Override
     public ProvisioningCriteriaData retrievePrivisiongCriteriaTemplate(ProvisioningCriteriaData data) {
@@ -81,7 +87,9 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
         final Collection<LoanProductData> allLoanProducts = this.loanProductReadPlatformService
                 .retrieveAllLoanProductsForLookup(onlyActive);
         final Collection<GLAccountData> glAccounts = this.glAccountReadPlatformService.retrieveAllEnabledDetailGLAccounts();
-        return ProvisioningCriteriaData.toTemplate(data, constructCriteriaTemplate(categories), allLoanProducts, glAccounts);
+        final Collection<EnumOptionData> provisioningAmountTypeOptions = ProvisioningEnumerations
+				.provisioningAmount(ProvisioningAmountType.values());
+        return ProvisioningCriteriaData.toTemplate(data, constructCriteriaTemplate(categories), allLoanProducts, glAccounts, provisioningAmountTypeOptions);
     }
     
     private Collection<ProvisioningCriteriaDefinitionData> constructCriteriaTemplate(Collection<ProvisioningCategoryData> categories) {
@@ -115,12 +123,12 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
     @Override
     public ProvisioningCriteriaData retrieveProvisioningCriteria(Long criteriaId) {
         try {
-            String criteriaName = retrieveCriteriaName(criteriaId);
+            ProvisioningCriteriaData data = retrieveCriteria(criteriaId);
             Collection<LoanProductData> loanProducts = loanProductReaPlatformService
                     .retrieveAllLoanProductsForLookup("select product_id from m_loanproduct_provisioning_mapping where m_loanproduct_provisioning_mapping.criteria_id="
                             + criteriaId);
-            List<ProvisioningCriteriaDefinitionData> definitions = retrieveProvisioningDefinitions(criteriaId);
-            return ProvisioningCriteriaData.toLookup(criteriaId, criteriaName, loanProducts, definitions);
+			List<ProvisioningCriteriaDefinitionData> definitions = retrieveProvisioningDefinitions(criteriaId);
+			return ProvisioningCriteriaData.toLookup(criteriaId, data, loanProducts, definitions);
         }catch(EmptyResultDataAccessException e) {
             throw new ProvisioningCriteriaNotFoundException(criteriaId) ;
         }
@@ -162,7 +170,8 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
             String expenseAccountName = rs.getString("expensename") ;
             
             return new ProvisioningCriteriaDefinitionData(id, categoryId, categoryName, minAge, maxAge, provisioningPercentage,
-                    liabilityAccount, liabilityAccountCode, liabilityAccountName, expenseAccount, expenseAccountCode, expenseAccountName);
+                    liabilityAccount, liabilityAccountCode, liabilityAccountName, expenseAccount, 
+                    expenseAccountCode, expenseAccountName);
         }
 
         public String schema() {
@@ -170,21 +179,25 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
         }
     }
 
-    private String retrieveCriteriaName(Long criteriaId) {
-        ProvisioningCriteriaNameRowMapper rowMapper = new ProvisioningCriteriaNameRowMapper();
-        final String sql = "select " + rowMapper.schema() + " from m_provisioning_criteria pc where pc.id = ?";
-        return this.jdbcTemplate.queryForObject(sql, rowMapper, new Object[] { criteriaId });
-    }
+	private ProvisioningCriteriaData retrieveCriteria(Long criteriaId) {
+		ProvisioningCriteriaDataRowMapper rowMapper = new ProvisioningCriteriaDataRowMapper();
+		final String sql = "select " + rowMapper.schema() + " from m_provisioning_criteria pc where pc.id = ?";
+		return this.jdbcTemplate.queryForObject(sql, rowMapper, new Object[] { criteriaId });
+	}
 
-    private static final class ProvisioningCriteriaNameRowMapper implements RowMapper<String> {
+	private static final class ProvisioningCriteriaDataRowMapper implements RowMapper<ProvisioningCriteriaData> {
+		@Override
+		public ProvisioningCriteriaData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+				throws SQLException {
+			Integer provisioningAmountTypeEnum = JdbcSupport.getInteger(rs, "provisioningAmountTypeEnum");
+			String criteriaName = rs.getString("criteriaName");
+			EnumOptionData provisioningAmountType = ProvisioningEnumerations
+					.provisioningAmountType(provisioningAmountTypeEnum);
+			return new ProvisioningCriteriaData(criteriaName, provisioningAmountType);
+		}
 
-        @Override
-        public String mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-            return rs.getString("criteriaName");
-        }
-
-        public String schema() {
-            return " pc.criteria_name as criteriaName";
-        }
-    }
+		public String schema() {
+			return " pc.criteria_name as criteriaName ,pc.provisioning_amount_type as provisioningAmountTypeEnum";
+		}
+	}
 }

@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.organisation.provisioning.constants.ProvisioningCriteriaConstants;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaDefinitionData;
+import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.DateTime;
@@ -53,6 +54,9 @@ public class ProvisioningCriteria extends AbstractAuditableCustom<AppUser, Long>
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "criteria", orphanRemoval = true, fetch=FetchType.EAGER)
     Set<LoanProductProvisionCriteria> loanProductMapping = new HashSet<>();
+    
+    @Column(name = "provisioning_amount_type", nullable = false)
+    private Integer provisioningAmountType;
 
     public String getCriteriaName() {
         return this.criteriaName;
@@ -66,12 +70,18 @@ public class ProvisioningCriteria extends AbstractAuditableCustom<AppUser, Long>
         
     }
     
-    public ProvisioningCriteria(String criteriaName, AppUser createdBy, DateTime createdDate, AppUser lastModifiedBy, DateTime lastModifiedDate) {
+    public Integer getProvisioningAmountType() {
+		return this.provisioningAmountType;
+	}
+
+	public ProvisioningCriteria(String criteriaName, AppUser createdBy, DateTime createdDate, AppUser lastModifiedBy, DateTime lastModifiedDate,
+			Integer provisioningAmountType) {
         this.criteriaName = criteriaName;
         setCreatedBy(createdBy) ;
         setCreatedDate(createdDate) ;
         setLastModifiedBy(lastModifiedBy) ;
         setLastModifiedDate(lastModifiedDate) ;
+        this.provisioningAmountType = provisioningAmountType;
     }
 
     public void setProvisioningCriteriaDefinitions(Set<ProvisioningCriteriaDefinition> provisioningCriteriaDefinition) {
@@ -90,6 +100,13 @@ public class ProvisioningCriteria extends AbstractAuditableCustom<AppUser, Long>
             final String valueAsInput = command.stringValueOfParameterNamed(ProvisioningCriteriaConstants.JSON_CRITERIANAME_PARAM);
             actualChanges.put(ProvisioningCriteriaConstants.JSON_CRITERIANAME_PARAM, valueAsInput);
             this.criteriaName = valueAsInput ;
+        }
+        
+        if(command.isChangeInIntegerParameterNamed(ProvisioningCriteriaConstants.JSON_PROVISIONING_AMOUNT_TYPE, provisioningAmountType)){
+        	final Integer newValue = command.integerValueOfParameterNamed(ProvisioningCriteriaConstants.JSON_PROVISIONING_AMOUNT_TYPE);
+            final ProvisioningAmountType newProvisioningAmountType = ProvisioningAmountType.fromInt(newValue);
+            actualChanges.put(ProvisioningCriteriaConstants.JSON_PROVISIONING_AMOUNT_TYPE, newProvisioningAmountType.getValue());
+            this.provisioningAmountType = newValue;
         }
 
         Set<LoanProductProvisionCriteria> temp = new HashSet<>() ;

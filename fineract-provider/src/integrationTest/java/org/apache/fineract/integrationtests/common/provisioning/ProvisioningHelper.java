@@ -27,13 +27,14 @@ import java.util.Random;
 
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.joda.time.LocalDate;
 
 import com.google.gson.Gson;
 
 public class ProvisioningHelper {
 
     public final static Map createProvisioingCriteriaJson(ArrayList<Integer> loanProducts, ArrayList categories, Account liability,
-            Account expense) {
+            Account expense, Integer provisioningAmountType) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("loanProducts", addLoanProducts(loanProducts));
         map.put("definitions", addProvisioningCategories(categories, liability, expense));
@@ -43,9 +44,40 @@ public class ProvisioningHelper {
         String criteriaName = "General Provisioning Criteria" + formattedString+rand.nextLong();
         map.put("criteriaName", criteriaName);
         map.put("locale", "en");
+        map.put("provisioningAmountType", provisioningAmountType);
        return map ;
     }
-
+    
+    public final static Map createProvisioingCriteriaJson(ArrayList<Integer> loanProducts, ArrayList categories, Account liability,
+            Account expense, LocalDate date, Integer provisioningAmountType) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("loanProducts", addLoanProducts(loanProducts));
+        map.put("definitions", addProvisioningCategories(categories, liability, expense));
+        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
+        String formattedString = simple.format(date.toDate());
+        Random rand = new Random() ;
+        String criteriaName = "General Provisioning Criteria" + formattedString+rand.nextLong();
+        map.put("criteriaName", criteriaName);
+        map.put("locale", "en");
+        map.put("provisioningAmountType", provisioningAmountType);
+       return map ;
+    }
+    
+    public final static Map updateProvisioingCriteriaJson(Map newCriteria){
+    	Integer provisioningAmountType = null;
+    	 if(newCriteria.containsKey("provisioningAmountType")){
+    		  Map provisioningAmountTypeMap = (Map)newCriteria.get("provisioningAmountType");
+    		  provisioningAmountType = (Integer)provisioningAmountTypeMap.get("id");
+    		 newCriteria.remove("provisioningAmountType");
+    	 }
+    	 if(newCriteria.containsKey("provisioningAmountTypeOptions")){
+    		 newCriteria.remove("provisioningAmountTypeOptions");
+    	 }
+    	 newCriteria.put("provisioningAmountType", provisioningAmountType);
+    	return newCriteria;
+   
+    }
+    
     public final static String createProvisioningEntryJson() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("createjournalentries", Boolean.FALSE);
@@ -53,6 +85,17 @@ public class ProvisioningHelper {
         map.put("dateFormat", "dd MMMM yyyy");
         DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
         map.put("date", simple.format(Utils.getLocalDateOfTenant().toDate()));
+        String provisioningEntryCreateJson = new Gson().toJson(map);
+        return provisioningEntryCreateJson;
+    }
+    
+    public final static String createProvisioningEntryJson(LocalDate date) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("createjournalentries", Boolean.FALSE);
+        map.put("locale", "en");
+        map.put("dateFormat", "dd MMMM yyyy");
+        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
+        map.put("date", simple.format(date.toDate()));
         String provisioningEntryCreateJson = new Gson().toJson(map);
         return provisioningEntryCreateJson;
     }

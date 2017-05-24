@@ -123,8 +123,9 @@ public class ProvisioningCriteriaAssembler {
         final String criteriaName = this.fromApiJsonHelper.extractStringNamed(ProvisioningCriteriaConstants.JSON_CRITERIANAME_PARAM, jsonElement);
         AppUser modifiedBy = null;
         DateTime modifiedOn = null;
+        Integer provisioningAmountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ProvisioningCriteriaConstants.JSON_PROVISIONING_AMOUNT_TYPE, jsonElement);
         ProvisioningCriteria criteria = new ProvisioningCriteria(criteriaName, platformSecurityContext.authenticatedUser(), new DateTime(),
-                modifiedBy, modifiedOn);
+                modifiedBy, modifiedOn, provisioningAmountType);
         return criteria;
     }
 
@@ -137,6 +138,7 @@ public class ProvisioningCriteriaAssembler {
                 jsonObject, locale);
         Long liabilityAccountId = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_LIABILITY_ACCOUNT_PARAM, jsonObject);
         Long expenseAccountId = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_EXPENSE_ACCOUNT_PARAM, jsonObject);
+        
 
         ProvisioningCategory provisioningCategory = provisioningCategoryRepository.findOne(categoryId);
         GLAccount liabilityAccount = glAccountRepository.findOne(liabilityAccountId);

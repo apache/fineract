@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.integrationtests.common;
 
+import static org.junit.Assert.*;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -35,6 +37,7 @@ import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.provisioning.ProvisioningHelper;
 import org.apache.fineract.integrationtests.common.provisioning.ProvisioningTransactionHelper;
+import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
@@ -52,11 +55,15 @@ public class ProvisioningIntegrationTest {
 
     private static final String NONE = "1";
     private final static int LOANPRODUCTS_SIZE = 10;
-
+    private final static int PROVISIONING_AMOUNT_TYPE_PRICIPAL_AMOUNT = 1; 
+    private final static int PROVISIONING_AMOUNT_TYPE_OUTSTADIND_AMOUNT = 2;
+    
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
     private AccountHelper accountHelper;
     private LoanTransactionHelper loanTransactionHelper;
+    private LocalDate date = new LocalDate("2016-01-02");
+   
 
     @Before
     public void setup() {
@@ -97,14 +104,14 @@ public class ProvisioningIntegrationTest {
         Assert.assertTrue(categories.size() > 0) ;
         Account liability = accountHelper.createLiabilityAccount() ;
         Account expense = accountHelper.createExpenseAccount() ;
-        Map requestCriteria = ProvisioningHelper.createProvisioingCriteriaJson(loanProducts, categories, liability, expense);
+        Map requestCriteria = ProvisioningHelper.createProvisioingCriteriaJson(loanProducts, categories, liability, expense, PROVISIONING_AMOUNT_TYPE_OUTSTADIND_AMOUNT);
         String provisioningCriteriaCreateJson = new Gson().toJson(requestCriteria);
         Integer criteriaId = transactionHelper.createProvisioningCriteria(provisioningCriteriaCreateJson);
         Assert.assertNotNull(criteriaId);
 
         Map newCriteria = transactionHelper.retrieveProvisioningCriteria(criteriaId) ;
         validateProvisioningCriteria(requestCriteria, newCriteria) ;
-        
+        ProvisioningHelper.updateProvisioingCriteriaJson(newCriteria);
         ArrayList definitions = (ArrayList)newCriteria.get("definitions") ;
         for(int i = 0 ; i < definitions.size(); i++) {
             Map criteriadefinition = (Map) definitions.get(i) ;
@@ -121,7 +128,7 @@ public class ProvisioningIntegrationTest {
         categories = transactionHelper.retrieveAllProvisioningCategories();
         liability = accountHelper.createLiabilityAccount() ;
         expense = accountHelper.createExpenseAccount() ;
-        requestCriteria = ProvisioningHelper.createProvisioingCriteriaJson(loanProducts, categories, liability, expense);
+        requestCriteria = ProvisioningHelper.createProvisioingCriteriaJson(loanProducts, categories, liability, expense, PROVISIONING_AMOUNT_TYPE_OUTSTADIND_AMOUNT);
         provisioningCriteriaCreateJson = new Gson().toJson(requestCriteria);
         criteriaId = transactionHelper.createProvisioningCriteria(provisioningCriteriaCreateJson);
         Assert.assertNotNull(criteriaId);
@@ -136,6 +143,104 @@ public class ProvisioningIntegrationTest {
         Assert.assertTrue((Boolean)entry.get("journalEntry")) ;
         Map provisioningEntry = transactionHelper.retrieveProvisioningEntries(provisioningEntryId) ;
         Assert.assertTrue(((ArrayList)provisioningEntry.get("pageItems")).size() > 0) ;
+    }
+    
+    @Test
+    public void testCreateProvisioningLossCriteria() {
+    	 ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper(requestSpec, responseSpec);
+    	 ArrayList<Integer> loanProducts = new ArrayList<>(LOANPRODUCTS_SIZE);
+    	 final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+    	 final Integer loanProductID = createLoanProduct(false, NONE);
+    	 loanProducts.add(loanProductID);
+    	 Assert.assertNotNull(loanProductID);
+         final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "1,00,000.00");
+         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+         loanStatusHashMap = this.loanTransactionHelper.approveLoan("20 September 2011", loanID);
+         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+         System.out.println("-------------------------------DISBURSE LOAN-------------------------------------------");
+         loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID);
+         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+         Assert.assertNotNull(loanID);
+         ArrayList categories = transactionHelper.retrieveAllProvisioningCategories();
+         Assert.assertTrue(categories.size() > 0) ;
+         Account liability = accountHelper.createLiabilityAccount() ;
+         Account expense = accountHelper.createExpenseAccount() ;
+         Map requestCriteria = ProvisioningHelper.createProvisioingCriteriaJson(loanProducts, categories, liability, expense, 
+        		 date, PROVISIONING_AMOUNT_TYPE_PRICIPAL_AMOUNT);
+         String provisioningCriteriaCreateJson = new Gson().toJson(requestCriteria);
+         Integer criteriaId = transactionHelper.createProvisioningCriteria(provisioningCriteriaCreateJson);
+         Assert.assertNotNull(criteriaId);
+         transactionHelper.deleteProvisioningCriteria(criteriaId);
+         categories = transactionHelper.retrieveAllProvisioningCategories();
+         liability = accountHelper.createLiabilityAccount() ;
+         expense = accountHelper.createExpenseAccount() ;
+         requestCriteria = ProvisioningHelper.createProvisioingCriteriaJson(loanProducts, categories, 
+        		 liability, expense, date, PROVISIONING_AMOUNT_TYPE_PRICIPAL_AMOUNT);
+         provisioningCriteriaCreateJson = new Gson().toJson(requestCriteria);
+         criteriaId = transactionHelper.createProvisioningCriteria(provisioningCriteriaCreateJson);
+         Assert.assertNotNull(criteriaId);
+
+         String provisioningEntryJson = ProvisioningHelper.createProvisioningEntryJson(date);
+         Integer provisioningEntryId = transactionHelper.createProvisioningEntries(provisioningEntryJson);
+         Assert.assertNotNull(provisioningEntryId);
+         
+         transactionHelper.updateProvisioningEntry("recreateprovisioningentry", provisioningEntryId, "") ;
+         transactionHelper.updateProvisioningEntry("createjournalentry", provisioningEntryId, "") ;
+         
+         Map entry = transactionHelper.retrieveProvisioningEntry(provisioningEntryId) ;
+         Assert.assertTrue((Boolean)entry.get("journalEntry")) ;
+         Assert.assertEquals("22000.0",entry.get("reservedAmount").toString());
+    }
+    
+    @Test
+    public void testCreateProvisioningLossCriteriaOnOutstandigPrincipal() {
+    	 ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper(requestSpec, responseSpec);
+    	 ArrayList<Integer> loanProducts = new ArrayList<>(LOANPRODUCTS_SIZE);
+    	 final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+    	 final Integer loanProductID = createLoanProduct(false, NONE);
+    	 loanProducts.add(loanProductID);
+    	 Assert.assertNotNull(loanProductID);
+         final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "1,00,000.00");
+         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+         loanStatusHashMap = this.loanTransactionHelper.approveLoan("20 September 2011", loanID);
+         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+         System.out.println("-------------------------------DISBURSE LOAN-------------------------------------------");
+         loanStatusHashMap = this.loanTransactionHelper.disburseLoan("20 September 2011", loanID);
+         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+         Assert.assertNotNull(loanID);
+         ArrayList categories = transactionHelper.retrieveAllProvisioningCategories();
+         Assert.assertTrue(categories.size() > 0) ;
+         Account liability = accountHelper.createLiabilityAccount() ;
+         Account expense = accountHelper.createExpenseAccount() ;
+         Map requestCriteria = ProvisioningHelper.createProvisioingCriteriaJson(loanProducts, categories, liability, expense, 
+        		 date, PROVISIONING_AMOUNT_TYPE_OUTSTADIND_AMOUNT);
+         String provisioningCriteriaCreateJson = new Gson().toJson(requestCriteria);
+         Integer criteriaId = transactionHelper.createProvisioningCriteria(provisioningCriteriaCreateJson);
+         Assert.assertNotNull(criteriaId);
+         transactionHelper.deleteProvisioningCriteria(criteriaId) ;
+         categories = transactionHelper.retrieveAllProvisioningCategories();
+         liability = accountHelper.createLiabilityAccount() ;
+         expense = accountHelper.createExpenseAccount() ;
+         requestCriteria = ProvisioningHelper.createProvisioingCriteriaJson(loanProducts, categories, 
+        		 liability, expense, date.plusDays(1), PROVISIONING_AMOUNT_TYPE_OUTSTADIND_AMOUNT);
+         provisioningCriteriaCreateJson = new Gson().toJson(requestCriteria);
+         criteriaId = transactionHelper.createProvisioningCriteria(provisioningCriteriaCreateJson);
+         Assert.assertNotNull(criteriaId);
+
+         String provisioningEntryJson = ProvisioningHelper.createProvisioningEntryJson(date.plusDays(1));
+         Integer provisioningEntryId = transactionHelper.createProvisioningEntries(provisioningEntryJson);
+         Assert.assertNotNull(provisioningEntryId);
+         
+         transactionHelper.updateProvisioningEntry("recreateprovisioningentry", provisioningEntryId, "") ;
+         transactionHelper.updateProvisioningEntry("createjournalentry", provisioningEntryId, "") ;
+         
+         Map entry = transactionHelper.retrieveProvisioningEntry(provisioningEntryId) ;
+         Assert.assertTrue((Boolean)entry.get("journalEntry")) ;
+         Assert.assertEquals("45110.89",entry.get("reservedAmount").toString());
     }
 
     private void validateProvisioningCriteria(Map requestCriteria, Map newCriteria) {

@@ -373,6 +373,11 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         List<JournalEntry> journalEntries = this.glJournalEntryRepository.findProvisioningJournalEntriesByEntityId(entityId, entityType);
         final String reversalTransactionId = journalEntries.get(0).getTransactionId();
         for (final JournalEntry journalEntry : journalEntries) {
+        	final GLClosure latestGLClosure = this.glClosureRepository.getLatestGLClosureByBranch(journalEntry.getOffice().getId());
+            if (latestGLClosure != null) {
+                if (!latestGLClosure.getClosingDate().before(journalEntry.getTransactionDate())) { throw new JournalEntryInvalidException(
+                        GL_JOURNAL_ENTRY_INVALID_REASON.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate(), null, null); }
+            }
             JournalEntry reversalJournalEntry;
             String reversalComment = "Reversal entry for Journal Entry with Entry Id  :" + journalEntry.getId() + " and transaction Id "
                     + journalEntry.getTransactionId();
@@ -408,6 +413,11 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         Map<OfficeCurrencyKey, List<LoanProductProvisioningEntry>> officeMap = new HashMap<>();
 
         for (LoanProductProvisioningEntry entry : provisioningEntries) {
+        	final GLClosure latestGLClosure = this.glClosureRepository.getLatestGLClosureByBranch(entry.getOffice().getId());
+            if (latestGLClosure != null) {
+                if (!latestGLClosure.getClosingDate().before(provisioningEntry.getCreatedDate())) { throw new JournalEntryInvalidException(
+                        GL_JOURNAL_ENTRY_INVALID_REASON.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate(), null, null); }
+            }
             OfficeCurrencyKey key = new OfficeCurrencyKey(entry.getOffice(), entry.getCurrencyCode());
             if (officeMap.containsKey(key)) {
                 List<LoanProductProvisioningEntry> list = officeMap.get(key);

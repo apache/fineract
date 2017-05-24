@@ -42,7 +42,7 @@ public class LoanProductProvisioningEntryData {
 
     private final BigDecimal percentage;
 
-    private final BigDecimal balance;
+    private final BigDecimal outstandingAsPerType;
 
     private final BigDecimal amountreserved ;
     
@@ -61,7 +61,7 @@ public class LoanProductProvisioningEntryData {
     private final Long criteriaId ;
     
     public LoanProductProvisioningEntryData(final Long historyId, final Long officeId, final String currencyCode, final Long productId,
-            final Long categoryId, final Long overdueInDays, final BigDecimal percentage, final BigDecimal balance, Long liablityAccount,
+            final Long categoryId, final Long overdueInDays, final BigDecimal percentage, final BigDecimal outstandingAsPerType, Long liablityAccount,
             Long expenseAccount, final Long criteriaId) {
         this.historyId = historyId;
         this.officeId = officeId;
@@ -70,7 +70,7 @@ public class LoanProductProvisioningEntryData {
         this.categoryId = categoryId;
         this.overdueInDays = overdueInDays;
         this.percentage = percentage;
-        this.balance = balance;
+        this.outstandingAsPerType = outstandingAsPerType;
         this.liablityAccount = liablityAccount;
         this.expenseAccount = expenseAccount;
         this.amountreserved = null ;
@@ -86,7 +86,8 @@ public class LoanProductProvisioningEntryData {
 
     public LoanProductProvisioningEntryData(final Long historyId, final Long officeId, final String officeName, final String currencyCode, final Long productId,
             final String productName, final Long categoryId, final String categoryName, final Long overdueInDays, final BigDecimal amountReserved, 
-            Long liablityAccount, String liabilityAccountglCode, String liabilityAccountName, Long expenseAccount, String expenseAccountglCode, String expenseAccountName, final Long criteriaId) {
+            Long liablityAccount, String liabilityAccountglCode, String liabilityAccountName, Long expenseAccount, String expenseAccountglCode, String expenseAccountName,
+            final Long criteriaId) {
         this.historyId = historyId;
         this.officeId = officeId;
         this.currencyCode = currencyCode;
@@ -95,7 +96,7 @@ public class LoanProductProvisioningEntryData {
         this.categoryName = categoryName ;
         this.overdueInDays = overdueInDays;
         this.percentage = null;
-        this.balance = null;
+        this.outstandingAsPerType = null;
         this.liablityAccount = liablityAccount;
         this.expenseAccount = expenseAccount;
         this.officeName = officeName ;
@@ -127,8 +128,8 @@ public class LoanProductProvisioningEntryData {
         return this.overdueInDays;
     }
 
-    public BigDecimal getOutstandingBalance() {
-        return balance;
+    public BigDecimal getOutstandingAsPerType() {
+        return outstandingAsPerType;
     }
 
     public BigDecimal getPercentage() {

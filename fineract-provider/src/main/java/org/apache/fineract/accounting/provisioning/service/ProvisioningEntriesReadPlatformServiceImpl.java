@@ -31,6 +31,7 @@ import java.util.Map;
 
 import org.apache.fineract.accounting.provisioning.data.LoanProductProvisioningEntryData;
 import org.apache.fineract.accounting.provisioning.data.ProvisioningEntryData;
+import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -67,23 +68,84 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
 
         private final StringBuilder sqlQuery;
 
-        protected LoanProductProvisioningEntryMapper(String formattedDate) {
-            sqlQuery = new StringBuilder()
-                    .append("select if(loan.loan_type_enum=1, mclient.office_id, mgroup.office_id) as office_id, loan.loan_type_enum, pcd.criteria_id as criteriaid, loan.product_id,loan.currency_code,")
-                    .append("GREATEST(datediff(")
-                    .append(formattedDate)
-                    .append(",sch.duedate),0) as numberofdaysoverdue,sch.duedate, pcd.category_id, pcd.provision_percentage,")
-                    .append("loan.total_outstanding_derived as outstandingbalance, pcd.liability_account, pcd.expense_account from m_loan_repayment_schedule sch")
-                    .append(" LEFT JOIN m_loan loan on sch.loan_id = loan.id")
-                    .append(" JOIN m_loanproduct_provisioning_mapping lpm on lpm.product_id = loan.product_id")
-                    .append(" JOIN m_provisioning_criteria_definition pcd on pcd.criteria_id = lpm.criteria_id and ")
-                    .append("(pcd.min_age <= GREATEST(datediff(").append(formattedDate).append(",sch.duedate),0) and ")
-                    .append("GREATEST(datediff(").append(formattedDate).append(",sch.duedate),0) <= pcd.max_age) and ")
-                    .append("pcd.criteria_id is not null ").append("LEFT JOIN m_client mclient ON mclient.id = loan.client_id ")
-                    .append("LEFT JOIN m_group mgroup ON mgroup.id = loan.group_id ")
-                    .append("where loan.loan_status_id=300 and sch.duedate = ")
-                    .append("(select MIN(sch1.duedate) from m_loan_repayment_schedule sch1 where sch1.loan_id=loan.id and sch1.completed_derived=false)");
-        }
+		protected LoanProductProvisioningEntryMapper(String formattedDate) {
+			sqlQuery = new StringBuilder().append("select ")
+					.append(" if(l.loan_type_enum=1, mc.office_id, mg.office_id) as office_id,")
+					.append(" l.loan_type_enum,").append(" pcd.criteria_id as criteriaid,").append(" l.product_id,")
+					.append(" l.currency_code,").append(" GREATEST(datediff(").append(formattedDate)
+					.append(" ,min(sch.duedate)),0) as numberofdaysoverdue,")
+					.append(" pcd.category_id, pcd.provision_percentage,").append(" sch.loan_id as loan_id,")
+					.append(" min(sch.duedate) as dueDate,").append(" if(criteria.provisioning_amount_type = 1,")
+					.append(" ((select sum(ifnull(sch1.principal_amount,0))")
+					.append(" from m_loan_repayment_schedule as sch1").append(" where sch1.loan_id = sch.loan_id")
+					.append(" and sch1.duedate <= ")
+					.append(formattedDate)
+					.append(" ) - (select ifnull(sum(ifnull(trans.principal_portion_derived,0)),0)")
+					.append(" from m_loan_transaction as trans").append(" where trans.transaction_date <=")
+					.append(formattedDate).append(" and trans.is_reversed = 0")
+					.append(" and trans.transaction_type_enum in (2,6)").append(" and trans.loan_id = sch.loan_id)),")
+					.append(" ((select sum(ifnull(sch1.principal_amount,0))+")
+					.append(" sum(ifnull(sch1.interest_amount,0))+").append(" sum(ifnull(sch1.fee_charges_amount,0))+")
+					.append(" sum(ifnull(sch1.penalty_charges_amount,0))")
+					.append(" from m_loan_repayment_schedule as sch1").append(" where sch1.loan_id = sch.loan_id")
+					.append(" and sch1.duedate <= ")
+					.append(formattedDate)
+					.append(" ) - (select ifnull(sum(ifnull(trans.amount,0)),0)").append(" from m_loan_transaction as trans")
+					.append(" where trans.transaction_date <=").append(formattedDate).append(" and trans.is_reversed = 0")
+					.append(" and trans.transaction_type_enum in (2,4,6,8,9,17)")
+					.append(" and trans.loan_id = sch.loan_id))) as outstandingAsPerType,")
+					.append(" pcd.liability_account, pcd.expense_account, ")
+					.append(" criteria.provisioning_amount_type as provisioningAmountType")
+					.append(" from m_loan_repayment_schedule as sch").append(" JOIN m_loan as l on l.id = sch.loan_id")
+					.append(" JOIN m_loanproduct_provisioning_mapping lpm on lpm.product_id = l.product_id")
+					.append(" JOIN m_provisioning_criteria_definition pcd on pcd.criteria_id = lpm.criteria_id")
+					.append(" and (pcd.min_age <= GREATEST(datediff( ").append(formattedDate).append(" ,sch.duedate),0) and")
+					.append(" GREATEST(datediff(").append(formattedDate).append(" ,sch.duedate),0) <= pcd.max_age)")
+					.append(" JOIN m_provisioning_criteria criteria on pcd.criteria_id = criteria.id and pcd.criteria_id is not null")
+					.append(" left join m_client mc on mc.id = l.client_id")
+					.append(" left join m_group mg on mg.id = l.group_id").append(" where")
+					.append(" if(criteria.provisioning_amount_type = 1,").append(" ((select sum(sch1.principal_amount)")
+					.append(" from m_loan_repayment_schedule as sch1").append(" where sch1.duedate <= sch.duedate")
+					.append(" and sch1.loan_id = sch.loan_id) >")
+					.append(" (select ifnull(sum(trans.principal_portion_derived),0)")
+					.append(" from m_loan_transaction as trans").append(" where trans.transaction_date <=")
+					.append(formattedDate).append(" and trans.is_reversed = 0")
+					.append(" and trans.transaction_type_enum in (2,6)").append(" and trans.loan_id = sch.loan_id)),")
+					.append(" ((((select sum(ifnull(sch1.principal_amount,0))")
+					.append(" from m_loan_repayment_schedule as sch1").append(" where sch1.duedate <= sch.duedate")
+					.append(" and sch1.loan_id = sch.loan_id) > ")
+					.append(" (select ifnull(sum(ifnull(trans.principal_portion_derived,0)),0)")
+					.append(" from m_loan_transaction as trans").append(" where trans.transaction_date <=")
+					.append(formattedDate).append(" and trans.is_reversed = 0")
+					.append(" and trans.transaction_type_enum in (2,4,6,8,9,17,16,18)")
+					.append(" and trans.loan_id = sch.loan_id)))").append(" OR")
+					.append(" ((select sum(ifnull(sch1.interest_amount,0))")
+					.append(" from m_loan_repayment_schedule as sch1").append(" where sch1.duedate <= sch.duedate")
+					.append(" and sch1.loan_id = sch.loan_id) >")
+					.append(" (select ifnull(sum(ifnull(trans.interest_portion_derived,0)),0)")
+					.append(" from m_loan_transaction as trans").append(" where trans.transaction_date <=")
+					.append(formattedDate).append(" and trans.is_reversed = 0")
+					.append(" and trans.transaction_type_enum in (2,4,6,8,9,17,16,18)")
+					.append(" and trans.loan_id = sch.loan_id))").append(" OR ")
+					.append(" ((select sum(ifnull(sch1.fee_charges_amount,0))")
+					.append(" from m_loan_repayment_schedule as sch1").append(" where sch1.duedate <= sch.duedate")
+					.append(" and sch1.loan_id = sch.loan_id) >")
+					.append(" (select ifnull(sum(ifnull(trans.fee_charges_portion_derived,0)),0)")
+					.append(" from m_loan_transaction as trans").append(" where trans.transaction_date <=")
+					.append(formattedDate).append(" and trans.is_reversed = 0")
+					.append(" and trans.transaction_type_enum in (2,4,6,8,9,17,16,18)")
+					.append(" and trans.loan_id = sch.loan_id))").append(" OR")
+					.append(" ((select sum(ifnull(sch1.penalty_charges_amount,0))")
+					.append(" from m_loan_repayment_schedule as sch1").append(" where sch1.duedate <= sch.duedate")
+					.append(" and sch1.loan_id = sch.loan_id) >")
+					.append(" (select ifnull(sum(ifnull(trans.penalty_charges_portion_derived,0)),0)")
+					.append(" from m_loan_transaction as trans").append(" where trans.transaction_date <=")
+					.append(formattedDate).append(" and trans.is_reversed = 0")
+					.append(" and trans.transaction_type_enum in (2,4,6,8,9,17,16,18)")
+					.append(" and trans.loan_id = sch.loan_id))").append(" ))").append(" and sch.duedate <=")
+					.append(formattedDate).append(" and l.loan_status_id not in (100,200, 400, 500, 602)")
+					.append(" group by sch.loan_id");
+		}
 
         @Override
         @SuppressWarnings("unused")
@@ -94,14 +156,15 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
             Long overdueDays = rs.getLong("numberofdaysoverdue");
             Long categoryId = rs.getLong("category_id");
             BigDecimal percentage = rs.getBigDecimal("provision_percentage");
-            BigDecimal outstandingBalance = rs.getBigDecimal("outstandingbalance");
+            BigDecimal outstandingAsPerType = rs.getBigDecimal("outstandingAsPerType");
             Long liabilityAccountCode = rs.getLong("liability_account");
             Long expenseAccountCode = rs.getLong("expense_account");
             Long criteriaId = rs.getLong("criteriaid");
             Long historyId = null;
-
+            Integer provisioningAmountTypeEnum  = JdbcSupport.getInteger(rs, "provisioningAmountType");
+            
             return new LoanProductProvisioningEntryData(historyId, officeId, currentcyCode, productId, categoryId, overdueDays, percentage,
-                    outstandingBalance, liabilityAccountCode, expenseAccountCode, criteriaId);
+            		outstandingAsPerType, liabilityAccountCode, expenseAccountCode, criteriaId);
         }
 
         public String schema() {
