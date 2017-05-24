@@ -24,6 +24,9 @@ INSERT INTO `m_code` (`code_name`, `is_system_defined`) VALUES ('STATE',1);
 INSERT INTO `m_code` (`code_name`, `is_system_defined`) VALUES ('COUNTRY',1);
 INSERT INTO `m_code` (`code_name`, `is_system_defined`) VALUES ('ADDRESS_TYPE',1);
 
+-- changing 'STATE' TO 'STATES'
+UPDATE m_code SET `code_name`='STATES' WHERE `code_name`='STATE';
+
 
 -- configuration
 INSERT INTO `c_configuration` (`name`, `value`, `date_value`, `enabled`, `is_trap_door`, `description`) VALUES ('Enable-Address', NULL, NULL, 0, 0, NULL);
