@@ -44,6 +44,10 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
 import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
+import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionEnumData;
@@ -76,6 +80,8 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
 
     private final NoteRepository noteRepository;
     
+    private final BusinessEventNotifierService businessEventNotifierService;
+    
     @Autowired
     public ShareAccountWritePlatformServiceJpaRepositoryImpl(final ShareAccountDataSerializer accountDataSerializer,
             final ShareAccountRepositoryWrapper shareAccountRepository, 
@@ -83,7 +89,8 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             final AccountNumberGenerator accountNumberGenerator,
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
             final JournalEntryWritePlatformService journalEntryWritePlatformService,
-            final NoteRepository noteRepository) {
+            final NoteRepository noteRepository,
+            final BusinessEventNotifierService businessEventNotifierService) {
         this.accountDataSerializer = accountDataSerializer;
         this.shareAccountRepository = shareAccountRepository;
         this.shareProductRepository = shareProductRepository ;
@@ -91,6 +98,7 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
         this.accountNumberFormatRepository = accountNumberFormatRepository;
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
         this.noteRepository = noteRepository ;
+        this.businessEventNotifierService = businessEventNotifierService;
     }
 
     @Override
@@ -101,6 +109,9 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             generateAccountNumber(account);
             journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account,
                     account.getPendingForApprovalSharePurchaseTransactions()));
+            
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.SHARE_ACCOUNT_CREATE,
+            		constructEntityMap(BUSINESS_ENTITY.SHARE_ACCOUNT, account));
             return new CommandProcessingResultBuilder() //
                     .withCommandId(jsonCommand.commandId()) //
                     .withEntityId(account.getId()) //
@@ -273,6 +284,10 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             this.shareProductRepository.save(shareProduct);
             
             this.journalEntryWritePlatformService.createJournalEntriesForShares(populateJournalEntries(account, journalTransactions));
+            
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.SHARE_ACCOUNT_APPROVE,
+            		constructEntityMap(BUSINESS_ENTITY.SHARE_ACCOUNT, account));
+            
             return new CommandProcessingResultBuilder() //
                     .withCommandId(jsonCommand.commandId()) //
                     .withEntityId(accountId) //
@@ -515,5 +530,11 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
         throw new PlatformDataIntegrityException("error.msg.shareaccount.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
+    }
+    
+    private Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> constructEntityMap(final BusinessEventNotificationConstants.BUSINESS_ENTITY entityEvent, Object entity) {
+    	Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> map = new HashMap<>(1);
+    	map.put(entityEvent, entity);
+    	return map;
     }
 }
