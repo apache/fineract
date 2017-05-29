@@ -382,6 +382,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         }
         postInterest(account,postInterestAs,transactionDate);
+        
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.SAVINGS_POST_INTEREST,
+        		constructEntityMap(BUSINESS_ENTITY.SAVING, account));
         return new CommandProcessingResultBuilder() //
                 .withEntityId(savingsId) //
                 .withOfficeId(account.officeId()) //
@@ -682,6 +685,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         }
         
+        this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.SAVINGS_CLOSE,
+        		 constructEntityMap(BUSINESS_ENTITY.SAVING, account));
         // disable all standing orders linked to the savings account
         this.disableStandingInstructionsLinkedToClosedSavings(account);
         return new CommandProcessingResultBuilder() //
