@@ -254,7 +254,18 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         boolean isRegularTransaction = true;
         final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(account, fmt, transactionDate,
                 transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction);
-
+		
+		/**
+         * This is not the best solution because it should confirm the transaction first and then store the note based on the boolean 
+         * returned from the TRANSACTIONSERVICES
+         */
+        
+        final String noteText = command.stringValueOfParameterNamed("note");
+        if (StringUtils.isNotBlank(noteText)) {
+            final Note note = Note.savingNote(account, noteText);
+            this.noteRepository.save(note);
+        }
+		
         return new CommandProcessingResultBuilder() //
                 .withEntityId(deposit.getId()) //
                 .withOfficeId(account.officeId()) //
@@ -298,6 +309,17 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final SavingsAccountTransaction withdrawal = this.savingsAccountDomainService.handleWithdrawal(account, fmt, transactionDate,
                 transactionAmount, paymentDetail, transactionBooleanValues);
 
+		/**
+         * This is not the best solution because it should confirm the transaction first and then store the note based on the boolean 
+         * returned from the TRANSACTIONSERVICES
+         */
+        
+        final String noteText = command.stringValueOfParameterNamed("note");
+        if (StringUtils.isNotBlank(noteText)) {
+            final Note note = Note.savingNote(account, noteText);
+            this.noteRepository.save(note);
+        }
+		
         return new CommandProcessingResultBuilder() //
                 .withEntityId(withdrawal.getId()) //
                 .withOfficeId(account.officeId()) //
