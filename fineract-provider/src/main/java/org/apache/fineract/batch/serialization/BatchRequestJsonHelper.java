@@ -46,7 +46,7 @@ public class BatchRequestJsonHelper extends FromJsonHelper {
      * JSON string.
      * 
      * @param json
-     * @return List<BatchRequest>
+     * @return List&lt;BatchRequest&gt;
      */
     public List<BatchRequest> extractList(final String json) {
         final Type listType = new TypeToken<List<BatchRequest>>() {}.getType();

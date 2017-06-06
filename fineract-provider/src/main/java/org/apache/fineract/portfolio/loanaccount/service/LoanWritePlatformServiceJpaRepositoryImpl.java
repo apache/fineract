@@ -449,7 +449,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
      * 
      * @param loan
      *            the disbursed loan
-     * @return void
+     * 
      **/
     private void createStandingInstruction(Loan loan) {
 

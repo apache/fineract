@@ -32,7 +32,7 @@ import java.util.Date;
  * {@code TellerData} represents an immutable data object for teller data.
  *
  * @version 1.0
-<<<<<<< HEAD
+
  * @since 2.0.0
  * @see java.io.Serializable
  * @since 2.0.0

@@ -118,7 +118,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     /**
      * LoanRescheduleRequestWritePlatformServiceImpl constructor
      * 
-     * @return void
+     * 
      **/
     @Autowired
     public LoanRescheduleRequestWritePlatformServiceImpl(final CodeValueRepositoryWrapper codeValueRepositoryWrapper,
@@ -585,7 +585,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
      *
      * @param dve
      *            data integrity violation exception
-     * @return void
+     * 
      **/
     private void handleDataIntegrityViolation(final DataIntegrityViolationException dve) {
 
