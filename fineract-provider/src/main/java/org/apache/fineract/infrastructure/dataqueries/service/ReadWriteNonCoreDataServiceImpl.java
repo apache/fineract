@@ -862,7 +862,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final String apptableName = this.fromJsonHelper.extractStringNamed("apptableName", element);
 
             validateDatatableName(datatableName);
-
+            int rowCount = getRowCount(datatableName);
             final List<ResultsetColumnHeaderData> columnHeaderData = this.genericDataService.fillResultsetColumnHeaders(datatableName);
             final Map<String, ResultsetColumnHeaderData> mapColumnNameDefinition = new HashMap<>();
             for (final ResultsetColumnHeaderData columnHeader : columnHeaderData) {
@@ -908,7 +908,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             if (changeColumns == null && addColumns == null && dropColumns == null) { return; }
 
             if (dropColumns != null) {
-
+                if(rowCount>0){
+                	throw new GeneralPlatformDomainRuleException("error.msg.non.empty.datatable.column.cannot.be.deleted",
+                            "Non-empty datatable columns can not be deleted.");
+                }
                 StringBuilder sqlBuilder = new StringBuilder("ALTER TABLE `" + datatableName + "`");
                 final StringBuilder constrainBuilder = new StringBuilder();
                 final List<String> codeMappings = new ArrayList<>();
@@ -931,7 +934,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 final StringBuilder constrainBuilder = new StringBuilder();
                 final Map<String, Long> codeMappings = new HashMap<>();
                 for (final JsonElement column : addColumns) {
-                    parseDatatableColumnForAdd(column.getAsJsonObject(), sqlBuilder, datatableName.toLowerCase().replaceAll("\\s", "_"),
+                	JsonObject columnAsJson = column.getAsJsonObject();
+                	if(rowCount>0 && columnAsJson.has("mandatory") && columnAsJson.get("mandatory").getAsBoolean()){
+                		throw new GeneralPlatformDomainRuleException("error.msg.non.empty.datatable.mandatory.column.cannot.be.added",
+                                "Non empty datatable mandatory columns can not be added.");
+                	}
+                    parseDatatableColumnForAdd(columnAsJson, sqlBuilder, datatableName.toLowerCase().replaceAll("\\s", "_"),
                             constrainBuilder, codeMappings, isConstraintApproach);
                 }
 
@@ -1050,10 +1058,14 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     private void assertDataTableEmpty(final String datatableName) {
-        final String sql = "select count(*) from `" + datatableName + "`";
-        final int rowCount = this.jdbcTemplate.queryForObject(sql, Integer.class);
+        final int rowCount = getRowCount(datatableName);
         if (rowCount != 0) { throw new GeneralPlatformDomainRuleException("error.msg.non.empty.datatable.cannot.be.deleted",
                 "Non-empty datatable cannot be deleted."); }
+    }
+    
+    private int getRowCount(final String datatableName){
+    	final String sql = "select count(*) from `" + datatableName + "`";
+        return this.jdbcTemplate.queryForObject(sql, Integer.class);
     }
 
     @Transactional

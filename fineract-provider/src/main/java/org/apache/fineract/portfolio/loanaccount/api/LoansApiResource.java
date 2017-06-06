@@ -320,11 +320,14 @@ public class LoansApiResource {
                     Map<Long, Integer> memberLoanCycle = new HashMap<>();
                     Collection<ClientData> members = loanAccountGroupData.groupData().clientMembers();
                     accountLinkingOptions = new ArrayList<>();
-                    for (ClientData clientData : members) {
-                        Integer loanCounter = this.loanReadPlatformService.retriveLoanCounter(clientData.id(), productId);
-                        memberLoanCycle.put(clientData.id(), loanCounter);
-                        accountLinkingOptions.addAll(getaccountLinkingOptions(newLoanAccount, clientData.id(), groupId));
+                    if(members != null){
+                    	for (ClientData clientData : members) {
+                            Integer loanCounter = this.loanReadPlatformService.retriveLoanCounter(clientData.id(), productId);
+                            memberLoanCycle.put(clientData.id(), loanCounter);
+                            accountLinkingOptions.addAll(getaccountLinkingOptions(newLoanAccount, clientData.id(), groupId));
+                        }
                     }
+                    
                     newLoanAccount = LoanAccountData.associateMemberVariations(newLoanAccount, memberLoanCycle);
                 }
 
