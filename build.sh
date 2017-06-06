@@ -32,7 +32,7 @@ git --version
 # the sub-module initially will be a fixed old rev. and only this grabs real latest:
 git submodule foreach 'git checkout develop && git pull --ff-only origin develop'
 
-cd apps/community-app
-./build.sh
-cd ../../fineract-provider/
+# cd apps/community-app
+# ./build.sh
+#cd ../../fineract-provider/
 ./gradlew -Penv=dev clean dist

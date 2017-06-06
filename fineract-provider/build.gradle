@@ -153,7 +153,11 @@ rat {
 	'**/assets/html5shiv.js',
 	
 	//BSD License
-	'**/assets/uglify.js'
+	'**/assets/uglify.js',
+
+    // intellij files
+     '**/fineract-provider/fineract-provider.ipr',
+     '**/fineract-provider/fineract-provider.iws',
 	]
 }
 
