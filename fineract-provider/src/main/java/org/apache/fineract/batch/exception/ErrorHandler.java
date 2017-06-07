@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.batch.exception;
 
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -69,7 +70,12 @@ public class ErrorHandler extends RuntimeException {
      */
     public static ErrorInfo handler(final RuntimeException exception) {
 
-        if (exception instanceof AbstractPlatformResourceNotFoundException) {
+    	if(exception instanceof AbstractPlatformDomainRuleException) {
+    		PlatformDomainRuleExceptionMapper mapper = new PlatformDomainRuleExceptionMapper() ;
+    		final String errorBody = jsonHelper
+                    .toJson(mapper.toResponse((AbstractPlatformDomainRuleException) exception).getEntity());
+    		return new ErrorInfo(500, 9999, errorBody);
+    	}else if (exception instanceof AbstractPlatformResourceNotFoundException) {
 
             final PlatformResourceNotFoundExceptionMapper mapper = new PlatformResourceNotFoundExceptionMapper();
             final String errorBody = jsonHelper

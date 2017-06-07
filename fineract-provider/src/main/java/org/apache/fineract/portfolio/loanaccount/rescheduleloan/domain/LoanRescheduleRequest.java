@@ -267,7 +267,7 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom<Long> {
 	 * 
 	 * @param approvedByUser the user who approved the request
 	 * @param approvedOnDate the date of the approval
-	 * @return void
+	 * 
 	 **/
 	public void approve(final AppUser approvedByUser, final LocalDate approvedOnDate) {
 		
@@ -284,7 +284,7 @@ public class LoanRescheduleRequest extends AbstractPersistableCustom<Long> {
 	 * 
 	 * @param approvedByUser the user who approved the request
 	 * @param approvedOnDate the date of the approval
-	 * @return void
+	 * 
 	 **/
 	public void reject(final AppUser approvedByUser, final LocalDate approvedOnDate) {
 		

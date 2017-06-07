@@ -33,7 +33,7 @@ public class SmsMessageDeliveryReportData {
 	/** 
 	 * SmsMessageDeliveryReportData constructor
 	 * 
-	 * @return void 
+	 *  
 	 **/
 	private SmsMessageDeliveryReportData(Long id, String externalId, String addedOnDate, String deliveredOnDate, 
 			Integer deliveryStatus, Boolean hasError, String errorMessage) {
@@ -49,7 +49,7 @@ public class SmsMessageDeliveryReportData {
 	/** 
 	 * Default SmsMessageDeliveryReportData constructor 
 	 * 
-	 * @return void
+	 * 
 	 **/
 	protected SmsMessageDeliveryReportData() {}
 	

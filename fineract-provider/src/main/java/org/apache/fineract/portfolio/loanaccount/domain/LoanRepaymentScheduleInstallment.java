@@ -43,7 +43,7 @@ import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_loan_repayment_schedule")
-public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<AppUser, Long> {
+public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCustom<AppUser, Long> implements Comparable<LoanRepaymentScheduleInstallment> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", referencedColumnName="id")
@@ -319,6 +319,11 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         return !this.obligationsMet;
     }
 
+    @Override
+    public int compareTo(LoanRepaymentScheduleInstallment o) {
+        return this.installmentNumber.compareTo(o.installmentNumber);
+    }
+    
     public boolean isPrincipalNotCompleted(final MonetaryCurrency currency) {
         return !isPrincipalCompleted(currency);
     }

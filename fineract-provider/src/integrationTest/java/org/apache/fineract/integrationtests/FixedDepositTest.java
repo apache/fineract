@@ -1855,7 +1855,7 @@ public class FixedDepositTest {
         final String VALID_TO = dateFormat.format(todaysDate.getTime());
 
         todaysDate = Calendar.getInstance();
-        todaysDate.add(Calendar.MONTH, -1);
+        //todaysDate.add(Calendar.MONTH, -1);
         Integer currentDate = new Integer(currentDateFormat.format(todaysDate.getTime()));
         todaysDate.add(Calendar.DATE, -(currentDate - 1));
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());

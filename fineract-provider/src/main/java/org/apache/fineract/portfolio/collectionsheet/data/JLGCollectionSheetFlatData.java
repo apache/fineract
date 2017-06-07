@@ -50,13 +50,15 @@ public class JLGCollectionSheetFlatData {
     private BigDecimal interestPaid = BigDecimal.ZERO;
     private BigDecimal chargesDue = BigDecimal.ZERO;
     private final EnumOptionData attendanceType;
+    private BigDecimal feeDue = BigDecimal.ZERO;
+    private BigDecimal feePaid = BigDecimal.ZERO;
 
     public JLGCollectionSheetFlatData(final String groupName, final Long groupId, final Long staffId, final String staffName,
             final Long levelId, final String levelName, final String clientName, final Long clientId, final Long loanId,
             final String accountId, final Integer accountStatusId, final String productShortName, final Long productId,
             final CurrencyData currency, final BigDecimal disbursementAmount, final BigDecimal principalDue,
             final BigDecimal principalPaid, final BigDecimal interestDue, final BigDecimal interestPaid, final BigDecimal chargesDue,
-            final EnumOptionData attendanceType) {
+            final EnumOptionData attendanceType, final BigDecimal feeDue, final BigDecimal feePaid) {
         this.groupName = groupName;
         this.groupId = groupId;
         this.staffId = staffId;
@@ -78,6 +80,8 @@ public class JLGCollectionSheetFlatData {
         this.interestPaid = interestPaid;
         this.chargesDue = chargesDue;
         this.attendanceType = attendanceType;
+        this.feeDue = feeDue;
+        this.feePaid = feePaid;
     }
 
     public String getGroupName() {
@@ -162,7 +166,8 @@ public class JLGCollectionSheetFlatData {
 
     public LoanDueData getLoanDueData() {
         return new LoanDueData(this.loanId, this.accountId, this.accountStatusId, this.productShortName, this.productId, this.currency,
-                this.disbursementAmount, this.principalDue, this.principalPaid, this.interestDue, this.interestPaid, this.chargesDue);
+                this.disbursementAmount, this.principalDue, this.principalPaid, this.interestDue, this.interestPaid, this.chargesDue,
+                this.feeDue, this.feePaid);
     }
 
     public JLGClientData getClientData() {
@@ -174,4 +179,11 @@ public class JLGCollectionSheetFlatData {
         return JLGGroupData.instance(this.groupId, this.groupName, this.staffId, this.staffName, this.levelId, this.levelName);
     }
 
+    public BigDecimal getFeeDue() {
+        return this.feeDue;
+    }
+
+    public BigDecimal getFeePaid() {
+        return this.feePaid;
+    }
 }

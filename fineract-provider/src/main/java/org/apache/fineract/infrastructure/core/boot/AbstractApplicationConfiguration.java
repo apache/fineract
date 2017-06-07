@@ -32,7 +32,7 @@ import org.springframework.context.annotation.PropertySource;
  * Base Spring Configuration with what's common to all Configuration subclasses.
  *
  * Notably the EnableAutoConfiguration excludes relevant for (and often adjusted
- * when upgrading versions of) Spring Boot, the "old" (pre. Spring Boot &
+ * when upgrading versions of) Spring Boot, the "old" (pre. Spring Boot &amp;
  * MariaDB4j) fineract appContext.xml which all configurations need, and the
  * web.xml successor WebXmlConfiguration.
  *

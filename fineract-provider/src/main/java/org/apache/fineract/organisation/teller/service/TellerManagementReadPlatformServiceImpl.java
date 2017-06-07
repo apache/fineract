@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.organisation.office.data.OfficeData;
@@ -70,16 +71,18 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
     private final StaffReadPlatformService staffReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final PaginationHelper<CashierTransactionData> paginationHelper = new PaginationHelper<>();
+    private final ColumnValidator columnValidator;
 
     @Autowired
     public TellerManagementReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final OfficeReadPlatformService officeReadPlatformService, StaffReadPlatformService staffReadPlatformService,
-            final CurrencyReadPlatformService currencyReadPlatformService) {
+            final CurrencyReadPlatformService currencyReadPlatformService, final ColumnValidator columnValidator) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.officeReadPlatformService = officeReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
         this.currencyReadPlatformService = currencyReadPlatformService;
+        this.columnValidator = columnValidator;
     }
 
     private static final class TellerMapper implements RowMapper<TellerData> {
@@ -98,7 +101,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         }
 
         @Override
-        public TellerData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public TellerData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("id");
             final Long officeId = rs.getLong("office_id");
@@ -140,7 +143,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         }
 
         @Override
-        public TellerData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public TellerData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("id");
             final String tellerName = rs.getString("teller_name");
@@ -182,7 +185,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         }
 
         @Override
-        public TellerData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public TellerData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("id");
             final String tellerName = rs.getString("teller_name");
@@ -223,11 +226,11 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     @Override
     public Collection<TellerData> retrieveAllTellers(final String sqlSearch, final Long officeId, final String status) {
-        final String extraCriteria = getTellerCriteria(sqlSearch, officeId, status);
-        return retrieveAllTeller(extraCriteria);
+    	final String extraCriteria = getTellerCriteria(sqlSearch, officeId, status);
+        return retrieveAllTeller(extraCriteria, officeId);
     }
 
-    private Collection<TellerData> retrieveAllTeller(final String extraCriteria) {
+    private Collection<TellerData> retrieveAllTeller(final String extraCriteria, final Long officeId) {
 
         final TellerMapper tm = new TellerMapper();
         String sql = "select " + tm.schema();
@@ -235,6 +238,9 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sql += " where " + extraCriteria;
         }
         sql = sql + " order by t.teller_name";
+        if(officeId!=null){
+        	return this.jdbcTemplate.query(sql, tm, new Object[] {officeId});
+        }
         return this.jdbcTemplate.query(sql, tm, new Object[] {});
     }
 
@@ -244,9 +250,11 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
         if (sqlSearch != null) {
             extraCriteria.append(" and (").append(sqlSearch).append(")");
+            final TellerMapper tm = new TellerMapper();
+            this.columnValidator.validateSqlInjection(tm.schema(), sqlSearch);
         }
         if (officeId != null) {
-            extraCriteria.append(" and office_id = ").append(officeId).append(" ");
+            extraCriteria.append(" and office_id = ? ");
         }
         // Passing status parameter to get ACTIVE (By Default), INACTIVE or ALL
         // (Both active and Inactive) employees
@@ -278,7 +286,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
     @Override
     public Collection<CashierData> retrieveCashiersForTellers(final String sqlSearch, final Long tellerId) {
-        final String extraCriteria = getTellerCriteria(sqlSearch, tellerId);
+    	final String extraCriteria = getTellerCriteria(sqlSearch, tellerId);
         return fetchCashiers(extraCriteria);
     }
 
@@ -288,6 +296,9 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
 
         if (sqlSearch != null) {
             extraCriteria.append(" and (").append(sqlSearch).append(")");
+            final CashierMapper cm = new CashierMapper();
+        	this.columnValidator.validateSqlInjection(cm.schema(), sqlSearch);
+        	
         }
         if (tellerId != null) {
             extraCriteria.append(" and teller_id = ").append(tellerId).append(" ");
@@ -510,9 +521,14 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         }
 
         final CashierTransactionMapper ctm = new CashierTransactionMapper();
+        
+        
 
         String sql = "select * from (select " + ctm.cashierTxnSchema()
-                + " where txn.cashier_id = ? and txn.currency_code = ? and o.hierarchy like ? ) cashier_txns " + " union (select "
+                + " where txn.cashier_id = ? and txn.currency_code = ? and o.hierarchy like ? "
+				+ "AND ((case when c.full_day then Date(txn.created_date) between c.start_date AND c.end_date else ( Date(txn.created_date) between c.start_date AND c.end_date"
+				+ " ) and ( TIME(txn.created_date) between TIME(c.start_time) AND TIME(c.end_time)) end) or txn.txn_type = 101))  cashier_txns "
+				+ " union (select "
                 + ctm.savingsTxnSchema()
                 + " where sav_txn.is_reversed = 0 and c.id = ? and sav.currency_code = ? and o.hierarchy like ? and "
                 + " sav_txn.transaction_date between c.start_date and date_add(c.end_date, interval 1 day) "
@@ -566,7 +582,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         }
 
         @Override
-        public CashierData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public CashierData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("id");
             final Long tellerId = rs.getLong("teller_id");
@@ -719,7 +735,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         }
 
         @Override
-        public CashierTransactionData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public CashierTransactionData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("txn_id");
             final Long cashierId = rs.getLong("cashier_id");
@@ -772,6 +788,10 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             sqlBuilder.append("	left join m_office o on o.id = t.office_id ");
             sqlBuilder.append("	left join m_staff s on s.id = c.staff_id ");
             sqlBuilder.append("	where txn.cashier_id = ? ");
+			sqlBuilder
+					.append(" AND (( case when c.full_day then Date(txn.created_date) between c.start_date AND c.end_date ");
+			sqlBuilder
+					.append(" else ( Date(txn.created_date) between c.start_date AND c.end_date) and  ( TIME(txn.created_date) between TIME(c.start_time) AND TIME(c.end_time))  end) or txn.txn_type = 101) ");
             sqlBuilder.append(" and   txn.currency_code = ? ");
             sqlBuilder.append("	and o.hierarchy like ?  ) cashier_txns ");
             sqlBuilder.append("	UNION ");
@@ -889,7 +909,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         }
 
         @Override
-        public CashierTransactionTypeTotalsData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+        public CashierTransactionTypeTotalsData mapRow(final ResultSet rs, final int rowNum)
                 throws SQLException {
 
             final Integer cashierTxnType = rs.getInt("cash_txn_type");

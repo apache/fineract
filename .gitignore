@@ -2,3 +2,5 @@
 *.jar
 *.war
 *.ear
+.gradle
+build

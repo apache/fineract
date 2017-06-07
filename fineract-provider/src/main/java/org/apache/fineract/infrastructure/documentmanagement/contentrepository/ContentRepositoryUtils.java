@@ -32,7 +32,7 @@ import org.apache.fineract.infrastructure.documentmanagement.exception.ContentMa
 
 public class ContentRepositoryUtils {
 
-    public static Random random = new Random();
+    private static final Random random = new Random();
 
     public static enum IMAGE_MIME_TYPE {
         GIF("image/gif"), JPEG("image/jpeg"), PNG("image/png");
@@ -121,7 +121,7 @@ public class ContentRepositoryUtils {
     /**
      * Extracts Image from a Data URL
      * 
-     * @param mimeType
+     * @param dataURL mimeType
      */
     public static Base64EncodedImage extractImageFromDataURL(final String dataURL) {
         String fileExtension = "";

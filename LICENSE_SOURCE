@@ -208,7 +208,8 @@
 ======================================
 
 All the source code for the Apache Fineract project is released under the
-license above. Additionally, the Apache Fineract source and binary distribution includes a number of third-party files that are required in
+license above. Additionally, the Apache Fineract source and binary
+distribution includes a number of third-party files that are required in
 order to the software to function. Unless noted below, these jars
 and resource files are also released under the ASF license above.
 
@@ -216,15 +217,18 @@ and resource files are also released under the ASF license above.
 *The exceptions for source release are as follows:
 ==================================================
 
-For API & System Architecture Documentation Apache Fineract includes following css and js packages.
+For API & System Architecture Documentation Apache Fineract includes
+following css and js packages.
 
-This product bundles normalize v1.1.1 and v2.1.0, copyright Nicolas Gallagher and Jonathan Neal, which is available under a MIT license.
+This product bundles normalize v1.1.1 and v2.1.0, copyright Nicolas
+Gallagher and Jonathan Neal, which is available under a MIT license.
 For details, see licenses/source/normalize.MIT
 
 This product bundles Modernizr v2.6.2, which is available under a MIT license.
 For details, see licenses/source/modernizr.MIT
 
-This product bundles filesaver, copyright Eli Grey, which is available under a MIT license.
+This product bundles filesaver, copyright Eli Grey, which is available under
+a MIT license.
 For details, see licenses/source/filesaver.MIT
 
 This product bundles Glyphicons Halflings Regular, copyright Jan Kovarik, 
@@ -232,10 +236,16 @@ which is available under a MIT license.
 For details, see licenses/source/glyphicons.MIT
 
 This product bundles jszip, copyright Stuart Knightley, 
-David Duponchel, Franz Buchinger and António Afonso, which is available under a MIT license.
+David Duponchel, Franz Buchinger and António Afonso, which is available
+under a MIT license.
 For details, see licenses/source/jszip.MIT
 
-This product bundles jQuery v1.7, v1.7.1, v1.9.1, v1.10.2, copyright jQuery Foundation, Inc. which is available under a MIT license.
+This product bundles jQuery v1.7, v1.7.1, Copyright (c) 2011 John Resig,
+which is available under a MIT license.
+For details, see licenses/source/jQuery1.MIT
+
+This product bundles jQuery v1.9.1, v1.10.2, copyright jQuery Foundation,
+Inc. which is available under a MIT license.
 For details, see licenses/source/jQuery.MIT
 
 This product bundles Respond v1.1.0, copyright Scott Jehl,
@@ -246,7 +256,7 @@ This product bundles matchMedia polyfill, copyright Scott Jehl,
 which is available under a MIT license.
 For details, see licenses/polyfill.MIT
 
-This product bundles HTML5Shiv v3.6.2pre, copyright Alexander Farkas,
+This product bundles HTML5Shiv v3.6.2, copyright Alexander Farkas,
 which is available under a MIT license.
 For details, see licenses/source/html5shiv.MIT
 
@@ -254,10 +264,12 @@ This product bundles UglifyJS copyright Mihai Bazon,
 which available under a BSD license.
 For details, see licenses/source/uglify.BSD
 
-This product bundles sizzle copyright jQuery Foundation and other contributors, which is available under a MIT license.
+This product bundles sizzle copyright jQuery Foundation and other
+contributors, which is available under a MIT license.
 For details, see licenses/source/sizzle.MIT
 
-This product bundles some parts of es5-shim, copyright Kristopher Michael Kowal and contributors, which is available under a MIT license.
+This product bundles some parts of es5-shim, copyright Kristopher Michael
+Kowal and contributors, which is available under a MIT license.
 For details, see licenses/source/es5shim.MIT
 
 This product bundles toc v0.1.2, copyright Greg Allen,
@@ -270,71 +282,5 @@ For details, see licenses/source/livejs.MIT
 
 This product bundles HTML5 Boilerplate, which is under a MIT license.
 For details, see licenses/source/h5bp.MIT.
-
-==================================================
-*The exceptions for binary release are as follows:
-==================================================
-This product bundles AOP Alliance v1.0, which is available under a Public Domain license. For details, see licenses/binary/Aopa.PL
-
-This product bundles ASM Core v3.1, which is available under a BSD license.
-For details, see licenses/binary/Asm.BSD
-
-This product bundles JavaMail API(compat) v1.5.0-b01, 
-which is available under a CDDL v1.0 license.
-For details, see licenses/binary/Javamail.CDDL
-
-This product bundles AspectJ Runtime v1.8.2, Copyright (c) 1999-2001 Xerox Corporation, 2002 Palo Alto Research Center, Incorporated (PARC), which is available under a EPL v1.0 license. 
-For details, see licenses/binary/Aspectrt.EPL
-
-This product bundles AspectJ Weaver v1.8.2, Copyright (c) 2002 Palo Alto Research Center, Incorporated (PARC), which is available under a EPL v1.0 license. For details, see licenses/binary/Aspectweaver.EPL
-
-This product bundles IText(A Free Java PDF Library) v2.1.7, Copyright 2007 Bruno Lowagie, which is available under a MPL v1.1 license.
-For details, see licenses/binary/IText.MPL
-
-This product bundles DOM4J, Copyright 2001-2005 (C) MetaStuff, Ltd., which is available under a BSD license.
-For details, see licenses/binary/Dom4J.BSD
-
-This product bundles JDBC driver for MySQL and Drizzle v1.3, Copyright (c) 2009-2013, Marcus Eriksson which is available under a BSD license.
-For details, see licenses/binary/Drizzle.BSD
-
-This product bundles Ical4J v1.0.4, Copyright (c) 2012, Ben Fortuna,
-which is available under a BSD license.
-For details, see licenses/binary/Ical4J.BSD
-
-This product bundles Jersey Core v1.17, Copyright (c) 2010-2012 Oracle and/or its affiliates, which is available under a CDDL 1.1 license.
-For details, see licenses/binary/Jersey.CDDL
-
-This product bundles Jersey Json v1.17, Copyright (c) 2010-2012 Oracle and/or its affiliates, which is available under a CDDL 1.1 license.
-For details, see licenses/binary/Jersey.CDDL
-
-This product bundles Jersey Multipart v1.17, Copyright (c) 2010-2011 Oracle and/or its affiliates, which is available under a CDDL 1.1 license.
-For details, see licenses/binary/Jersey.CDDL
-
-This product bundles Jersey Server v1.17, Copyright (c) 2010-2011 Oracle and/or its affiliates, which is available under a CDDL 1.1 license.
-For details, see licenses/binary/Jersey.CDDL
-
-This product bundles Jersey Servlet v1.17, Copyright (c) 2010-2011 Oracle and/or its affiliates, which is available under a CDDL 1.1 license.
-For details, see licenses/binary/Jersey.CDDL
-
-This product bundles Jersey Spring v1.17, Copyright (c) 2010-2011 Oracle and/or its affiliates, which is available under a CDDL 1.1 license.
-For details, see licenses/binary/Jersey.CDDL
-
-This product bundles Logback Classic Module v1.1.2, Copyright (C) 1999-2012, QOS.ch. All rights reserved, which is available under a EPL v1.0 license.
-For details, see licenses/binary/Logback.EPL
-
-This product bundles Logback Core Module v1.1.2, Copyright (C) 1999-2012, QOS.ch. All rights reserved, which is available under a EPL v1.0 license.
-For details, see licenses/binary/Logback.EPL
-
-This product bundles MIME Streaming Extension v1.6, Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved., which is available under a CDDL v1.1 license.
-For details, see licenses/binary/Mimepull.CDDL
-
-This product bundles JUnit v3.8.1 created by Erich Gamma and Kent Beck which is available under a CPL v1.0 license. 
-For details, see licenses/binary/Junit.CPL
-
-This product bundles SLF4J API Module v1.7.7 opyright (c) 2004-2013 QOS.ch All rights reserved., which is available under a MIT license. 
-For details, see licenses/binary/Slf4j.MIT
-	
-This product bundles Backport Util Concurrent v3.1 written by Dawid Kurzyniec,
-which is avilable under Public Domain license. For details see licenses/binary/Backport.PL
 
 ******************************************

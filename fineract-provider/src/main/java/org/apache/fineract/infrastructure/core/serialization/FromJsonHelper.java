@@ -115,7 +115,7 @@ public class FromJsonHelper {
     /**
      * @param parentPropertyName
      *            The full json path to this property,the value is appended to
-     *            the parameter name while generating an error message <br/>
+     *            the parameter name while generating an error message <br>
      *            Ex: property "name" in Object "person" would be named as
      *            "person.name"
      * @param object

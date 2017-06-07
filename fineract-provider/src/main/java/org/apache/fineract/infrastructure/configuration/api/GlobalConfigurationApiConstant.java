@@ -32,7 +32,4 @@ public class GlobalConfigurationApiConstant {
     public static final String localeParamName = "locale";
     public static final String dateFormatParamName = "dateFormat";
 
-    public static final Set<String> UPDATE_CONFIGURATION_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName, dateFormatParamName, 
-            ENABLED, VALUE, DATE_VALUE));
-
 }

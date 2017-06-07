@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PaginationParametersDataValidator {
 
-    public static Set<String> sortOrderValues = new HashSet<>(Arrays.asList("ASC", "DESC"));
+    private final Set<String> sortOrderValues = new HashSet<>(Arrays.asList("ASC", "DESC"));
 
     public void validateParameterValues(PaginationParameters parameters, final Set<String> supportedOrdeByValues, final String resourceName) {
 

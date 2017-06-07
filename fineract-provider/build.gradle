@@ -20,7 +20,6 @@ description = '''\
 Run as:
 gradle clean tomcatrunwar
 '''
-
 buildscript {
   repositories {
   	 jcenter()
@@ -50,6 +49,8 @@ apply plugin: 'tomcat'
 apply plugin: 'project-report'
 apply plugin: 'java'
 apply plugin: 'openjpa'
+apply plugin: 'pmd'
+apply plugin: 'findbugs'
 
 /* define the valid syntax level for source files */
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -67,12 +68,9 @@ project.ext.mysqlPassword='mysql'
 
 
 group = 'org.apache.fineract'
-
+buildDir = new File(rootProject.projectDir, "../build")
 repositories {
 	jcenter()
-	maven {
-	url "http://nexus.pentaho.org/content/repositories/omni/"
-    }
 	// mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
 }
 openjpa {
@@ -88,11 +86,13 @@ rat {
   xmlOutput = false
   htmlOutput = false
   plainOutput = true
-  verbose = true 
-  inputDir = './..'
+  verbose = false 
+//  inputDir = './..'
+  reportDir = new File(buildDir,'reports/rat')
  excludes = [
 	'**/licenses/**',
 	'**/*.md',
+	'**/MANIFEST.MF',
 	'**/*.txt',
 	'**/*.log',
 	'**/fineractdev-eclipse-preferences.epf',
@@ -107,7 +107,9 @@ rat {
     '**/.gitignore',
     '**/.gitkeep',
 	'**/*.iml',
-		
+	//Notice files
+	'**/NOTICE_RELEASE',
+	'**/NOTICE_SOURCE',	
     // gradle
     '**/.gradle/**',
     '**/gradlew',
@@ -221,11 +223,6 @@ task dist(type:Zip){
         include '**/*'
 		into('apps')
 	}
-	from('src/main/pentahoReports/') {
-        fileMode = 0755
-        include '*'
-        into('pentahoReports')
-    }
     from('../api-docs/') {
         fileMode = 0755
         include '*'
@@ -246,38 +243,39 @@ task dist(type:Zip){
     into(baseName + '-' + version)
 }
 
-task deployPentahoReports() {
-	def pentahoReportDir = System.properties['user.home'] + System.properties['file.separator'] + '.mifosx' + System.properties['file.separator'] + 'pentahoReports'
-	copy {
-        from "src/main/pentahoReports"
-        into pentahoReportDir
-    }
-
-    doLast {
-        println ':deployPentahoReports - moving pentaho reports under: ' + pentahoReportDir
-    }
+compileJava{
+    dependsOn rat
+}
+pmd {
+    sourceSets = [sourceSets.main]
+    ignoreFailures = true
+}
+findbugs {
+    ignoreFailures = true
+    sourceSets = [sourceSets.main] 
 }
 
-//compileJava{
-//    dependsOn rat
-//}
-
 war {
-	it.dependsOn deployPentahoReports
-	from('../licenses') { // notice the parens
-		into "WEB-INF/licenses/" // no leading slash
+	from('../licenses/binary/') { // notice the parens
+		into "WEB-INF/licenses/binary/" // no leading slash
 	}
-	from('../LICENSE') { // notice the parens
+	from('../LICENSE_RELEASE') { // notice the parens
 		into "WEB-INF/" // no leading slash
 	}
-	from('../NOTICE') { // notice the parens
+	from('../NOTICE_RELEASE') { // notice the parens
+		into "WEB-INF/" // no leading slash
+	}
+	rename ('LICENSE_RELEASE', 'LICENSE')
+	rename ('NOTICE_RELEASE', 'NOTICE')
+	
+	from('../DISCLAIMER') { // notice the parens
 		into "WEB-INF/" // no leading slash
 	}
     war.finalizedBy(bootRepackage)
 }
 
 license {
-    header rootProject.file('../LICENSE.md')
+    header rootProject.file('../APACHE_LICENSETEXT.md')
     excludes(["**/*.html", "**/*.mustache", "**/package-info.java", "**/keystore.jks"])
     strictCheck true
 }
@@ -348,8 +346,6 @@ task integrationTest(type:Test){
         tomcatRunWar.daemon = true
         tomcatRunWar.execute()
     }
-
-
     testClassesDir = project.sourceSets.integrationTest.output.classesDir
     classpath = project.sourceSets.integrationTest.runtimeClasspath
 }
@@ -364,7 +360,7 @@ configurations {
     driver
 }
 dependencies {
-    driver 'mysql:mysql-connector-java:5.1.16'
+    driver 'org.drizzle.jdbc:drizzle-jdbc:1.3'
 }
 
 test {
@@ -381,17 +377,17 @@ configurations.driver.each {File file ->
 
 task createDB<<{
     description= "Creates the Database. Needs database name to be passed (like: -PdbName=someDBname)"
-    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
+    sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
     sql.execute( 'create database '+"`$dbName`" )
 }
 
 task dropDB<<{
     description= "Drops the specified database. The database name has to be passed (like: -PdbName=someDBname)"
-    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
+    sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
     sql.execute( 'DROP DATABASE '+"`$dbName`")
 }
 task setBlankPassword<<{
-    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
+    sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
     sql.execute('USE `mifosplatform-tenants`')
     sql.execute('UPDATE mifosplatform-tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
 }
@@ -411,8 +407,8 @@ buildscript {
 
 
 flyway {
-    url = "jdbc:mysql://localhost:3306/mifostenant-default"
-	driver = "com.mysql.jdbc.Driver"
+    url = "jdbc:mysql:thin://localhost:3306/mifostenant-default"
+	driver = "org.drizzle.jdbc.DrizzleDriver"
     user = mysqlUser
     password = mysqlPassword
 }
@@ -426,8 +422,8 @@ task migrateTenantDB<<{
 		tenantDbName = rootProject.getProperty("dbName")
 	}
 	
-    flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
-	flyway.driver = "com.mysql.jdbc.Driver"
+    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantDbName"
+	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
     /**We use ${ as the prefix for strecthy reporting, do not want them to be interpreted by Flyway**/
     flyway.placeholderPrefix = "\$\${"
@@ -443,8 +439,8 @@ task showTenantDBInfo<<{
 		tenantDbName = rootProject.getProperty("dbName")
 	}
 	
-    flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
-	flyway.driver = "com.mysql.jdbc.Driver"
+    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantDbName"
+	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
     flywayInfo.execute()
 }
@@ -459,8 +455,8 @@ task migrateTenantListDB<<{
 		tenantsDbName = rootProject.getProperty("dbName")
 	}
 	
-    flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
-	flyway.driver = "com.mysql.jdbc.Driver"
+    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
+	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
 
     flywayMigrate.execute()
@@ -475,8 +471,8 @@ task showTenantListDBInfo<<{
 		tenantsDbName = rootProject.getProperty("dbName")
 	}
     
-    flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
-	flyway.driver = "com.mysql.jdbc.Driver"
+    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
+	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
     flywayInfo.execute()
 }
@@ -490,8 +486,8 @@ task repairTenantDB<<{
         tenantsDbName = rootProject.getProperty("dbName")
     }
     
-    flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
-	flyway.driver = "com.mysql.jdbc.Driver"
+    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
+	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
     flywayRepair.execute()
 }

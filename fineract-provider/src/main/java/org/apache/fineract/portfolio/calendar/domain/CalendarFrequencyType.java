@@ -107,8 +107,8 @@ public enum CalendarFrequencyType {
      * To convert from period frequency type tp calendar frequency type. This
      * method requires code refactoring.
      * 
-     * @param periodFrequencyType
-     * @return
+     * @param periodFrequencyType periodFrequencyType
+     * @return CalendarFrequencyType
      */
     public static CalendarFrequencyType from(final PeriodFrequencyType periodFrequencyType) {
         switch (periodFrequencyType) {

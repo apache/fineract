@@ -2817,4 +2817,9 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
         charges.size();
         savingsOfficerHistory.size();
     }
+    
+    public void updateSavingsAccountSummary(final List<SavingsAccountTransaction> transactions) {
+        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, transactions);
+    }
+    
 }

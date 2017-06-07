@@ -22,9 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <ul>
+ * 
  * People typically use either of the following settings when calculating there
  * interest using the daily method:
+ * <ul>
  * <li>Actual or</li>
  * <li>360 or</li>
  * <li>364 or</li>

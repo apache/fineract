@@ -9,13 +9,25 @@ Requirements
 * gradle-wrapper.jar version 2.10
 * MySQL 5.5
 
+Instructions to download gradle wrapper
+============
+By running following command, it will download the gradle wrapper from Fineract git repository and puts under fineract-provider/gradle/wrapper
+
+wget --no-check-certificate -P fineract-provider/gradle/wrapper https://github.com/apache/incubator-fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar
+(or)
+curl --insecure -L https://github.com/apache/incubator-fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar > fineract-provider/gradle/wrapper/gradle-wrapper.jar
+
+Instructions to run Apache RAT (Release Audit Tool)
+============
+1. Extract the archive file to your local directory.
+2. Download gradle-wrapper.jar version 2.10 and place it in the fineract-provider/gradle/wrapper folder. See 'Instructions to download gradle wrapper' above.
+3. Run `./gradlew rat`. Report will be generated under build/reports/rat/rat-report.txt
+
 Instructions to build war file
 ============
-
 1. Extract the archive file to your local directory.
-2. Download gradle-wrapper.jar version 2.10 and place it in the fineract-provider/gradle/wrapper folder.
-3. Change the current working directory to fineract-provider.
-4. Run `./gradlew clean war` or `./gradlew build` to build deployable war file which will be created at fineract-provider/build/libs directory.
+2. Download gradle-wrapper.jar version 2.10 and place it in the fineract-provider/gradle/wrapper folder. See 'Instructions to download gradle wrapper' above.
+3. Run `./gradlew clean war` or `./gradlew build` to build deployable war file which will be created at build/libs directory.
 
 
 Instructions to execute Integration tests
@@ -23,10 +35,11 @@ Instructions to execute Integration tests
 1. Login to mysql DB using `mysql -u root -pmysql`
 2. Create the mifosplatform-tenants database using `CREATE DATABASE mifosplatform-tenants`.
 3. Create the default tenant database using `CREATE DATABASE mifostenant-default`.
-4. With fineract-provider as current working directory run the following commands:
+4. Download gradle-wrapper.jar version 2.10 and place it in the fineract-provider/gradle/wrapper folder. See 'Instructions to download gradle wrapper' above.
+5. Run the following commands:
 	1. `./gradlew migrateTenantListDB -PdbName=mifosplatform-tenants`
 	2. `./gradlew migrateTenantDB -PdbName=mifostenant-default`
-5. Run `./gradlew clean integrationTest`
+6. Run `./gradlew clean integrationTest`
 
 Version
 ============

@@ -21,8 +21,8 @@ package org.apache.fineract.commands.annotation;
 import java.lang.annotation.*;
 
 /**
- * Specifies the command type for the annotated class.<br/>
- * <br/>
+ * Specifies the command type for the annotated class.<br>
+ * <br>
  * The entity name (e.g. CLIENT, SAVINGSACCOUNT, LOANPRODUCT) and the action (e.g. CREATE, DELETE) must be given.
  *
  * @author Markus Geiss
