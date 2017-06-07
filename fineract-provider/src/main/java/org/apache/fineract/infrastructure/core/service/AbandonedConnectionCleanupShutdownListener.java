@@ -29,6 +29,8 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Service;
 
+import com.mysql.jdbc.AbandonedConnectionCleanupThread;
+
 @Service
 public class AbandonedConnectionCleanupShutdownListener implements ApplicationListener<ContextClosedEvent> {
 
@@ -44,13 +46,13 @@ public class AbandonedConnectionCleanupShutdownListener implements ApplicationLi
     }
 
     private void shutDowncleanUpThreadAndDeregisterJDBCDriver() {
-        /*try {
+        try {
         	
-            AbandonedConnectionCleanupThread.shutdown(); tomcat memoroy leak with mysql connector. With Drizzle not required
+            AbandonedConnectionCleanupThread.shutdown(); //tomcat memoroy leak with mysql connector. With Drizzle not required
             logger.info("Shut-down of AbandonedConnectionCleanupThread successful"); 
         } catch (Throwable t) {
             logger.error("Exception occurred while shut-down of AbandonedConnectionCleanupThread", t);
-        }*/
+        }
 
         // This manually deregisters JDBC driver, which prevents Tomcat 7 from
         // complaining about memory leaks
