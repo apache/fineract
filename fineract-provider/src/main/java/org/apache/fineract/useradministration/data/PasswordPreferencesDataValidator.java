@@ -20,8 +20,11 @@ package org.apache.fineract.useradministration.data;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -39,7 +42,9 @@ import com.google.gson.reflect.TypeToken;
 @Component
 public class PasswordPreferencesDataValidator {
 
-    private final FromJsonHelper fromApiJsonHelper;
+	private final FromJsonHelper fromApiJsonHelper;
+	private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(PasswordPreferencesApiConstants.VALIDATION_POLICY_ID));
 
     @Autowired
     public PasswordPreferencesDataValidator(FromJsonHelper fromApiJsonHelper) {
@@ -50,7 +55,7 @@ public class PasswordPreferencesDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, PasswordPreferencesApiConstants.REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

@@ -18,7 +18,10 @@
  */
 package org.apache.fineract.organisation.provisioning.api;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -57,6 +60,19 @@ public class ProvisioningCriteriaApiResource {
     private final ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final DefaultToApiJsonSerializer<ProvisioningCriteriaData> toApiJsonSerializer;
+
+	private static final Set<String> PROVISIONING_CRITERIA_TEMPLATE_PARAMETER = new HashSet<>(
+			Arrays.asList(ProvisioningCriteriaConstants.DEFINITIONS_PARAM,
+					ProvisioningCriteriaConstants.LOANPRODUCTS_PARAM, ProvisioningCriteriaConstants.GLACCOUNTS_PARAM));
+
+	private static final Set<String> PROVISIONING_CRITERIA_PARAMETERS = new HashSet<>(
+			Arrays.asList(ProvisioningCriteriaConstants.CRITERIA_PARAM,
+					ProvisioningCriteriaConstants.LOANPRODUCTS_PARAM, ProvisioningCriteriaConstants.DEFINITIONS_PARAM));
+
+	private static final Set<String> ALL_PROVISIONING_CRITERIA_PARAMETERS = new HashSet<>(
+			Arrays.asList(ProvisioningCriteriaConstants.CRITERIA_ID_PARAM,
+					ProvisioningCriteriaConstants.CRITERIA_NAME_PARAM, ProvisioningCriteriaConstants.CREATED_BY_PARAM));
+
     @Autowired
     public ProvisioningCriteriaApiResource(final PlatformSecurityContext platformSecurityContext,
             final ApiRequestParameterHelper apiRequestParameterHelper,
@@ -78,7 +94,7 @@ public class ProvisioningCriteriaApiResource {
         this.platformSecurityContext.authenticatedUser();
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         ProvisioningCriteriaData data = this.provisioningCriteriaReadPlatformService.retrievePrivisiongCriteriaTemplate();
-        return this.toApiJsonSerializer.serialize(settings, data, ProvisioningCriteriaConstants.PROVISIONING_CRITERIA_TEMPLATE_PARAMETER);
+        return this.toApiJsonSerializer.serialize(settings, data, PROVISIONING_CRITERIA_TEMPLATE_PARAMETER);
     }
     
     @GET
@@ -92,7 +108,7 @@ public class ProvisioningCriteriaApiResource {
         if(settings.isTemplate()) {
             criteria = this.provisioningCriteriaReadPlatformService.retrievePrivisiongCriteriaTemplate(criteria);   
         }
-        return this.toApiJsonSerializer.serialize(settings, criteria, ProvisioningCriteriaConstants.PROVISIONING_CRITERIA_PARAMETERS); 
+        return this.toApiJsonSerializer.serialize(settings, criteria, PROVISIONING_CRITERIA_PARAMETERS);
     }
         
     @GET
@@ -102,7 +118,7 @@ public class ProvisioningCriteriaApiResource {
         platformSecurityContext.authenticatedUser() ;
         Collection<ProvisioningCriteriaData> data = this.provisioningCriteriaReadPlatformService.retrieveAllProvisioningCriterias() ;
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, data, ProvisioningCriteriaConstants.ALL_PROVISIONING_CRITERIA_PARAMETERS); 
+        return this.toApiJsonSerializer.serialize(settings, data, ALL_PROVISIONING_CRITERIA_PARAMETERS);
     }
     
     @POST

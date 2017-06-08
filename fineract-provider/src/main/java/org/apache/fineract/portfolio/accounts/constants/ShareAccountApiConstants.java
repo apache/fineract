@@ -104,11 +104,4 @@ public interface ShareAccountApiConstants {
 	        allowdividendcalculationforinactiveclients_paramname, charges_paramname, applicationdate_param,
 	        purchaseddate_paramname,numberofshares_paramname,purchasedprice_paramname));
 
-	Set<String> approvalParameters = new HashSet<>(Arrays.asList(locale_paramname, dateformat_paramname, approveddate_paramname, note_paramname));
-	
-	Set<String> activateParameters = new HashSet<>(Arrays.asList(locale_paramname, dateformat_paramname, activatedate_paramname));
-	
-	Set<String> closeParameters = new HashSet<>(Arrays.asList(locale_paramname, dateformat_paramname, closeddate_paramname, note_paramname));
-	
-	Set<String> addtionalSharesParameters = new HashSet<>(Arrays.asList(locale_paramname, requesteddate_paramname, requestedshares_paramname, purchasedprice_paramname, dateformat_paramname));
 }

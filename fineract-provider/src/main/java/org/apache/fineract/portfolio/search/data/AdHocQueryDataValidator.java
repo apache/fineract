@@ -22,8 +22,10 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -42,6 +44,34 @@ import com.google.gson.reflect.TypeToken;
 public class AdHocQueryDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
+	private static final Set<String> AD_HOC_SEARCH_QUERY_REQUEST_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(AdHocQuerySearchConstants.entitiesParamName, AdHocQuerySearchConstants.loanStatusParamName,
+					AdHocQuerySearchConstants.loanProductsParamName, AdHocQuerySearchConstants.officesParamName,
+					AdHocQuerySearchConstants.loanDateOptionParamName, AdHocQuerySearchConstants.loanFromDateParamName,
+					AdHocQuerySearchConstants.loanToDateParamName,
+					AdHocQuerySearchConstants.includeOutStandingAmountPercentageParamName,
+					AdHocQuerySearchConstants.outStandingAmountPercentageConditionParamName,
+					AdHocQuerySearchConstants.minOutStandingAmountPercentageParamName,
+					AdHocQuerySearchConstants.maxOutStandingAmountPercentageParamName,
+					AdHocQuerySearchConstants.outStandingAmountPercentageParamName,
+					AdHocQuerySearchConstants.includeOutstandingAmountParamName,
+					AdHocQuerySearchConstants.outstandingAmountConditionParamName,
+					AdHocQuerySearchConstants.minOutstandingAmountParamName,
+					AdHocQuerySearchConstants.maxOutstandingAmountParamName,
+					AdHocQuerySearchConstants.outstandingAmountParamName, AdHocQuerySearchConstants.localeParamName,
+					AdHocQuerySearchConstants.dateFormatParamName));
+
+    private static final Set<String> AD_HOC_SEARCH_QUERY_CONDITIONS = new HashSet<>(
+            Arrays.asList("between", "<=", ">=", "<", ">", "="));
+
+    private static final Object[] loanDateOptions = { AdHocQuerySearchConstants.approvalDateOption,
+            AdHocQuerySearchConstants.createDateOption,
+            AdHocQuerySearchConstants.disbursalDateOption };
+
+	private static final Object[] loanStatusOptions = {AdHocQuerySearchConstants.allLoanStatusOption,
+			AdHocQuerySearchConstants.activeLoanStatusOption, AdHocQuerySearchConstants.overpaidLoanStatusOption,
+			AdHocQuerySearchConstants.arrearsLoanStatusOption, AdHocQuerySearchConstants.closedLoanStatusOption,
+			AdHocQuerySearchConstants.writeoffLoanStatusOption};
 
     @Autowired
     public AdHocQueryDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -53,8 +83,7 @@ public class AdHocQueryDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                AdHocQuerySearchConstants.AD_HOC_SEARCH_QUERY_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, AD_HOC_SEARCH_QUERY_REQUEST_DATA_PARAMETERS);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
@@ -71,7 +100,7 @@ public class AdHocQueryDataValidator {
             if (loanStatus != null && loanStatus.length > 0) {
                 for (String status : loanStatus) {
                     baseDataValidator.reset().parameter(AdHocQuerySearchConstants.loanStatusParamName).value(status)
-                            .isOneOfTheseValues(AdHocQuerySearchConstants.loanStatusOptions);
+                            .isOneOfTheseValues(loanStatusOptions);
                 }
             }
         }
@@ -91,7 +120,7 @@ public class AdHocQueryDataValidator {
             final String loanDateOption = this.fromApiJsonHelper.extractStringNamed(AdHocQuerySearchConstants.loanDateOptionParamName,
                     element);
             baseDataValidator.reset().parameter(AdHocQuerySearchConstants.loanDateOptionParamName).value(loanDateOption)
-                    .isOneOfTheseValues(AdHocQuerySearchConstants.loanDateOptions);
+                    .isOneOfTheseValues(loanDateOptions);
         }
 
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.loanFromDateParamName, element)) {
@@ -118,7 +147,7 @@ public class AdHocQueryDataValidator {
                     AdHocQuerySearchConstants.outStandingAmountPercentageConditionParamName, element);
             baseDataValidator.reset().parameter(AdHocQuerySearchConstants.outStandingAmountPercentageConditionParamName)
                     .value(outStandingAmountPercentageCondition)
-                    .isNotOneOfTheseValues(AdHocQuerySearchConstants.AD_HOC_SEARCH_QUERY_CONDITIONS);
+                    .isNotOneOfTheseValues(AD_HOC_SEARCH_QUERY_CONDITIONS);
             if (outStandingAmountPercentageCondition.equals("between")) {
                 final BigDecimal minOutStandingAmountPercentage = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
                         AdHocQuerySearchConstants.minOutStandingAmountPercentageParamName, element);
@@ -151,7 +180,7 @@ public class AdHocQueryDataValidator {
             final String outstandingAmountCondition = this.fromApiJsonHelper.extractStringNamed(
                     AdHocQuerySearchConstants.outstandingAmountConditionParamName, element);
             baseDataValidator.reset().parameter(AdHocQuerySearchConstants.outstandingAmountConditionParamName)
-                    .value(outstandingAmountCondition).isNotOneOfTheseValues(AdHocQuerySearchConstants.AD_HOC_SEARCH_QUERY_CONDITIONS);
+                    .value(outstandingAmountCondition).isNotOneOfTheseValues(AD_HOC_SEARCH_QUERY_CONDITIONS);
             if (outstandingAmountCondition.equals("between")) {
                 final BigDecimal minOutstandingAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
                         AdHocQuerySearchConstants.minOutstandingAmountParamName, element);

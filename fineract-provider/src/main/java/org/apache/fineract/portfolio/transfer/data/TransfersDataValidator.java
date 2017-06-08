@@ -20,8 +20,11 @@ package org.apache.fineract.portfolio.transfer.data;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -42,6 +45,32 @@ import com.google.gson.reflect.TypeToken;
 public final class TransfersDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
+	private static final Set<String> TRANSFER_CLIENTS_BETWEEN_GROUPS_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(TransferApiConstants.localeParamName, TransferApiConstants.dateFormatParamName,
+					TransferApiConstants.destinationGroupIdParamName, TransferApiConstants.clients,
+					TransferApiConstants.inheritDestinationGroupLoanOfficer, TransferApiConstants.newStaffIdParamName,
+					TransferApiConstants.transferActiveLoans));
+
+	private static final Set<String> PROPOSE_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(TransferApiConstants.localeParamName, TransferApiConstants.dateFormatParamName,
+					TransferApiConstants.destinationOfficeIdParamName, TransferApiConstants.transferActiveLoans,
+					TransferApiConstants.note));
+
+	private static final Set<String> ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(TransferApiConstants.newStaffIdParamName, TransferApiConstants.destinationGroupIdParamName,
+					TransferApiConstants.note));
+
+	private static final Set<String> PROPOSE_AND_ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(TransferApiConstants.localeParamName, TransferApiConstants.dateFormatParamName,
+					TransferApiConstants.destinationOfficeIdParamName, TransferApiConstants.transferActiveLoans,
+					TransferApiConstants.newStaffIdParamName, TransferApiConstants.destinationGroupIdParamName,
+					TransferApiConstants.note));
+
+	private static final Set<String> REJECT_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(TransferApiConstants.note));
+
+	private static final Set<String> WITHDRAW_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(TransferApiConstants.note));
 
     @Autowired
     public TransfersDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -57,8 +86,8 @@ public final class TransfersDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                TransferApiConstants.TRANSFER_CLIENTS_BETWEEN_GROUPS_DATA_PARAMETERS);
+		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+				TRANSFER_CLIENTS_BETWEEN_GROUPS_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -91,7 +120,7 @@ public final class TransfersDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, TransferApiConstants.PROPOSE_CLIENT_TRANSFER_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, PROPOSE_CLIENT_TRANSFER_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -113,7 +142,7 @@ public final class TransfersDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, TransferApiConstants.ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -142,8 +171,7 @@ public final class TransfersDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                TransferApiConstants.PROPOSE_AND_ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, PROPOSE_AND_ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -177,7 +205,7 @@ public final class TransfersDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, TransferApiConstants.REJECT_CLIENT_TRANSFER_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, REJECT_CLIENT_TRANSFER_DATA_PARAMETERS);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -194,7 +222,7 @@ public final class TransfersDataValidator {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper
-                .checkForUnsupportedParameters(typeOfMap, json, TransferApiConstants.WITHDRAW_CLIENT_TRANSFER_DATA_PARAMETERS);
+                .checkForUnsupportedParameters(typeOfMap, json, WITHDRAW_CLIENT_TRANSFER_DATA_PARAMETERS);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
