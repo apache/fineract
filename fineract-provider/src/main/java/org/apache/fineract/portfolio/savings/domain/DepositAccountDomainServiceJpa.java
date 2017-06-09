@@ -163,6 +163,21 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         }
         return deposit;
     }
+    
+    @Transactional
+    @Override
+    public SavingsAccountTransaction handleSavingDeposit(final SavingsAccount account, final DateTimeFormatter fmt,
+            final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
+            final boolean isRegularTransaction) {
+        boolean isAccountTransfer = false;
+        final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(account, fmt, transactionDate,
+                transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction);
+        final Set<Long> existingTransactionIds = new HashSet<>();
+        final Set<Long> existingReversedTransactionIds = new HashSet<>();
+        updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
+        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
+        return deposit;
+    }
 
     private boolean isAnyActivationChargesDue(final RecurringDepositAccount account) {
         for (final SavingsAccountCharge savingsAccountCharge : account.charges()) {
