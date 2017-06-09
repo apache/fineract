@@ -73,6 +73,7 @@ import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
+import org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.exception.CenterNotActiveException;
@@ -444,12 +445,14 @@ public class DepositAccountAssembler {
                     final Long savingsId = this.fromApiJsonHelper.extractLongNamed(savingsIdParamName, savingsTransactionElement);
                     final BigDecimal dueAmount = this.fromApiJsonHelper.extractBigDecimalNamed(transactionAmountParamName,
                             savingsTransactionElement, locale);
+                    final Integer depositAccountType = this.fromApiJsonHelper.extractIntegerNamed(
+                            CollectionSheetConstants.depositAccountTypeParamName, savingsTransactionElement, locale);
                     PaymentDetail detail = paymentDetail;
                     if (paymentDetail == null) {
                         detail = this.paymentDetailAssembler.fetchPaymentDetail(savingsTransactionElement);
                     }
                     final SavingsAccountTransactionDTO savingsAccountTransactionDTO = new SavingsAccountTransactionDTO(formatter,
-                            transactionDate, dueAmount, detail, new Date(), savingsId, user);
+                            transactionDate, dueAmount, detail, new Date(), savingsId, user, depositAccountType);
                     savingsAccountTransactions.add(savingsAccountTransactionDTO);
                 }
             }

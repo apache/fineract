@@ -550,8 +550,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         SavingsAccountTransaction transaction = null;
         boolean isInterestTransfer = false;
+        Integer accountType = null;
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                paymentDetail, savingsAccountTransaction.createdDate(), user);
+                paymentDetail, savingsAccountTransaction.createdDate(), user, accountType);
         if (savingsAccountTransaction.isDeposit()) {
             transaction = account.deposit(transactionDTO);
         } else {
