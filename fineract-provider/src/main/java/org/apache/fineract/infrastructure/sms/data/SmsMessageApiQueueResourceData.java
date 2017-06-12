@@ -115,6 +115,15 @@ public class SmsMessageApiQueueResourceData {
     }
 
     /**
+     * Returns the JSOPN representation of the current object.
+     * @return the JSON representation of the current object
+     */
+    public String toJsonString() {
+        Gson gson = new Gson();
+        return gson.toJson(this);
+    }
+
+    /**
      * @return JSON representation of the object
      **/
     public static String toJsonString(Collection<SmsMessageApiQueueResourceData> smsResourceData) {

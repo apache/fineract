@@ -20,24 +20,24 @@ package org.apache.fineract.infrastructure.core.domain;
 
 public class EmailDetail {
 
-    private final String organisationName;
-    private final String username;
-    private final String contactName;
+    private final String subject;
+    private final String body;
     private final String address;
+    private final String contactName;
 
-    public EmailDetail(final String organisationName, final String contactName, final String address, final String username) {
-        this.organisationName = organisationName;
-        this.contactName = contactName;
+    public EmailDetail(final String subject, final String body, final String address, final String contactName) {
+        this.subject = subject;
+        this.body = body;
         this.address = address;
-        this.username = username;
+        this.contactName = contactName;
     }
 
-    public String getOrganisationName() {
-        return this.organisationName;
+    public String getSubject() {
+        return subject;
     }
 
-    public String getUsername() {
-        return this.username;
+    public String getBody() {
+        return body;
     }
 
     public String getContactName() {
