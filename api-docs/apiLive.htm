@@ -2629,6 +2629,30 @@
 								<td></td>
 							</tr>
 							<tr>
+                                <td><a href="#twofactor">Two-Factor Authentication</a></td>
+								<td>twofactor</td>
+								<td><a href="#twofactor_request">Request OTP</a></td>
+								<td><a href="#twofactor_deliverymethods">List OTP delivery methods</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>twofactor/validate</td>
+								<td><a href="#twofactor_validate">Validate OTP</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+                            <tr>
+                                <td></td>
+                                <td>twofactor/invalidate</td>
+                                <td><a href="#twofactor_invalidate">Invalidate Access Token</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+							<tr>
 								<td><a href="#users">User</a></td>
 								<td>users</td>
 								<td><a href="#users_create">Create a User</a></td>
@@ -2942,6 +2966,16 @@
 										external service Configuration</a></td>
 								<td></td>
 							</tr>
+                            <tr>
+                                <td><a href="#twofactor_config_get">Two-Factor Configuration</a></td>
+                                <td>twofactor/configure</td>
+                                <td></td>
+                                <td><a href="#twofactor_config_get">Retrieve
+                                    Two-Factor Configuration</a></td>
+                                <td><a href="#twofactor_config_update">Update
+                                    Two-Factor Configuration</a></td>
+                                <td></td>
+                            </tr>
 						</table>
 					</div>
 				</div>
@@ -3931,6 +3965,11 @@
 						the platform setup <a href="https://github.com/openMF/mifosx/wiki/Launching-platform-server-locally-from-the-command-line#choosing-authentication-mechanism"> wiki</a> for additional details.
 					</p>
 					<p>
+						Optionally, two-factor authentication can be enabled by using
+						<i>-Ptwofactor=enabled</i> on gradle build.
+						Details of the authentication workflow with two-factor authentication enabled can be found <a href="#twofactor">here</a>.
+					</p>
+					<p>
 						The platform has been configured to reject plain HTTP requests and
 						to expect all API requests to be made over <a
 							href="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS</a>. All
@@ -4057,6 +4096,142 @@ function executeAjaxRequest(url, verbType, jsonData, authKey, successFunction, e
 </code>
 					</div>
 			</div>
+			<a id="twofactor" name="twofactor" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Two-Factor Authentication</h3>
+					<p>
+						Two-Factor authentication is supported by requesting & verifying
+						one-time passwords(OTP). OTPs are sent via SMS & email.
+					</p>
+					<p>
+						By default, two-factor authentication is disabled by default.
+						More information on how to enable TFA can be found <a href="#authentication_overview">here</a>.
+					</p>
+					<p>
+						Two-factor authentication workflow:
+						<ol class="normalli">
+							<li class="normalli">User authticates via BasicAuth / oAauth</li>
+							<li>Client requests a list of supported OTP delivery methods for the authenticated user(<a href="#twofactor_deliverymethods">Get Delivery Methods</a>)</li>
+							<li>User selects an OTP delivery method and client sends a request for OTP(<a href="#twofactor_request">Request OTP</a>)</li>
+							<li>User receives an OTP and the client sends it for verification(<a href="#twofactor_validate">Validate OTP</a>)</li>
+							<li>If the OTP is valid, an access token is returned</li>
+							<li>The access token is sent in following requestes to the server as a header <i>Fineract-Platform-TFA-Token</i></li>
+                            <li>On session end, the access token should be invalidated<a href="#twofactor_invalidate">Invalidate Access Token</a>)</li>
+						</ol>
+					</p>
+					<p>
+						Two-Factor authentication and delivery methods can be configured via
+						the <a href="#twofactor_configure"<i>/twofactor/configure</i> endpoint.</a>
+					</p>
+				</div>
+				<div class="method-example">
+
+				</div>
+			</div>
+
+			<a id="twofactor_deliverymethods" name="twofactor_deliverymethods" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Get Delivery Methods</h4>
+					<p>Returns a list of possible OTP delivery methods for the current user</p>
+					<p>Requires first-factor authenticated user.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">GET https://DomainName/api/v1/twofactor</code>
+					<code class="method-response">
+[
+    {
+        "name": "sms",
+        "target": "08888888888"
+    },
+    {
+        "name": "email",
+        "target": "user@example.com"
+    }
+]</code>
+				</div>
+			</div>
+
+			<a id="twofactor_request" name="twofactor_request" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Request OTP</h4>
+					<p>Requests an OTP.</p>
+					<p>Requires first-factor authenticated user.</p>
+					<h5>Arguments</h5>
+					<dl class="argument-list">
+						<dt>deliveryMethod</dt>
+						<dd>
+							String<span> mandatory, the delivery method name</span>
+						</dd>
+						<dt>extendedToken</dt>
+						<dd>
+							boolean<span> optional, whether to request an extended token, default false</span>
+						</dd>
+					</dl>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">POST https://DomainName/api/v1/twofactor?deliveryMethod=sms&extendedToken=false</code>
+					<code class="method-response">
+{
+    "requestTime": 1500000000000,
+    "tokenLiveTimeInSec": 300,
+    "extendedAccessToken": false,
+    "deliveryMethod": {
+        "name": "sms",
+        "target": "08888888888"
+    }
+}</code>
+				</div>
+			</div>
+
+			<a id="twofactor_validate" name="twofactor_validate" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Validate OTP</h4>
+					<p>Validates an OTP. If the OTP is valid, an access token is created.</p>
+					<p>The returned access token is later sent as a header <i>Fineract-Platform-TFA-Token</i>.</p>
+					<p>Requires first-factor authenticated user.</p>
+					<h5>Arguments</h5>
+					<dl class="argument-list">
+						<dt>token</dt>
+						<dd>
+							String<span> mandatory, the OTP to validate</span>
+						</dd>
+					</dl>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">POST https://DomainName/api/v1/twofactor/validate?token=YYYYY</code>
+					<code class="method-response">
+{
+    "token": "cb0bb6e33fc540709d50a16eb2e555f9",
+    "validFrom": 1501530702801,
+    "validTo": 1501617102801
+}</code>
+				</div>
+			</div>
+
+            <a id="twofactor_invalidate" name="twofactor_invalidate" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Invalidate Access Token</h4>
+                    <p>Invalidates an access token.</p>
+                    <p>Two factor access tokens should be invalidated on logout.</p>
+                    <p>Requires fully authenticated user.</p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">POST https://DomainName/api/v1/twofactor/invalidate</code>
+                    <code class="method-request">
+{
+    "token": "cb0bb6e33fc540709d50a16eb2e555f9"
+}</code>
+                    <code class="method-response">
+{
+    "resourceIdentifier": "cb0bb6e33fc540709d50a16eb2e555f9"
+}</code>
+                </div>
+            </div>
 
 			<a id="batch_api" name="batch_api" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -19390,6 +19565,73 @@ Content-Type: application/json
 				</code>
 				</div>
 			</div>
+
+            <a id="twofactor_config" name="twofactor_config"
+               class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h3>Two-Factor Configuration</h3>
+                    <p>The following section describes the way to configure two-factor authentication</p>
+                    <p>Two-Factor Authentication has to be enabled by either building with Gradle arguments
+                        <i>-Ptwofactor=enabled</i> or enabling the <i>twofactor</i> profile via env. variable
+                    </p>
+                    <p>In order for SMS to be enabled an SMS bridge has to be setup with the message-gateway service.</p>
+                </div>
+                <div class="method-example">
+                </div>
+            </div>
+
+            <a id="twofactor_config_get" name="twofactor_config_get" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Retrieve Two-Factor Configuration</h4>
+                    <p>Returns available two-factor configuration.</p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration"> GET https://DomainName/api/v1/twofactor/configure
+                    </code>
+                    <code class="method-response">
+{
+    "otp-delivery-email-body": "Hello {{username}}.\n\nYour OTP login token is {{token}}.",
+    "otp-delivery-sms-enable": true,
+    "otp-delivery-sms-provider": 6,
+    "otp-delivery-email-subject": "Fineract Two-Factor Authentication Token",
+    "otp-token-length": 5,
+    "access-token-live-time-extended": 604800,
+    "otp-delivery-email-enable": true,
+    "otp-token-live-time": 300,
+    "otp-delivery-sms-text": "Your authentication token for Fineract is {{token}}.",
+    "access-token-live-time": 86400
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="twofactor_config_update" name="twofactor_config_update" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Update Two-Factor Configuration</h4>
+                    <p>Update two-factor configuration.</p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration"> PUT https://DomainName/api/v1/twofactor/configure
+                    </code>
+                    <code class="method-request">
+{
+    "otp-delivery-sms-provider": 7
+    "otp-delivery-sms-enable": false
+}
+                    </code>
+                    <code class="method-response">
+{
+    "changes": {
+        "otp-delivery-sms-enable": false,
+        "otp-delivery-sms-provider": 7
+    }
+}
+                    </code>
+                </div>
+            </div>
 
 			<!-- Fund starts here -->
 			<a id="funds" name="funds" class="old-syle-anchor">&nbsp;</a>

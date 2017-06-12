@@ -287,6 +287,43 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         configurations.remove(key);
     }
 
+    @Override
+    public boolean isSMSOTPDeliveryEnabled() {
+        final String propertyName = "use-sms-for-2fa";
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
+        return property.isEnabled();
+    }
+
+    @Override
+    public boolean isEmailOTPDeliveryEnabled() {
+        final String propertyName = "use-email-for-2fa";
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
+        return property.isEnabled();
+    }
+
+    @Override
+    public Integer retrieveOTPCharacterLength() {
+        final String propertyName = "otp-character-length";
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
+        int defaultValue = 6;
+        int value = property.getValue().intValue();
+        if(value < 1)
+            return defaultValue;
+        return value;
+    }
+
+    @Override
+    public Integer retrieveOTPLiveTime() {
+        final String propertyName = "otp-validity-period";
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
+        int defaultValue = 300;
+        int value = property.getValue().intValue();
+        if(value < 1) {
+            return defaultValue;
+        }
+        return value;
+    }
+
     private GlobalConfigurationPropertyData getGlobalConfigurationPropertyData(final String propertyName) {
         String identifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
         String key = identifier + "_" + propertyName;

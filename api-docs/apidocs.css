@@ -746,3 +746,7 @@ ul.field li {
 tt {
     font-size: 9.5pt;
 }
+
+ol.normalli li {
+    list-style-type: decimal;
+}
