@@ -50,4 +50,5 @@ public class CollectionSheetConstants {
     public static final String loanIdParamName = "loanId";
     public static final String savingsIdParamName = "savingsId";
     public static final String transactionAmountParamName = "transactionAmount";
+    public static final String depositAccountTypeParamName = "depositAccountType";
 }

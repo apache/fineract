@@ -386,6 +386,11 @@ public class LoanTransaction extends AbstractPersistableCustom<Long> {
      * 
      * This accumulates the values passed to the already existent values for
      * each of the portions.
+     * 
+     * @param principal principal
+     * @param interest interest
+     * @param feeCharges feeCharges
+     * @param penaltyCharges penaltyCharges
      */
     public void updateComponents(final Money principal, final Money interest, final Money feeCharges, final Money penaltyCharges) {
         final MonetaryCurrency currency = principal.getCurrency();

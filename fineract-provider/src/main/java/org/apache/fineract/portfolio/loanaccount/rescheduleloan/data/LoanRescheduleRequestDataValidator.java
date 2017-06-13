@@ -81,7 +81,7 @@ public class LoanRescheduleRequestDataValidator {
      * 
      * @param jsonCommand
      *            the JSON command object (instance of the JsonCommand class)
-     * @return void
+     * 
      **/
     public void validateForCreateAction(final JsonCommand jsonCommand, final Loan loan) {
 
@@ -214,7 +214,7 @@ public class LoanRescheduleRequestDataValidator {
      * 
      * @param jsonCommand
      *            the JSON command object (instance of the JsonCommand class)
-     * @return void
+     * 
      **/
     public void validateForApproveAction(final JsonCommand jsonCommand, LoanRescheduleRequest loanRescheduleRequest) {
         final String jsonString = jsonCommand.json();
@@ -283,7 +283,7 @@ public class LoanRescheduleRequestDataValidator {
      * 
      * @param jsonCommand
      *            the JSON command object (instance of the JsonCommand class)
-     * @return void
+     * 
      **/
     public void validateForRejectAction(final JsonCommand jsonCommand, LoanRescheduleRequest loanRescheduleRequest) {
         final String jsonString = jsonCommand.json();

@@ -213,7 +213,7 @@ public class CashierTransaction extends AbstractPersistableCustom<Long> {
     /**
      * Sets the transaction type of this cashier transaction.
      *
-     * @param description the transaction type of this cashier transaction
+     * @param txnType description the transaction type of this cashier transaction
      */
     public void setTxnType(Integer txnType) {
         this.txnType = txnType;
@@ -239,7 +239,7 @@ public class CashierTransaction extends AbstractPersistableCustom<Long> {
     /**
      * Sets the transaction date of this cashier transaction.
      *
-     * @param transaction date of this cashier transaction
+     * @param txnDate transaction date of this cashier transaction
      */
     public void setTxnDate(Date txnDate) {
         this.txnDate = txnDate;

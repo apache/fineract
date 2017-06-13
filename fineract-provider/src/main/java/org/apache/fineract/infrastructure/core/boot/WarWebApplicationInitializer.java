@@ -28,7 +28,7 @@ import org.springframework.context.annotation.ImportResource;
  * Configuration just adds the JNDI-based DataSource lookup to its
  * AbstractApplicationConfiguration.
  *
- * This (intentionally) only configures the original (pre-Spring Boot &
+ * This (intentionally) only configures the original (pre-Spring Boot &amp;
  * MariaDB4j) fineract Spring Beans, and does NOT include the embedded Tomcat
  * (incl. TomcatSSLConfiguration) nor the MariaDB4jSetupService or
  * MariaDB4jDataSourceConfiguration, and not even the DataSourceConfiguration

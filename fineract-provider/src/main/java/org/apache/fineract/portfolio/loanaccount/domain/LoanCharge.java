@@ -741,10 +741,14 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
     }
 
     /**
+     * @param incrementBy
+     * 
+     * @param installmentNumber
+     * 
      * @param feeAmount
      *            TODO
-     * @param processAmount
-     *            Amount used to pay off this charge
+     * 
+     * 
      * @return Actual amount paid on this charge
      */
     public Money updatePaidAmountBy(final Money incrementBy, final Integer installmentNumber, final Money feeAmount) {

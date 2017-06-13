@@ -41,12 +41,48 @@ public class CommandWrapperBuilder {
     private String transactionId;
     private Long productId;
     private Long templateId;
+    private Long creditBureauId;
+    private Long organisationCreditBureauId;
    
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
                 this.entityName, this.entityId, this.subentityId, this.href, this.json, this.transactionId, this.productId,
-                this.templateId);
+                this.templateId,this.creditBureauId,this.organisationCreditBureauId);
+    }
+    
+    public CommandWrapperBuilder updateCreditBureau() {
+        this.actionName = "UPDATE";
+        this.entityName = "ORGANISATIONCREDITBUREAU";
+        this.entityId = null;
+        this.href = "/creditBureauConfiguration/template";
+        return this;
+    }
+    
+    public CommandWrapperBuilder updateCreditBureauLoanProductMapping() {
+        this.actionName = "UPDATE";
+        this.entityName = "CREDITBUREAU_LOANPRODUCT_MAPPING";
+        this.entityId = null;
+        this.href = "/creditBureauConfiguration/template";
+        return this;
+    }
+    
+    public CommandWrapperBuilder addOrganisationCreditBureau(final long organisationCreditBureauId) {
+        this.actionName = "CREATE";
+        this.entityName = "ORGANISATIONCREDITBUREAU";
+        this.entityId = organisationCreditBureauId;
+        this.href = "/creditBureauConfiguration/organizationCreditBureau/template";
+        this.organisationCreditBureauId=organisationCreditBureauId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder createCreditBureauLoanProductMapping(final long CreditBureauId) {
+        this.actionName = "CREATE";
+        this.entityName = "CREDITBUREAU_LOANPRODUCT_MAPPING";
+        this.entityId = CreditBureauId;
+        this.href = "/creditBureauConfiguration/template";
+        this.creditBureauId=CreditBureauId;
+        return this;
     }
     
     public CommandWrapperBuilder addClientAddress(final long clientId,final long addressTypeId) {

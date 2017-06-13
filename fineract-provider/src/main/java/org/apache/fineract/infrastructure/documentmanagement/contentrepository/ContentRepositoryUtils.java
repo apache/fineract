@@ -121,7 +121,7 @@ public class ContentRepositoryUtils {
     /**
      * Extracts Image from a Data URL
      * 
-     * @param mimeType
+     * @param dataURL mimeType
      */
     public static Base64EncodedImage extractImageFromDataURL(final String dataURL) {
         String fileExtension = "";

@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,7 +139,7 @@ public class CollectionSheetTransactionDataValidator {
         final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(CollectionSheetConstants
                 .transactionDateParamName, element);
         baseDataValidator.reset().parameter(CollectionSheetConstants.transactionDateParamName).value(transactionDate)
-                .notNull();
+                .notNull().validateDateBeforeOrEqual(DateUtils.getLocalDateOfTenant());
 
         final String note = this.fromApiJsonHelper.extractStringNamed(CollectionSheetConstants.noteParamName, element);
         if (StringUtils.isNotBlank(note)) {

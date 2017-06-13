@@ -61,6 +61,7 @@ public class SavingsProductData {
     private final BigDecimal minOverdraftForInterestCalculation;
     private final boolean withHoldTax;
     private final TaxGroupData taxGroup;
+    private String depositAccountType = null;
 
     // accounting
     private final EnumOptionData accountingRule;
@@ -436,4 +437,14 @@ public class SavingsProductData {
     public String getName() {
         return this.name;
     }
+
+	public String getDepositAccountType() {
+		return depositAccountType;
+	}
+
+	public void setDepositAccountType(String depositAccountType) {
+		this.depositAccountType = depositAccountType;
+	}
+    
+    
 }

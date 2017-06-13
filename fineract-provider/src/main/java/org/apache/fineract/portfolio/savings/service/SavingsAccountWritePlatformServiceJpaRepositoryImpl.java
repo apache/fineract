@@ -550,8 +550,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         SavingsAccountTransaction transaction = null;
         boolean isInterestTransfer = false;
+        Integer accountType = null;
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                paymentDetail, savingsAccountTransaction.createdDate(), user);
+                paymentDetail, savingsAccountTransaction.createdDate(), user, accountType);
         if (savingsAccountTransaction.isDeposit()) {
             transaction = account.deposit(transactionDTO);
         } else {
@@ -1315,7 +1316,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
      * Disable all standing instructions linked to the savings account if the status is "closed" 
      * 
      * @param savingsAccount -- the savings account object
-     * @return None
+     * 
      **/
     @Transactional
     private void disableStandingInstructionsLinkedToClosedSavings(final SavingsAccount savingsAccount) {
