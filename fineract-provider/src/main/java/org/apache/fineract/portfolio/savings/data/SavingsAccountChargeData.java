@@ -158,4 +158,14 @@ public class SavingsAccountChargeData {
     public boolean isAnnualFee() {
         return ChargeTimeType.fromInt(this.chargeTimeType.getId().intValue()).isAnnualFee();
     }
+    
+    public boolean isSavingsActivation() {
+        return ChargeTimeType.fromInt(this.chargeTimeType.getId().intValue()).isSavingsActivation();
+    }
+
+    public BigDecimal getAmountOutstanding() {
+        return this.amountOutstanding;
+    } 
+    
+    
 }

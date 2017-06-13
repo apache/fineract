@@ -53,6 +53,7 @@ public class FixedDepositAccountData extends DepositAccountData {
     private LocalDate maturityDate;
     private Integer depositPeriod;
     private EnumOptionData depositPeriodFrequency;
+    private BigDecimal activationCharge;
 
     // used for account close
     private EnumOptionData onAccountClosure;
@@ -449,4 +450,13 @@ public class FixedDepositAccountData extends DepositAccountData {
         return new HashCodeBuilder(17, 37).append(this.id).append(this.accountNo).toHashCode();
     }
 
+    
+    public BigDecimal getActivationCharge() {
+        return this.activationCharge;
+    }
+
+    
+    public void setActivationCharge(BigDecimal activationCharge) {
+        this.activationCharge = activationCharge;
+    }
 }
