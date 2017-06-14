@@ -2904,4 +2904,43 @@ public class CommandWrapperBuilder {
         this.href = "/smscampaigns/"+resourceId;
         return this;
     }
+	public CommandWrapperBuilder disableAdHoc(Long adHocId) {
+        this.actionName = "DISABLE";
+        this.entityName = "ADHOC";
+        this.entityId = adHocId;
+        this.href = "/adhoc/" + adHocId + "/disbale";
+        this.json = "{}";
+        return this;
+    }
+
+    public CommandWrapperBuilder enableAdHoc(Long adHocId) {
+        this.actionName = "ENABLE";
+        this.entityName = "ADHOC";
+        this.entityId = adHocId;
+        this.href = "/adhoc/" + adHocId + "/enable";
+        this.json = "{}";
+        return this;
+    }
+    public CommandWrapperBuilder createAdHoc() {
+        this.actionName = "CREATE";
+        this.entityName = "ADHOC";
+        this.href = "/adhocquery/template";
+        return this;
+    }
+    public CommandWrapperBuilder updateAdHoc(final Long adHocId) {
+        this.actionName = "UPDATE";
+        this.entityName = "ADHOC";
+        this.entityId = adHocId;
+        this.href = "/adhocquery/" + adHocId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteAdHoc(Long adHocId) {
+        this.actionName = "DELETE";
+        this.entityName = "ADHOC";
+        this.entityId = adHocId;
+        this.href = "/adhocquery/" + adHocId;
+        this.json = "{}";
+        return this;
+    }
 }
