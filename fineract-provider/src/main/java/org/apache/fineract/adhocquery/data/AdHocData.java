@@ -33,7 +33,8 @@ import org.joda.time.LocalDate;
 public class AdHocData {
 
 	
-    @SuppressWarnings("unused")
+    
+	@SuppressWarnings("unused")
     private final Long id;
     @SuppressWarnings("unused")
     private final String name;
@@ -82,4 +83,40 @@ public class AdHocData {
         AdHocData adHocData = new AdHocData(null,null,null,null,null,false,null,null,null,null,null,null);
 		return adHocData;
     }
+    public Long getId() {
+		return this.id;
+	}
+	public String getName() {
+		return this.name;
+	}
+	public String getQuery() {
+		return this.query;
+	}
+	public String getTableName() {
+		return this.tableName;
+	}
+	public String getTableFields() {
+		return this.tableFields;
+	}
+	public String getEmail() {
+		return this.email;
+	}
+	public boolean isActive() {
+		return this.isActive;
+	}
+	public DateTime getCreatedOn() {
+		return this.createdOn;
+	}
+	public Long getCreatedById() {
+		return this.createdById;
+	}
+	public Long getUpdatedById() {
+		return this.updatedById;
+	}
+	public DateTime getUpdatedOn() {
+		return this.updatedOn;
+	}
+	public String getCreatedBy() {
+		return this.createdBy;
+	}
 }
