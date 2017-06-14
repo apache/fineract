@@ -247,6 +247,19 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+	    
+	 /**
+         * This is not the best solution because it should confirm the transaction first and then store the note based on the boolean 
+         * returned from the TRANSACTIONSERVICES
+         * @Saransh
+         * @Company: Upscale Tech
+         */
+        
+        final String noteText = command.stringValueOfParameterNamed("note");
+        if (StringUtils.isNotBlank(noteText)) {
+            final Note note = Note.savingNote(account, noteText);
+            this.noteRepository.save(note);
+        }
 
         final Map<String, Object> changes = new LinkedHashMap<>();
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
@@ -285,7 +298,20 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final Map<String, Object> changes = new LinkedHashMap<>();
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
-
+	
+	 /**
+         * This is not the best solution because it should confirm the transaction first and then store the note based on the boolean 
+         * returned from the TRANSACTIONSERVICES
+         * @Saransh
+         * @Company: Upscale Tech
+         */
+        
+        final String noteText = command.stringValueOfParameterNamed("note");
+        if (StringUtils.isNotBlank(noteText)) {
+            final Note note = Note.savingNote(account, noteText);
+            this.noteRepository.save(note);
+        }
+	    
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
         checkClientOrGroupActive(account);        
         final boolean isAccountTransfer = false;
