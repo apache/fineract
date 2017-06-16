@@ -20,8 +20,11 @@ package org.apache.fineract.portfolio.group.serialization;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -41,6 +44,8 @@ import com.google.gson.reflect.TypeToken;
 public class GroupRolesDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
+    private static final Set<String> GROUP_ROLES_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(GroupingTypesApiConstants.roleParamName, GroupingTypesApiConstants.clientIdParamName));
 
     @Autowired
     public GroupRolesDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -59,7 +64,7 @@ public class GroupRolesDataValidator {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper
-                .checkForUnsupportedParameters(typeOfMap, json, GroupingTypesApiConstants.GROUP_ROLES_REQUEST_DATA_PARAMETERS);
+                .checkForUnsupportedParameters(typeOfMap, json, GROUP_ROLES_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
@@ -84,7 +89,7 @@ public class GroupRolesDataValidator {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper
-                .checkForUnsupportedParameters(typeOfMap, json, GroupingTypesApiConstants.GROUP_ROLES_REQUEST_DATA_PARAMETERS);
+                .checkForUnsupportedParameters(typeOfMap, json, GROUP_ROLES_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 

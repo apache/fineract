@@ -24,14 +24,15 @@ import static org.apache.fineract.portfolio.self.account.api.SelfBeneficiariesTP
 import static org.apache.fineract.portfolio.self.account.api.SelfBeneficiariesTPTApiConstants.ACCOUNT_TYPE_PARAM_NAME;
 import static org.apache.fineract.portfolio.self.account.api.SelfBeneficiariesTPTApiConstants.ACCOUNT_NUMBER_PARAM_NAME;
 import static org.apache.fineract.portfolio.self.account.api.SelfBeneficiariesTPTApiConstants.TRANSFER_LIMIT_PARAM_NAME;
-import static org.apache.fineract.portfolio.self.account.api.SelfBeneficiariesTPTApiConstants.CREATE_REQUEST_DATA_PARAMETERS;
-import static org.apache.fineract.portfolio.self.account.api.SelfBeneficiariesTPTApiConstants.UPDATE_REQUEST_DATA_PARAMETERS;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -40,6 +41,7 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
+import org.apache.fineract.portfolio.self.account.api.SelfBeneficiariesTPTApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -50,6 +52,13 @@ import com.google.gson.reflect.TypeToken;
 public class SelfBeneficiariesTPTDataValidator {
 
 	private final FromJsonHelper fromApiJsonHelper;
+	private static final Set<String> CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(SelfBeneficiariesTPTApiConstants.LOCALE, NAME_PARAM_NAME, OFFICE_NAME_PARAM_NAME,
+					ACCOUNT_NUMBER_PARAM_NAME, ACCOUNT_TYPE_PARAM_NAME, TRANSFER_LIMIT_PARAM_NAME));
+
+	private static final Set<String> UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(NAME_PARAM_NAME, TRANSFER_LIMIT_PARAM_NAME));
+
 
 	@Autowired
 	public SelfBeneficiariesTPTDataValidator(

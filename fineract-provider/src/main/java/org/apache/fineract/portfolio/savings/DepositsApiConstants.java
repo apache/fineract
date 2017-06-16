@@ -39,28 +39,28 @@ public class DepositsApiConstants {
     public static final String SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME = "savingsaccountcharge";
 
     // deposit product actions
-    public static String summitalAction = ".summital";
-    public static String approvalAction = ".approval";
-    public static String undoApprovalAction = ".undoApproval";
-    public static String rejectAction = ".reject";
-    public static String withdrawnByApplicantAction = ".withdrawnByApplicant";
-    public static String activateAction = ".activate";
-    public static String modifyApplicationAction = ".modify";
-    public static String deleteApplicationAction = ".delete";
-    public static String undoTransactionAction = ".undotransaction";
-    public static String applyAnnualFeeTransactionAction = ".applyannualfee";
-    public static String adjustTransactionAction = ".adjusttransaction";
-    public static String closeAction = ".close";
-    public static String preMatureCloseAction = ".preMatureClose";
-    public static String payChargeTransactionAction = ".paycharge";
-    public static String waiveChargeTransactionAction = ".waivecharge";
+    public static final String summitalAction = ".summital";
+    public static final String approvalAction = ".approval";
+    public static final String undoApprovalAction = ".undoApproval";
+    public static final String rejectAction = ".reject";
+    public static final String withdrawnByApplicantAction = ".withdrawnByApplicant";
+    public static final String activateAction = ".activate";
+    public static final String modifyApplicationAction = ".modify";
+    public static final String deleteApplicationAction = ".delete";
+    public static final String undoTransactionAction = ".undotransaction";
+    public static final String applyAnnualFeeTransactionAction = ".applyannualfee";
+    public static final String adjustTransactionAction = ".adjusttransaction";
+    public static final String closeAction = ".close";
+    public static final String preMatureCloseAction = ".preMatureClose";
+    public static final String payChargeTransactionAction = ".paycharge";
+    public static final String waiveChargeTransactionAction = ".waivecharge";
 
     // command
-    public static String COMMAND_UNDO_TRANSACTION = "undo";
-    public static String COMMAND_ADJUST_TRANSACTION = "modify";
-    public static String COMMAND_WAIVE_CHARGE = "waive";
-    public static String COMMAND_PAY_CHARGE = "paycharge";
-    public static String UPDATE_DEPOSIT_AMOUNT = "updateDepositAmount";
+    public static final String COMMAND_UNDO_TRANSACTION = "undo";
+    public static final String COMMAND_ADJUST_TRANSACTION = "modify";
+    public static final String COMMAND_WAIVE_CHARGE = "waive";
+    public static final String COMMAND_PAY_CHARGE = "paycharge";
+    public static final String UPDATE_DEPOSIT_AMOUNT = "updateDepositAmount";
 
     // general
     public static final String localeParamName = "locale";
@@ -345,13 +345,6 @@ public class DepositsApiConstants {
         return recurringDepositResponseData;
     }
 
-    public static final Set<String> DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
-            dateFormatParamName, transactionDateParamName, transactionAmountParamName, paymentTypeIdParamName,
-            transactionAccountNumberParamName, checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
-
-    public static final Set<String> DEPOSIT_ACCOUNT_RECOMMENDED_DEPOSIT_AMOUNT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(localeParamName, dateFormatParamName, mandatoryRecommendedDepositAmountParamName, effectiveDateParamName));
-
     public static final Set<String> FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
             "accountId", accountNoParamName, "currency", "amount", dateParamName, paymentDetailDataParamName, runningBalanceParamName,
             reversedParamName));
@@ -362,14 +355,6 @@ public class DepositsApiConstants {
 
     public static final Set<String> SAVINGS_ACCOUNT_ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, activatedOnDateParamName));
-
-    public static final Set<String> DEPOSIT_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
-            dateFormatParamName, closedOnDateParamName, noteParamName, onAccountClosureIdParamName, paymentTypeIdParamName,
-            transactionAccountNumberParamName, checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName,
-            transferDescriptionParamName, toSavingsAccountIdParamName));
-
-    public static final Set<String> DEPOSIT_ACCOUNT_PRE_MATURE_CALCULATION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            localeParamName, dateFormatParamName, closedOnDateParamName));
 
     public static final Set<String> SAVINGS_ACCOUNT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(chargeIdParamName,
             savingsAccountChargeIdParamName, chargeNameParamName, penaltyParamName, chargeTimeTypeParamName, dueAsOfDateParamName,

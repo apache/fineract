@@ -37,8 +37,7 @@ public class PasswordPreferencesApiConstants {
     // request parameters
     public static final String VALIDATION_POLICY_ID = "validationPolicyId";
 
-    public static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(VALIDATION_POLICY_ID));
-
-    public static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(ID_PARAM_NAME, ACTIVE, DESCRIPTION));
+    protected static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(ID_PARAM_NAME, ACTIVE,
+            DESCRIPTION));
 
 }

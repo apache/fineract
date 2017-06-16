@@ -65,19 +65,4 @@ public interface ShareProductApiConstants {
 
     String accountingRuleParamName = "accountingRule";
 
-    Set<String> supportedParametersForCreate = new HashSet<>(Arrays.asList(locale_paramname, name_paramname, shortname_paramname,
-            shortname_paramname, description_paramname, externalid_paramname, totalshares_paramname, currency_paramname,
-            digitsafterdecimal_paramname, digitsafterdecimal_paramname, inmultiplesof_paramname, totalsharesissued_paramname,
-            unitprice_paramname, minimumshares_paramname, nominaltshares_paramname, maximumshares_paramname, marketprice_paramname,
-            charges_paramname, allowdividendcalculationforinactiveclients_paramname, lockperiod_paramname,
-            lockinperiodfrequencytype_paramname, minimumactiveperiodfordividends_paramname, minimumactiveperiodfrequencytype_paramname,
-            sharecapital_paramname, accountingRuleParamName,
-            AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(),
-            AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_EQUITY.getValue(),
-            AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_REFERENCE.getValue(),
-            AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_SUSPENSE.getValue()));
-
-    Set<String> supportedParametersForDivident = new HashSet<>(Arrays.asList(locale_paramname, dateFormatParamName,
-            dividendPeriodStartDateParamName, dividendPeriodEndDateParamName, dividendAmountParamName));
-
 }

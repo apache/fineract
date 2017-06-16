@@ -19,9 +19,11 @@
 package org.apache.fineract.portfolio.meeting.api;
 
 import static org.apache.fineract.portfolio.meeting.MeetingApiConstants.MEETING_RESOURCE_NAME;
-import static org.apache.fineract.portfolio.meeting.MeetingApiConstants.MEETING_RESPONSE_DATA_PARAMETERS;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -53,6 +55,7 @@ import org.apache.fineract.portfolio.calendar.exception.CalendarEntityTypeNotSup
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
+import org.apache.fineract.portfolio.meeting.MeetingApiConstants;
 import org.apache.fineract.portfolio.meeting.attendance.data.ClientAttendanceData;
 import org.apache.fineract.portfolio.meeting.attendance.service.AttendanceDropdownReadPlatformService;
 import org.apache.fineract.portfolio.meeting.attendance.service.ClientAttendanceReadPlatformService;
@@ -78,6 +81,10 @@ public class MeetingsApiResource {
     private final DefaultToApiJsonSerializer<MeetingData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+	private static final Set<String> MEETING_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(MeetingApiConstants.idParamName, MeetingApiConstants.meetingDateParamName,
+					MeetingApiConstants.clientsAttendance, MeetingApiConstants.clients,
+					MeetingApiConstants.calendarData, MeetingApiConstants.attendanceTypeOptions));
 
     @Autowired
     public MeetingsApiResource(final PlatformSecurityContext context, final MeetingReadPlatformService readPlatformService,

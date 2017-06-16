@@ -104,7 +104,7 @@ public class SavingsAccountTransactionsApiResource {
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, savingsAccount,
-                SavingsApiConstants.SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS);        
+                SavingsApiSetConstants.SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -124,7 +124,7 @@ public class SavingsAccountTransactionsApiResource {
         }
 
         return this.toApiJsonSerializer.serialize(settings, transactionData,
-                SavingsApiConstants.SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS);
+                SavingsApiSetConstants.SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS);
     }
 
     @POST

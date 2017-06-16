@@ -20,9 +20,12 @@ package org.apache.fineract.portfolio.loanaccount.rescheduleloan.data;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -47,6 +50,26 @@ import com.google.gson.reflect.TypeToken;
 public class LoanRescheduleRequestDataValidator {
 
     private final FromJsonHelper fromJsonHelper;
+	private static final Set<String> CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+			RescheduleLoansApiConstants.localeParamName, RescheduleLoansApiConstants.dateFormatParamName,
+			RescheduleLoansApiConstants.graceOnPrincipalParamName,
+			RescheduleLoansApiConstants.recurringMoratoriumOnPrincipalPeriodsParamName,
+			RescheduleLoansApiConstants.graceOnInterestParamName, RescheduleLoansApiConstants.extraTermsParamName,
+			RescheduleLoansApiConstants.rescheduleFromDateParamName,
+			RescheduleLoansApiConstants.newInterestRateParamName,
+			RescheduleLoansApiConstants.rescheduleReasonIdParamName,
+			RescheduleLoansApiConstants.rescheduleReasonCommentParamName,
+			RescheduleLoansApiConstants.submittedOnDateParamName, RescheduleLoansApiConstants.loanIdParamName,
+			RescheduleLoansApiConstants.adjustedDueDateParamName,
+			RescheduleLoansApiConstants.recalculateInterestParamName));
+
+	private static final Set<String> REJECT_REQUEST_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(RescheduleLoansApiConstants.localeParamName, RescheduleLoansApiConstants.dateFormatParamName,
+					RescheduleLoansApiConstants.rejectedOnDateParam));
+
+	private static final Set<String> APPROVE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(RescheduleLoansApiConstants.localeParamName, RescheduleLoansApiConstants.dateFormatParamName,
+					RescheduleLoansApiConstants.approvedOnDateParam));
 
     @Autowired
     public LoanRescheduleRequestDataValidator(FromJsonHelper fromJsonHelper) {
@@ -68,7 +91,7 @@ public class LoanRescheduleRequestDataValidator {
 
         final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromJsonHelper
-                .checkForUnsupportedParameters(typeToken, jsonString, RescheduleLoansApiConstants.CREATE_REQUEST_DATA_PARAMETERS);
+                .checkForUnsupportedParameters(typeToken, jsonString, CREATE_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder dataValidatorBuilder = new DataValidatorBuilder(dataValidationErrors).resource(StringUtils
@@ -199,8 +222,7 @@ public class LoanRescheduleRequestDataValidator {
         if (StringUtils.isBlank(jsonString)) { throw new InvalidJsonException(); }
 
         final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromJsonHelper.checkForUnsupportedParameters(typeToken, jsonString,
-                RescheduleLoansApiConstants.APPROVE_REQUEST_DATA_PARAMETERS);
+        this.fromJsonHelper.checkForUnsupportedParameters(typeToken, jsonString, APPROVE_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder dataValidatorBuilder = new DataValidatorBuilder(dataValidationErrors).resource(StringUtils
@@ -270,7 +292,7 @@ public class LoanRescheduleRequestDataValidator {
 
         final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromJsonHelper
-                .checkForUnsupportedParameters(typeToken, jsonString, RescheduleLoansApiConstants.REJECT_REQUEST_DATA_PARAMETERS);
+                .checkForUnsupportedParameters(typeToken, jsonString, REJECT_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder dataValidatorBuilder = new DataValidatorBuilder(dataValidationErrors).resource(StringUtils

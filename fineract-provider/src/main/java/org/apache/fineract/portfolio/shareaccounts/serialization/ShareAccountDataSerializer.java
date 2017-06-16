@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.shareaccounts.serialization;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -89,6 +90,26 @@ public class ShareAccountDataSerializer {
     private final ShareProductRepositoryWrapper shareProductRepository;
 
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService ;
+
+    private static final Set<String> approvalParameters = new HashSet<>(Arrays.asList(ShareAccountApiConstants
+                    .locale_paramname,
+            ShareAccountApiConstants.dateformat_paramname, ShareAccountApiConstants.approveddate_paramname,
+            ShareAccountApiConstants.note_paramname));
+
+    private static final Set<String> activateParameters = new HashSet<>(Arrays.asList(ShareAccountApiConstants
+                    .locale_paramname,
+            ShareAccountApiConstants.dateformat_paramname, ShareAccountApiConstants.activatedate_paramname));
+
+    private static final Set<String> closeParameters = new HashSet<>(Arrays.asList(ShareAccountApiConstants
+                    .locale_paramname,
+            ShareAccountApiConstants.dateformat_paramname, ShareAccountApiConstants.closeddate_paramname,
+            ShareAccountApiConstants.note_paramname));
+
+    private static final Set<String> addtionalSharesParameters = new HashSet<>(Arrays.asList(ShareAccountApiConstants
+                    .locale_paramname,
+            ShareAccountApiConstants.requesteddate_paramname, ShareAccountApiConstants.requestedshares_paramname,
+            ShareAccountApiConstants.purchasedprice_paramname, ShareAccountApiConstants.dateformat_paramname));
+
     
     @Autowired
     public ShareAccountDataSerializer(final PlatformSecurityContext platformSecurityContext, final FromJsonHelper fromApiJsonHelper,
@@ -426,7 +447,7 @@ public class ShareAccountDataSerializer {
         Map<String, Object> actualChanges = new HashMap<>();
         if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), ShareAccountApiConstants.approvalParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), approvalParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");
         JsonElement element = jsonCommand.parsedJson();
@@ -498,7 +519,7 @@ public class ShareAccountDataSerializer {
         Map<String, Object> actualChanges = new HashMap<>();
         if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), ShareAccountApiConstants.activateParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), activateParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");
         if(!account.status().equals(ShareAccountStatusType.APPROVED.getValue())) {
@@ -552,7 +573,7 @@ public class ShareAccountDataSerializer {
         Map<String, Object> actualChanges = new HashMap<>();
         if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), ShareAccountApiConstants.activateParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), activateParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");
         JsonElement element = jsonCommand.parsedJson();
@@ -633,7 +654,7 @@ public class ShareAccountDataSerializer {
         if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(),
-                ShareAccountApiConstants.addtionalSharesParameters);
+                addtionalSharesParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");
         JsonElement element = jsonCommand.parsedJson();
@@ -697,7 +718,7 @@ public class ShareAccountDataSerializer {
         if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(),
-                ShareAccountApiConstants.addtionalSharesParameters);
+                addtionalSharesParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");
         JsonElement element = jsonCommand.parsedJson();
@@ -747,7 +768,7 @@ public class ShareAccountDataSerializer {
         if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(),
-                ShareAccountApiConstants.addtionalSharesParameters);
+                addtionalSharesParameters);
         JsonElement element = jsonCommand.parsedJson();
         final ArrayList<Long> purchasedShares = new ArrayList<>();
         if (this.fromApiJsonHelper.parameterExists(ShareAccountApiConstants.requestedshares_paramname, element)) {
@@ -792,7 +813,7 @@ public class ShareAccountDataSerializer {
         if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(),
-                ShareAccountApiConstants.addtionalSharesParameters);
+                addtionalSharesParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");
         JsonElement element = jsonCommand.parsedJson();
@@ -938,7 +959,7 @@ public class ShareAccountDataSerializer {
         Map<String, Object> actualChanges = new HashMap<>();
         if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), ShareAccountApiConstants.closeParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(), closeParameters);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");
         JsonElement element = jsonCommand.parsedJson();
