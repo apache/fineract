@@ -57,19 +57,21 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
         	}
         	email.setFrom(authuser, authuserName);
 
-            final StringBuilder subjectBuilder = new StringBuilder().append("Welcome ").append(emailDetail.getContactName())
-                    .append(" to ").append(emailDetail.getOrganisationName());
+            final StringBuilder subjectBuilder = new StringBuilder().append("New User Information")
 
             email.setSubject(subjectBuilder.toString());
 
             final String sendToEmail = emailDetail.getAddress();
 
-            final StringBuilder messageBuilder = new StringBuilder().append("You are receiving this email as your email account: ")
-                    .append(sendToEmail).append(" has being used to create a user account for an organisation named [")
-                    .append(emailDetail.getOrganisationName()).append("] on Mifos.\n")
-                    .append("You can login using the following credentials:\nusername: ").append(emailDetail.getUsername()).append("\n")
-                    .append("password: ").append(unencodedPassword).append("\n")
-                    .append("You must change this password upon first log in using Uppercase, Lowercase, number and character.\n")
+            final StringBuilder messageBuilder = new StringBuilder().append("Your login credentials for Mifos are: ")
+                    .append("\n")
+                    .append("Username: ")
+                    .append(emailDetail.getUsername())
+                    .append("\n")
+                    .append("Password: ")
+                    .append(unencodedPassword)
+                    .append("\n")
+                    .append("You must change this password when you first log in using a combination of Uppercase letters, Lowercase letters, numbers, and characters.\n")
                     .append("Thank you and welcome to the organisation.");
 
             email.setMsg(messageBuilder.toString());
