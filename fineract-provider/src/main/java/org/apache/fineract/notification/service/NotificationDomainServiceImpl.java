@@ -552,7 +552,8 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 		
 		String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
 		Queue queue = new ActiveMQQueue("NotificationQueue");
-		List<Long> userIds = retrieveUsersWithSpecificPermission(permission);
+		Long topicId = retrieveTopicWithSpecificPermission(permission);
+		List<Long> usersId = retrieveUserWithSpecificSubscribtion(permission);
 		NotificationData notificationData = new NotificationData(
 				objectType,
 				objectIdentifier,
@@ -562,13 +563,14 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 				false,
 				tenantIdentifier,
 				officeId,
-				userIds
+				topicId,
+				usersId
 		);
 		notificationEvent.broadcastNotification(queue, notificationData);
 	}
 	
-	private List<Long> retrieveUsersWithSpecificPermission(String permission) {
-		List<AppUser> appUsers = appUserRepository.findAll();
+	private Long retrieveTopicWithSpecificPermission(String permission) {
+		/*List<AppUser> appUsers = appUserRepository.findAll();
 		List<Long> userIds = new ArrayList<>();
 		for (AppUser appUser : appUsers) {
 			Set<Role> roles = appUser.getRoles();
@@ -580,6 +582,22 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 				 }
 			 }
 		 }
-		 return userIds;
+		 return userIds;*/
+	}
+	
+	private List<Long> retrieveUserWithSpecificSubscribtion(String permission) {
+		/*List<AppUser> appUsers = appUserRepository.findAll();
+		List<Long> userIds = new ArrayList<>();
+		for (AppUser appUser : appUsers) {
+			Set<Role> roles = appUser.getRoles();
+			for (Role role : roles) {
+				if (role.hasPermissionTo(permission)) {
+					if (!(userIds.contains(appUser.getId()))) {
+						 userIds.add(appUser.getId());
+					 }
+				 }
+			 }
+		 }
+		 return userIds;*/
 	}
 }

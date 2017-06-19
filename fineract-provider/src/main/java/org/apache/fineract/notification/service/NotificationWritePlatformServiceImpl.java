@@ -53,10 +53,10 @@ public class NotificationWritePlatformServiceImpl implements NotificationWritePl
 
 	@Override
 	public Long notify(Long userId, String objectType, Long objectIdentifier, String action, Long actorId,
-			String notificationContent, boolean isSystemGenerated) {
+			String notificationContent, boolean isSystemGenerated, Long topicId) {
 		
 		Long generatedNotificationId = insertIntoNotificationGenerator(objectType, objectIdentifier, action,
-				actorId, notificationContent, isSystemGenerated);
+				actorId, notificationContent, isSystemGenerated, topicId);
 		insertIntoNotificationMapper(userId, generatedNotificationId);
 		return generatedNotificationId;
 	}
@@ -75,7 +75,7 @@ public class NotificationWritePlatformServiceImpl implements NotificationWritePl
 	}
 	
 	private Long insertIntoNotificationGenerator(String objectType, Long objectIdentifier, String action,
-			Long actorId, String notificationContent, boolean isSystemGenerated) {
+			Long actorId, String notificationContent, boolean isSystemGenerated, Long topicId) {
 		
 		Notification notification = new Notification(
 				objectType,
@@ -84,7 +84,8 @@ public class NotificationWritePlatformServiceImpl implements NotificationWritePl
 				actorId,
 				isSystemGenerated,
 				notificationContent,
-				getCurrentDateTime()
+				getCurrentDateTime(),
+				topicId
 		);
 		
 		return this.notificationGeneratorWritePlatformService.create(notification);
@@ -92,9 +93,9 @@ public class NotificationWritePlatformServiceImpl implements NotificationWritePl
 
 	@Override
 	public Long notify(List<Long> userIds, String objectType, Long objectId, String action, Long actorId,
-			String notificationContent, boolean isSystemGenerated) {
+			String notificationContent, boolean isSystemGenerated, Long topicId) {
 		Long generatedNotificationId = insertIntoNotificationGenerator(objectType, objectId, action,
-				actorId, notificationContent, isSystemGenerated);
+				actorId, notificationContent, isSystemGenerated, topicId);
 		
 		insertIntoNotificationMapper(userIds, generatedNotificationId);
 		return generatedNotificationId;

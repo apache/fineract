@@ -16,15 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.notification.service;
+package org.apache.fineract.notification.domain;
 
-import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
 
-public interface NotificationWritePlatformService {
-
-	public Long notify(Long userId, String objectType, Long objectId, String action,
-			Long actorId, String notificationContent, boolean isSystemGenerated, Long topicId);
-	
-	public Long notify(List<Long> userIds, String objectType, Long objectId, String action,
-			Long actorId, String notificationContent, boolean isSystemGenerated, Long topicId);
+public interface TopicRepository extends JpaRepository<Topic, Long> {
+	Topic findByPermission(@Param("permissionId") Long permissionId);
 }

@@ -33,13 +33,14 @@ public class NotificationData implements Serializable {
 	private String tenantIdentifier;
 	private String createdAt;
 	private Long officeId;
+	private Long topicId;
 	private List<Long> userIds;
 	
 	public NotificationData() {
 	}
 
 	public NotificationData(String objectType, Long objectId, String action, Long actorId, String content,
-			boolean isSystemGenerated, String tenantIdentifier, Long officeId, List<Long> userIds) {
+			boolean isSystemGenerated, String tenantIdentifier, Long officeId, Long topicId, List<Long> userIds) {
 		this.objectType = objectType;
 		this.objectId = objectId;
 		this.action = action;
@@ -48,6 +49,7 @@ public class NotificationData implements Serializable {
 		this.isSystemGenerated = isSystemGenerated;
 		this.tenantIdentifier = tenantIdentifier;
 		this.officeId = officeId;
+		this.topicId = topicId;
 		this.userIds = userIds;
 	}
 
@@ -71,7 +73,7 @@ public class NotificationData implements Serializable {
 		return this.objectId;
 	}
 
-	public void entifier(Long objectId) {
+	public void setObjectIdentfier(Long objectId) {
 		this.objectId = objectId;
 	}
 
@@ -129,6 +131,14 @@ public class NotificationData implements Serializable {
 
 	public void setOfficeId(Long officeId) {
 		this.officeId = officeId;
+	}
+
+	public Long getTopicId() {
+		return this.topicId;
+	}
+
+	public void setTopicId(Long topicId) {
+		this.topicId = topicId;
 	}
 
 	public List<Long> getUserIds() {

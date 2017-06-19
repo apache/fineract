@@ -16,15 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.notification.service;
+package org.apache.fineract.notification.exception;
 
-import java.util.List;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-public interface NotificationWritePlatformService {
+/**
+ * A {@link RuntimeException} thrown when topic resources are not found.
+ */
+public class TopicNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-	public Long notify(Long userId, String objectType, Long objectId, String action,
-			Long actorId, String notificationContent, boolean isSystemGenerated, Long topicId);
-	
-	public Long notify(List<Long> userIds, String objectType, Long objectId, String action,
-			Long actorId, String notificationContent, boolean isSystemGenerated, Long topicId);
+	public TopicNotFoundException(final Long id) {
+		super("error.msg.topic.id.invalid", "Topic with identifier " + id + " does not exist", id);
+	}
+
 }

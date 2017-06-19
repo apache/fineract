@@ -1662,7 +1662,7 @@ public class CommandWrapperBuilder {
         this.href = "/centers/" + centerId;
         return this;
     }
-
+    
     public CommandWrapperBuilder activateCenter(final Long centerId) {
         this.actionName = "ACTIVATE";
         this.entityName = "CENTER";
@@ -2902,6 +2902,38 @@ public class CommandWrapperBuilder {
         this.entityName = "SMSCAMPAIGN";
         this.entityId = resourceId;
         this.href = "/smscampaigns/"+resourceId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder createTopic() {
+        this.actionName = "CREATE";
+        this.entityName = "TOPIC";
+        this.entityId = null;
+        this.href = "/topics/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder activateTopic(final Long topicId) {
+        this.actionName = "ACTIVATE";
+        this.entityName = "TOPIC";
+        this.entityId = topicId;
+        this.href = "/topics/" + topicId + "command=activate";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateTopic(final Long topicId) {
+        this.actionName = "UPDATE";
+        this.entityName = "TOPIC";
+        this.entityId = topicId;
+        this.href = "/topics/" + topicId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder reactivateTopic(final Long topicId) {
+        this.actionName = "REACTIVATE";
+        this.entityName = "TOPIC";
+        this.entityId = topicId;
+        this.href = "/topics/" + topicId + "command=reactivate";
         return this;
     }
 }

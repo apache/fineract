@@ -73,6 +73,7 @@ public class StorageTest {
 		Long actor = 1L;
 		String notificationContent = "A client was created";
 		boolean isSystemGenerated = false;
+		Long topicId = 1L;
 		
 		Notification notification = new Notification(
 				objectType,
@@ -81,7 +82,8 @@ public class StorageTest {
 				actor,
 				isSystemGenerated,
 				notificationContent,
-				getCurrentDateTime()
+				getCurrentDateTime(),
+				topicId
 		);
 		
 		
@@ -107,7 +109,8 @@ public class StorageTest {
 						action,
 						actor,
 						notificationContent,
-						isSystemGenerated
+						isSystemGenerated,
+						topicId
 				);
 		
 		verify(this.notificationGeneratorWritePlatformService, times(1)).create(refEq(notification));

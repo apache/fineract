@@ -83,7 +83,8 @@ public class NotificationEventListener implements SessionAwareMessageListener<Me
 					notificationData.getAction(),
 					notificationData.getActorId(),
 					notificationData.getContent(),
-					notificationData.isSystemGenerated()
+					notificationData.isSystemGenerated(),
+					notificationData.getTopicId()
 			);
 			
 		}

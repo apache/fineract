@@ -20,6 +20,8 @@ package org.apache.fineract.notification.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -48,12 +50,16 @@ public class Notification extends AbstractPersistableCustom<Long> {
 	
 	@Column(name = "created_at")
 	private String createdAt;
+	
+	@OneToOne
+	@JoinColumn(name = "topic_id")
+	private Long topicId;
 
 	public Notification() {
 	}
 
 	public Notification(String objectType, Long objectIdentifier, String action, Long actorId,
-			boolean isSystemGenerated, String notificationContent, String createdAt) {
+			boolean isSystemGenerated, String notificationContent, String createdAt, Long topicId) {
 		this.objectType = objectType;
 		this.objectIdentifier = objectIdentifier;
 		this.action = action;
@@ -61,6 +67,7 @@ public class Notification extends AbstractPersistableCustom<Long> {
 		this.isSystemGenerated = isSystemGenerated;
 		this.notificationContent = notificationContent;
 		this.createdAt = createdAt;
+		this.topicId = topicId;
 	}
 
 	public String getObjectType() {
@@ -117,6 +124,14 @@ public class Notification extends AbstractPersistableCustom<Long> {
 
 	public void setCreatedAt(String createdAt) {
 		this.createdAt = createdAt;
+	}
+
+	public Long getTopicId() {
+		return this.topicId;
+	}
+
+	public void setTopicId(Long topicId) {
+		this.topicId = topicId;
 	}
 	
 }

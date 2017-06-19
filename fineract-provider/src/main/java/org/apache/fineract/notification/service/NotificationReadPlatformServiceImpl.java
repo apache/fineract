@@ -31,7 +31,6 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.notification.cache.CacheNotificationResponseHeader;
 import org.apache.fineract.notification.data.NotificationData;
 import org.apache.fineract.notification.data.NotificationMapperData;
-import org.apache.fineract.notification.domain.Notification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -179,7 +178,7 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
 			notificationData.setObjectType(objectType);
 			
 			final Long objectId = rs.getLong("objectId");
-			notificationData.entifier(objectId);
+			notificationData.setObjectIdentfier(objectId);
 			
 			final Long actorId = rs.getLong("actor");
 			notificationData.setActorId(actorId);

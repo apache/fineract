@@ -18,13 +18,18 @@
  */
 package org.apache.fineract.notification.service;
 
-import java.util.List;
+import java.util.Collection;
 
-public interface NotificationWritePlatformService {
+import org.apache.fineract.notification.data.TopicData;
 
-	public Long notify(Long userId, String objectType, Long objectId, String action,
-			Long actorId, String notificationContent, boolean isSystemGenerated, Long topicId);
+public interface TopicReadPlatformService {
 	
-	public Long notify(List<Long> userIds, String objectType, Long objectId, String action,
-			Long actorId, String notificationContent, boolean isSystemGenerated, Long topicId);
+	Collection<TopicData> getAllTopics();
+	
+	Collection<TopicData> getAllActiveTopics();
+
+	TopicData findById(Long id);
+	
+	TopicData findByPermissionId(Long permissionId);
+	
 }

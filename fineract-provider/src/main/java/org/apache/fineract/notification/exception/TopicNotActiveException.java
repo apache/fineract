@@ -16,15 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.notification.service;
+package org.apache.fineract.notification.exception;
 
-import java.util.List;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface NotificationWritePlatformService {
-
-	public Long notify(Long userId, String objectType, Long objectId, String action,
-			Long actorId, String notificationContent, boolean isSystemGenerated, Long topicId);
+/**
+ * {@link RuntimeException} thrown when a notification
+ * is accessed on a disabled topic
+ */
+public class TopicNotActiveException extends AbstractPlatformDomainRuleException {
 	
-	public Long notify(List<Long> userIds, String objectType, Long objectId, String action,
-			Long actorId, String notificationContent, boolean isSystemGenerated, Long topicId);
+	public TopicNotActiveException(final Long topicId) {
+        super("error.msg.topic.not.active.exception", "The Topic with id `" + topicId + "` is not active", topicId);
+    }
+	
 }

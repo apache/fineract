@@ -52,6 +52,7 @@ public class SenderTest {
 		String action = "created";
 		Long actorId = 1L;
 		String notificationContent = "A client was created";
+		Long topicId = 1L;
 		
 		NotificationData notificationData = new NotificationData(
 				objectType,
@@ -62,6 +63,7 @@ public class SenderTest {
 				false,
 				null,
 				null,
+				topicId,
 				null
 		);
 		
