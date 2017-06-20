@@ -2954,6 +2954,19 @@ public class Loan extends AbstractPersistableCustom<Long> {
             final String errorMessage = "Transfer funds is allowed only for loan accounts with overpaid status ";
             throw new InvalidLoanStateTransitionException("transaction", "is.not.a.overpaid.loan", errorMessage);
         }
+		
+		// check if loan balance goes to zero
+         if (this.totalOverpaid.compareTo(loanTransaction.getAmount(getCurrency()).getAmount()) == 0) {
+         	// change status to closed obligations met
+         	this.loanStatus = LoanStatus.CLOSED_OBLIGATIONS_MET.getValue();
+         	
+         	// get current date
+         	final LocalDate today = new LocalDate();
+         	
+         	// update the close on date (set to today's date)
+         	this.closedOnDate = today.toDate();
+         }
+ 
         loanTransaction.updateLoan(this);
 
         if (loanTransaction.isNotZero(loanCurrency())) {

@@ -110,6 +110,8 @@ public interface LoanReadPlatformService {
     Collection<LoanScheduleAccrualData> retrivePeriodicAccrualData(LocalDate tillDate);
 
     Collection<Long> fetchLoansForInterestRecalculation();
+	
+	Collection<Long> fetchOverpayedLoansForAllocation();
 
     LoanTransactionData retrieveLoanPrePaymentTemplate(Long loanId, LocalDate onDate);
 

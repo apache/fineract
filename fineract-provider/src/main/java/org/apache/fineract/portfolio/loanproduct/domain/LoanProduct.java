@@ -182,6 +182,9 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
 
     @Column(name = "can_use_for_topup", nullable = false)
     private boolean canUseForTopup = false;
+	
+	@Column(name = "can_auto_allocate_overpayments")
+    private boolean canAutoAllocateOverpayments;
 
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate) {
@@ -332,6 +335,8 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
 				? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.canUseForTopup)
 				: false;
 
+		final boolean canAutoAllocateOverpayments = command.booleanPrimitiveValueOfParameterNamed("canAutoAllocateOverpayments");
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
                 annualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion, repaymentEvery,
@@ -345,7 +350,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 installmentAmountInMultiplesOf, loanConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRate,
                 interestRateDifferential, minDifferentialLendingRate, maxDifferentialLendingRate, defaultDifferentialLendingRate,
                 isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGapBetweenInstallments,
-                maximumGapBetweenInstallments, syncExpectedWithDisbursementDate, canUseForTopup);
+                maximumGapBetweenInstallments, syncExpectedWithDisbursementDate, canUseForTopup, canAutoAllocateOverpayments);
 
     }
 
@@ -575,7 +580,8 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             BigDecimal minDifferentialLendingRate, BigDecimal maxDifferentialLendingRate, BigDecimal defaultDifferentialLendingRate,
             Boolean isFloatingInterestRateCalculationAllowed, final Boolean isVariableInstallmentsAllowed,
             final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments,
-            final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup) {
+            final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup,
+            final boolean canAutoAllocateOverpayments) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -652,6 +658,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         this.syncExpectedWithDisbursementDate = 
         		syncExpectedWithDisbursementDate;
         this.canUseForTopup = canUseForTopup;
+		this.canAutoAllocateOverpayments = canAutoAllocateOverpayments;
     }
 
     public MonetaryCurrency getCurrency() {
@@ -1036,6 +1043,12 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             actualChanges.put(LoanProductConstants.canUseForTopup, newValue);
             this.canUseForTopup = newValue;
         }
+		
+		if (command.isChangeInBooleanParameterNamed(LoanProductConstants.canAutoAllocateOverpaymentsParameterName, this.canAutoAllocateOverpayments)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.canAutoAllocateOverpaymentsParameterName);
+            actualChanges.put(LoanProductConstants.canAutoAllocateOverpaymentsParameterName, newValue);
+            this.canAutoAllocateOverpayments = newValue;
+        }
 
         return actualChanges;
     }
@@ -1365,4 +1378,8 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         return this.canUseForTopup;
     }
 
+	public boolean canAutoAllocateOverpayments(){
+		return this.canAutoAllocateOverpayments;
+	}
+	
 }

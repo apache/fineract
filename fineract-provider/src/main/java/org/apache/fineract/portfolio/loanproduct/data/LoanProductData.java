@@ -117,6 +117,7 @@ public class LoanProductData {
     private final Integer minimumDaysBetweenDisbursalAndFirstRepayment;
     private final boolean canDefineInstallmentAmount;
     private final Integer installmentAmountInMultiplesOf;
+	private final boolean canAutoAllocateOverpayments;
 
     // charges
     private final Collection<ChargeData> charges;
@@ -258,6 +259,7 @@ public class LoanProductData {
         final LoanProductConfigurableAttributes loanProductConfigurableAttributes = null;
         final boolean syncExpectedWithDisbursementDate = false;
         final boolean canUseForTopup = false;
+		final boolean canAutoAllocateOverpayments = false;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -273,7 +275,7 @@ public class LoanProductData {
                 loanProductConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRateId, floatingRateName,
                 interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate, maxDifferentialLendingRate,
                 isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
-                syncExpectedWithDisbursementDate, canUseForTopup);
+                syncExpectedWithDisbursementDate, canUseForTopup, canAutoAllocateOverpayments);
 
     }
 
@@ -350,6 +352,7 @@ public class LoanProductData {
         final LoanProductConfigurableAttributes loanProductConfigurableAttributes = null;
         final boolean syncExpectedWithDisbursementDate = false;
         final boolean canUseForTopup = false;
+		final boolean canAutoAllocateOverpayments = false;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -365,7 +368,7 @@ public class LoanProductData {
                 loanProductConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRateId, floatingRateName,
                 interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate, maxDifferentialLendingRate,
                 isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
-                syncExpectedWithDisbursementDate, canUseForTopup);
+                syncExpectedWithDisbursementDate, canUseForTopup, canAutoAllocateOverpayments);
 
     }
 
@@ -449,6 +452,7 @@ public class LoanProductData {
         final LoanProductConfigurableAttributes loanProductConfigurableAttributes = null;
         final boolean syncExpectedWithDisbursementDate = false;
         final boolean canUseForTopup = false;
+		final boolean canAutoAllocateOverpayments = false;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -464,7 +468,7 @@ public class LoanProductData {
                 installmentAmountInMultiplesOf, loanProductConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRateId,
                 floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
-                syncExpectedWithDisbursementDate, canUseForTopup);
+                syncExpectedWithDisbursementDate, canUseForTopup, canAutoAllocateOverpayments);
 
     }
     
@@ -542,6 +546,7 @@ public class LoanProductData {
         final LoanProductConfigurableAttributes loanProductConfigurableAttributes = null;
         final boolean syncExpectedWithDisbursementDate = false;
         final boolean canUseForTopup = false;
+		final boolean canAutoAllocateOverpayments = false;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -557,7 +562,7 @@ public class LoanProductData {
                 installmentAmountInMultiplesOf, loanProductConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRateId,
                 floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
-                syncExpectedWithDisbursementDate, canUseForTopup);
+                syncExpectedWithDisbursementDate, canUseForTopup, canAutoAllocateOverpayments);
 
     }
 
@@ -596,7 +601,8 @@ public class LoanProductData {
             BigDecimal minDifferentialLendingRate, BigDecimal defaultDifferentialLendingRate, BigDecimal maxDifferentialLendingRate,
             boolean isFloatingInterestRateCalculationAllowed, final boolean isVariableInstallmentsAllowed,
             final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments, 
-            final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup) {
+            final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup,
+			final boolean canAutoAllocateOverpayments) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -700,6 +706,7 @@ public class LoanProductData {
         this.preClosureInterestCalculationStrategyOptions = null;
         this.syncExpectedWithDisbursementDate = syncExpectedWithDisbursementDate;
         this.canUseForTopup = canUseForTopup;
+		this.canAutoAllocateOverpayments = canAutoAllocateOverpayments;
 
     }
 
@@ -836,6 +843,7 @@ public class LoanProductData {
         this.preClosureInterestCalculationStrategyOptions = preCloseInterestCalculationStrategyOptions;
         this.syncExpectedWithDisbursementDate = productData.syncExpectedWithDisbursementDate;
         this.canUseForTopup = productData.canUseForTopup;
+		this.canAutoAllocateOverpayments = productData.canAutoAllocateOverpayments;
     }
 
     private Collection<ChargeData> nullIfEmpty(final Collection<ChargeData> charges) {
@@ -1189,11 +1197,19 @@ public class LoanProductData {
 		return syncExpectedWithDisbursementDate;
 	}
     
-        public boolean canUseForTopup() {
-            return this.canUseForTopup;
-        }
+	public boolean canUseForTopup() {
+		return this.canUseForTopup;
+	}
         
     public BigDecimal getInterestRateDifferential() {
         return this.interestRateDifferential;
     }
+	
+	/**
+     * @return the canAutoAllocateOverpayments
+     */
+     public boolean isCanAutoAllocateOverpayments() {
+		 return canAutoAllocateOverpayments; 
+	}
+	
 }

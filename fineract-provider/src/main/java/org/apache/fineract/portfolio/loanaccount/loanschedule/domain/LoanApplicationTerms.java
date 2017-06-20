@@ -1199,7 +1199,7 @@ public final class LoanApplicationTerms {
             double installmentAmount = FinanicalFunctions.pmt(periodicInterestRate.doubleValue(), periodsRemaining.doubleValue(),
                     principalDouble, futureValue, false);
 
-            if (this.installmentAmountInMultiplesOf != null) {
+            if (this.installmentAmountInMultiplesOf != null && !this.installmentAmountInMultiplesOf.equals(0)) {
                 installmentAmount = Money.roundToMultiplesOf(installmentAmount, this.installmentAmountInMultiplesOf);
             }
             setFixedEmiAmount(BigDecimal.valueOf(installmentAmount));

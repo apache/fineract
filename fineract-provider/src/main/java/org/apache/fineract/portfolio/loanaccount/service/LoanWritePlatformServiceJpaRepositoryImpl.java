@@ -31,6 +31,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
@@ -111,6 +112,7 @@ import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -1791,6 +1793,49 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         return loanCharge;
     }
 
+	@Override
+    @CronTarget(jobName = JobName.ALLOCATE_OVERPAYMENTS_TO_SAVINGS)
+    public void allocateOverpayments() throws JobExecutionException {
+        final Collection<Long> loanIds = this.loanReadPlatformService.fetchOverpayedLoansForAllocation();
+        final StringBuilder sb = new StringBuilder();
+
+        if(loanIds != null){
+            for(final Long loanId : loanIds){
+
+                try{
+					if(accountAssociations != null){
+						final AccountAssociations accountAssociations = this.accountAssociationRepository.findByLoanIdAndType(loanId,AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
+						final Loan loan = accountAssociations.getLoan();
+						final SavingsAccount toSavingsAccount = accountAssociations.linkedSavingsAccount();
+						final BigDecimal transactionAmount = loan.getTotalOverpaid();
+						final LocalDate transactionDate = LocalDate.now();
+
+						final boolean isRegularTransaction = true;
+						final boolean isExceptionForBalanceCheck = false;
+						final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, transactionAmount,
+								PortfolioAccountType.LOAN, PortfolioAccountType.SAVINGS, loanId, toSavingsAccount.getId(), "Loan overpayment allocation",
+								null, null, null, LoanTransactionType.WITHDRAW_TRANSFER.getValue(), SavingsAccountTransactionType.DEPOSIT.getValue(), null, null,
+								AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, loan, toSavingsAccount, null, isRegularTransaction,
+								isExceptionForBalanceCheck);
+						this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
+					}catch(Exception e){
+						sb.append(e.getCause().getMessage() + " no linked savings account for loan with id" + loanId + ",");
+					}
+                }catch(PlatformApiDataValidationException e){
+                    sb.append(e.getErrors().get(0).getDeveloperMessage() + " loan with id " + loanId + ",");
+                }catch(AbstractPlatformDomainRuleException e){
+                    sb.append(e.getDefaultUserMessage()  + " loan with id " + loanId + ",");
+                }catch(RuntimeException e){
+                    sb.append(e.toString()  + " loan with id " + loanId + ",");
+                }catch(Exception e){
+                    sb.append(e.getCause().getMessage() + " loan with id " + loanId + ",");
+                }
+
+            }
+            if (sb.length() > 0) { throw new JobExecutionException(sb.toString()); }
+        }
+    }
+ 
     @Transactional
     @Override
     public LoanTransaction initiateLoanTransfer(final Loan loan, final LocalDate transferDate) {

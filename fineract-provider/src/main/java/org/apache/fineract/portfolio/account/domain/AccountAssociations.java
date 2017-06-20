@@ -80,6 +80,10 @@ public class AccountAssociations extends AbstractPersistableCustom<Long> {
         return this.linkedSavingsAccount;
     }
 
+	public Loan getLoan() { 
+		return this.loanAccount; 
+	}
+	
     public void updateLinkedSavingsAccount(final SavingsAccount savingsAccount) {
         this.linkedSavingsAccount = savingsAccount;
     }

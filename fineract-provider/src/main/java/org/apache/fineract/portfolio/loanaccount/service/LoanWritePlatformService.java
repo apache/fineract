@@ -87,6 +87,8 @@ public interface LoanWritePlatformService {
 
     CommandProcessingResult payLoanCharge(Long loanId, Long loanChargeId, JsonCommand command, boolean isChargeIdIncludedInJson);
 
+	void allocateOverpayments() throws JobExecutionException;
+	
     void transferFeeCharges() throws JobExecutionException;
 
     CommandProcessingResult undoWriteOff(Long loanId);
