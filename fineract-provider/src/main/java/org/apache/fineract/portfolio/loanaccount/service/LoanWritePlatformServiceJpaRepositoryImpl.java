@@ -1801,20 +1801,24 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             for(final Long loanId : loanIds){
 
                 try{
-                    final AccountAssociations accountAssociations = this.accountAssociationRepository.findByLoanIdAndType(loanId,AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
-                    final Loan loan = accountAssociations.getLoan();
-                    final SavingsAccount toSavingsAccount = accountAssociations.linkedSavingsAccount();
-                    final BigDecimal transactionAmount = loan.getTotalOverpaid();
-                    final LocalDate transactionDate = LocalDate.now();
+					if(accountAssociations != null){
+						final AccountAssociations accountAssociations = this.accountAssociationRepository.findByLoanIdAndType(loanId,AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
+						final Loan loan = accountAssociations.getLoan();
+						final SavingsAccount toSavingsAccount = accountAssociations.linkedSavingsAccount();
+						final BigDecimal transactionAmount = loan.getTotalOverpaid();
+						final LocalDate transactionDate = LocalDate.now();
 
-                    final boolean isRegularTransaction = true;
-                    final boolean isExceptionForBalanceCheck = false;
-                    final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, transactionAmount,
-                            PortfolioAccountType.LOAN, PortfolioAccountType.SAVINGS, loanId, toSavingsAccount.getId(), "Loan overpayment allocation",
-                            null, null, null, LoanTransactionType.WITHDRAW_TRANSFER.getValue(), SavingsAccountTransactionType.DEPOSIT.getValue(), null, null,
-                            AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, loan, toSavingsAccount, null, isRegularTransaction,
-                            isExceptionForBalanceCheck);
-                    this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
+						final boolean isRegularTransaction = true;
+						final boolean isExceptionForBalanceCheck = false;
+						final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, transactionAmount,
+								PortfolioAccountType.LOAN, PortfolioAccountType.SAVINGS, loanId, toSavingsAccount.getId(), "Loan overpayment allocation",
+								null, null, null, LoanTransactionType.WITHDRAW_TRANSFER.getValue(), SavingsAccountTransactionType.DEPOSIT.getValue(), null, null,
+								AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, loan, toSavingsAccount, null, isRegularTransaction,
+								isExceptionForBalanceCheck);
+						this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
+					}catch(Exception e){
+						sb.append(e.getCause().getMessage() + " no linked savings account for loan with id" + loanId + ",");
+					}
                 }catch(PlatformApiDataValidationException e){
                     sb.append(e.getErrors().get(0).getDeveloperMessage() + " loan with id " + loanId + ",");
                 }catch(AbstractPlatformDomainRuleException e){
