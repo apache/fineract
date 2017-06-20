@@ -86,7 +86,43 @@ public class LoanRescheduleRequestData {
                 rescheduleReasonCodeValue, rescheduleReasonComment, timeline, clientName, loanAccountNumber, clientId, recalculateInterest,
                 rescheduleReasons, loanTermVariationsData);
     }
+    
+    /**
+     * LoanRescheduleRequestData constructor
+     * 
+     * @param loanTermVariationsData
+     *            TODO
+     **/
+    private LoanRescheduleRequestData(Long id, Long loanId, LoanRescheduleRequestStatusEnumData statusEnum, final String clientName,
+            final String loanAccountNumber, final Long clientId, final LocalDate rescheduleFromDate,
+            final CodeValueData rescheduleReasonCodeValue) {
 
+        this.id = id;
+        this.loanId = loanId;
+        this.statusEnum = statusEnum;
+        this.clientName = clientName;
+        this.loanAccountNumber = loanAccountNumber;
+        this.clientId = clientId;
+        this.rescheduleFromDate = rescheduleFromDate;
+        this.rescheduleReasonCodeValue = rescheduleReasonCodeValue;
+        this.rescheduleFromInstallment = null;
+        this.rescheduleReasonComment = null;
+        this.timeline = null;
+        this.recalculateInterest = null;
+        this.rescheduleReasons = null;
+        this.loanTermVariationsData = null;
+    }
+
+    /**
+     * @return an instance of the LoanRescheduleRequestData class
+     **/
+    public static LoanRescheduleRequestData instance(Long id, Long loanId, LoanRescheduleRequestStatusEnumData statusEnum,
+            final String clientName, final String loanAccountNumber, final Long clientId, final LocalDate rescheduleFromDate,
+            final CodeValueData rescheduleReasonCodeValue) {
+
+        return new LoanRescheduleRequestData(id, loanId, statusEnum, clientName, loanAccountNumber, clientId, rescheduleFromDate,
+                rescheduleReasonCodeValue);
+    }
     /**
      * @return the id
      */

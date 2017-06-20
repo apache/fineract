@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.rescheduleloan.api;
 
 import java.util.HashSet;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -96,7 +97,7 @@ public class RescheduleLoansApiResource {
 
         return this.loanRescheduleRequestToApiJsonSerializer.serialize(settings, loanRescheduleReasons);
     }
-
+    
     @GET
     @Path("{scheduleId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -169,6 +170,24 @@ public class RescheduleLoansApiResource {
      **/
     private boolean compareIgnoreCase(String firstString, String secondString) {
         return StringUtils.isNotBlank(firstString) && firstString.trim().equalsIgnoreCase(secondString);
+    }
+
+    @GET
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveAllRescheduleRequest(@Context final UriInfo uriInfo, @QueryParam("command") final String command) {
+
+        this.platformSecurityContext.authenticatedUser().validateHasReadPermission(RescheduleLoansApiConstants.ENTITY_NAME);
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        if (StringUtils.isNotBlank(command) && !RescheduleLoansApiConstants.commandParams.contains(command.toLowerCase())) { throw new UnrecognizedQueryParamException(
+                "command", command, new Object[] { RescheduleLoansApiConstants.allCommandParamName,
+                        RescheduleLoansApiConstants.pendingCommandParamName, RescheduleLoansApiConstants.approveCommandParamName,
+                        RescheduleLoansApiConstants.rejectCommandParamName }); }
+        final List<LoanRescheduleRequestData> loanRescheduleRequestsData = this.loanRescheduleRequestReadPlatformService
+                .retrieveAllRescheduleRequests(command);
+
+        return this.loanRescheduleRequestToApiJsonSerializer.serialize(settings, loanRescheduleRequestsData);
     }
     
     /*@GET

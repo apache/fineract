@@ -59,4 +59,15 @@ public interface LoanRescheduleRequestReadPlatformService {
      * @return list of LoanRescheduleRequestData objects
      **/
     public LoanRescheduleRequestData retrieveAllRescheduleReasons(String loanRescheduleReason);
+    /**
+     * get all loan reschedule request
+     * 
+     * @param command 
+     * all/null - give all request
+     * approved - give all approved request
+     * pending - give all  request which is pending for approval
+     * reject - give all rejected requests
+     * @return list of LoanRescheduleRequestData objects
+     **/
+    public List<LoanRescheduleRequestData> retrieveAllRescheduleRequests(String command);
 }
