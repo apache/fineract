@@ -121,6 +121,9 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
     @JoinColumn(name = "savings_transaction_id", referencedColumnName = "id", nullable = false)
     private List<SavingsAccountTransactionTaxDetails> taxDetails = new ArrayList<>();
+    
+    @Column(name = "release_id_of_hold_amount", length = 20)
+    private Long releaseIdOfHoldAmountTransaction;
 
     protected SavingsAccountTransaction() {
         this.dateOf = null;
@@ -288,6 +291,21 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
         this.createdDate = createdDate;
         this.appUser = appUser;
         this.isManualTransaction = isManualTransaction;
+    }
+    
+    public static SavingsAccountTransaction holdAmount(final SavingsAccount savingsAccount, final Office office,
+            final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser) {
+        final boolean isReversed = false;
+        final boolean isManualTransaction = false;
+        return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, SavingsAccountTransactionType.AMOUNT_HOLD.getValue(),
+                date, createdDate, amount, isReversed, appUser, isManualTransaction);
+    }
+
+    public static SavingsAccountTransaction releaseAmount(SavingsAccountTransaction accountTransaction,LocalDate transactionDate, Date createdDate,
+            final AppUser appUser) {
+        return new SavingsAccountTransaction(accountTransaction.savingsAccount, accountTransaction.office, accountTransaction.paymentDetail,
+                SavingsAccountTransactionType.AMOUNT_RELEASE.getValue(),transactionDate , createdDate,
+                accountTransaction.amount, accountTransaction.reversed, appUser, accountTransaction.isManualTransaction);
     }
 
     public LocalDate transactionLocalDate() {
@@ -640,6 +658,14 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     public boolean isWaiveCharge() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isWaiveCharge();
     }
+    
+    public boolean isAmountOnHold() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isAmountOnHold();
+    }
+    
+    public boolean isAmountRelease() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isAmountRelease();
+    }
 
     private boolean canOverriteSavingAccountRules() {
         final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
@@ -752,5 +778,13 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
 
     public PaymentDetail getPaymentDetail() {
     	return this.paymentDetail ;
+    }
+    
+    public void updateReleaseId(Long releaseId) {
+        this.releaseIdOfHoldAmountTransaction = releaseId;
+    }
+    
+    public Long getReleaseIdOfHoldAmountTransaction() {
+        return this.releaseIdOfHoldAmountTransaction;
     }
 }

@@ -511,6 +511,12 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     "minBalanceForInterestCalculation");
             final BigDecimal onHoldFunds = rs.getBigDecimal("onHoldFunds");
             
+            BigDecimal availableBalance = accountBalance;
+            if (availableBalance != null && onHoldFunds != null) {
+
+                availableBalance = availableBalance.subtract(onHoldFunds);
+            }
+            
             BigDecimal interestNotPosted = BigDecimal.ZERO;
             LocalDate lastInterestCalculationDate = null;
             if(totalInterestEarned != null){
@@ -520,7 +526,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             
             final SavingsAccountSummaryData summary = new SavingsAccountSummaryData(currency, totalDeposits, totalWithdrawals,
                     totalWithdrawalFees, totalAnnualFees, totalInterestEarned, totalInterestPosted, accountBalance, totalFeeCharge,
-                    totalPenaltyCharge, totalOverdraftInterestDerived, totalWithholdTax, interestNotPosted, lastInterestCalculationDate);
+                    totalPenaltyCharge, totalOverdraftInterestDerived, totalWithholdTax, interestNotPosted, lastInterestCalculationDate, availableBalance);
 
             final boolean withHoldTax = rs.getBoolean("withHoldTax");
             final Long taxGroupId = JdbcSupport.getLong(rs, "taxGroupId");

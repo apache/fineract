@@ -50,6 +50,12 @@ public class SavingsApiConstants {
     public static final String payChargeTransactionAction = ".paycharge";
     public static final String waiveChargeTransactionAction = ".waivecharge";
     public static final String updateMaturityDetailsAction = ".updateMaturityDetails";
+    public static final String blockAction = ".block";
+    public static final String unblockAction = ".unblock";
+    public static final String blockCreditsAction = ".blockCredits";
+    public static final String unblockCreditsAction = ".unblockCredits";
+    public static final String blockDebitsAction = ".blockDebits";
+    public static final String unblockDebitsAction = ".unblockDebits";
 
     // command
     public static final String COMMAND_UNDO_TRANSACTION = "undo";
@@ -57,6 +63,14 @@ public class SavingsApiConstants {
     public static final String COMMAND_WAIVE_CHARGE = "waive";
     public static final String COMMAND_PAY_CHARGE = "paycharge";
     public static final String COMMAND_INACTIVATE_CHARGE = "inactivate";
+    public static final String COMMAND_HOLD_AMOUNT = "holdAmount";
+    public static final String COMMAND_RELEASE_AMOUNT = "releaseAmount";
+    public static final String COMMAND_UNBLOCK_ACCOUNT= "unblock";
+    public static final String COMMAND_BLOCK_ACCOUNT = "block";
+    public static final String COMMAND_BLOCK_CREDIT = "blockCredit";
+    public static final String COMMAND_BLOCK_DEBIT = "blockDebit";
+    public static final String COMMAND_UNBLOCK_DEBIT = "unblockDebit";
+    public static final String COMMAND_UNBLOCK_CREDIT = "unblockCredit";
 
     // general
     public static final String localeParamName = "locale";
@@ -69,6 +83,7 @@ public class SavingsApiConstants {
     public static final String accountNoParamName = "accountNo";
     public static final String externalIdParamName = "externalId";
     public static final String statusParamName = "status";
+    public static final String subStatusParamName = "subStatus";
     public static final String clientIdParamName = "clientId";
     public static final String groupIdParamName = "groupId";
     public static final String productIdParamName = "productId";
@@ -169,4 +184,9 @@ public class SavingsApiConstants {
     public static final String daysToEscheatParamName = "daysToEscheat";
 
     public static final String datatables = "datatables";
+    
+    public static final String ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE = "not.in.active.state";
+    
+    public static final Set<String> SAVINGS_ACCOUNT_HOLD_AMOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(transactionDateParamName, dateFormatParamName, localeParamName, transactionAmountParamName));
 }

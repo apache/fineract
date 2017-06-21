@@ -193,6 +193,14 @@ public class SavingsEnumerations {
                 optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.ESCHEAT.getValue().longValue(),
                         SavingsAccountTransactionType.ESCHEAT.getCode(), "Escheat");
                 break;
+            case AMOUNT_HOLD:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.AMOUNT_HOLD.getValue().longValue(),
+                        SavingsAccountTransactionType.AMOUNT_HOLD.getCode(), "Amount on hold");
+                break;    
+            case AMOUNT_RELEASE:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.AMOUNT_RELEASE.getValue().longValue(),
+                        SavingsAccountTransactionType.AMOUNT_RELEASE.getCode(), "Release Amount");
+                break; 
         }
         return optionData;
     }
@@ -294,22 +302,37 @@ public class SavingsEnumerations {
         final boolean inactive = type.isSubStatusInactive();
         final boolean dormant = type.isSubStatusDormant();
         final boolean escheat = type.isSubStatusEscheat();
+        final boolean block = type.isSubStatusAccountBlocked();
+        final boolean blockCredit = type.isSubStatusCreditBlocked();
+        final boolean blockDebit = type.isSubStatusDebitBlocked();
 
         SavingsAccountSubStatusEnumData optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.NONE.getValue().longValue(),
-        		SavingsAccountSubStatusEnum.NONE.getCode(), "None", true, inactive, dormant, escheat);
+        		SavingsAccountSubStatusEnum.NONE.getCode(), "None", true, inactive, dormant, escheat, block, blockCredit, blockDebit);
 
         switch (type) {
             case INACTIVE:
                 optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.INACTIVE.getValue().longValue(),
-                		SavingsAccountSubStatusEnum.INACTIVE.getCode(), "Inactive", none, inactive, dormant, escheat);
+                		SavingsAccountSubStatusEnum.INACTIVE.getCode(), "Inactive", none, inactive, dormant, escheat, block, blockCredit, blockDebit);
             break;
             case DORMANT:
                 optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.DORMANT.getValue().longValue(),
-                		SavingsAccountSubStatusEnum.DORMANT.getCode(), "Dormant", none, inactive, dormant, escheat);
+                		SavingsAccountSubStatusEnum.DORMANT.getCode(), "Dormant", none, inactive, dormant, escheat, block, blockCredit, blockDebit);
             break;
             case ESCHEAT:
                 optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.ESCHEAT.getValue().longValue(),
-                		SavingsAccountSubStatusEnum.ESCHEAT.getCode(), "Escheat", none, inactive, dormant, escheat);
+                		SavingsAccountSubStatusEnum.ESCHEAT.getCode(), "Escheat", none, inactive, dormant, escheat, block, blockCredit, blockDebit);
+            break;
+            case BLOCK:
+                optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.BLOCK.getValue().longValue(),
+                                SavingsAccountSubStatusEnum.BLOCK.getCode(), "Block", none, inactive, dormant, escheat, block, blockCredit, blockDebit);
+            break;
+            case BLOCK_CREDIT:
+                optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.BLOCK_CREDIT.getValue().longValue(),
+                                SavingsAccountSubStatusEnum.BLOCK_CREDIT.getCode(), "BlockCredit", none, inactive, dormant, escheat, block, blockCredit, blockDebit);
+            break;
+            case BLOCK_DEBIT:
+                optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.BLOCK_DEBIT.getValue().longValue(),
+                                SavingsAccountSubStatusEnum.BLOCK_DEBIT.getCode(), "BlockDebit", none, inactive, dormant, escheat, block, blockCredit, blockDebit);
             break;
             default:
             break;

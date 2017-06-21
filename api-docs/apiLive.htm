@@ -630,6 +630,54 @@
 								<td></td>
 							</tr>
 							<tr>
+								<td></td>
+								<td>savingsaccounts/{accountId}?command=block</td>
+								<td><a href="#savingsaccounts_block">Block savings account</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>savingsaccounts/{accountId}?command=unblock</td>
+								<td><a href="#savingsaccounts_unblock">Unblock savings account</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>savingsaccounts/{accountId}?command=blockCredit</td>
+								<td><a href="#savingsaccounts_block_credit">Block Savings Account Credit Transactions</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>savingsaccounts/{accountId}?command=unblockCredit</td>
+								<td><a href="#savingsaccounts_unblock_credit">Unblock Savings Account Credit Transactions</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>savingsaccounts/{accountId}?command=blockDebit</td>
+								<td><a href="#savingsaccounts_block_debit">Block Savings Account Debit Transactions</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>savingsaccounts/{accountId}?command=unblockDebit</td>
+								<td><a href="#savingsaccounts_unblock_debit">Unblock Savings Account Debit Transactions</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
 								<td><a href="#savingsaccounts_transactions">Savings Transactions</a></td>
 								<td>savingsaccounts/{accountId}/transactions?command=deposit</td>
 								<td><a href="#savingsaccounts_deposit">Make a deposit</a></td>
@@ -657,6 +705,22 @@
 								<td></td>
 								<td>savingsaccounts/{accountId}/transactions/{transactionId}?command=modify</td>
 								<td><a href="#savingsaccounts_adjusttransaction">Adjust transaction</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>savingsaccounts/{accountId}/transactions/{transactionId}?command=holdAmount</td>
+								<td><a href="#savingsaccounts_hold_amount">Hold Amount</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>savingsaccounts/{accountId}/transactions/{transactionId}?command=releaseAmount</td>
+								<td><a href="#savingsaccounts_release_amount">Release Amount</a></td>
 								<td></td>
 								<td></td>
 								<td></td>
@@ -26243,7 +26307,248 @@ Request Body:
 	        </code>
 	    </div>
 	</div>
+<a id="savingsaccounts_block" name="savingsaccounts_block" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Block Savings Account</h2>
+	        <p>
+	        	Blocks Savings account from all types of credit and debit transactions
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=block</code>
+	        <code class="method-request">POST savingsaccount/1?command=block
+Content-Type: application/json
+Request Body:
+{
+}
+			</code>
+	        <code class="method-response">
+{  
+   "officeId":1,
+   "clientId":1,
+   "savingsId":1,
+   "resourceId":1,
+   "changes":{  
+      "subStatus":{  
+         "id":400,
+         "code":"SavingsAccountSubStatusEnum.block",
+         "value":"Block",
+         "none":false,
+         "inactive":false,
+         "dormant":false,
+         "escheat":false,
+         "block":true,
+         "blockCredit":false,
+         "blockDebit":false
+      }
+   }
+}
+	        </code>
+	    </div>
+	</div>
 
+<a id="savingsaccounts_unblock" name="savingsaccounts_unblock" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Unblock Savings Account</h2>
+	        <p>
+	        	Unblock a blocked account. On unblocking account, user can perform debit and credit transactions
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=unblock</code>
+	        <code class="method-request">POST savingsaccount/1?command=unblock
+Content-Type: application/json
+Request Body:
+{
+}
+			</code>
+	        <code class="method-response">
+{  
+   "officeId":1,
+   "clientId":1,
+   "savingsId":1,
+   "resourceId":1,
+   "changes":{  
+      "subStatus":{  
+         "id":0,
+         "code":"SavingsAccountSubStatusEnum.none",
+         "value":"None",
+         "none":true,
+         "inactive":false,
+         "dormant":false,
+         "escheat":false,
+         "block":false,
+         "blockCredit":false,
+         "blockDebit":false
+      }
+   }
+}
+	        </code>
+	    </div>
+	</div>
+	
+<a id="savingsaccounts_block_credit" name="savingsaccounts_block_credit" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Block Savings Account Credit transactions</h2>
+	        <p>
+	        	Savings account will be blocked from all types of credit transactions.
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=blockCredit</code>
+	        <code class="method-request">POST savingsaccount/1?command=blockCredit
+Content-Type: application/json
+Request Body:
+{
+}
+			</code>
+	        <code class="method-response">
+{  
+   "officeId":1,
+   "clientId":1,
+   "savingsId":1,
+   "resourceId":1,
+   "changes":{  
+      "subStatus":{  
+        "id":500,
+         "code":"SavingsAccountSubStatusEnum.blockcredit",
+         "value":"BlockCredit",
+         "none":false,
+         "inactive":false,
+         "dormant":false,
+         "escheat":false,
+         "block":false,
+         "blockCredit":true,
+         "blockDebit":false
+      }
+   }
+}
+	        </code>
+	    </div>
+	</div>
+	
+<a id="savingsaccounts_unblock_credit" name="savingsaccounts_unblock_credit" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Unblock Savings Account Credit transactions</h2>
+	        <p>It unblocks the Saving account's credit operations. Now all types of credits can be transacted to Savings account
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=unblockCredit</code>
+	        <code class="method-request">POST savingsaccount/1?command=unblockCredit
+Content-Type: application/json
+Request Body:
+{
+}
+			</code>
+	        <code class="method-response">
+{  
+   "officeId":1,
+   "clientId":1,
+   "savingsId":1,
+   "resourceId":1,
+   "changes":{  
+      "subStatus":{  
+        "id":0,
+         "code":"SavingsAccountSubStatusEnum.none",
+         "value":"None",
+         "none":true,
+         "inactive":false,
+         "dormant":false,
+         "escheat":false,
+         "block":false,
+         "blockCredit":false,
+         "blockDebit":false
+      }
+   }
+}
+	        </code>
+	    </div>
+	</div>
+	
+	
+<a id="savingsaccounts_block_debit" name="savingsaccounts_block_debit" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Block Savings Account Debit transactions</h2>
+	        <p> All types of debit operations from Savings account wil be blocked</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=blockDebit</code>
+	        <code class="method-request">POST savingsaccount/1?command=blockDebit
+Content-Type: application/json
+Request Body:
+{
+}
+			</code>
+	        <code class="method-response">
+{  
+   "officeId":1,
+   "clientId":1,
+   "savingsId":1,
+   "resourceId":1,
+   "changes":{  
+      "subStatus":{  
+        "id":600,
+         "code":"SavingsAccountSubStatusEnum.blockdebit",
+         "value":"BlockDebit",
+         "none":false,
+         "inactive":false,
+         "dormant":false,
+         "escheat":false,
+         "block":false,
+         "blockCredit":false,
+         "blockDebit":true
+      }
+   }
+}
+			</code>
+		</div>
+	</div>
+
+<a id="savingsaccounts_unblock_debit" name="savingsaccounts_unblock_debit" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Unblock Savings Account debit transactions</h2>
+	        <p>It unblocks the Saving account's debit operations. Now all types of debits can be transacted from Savings account
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=unblockDebit</code>
+	        <code class="method-request">POST savingsaccount/1?command=unblockDebit
+Content-Type: application/json
+Request Body:
+{
+}
+			</code>
+	        <code class="method-response">
+{  
+   "officeId":1,
+   "clientId":1,
+   "savingsId":1,
+   "resourceId":1,
+   "changes":{  
+      "subStatus":{  
+        "id":0,
+         "code":"SavingsAccountSubStatusEnum.none",
+         "value":"None",
+         "none":true,
+         "inactive":false,
+         "dormant":false,
+         "escheat":false,
+         "block":false,
+         "blockCredit":false,
+         "blockDebit":false
+      }
+   }
+}
+	        </code>
+	    </div>
+	</div>
 	<a id="savingsaccounts_list" name="savingsaccounts_list" class="old-syle-anchor">&nbsp;</a>
     <div class="method-section">
         <div class="method-description">
@@ -26417,7 +26722,8 @@ Request Body:
       "nameCode": "currency.USD",
       "displayLabel": "US Dollar ($)"
     },
-    "accountBalance": 0
+    "accountBalance": 0,
+	"availableBalance": 0
   }
 }
 	        </code>
@@ -26787,6 +27093,60 @@ No Request Body:
 	        </code>
 	    </div>
 	</div>
+<a id="savingsaccounts_hold_amount" name="savingsaccounts_hold_amount" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Hold Amount</h2>
+	        <p>Hold amount enables the user to hold/block/lien the specified amount from the account</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/4/transactions?command=holdAmount</code>
+	        <code class="method-request">POST savingsaccounts/4/transactions?command=holdAmount
+Content-Type: application/json
+Request Body:
+{
+   transactionDate:"15 June 2017",
+   transactionAmount:"200",
+   locale:"en",
+   dateFormat:"dd MMMM yyyy"
+}
+	        </code>
+	        <code class="method-response">
+{
+  "officeId":1,
+  "clientId":2,
+  "savingsId":4,
+  "resourceId":35
+}
+	        </code>
+	    </div>
+	</div>
+<a id="savingsaccounts_release_amount" name="savingsaccounts_release_amount" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Release Amount</h2>
+	        <p>Release amount removes the hold/block/lien already placed on an amount in the account. </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/4/transactions/35?command=releaseAmount</code>
+	        <code class="method-request">POST savingsaccounts/4/transactions/35?command=releaseAmount
+Content-Type: application/json
+No Request Body:
+{
+  
+}
+	        </code>
+	        <code class="method-response">
+{
+   "officeId":1,
+   "clientId":2,
+   "savingsId":4,
+   "resourceId":36
+}
+	        </code>
+	    </div>
+	</div>
+
 <!-- end of savings accounts api -->
 
 <!-- start of Savings charges content-->
@@ -48362,6 +48722,54 @@ No Request Body:
 					<td></td>
 				</tr>
 				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=block</td>
+					<td><a href="#savingsaccounts_block">Block savings account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=unblock</td>
+					<td><a href="#savingsaccounts_unblock">UnBlock savings account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=blockCredit</td>
+					<td><a href="#savingsaccounts_block_credit">Block Savings Account Credit transactions</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=unblockCredit</td>
+					<td><a href="#savingsaccounts_unblock_credit">Unblock Savings Account Credit transactions</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=blockDebit</td>
+					<td><a href="#savingsaccounts_block_debit">Block Savings Account Debit transactions</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=unblockDebit</td>
+					<td><a href="#savingsaccounts_unblock_debit">Unblock Savings Account Debit transactions</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>	
+				<tr>
 					<td><a href="#savingsaccounts_transactions">Savings Transactions</a></td>
 					<td>savingsaccounts/{accountId}/transactions?command=deposit</td>
 					<td><a href="#savingsaccounts_deposit">Make a deposit</a></td>
@@ -48389,6 +48797,22 @@ No Request Body:
 					<td></td>
 					<td>savingsaccounts/{accountId}/transactions/{transactionId}?command=modify</td>
 					<td><a href="#savingsaccounts_adjusttransaction">Adjust transaction</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}/transactions/{transactionId}?command=holdAmount</td>
+					<td><a href="#savingsaccounts_hold_amount">Hold Amount</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}/transactions/{transactionId}?command=releaseAmount</td>
+					<td><a href="#savingsaccounts_release_amount">Release Amount</a></td>
 					<td></td>
 					<td></td>
 					<td></td>

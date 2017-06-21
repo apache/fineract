@@ -43,12 +43,13 @@ public class SavingsAccountSummaryData {
     private final BigDecimal totalWithholdTax;
     private final BigDecimal interestNotPosted;
     private final LocalDate lastInterestCalculationDate;
+    private final BigDecimal availableBalance;
 
     public SavingsAccountSummaryData(final CurrencyData currency, final BigDecimal totalDeposits, final BigDecimal totalWithdrawals,
             final BigDecimal totalWithdrawalFees, final BigDecimal totalAnnualFees, final BigDecimal totalInterestEarned,
             final BigDecimal totalInterestPosted, final BigDecimal accountBalance, final BigDecimal totalFeeCharge,
             final BigDecimal totalPenaltyCharge, final BigDecimal totalOverdraftInterestDerived,final BigDecimal totalWithholdTax,
-            final BigDecimal interestNotPosted, final LocalDate lastInterestCalculationDate) {
+            final BigDecimal interestNotPosted, final LocalDate lastInterestCalculationDate, final BigDecimal availableBalance) {
         this.currency = currency;
         this.totalDeposits = totalDeposits;
         this.totalWithdrawals = totalWithdrawals;
@@ -63,5 +64,6 @@ public class SavingsAccountSummaryData {
         this.totalWithholdTax = totalWithholdTax;
         this.interestNotPosted = interestNotPosted;
         this.lastInterestCalculationDate = lastInterestCalculationDate;
+        this.availableBalance = availableBalance;
     }
 }
