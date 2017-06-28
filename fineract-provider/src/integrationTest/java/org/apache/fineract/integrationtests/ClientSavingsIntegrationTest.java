@@ -2115,4 +2115,115 @@ public class ClientSavingsIntegrationTest {
      * assertEquals("Verifying Interest Calculation", new Float("238.3399"),
      * savingsInterest); }
      */
+    
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testSavingsAccountBlockStatus() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        SavingsAccountHelper savingsAccountHelperValidationError = new SavingsAccountHelper(this.requestSpec,
+                new ResponseSpecBuilder().build());
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientID);
+        final String minBalanceForInterestCalculation = null;
+        final String minRequiredBalance = null;
+        final String enforceMinRequiredBalance = "false";
+        final boolean allowOverdraft = false;
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
+        Assert.assertNotNull(savingsProductID);
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertNotNull(savingsProductID);
+
+        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+        Float balance = new Float(MINIMUM_OPENING_BALANCE);
+
+        savingsStatusHashMap = this.savingsAccountHelper.blockSavings(savingsId);
+        SavingsStatusChecker.verifySavingsSubStatusblock(savingsStatusHashMap);
+
+        List<HashMap> error = (List) savingsAccountHelperValidationError.withdrawalFromSavingsAccount(savingsId, "100",
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
+        assertEquals("error.msg.saving.account.blocked.transaction.not.allowed",
+                error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+
+        error = (List) savingsAccountHelperValidationError.depositToSavingsAccount(savingsId, "100", SavingsAccountHelper.TRANSACTION_DATE,
+                CommonConstants.RESPONSE_ERROR);
+        assertEquals("error.msg.saving.account.blocked.transaction.not.allowed",
+                error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+
+        savingsStatusHashMap = this.savingsAccountHelper.unblockSavings(savingsId);
+        SavingsStatusChecker.verifySavingsSubStatusIsNone(savingsStatusHashMap);
+        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
+        balance += new Float(DEPOSIT_AMOUNT);
+        assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+
+        savingsStatusHashMap = this.savingsAccountHelper.blockDebit(savingsId);
+        SavingsStatusChecker.verifySavingsSubStatusIsDebitBlocked(savingsStatusHashMap);
+        error = (List) savingsAccountHelperValidationError.withdrawalFromSavingsAccount(savingsId, "100",
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
+        assertEquals("error.msg.savings.account.debit.transaction.not.allowed",
+                error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        
+        depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
+        balance += new Float(DEPOSIT_AMOUNT);
+        assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+
+        savingsStatusHashMap = this.savingsAccountHelper.unblockDebit(savingsId);
+        SavingsStatusChecker.verifySavingsSubStatusIsNone(savingsStatusHashMap);
+        Integer withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        HashMap withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
+        balance -= new Float(WITHDRAW_AMOUNT);
+        assertEquals("Verifying Withdrawal Amount", new Float(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
+
+        savingsStatusHashMap = this.savingsAccountHelper.blockCredit(savingsId);
+        SavingsStatusChecker.verifySavingsSubStatusIsCreditBlocked(savingsStatusHashMap);
+        error = (List) savingsAccountHelperValidationError.depositToSavingsAccount(savingsId, "100", SavingsAccountHelper.TRANSACTION_DATE,
+                CommonConstants.RESPONSE_ERROR);
+        assertEquals("error.msg.savings.account.credit.transaction.not.allowed",
+                error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        
+        withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, WITHDRAW_AMOUNT,
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
+        balance -= new Float(WITHDRAW_AMOUNT);
+        assertEquals("Verifying Withdrawal Amount", new Float(WITHDRAW_AMOUNT), withdrawTransaction.get("amount"));
+
+        savingsStatusHashMap = this.savingsAccountHelper.unblockCredit(savingsId);
+        SavingsStatusChecker.verifySavingsSubStatusIsNone(savingsStatusHashMap);
+        depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, DEPOSIT_AMOUNT,
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        depositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
+        balance += new Float(DEPOSIT_AMOUNT);
+        assertEquals("Verifying Deposit Amount", new Float(DEPOSIT_AMOUNT), depositTransaction.get("amount"));
+
+        Integer holdTransactionId = (Integer) this.savingsAccountHelper.holdAmountInSavingsAccount(savingsId, String.valueOf(balance - 100),
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        error = (List) savingsAccountHelperValidationError.withdrawalFromSavingsAccount(savingsId, "300",
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
+        assertEquals("error.msg.savingsaccount.transaction.insufficient.account.balance",
+                error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+
+        Integer releaseTransactionId = this.savingsAccountHelper.releaseAmount(savingsId, holdTransactionId);
+        withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "300",
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
+        balance -= new Float("300");
+        assertEquals("Verifying Withdrawal Amount", new Float("300"), withdrawTransaction.get("amount"));
+
+    }
 }

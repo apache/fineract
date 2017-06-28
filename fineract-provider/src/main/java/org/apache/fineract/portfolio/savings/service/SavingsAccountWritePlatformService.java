@@ -88,4 +88,20 @@ public interface SavingsAccountWritePlatformService {
     CommandProcessingResult postInterest(JsonCommand command);
 
     void postInterest(SavingsAccount account, boolean postInterestAs, LocalDate transactionDate);
+    
+    CommandProcessingResult blockAccount(Long savingsId);
+
+    CommandProcessingResult unblockAccount(Long savingsId);
+
+    CommandProcessingResult holdAmount(Long savingsId, JsonCommand command);
+
+    CommandProcessingResult blockCredits(Long savingsId);
+
+    CommandProcessingResult unblockCredits(Long savingsId);
+
+    CommandProcessingResult blockDebits(Long savingsId);
+
+    CommandProcessingResult unblockDebits(Long savingsId);
+
+    CommandProcessingResult releaseAmount(Long savingsId, Long transactionId);
 }

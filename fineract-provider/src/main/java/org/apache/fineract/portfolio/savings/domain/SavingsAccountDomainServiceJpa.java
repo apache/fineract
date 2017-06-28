@@ -86,6 +86,8 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
             final SavingsTransactionBooleanValues transactionBooleanValues) {
 
         AppUser user = getAppUserIfPresent();
+        account.validateForAccountBlock();
+        account.validateForDebitBlock();
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
@@ -148,6 +150,8 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
             final boolean isAccountTransfer, final boolean isRegularTransaction,
             final SavingsAccountTransactionType savingsAccountTransactionType) {
         AppUser user = getAppUserIfPresent();
+        account.validateForAccountBlock();
+        account.validateForCreditBlock();
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();

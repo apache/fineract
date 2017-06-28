@@ -145,11 +145,14 @@ public class SavingsAccountTransactionsApiResource {
             } else if (is(commandParam, "postInterestAsOn")) {
                 final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(savingsId).build();
                 result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            } else if (is(commandParam, SavingsApiConstants.COMMAND_HOLD_AMOUNT)) {
+                final CommandWrapper commandRequest = builder.holdAmount(savingsId).build();
+                result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             }
 
             if (result == null) {
                 //
-                throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "deposit", "withdrawal" });
+                throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "deposit", "withdrawal", SavingsApiConstants.COMMAND_HOLD_AMOUNT });
             }
 
             return this.toApiJsonSerializer.serialize(result);
@@ -183,11 +186,15 @@ public class SavingsAccountTransactionsApiResource {
         } else if (is(commandParam, SavingsApiConstants.COMMAND_ADJUST_TRANSACTION)) {
             final CommandWrapper commandRequest = builder.adjustSavingsAccountTransaction(savingsId, transactionId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam,SavingsApiConstants.COMMAND_RELEASE_AMOUNT)) {
+            final CommandWrapper commandRequest = builder.releaseAmount(savingsId, transactionId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (result == null) {
             //
-            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "undo" });
+            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { SavingsApiConstants.COMMAND_UNDO_TRANSACTION,
+                    SavingsApiConstants.COMMAND_ADJUST_TRANSACTION, SavingsApiConstants.COMMAND_RELEASE_AMOUNT});
         }
 
         return this.toApiJsonSerializer.serialize(result);
