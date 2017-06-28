@@ -60,7 +60,7 @@ public class SmsMessage extends AbstractPersistableCustom<Long> {
     private Staff staff;
 
     @ManyToOne
-    @JoinColumn(name = "campaign_id", nullable = false)
+    @JoinColumn(name = "campaign_id", nullable = true)
     private SmsCampaign smsCampaign;
 
     @Column(name = "status_enum", nullable = false)
