@@ -51,6 +51,7 @@ import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -266,7 +267,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
 
     private void addAccrualAccounting(LoanScheduleAccrualData scheduleAccrualData, BigDecimal amount, BigDecimal interestportion,
             BigDecimal totalAccInterest, BigDecimal feeportion, BigDecimal totalAccFee, BigDecimal penaltyportion,
-            BigDecimal totalAccPenalty, final LocalDate accruedTill) throws Exception {
+            BigDecimal totalAccPenalty, final LocalDate accruedTill) throws DataAccessException {
         String transactionSql = "INSERT INTO m_loan_transaction  (loan_id,office_id,is_reversed,transaction_type_enum,transaction_date,amount,interest_portion_derived,"
                 + "fee_charges_portion_derived,penalty_charges_portion_derived, submitted_on_date) VALUES (?, ?, 0, ?, ?, ?, ?, ?, ?, ?)";
         this.jdbcTemplate.update(transactionSql, scheduleAccrualData.getLoanId(), scheduleAccrualData.getOfficeId(),
@@ -485,7 +486,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
 
     @Override
     @Transactional
-    public void addIncomeAndAccrualTransactions(Long loanId) throws Exception {
+    public void addIncomeAndAccrualTransactions(Long loanId) throws LoanNotFoundException {
         if (loanId != null) {
             Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
             if (loan == null) { throw new LoanNotFoundException(loanId); }
