@@ -101,6 +101,31 @@ public class CommandWrapperBuilder {
         this.clientId=clientId;
         return this;
     }
+    
+    
+    public CommandWrapperBuilder addFamilyMembers(final long clientId) {
+        this.actionName = "CREATE";
+        this.entityName = "FAMILYMEMBERS";
+        this.href = "/clients/"+clientId+"/familymembers";
+        this.clientId=clientId;
+        return this;
+    }
+  
+    public CommandWrapperBuilder updateFamilyMembers(final long familyMemberId) {
+        this.actionName = "UPDATE";
+        this.entityName = "FAMILYMEMBERS";
+        this.href = "/clients/"+clientId+"/familymembers";
+        this.entityId=familyMemberId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder deleteFamilyMembers(final long familyMemberId) {
+        this.actionName = "DELETE";
+        this.entityName = "FAMILYMEMBERS";
+        this.href = "/clients/"+clientId+"/familymembers";
+        this.entityId=familyMemberId;
+        return this;
+    }
   
     public CommandWrapperBuilder withLoanId(final Long withLoanId) {
         this.loanId = withLoanId;

@@ -69,6 +69,11 @@ public class ClientApiConstants {
     public static final String localeParamName = "locale";
     public static final String dateFormatParamName = "dateFormat";
     public static final String address = "address";
+    public static final String familyMembers = "familyMembers";
+    public static final String MARITALSTATUS="MARITALSTATUS";
+    public static final String maritalStatusIdParamName="maritalStatusId";
+    
+    
     
     public static final String CLIENT_TYPE_INDIVIDUAL = "Individual";
 
