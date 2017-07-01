@@ -20,12 +20,12 @@ package org.apache.fineract.useradministration.service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.EntityExistsException;
 import javax.persistence.PersistenceException;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -39,6 +39,10 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.core.service.PlatformEmailSendException;
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.notification.domain.Topic;
+import org.apache.fineract.notification.domain.TopicRepository;
+import org.apache.fineract.notification.domain.TopicSubscriber;
+import org.apache.fineract.notification.domain.TopicSubscriberRepository;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -50,6 +54,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserPreviousPassword;
 import org.apache.fineract.useradministration.domain.AppUserPreviousPasswordRepository;
 import org.apache.fineract.useradministration.domain.AppUserRepository;
+import org.apache.fineract.useradministration.domain.Permission;
 import org.apache.fineract.useradministration.domain.Role;
 import org.apache.fineract.useradministration.domain.RoleRepository;
 import org.apache.fineract.useradministration.domain.UserDomainService;
@@ -87,13 +92,16 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     private final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository;
     private final StaffRepositoryWrapper staffRepositoryWrapper;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
+    private final TopicRepository topicRepository;
+    private final TopicSubscriberRepository topicSubscriberRepository;
 
     @Autowired
     public AppUserWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AppUserRepository appUserRepository,
             final UserDomainService userDomainService, final OfficeRepositoryWrapper officeRepositoryWrapper, final RoleRepository roleRepository,
             final PlatformPasswordEncoder platformPasswordEncoder, final UserDataValidator fromApiJsonDeserializer,
             final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository, final StaffRepositoryWrapper staffRepositoryWrapper,
-            final ClientRepositoryWrapper clientRepositoryWrapper) {
+            final ClientRepositoryWrapper clientRepositoryWrapper, final TopicRepository topicRepository,
+            final TopicSubscriberRepository topicSubscriberRepository) {
         this.context = context;
         this.appUserRepository = appUserRepository;
         this.userDomainService = userDomainService;
@@ -104,6 +112,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         this.appUserPreviewPasswordRepository = appUserPreviewPasswordRepository;
         this.staffRepositoryWrapper = staffRepositoryWrapper;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
+        this.topicRepository = topicRepository;
+        this.topicSubscriberRepository = topicSubscriberRepository;
     }
 
     @Transactional
@@ -150,6 +160,25 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
             final Boolean sendPasswordToEmail = command.booleanObjectValueOfParameterNamed("sendPasswordToEmail");
             this.userDomainService.create(appUser, sendPasswordToEmail);
+            
+            List<Topic> allTopics = topicRepository.findAll();
+            List<Topic> possibleTopics = new ArrayList<>();
+            for (Topic curTopic : allTopics) {
+            	if (curTopic.getEntityId() == appUser.getOffice().getId()) {
+            		possibleTopics.add(curTopic);
+            	}
+            }
+            if (!possibleTopics.isEmpty()) {
+            	Set<Role> userRoles = appUser.getRoles();
+            	for (Role curRole : userRoles) {
+            		for (Topic curTopic : possibleTopics) {
+            			if(curRole.getName().compareToIgnoreCase(curTopic.getMemberType()) == 0) {
+            				TopicSubscriber topicSubscriber = new TopicSubscriber(curTopic, appUser, new Date());
+            				topicSubscriberRepository.save(topicSubscriber);
+            			}
+            		}
+            	}
+            }
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //

@@ -19,10 +19,9 @@
 package org.apache.fineract.notification.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import javax.annotation.PostConstruct;
 import javax.jms.Queue;
 
@@ -31,7 +30,9 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.notification.data.NotificationData;
+import org.apache.fineract.notification.data.TopicSubscriberData;
 import org.apache.fineract.notification.eventandlistener.NotificationEvent;
+import org.apache.fineract.organisation.office.domain.OfficeRepository;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
@@ -46,9 +47,8 @@ import org.apache.fineract.portfolio.savings.domain.RecurringDepositAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
-import org.apache.fineract.useradministration.domain.AppUser;
-import org.apache.fineract.useradministration.domain.AppUserRepository;
 import org.apache.fineract.useradministration.domain.Role;
+import org.apache.fineract.useradministration.domain.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -57,19 +57,24 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 
 	private final BusinessEventNotifierService businessEventNotifierService;
 	private final NotificationEvent notificationEvent;
-	private final AppUserRepository appUserRepository;
 	private final PlatformSecurityContext context;
+	private final RoleRepository roleRepository;
+	private final OfficeRepository officeRepository;
+	private final TopicSubscriberReadPlatformService topicSubscriberReadPlatformService;
 	
 	@Autowired
 	public NotificationDomainServiceImpl(final BusinessEventNotifierService businessEventNotifierService,
 			final NotificationEvent notificationEvent,
-			final AppUserRepository appUserRepository,
-			final PlatformSecurityContext context) {
+			final PlatformSecurityContext context, final RoleRepository roleRepository,
+			final TopicSubscriberReadPlatformService topicSubscriberReadPlatformService,
+			final OfficeRepository officeRepository) {
 		
 		this.businessEventNotifierService = businessEventNotifierService;
 		this.notificationEvent = notificationEvent;
-		this.appUserRepository = appUserRepository;
 		this.context = context;
+		this.roleRepository = roleRepository;
+		this.topicSubscriberReadPlatformService = topicSubscriberReadPlatformService;
+		this.officeRepository = officeRepository;
 	}
 	
 	@PostConstruct
@@ -552,7 +557,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 		
 		String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
 		Queue queue = new ActiveMQQueue("NotificationQueue");
-		List<Long> userIds = retrieveUsersWithSpecificPermission(permission);
+		List<Long> userIds = retrieveSubscribers(officeId, permission);
 		NotificationData notificationData = new NotificationData(
 				objectType,
 				objectIdentifier,
@@ -567,19 +572,28 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 		notificationEvent.broadcastNotification(queue, notificationData);
 	}
 	
-	private List<Long> retrieveUsersWithSpecificPermission(String permission) {
-		List<AppUser> appUsers = appUserRepository.findAll();
-		List<Long> userIds = new ArrayList<>();
-		for (AppUser appUser : appUsers) {
-			Set<Role> roles = appUser.getRoles();
-			for (Role role : roles) {
-				if (role.hasPermissionTo(permission)) {
-					if (!(userIds.contains(appUser.getId()))) {
-						 userIds.add(appUser.getId());
-					 }
-				 }
-			 }
+	private List<Long> retrieveSubscribers(Long officeId, String permission) {
+		
+		Collection<TopicSubscriberData> topicSubscribers = new ArrayList<>();
+		List<Long> subscriberIds = new ArrayList<>();
+		Long entityId = officeId;
+		String entityType= "";
+		if (officeRepository.findOne(entityId).getParent() == null) {
+			entityType = "OFFICE";
+		} else {
+			entityType = "BRANCH";
+		}
+		List<Role> allRoles = roleRepository.findAll();
+		for (Role curRole : allRoles){
+			if (curRole.hasPermissionTo(permission)) {
+				String memberType = curRole.getName();
+				topicSubscribers = topicSubscriberReadPlatformService.getSubscribers(entityId, entityType, memberType);
+			}
+		}
+		
+		for (TopicSubscriberData topicSubscriber : topicSubscribers) {
+			subscriberIds.add(topicSubscriber.getUserId());
 		 }
-		 return userIds;
+		 return subscriberIds;
 	}
 }
