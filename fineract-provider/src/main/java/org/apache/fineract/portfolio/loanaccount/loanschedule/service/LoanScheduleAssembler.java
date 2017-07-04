@@ -515,7 +515,8 @@ public class LoanScheduleAssembler {
                             && StringUtils.isNotBlank((jsonObject.get(LoanApiConstants.disbursementPrincipalParameterName).getAsString()))) {
                         principal = jsonObject.getAsJsonPrimitive(LoanApiConstants.disbursementPrincipalParameterName).getAsBigDecimal();
                     }
-                    disbursementDatas.add(new DisbursementData(null, expectedDisbursementDate, null, principal, null, null));
+                    BigDecimal waivedAmount = null;
+                    disbursementDatas.add(new DisbursementData(null, expectedDisbursementDate, null, principal, null, null, waivedAmount));
                     i++;
                 } while (i < disbursementDataArray.size());
             }

@@ -5576,9 +5576,9 @@ public class Loan extends AbstractPersistableCustom<Long> {
             if (loanDisbursementDetails.actualDisbursementDate() != null) {
                 actualDisbursementDate = new LocalDate(loanDisbursementDetails.actualDisbursementDate());
             }
-
+            BigDecimal waivedAmount = null;
             disbursementData.add(new DisbursementData(loanDisbursementDetails.getId(), expectedDisbursementDate, actualDisbursementDate,
-                    loanDisbursementDetails.principal(), null, null));
+                    loanDisbursementDetails.principal(), null, null, waivedAmount));
         }
 
         return disbursementData;

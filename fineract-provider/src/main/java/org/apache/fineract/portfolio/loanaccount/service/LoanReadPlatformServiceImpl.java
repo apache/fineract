@@ -132,6 +132,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import sun.awt.image.PixelConverter.Bgrx;
+
 @Service
 public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
@@ -1056,7 +1058,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         @Override
         public LoanScheduleData extractData(final ResultSet rs) throws SQLException, DataAccessException {
-
+            BigDecimal waivedAmount = BigDecimal.ZERO;
+            for (DisbursementData disbursementDetail : disbursementData) {
+                waivedAmount = waivedAmount.add(disbursementDetail.getWaivedChargeAmount());
+            }
             final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursementOnlyPeriod(
                     this.disbursement.disbursementDate(), this.disbursement.amount(), this.totalFeeChargesDueAtDisbursement,
                     this.disbursement.isDisbursed());
@@ -1095,9 +1100,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             Money totalOutstanding = Money.zero(monCurrency);
 
             // update totals with details of fees charged during disbursement
-            totalFeeChargesCharged = totalFeeChargesCharged.plus(disbursementPeriod.feeChargesDue());
-            totalRepaymentExpected = totalRepaymentExpected.plus(disbursementPeriod.feeChargesDue());
-            totalRepayment = totalRepayment.plus(disbursementPeriod.feeChargesPaid());
+            totalFeeChargesCharged = totalFeeChargesCharged.plus(disbursementPeriod.feeChargesDue().subtract(waivedAmount));
+            totalRepaymentExpected = totalRepaymentExpected.plus(disbursementPeriod.feeChargesDue()).minus(waivedAmount);
+            totalRepayment = totalRepayment.plus(disbursementPeriod.feeChargesPaid()).minus(waivedAmount);
             totalOutstanding = totalOutstanding.plus(disbursementPeriod.feeChargesDue()).minus(disbursementPeriod.feeChargesPaid());
 
             Integer loanTermInDays = Integer.valueOf(0);
@@ -1121,7 +1126,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                                             disbursementChargeAmount, data.isDisbursed());
                                 } else {
                                     periodData = LoanSchedulePeriodData.disbursementOnlyPeriod(data.disbursementDate(), data.amount(),
-                                            disbursementChargeAmount.add(data.getChargeAmount()), data.isDisbursed());
+                                            disbursementChargeAmount.add(data.getChargeAmount()).subtract(waivedAmount), data.isDisbursed());
                                 }
                                 if (periodData != null) {
                                     periods.add(periodData);
@@ -1543,7 +1548,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal waivedAmount = rs.getBigDecimal("waivedAmount");
             if (chargeAmount != null && waivedAmount != null) chargeAmount = chargeAmount.subtract(waivedAmount);
             final DisbursementData disbursementData = new DisbursementData(id, expectedDisbursementdate, actualDisbursementdate, principal,
-                    loanChargeId, chargeAmount);
+                    loanChargeId, chargeAmount, waivedAmount);
             return disbursementData;
         }
 

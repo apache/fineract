@@ -1482,7 +1482,7 @@ public class LoanAccountData {
 
     public RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData() {
         return this.timeline.repaymentScheduleRelatedData(this.currency, this.principal, this.approvedPrincipal, this.inArrearsTolerance,
-                this.feeChargesAtDisbursementCharged);
+                (this.feeChargesAtDisbursementCharged));
     }
 
     public Long officeId() {
