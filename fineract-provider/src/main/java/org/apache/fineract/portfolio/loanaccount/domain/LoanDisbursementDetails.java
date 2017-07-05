@@ -119,7 +119,8 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom<Long> {
         if (this.actualDisbursementDate != null) {
             actualDisburseDate = new LocalDate(this.actualDisbursementDate);
         }
-        return new DisbursementData(getId(), expectedDisburseDate, actualDisburseDate, this.principal, null, null);
+        BigDecimal waivedChargeAmount = null;
+        return new DisbursementData(getId(), expectedDisburseDate, actualDisburseDate, this.principal, null, null, waivedChargeAmount);
     }
 
     public void updateActualDisbursementDate(Date actualDisbursementDate) {
