@@ -151,6 +151,7 @@ public class DepositsApiConstants {
     public static final String runningBalanceParamName = "runningBalance";
     public static final String reversedParamName = "reversed";
     public static final String dateParamName = "date";
+    public static final String accountIdParamName = "accountId";
 
     // recurring deposits update parameters
     public static final String effectiveDateParamName = "effectiveDate";
@@ -199,9 +200,6 @@ public class DepositsApiConstants {
     // template
     public static final String chartTemplate = "chartTemplate";
 
-    // allowed column names for sorting the query result
-    public final static Set<String> supportedOrderByValues = new HashSet<>(Arrays.asList("id", "accountNumbr", "officeId", "officeName"));
-
     /**
      * Deposit Product Parameters
      */
@@ -244,7 +242,7 @@ public class DepositsApiConstants {
             adjustAdvanceTowardsFuturePaymentsParamName, recurringFrequencyTypeParamName, recurringFrequencyParamName,
             isCalendarInheritedParamName));
 
-    public static final Set<String> DEPOSIT_PRECLOSURE_CALCULATION_REQUEST_DATA_PARAMETERS = new HashSet<>(
+    private static final Set<String> DEPOSIT_PRECLOSURE_CALCULATION_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(preMatureCloseOnDateParamName));
 
     public static final Set<String> FIXED_DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS = fixedDepositProductRequestData();
@@ -293,13 +291,15 @@ public class DepositsApiConstants {
      * Depost Account parameters
      */
 
-    public static final Set<String> DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
-            dateFormatParamName, monthDayFormatParamName, accountNoParamName, externalIdParamName, clientIdParamName, groupIdParamName,
-            productIdParamName, fieldOfficerIdParamName, submittedOnDateParamName, nominalAnnualInterestRateParamName,
-            interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName, interestCalculationTypeParamName,
-            interestCalculationDaysInYearTypeParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName,
-            chargesParamName, chartsParamName, depositAmountParamName, depositPeriodParamName, depositPeriodFrequencyIdParamName,
-            savingsAccounts, expectedFirstDepositOnDateParamName, SavingsApiConstants.withHoldTaxParamName));
+	private static final Set<String> DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(localeParamName, dateFormatParamName, monthDayFormatParamName, accountNoParamName,
+					externalIdParamName, clientIdParamName, groupIdParamName, productIdParamName,
+					fieldOfficerIdParamName, submittedOnDateParamName, nominalAnnualInterestRateParamName,
+					interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName,
+					interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
+					lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, chargesParamName,
+					chartsParamName, depositAmountParamName, depositPeriodParamName, depositPeriodFrequencyIdParamName,
+					savingsAccounts, expectedFirstDepositOnDateParamName, SavingsApiConstants.withHoldTaxParamName));
 
     public static final Set<String> FIXED_DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS = fixedDepositAccountRequestData();
     public static final Set<String> FIXED_DEPOSIT_ACCOUNT_RESPONSE_DATA_PARAMETERS = fixedDepositAccountResponseData();
@@ -345,27 +345,27 @@ public class DepositsApiConstants {
         return recurringDepositResponseData;
     }
 
-    public static final Set<String> FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
-            "accountId", accountNoParamName, "currency", "amount", dateParamName, paymentDetailDataParamName, runningBalanceParamName,
-            reversedParamName));
+	private static final Set<String> RECURRING_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(idParamName, "accountId", accountNoParamName, "currency", "amount", dateParamName,
+					paymentDetailDataParamName, runningBalanceParamName, reversedParamName));
 
-    public static final Set<String> RECURRING_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
-            "accountId", accountNoParamName, "currency", "amount", dateParamName, paymentDetailDataParamName, runningBalanceParamName,
-            reversedParamName));
-
-    public static final Set<String> SAVINGS_ACCOUNT_ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
+    private static final Set<String> SAVINGS_ACCOUNT_ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList
+            (localeParamName,
             dateFormatParamName, activatedOnDateParamName));
 
-    public static final Set<String> SAVINGS_ACCOUNT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(chargeIdParamName,
+    private static final Set<String> SAVINGS_ACCOUNT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList
+            (chargeIdParamName,
             savingsAccountChargeIdParamName, chargeNameParamName, penaltyParamName, chargeTimeTypeParamName, dueAsOfDateParamName,
             chargeCalculationTypeParamName, percentageParamName, amountPercentageAppliedToParamName, currencyParamName,
             amountWaivedParamName, amountWrittenOffParamName, amountOutstandingParamName, amountOrPercentageParamName, amountParamName,
             amountPaidParamName, chargeOptionsParamName));
 
-    public static final Set<String> SAVINGS_ACCOUNT_CHARGES_ADD_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(chargeIdParamName,
+    private static final Set<String> SAVINGS_ACCOUNT_CHARGES_ADD_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList
+            (chargeIdParamName,
             amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName, feeOnMonthDayParamName, monthDayFormatParamName,
             feeIntervalParamName));
 
-    public static final Set<String> SAVINGS_ACCOUNT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+    private static final Set<String> SAVINGS_ACCOUNT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays
+            .asList(
             amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName));
 }

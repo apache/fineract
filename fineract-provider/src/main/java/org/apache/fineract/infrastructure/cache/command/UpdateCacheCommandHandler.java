@@ -20,8 +20,11 @@ package org.apache.fineract.infrastructure.cache.command;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.annotation.CommandType;
@@ -47,6 +50,8 @@ import com.google.gson.reflect.TypeToken;
 public class UpdateCacheCommandHandler implements NewCommandSourceHandler {
 
     private final CacheWritePlatformService cacheService;
+    private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(CacheApiConstants
+            .cacheTypeParameter));
 
     @Autowired
     public UpdateCacheCommandHandler(final CacheWritePlatformService cacheService) {
@@ -62,7 +67,7 @@ public class UpdateCacheCommandHandler implements NewCommandSourceHandler {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        command.checkForUnsupportedParameters(typeOfMap, json, CacheApiConstants.REQUEST_DATA_PARAMETERS);
+        command.checkForUnsupportedParameters(typeOfMap, json, REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)

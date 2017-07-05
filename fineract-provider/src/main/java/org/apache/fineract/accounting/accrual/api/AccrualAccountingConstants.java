@@ -30,7 +30,4 @@ public class AccrualAccountingConstants {
     
     public static final String PERIODIC_ACCRUAL_ACCOUNTING_RESOURCE_NAME = "periodicaccrual";
     public static final String PERIODIC_ACCRUAL_ACCOUNTING_EXECUTION_ERROR_CODE = "execution.failed";
-
-    public static final Set<String> LOAN_PERIODIC_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(accrueTillParamName,
-            localeParamName, dateFormatParamName));
 }
