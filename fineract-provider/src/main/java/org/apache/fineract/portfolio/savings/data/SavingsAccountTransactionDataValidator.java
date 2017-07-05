@@ -31,6 +31,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.transact
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawBalanceParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_HOLD_AMOUNT_REQUEST_DATA_PARAMETERS;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.noteParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -94,6 +95,9 @@ public class SavingsAccountTransactionDataValidator {
 
         final BigDecimal transactionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(transactionAmountParamName, element);
         baseDataValidator.reset().parameter(transactionAmountParamName).value(transactionAmount).notNull().positiveAmount();
+		
+		final String note = this.fromApiJsonHelper.extractStringNamed(noteParamName, element);
+        baseDataValidator.reset().parameter(noteParamName).value(note).notNull().notExceedingLengthOf(1000);
 
         validatePaymentTypeDetails(baseDataValidator, element);
 

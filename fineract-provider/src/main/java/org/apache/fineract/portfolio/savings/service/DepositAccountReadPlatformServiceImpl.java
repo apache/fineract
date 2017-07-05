@@ -968,6 +968,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             sqlBuilder.append("totran.transaction_date as toTransferDate, totran.amount as toTransferAmount,");
             sqlBuilder.append("totran.description as toTransferDescription,");
             sqlBuilder.append("sa.id as savingsId, sa.account_no as accountNo,");
+			sqlBuilder.append("au.username as submittedByUsername,");
             sqlBuilder.append("pd.payment_type_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, ");
             sqlBuilder.append("pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode, ");
             sqlBuilder
@@ -982,6 +983,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             sqlBuilder.append("left join m_account_transfer_transaction totran on totran.to_savings_transaction_id = tr.id ");
             sqlBuilder.append("left join m_payment_detail pd on tr.payment_detail_id = pd.id ");
             sqlBuilder.append("left join m_payment_type pt on pd.payment_type_id = pt.id ");
+			sqlBuilder.append("left join m_appuser au on au.id=tr.appuser_id ");
 
             this.schemaSql = sqlBuilder.toString();
         }
@@ -1051,8 +1053,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                         toTransferDescription, toTransferReversed);
             }
             final boolean postInterestAsOn = false;
+			final String submittedByUsername = rs.getString("submittedByUsername");
             return SavingsAccountTransactionData.create(id, transactionType, paymentDetailData, savingsId, accountNo, date, currency,
-                    amount, outstandingChargeAmount, runningBalance, reversed, transfer, postInterestAsOn);
+                    amount, outstandingChargeAmount, runningBalance, reversed, transfer, postInterestAsOn, submittedByUsername);
         }
     }
 
@@ -1447,8 +1450,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final AccountTransferData transfer = null;
             final BigDecimal runningBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "runningBalance");
             final boolean postInterestAsOn = false;
+			final String submittedByUsername = rs.getString("submittedByUsername");
             return SavingsAccountTransactionData.create(savingsId, transactionType, paymentDetailData, savingsId, accountNo, duedate,
-                    currency, dueamount, outstandingChargeAmount, runningBalance, false, transfer, postInterestAsOn);
+                    currency, dueamount, outstandingChargeAmount, runningBalance, false, transfer, postInterestAsOn, submittedByUsername);
         }
     }
 
