@@ -49,7 +49,6 @@ public class NotificationMapper extends AbstractPersistableCustom<Long> {
 	}
 
 	public NotificationMapper(Notification notification, AppUser userId, boolean isRead, String createdAt) {
-		super();
 		this.notification = notification;
 		this.userId = userId;
 		this.isRead = isRead;

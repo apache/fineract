@@ -18,10 +18,7 @@
  */
 package org.apache.fineract.notification.eventandlistener;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
@@ -32,8 +29,6 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.BasicAuthTenantDetailsService;
 import org.apache.fineract.notification.data.NotificationData;
 import org.apache.fineract.notification.service.NotificationWritePlatformService;
-import org.apache.fineract.useradministration.domain.AppUser;
-import org.apache.fineract.useradministration.domain.AppUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.listener.SessionAwareMessageListener;
 
@@ -41,14 +36,12 @@ public class NotificationEventListener implements SessionAwareMessageListener<Me
 
 	private final BasicAuthTenantDetailsService basicAuthTenantDetailsService;
 	private final NotificationWritePlatformService notificationWritePlatformService;
-	private final AppUserRepository appUserRepository;
 	
 	@Autowired
 	public NotificationEventListener(BasicAuthTenantDetailsService basicAuthTenantDetailsService,
-			NotificationWritePlatformService notificationWritePlatformService, AppUserRepository appUserRepository) {
+			NotificationWritePlatformService notificationWritePlatformService) {
 		this.basicAuthTenantDetailsService = basicAuthTenantDetailsService;
 		this.notificationWritePlatformService = notificationWritePlatformService;
-		this.appUserRepository = appUserRepository;
 	}
 
 	@Override

@@ -39,8 +39,6 @@ public class NotificationMapperWritePlatformServiceJpaRepositoryImpl implements 
 	public Long create(NotificationMapper notificationMapper) {
 		this.notificationMapperRepository.save(notificationMapper);
 		return notificationMapper.getId();
-	}
-	
-	
+	}	
 	
 }

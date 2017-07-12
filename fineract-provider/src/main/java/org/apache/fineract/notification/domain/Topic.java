@@ -27,10 +27,9 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Entity
 @Table(name = "topic")
 public class Topic extends AbstractPersistableCustom<Long> {
-	
-	
+
 	@Column(name = "title", unique = true, nullable = false, length = 100)
-    private String title;
+	private String title;
 	
 	@Column(name = "enabled", nullable = false)
 	private Boolean enabled;
@@ -39,16 +38,15 @@ public class Topic extends AbstractPersistableCustom<Long> {
 	private Long entityId;
 	
 	@Column(name = "entity_type")
-    private String entityType;
+	private String entityType;
 	
 	@Column(name = "member_type")
-    private String memberType;
+	private String memberType;
 	
 	public Topic() {
 	}
 	
 	public Topic(String title, Boolean enabled, Long entityId, String entityType, String memberType) {
-		
 		this.title = title.trim();
 		this.enabled = enabled;
 		this.entityId = entityId;
@@ -57,30 +55,29 @@ public class Topic extends AbstractPersistableCustom<Long> {
 	}
 
 	public static Topic fromJson(final JsonCommand command) {
-
 		String title = "";
 		Boolean enabled = null;
 		Long entityId = 0L;
 		String entityType = "";
 		String memberType = "";
 		
-		if(command.hasParameter("title")) {
+		if (command.hasParameter("title")) {
 			title = command.stringValueOfParameterNamed("title");
 		}
-        if (command.hasParameter("enabled")) {
-        	enabled = command.booleanPrimitiveValueOfParameterNamed("enabled");
+		if (command.hasParameter("enabled")) {
+			enabled = command.booleanPrimitiveValueOfParameterNamed("enabled");
+		}
+		if (command.hasParameter("entityId")) {
+			entityId = command.longValueOfParameterNamed("entityId");
+		}
+		if (command.hasParameter("entityType")) {
+			entityType = command.stringValueOfParameterNamed("entityType");
         }
-        if (command.hasParameter("entityId")) {
-        	entityId = command.longValueOfParameterNamed("entityId");
-        }
-        if (command.hasParameter("entityType")) {
-        	entityType = command.stringValueOfParameterNamed("entityType");
-        }
-        if (command.hasParameter("memberType")) {
-        	memberType = command.stringValueOfParameterNamed("memberType");
-        }
-        return new Topic(title, enabled, entityId, entityType, memberType);
-    }
+		if (command.hasParameter("memberType")) {
+			memberType = command.stringValueOfParameterNamed("memberType");
+		}
+		return new Topic(title, enabled, entityId, entityType, memberType);
+	}
 
 	public String getTitle() {
 		return this.title;

@@ -154,13 +154,13 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
 			final Long userId = rs.getLong("userId");
 			notificationMapperData.setUserId(userId);
 			
-			 final boolean isRead = rs.getBoolean("isRead");
-			 notificationMapperData.setRead(isRead);
+			final boolean isRead = rs.getBoolean("isRead");
+			notificationMapperData.setRead(isRead);
 			 
-			 final String createdAt = rs.getString("createdAt");
-			 notificationMapperData.setCreatedAt(createdAt);
+			final String createdAt = rs.getString("createdAt");
+			notificationMapperData.setCreatedAt(createdAt);
 			 
-			 return notificationMapperData;
+			return notificationMapperData;
 		}
 		
 	}

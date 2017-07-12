@@ -36,12 +36,12 @@ public class TopicReadPlatformServiceImpl implements TopicReadPlatformService {
 	
 	private final JdbcTemplate jdbcTemplate;
 	
-    @Autowired
+	@Autowired
 	public TopicReadPlatformServiceImpl(final RoutingDataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
     
-    private static final class TopicMapper implements RowMapper<TopicData> {
+	private static final class TopicMapper implements RowMapper<TopicData> {
 
         private final String schema;
 
@@ -92,7 +92,7 @@ public class TopicReadPlatformServiceImpl implements TopicReadPlatformService {
             final String sql = "select " + tm.schema() + " where t.id = ?";
             return this.jdbcTemplate.queryForObject(sql, tm, new Object[] { topicId });
         } catch (final EmptyResultDataAccessException e) {
-            throw new TopicNotFoundException(topicId);
+        	throw new TopicNotFoundException(topicId);
         }
 	}	
 }

@@ -584,7 +584,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 			entityType = "BRANCH";
 		}
 		List<Role> allRoles = roleRepository.findAll();
-		for (Role curRole : allRoles){
+		for (Role curRole : allRoles) {
 			if (curRole.hasPermissionTo(permission)) {
 				String memberType = curRole.getName();
 				topicSubscribers = topicSubscriberReadPlatformService.getSubscribers(entityId, entityType, memberType);

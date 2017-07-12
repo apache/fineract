@@ -66,7 +66,7 @@ public class BusinessEventNotificationConstants {
         LOAN("loan"), LOAN_TRANSACTION("loan_transaction"), LOAN_CHARGE("loan_charge"), LOAN_ADJUSTED_TRANSACTION(
                 "loan_adjusted_transaction"), SAVING("saving"), CLIENT("client"), SAVINGS_TRANSACTION("Savings Transaction"), 
         		GROUP("group"), SHARE_ACCOUNT("share_account"), SHARE_PRODUCT("share_product"), DEPOSIT_ACCOUNT("deposit_account"),
-        		LOAN_PRODUCT("loan_product");;
+        		LOAN_PRODUCT("loan_product");
 
         private final String value;
 
