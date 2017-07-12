@@ -129,7 +129,11 @@ public class Role extends AbstractPersistableCustom<Long> {
         return new RoleData(getId(), this.name, this.description, this.disabled);
     }
 
-    public void disableRole() {
+    public String getName() {
+		return this.name;
+	}
+
+	public void disableRole() {
         this.disabled = true;
     }
 
