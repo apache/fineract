@@ -325,6 +325,8 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
     @JoinColumn(name = "tax_group_id")
     private TaxGroup taxGroup;
 
+    @Column(name = "total_savings_amount_on_hold", scale = 6, precision = 19, nullable = true)
+    private BigDecimal savingsOnHoldAmount;
     protected SavingsAccount() {
         //
     }
@@ -1051,18 +1053,15 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
         Money runningBalance = Money.zero(this.currency);
         Money minRequiredBalance = minRequiredBalanceDerived(getCurrency());
         LocalDate lastSavingsDate = null;
+        final BigDecimal withdrawalFee = null;
         for (final SavingsAccountTransaction transaction : transactionsSortedByDate) {
             if (transaction.isNotReversed() && transaction.isCredit()) {
                 runningBalance = runningBalance.plus(transaction.getAmount(this.currency));
             } else if (transaction.isNotReversed() && transaction.isDebit()) {
                 runningBalance = runningBalance.minus(transaction.getAmount(this.currency));
-            } else if(transaction.isAmountOnHold() && transaction.getReleaseIdOfHoldAmountTransaction() == null){
-                runningBalance = runningBalance.minus(transaction.getAmount(this.currency));
             }else {
                 continue;
             }
-
-            final BigDecimal withdrawalFee = null;
 
             /*
              * Loop through the onHold funds and see if we need to deduct or add
@@ -1093,6 +1092,12 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
             lastSavingsDate = transaction.transactionLocalDate();
 
         }
+		if (this.getSavingsHoldAmount().compareTo(BigDecimal.ZERO) == 1) {
+			if (runningBalance.minus(this.getSavingsHoldAmount()).isLessThanZero()) {
+				throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee,
+						transactionAmount);
+			}
+		}
     }
 
     public void validateAccountBalanceDoesNotBecomeNegative(final String transactionAction,
@@ -2753,7 +2758,7 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
     }
 
     public BigDecimal getWithdrawableBalance() {
-        return getAccountBalance().subtract(minRequiredBalanceDerived(getCurrency()).getAmount()).subtract(this.getOnHoldFunds());
+        return getAccountBalance().subtract(minRequiredBalanceDerived(getCurrency()).getAmount()).subtract(this.getOnHoldFunds()).subtract(this.getSavingsHoldAmount());
     }
 
     public TaxGroup getTaxGroup() {
@@ -3006,9 +3011,27 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
 
     public LocalDate retrieveLastTransactionDate() {
         final List<SavingsAccountTransaction> transactionsSortedByDate = retreiveListOfTransactions();
-        SavingsAccountTransaction lastTransaction = transactionsSortedByDate.get(transactionsSortedByDate.size() - 1);
-        return lastTransaction.transactionLocalDate();
+        SavingsAccountTransaction lastTransaction = null;
+        if (transactionsSortedByDate.size() > 0) {
+            lastTransaction = transactionsSortedByDate.get(transactionsSortedByDate.size() - 1);
+        }
+        LocalDate lastransactionDate = null;
+        if (lastTransaction != null) {
+            lastransactionDate = lastTransaction.transactionLocalDate();
+        }
+        return lastransactionDate;
     }
-    
-    
+
+    public BigDecimal getSavingsHoldAmount() {
+        return this.savingsOnHoldAmount == null ? BigDecimal.ZERO : this.savingsOnHoldAmount;
+    }
+
+    public void holdAmount(BigDecimal amount) {
+        this.savingsOnHoldAmount = getSavingsHoldAmount().add(amount);
+    }
+
+    public void releaseAmount(BigDecimal amount) {
+        this.savingsOnHoldAmount = getSavingsHoldAmount().subtract(amount);
+    }
+
 }

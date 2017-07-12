@@ -69,6 +69,7 @@ public class SavingsAccountHelper {
     public static final String CREATED_DATE_PLUS_ONE = "09 January 2013";
     public static final String CREATED_DATE_MINUS_ONE = "07 January 2013";
     public static final String TRANSACTION_DATE = "01 March 2013";
+    public static final String TRANSACTION_DATE_PLUS_ONE = "02 March 2013";
     public static final String LAST_TRANSACTION_DATE = "01 March 2013";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
 
