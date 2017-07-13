@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.organisation.office.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.PersistenceException;
@@ -29,6 +31,8 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.notification.domain.Topic;
+import org.apache.fineract.notification.domain.TopicRepository;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -40,6 +44,8 @@ import org.apache.fineract.organisation.office.domain.OfficeTransactionRepositor
 import org.apache.fineract.organisation.office.serialization.OfficeCommandFromApiJsonDeserializer;
 import org.apache.fineract.organisation.office.serialization.OfficeTransactionCommandFromApiJsonDeserializer;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.apache.fineract.useradministration.domain.Role;
+import org.apache.fineract.useradministration.domain.RoleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,19 +66,23 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     private final OfficeRepositoryWrapper officeRepositoryWrapper;
     private final OfficeTransactionRepository officeTransactionRepository;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
+    private final RoleRepository roleRepository;
+    private final TopicRepository topicRepository;
 
     @Autowired
     public OfficeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final OfficeTransactionCommandFromApiJsonDeserializer moneyTransferCommandFromApiJsonDeserializer,
             final OfficeRepositoryWrapper officeRepositoryWrapper, final OfficeTransactionRepository officeMonetaryTransferRepository,
-            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository) {
+            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository, RoleRepository roleRepository, TopicRepository topicRepository) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.moneyTransferCommandFromApiJsonDeserializer = moneyTransferCommandFromApiJsonDeserializer;
         this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.officeTransactionRepository = officeMonetaryTransferRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
+        this.roleRepository = roleRepository;
+        this.topicRepository = topicRepository;
     }
 
     @Transactional
@@ -101,6 +111,23 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
             office.generateHierarchy();
 
             this.officeRepositoryWrapper.save(office);
+            
+            Long entityId = office.getId();
+            String entityType = "";
+            if (office.getParent() == null) {
+            	entityType = "OFFICE";
+            } else {
+            	entityType = "BRANCH";
+            }
+            
+            List<Role> allRoles = roleRepository.findAll();
+            for(Role curRole : allRoles) {
+            	String memberType = curRole.getName().toUpperCase();
+            	String title = curRole.getName() + " of " + office.getName();
+            	Topic newTopic = new Topic(title, true, entityId, entityType, memberType);
+            	topicRepository.save(newTopic);
+            }
+            
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //

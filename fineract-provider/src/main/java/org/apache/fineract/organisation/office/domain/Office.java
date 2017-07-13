@@ -205,7 +205,11 @@ public class Office extends AbstractPersistableCustom<Long> {
         return this.hierarchy;
     }
 
-    public boolean hasParentOf(final Office office) {
+    public Office getParent() {
+		return this.parent;
+	}
+
+	public boolean hasParentOf(final Office office) {
         boolean isParent = false;
         if (this.parent != null) {
             isParent = this.parent.equals(office);

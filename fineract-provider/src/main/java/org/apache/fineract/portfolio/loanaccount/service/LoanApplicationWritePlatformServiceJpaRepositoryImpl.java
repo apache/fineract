@@ -394,7 +394,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     EntityTables.LOAN.getName(), StatusEnum.CREATE.getCode().longValue(),
                     EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), newLoanApplication.productId());
 
-
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_CREATE,
+            		constructEntityMap(BUSINESS_ENTITY.LOAN, newLoanApplication));
+            
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withEntityId(newLoanApplication.getId()) //
