@@ -35,15 +35,17 @@ public class DisbursementData implements Comparable<DisbursementData> {
     @SuppressWarnings("unused")
     private final String loanChargeId;
     private final BigDecimal chargeAmount;
+    private final BigDecimal waivedChargeAmount;
 
     public DisbursementData(Long id, final LocalDate expectedDisbursementDate, final LocalDate actualDisbursementDate,
-            final BigDecimal principalDisbursed, final String loanChargeId, BigDecimal chargeAmount) {
+            final BigDecimal principalDisbursed, final String loanChargeId, BigDecimal chargeAmount, BigDecimal waivedChargeAmount) {
         this.id = id;
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.actualDisbursementDate = actualDisbursementDate;
         this.principal = principalDisbursed;
         this.loanChargeId = loanChargeId;
         this.chargeAmount = chargeAmount;
+        this.waivedChargeAmount = waivedChargeAmount;
     }
 
     public LocalDate disbursementDate() {
@@ -81,6 +83,14 @@ public class DisbursementData implements Comparable<DisbursementData> {
     private boolean occursOnDayFromAndUpToAndIncluding(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive,
             final LocalDate target) {
         return target != null && target.isAfter(fromNotInclusive) && !target.isAfter(upToAndInclusive);
+    }
+
+    
+    public BigDecimal getWaivedChargeAmount() {
+        if(this.waivedChargeAmount == null){
+            return BigDecimal.ZERO;
+        }
+        return this.waivedChargeAmount;
     }
 
 }
