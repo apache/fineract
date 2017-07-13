@@ -26,7 +26,7 @@ import org.apache.fineract.accounting.common.AccountingConstants.SAVINGS_PRODUCT
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 
-public class SavingsApiConstants {
+public class    SavingsApiConstants {
 
     public static final String SAVINGS_PRODUCT_RESOURCE_NAME = "savingsproduct";
     public static final String SAVINGS_ACCOUNT_RESOURCE_NAME = "savingsaccount";
@@ -186,7 +186,4 @@ public class SavingsApiConstants {
     public static final String datatables = "datatables";
     
     public static final String ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE = "not.in.active.state";
-    
-    public static final Set<String> SAVINGS_ACCOUNT_HOLD_AMOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(transactionDateParamName, dateFormatParamName, localeParamName, transactionAmountParamName));
 }
