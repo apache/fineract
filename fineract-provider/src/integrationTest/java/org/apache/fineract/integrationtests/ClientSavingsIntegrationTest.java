@@ -28,10 +28,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
@@ -2214,13 +2216,17 @@ public class ClientSavingsIntegrationTest {
         Integer holdTransactionId = (Integer) this.savingsAccountHelper.holdAmountInSavingsAccount(savingsId, String.valueOf(balance - 100),
                 SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
         error = (List) savingsAccountHelperValidationError.withdrawalFromSavingsAccount(savingsId, "300",
-                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_ERROR);
+                SavingsAccountHelper.TRANSACTION_DATE_PLUS_ONE, CommonConstants.RESPONSE_ERROR);
         assertEquals("error.msg.savingsaccount.transaction.insufficient.account.balance",
                 error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         Integer releaseTransactionId = this.savingsAccountHelper.releaseAmount(savingsId, holdTransactionId);
-        withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "300",
-                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+        Date today = DateUtils.getDateOfTenant();
+        String todayDate = today.toString();
+        SimpleDateFormat dt1 = new SimpleDateFormat("dd MMM yyyy");
+        todayDate = dt1.format(today).toString();
+        withdrawTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "300", todayDate,
+                CommonConstants.RESPONSE_RESOURCE_ID);
         withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
         balance -= new Float("300");
         assertEquals("Verifying Withdrawal Amount", new Float("300"), withdrawTransaction.get("amount"));

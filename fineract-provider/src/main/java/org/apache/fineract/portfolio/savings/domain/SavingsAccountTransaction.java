@@ -787,4 +787,8 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     public Long getReleaseIdOfHoldAmountTransaction() {
         return this.releaseIdOfHoldAmountTransaction;
     }
+    
+	public boolean isAmountOnHoldNotReleased() {
+		return (isAmountOnHold() && getReleaseIdOfHoldAmountTransaction() == null);
+	}	    
 }

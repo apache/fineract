@@ -612,8 +612,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public CommandProcessingResult close(final Long savingsId, final JsonCommand command) {
         final AppUser user = this.context.authenticatedUser();
         
-        this.savingsAccountTransactionDataValidator.validateClosing(command);
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+        this.savingsAccountTransactionDataValidator.validateClosing(command, account);
+        
         final boolean isLinkedWithAnyActiveLoan = this.accountAssociationsReadPlatformService.isLinkedWithAnyActiveAccount(savingsId);
 
         if (isLinkedWithAnyActiveLoan) {
@@ -1403,7 +1404,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .validateReleaseAmountAndAssembleForm(holdTransaction, submittedBy);
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
         checkClientOrGroupActive(account);
-        account.releaseFunds(transaction.getAmount());
+        account.releaseAmount(transaction.getAmount());
 
         this.savingsAccountTransactionRepository.save(transaction);
         holdTransaction.updateReleaseId(transaction.getId());

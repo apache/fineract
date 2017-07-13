@@ -40,5 +40,9 @@ INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `c
 
 ALTER TABLE `m_savings_account_transaction` ADD COLUMN `release_id_of_hold_amount` BIGINT(20) NULL DEFAULT NULL;
 
+--  modify `m_savings_account` 
+
+ALTER TABLE `m_savings_account` ADD COLUMN `total_savings_amount_on_hold` DECIMAL(19,6) NULL DEFAULT NULL;
+
 
 

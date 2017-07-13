@@ -133,6 +133,7 @@ public class    SavingsApiConstants {
     public static final String minBalanceForInterestCalculationParamName = "minBalanceForInterestCalculation";
     public static final String withdrawBalanceParamName = "withdrawBalance";
     public static final String onHoldFundsParamName = "onHoldFunds";
+    public static final String savingsAmountOnHold = "savingsAmountOnHold";
     public static final String withHoldTaxParamName = "withHoldTax";
     public static final String taxGroupIdParamName = "taxGroupId";
 

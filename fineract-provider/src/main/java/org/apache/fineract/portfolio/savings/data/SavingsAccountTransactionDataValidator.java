@@ -123,7 +123,7 @@ public class SavingsAccountTransactionDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateClosing(final JsonCommand command) {
+    public void validateClosing(final JsonCommand command, final SavingsAccount account) {
         final String json = command.json();
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
@@ -146,6 +146,11 @@ public class SavingsAccountTransactionDataValidator {
             baseDataValidator.reset().parameter(withdrawBalanceParamName).value(withdrawBalance).isOneOfTheseValues(true, false);
         }
 
+		if (account.getSavingsHoldAmount().compareTo(BigDecimal.ZERO) == 1) {
+			baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
+					"amount.is.on.hold.release.the.amount.to.continue", account.getId());
+		}
+                      
         validatePaymentTypeDetails(baseDataValidator, element);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -194,10 +199,9 @@ public class SavingsAccountTransactionDataValidator {
             baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
                     .failWithCodeNoParameterAddedToErrorCode(SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
         }
-        account.holdFunds(amount);
-        if (account.getWithdrawableBalance().compareTo(BigDecimal.ZERO) == -1) {
+        account.holdAmount(amount);
+        if (account.getWithdrawableBalance().compareTo(BigDecimal.ZERO)==-1){
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("insufficient balance", account.getId());
-            baseDataValidator.failWithCode("validation.msg.savingsaccount.insufficient balance", "Insufficient balance");
         }
         LocalDate lastTransactionDate = account.retrieveLastTransactionDate();
         // compare two dates now
@@ -208,7 +212,8 @@ public class SavingsAccountTransactionDataValidator {
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
         final PaymentDetail paymentDetails = null;
-        Date createdDate = DateUtils.getDateOfTenant();
+        Date createdDate = new Date();
+        
         SavingsAccountTransaction transaction = SavingsAccountTransaction.holdAmount(account, account.office(), paymentDetails,
                 transactionDate, Money.of(account.getCurrency(), amount), createdDate, createdUser);
         return transaction;
@@ -219,15 +224,24 @@ public class SavingsAccountTransactionDataValidator {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
 
-        if (holdTransaction == null) {
-            baseDataValidator.failWithCode("validation.msg.validation.errors.exist", "Transaction not found");
-        } else if (holdTransaction.getReleaseIdOfHoldAmountTransaction() != null) {
-            baseDataValidator.parameter(SavingsApiConstants.amountParamName).value(holdTransaction.getAmount()).failWithCode("validation.msg.amount.is.not.on.hold",
-                    "Transaction amount is not on hold");
-        }
+		if (holdTransaction == null) {
+			baseDataValidator.failWithCode("validation.msg.validation.errors.exist", "Transaction not found");
+		} else if (holdTransaction.getReleaseIdOfHoldAmountTransaction() != null) {
+			baseDataValidator.parameter(SavingsApiConstants.amountParamName).value(holdTransaction.getAmount())
+					.failWithCode("validation.msg.amount.is.not.on.hold", "Transaction amount is not on hold");
+		}
+
+		if (holdTransaction != null) {
+			boolean isActive = holdTransaction.getSavingsAccount().isActive();
+			if (!isActive) {
+				baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
+						.failWithCodeNoParameterAddedToErrorCode(
+								SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
+			}
+		}
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
-        Date createdDate = DateUtils.getDateOfTenant();
+        Date createdDate = new Date();
         LocalDate transactionDate = DateUtils.getLocalDateOfTenant();
         SavingsAccountTransaction transaction = SavingsAccountTransaction.releaseAmount(holdTransaction, transactionDate, createdDate,
                 createdUser);
