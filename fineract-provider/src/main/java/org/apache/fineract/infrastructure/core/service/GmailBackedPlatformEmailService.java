@@ -39,7 +39,25 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
 	}
 
     @Override
-    public void sendToUserAccount(final EmailDetail emailDetail, final String unencodedPassword) {
+    public void sendToUserAccount(String organisationName, String contactName,
+                                  String address, String username, String unencodedPassword) {
+
+	    final String subject = "Welcome " + contactName + " to " + organisationName;
+	    final String body = "You are receiving this email as your email account: " +
+                address + " has being used to create a user account for an organisation named [" +
+                organisationName + "] on Mifos.\n" +
+                "You can login using the following credentials:\nusername: " + username + "\n" +
+                "password: " + unencodedPassword + "\n" +
+                "You must change this password upon first log in using Uppercase, Lowercase, number and character.\n" +
+                "Thank you and welcome to the organisation.";
+
+	    final EmailDetail emailDetail = new EmailDetail(subject, body, address, contactName);
+	    sendDefinedEmail(emailDetail);
+
+    }
+
+    @Override
+    public void sendDefinedEmail(EmailDetail emailDetails) {
         final Email email = new SimpleEmail();
         final SMTPCredentialsData smtpCredentialsData = this.externalServicesReadPlatformService.getSMTPCredentials();
         final String authuserName = smtpCredentialsData.getUsername();
@@ -51,32 +69,19 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
         email.setAuthenticator(new DefaultAuthenticator(authuser, authpwd));
         email.setDebug(false); // true if you want to debug
         email.setHostName(smtpCredentialsData.getHost());
+
         try {
-        	if(smtpCredentialsData.isUseTLS()){
-        		email.getMailSession().getProperties().put("mail.smtp.starttls.enable", "true");
-        	}
-        	email.setFrom(authuser, authuserName);
+            if(smtpCredentialsData.isUseTLS()){
+                email.getMailSession().getProperties().put("mail.smtp.starttls.enable", "true");
+            }
+            email.setFrom(authuser, authuserName);
 
-            final StringBuilder subjectBuilder = new StringBuilder().append("Welcome ").append(emailDetail.getContactName())
-                    .append(" to ").append(emailDetail.getOrganisationName());
+            email.setSubject(emailDetails.getSubject());
+            email.setMsg(emailDetails.getBody());
 
-            email.setSubject(subjectBuilder.toString());
-
-            final String sendToEmail = emailDetail.getAddress();
-
-            final StringBuilder messageBuilder = new StringBuilder().append("You are receiving this email as your email account: ")
-                    .append(sendToEmail).append(" has being used to create a user account for an organisation named [")
-                    .append(emailDetail.getOrganisationName()).append("] on Mifos.\n")
-                    .append("You can login using the following credentials:\nusername: ").append(emailDetail.getUsername()).append("\n")
-                    .append("password: ").append(unencodedPassword).append("\n")
-                    .append("You must change this password upon first log in using Uppercase, Lowercase, number and character.\n")
-                    .append("Thank you and welcome to the organisation.");
-
-            email.setMsg(messageBuilder.toString());
-
-            email.addTo(sendToEmail, emailDetail.getContactName());
+            email.addTo(emailDetails.getAddress(), emailDetails.getContactName());
             email.send();
-        } catch (final EmailException e) {
+        } catch (EmailException e) {
             throw new PlatformEmailSendException(e);
         }
     }

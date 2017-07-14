@@ -33,9 +33,9 @@ import org.springframework.stereotype.Component;
  * Implements {@link org.apache.fineract.batch.command.CommandStrategy} to handle
  * disburse of a loan. It passes the contents of the body from the
  * BatchRequest to
- * {@link org.apache.fineract.portfolio.client.api.LoansApiResource} and gets
+ * {@link org.apache.fineract.portfolio.loanaccount.api.LoansApiResource} and gets
  * back the response. This class will also catch any errors raised by
- * {@link org.apache.fineract.portfolio.client.api.LoansApiResource} and map
+ * {@link org.apache.fineract.portfolio.loanaccount.api.LoansApiResource} and map
  * those errors to appropriate status codes in BatchResponse.
  * 
  * @author Rishabh Shukla

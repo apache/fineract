@@ -499,6 +499,10 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         return actualChanges;
     }
 
+    public void updateCurrency(final MonetaryCurrency currency) {
+    	this.currency = currency ;
+    }
+    
     public void validateRepaymentPeriodWithGraceSettings() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loanproduct");

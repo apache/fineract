@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.useradministration.domain;
 
-import org.apache.fineract.infrastructure.core.domain.EmailDetail;
 import org.apache.fineract.infrastructure.core.service.PlatformEmailService;
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,10 +53,8 @@ public class JpaUserDomainService implements UserDomainService {
         this.userRepository.saveAndFlush(appUser);
 
         if (sendPasswordToEmail.booleanValue()) {
-            final EmailDetail emailDetail = new EmailDetail(appUser.getOffice().getName(), appUser.getFirstname(), appUser.getEmail(),
-                    appUser.getUsername());
-
-            this.emailService.sendToUserAccount(emailDetail, unencodedPassword);
+            this.emailService.sendToUserAccount(appUser.getOffice().getName(),
+                    appUser.getFirstname(), appUser.getEmail(), appUser.getUsername(), unencodedPassword);
         }
     }
 

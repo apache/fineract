@@ -35,8 +35,9 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 
 /**
- * {@link CommandHandlerProvider} provides {@link NewCommandSourceHandler}s for a given entity and action.<br/>
- * <br/>
+ * {@link CommandHandlerProvider} provides {@link NewCommandSourceHandler}s for a given entity and action.
+ * <br>
+ * <br>
  * A {@link NewCommandSourceHandler} can be registered and the annotation {@link CommandType} is used to determine
  * the entity and the action the handler is capable to process.
  *
@@ -60,8 +61,8 @@ public class CommandHandlerProvider implements ApplicationContextAware {
     }
 
     /**
-     * Returns a handler for the given entity and action.<br/>
-     * <br/>
+     * Returns a handler for the given entity and action.<br>
+     * <br>
      * Throws an {@link UnsupportedCommandException} if no handler
      * for the given entity, action combination can be found.
      * @param entity the entity to lookup the handler, must be given.

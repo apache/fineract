@@ -748,6 +748,7 @@ INSERT INTO `job` (`id`, `name`, `display_name`, `cron_expression`, `create_time
 	(24, 'Update SMS Outbound with Campaign Message', 'Update SMS Outbound with Campaign Message', '0 0 5 1/1 * ? *', '2016-11-18 17:28:01', 3, NULL, NULL, '2016-12-15 05:00:00', 'Update SMS Outbound with Campaign MessageJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 4, 0),
 	(25, 'Send Messages to SMS Gateway', 'Send Messages to SMS Gateway', '0 0 5 1/1 * ? *', '2016-11-18 17:28:01', 2, NULL, NULL, '2016-12-15 05:00:00', 'Send Messages to SMS GatewayJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 4, 0),
 	(26, 'Get Delivery Reports from SMS Gateway', 'Get Delivery Reports from SMS Gateway', '0 0 5 1/1 * ? *', '2016-11-18 17:28:01', 1, NULL, NULL, '2016-12-15 05:00:00', 'Get Delivery Reports from SMS GatewayJobDetail2 _ DEFAULT', NULL, 1, 0, 1, 4, 0);
+
 /*!40000 ALTER TABLE `job` ENABLE KEYS */;
 
 
@@ -1976,6 +1977,27 @@ CREATE TABLE IF NOT EXISTS `m_document` (
 -- Dumping data for table mifostenant-reference.m_document: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_document` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_document` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-reference.m_entity_datatable_check
+DROP TABLE IF EXISTS `m_entity_datatable_check`;
+CREATE TABLE IF NOT EXISTS `m_entity_datatable_check` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `application_table_name` varchar(200) NOT NULL,
+  `x_registered_table_name` varchar(50) NOT NULL,
+  `status_enum` int(11) NOT NULL,
+  `system_defined` tinyint(4) NOT NULL DEFAULT '0',
+  `product_id` bigint(10) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_entity_check` (`application_table_name`,`x_registered_table_name`,`status_enum`,`product_id`),
+  KEY `x_registered_table_name` (`x_registered_table_name`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `m_entity_datatable_check_ibfk_1` FOREIGN KEY (`x_registered_table_name`) REFERENCES `x_registered_table` (`registered_table_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-reference.m_entity_datatable_check: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_entity_datatable_check` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_entity_datatable_check` ENABLE KEYS */;
 
 
 -- Dumping structure for table mifostenant-reference.m_entity_relation
@@ -6520,6 +6542,7 @@ INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `desc
 	(335, 335, '322', 'sms campaign', 'SQL', 'V322__sms_campaign.sql', -1316831815, 'root', '2016-11-18 17:28:01', 1439, 1),
 	(336, 337, '323', 'spm replace dead fk with exisiting one', 'SQL', 'V323__spm_replace_dead_fk_with_exisiting_one.sql', 656055500, 'root', '2016-12-14 11:21:57', 613, 1),
 	(337, 338, '324', 'datatable checks', 'SQL', 'V324__datatable_checks.sql', -142308095, 'root', '2016-12-14 11:21:57', 396, 1),
+
 	(33, 33, '33', 'drop unique check on stretchy report parameter', 'SQL', 'V33__drop_unique_check_on_stretchy_report_parameter.sql', -716768190, 'root', '2014-03-08 02:28:56', 253, 1),
 	(34, 34, '34', 'add unique check on stretchy report parameter', 'SQL', 'V34__add_unique_check_on_stretchy_report_parameter.sql', -1989718961, 'root', '2014-03-08 02:28:56', 254, 1),
 	(35, 35, '35', 'add hierarchy column for acc gl account', 'SQL', 'V35__add_hierarchy_column_for_acc_gl_account.sql', -1387013309, 'root', '2014-03-08 02:28:57', 300, 1),

@@ -102,13 +102,13 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     public Collection<ChargeData> retrieveAllChargesForCurrency(String currencyCode) {
         final ChargeMapper rm = new ChargeMapper();
 
-        String sql = "select " + rm.chargeSchema() + " where c.is_deleted=false and c.currency_code='" + currencyCode + "' ";
+        String sql = "select " + rm.chargeSchema() + " where c.is_deleted=false and c.currency_code= ? ";
 
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
 
         sql += " order by c.name ";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm, new Object[] {currencyCode});
     }
 
     @Override

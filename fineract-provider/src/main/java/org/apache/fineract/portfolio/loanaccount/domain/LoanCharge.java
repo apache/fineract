@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -181,6 +182,19 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
                     percentage);
         }
 
+        // If charge type is specified due date and loan is multi disburment
+        // loan.
+        // Then we need to get as of this loan charge due date how much amount
+        // disbursed.
+        if (chargeDefinition.getChargeTimeType().equals(ChargeTimeType.SPECIFIED_DUE_DATE.getValue()) && loan.isMultiDisburmentLoan()) {
+            amountPercentageAppliedTo = BigDecimal.ZERO;
+            for (final LoanDisbursementDetails loanDisbursementDetails : loan.getDisbursementDetails()) {
+                if (!loanDisbursementDetails.expectedDisbursementDate().after(dueDate.toDate())) {
+                    amountPercentageAppliedTo = amountPercentageAppliedTo.add(loanDisbursementDetails.principal());
+                }
+            }
+        }
+        
         return new LoanCharge(loan, chargeDefinition, amountPercentageAppliedTo, amount, chargeTime, chargeCalculation, dueDate,
                 chargePaymentMode, null, loanCharge);
     }
@@ -407,7 +421,19 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
         if (this.loan != null) {
             switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
                 case PERCENT_OF_AMOUNT:
-                    amountPercentageAppliedTo = this.loan.getPrincpal().getAmount();
+                    // If charge type is specified due date and loan is multi
+                    // disburment loan.
+                    // Then we need to get as of this loan charge due date how
+                    // much amount disbursed.
+                    if (this.loan.isMultiDisburmentLoan() && this.isSpecifiedDueDate()) {
+                        for (final LoanDisbursementDetails loanDisbursementDetails : this.loan.getDisbursementDetails()) {
+                            if (!loanDisbursementDetails.expectedDisbursementDate().after(this.getDueDate())) {
+                                amountPercentageAppliedTo = amountPercentageAppliedTo.add(loanDisbursementDetails.principal());
+                            }
+                        }
+                    } else {
+                        amountPercentageAppliedTo = this.loan.getPrincpal().getAmount();
+                    }
                 break;
                 case PERCENT_OF_AMOUNT_AND_INTEREST:
                     amountPercentageAppliedTo = this.loan.getPrincpal().getAmount().add(this.loan.getTotalInterest());
@@ -489,26 +515,35 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
 
     private void updateInstallmentCharges() {
         final Collection<LoanInstallmentCharge> remove = new HashSet<>();
-        final Set<LoanInstallmentCharge> chargePerInstallments = this.loan.generateInstallmentLoanCharges(this);
+        final List<LoanInstallmentCharge> newChargeInstallments = this.loan.generateInstallmentLoanCharges(this);
         if (this.loanInstallmentCharge.isEmpty()) {
-            this.loanInstallmentCharge.addAll(chargePerInstallments);
+            this.loanInstallmentCharge.addAll(newChargeInstallments);
         } else {
             int index = 0;
-            final LoanInstallmentCharge[] loanChargePerInstallments = new LoanInstallmentCharge[chargePerInstallments.size()];
-            final LoanInstallmentCharge[] loanChargePerInstallmentArray = chargePerInstallments.toArray(loanChargePerInstallments);
-            for (final LoanInstallmentCharge chargePerInstallment : this.loanInstallmentCharge) {
+            final List<LoanInstallmentCharge> oldChargeInstallments = new ArrayList<>();
+            if(this.loanInstallmentCharge != null && !this.loanInstallmentCharge.isEmpty()){
+                oldChargeInstallments.addAll(this.loanInstallmentCharge);
+            }
+            Collections.sort(oldChargeInstallments);
+            final LoanInstallmentCharge[] loanChargePerInstallmentArray = newChargeInstallments.toArray(new LoanInstallmentCharge[newChargeInstallments.size()]);
+            for (final LoanInstallmentCharge chargePerInstallment : oldChargeInstallments) {
                 if (index == loanChargePerInstallmentArray.length) {
                     remove.add(chargePerInstallment);
-                    //chargePerInstallment.updateInstallment(null);
+                    chargePerInstallment.updateInstallment(null);
                 } else {
                     chargePerInstallment.copyFrom(loanChargePerInstallmentArray[index++]);
                 }
             }
             this.loanInstallmentCharge.removeAll(remove);
-            while (index < loanChargePerInstallmentArray.length - 1) {
+            while (index < loanChargePerInstallmentArray.length) {
                 this.loanInstallmentCharge.add(loanChargePerInstallmentArray[index++]);
             }
         }
+        Money amount = Money.zero(this.loan.getCurrency());
+        for(LoanInstallmentCharge charge:this.loanInstallmentCharge){
+            amount =amount.plus(charge.getAmount());
+        }
+        this.amount =amount.getAmount();
     }
 
     public boolean isDueAtDisbursement() {
@@ -542,6 +577,10 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
             dueDate = new LocalDate(this.dueDate);
         }
         return dueDate;
+    }
+    
+    public Date getDueDate() {
+        return this.dueDate;
     }
 
     private boolean determineIfFullyPaid() {
@@ -702,10 +741,14 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
     }
 
     /**
+     * @param incrementBy
+     * 
+     * @param installmentNumber
+     * 
      * @param feeAmount
      *            TODO
-     * @param processAmount
-     *            Amount used to pay off this charge
+     * 
+     * 
      * @return Actual amount paid on this charge
      */
     public Money updatePaidAmountBy(final Money incrementBy, final Integer installmentNumber, final Money feeAmount) {
@@ -978,6 +1021,10 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
 
     public Loan getLoan() {
         return this.loan;
+    }
+    
+    public boolean isDisbursementCharge() {
+        return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.DISBURSEMENT);
     }
     
     public boolean isTrancheDisbursementCharge() {

@@ -379,18 +379,17 @@ public class AccountingProcessorHelper {
      * The target accounts for debits and credits are switched in case of a
      * reversal
      * 
-     * @param office
-     * @param accountTypeToBeDebited
-     *            Enum of the placeholder GLAccount to be debited
-     * @param accountTypeToBeCredited
-     *            Enum of the placeholder of the GLAccount to be credited
-     * @param loanProductId
-     * @param paymentTypeId
-     * @param loanId
-     * @param transactionId
-     * @param transactionDate
-     * @param amount
-     * @param isReversal
+     * @param office office
+     * @param currencyCode currencyCode
+     * @param accountTypeToBeDebited  Enum of the placeholder GLAccount to be debited
+     * @param accountTypeToBeCredited Enum of the placeholder of the GLAccount to be credited
+     * @param loanProductId loanProductId
+     * @param loanId loanId
+     * @param transactionId transactionId
+     * @param transactionDate transactionDate
+     * @param totalAmount totalAmount
+     * @param isReversal isReversal
+     * @param chargePaymentDTOs chargePaymentDTOs
      */
     public void createAccrualBasedJournalEntriesAndReversalsForLoanCharges(final Office office, final String currencyCode,
             final Integer accountTypeToBeDebited, final Integer accountTypeToBeCredited, final Long loanProductId, final Long loanId,
@@ -568,17 +567,17 @@ public class AccountingProcessorHelper {
      * reversal
      * 
      * @param office
-     * @param accountTypeToBeDebited
-     *            Enum of the placeholder GLAccount to be debited
-     * @param accountTypeToBeCredited
-     *            Enum of the placeholder of the GLAccount to be credited
+     * @param currencyCode
+     * @param accountTypeToBeDebited Enum of the placeholder GLAccount to be debited
+     * @param accountTypeToBeCredited Enum of the placeholder of the GLAccount to be credited
      * @param savingsProductId
      * @param paymentTypeId
-     * @param loanId
+     * @param savingsId
      * @param transactionId
      * @param transactionDate
      * @param amount
      * @param isReversal
+     * @param taxDetails
      */
     public void createCashBasedJournalEntriesAndReversalsForSavingsTax(final Office office, final String currencyCode,
             final CASH_ACCOUNTS_FOR_SAVINGS accountTypeToBeDebited, final CASH_ACCOUNTS_FOR_SAVINGS accountTypeToBeCredited,
@@ -726,18 +725,18 @@ public class AccountingProcessorHelper {
      * The target accounts for debits and credits are switched in case of a
      * reversal
      * 
-     * @param office
-     * @param accountTypeToBeDebited
-     *            Enum of the placeholder GLAccount to be debited
-     * @param accountTypeToBeCredited
-     *            Enum of the placeholder of the GLAccount to be credited
-     * @param savingsProductId
-     * @param paymentTypeId
-     * @param loanId
-     * @param transactionId
-     * @param transactionDate
-     * @param amount
-     * @param isReversal
+     * @param office office
+     * @param currencyCode currencyCode
+     * @param accountTypeToBeDebited Enum of the placeholder GLAccount to be debited
+     * @param accountTypeToBeCredited Enum of the placeholder of the GLAccount to be credited
+     * @param savingsProductId savingsProductId
+     * @param paymentTypeId paymentTypeId
+     * @param loanId loanId
+     * @param transactionId transactionId
+     * @param transactionDate transactionDate
+     * @param totalAmount totalAmount
+     * @param isReversal isReversal
+     * @param chargePaymentDTOs chargePaymentDTOs
      */
     public void createCashBasedJournalEntriesAndReversalsForSavingsCharges(final Office office, final String currencyCode,
             final CASH_ACCOUNTS_FOR_SAVINGS accountTypeToBeDebited, final CASH_ACCOUNTS_FOR_SAVINGS accountTypeToBeCredited,

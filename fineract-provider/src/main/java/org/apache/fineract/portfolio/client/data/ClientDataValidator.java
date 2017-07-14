@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.portfolio.client.data.ClientApiCollectionConstants;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,19 +60,19 @@ public final class ClientDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.CLIENT_CREATE_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiCollectionConstants.CLIENT_CREATE_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.clientNonPersonDetailsParamName, element)) {
 	        final String clientNonPersonJson = this.fromApiJsonHelper.toJson(element.getAsJsonObject().get(ClientApiConstants.clientNonPersonDetailsParamName));
 	        if(clientNonPersonJson != null)
-	        	this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, clientNonPersonJson, ClientApiConstants.CLIENT_NON_PERSON_CREATE_REQUEST_DATA_PARAMETERS);
+	        	this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, clientNonPersonJson, ClientApiCollectionConstants.CLIENT_NON_PERSON_CREATE_REQUEST_DATA_PARAMETERS);
         }
         
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+                .resource(ClientApiCollectionConstants.CLIENT_RESOURCE_NAME);
 
         final Long officeId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.officeIdParamName, element);
         baseDataValidator.reset().parameter(ClientApiConstants.officeIdParamName).value(officeId).notNull().integerGreaterThanZero();
@@ -211,6 +212,11 @@ public final class ClientDataValidator {
             baseDataValidator.reset().parameter(ClientApiConstants.datatables).value(datatables).notNull().jsonArrayNotEmpty();
         }
 
+		if (this.fromApiJsonHelper.parameterExists("isStaff", element)) {
+            final Boolean isStaffFlag = this.fromApiJsonHelper.extractBooleanNamed("isStaff", element);
+            baseDataValidator.reset().parameter("isStaff").value(isStaffFlag).notNull();
+        }
+		
         List<ApiParameterError> dataValidationErrorsForClientNonPerson = getDataValidationErrorsForCreateOnClientNonPerson(element.getAsJsonObject().get(ClientApiConstants.clientNonPersonDetailsParamName));
         dataValidationErrors.addAll(dataValidationErrorsForClientNonPerson);
         
@@ -223,7 +229,7 @@ public final class ClientDataValidator {
     	final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+                .resource(ClientApiCollectionConstants.CLIENT_RESOURCE_NAME);
         
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.incorpNumberParamName, element)) {
             final String incorpNumber = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.incorpNumberParamName, element);
@@ -245,7 +251,7 @@ public final class ClientDataValidator {
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.constitutionIdParamName, element)) {
             final Integer constitution = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.constitutionIdParamName,
                     element);
-            baseDataValidator.reset().parameter(ClientApiConstants.constitutionIdParamName).value(constitution).notNull().integerGreaterThanZero();
+            baseDataValidator.reset().parameter(ClientApiConstants.constitutionIdParamName).value(constitution).ignoreIfNull().integerGreaterThanZero();
         }
         
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.mainBusinessLineIdParamName, element)) {
@@ -327,19 +333,19 @@ public final class ClientDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.CLIENT_UPDATE_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiCollectionConstants.CLIENT_UPDATE_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.clientNonPersonDetailsParamName, element)) {
 	        final String clientNonPersonJson = this.fromApiJsonHelper.toJson(element.getAsJsonObject().get(ClientApiConstants.clientNonPersonDetailsParamName));
 	        if(clientNonPersonJson != null)
-	        	this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, clientNonPersonJson, ClientApiConstants.CLIENT_NON_PERSON_UPDATE_REQUEST_DATA_PARAMETERS);
+	        	this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, clientNonPersonJson, ClientApiCollectionConstants.CLIENT_NON_PERSON_UPDATE_REQUEST_DATA_PARAMETERS);
         }
 	        
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+                .resource(ClientApiCollectionConstants.CLIENT_RESOURCE_NAME);
 
         boolean atLeastOneParameterPassedForUpdate = false;
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.accountNoParamName, element)) {
@@ -478,6 +484,11 @@ public final class ClientDataValidator {
             baseDataValidator.reset().parameter(ClientApiConstants.legalFormIdParamName).value(legalFormId).ignoreIfNull().inMinMaxRange(1, 2);
         }
 
+		if (this.fromApiJsonHelper.parameterExists("isStaff", element)) {
+            final Boolean isStaffFlag = this.fromApiJsonHelper.extractBooleanNamed("isStaff", element);
+            baseDataValidator.reset().parameter("isStaff").value(isStaffFlag).notNull();
+        }
+
         Map<String, Object> parameterUpdateStatusDetails = getParameterUpdateStatusAndDataValidationErrorsForUpdateOnClientNonPerson(element.getAsJsonObject().get(ClientApiConstants.clientNonPersonDetailsParamName));
         boolean atLeastOneParameterPassedForClientNonPersonUpdate = (boolean) parameterUpdateStatusDetails.get("parameterUpdateStatus");
                
@@ -499,7 +510,7 @@ public final class ClientDataValidator {
     	final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+                .resource(ClientApiCollectionConstants.CLIENT_RESOURCE_NAME);
     	
     	if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.incorpNumberParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
@@ -522,7 +533,7 @@ public final class ClientDataValidator {
     	if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.constitutionIdParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final Integer constitutionId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.constitutionIdParamName, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.constitutionIdParamName).value(constitutionId).notNull().integerGreaterThanZero();
+            baseDataValidator.reset().parameter(ClientApiConstants.constitutionIdParamName).value(constitutionId).ignoreIfNull().integerGreaterThanZero();
         }
     	
     	if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.mainBusinessLineIdParamName, element)) {
@@ -545,11 +556,11 @@ public final class ClientDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.ACTIVATION_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiCollectionConstants.ACTIVATION_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+                .resource(ClientApiCollectionConstants.CLIENT_RESOURCE_NAME);
 
         final JsonElement element = command.parsedJson();
 
@@ -604,7 +615,7 @@ public final class ClientDataValidator {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+                .resource(ClientApiCollectionConstants.CLIENT_RESOURCE_NAME);
 
         final String staffIdParameterName = ClientApiConstants.staffIdParamName;
         final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
@@ -621,11 +632,11 @@ public final class ClientDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.CLIENT_CLOSE_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiCollectionConstants.CLIENT_CLOSE_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+                .resource(ClientApiCollectionConstants.CLIENT_RESOURCE_NAME);
 
         final JsonElement element = command.parsedJson();
 
@@ -653,7 +664,7 @@ public final class ClientDataValidator {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+                .resource(ClientApiCollectionConstants.CLIENT_RESOURCE_NAME);
 
         final String savingsIdParameterName = ClientApiConstants.savingsAccountIdParamName;
         final Long savingsId = this.fromApiJsonHelper.extractLongNamed(savingsIdParameterName, element);
@@ -670,11 +681,11 @@ public final class ClientDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.CLIENT_REJECT_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiCollectionConstants.CLIENT_REJECT_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+                .resource(ClientApiCollectionConstants.CLIENT_RESOURCE_NAME);
 
         final JsonElement element = command.parsedJson();
 
@@ -696,11 +707,11 @@ public final class ClientDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.CLIENT_WITHDRAW_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiCollectionConstants.CLIENT_WITHDRAW_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+                .resource(ClientApiCollectionConstants.CLIENT_RESOURCE_NAME);
 
         final JsonElement element = command.parsedJson();
 
@@ -722,11 +733,11 @@ public final class ClientDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.REACTIVATION_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiCollectionConstants.REACTIVATION_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+                .resource(ClientApiCollectionConstants.CLIENT_RESOURCE_NAME);
 
         final JsonElement element = command.parsedJson();
 
@@ -746,11 +757,11 @@ public final class ClientDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.UNDOREJECTION_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiCollectionConstants.UNDOREJECTION_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+                .resource(ClientApiCollectionConstants.CLIENT_RESOURCE_NAME);
 
         final JsonElement element = command.parsedJson();
 
@@ -769,11 +780,11 @@ public final class ClientDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.UNDOWITHDRAWN_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiCollectionConstants.UNDOWITHDRAWN_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+                .resource(ClientApiCollectionConstants.CLIENT_RESOURCE_NAME);
 
         final JsonElement element = command.parsedJson();
 

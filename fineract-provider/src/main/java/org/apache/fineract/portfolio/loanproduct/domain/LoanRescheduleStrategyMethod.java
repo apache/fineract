@@ -22,9 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /***
- * <ul>
- * People typically use either of the following settings when defining interest
+ * * People typically use either of the following settings when defining interest
  * recalculation method:
+ * <ul>
  * <li>RESCHEDULE_NEXT_REPAYMENTS</li>
  * <li>REDUCE_NUMBER_OF_INSTALLMENTS</li>
  * <li>REDUCE_EMI_AMOUNT</li>

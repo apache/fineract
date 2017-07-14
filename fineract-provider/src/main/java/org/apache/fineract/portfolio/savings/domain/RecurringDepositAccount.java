@@ -370,11 +370,21 @@ public class RecurringDepositAccount extends SavingsAccount {
         List<SavingsAccountTransaction> allTransactions = new ArrayList<>();
         // add existing transactions
         allTransactions.addAll(retreiveOrderedNonInterestPostingTransactions());
+        LocalDate latestTransactionDate = null;
+        for (final SavingsAccountTransaction installment : allTransactions) {
+            if(latestTransactionDate == null || latestTransactionDate.isBefore(installment.getTransactionLocalDate())){
+                latestTransactionDate = installment.getTransactionLocalDate();
+            }
+        }
         if (generateFutureTransactions) {
             for (RecurringDepositScheduleInstallment installment : depositScheduleInstallments()) {
                 if (installment.isPrincipalNotCompleted(getCurrency())) {
+                    LocalDate dueDate = installment.dueDate();
+                    if(latestTransactionDate != null && dueDate.isBefore(latestTransactionDate)){
+                        dueDate = latestTransactionDate;
+                    }
                     final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(null, office(), null,
-                            installment.dueDate(), installment.getDepositAmountOutstanding(getCurrency()), installment.dueDate().toDate(),
+                            dueDate, installment.getDepositAmountOutstanding(getCurrency()), installment.dueDate().toDate(),
                             null);
                     allTransactions.add(transaction);
                 }
@@ -513,7 +523,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
         if (minRequiredOpeningBalance.isGreaterThanZero()) {
             final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, getActivationLocalDate(),
-                    minRequiredOpeningBalance.getAmount(), null, new Date(), user);
+                    minRequiredOpeningBalance.getAmount(), null, new Date(), user, accountType);
             deposit(transactionDTO);
 
             // update existing transactions so derived balance fields are
@@ -600,6 +610,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         if (interestPostingUpToDate == null) {
             interestPostingUpToDate = closeDate;
         }
+        this.setClosedOnDate(closeDate);
         final MathContext mc = MathContext.DECIMAL64;
         boolean isInterestTransfer = false;
         LocalDate postInterestOnDate = null;
@@ -642,7 +653,6 @@ public class RecurringDepositAccount extends SavingsAccount {
             // correct.
             recalculateDailyBalances(Money.zero(this.currency), interestPostingUpToDate);
         }
-
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
     }
 
@@ -1083,8 +1093,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         final Integer lockinPeriodFrequency = this.lockinPeriodFrequency;
         final boolean withdrawalFeeApplicableForTransfer = false;
 
-        LocalDate now = DateUtils.getLocalDateOfTenant();
-
+        LocalDate now = getClosedOnDate();
         newAccountTermAndPreClosure.updateExpectedFirstDepositDate(now);
 
         RecurringDepositAccount rdAccount = RecurringDepositAccount.createNewActivatedAccount(client, group, product, savingsOfficer,
@@ -1119,6 +1128,10 @@ public class RecurringDepositAccount extends SavingsAccount {
         this.lockedInUntilDate = null;
 
         this.activatedOnDate = now.toDate();
+    }
+    
+    public void setClosedOnDate(final LocalDate closedOnDate) {
+        this.closedOnDate = closedOnDate.toDate();
     }
 
     @Override

@@ -43,6 +43,7 @@
 										  org.apache.fineract.commands.service.*,
 										  org.apache.fineract.commands.*,
 										  org.apache.fineract.audit.*,
+										 org.apache.fineract.infrastructure.creditbureau.*,
 										  org.apache.fineract.infrastructure.*,
 										  org.apache.fineract.scheduledjobs.*,
 										  org.apache.fineract.organisation.*,
@@ -70,7 +71,6 @@
 	<bean id="auditorAware"
 		class="org.apache.fineract.infrastructure.core.domain.AuditorAwareImpl" />
 	<jpa:auditing auditor-aware-ref="auditorAware" />
-
 	<jpa:repositories base-package="org.apache.fineract.commands.domain" />
 	<jpa:repositories base-package="org.apache.fineract.infrastructure.*.domain" />
 	<jpa:repositories base-package="org.apache.fineract.accounting.*.domain" />

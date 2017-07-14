@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.shareproducts.serialization;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.fineract.accounting.common.AccountingConstants;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -39,7 +41,6 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
-import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
@@ -67,6 +68,31 @@ public class ShareProductDataSerializer {
     private final ChargeRepositoryWrapper chargeRepository;
 
     private final PlatformSecurityContext platformSecurityContext;
+	private static final Set<String> supportedParametersForCreate = new HashSet<>(Arrays.asList(
+			ShareProductApiConstants.locale_paramname, ShareProductApiConstants.name_paramname,
+			ShareProductApiConstants.shortname_paramname, ShareProductApiConstants.shortname_paramname,
+			ShareProductApiConstants.description_paramname, ShareProductApiConstants.externalid_paramname,
+			ShareProductApiConstants.totalshares_paramname, ShareProductApiConstants.currency_paramname,
+			ShareProductApiConstants.digitsafterdecimal_paramname,
+			ShareProductApiConstants.digitsafterdecimal_paramname, ShareProductApiConstants.inmultiplesof_paramname,
+			ShareProductApiConstants.totalsharesissued_paramname, ShareProductApiConstants.unitprice_paramname,
+			ShareProductApiConstants.minimumshares_paramname, ShareProductApiConstants.nominaltshares_paramname,
+			ShareProductApiConstants.maximumshares_paramname, ShareProductApiConstants.marketprice_paramname,
+			ShareProductApiConstants.charges_paramname,
+			ShareProductApiConstants.allowdividendcalculationforinactiveclients_paramname,
+			ShareProductApiConstants.lockperiod_paramname, ShareProductApiConstants.lockinperiodfrequencytype_paramname,
+			ShareProductApiConstants.minimumactiveperiodfordividends_paramname,
+			ShareProductApiConstants.minimumactiveperiodfrequencytype_paramname,
+			ShareProductApiConstants.sharecapital_paramname, ShareProductApiConstants.accountingRuleParamName,
+			AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(),
+			AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_EQUITY.getValue(),
+			AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_REFERENCE.getValue(),
+			AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_SUSPENSE.getValue()));
+
+	private static final Set<String> supportedParametersForDivident = new HashSet<>(Arrays.asList(
+			ShareProductApiConstants.locale_paramname, ShareProductApiConstants.dateFormatParamName,
+			ShareProductApiConstants.dividendPeriodStartDateParamName,
+			ShareProductApiConstants.dividendPeriodEndDateParamName, ShareProductApiConstants.dividendAmountParamName));
 
     @Autowired
     public ShareProductDataSerializer(final FromJsonHelper fromApiJsonHelper, final ChargeRepositoryWrapper chargeRepository,
@@ -79,8 +105,8 @@ public class ShareProductDataSerializer {
     public ShareProduct validateAndCreate(JsonCommand jsonCommand) {
         if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(),
-                ShareProductApiConstants.supportedParametersForCreate);
+		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(),
+				supportedParametersForCreate);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesproduct");
@@ -248,8 +274,8 @@ public class ShareProductDataSerializer {
 
         if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(),
-                ShareProductApiConstants.supportedParametersForCreate);
+		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(),
+				supportedParametersForCreate);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesproduct");
@@ -447,8 +473,8 @@ public class ShareProductDataSerializer {
     public void validateDividendDetails(JsonCommand jsonCommand) {
         if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(),
-                ShareProductApiConstants.supportedParametersForDivident);
+		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(),
+				supportedParametersForDivident);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)

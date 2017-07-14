@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.organisation.teller.service;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,6 +43,7 @@ import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepository;
 import org.apache.fineract.organisation.staff.exception.StaffNotFoundException;
+import org.apache.fineract.organisation.teller.data.CashierTransactionDataValidator;
 import org.apache.fineract.organisation.teller.domain.Cashier;
 import org.apache.fineract.organisation.teller.domain.CashierRepository;
 import org.apache.fineract.organisation.teller.domain.CashierTransaction;
@@ -54,6 +56,7 @@ import org.apache.fineract.organisation.teller.exception.CashierNotFoundExceptio
 import org.apache.fineract.organisation.teller.serialization.TellerCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.client.domain.ClientTransaction;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +78,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     private final CashierTransactionRepository cashierTxnRepository;
     private final JournalEntryRepository glJournalEntryRepository;
     private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper;
+    private final CashierTransactionDataValidator cashierTransactionDataValidator;
 
     @Autowired
     public TellerWritePlatformServiceJpaImpl(final PlatformSecurityContext context,
@@ -82,7 +86,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
             final TellerRepositoryWrapper tellerRepositoryWrapper, final OfficeRepositoryWrapper officeRepositoryWrapper,
             final StaffRepository staffRepository, CashierRepository cashierRepository, CashierTransactionRepository cashierTxnRepository,
             JournalEntryRepository glJournalEntryRepository,
-            FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper) {
+            FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
+            final CashierTransactionDataValidator cashierTransactionDataValidator) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.tellerRepositoryWrapper = tellerRepositoryWrapper;
@@ -92,6 +97,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
         this.cashierTxnRepository = cashierTxnRepository;
         this.glJournalEntryRepository = glJournalEntryRepository;
         this.financialActivityAccountRepositoryWrapper = financialActivityAccountRepositoryWrapper;
+        this.cashierTransactionDataValidator = cashierTransactionDataValidator;
     }
 
     @Override
@@ -251,9 +257,9 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                     endTime = hourEndTime.toString() + ":" + minEndTime.toString();
 
             }
-
             final Cashier cashier = Cashier.fromJson(tellerOffice, teller, staff, startTime, endTime, command);
-
+            this.cashierTransactionDataValidator.validateCashierAllowedDateAndTime(cashier, teller);
+            
             this.cashierRepository.save(cashier);
 
             return new CommandProcessingResultBuilder() //
@@ -351,7 +357,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 
     @Override
     public CommandProcessingResult allocateCashToCashier(final Long cashierId, JsonCommand command) {
-        return doTransactionForCashier(cashierId, CashierTxnType.ALLOCATE, command); // For
+    	return doTransactionForCashier(cashierId, CashierTxnType.ALLOCATE, command); // For
                                                                                      // fund
                                                                                      // allocation
                                                                                      // to
@@ -360,7 +366,10 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 
     @Override
     public CommandProcessingResult settleCashFromCashier(final Long cashierId, JsonCommand command) {
-        return doTransactionForCashier(cashierId, CashierTxnType.SETTLE, command); // For
+    	
+    	this.cashierTransactionDataValidator.validateSettleCashAndCashOutTransactions(cashierId, command);
+    	
+    	return doTransactionForCashier(cashierId, CashierTxnType.SETTLE, command); // For
                                                                                    // fund
                                                                                    // settlement
                                                                                    // from

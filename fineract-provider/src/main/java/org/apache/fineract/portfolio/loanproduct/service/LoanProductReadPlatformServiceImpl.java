@@ -121,7 +121,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         String sql = "select " + rm.schema();
 
         if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
-            sql += " where lp.id in ( " + inClause + " ) ";
+            sql += " where lp.id in ("+inClause+") ";
+            //Here no need to check injection as this is internal where clause
+           // SQLInjectionValidator.validateSQLInput(inClause);
         }
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
@@ -469,7 +471,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     private static final class LoanProductLookupMapper implements RowMapper<LoanProductData> {
 
         public String schema() {
-            return "lp.id as id, lp.name as name from m_product_loan lp";
+            return "lp.id as id, lp.name as name, lp.allow_multiple_disbursals as multiDisburseLoan from m_product_loan lp";
         }
 
         public String activeOnlySchema() {
@@ -477,16 +479,16 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         }
 
         public String productMixSchema() {
-            return "lp.id as id, lp.name as name FROM m_product_loan lp left join m_product_mix pm on pm.product_id=lp.id where lp.id not IN("
+            return "lp.id as id, lp.name as name, lp.allow_multiple_disbursals as multiDisburseLoan FROM m_product_loan lp left join m_product_mix pm on pm.product_id=lp.id where lp.id not IN("
                     + "select lp.id from m_product_loan lp inner join m_product_mix pm on pm.product_id=lp.id)";
         }
 
         public String restrictedProductsSchema() {
-            return "pm.restricted_product_id as id, rp.name as name from m_product_mix pm join m_product_loan rp on rp.id = pm.restricted_product_id ";
+            return "pm.restricted_product_id as id, rp.name as name, rp.allow_multiple_disbursals as multiDisburseLoan from m_product_mix pm join m_product_loan rp on rp.id = pm.restricted_product_id ";
         }
 
         public String derivedRestrictedProductsSchema() {
-            return "pm.product_id as id, lp.name as name from m_product_mix pm join m_product_loan lp on lp.id=pm.product_id";
+            return "pm.product_id as id, lp.name as name, lp.allow_multiple_disbursals as multiDisburseLoan from m_product_mix pm join m_product_loan lp on lp.id=pm.product_id";
         }
 
         @Override
@@ -494,8 +496,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
             final Long id = rs.getLong("id");
             final String name = rs.getString("name");
+            final Boolean multiDisburseLoan = rs.getBoolean("multiDisburseLoan");
 
-            return LoanProductData.lookup(id, name);
+            return LoanProductData.lookup(id, name, multiDisburseLoan);
         }
     }
 
@@ -533,17 +536,17 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         final LoanProductMapper rm = new LoanProductMapper(null, null);
 
-        String sql = "select " + rm.loanProductSchema() + " where lp.currency_code='" + currencyCode + "'";
+        String sql = "select " + rm.loanProductSchema() + " where lp.currency_code= ? ";
 
         // Check if branch specific products are enabled. If yes, fetch only
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
         if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
-            sql += " and id in ( " + inClause + " ) ";
+            sql += " and id in (" + inClause + ") ";
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm, new Object[] {currencyCode});
     }
 
     @Override

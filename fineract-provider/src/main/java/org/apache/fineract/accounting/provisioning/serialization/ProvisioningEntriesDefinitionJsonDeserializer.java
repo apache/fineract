@@ -20,9 +20,12 @@ package org.apache.fineract.accounting.provisioning.serialization;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.provisioning.constant.ProvisioningEntriesApiConstants;
@@ -43,6 +46,9 @@ import com.google.gson.reflect.TypeToken;
 public class ProvisioningEntriesDefinitionJsonDeserializer implements ProvisioningEntriesApiConstants {
 
     private final FromJsonHelper fromApiJsonHelper;
+	private static final Set<String> supportedParameters = new HashSet<>(
+			Arrays.asList(JSON_DATE_PARAM, JSON_DATEFORMAT_PARAM, JSON_LOCALE_PARAM, JSON_CREATEJOURNALENTRIES_PARAM));
+
 
     @Autowired
     public ProvisioningEntriesDefinitionJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {

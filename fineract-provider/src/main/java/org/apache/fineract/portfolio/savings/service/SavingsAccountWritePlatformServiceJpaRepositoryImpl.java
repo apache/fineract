@@ -550,8 +550,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         SavingsAccountTransaction transaction = null;
         boolean isInterestTransfer = false;
+        Integer accountType = null;
         final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
-                paymentDetail, savingsAccountTransaction.createdDate(), user);
+                paymentDetail, savingsAccountTransaction.createdDate(), user, accountType);
         if (savingsAccountTransaction.isDeposit()) {
             transaction = account.deposit(transactionDTO);
         } else {
@@ -611,8 +612,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public CommandProcessingResult close(final Long savingsId, final JsonCommand command) {
         final AppUser user = this.context.authenticatedUser();
         
-        this.savingsAccountTransactionDataValidator.validateClosing(command);
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+        this.savingsAccountTransactionDataValidator.validateClosing(command, account);
+        
         final boolean isLinkedWithAnyActiveLoan = this.accountAssociationsReadPlatformService.isLinkedWithAnyActiveAccount(savingsId);
 
         if (isLinkedWithAnyActiveLoan) {
@@ -1315,7 +1317,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
      * Disable all standing instructions linked to the savings account if the status is "closed" 
      * 
      * @param savingsAccount -- the savings account object
-     * @return None
+     * 
      **/
     @Transactional
     private void disableStandingInstructionsLinkedToClosedSavings(final SavingsAccount savingsAccount) {
@@ -1337,5 +1339,142 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         Map<BUSINESS_ENTITY, Object> map = new HashMap<>(1);
         map.put(entityEvent, entity);
         return map;
+    }
+    
+    @Override
+    public CommandProcessingResult blockAccount(final Long savingsId) {
+
+        this.context.authenticatedUser();
+
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+        checkClientOrGroupActive(account);
+
+        final Map<String, Object> changes = account.block();
+        if (!changes.isEmpty()) {
+
+            this.savingAccountRepositoryWrapper.save(account);
+        }
+        return new CommandProcessingResultBuilder().withEntityId(savingsId).withOfficeId(account.officeId())
+                .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(savingsId).with(changes).build();
+    }
+
+    @Override
+    public CommandProcessingResult unblockAccount(final Long savingsId) {
+        this.context.authenticatedUser();
+
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+        checkClientOrGroupActive(account);
+
+        final Map<String, Object> changes = account.unblock();
+        if (!changes.isEmpty()) {
+
+            this.savingAccountRepositoryWrapper.save(account);
+        }
+        return new CommandProcessingResultBuilder().withEntityId(savingsId).withOfficeId(account.officeId())
+                .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(savingsId).with(changes).build();
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult holdAmount(final Long savingsId, final JsonCommand command) {
+
+        final AppUser submittedBy = this.context.authenticatedUser();
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+        checkClientOrGroupActive(account);
+
+        SavingsAccountTransaction transacton = this.savingsAccountTransactionDataValidator.validateHoldAndAssembleForm(command.json(),
+                account, submittedBy);
+
+        this.savingsAccountTransactionRepository.save(transacton);
+        this.savingAccountRepositoryWrapper.saveAndFlush(account);
+
+        return new CommandProcessingResultBuilder().withEntityId(transacton.getId()).withOfficeId(account.officeId())
+                .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(savingsId).build();
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult releaseAmount(final Long savingsId, final Long savingsTransactionId) {
+
+        final AppUser submittedBy = this.context.authenticatedUser();
+        SavingsAccountTransaction holdTransaction = this.savingsAccountTransactionRepository
+                .findOneByIdAndSavingsAccountId(savingsTransactionId, savingsId);
+
+        final SavingsAccountTransaction transaction = this.savingsAccountTransactionDataValidator
+                .validateReleaseAmountAndAssembleForm(holdTransaction, submittedBy);
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+        checkClientOrGroupActive(account);
+        account.releaseAmount(transaction.getAmount());
+
+        this.savingsAccountTransactionRepository.save(transaction);
+        holdTransaction.updateReleaseId(transaction.getId());
+        this.savingAccountRepositoryWrapper.save(account);
+
+        return new CommandProcessingResultBuilder().withEntityId(transaction.getId()).withOfficeId(account.officeId())
+                .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(account.getId()).build();
+    }
+
+    @Override
+    public CommandProcessingResult blockCredits(final Long savingsId) {
+        this.context.authenticatedUser();
+
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+        checkClientOrGroupActive(account);
+
+        final Map<String, Object> changes = account.blockCredits(account.getSubStatus());
+        if (!changes.isEmpty()) {
+
+            this.savingAccountRepositoryWrapper.save(account);
+        }
+        return new CommandProcessingResultBuilder().withEntityId(savingsId).withOfficeId(account.officeId())
+                .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(savingsId).with(changes).build();
+    }
+
+    @Override
+    public CommandProcessingResult unblockCredits(final Long savingsId) {
+        this.context.authenticatedUser();
+
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+        checkClientOrGroupActive(account);
+
+        final Map<String, Object> changes = account.unblockCredits();
+        if (!changes.isEmpty()) {
+
+            this.savingAccountRepositoryWrapper.save(account);
+        }
+        return new CommandProcessingResultBuilder().withEntityId(savingsId).withOfficeId(account.officeId())
+                .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(savingsId).with(changes).build();
+    }
+
+    @Override
+    public CommandProcessingResult blockDebits(final Long savingsId) {
+        this.context.authenticatedUser();
+
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+        checkClientOrGroupActive(account);
+
+        final Map<String, Object> changes = account.blockDebits(account.getSubStatus());
+        if (!changes.isEmpty()) {
+
+            this.savingAccountRepositoryWrapper.save(account);
+        }
+        return new CommandProcessingResultBuilder().withEntityId(savingsId).withOfficeId(account.officeId())
+                .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(savingsId).with(changes).build();
+    }
+
+    @Override
+    public CommandProcessingResult unblockDebits(final Long savingsId) {
+        this.context.authenticatedUser();
+
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+        checkClientOrGroupActive(account);
+
+        final Map<String, Object> changes = account.unblockDebits();
+        if (!changes.isEmpty()) {
+
+            this.savingAccountRepositoryWrapper.save(account);
+        }
+        return new CommandProcessingResultBuilder().withEntityId(savingsId).withOfficeId(account.officeId())
+                .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(savingsId).with(changes).build();
     }
 }

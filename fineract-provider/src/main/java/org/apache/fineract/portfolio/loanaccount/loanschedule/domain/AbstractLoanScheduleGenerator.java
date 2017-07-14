@@ -210,10 +210,15 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             // this block is to generate the schedule till the specified
             // date(used for calculating preclosure)
+            boolean isCompletePeriod = true;
             if (scheduleParams.getScheduleTillDate() != null && !scheduledDueDate.isBefore(scheduleParams.getScheduleTillDate())) {
+             if(!scheduledDueDate.isEqual(scheduleParams.getScheduleTillDate())){
+              isCompletePeriod = false;
+             }
                 scheduledDueDate = scheduleParams.getScheduleTillDate();
                 isNextRepaymentAvailable = false;
             }
+            
             if (loanApplicationTerms.isInterestRecalculationEnabled()) {
                 populateCompoundingDatesInPeriod(scheduleParams.getPeriodStartDate(), scheduledDueDate, loanApplicationTerms,
                         holidayDetailDTO, scheduleParams, loanCharges, currency);
@@ -313,7 +318,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     scheduleParams.getPeriodStartDate(), scheduledDueDate, currentPeriodParams.getPrincipalForThisPeriod(),
                     scheduleParams.getOutstandingBalance(), currentPeriodParams.getInterestForThisPeriod(),
                     currentPeriodParams.getFeeChargesForInstallment(), currentPeriodParams.getPenaltyChargesForInstallment(),
-                    totalInstallmentDue, false);
+                    totalInstallmentDue, !isCompletePeriod);
 
             addLoanRepaymentScheduleInstallment(scheduleParams.getInstallments(), installment);
             // apply loan transactions on installments to identify early/late
@@ -530,8 +535,18 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             LocalDate periodStartDateApplicableForInterest, final double interestCalculationGraceOnRepaymentPeriodFraction,
             final ScheduleCurrentPeriodParams currentPeriodParams, final Money lastTotalOutstandingInterestPaymentDueToGrace,
             final LocalDate transactionDate, final LoanScheduleModelPeriod installment, Set<LoanCharge> loanCharges) {
-        LoanScheduleModelPeriod modifiedInstallment = installment;
-        if (!scheduleParams.getOutstandingBalance().isGreaterThan(currentPeriodParams.getInterestForThisPeriod())
+    	LoanScheduleModelPeriod modifiedInstallment = installment;
+        Money oustanding = scheduleParams.getOutstandingBalance();
+        PrincipalInterest tempPrincipalInterest = new PrincipalInterest(currentPeriodParams.getPrincipalForThisPeriod(),
+                currentPeriodParams.getInterestForThisPeriod(), null);
+        oustanding = oustanding.minus(cumulativeFeeChargesDueWithin(transactionDate,
+                scheduledDueDate, loanCharges, totalInterestChargedForFullLoanTerm.getCurrency(), tempPrincipalInterest, scheduleParams.getPrincipalToBeScheduled(),
+                scheduleParams.getTotalCumulativeInterest(), true));
+        oustanding = oustanding.minus(cumulativePenaltyChargesDueWithin(transactionDate,
+                scheduledDueDate, loanCharges, totalInterestChargedForFullLoanTerm.getCurrency(), tempPrincipalInterest, scheduleParams.getPrincipalToBeScheduled(),
+                scheduleParams.getTotalCumulativeInterest(), true));
+        
+        if (!oustanding.isGreaterThan(currentPeriodParams.getInterestForThisPeriod())
                 && !scheduledDueDate.equals(transactionDate)) {
             final Collection<LoanTermVariationsData> interestRates = loanApplicationTerms.getLoanTermVariations().getInterestRateChanges();
             LocalDate calculateTill = transactionDate;

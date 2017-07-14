@@ -671,6 +671,7 @@ INSERT INTO `job` (`id`, `name`, `display_name`, `cron_expression`, `create_time
 	(24, 'Update SMS Outbound with Campaign Message', 'Update SMS Outbound with Campaign Message', '0 0 5 1/1 * ? *', '2016-11-18 17:27:19', 3, NULL, NULL, '2016-12-15 05:00:00', 'Update SMS Outbound with Campaign MessageJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 4, 0),
 	(25, 'Send Messages to SMS Gateway', 'Send Messages to SMS Gateway', '0 0 5 1/1 * ? *', '2016-11-18 17:27:19', 2, NULL, NULL, '2016-12-15 05:00:00', 'Send Messages to SMS GatewayJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 4, 0),
 	(26, 'Get Delivery Reports from SMS Gateway', 'Get Delivery Reports from SMS Gateway', '0 0 5 1/1 * ? *', '2016-11-18 17:27:19', 1, NULL, NULL, '2016-12-15 05:00:00', 'Get Delivery Reports from SMS GatewayJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 4, 0);
+
 /*!40000 ALTER TABLE `job` ENABLE KEYS */;
 
 
@@ -1562,7 +1563,7 @@ INSERT INTO `m_currency` (`id`, `code`, `decimal_places`, `currency_multiplesof`
 	(29, 'CLP', 0, NULL, '$', 'Chilean Peso', 'currency.CLP'),
 	(30, 'CNY', 2, NULL, NULL, 'Chinese Yuan Renminbi', 'currency.CNY'),
 	(31, 'COP', 2, NULL, '$', 'Colombian Peso', 'currency.COP'),
-	(32, 'CRC', 2, NULL, '₡', 'Costa Rican Colon', 'currency.CRC'),
+	(32, 'CRC', 2, NULL, '¢', 'Costa Rican Colon', 'currency.CRC'),
 	(33, 'CSD', 2, NULL, NULL, 'Serbian Dinar', 'currency.CSD'),
 	(34, 'CUP', 2, NULL, '$MN', 'Cuban Peso', 'currency.CUP'),
 	(35, 'CVE', 2, NULL, NULL, 'Cape Verde Escudo', 'currency.CVE'),
@@ -1594,7 +1595,7 @@ INSERT INTO `m_currency` (`id`, `code`, `decimal_places`, `currency_multiplesof`
 	(61, 'HUF', 2, NULL, NULL, 'Hungarian Forint', 'currency.HUF'),
 	(62, 'IDR', 2, NULL, NULL, 'Indonesian Rupiah', 'currency.IDR'),
 	(63, 'ILS', 2, NULL, NULL, 'New Israeli Shekel', 'currency.ILS'),
-	(64, 'INR', 2, NULL, '₹', 'Indian Rupee', 'currency.INR'),
+	(64, 'INR', 2, NULL, '?', 'Indian Rupee', 'currency.INR'),
 	(65, 'IQD', 3, NULL, NULL, 'Iraqi Dinar', 'currency.IQD'),
 	(66, 'IRR', 2, NULL, NULL, 'Iranian Rial', 'currency.IRR'),
 	(67, 'ISK', 0, NULL, NULL, 'Iceland Krona', 'currency.ISK'),
@@ -1646,7 +1647,7 @@ INSERT INTO `m_currency` (`id`, `code`, `decimal_places`, `currency_multiplesof`
 	(113, 'PHP', 2, NULL, NULL, 'Philippine Peso', 'currency.PHP'),
 	(114, 'PKR', 2, NULL, NULL, 'Pakistan Rupee', 'currency.PKR'),
 	(115, 'PLN', 2, NULL, NULL, 'Polish Zloty', 'currency.PLN'),
-	(116, 'PYG', 0, NULL, '₲', 'Paraguayan Guarani', 'currency.PYG'),
+	(116, 'PYG', 0, NULL, '?', 'Paraguayan Guarani', 'currency.PYG'),
 	(117, 'QAR', 2, NULL, NULL, 'Qatari Rial', 'currency.QAR'),
 	(118, 'RON', 2, NULL, NULL, 'Romanian Leu', 'currency.RON'),
 	(119, 'RUB', 2, NULL, NULL, 'Russian Ruble', 'currency.RUB'),
@@ -1851,6 +1852,27 @@ CREATE TABLE IF NOT EXISTS `m_document` (
 -- Dumping data for table mifostenant-default.m_document: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_document` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_document` ENABLE KEYS */;
+
+
+-- Dumping structure for table mifostenant-default.m_entity_datatable_check
+DROP TABLE IF EXISTS `m_entity_datatable_check`;
+CREATE TABLE IF NOT EXISTS `m_entity_datatable_check` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `application_table_name` varchar(200) NOT NULL,
+  `x_registered_table_name` varchar(50) NOT NULL,
+  `status_enum` int(11) NOT NULL,
+  `system_defined` tinyint(4) NOT NULL DEFAULT '0',
+  `product_id` bigint(10) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_entity_check` (`application_table_name`,`x_registered_table_name`,`status_enum`,`product_id`),
+  KEY `x_registered_table_name` (`x_registered_table_name`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `m_entity_datatable_check_ibfk_1` FOREIGN KEY (`x_registered_table_name`) REFERENCES `x_registered_table` (`registered_table_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_entity_datatable_check: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_entity_datatable_check` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_entity_datatable_check` ENABLE KEYS */;
 
 
 -- Dumping structure for table mifostenant-default.m_entity_relation
@@ -3341,6 +3363,7 @@ CREATE TABLE IF NOT EXISTS `m_permission` (
 ) ENGINE=InnoDB AUTO_INCREMENT=768 DEFAULT CHARSET=utf8;
 
 -- Dumping data for table mifostenant-default.m_permission: ~742 rows (approximately)
+
 /*!40000 ALTER TABLE `m_permission` DISABLE KEYS */;
 INSERT INTO `m_permission` (`id`, `grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES
 	(1, 'special', 'ALL_FUNCTIONS', NULL, NULL, 0),
@@ -6264,6 +6287,7 @@ INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `desc
 	(335, 335, '322', 'sms campaign', 'SQL', 'V322__sms_campaign.sql', -1316831815, 'root', '2016-11-18 17:27:20', 1561, 1),
 	(336, 337, '323', 'spm replace dead fk with exisiting one', 'SQL', 'V323__spm_replace_dead_fk_with_exisiting_one.sql', 656055500, 'root', '2016-12-14 11:21:55', 576, 1),
 	(337, 338, '324', 'datatable checks', 'SQL', 'V324__datatable_checks.sql', -142308095, 'root', '2016-12-14 11:21:55', 676, 1),
+
 	(33, 33, '33', 'drop unique check on stretchy report parameter', 'SQL', 'V33__drop_unique_check_on_stretchy_report_parameter.sql', -1599579296, 'root', '2015-06-03 15:26:53', 23, 1),
 	(34, 34, '34', 'add unique check on stretchy report parameter', 'SQL', 'V34__add_unique_check_on_stretchy_report_parameter.sql', -1286928230, 'root', '2015-06-03 15:26:53', 22, 1),
 	(35, 35, '35', 'add hierarchy column for acc gl account', 'SQL', 'V35__add_hierarchy_column_for_acc_gl_account.sql', -1387013309, 'root', '2015-06-03 15:26:54', 49, 1),

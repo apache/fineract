@@ -39,7 +39,7 @@ import org.joda.time.LocalDate;
  * <li>Equal principal payments</li>
  * <li>Equal installment payments</li>
  * </ol>
- * </p>
+ * <p></p>
  * 
  * <p>
  * When amortized using <i>equal principal payments</i>, the <b>principal

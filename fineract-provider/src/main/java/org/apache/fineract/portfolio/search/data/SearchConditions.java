@@ -28,6 +28,7 @@ public class SearchConditions {
     private final Boolean groupSearch;
     private final Boolean loanSeach;
 	private final Boolean savingSeach;
+	private final Boolean shareSeach;
     private final Boolean clientIdentifierSearch;
     private  Boolean exactMatch;
 
@@ -43,18 +44,21 @@ public class SearchConditions {
                 SEARCH_SUPPORTED_RESOURCES.LOANS.name().toLowerCase())) ? true : false;
         this.savingSeach = (null == searchResource || searchResource.toLowerCase().contains(
                 SEARCH_SUPPORTED_RESOURCES.SAVINGS.name().toLowerCase())) ? true : false;
+		this.shareSeach = (null == searchResource || searchResource.toLowerCase().contains(
+                SEARCH_SUPPORTED_RESOURCES.SHARES.name().toLowerCase())) ? true : false;
   		this.clientIdentifierSearch = (null == searchResource || searchResource.toLowerCase().contains(
                 SEARCH_SUPPORTED_RESOURCES.CLIENTIDENTIFIERS.name().toLowerCase())) ? true : false;
     }
 
     public SearchConditions(final String searchQueryParam, final String searchResource, final Boolean clientSearch,
-            final Boolean groupSearch, final Boolean loanSeach, final Boolean savingSeach, final Boolean clientIdentifierSearch, Boolean exactMatch) {
+            final Boolean groupSearch, final Boolean loanSeach, final Boolean savingSeach, final Boolean shareSeach, final Boolean clientIdentifierSearch, Boolean exactMatch) {
         this.searchQuery = searchQueryParam;
         this.searchResource = searchResource;
         this.clientSearch = clientSearch;
         this.groupSearch = groupSearch;
         this.loanSeach = loanSeach;
 		this.savingSeach = savingSeach;
+		this.shareSeach = shareSeach;
         this.clientIdentifierSearch = clientIdentifierSearch;
         this.exactMatch=exactMatch;
     }
@@ -83,6 +87,10 @@ public class SearchConditions {
 
     public Boolean isSavingSeach() {
         return this.savingSeach;
+    }
+	
+	public Boolean isShareSeach() {
+        return this.shareSeach;
     }
 
 	public Boolean isClientIdentifierSearch() {

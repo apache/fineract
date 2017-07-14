@@ -140,11 +140,12 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     }
 
     /****
-     * Variables that would make sense <br/>
+     * Variables that would make sense <br>
      * <ul>
      * <li>inheritDestinationGroupLoanOfficer: Default true</li>
      * <li>newStaffId: Optional field with Id of new Loan Officer to be linked
      * to this client and all his JLG loans for this group</li>
+     * </ul>
      * ***/
     @Transactional
     public void transferClientBetweenGroups(final Group sourceGroup, final Client client, final Group destinationGroup,
@@ -248,10 +249,9 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
 
     /**
      * This API is meant for transferring clients between branches mainly by
-     * Organizations following an Individual lending Model <br/>
+     * Organizations following an Individual lending Model <br>
      * 
      * @param clientId
-     * @param destinationOfficeId
      * @param jsonCommand
      * @return
      **/
@@ -277,13 +277,12 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
 
     /**
      * This API is meant for transferring clients between branches mainly by
-     * Organizations following an Individual lending Model <br/>
+     * Organizations following an Individual lending Model <br>
      * If the Client is linked to any Groups, we can optionally choose to have
      * all the linkages broken and all JLG Loans are converted into Individual
      * Loans
      * 
      * @param clientId
-     * @param destinationOfficeId
      * @param jsonCommand
      * @return
      **/
@@ -306,13 +305,12 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
 
     /**
      * This API is meant for transferring clients between branches mainly by
-     * Organizations following an Individual lending Model <br/>
+     * Organizations following an Individual lending Model <br>
      * If the Client is linked to any Groups, we can optionally choose to have
      * all the linkages broken and all JLG Loans are converted into Individual
      * Loans
      * 
      * @param clientId
-     * @param destinationOfficeId
      * @param jsonCommand
      * @return
      **/

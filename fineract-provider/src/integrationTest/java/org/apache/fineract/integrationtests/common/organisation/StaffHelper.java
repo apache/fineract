@@ -97,6 +97,9 @@ public class StaffHelper {
         map.put("firstname", Utils.randomNameGenerator("michael_", 5));
         map.put("lastname", Utils.randomNameGenerator("Doe_", 4));
         map.put("isLoanOfficer", true);
+        map.put("locale", "en");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("joiningDate", "20 September 2011") ;
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }

@@ -20,7 +20,6 @@ package org.apache.fineract.organisation.teller.service;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.useradministration.domain.AppUser;
 
 /**
  * Provides the local service for adding, modifying and deleting tellers.

@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount.guarantor.service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -57,6 +56,8 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.domain.DepositAccountOnHoldTransaction;
 import org.apache.fineract.portfolio.savings.domain.DepositAccountOnHoldTransactionRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
@@ -73,6 +74,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
     private final BusinessEventNotifierService businessEventNotifierService;
     private final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository;
     private final Map<Long, Long> releaseLoanIds = new HashMap<>(2);
+    private final SavingsAccountAssembler savingsAccountAssembler;
     
 
     @Autowired
@@ -81,13 +83,15 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
             final GuarantorFundingTransactionRepository guarantorFundingTransactionRepository,
             final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
             final BusinessEventNotifierService businessEventNotifierService,
-            final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository) {
+            final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
+            final SavingsAccountAssembler savingsAccountAssembler) {
         this.guarantorRepository = guarantorRepository;
         this.guarantorFundingRepository = guarantorFundingRepository;
         this.guarantorFundingTransactionRepository = guarantorFundingTransactionRepository;
         this.accountTransfersWritePlatformService = accountTransfersWritePlatformService;
         this.businessEventNotifierService = businessEventNotifierService;
         this.depositAccountOnHoldTransactionRepository = depositAccountOnHoldTransactionRepository;
+        this.savingsAccountAssembler = savingsAccountAssembler;
     }
 
     @PostConstruct
@@ -327,7 +331,17 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                 final List<GuarantorFundingDetails> fundingDetails = guarantor.getGuarantorFundDetails();
                 for (GuarantorFundingDetails guarantorFundingDetails : fundingDetails) {
                     if (guarantorFundingDetails.getStatus().isActive()) {
-                        SavingsAccount savingsAccount = guarantorFundingDetails.getLinkedSavingsAccount();
+                        final SavingsAccount savingsAccount = guarantorFundingDetails.getLinkedSavingsAccount();
+                        if (loan.isApproved() && !loan.isDisbursed()) {
+                            final List<SavingsAccountTransaction> transactions = new ArrayList<>();
+                            for (final SavingsAccountTransaction transaction : savingsAccount.getTransactions()) {
+                                if (!transaction.getTransactionLocalDate().isAfter(loan.getApprovedOnDate())) {
+                                    transactions.add(transaction);
+                                }
+                            }
+                            this.savingsAccountAssembler.setHelpers(savingsAccount);
+                            savingsAccount.updateSavingsAccountSummary(transactions);
+                        }
                         savingsAccount.holdFunds(guarantorFundingDetails.getAmount());
                         totalGuarantee = totalGuarantee.add(guarantorFundingDetails.getAmount());
                         DepositAccountOnHoldTransaction onHoldTransaction = DepositAccountOnHoldTransaction.hold(savingsAccount,
@@ -340,6 +354,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                         if (savingsAccount.getWithdrawableBalance().compareTo(BigDecimal.ZERO) == -1) {
                             insufficientBalanceIds.add(savingsAccount.getId());
                         }
+                        savingsAccount.updateSavingsAccountSummary(savingsAccount.getTransactions());
                     }
                 }
             }

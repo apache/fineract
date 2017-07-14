@@ -50,6 +50,8 @@ apply plugin: 'tomcat'
 apply plugin: 'project-report'
 apply plugin: 'java'
 apply plugin: 'openjpa'
+apply plugin: 'pmd'
+apply plugin: 'findbugs'
 
 /* define the valid syntax level for source files */
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -67,7 +69,7 @@ project.ext.mysqlPassword='mysql'
 
 
 group = 'org.apache.fineract'
-
+buildDir = new File(rootProject.projectDir, "../build")
 repositories {
 	jcenter()
 	maven {
@@ -88,11 +90,13 @@ rat {
   xmlOutput = false
   htmlOutput = false
   plainOutput = true
-  verbose = true 
-  inputDir = './..'
+  verbose = false 
+//  inputDir = './..'
+  reportDir = new File(buildDir,'reports/rat')
  excludes = [
 	'**/licenses/**',
 	'**/*.md',
+	'**/MANIFEST.MF',
 	'**/*.txt',
 	'**/*.log',
 	'**/fineractdev-eclipse-preferences.epf',
@@ -107,7 +111,9 @@ rat {
     '**/.gitignore',
     '**/.gitkeep',
 	'**/*.iml',
-		
+	//Notice files
+	'**/NOTICE_RELEASE',
+	'**/NOTICE_SOURCE',	
     // gradle
     '**/.gradle/**',
     '**/gradlew',
@@ -257,27 +263,40 @@ task deployPentahoReports() {
         println ':deployPentahoReports - moving pentaho reports under: ' + pentahoReportDir
     }
 }
+pmd {
+    sourceSets = [sourceSets.main]
+    ignoreFailures = true
+}
+findbugs {
+    ignoreFailures = true
+    sourceSets = [sourceSets.main] 
+}
 
 //compileJava{
 //    dependsOn rat
 //}
 
 war {
-	it.dependsOn deployPentahoReports
-	from('../licenses') { // notice the parens
-		into "WEB-INF/licenses/" // no leading slash
+	from('../licenses/binary/') { // notice the parens
+		into "WEB-INF/licenses/binary/" // no leading slash
 	}
-	from('../LICENSE') { // notice the parens
+	from('../LICENSE_RELEASE') { // notice the parens
 		into "WEB-INF/" // no leading slash
 	}
-	from('../NOTICE') { // notice the parens
+	from('../NOTICE_RELEASE') { // notice the parens
+		into "WEB-INF/" // no leading slash
+	}
+	rename ('LICENSE_RELEASE', 'LICENSE')
+	rename ('NOTICE_RELEASE', 'NOTICE')
+	
+	from('../DISCLAIMER') { // notice the parens
 		into "WEB-INF/" // no leading slash
 	}
     war.finalizedBy(bootRepackage)
 }
 
 license {
-    header rootProject.file('../LICENSE.md')
+    header rootProject.file('../APACHE_LICENSETEXT.md')
     excludes(["**/*.html", "**/*.mustache", "**/package-info.java", "**/keystore.jks"])
     strictCheck true
 }

@@ -301,7 +301,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
      * @param reportMailingJob -- the report mailing job entity
      * @param errorLog -- StringBuilder object containing the error log if any
      * @param jobStartDateTime -- the start DateTime of the job
-     * @return None
+     * 
      **/
     private void updateReportMailingJobAfterJobExecution(final ReportMailingJob reportMailingJob, final StringBuilder errorLog, 
             final DateTime jobStartDateTime) {
@@ -374,7 +374,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
      * @param errorLog -- StringBuilder object containing the error log if any
      * @param jobStartDateTime -- the start DateTime of the job
      * @param jobRunStatus -- the status of the job (success/error)
-     * @return None
+     * 
      **/
     private void createReportMailingJobRunHistroryAfterJobExecution(final ReportMailingJob reportMailingJob, final StringBuilder errorLog, 
             final DateTime jobStartDateTime, final String jobRunStatus) {
@@ -391,7 +391,7 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
      *
      * @param jsonCommand -- JsonCommand object
      * @param dve -- data integrity exception object
-     * @return None
+     * 
      **/
     private void handleDataIntegrityIssues(final JsonCommand jsonCommand, final DataIntegrityViolationException dve) {
         final Throwable realCause = dve.getMostSpecificCause();

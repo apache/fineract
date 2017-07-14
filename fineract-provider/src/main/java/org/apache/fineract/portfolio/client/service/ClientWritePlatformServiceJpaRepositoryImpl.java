@@ -229,6 +229,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 					.retrieveGlobalConfiguration("Enable-Address");
 
 			final Boolean isAddressEnabled = configuration.isEnabled();
+			
+			final Boolean isStaff = command.booleanObjectValueOfParameterNamed(ClientApiConstants.isStaffParamName);
 
             final Long officeId = command.longValueOfParameterNamed(ClientApiConstants.officeIdParamName);
 
@@ -298,7 +300,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 final CommandWrapper commandWrapper = new CommandWrapperBuilder().activateClient(null).build();
                 rollbackTransaction = this.commandProcessingService.validateCommand(commandWrapper, currentUser);
             }
-
+			
             this.clientRepository.save(newClient);
             if (newClient.isActive()) {
                 this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.CLIENTS_ACTIVATE,
@@ -334,7 +336,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             this.entityDatatableChecksWritePlatformService.runTheCheck(newClient.getId(), EntityTables.CLIENT.getName(),
                     StatusEnum.CREATE.getCode().longValue(), EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable());
-
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withOfficeId(clientOffice.getId()) //
@@ -364,7 +365,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     {    	
     	final JsonElement clientNonPersonElement = this.fromApiJsonHelper.parse(command.jsonFragment(ClientApiConstants.clientNonPersonDetailsParamName));
 
-		if(clientNonPersonElement != null)
+		if(clientNonPersonElement != null && !isEmpty(clientNonPersonElement))
 		{
 			final String incorpNumber = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.incorpNumberParamName, clientNonPersonElement);
 	        final String remarks = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.remarksParamName, clientNonPersonElement);                
@@ -389,6 +390,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 	    	
 	    	this.clientNonPersonRepository.save(newClientNonPerson);
 		}
+    }
+    
+    public boolean isEmpty(final JsonElement element){
+    	return element.toString().trim().length()<4;
     }
 
     @Transactional
@@ -496,7 +501,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final ClientNonPerson clientNonPersonForUpdate = this.clientNonPersonRepository.findOneByClientId(clientId);
             if(clientNonPersonForUpdate != null)
             {
-            	final JsonElement clientNonPersonElement = this.fromApiJsonHelper.parse(command.jsonFragment(ClientApiConstants.clientNonPersonDetailsParamName));
+            	final JsonElement clientNonPersonElement = command.jsonElement(ClientApiConstants.clientNonPersonDetailsParamName);
             	final Map<String, Object> clientNonPersonChanges = clientNonPersonForUpdate.update(JsonCommand.fromExistingCommand(command, clientNonPersonElement));
                 
                 if (clientNonPersonChanges.containsKey(ClientApiConstants.constitutionIdParamName)) {
@@ -524,8 +529,19 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 }
                 
                 changes.putAll(clientNonPersonChanges);
+            } else {
+                final Integer legalFormParamValue = command.integerValueOfParameterNamed(ClientApiConstants.legalFormIdParamName);
+                boolean isEntity = false;
+                if (legalFormParamValue != null) {
+                    final LegalForm legalForm = LegalForm.fromInt(legalFormParamValue);
+                    if (legalForm != null) {
+                        isEntity = legalForm.isEntity();
+                    }
+                }
+                if (isEntity) {
+                    extractAndCreateClientNonPerson(clientForUpdate, command);
+                }
             }
-
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withOfficeId(clientForUpdate.officeId()) //

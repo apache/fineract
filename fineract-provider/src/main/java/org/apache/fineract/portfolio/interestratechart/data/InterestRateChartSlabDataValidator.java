@@ -18,9 +18,7 @@
  */
 package org.apache.fineract.portfolio.interestratechart.data;
 
-import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.INTERESTRATE_CHART_SLAB_CREATE_REQUEST_DATA_PARAMETERS;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.INTERESTRATE_CHART_SLAB_RESOURCE_NAME;
-import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.INTERESTRATE_CHART_SLAB_UPDATE_REQUEST_DATA_PARAMETERS;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.amountRangeFromParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.amountRangeToParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.annualInterestRateParamName;
@@ -34,9 +32,12 @@ import static org.apache.fineract.portfolio.interestratechart.InterestRateChartS
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -46,6 +47,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants;
+import org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -59,6 +61,17 @@ public class InterestRateChartSlabDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final InterestIncentiveDataValidator interestIncentiveDataValidator;
+	private static final Set<String> INTERESTRATE_CHART_SLAB_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(InterestRateChartSlabApiConstants.localeParamName,
+					InterestRateChartSlabApiConstants.idParamName, descriptionParamName, periodTypeParamName,
+					fromPeriodParamName, toPeriodParamName, amountRangeFromParamName, amountRangeToParamName,
+					annualInterestRateParamName, currencyCodeParamName, incentivesParamName));
+
+	private static final Set<String> INTERESTRATE_CHART_SLAB_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(InterestRateChartSlabApiConstants.localeParamName,
+					InterestRateChartSlabApiConstants.idParamName, descriptionParamName, periodTypeParamName,
+					fromPeriodParamName, toPeriodParamName, amountRangeFromParamName, amountRangeToParamName,
+					annualInterestRateParamName, currencyCodeParamName, incentivesParamName));
 
     @Autowired
     public InterestRateChartSlabDataValidator(final FromJsonHelper fromApiJsonHelper,

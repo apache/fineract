@@ -45,7 +45,7 @@ public interface BatchApiService {
      * 
      * @param requestList
      * @param uriInfo
-     * @return List<BatchResponse>
+     * @return List&lt;BatchResponse&gt;
      */
     List<BatchResponse> handleBatchRequestsWithoutEnclosingTransaction(List<BatchRequest> requestList, UriInfo uriInfo);
 
@@ -59,7 +59,7 @@ public interface BatchApiService {
      * 
      * @param requestList
      * @param uriInfo
-     * @return List<BatchResponse>
+     * @return List&lt;BatchResponse&gt;
      */
     List<BatchResponse> handleBatchRequestsWithEnclosingTransaction(List<BatchRequest> requestList, UriInfo uriInfo);
 }

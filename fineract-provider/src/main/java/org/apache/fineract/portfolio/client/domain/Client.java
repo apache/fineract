@@ -115,6 +115,9 @@ public final class Client extends AbstractPersistableCustom<Long> {
     @Column(name = "mobile_no", length = 50, nullable = false, unique = true)
     private String mobileNo;
 
+	@Column(name = "is_staff", nullable = false)
+    private boolean isStaff;
+
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private String externalId;
 
@@ -238,6 +241,8 @@ public final class Client extends AbstractPersistableCustom<Long> {
         final String middlename = command.stringValueOfParameterNamed(ClientApiConstants.middlenameParamName);
         final String lastname = command.stringValueOfParameterNamed(ClientApiConstants.lastnameParamName);
         final String fullname = command.stringValueOfParameterNamed(ClientApiConstants.fullnameParamName);
+		
+		final boolean isStaff = command.booleanPrimitiveValueOfParameterNamed(ClientApiConstants.isStaffParamName);
 
         final LocalDate dataOfBirth = command.localDateValueOfParameterNamed(ClientApiConstants.dateOfBirthParamName);
 
@@ -265,7 +270,7 @@ public final class Client extends AbstractPersistableCustom<Long> {
         final Long savingsAccountId = null;
         return new Client(currentUser, status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname,
                 activationDate, officeJoiningDate, externalId, mobileNo, staff, submittedOnDate, savingsProductId, savingsAccountId, dataOfBirth,
-                gender, clientType, clientClassification, legalForm);
+                gender, clientType, clientClassification, legalForm, isStaff);
     }
 
     protected Client() {
@@ -276,7 +281,7 @@ public final class Client extends AbstractPersistableCustom<Long> {
             final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
             final LocalDate activationDate, final LocalDate officeJoiningDate, final String externalId, final String mobileNo,
             final Staff staff, final LocalDate submittedOnDate, final Long savingsProductId, final Long savingsAccountId,
-            final LocalDate dateOfBirth, final CodeValue gender, final CodeValue clientType, final CodeValue clientClassification, final Integer legalForm) {
+            final LocalDate dateOfBirth, final CodeValue gender, final CodeValue clientType, final CodeValue clientClassification, final Integer legalForm, final Boolean isStaff) {
 
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
@@ -557,6 +562,13 @@ public final class Client extends AbstractPersistableCustom<Long> {
             	{
             		actualChanges.put(ClientApiConstants.legalFormIdParamName, ClientEnumerations.legalForm(newValue));
                     this.setLegalForm(legalForm.getValue());
+                    if(legalForm.isPerson()){
+                        this.fullname = null;
+                    }else if(legalForm.isEntity()){
+                        this.firstname = null;
+                        this.lastname = null;
+                        this.displayName = null;
+                    }
             	}
             	else
             	{
@@ -762,6 +774,18 @@ public final class Client extends AbstractPersistableCustom<Long> {
     public void setMobileNo(final String mobileNo) {
         this.mobileNo = mobileNo;
     }
+
+	public boolean isNotStaff() {
+        return !isStaff();
+    }
+
+    public boolean isStaff() {
+        return this.isStaff;
+    }
+
+	public String getExternalId() {
+		return this.externalId; 
+	}
 
     public String getDisplayName() {
         return this.displayName;

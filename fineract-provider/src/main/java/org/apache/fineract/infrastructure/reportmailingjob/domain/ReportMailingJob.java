@@ -322,7 +322,7 @@ public class ReportMailingJob extends AbstractAuditableCustom<AppUser, Long> {
      * update the stretchy report entity associated with the credit check 
      * 
      * @param stretchyReport -- Report entity
-     * @return None
+     * 
      **/
     public void update(final Report stretchyReport) {
         if (stretchyReport != null) {
@@ -333,7 +333,7 @@ public class ReportMailingJob extends AbstractAuditableCustom<AppUser, Long> {
     /** 
      * delete the report mailing job, set the isDeleted property to 1 and alter the name 
      * 
-     * @return None
+     * 
      **/
     public void delete() {
         this.isDeleted = true;
@@ -491,7 +491,7 @@ public class ReportMailingJob extends AbstractAuditableCustom<AppUser, Long> {
     /** 
      * increase the numberOfRuns by 1 
      * 
-     * @return None
+     * 
      **/
     public void increaseNumberOfRunsByOne() {
         this.numberOfRuns++;
@@ -501,7 +501,7 @@ public class ReportMailingJob extends AbstractAuditableCustom<AppUser, Long> {
      * update the previousRunStatus 
      * 
      * @param previousRunStatus -- the status of the previous job execution
-     * @return None
+     * 
      **/
     public void updatePreviousRunStatus(final String previousRunStatus) {
         if (!StringUtils.isEmpty(previousRunStatus)) {
@@ -513,7 +513,7 @@ public class ReportMailingJob extends AbstractAuditableCustom<AppUser, Long> {
      * update the previousRunDateTime
      * 
      * @param previousRunDateTime -- previous run date
-     * @return None
+     * 
      **/
     public void updatePreviousRunDateTime(final DateTime previousRunDateTime) {
         if (previousRunDateTime != null) {
@@ -525,7 +525,7 @@ public class ReportMailingJob extends AbstractAuditableCustom<AppUser, Long> {
      * update the nextRunDateTime
      * 
      * @param nextRunDateTime -- the next run DateTime
-     * @return None
+     * 
      **/
     public void updateNextRunDateTime(final DateTime nextRunDateTime) {
         if (nextRunDateTime != null) {
@@ -540,7 +540,7 @@ public class ReportMailingJob extends AbstractAuditableCustom<AppUser, Long> {
     /** 
      * deactivate the report mailing job by setting the isActive property to 0 
      * 
-     * @return None
+     * 
      **/
     public void deactivate() {
         this.isActive = false;
@@ -550,7 +550,7 @@ public class ReportMailingJob extends AbstractAuditableCustom<AppUser, Long> {
      * update the previousRunErrorLog property
      * 
      * @param previousRunErrorLog -- the previous job run error log
-     * @return None
+     * 
      **/
     public void updatePreviousRunErrorLog(final String previousRunErrorLog) {
         this.previousRunErrorLog = previousRunErrorLog;

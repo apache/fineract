@@ -63,7 +63,7 @@ public class ReportMailingJobValidator {
      * validate the request to create a new report mailing job 
      * 
      * @param jsonCommand -- the JSON command object (instance of the JsonCommand class)
-     * @return None
+     * 
      **/
     public void validateCreateRequest(final JsonCommand jsonCommand) {
         final String jsonString = jsonCommand.json();
@@ -142,7 +142,7 @@ public class ReportMailingJobValidator {
      * validate the request to update a report mailing job 
      * 
      * @param jsonCommand -- the JSON command object (instance of the JsonCommand class)
-     * @return None
+     * 
      **/
     public void validateUpdateRequest(final JsonCommand jsonCommand) {
         final String jsonString = jsonCommand.json();
@@ -309,7 +309,7 @@ public class ReportMailingJobValidator {
      * throw a PlatformApiDataValidationException exception if there are validation errors
      * 
      * @param dataValidationErrors -- list of ApiParameterError objects
-     * @return None
+     * 
      **/
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) { 

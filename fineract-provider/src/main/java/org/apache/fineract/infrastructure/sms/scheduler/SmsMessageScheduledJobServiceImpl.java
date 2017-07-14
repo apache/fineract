@@ -204,6 +204,29 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
         }
     }
 
+    @Override
+    public void sendTriggeredMessage(Collection<SmsMessage> smsMessages, long providerId) {
+        try {
+            Collection<SmsMessageApiQueueResourceData> apiQueueResourceDatas = new ArrayList<>();
+            StringBuilder request = new StringBuilder();
+            for(SmsMessage smsMessage : smsMessages) {
+                SmsMessageApiQueueResourceData apiQueueResourceData =
+                        SmsMessageApiQueueResourceData.instance(smsMessage.getId(), null,
+                                null, null, smsMessage.getMobileNo(),
+                                smsMessage.getMessage(), providerId);
+                apiQueueResourceDatas.add(apiQueueResourceData);
+                smsMessage.setStatusType(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue());
+            }
+            this.smsMessageRepository.save(smsMessages);
+            request.append(SmsMessageApiQueueResourceData.toJsonString(apiQueueResourceDatas));
+            logger.info("Sending triggered SMS to specific provider with request - " + request.toString());
+            this.triggeredExecutorService.execute(new SmsTask(ThreadLocalContextUtil.getTenant(),
+                    apiQueueResourceDatas));
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
+
     /**
      * get SMS message delivery reports from the SMS gateway (or intermediate
      * gateway)

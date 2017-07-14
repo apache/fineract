@@ -32,7 +32,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
  * Encapsulates all the summary details of a {@link Loan}.
  * 
  * {@link LoanSummary} fields are updated through a scheduled job. see -
- * {@link UpdateLoanSummariesScheduledJob}.
+ * 
  */
 @Embeddable
 public final class LoanSummary {

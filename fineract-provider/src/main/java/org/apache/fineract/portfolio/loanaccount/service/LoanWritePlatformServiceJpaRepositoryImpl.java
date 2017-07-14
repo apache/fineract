@@ -51,6 +51,7 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
+import org.apache.fineract.organisation.teller.data.CashierTransactionDataValidator;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
@@ -170,6 +171,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
     private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessingStrategy;
     private final CodeValueRepositoryWrapper codeValueRepository;
+    private final CashierTransactionDataValidator cashierTransactionDataValidator;
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -200,7 +202,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
             final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessingStrategy,
             final CodeValueRepositoryWrapper codeValueRepository,
-            final LoanRepositoryWrapper loanRepositoryWrapper) {
+            final LoanRepositoryWrapper loanRepositoryWrapper,
+            final CashierTransactionDataValidator cashierTransactionDataValidator) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanAssembler = loanAssembler;
@@ -239,6 +242,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.entityDatatableChecksWritePlatformService = entityDatatableChecksWritePlatformService;
         this.codeValueRepository = codeValueRepository;
+        this.cashierTransactionDataValidator = cashierTransactionDataValidator;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -257,6 +261,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
+        
         // validate ActualDisbursement Date Against Expected Disbursement Date
         LoanProduct loanProduct = loan.loanProduct();
         if(loanProduct.syncExpectedWithDisbursementDate()){
@@ -274,6 +279,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         checkForProductMixRestrictions(loan);
         
         LocalDate recalculateFrom = null;
+        if(!loan.isMultiDisburmentLoan()){
+        	loan.setActualDisbursementDate(actualDisbursementDate.toDate());
+        }        
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
 
         // validate actual disbursement date against meeting date
@@ -293,7 +301,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Map<String, Object> changes = new LinkedHashMap<>();
 
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
-
+		if (paymentDetail != null && paymentDetail.getPaymentType() != null
+				&& paymentDetail.getPaymentType().isCashPayment()) {
+			BigDecimal transactionAmount = command
+					.bigDecimalValueOfParameterNamed("transactionAmount");
+			this.cashierTransactionDataValidator.validateOnLoanDisbursal(
+					currentUser, loan.getCurrencyCode(), transactionAmount);
+		}     
         final Boolean isPaymnetypeApplicableforDisbursementCharge = configurationDomainService
                 .isPaymnetypeApplicableforDisbursementCharge();
 
@@ -317,7 +331,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                             "Loan to be closed with this topup is not active.");
                 }
                 final LocalDate lastUserTransactionOnLoanToClose = loanToClose.getLastUserTransactionDate();
-                if(!loan.getDisbursementDate().isAfter(lastUserTransactionOnLoanToClose)){
+                if(loan.getDisbursementDate().isBefore(lastUserTransactionOnLoanToClose)){
                     throw new GeneralPlatformDomainRuleException(
                             "error.msg.loan.disbursal.date.should.be.after.last.transaction.date.of.loan.to.be.closed",
                             "Disbursal date of this loan application "+loan.getDisbursementDate()
@@ -406,7 +420,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
         }
-
+        
         updateRecurringCalendarDatesForInterestRecalculation(loan);
         this.loanAccountDomainService.recalculateAccruals(loan);
         this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_DISBURSAL,
@@ -435,7 +449,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
      * 
      * @param loan
      *            the disbursed loan
-     * @return void
+     * 
      **/
     private void createStandingInstruction(Loan loan) {
 
@@ -678,6 +692,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
 
         final LocalDate recalculateFrom = null;
+        loan.setActualDisbursementDate(null);
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
 
         final Map<String, Object> changes = loan.undoDisbursal(scheduleGeneratorDTO, existingTransactionIds,
@@ -2303,7 +2318,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(overdueInstallment.toString());
             final JsonCommand command = JsonCommand.from(overdueInstallment.toString(), parsedCommand, this.fromApiJsonHelper, null, null,
-                    null, null, null, loanId, null, null, null, null);
+                    null, null, null, loanId, null, null, null, null,null,null);
             LoanOverdueDTO overdueDTO = applyChargeToOverdueLoanInstallment(loanId, overdueInstallment.getChargeId(),
                     overdueInstallment.getPeriodNumber(), command, loan, existingTransactionIds, existingReversedTransactionIds);
             loan = overdueDTO.getLoan();
@@ -2375,7 +2390,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 LoanRepaymentScheduleInstallment newEntry = new LoanRepaymentScheduleInstallment(loan, installments.size() + 1,
                         lastInstallment.getDueDate(), lastChargeDate, principal, interest, feeCharges, penaltyCharges,
                         recalculatedInterestComponent, compoundingDetails);
-                installments.add(newEntry);
                 loan.addLoanRepaymentScheduleInstallment(newEntry);
             }
         }
@@ -2396,15 +2410,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Long penaltyPostingWaitPeriodValue = this.configurationDomainService.retrieveGraceOnPenaltyPostingPeriod();
         final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
         Long diff = penaltyWaitPeriodValue + 1 - penaltyPostingWaitPeriodValue;
-        if (diff < 0) {
-            diff = 0L;
+        if (diff < 1) {
+            diff = 1L;
         }
         LocalDate startDate = dueDate.plusDays(penaltyWaitPeriodValue.intValue() + 1);
         Integer frequencyNunber = 1;
         if (feeFrequency == null) {
             scheduleDates.put(frequencyNunber++, startDate.minusDays(diff.intValue()));
         } else {
-            while (DateUtils.getLocalDateOfTenant().isAfter(startDate)) {
+            while (!startDate.isAfter(DateUtils.getLocalDateOfTenant())) {
                 scheduleDates.put(frequencyNunber++, startDate.minusDays(diff.intValue()));
                 LocalDate scheduleDate = scheduledDateGenerator.getRepaymentPeriodDate(PeriodFrequencyType.fromInt(feeFrequency),
                         chargeDefinition.feeInterval(), startDate, null, null);

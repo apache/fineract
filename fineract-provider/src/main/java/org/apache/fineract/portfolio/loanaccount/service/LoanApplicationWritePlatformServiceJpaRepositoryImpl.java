@@ -301,7 +301,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                                 "loanIdToClose is invalid, Currency code is different.");
                     }
                     final LocalDate lastUserTransactionOnLoanToClose = loanToClose.getLastUserTransactionDate();
-                    if(!newLoanApplication.getDisbursementDate().isAfter(lastUserTransactionOnLoanToClose)){
+                    if(newLoanApplication.getDisbursementDate().isBefore(lastUserTransactionOnLoanToClose)){
                         throw new GeneralPlatformDomainRuleException(
                                 "error.msg.loan.disbursal.date.should.be.after.last.transaction.date.of.loan.to.be.closed",
                                 "Disbursal date of this loan application "+newLoanApplication.getDisbursementDate()
@@ -605,7 +605,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
 
             final Map<String, Object> changes = existingLoanApplication.loanApplicationModification(command, possiblyModifedLoanCharges,
-                    possiblyModifedLoanCollateralItems, this.aprCalculator, isChargeModified);
+                    possiblyModifedLoanCollateralItems, this.aprCalculator, isChargeModified, loanProductForValidations);
 
             if (changes.containsKey("expectedDisbursementDate")) {
                 this.loanAssembler.validateExpectedDisbursementForHolidayAndNonWorkingDay(existingLoanApplication);
@@ -710,7 +710,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                                     "loanIdToClose is invalid, Currency code is different.");
                         }
                         final LocalDate lastUserTransactionOnLoanToClose = loanToClose.getLastUserTransactionDate();
-                        if(!existingLoanApplication.getDisbursementDate().isAfter(lastUserTransactionOnLoanToClose)){
+                        if(existingLoanApplication.getDisbursementDate().isBefore(lastUserTransactionOnLoanToClose)){
                             throw new GeneralPlatformDomainRuleException(
                                     "error.msg.loan.disbursal.date.should.be.after.last.transaction.date.of.loan.to.be.closed",
                                     "Disbursal date of this loan application "+existingLoanApplication.getDisbursementDate()
@@ -824,7 +824,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     final CalendarInstance calendarInstance = ciList.get(0);
                     final boolean isCalendarAssociatedWithEntity = this.calendarReadPlatformService.isCalendarAssociatedWithEntity(calendarInstance
                             .getEntityId(), calendarInstance.getCalendar().getId(), CalendarEntityType.LOANS.getValue().longValue());
-                    if (isCalendarAssociatedWithEntity) {
+                    if (isCalendarAssociatedWithEntity && calendarId == null) {
                         this.calendarRepository.delete(calendarInstance.getCalendar());
                     }
                     if (calendarInstance.getCalendar().getId() != calendar.getId()) {
@@ -1030,6 +1030,12 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final List<Note> relatedNotes = this.noteRepository.findByLoanId(loan.getId());
         this.noteRepository.deleteInBatch(relatedNotes);
 
+        final AccountAssociations accountAssociations = this.accountAssociationsRepository.findByLoanIdAndType(loanId,
+				AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
+		if (accountAssociations != null) {
+			this.accountAssociationsRepository.delete(accountAssociations);
+		}
+		
         this.loanRepositoryWrapper.delete(loanId);
 
         return new CommandProcessingResultBuilder() //
@@ -1117,7 +1123,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 }
 
                 final LocalDate lastUserTransactionOnLoanToClose = loanToClose.getLastUserTransactionDate();
-                if(!loan.getDisbursementDate().isAfter(lastUserTransactionOnLoanToClose)){
+                if(loan.getDisbursementDate().isBefore(lastUserTransactionOnLoanToClose)){
                     throw new GeneralPlatformDomainRuleException(
                             "error.msg.loan.disbursal.date.should.be.after.last.transaction.date.of.loan.to.be.closed",
                             "Disbursal date of this loan application "+loan.getDisbursementDate()

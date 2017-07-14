@@ -31,12 +31,9 @@ public interface ProvisioningEntriesApiConstants {
     public final static String JSON_LOCALE_PARAM = "locale" ;
     
     public final static String JSON_CREATEJOURNALENTRIES_PARAM = "createjournalentries" ;
-    
-    Set<String> supportedParameters = new HashSet<>(Arrays.asList(JSON_DATE_PARAM, JSON_DATEFORMAT_PARAM,JSON_LOCALE_PARAM,
-            JSON_CREATEJOURNALENTRIES_PARAM));
-    
-    Set<String> PROVISIONING_ENTRY_PARAMETERS = new HashSet<>(Arrays.asList("provisioningentry", "entries"));
 
-    Set<String> ALL_PROVISIONING_ENTRIES = new HashSet<>(Arrays.asList("provisioningentry"));
+    public final static String PROVISIONINGENTRY_PARAM = "provisioningentry";
+
+    public final static String ENTRIES_PARAM = "entries";
 
 }

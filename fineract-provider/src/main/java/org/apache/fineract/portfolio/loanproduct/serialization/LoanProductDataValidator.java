@@ -110,6 +110,13 @@ public final class LoanProductDataValidator {
             LoanProductConstants.isCompoundingToBePostedAsTransactionParamName, LoanProductConstants.allowCompoundingOnEodParamName,
             LoanProductConstants.canUseForTopup));
 
+    private static final String[] supportedloanConfigurableAttributes = {LoanProductConstants.amortizationTypeParamName,
+            LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyIdParamName,
+            LoanProductConstants.interestCalculationPeriodTypeParamName,
+            LoanProductConstants.inArrearsToleranceParamName, LoanProductConstants.repaymentEveryParamName,
+            LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName,
+            LoanProductConstants.graceOnArrearsAgeingParameterName};
+
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -686,18 +693,18 @@ public final class LoanProductDataValidator {
 
             // Validate that parameter names are allowed
             Set<String> supportedConfigurableAttributes = new HashSet<>();
-            Collections.addAll(supportedConfigurableAttributes, LoanProductConfigurableAttributes.supportedloanConfigurableAttributes);
+            Collections.addAll(supportedConfigurableAttributes, supportedloanConfigurableAttributes);
             this.fromApiJsonHelper.checkForUnsupportedNestedParameters(LoanProductConstants.allowAttributeOverridesParamName, object,
                     supportedConfigurableAttributes);
 
-            Integer length = LoanProductConfigurableAttributes.supportedloanConfigurableAttributes.length;
+            Integer length = supportedloanConfigurableAttributes.length;
 
             for (int i = 0; i < length; i++) {
                 /* Validate the attribute names */
                 if (this.fromApiJsonHelper
-                        .parameterExists(LoanProductConfigurableAttributes.supportedloanConfigurableAttributes[i], object)) {
+                        .parameterExists(supportedloanConfigurableAttributes[i], object)) {
                     Boolean loanConfigurationAttributeValue = this.fromApiJsonHelper.extractBooleanNamed(
-                            LoanProductConfigurableAttributes.supportedloanConfigurableAttributes[i], object);
+                            supportedloanConfigurableAttributes[i], object);
                     /* Validate the boolean value */
                     baseDataValidator.reset().parameter(LoanProductConstants.allowAttributeOverridesParamName)
                             .value(loanConfigurationAttributeValue).notNull().validateForBooleanValue();

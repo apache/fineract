@@ -113,5 +113,30 @@ public class SavingsStatusChecker {
         assertTrue("UNEXPECTED SAVINGS ACCOUNT SUB STATUS", getStatus(savingsStatusHashMap, "none"));
         System.out.println("Savings Application Sub Status:" + savingsStatusHashMap + "\n");
 	}
+	
+	public static void verifySavingsSubStatusblock(HashMap savingsStatusHashMap) {
+        System.out.println(
+                "\n-------------------------------------- VERIFYING SAVINGS ACCOUNT IS BLOCKED ------------------------------------");
+        assertTrue("block", getStatus(savingsStatusHashMap, "block"));
+        System.out.println("Savings Application Sub Status:" + savingsStatusHashMap + "\n");
+    }
+
+	public static void verifySavingsSubStatusIsNone(HashMap savingsStatusHashMap) {
+        System.out.println("\n------------------------- VERIFYING SAVINGS ACCOUNT IS NOT BLOCKED FOR ANY TYPE OF TRANSACTIONS ---------------------------");
+        assertTrue("none", getStatus(savingsStatusHashMap, "none"));
+        System.out.println("Savings Application Sub Status:" + savingsStatusHashMap + "\n");
+    }
+
+    public static void verifySavingsSubStatusIsDebitBlocked(HashMap savingsStatusHashMap) {
+        System.out.println("\n--------------------- VERIFYING SAVINGS APPLICATION IS BLOCKED FOR DEBIT TRANSACTIONS ---------------------");
+        assertTrue("status is blockDebit", getStatus(savingsStatusHashMap, "blockDebit"));
+        System.out.println("Savings Application Sub Status:" + savingsStatusHashMap + "\n");
+    }
+
+    public static void verifySavingsSubStatusIsCreditBlocked(HashMap savingsStatusHashMap) {
+        System.out.println("\n---------------------- VERIFYING SAVINGS APPLICATION IS BLOCKED FOR CREDIT TRANSACTIONS ---------------");
+        assertTrue("blockCredit ", getStatus(savingsStatusHashMap, "blockCredit"));
+        System.out.println("Savings Application Sub Status:" + savingsStatusHashMap + "\n");
+    }
 
 }

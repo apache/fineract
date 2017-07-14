@@ -153,7 +153,8 @@ public class SavingsProductsApiResource {
         final Collection<SavingsProductData> products = this.savingProductReadPlatformService.retrieveAll();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, products, SavingsApiConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
+		return this.toApiJsonSerializer.serialize(settings, products,
+				SavingsApiSetConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -189,8 +190,8 @@ public class SavingsProductsApiResource {
             savingProductData = handleTemplateRelatedData(savingProductData);
         }
 
-        return this.toApiJsonSerializer
-                .serialize(settings, savingProductData, SavingsApiConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
+		return this.toApiJsonSerializer.serialize(settings, savingProductData,
+				SavingsApiSetConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -204,7 +205,8 @@ public class SavingsProductsApiResource {
         final SavingsProductData savingProduct = handleTemplateRelatedData(null);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, savingProduct, SavingsApiConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
+		return this.toApiJsonSerializer.serialize(settings, savingProduct,
+				SavingsApiSetConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
     }
 
     private SavingsProductData handleTemplateRelatedData(final SavingsProductData savingsProduct) {

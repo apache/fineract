@@ -62,12 +62,12 @@ public class HookApiConstants {
 
     public static final String templateNameParamName = "templateName";
 
-    public static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+    protected static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(nameParamName, displayNameParamName,
                     templateIdParamName, isActiveParamName, configParamName,
                     eventsParamName, templateNameParamName));
 
-    public static final Set<String> UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+    protected static final Set<String> UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(nameParamName, displayNameParamName,
                     templateIdParamName, isActiveParamName, configParamName,
                     eventsParamName, templateNameParamName));

@@ -41,7 +41,9 @@ public enum SavingsAccountTransactionType {
     REJECT_TRANSFER(15, "savingsAccountTransactionType.rejectTransfer"), WRITTEN_OFF(16, "savingsAccountTransactionType.writtenoff"), //
     OVERDRAFT_INTEREST(17, "savingsAccountTransactionType.overdraftInterest"), //
     WITHHOLD_TAX(18, "savingsAccountTransactionType.withholdTax"),
-    ESCHEAT(19, "savingsAccountTransactionType.escheat");
+    ESCHEAT(19, "savingsAccountTransactionType.escheat"),
+    AMOUNT_HOLD(20, "savingsAccountTransactionType.onHold"),
+    AMOUNT_RELEASE(21, "savingsAccountTransactionType.release");
 
     private final Integer value;
     private final String code;
@@ -112,6 +114,12 @@ public enum SavingsAccountTransactionType {
             break;
             case 19:
             	savingsAccountTransactionType = SavingsAccountTransactionType.ESCHEAT;
+            break;
+            case 20:
+                savingsAccountTransactionType = SavingsAccountTransactionType.AMOUNT_HOLD;
+            break;
+            case 21:
+                savingsAccountTransactionType = SavingsAccountTransactionType.AMOUNT_RELEASE;
             break;
         }
         return savingsAccountTransactionType;
@@ -188,12 +196,20 @@ public enum SavingsAccountTransactionType {
     public boolean isEscheat() {
         return this.value.equals(SavingsAccountTransactionType.ESCHEAT.getValue());
     }
+    
+    public boolean isAmountOnHold() {
+        return this.value.equals(SavingsAccountTransactionType.AMOUNT_HOLD.getValue());
+    }
+
+    public boolean isAmountRelease() {
+        return this.value.equals(SavingsAccountTransactionType.AMOUNT_RELEASE.getValue());
+    }
 
     public boolean isDebit() {
-        return isWithdrawal() || isWithdrawalFee() || isAnnualFee() || isPayCharge() || isIncomeFromInterest() || isWithHoldTax() || isEscheat();
+        return isWithdrawal() || isWithdrawalFee() || isAnnualFee() || isPayCharge() || isIncomeFromInterest() || isWithHoldTax() || isEscheat() || isAmountOnHold();
     }
 
     public boolean isCredit() {
-        return isDeposit() || isInterestPosting() || isDividendPayout();
+        return isDeposit() || isInterestPosting() || isDividendPayout() || isAmountRelease();
     }
 }

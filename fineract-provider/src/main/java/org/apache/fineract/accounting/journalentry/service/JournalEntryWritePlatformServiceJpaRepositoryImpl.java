@@ -52,6 +52,8 @@ import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
 import org.apache.fineract.accounting.journalentry.exception.JournalEntriesNotFoundException;
 import org.apache.fineract.accounting.journalentry.exception.JournalEntryInvalidException;
 import org.apache.fineract.accounting.journalentry.exception.JournalEntryInvalidException.GL_JOURNAL_ENTRY_INVALID_REASON;
+
+import org.apache.fineract.accounting.journalentry.exception.JournalEntryRuntimeException;
 import org.apache.fineract.accounting.journalentry.serialization.JournalEntryCommandFromApiJsonDeserializer;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.PortfolioProductType;
 import org.apache.fineract.accounting.provisioning.domain.LoanProductProvisioningEntry;
@@ -255,7 +257,9 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                     }
                 }
             }
-            if (credits.length != validCredits.length) { throw new RuntimeException("Invalid credits"); }
+			if (credits.length != validCredits.length) {
+				throw new JournalEntryRuntimeException("error.msg.glJournalEntry.invalid.credits", "Invalid Credits.");
+			}
         }
 
         if (debits != null && debits.length > 0) {
@@ -268,9 +272,11 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                         validDebits[i] = debit;
                     }
                 }
-            }
-            if (debits.length != validDebits.length) { throw new RuntimeException("Invalid debits"); }
-        }
+			}
+			if (debits.length != validDebits.length) {
+				throw new JournalEntryRuntimeException("error.msg.glJournalEntry.invalid.debits","Invalid Debits");
+			}
+		}
     }
 
     private void checkDebitAndCreditAmounts(final SingleDebitOrCreditEntryCommand[] credits, final SingleDebitOrCreditEntryCommand[] debits) {
@@ -325,6 +331,19 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         final boolean useDefaultComment = StringUtils.isBlank(reversalComment);
 
         validateCommentForReversal(reversalComment);
+        
+        //Before reversal validate accounting closure is done for that branch or not.
+        final Date journalEntriesTransactionDate = journalEntries.get(0).getTransactionDate();
+        final GLClosure latestGLClosureByBranch = this.glClosureRepository.getLatestGLClosureByBranch(officeId);
+        if (latestGLClosureByBranch != null) {
+            if (latestGLClosureByBranch.getClosingDate().after(journalEntriesTransactionDate)
+                    || latestGLClosureByBranch.getClosingDate().equals(journalEntriesTransactionDate)) {
+                final String accountName = null;
+                final String accountGLCode = null;
+                throw new JournalEntryInvalidException(GL_JOURNAL_ENTRY_INVALID_REASON.ACCOUNTING_CLOSED,
+                        latestGLClosureByBranch.getClosingDate(), accountName, accountGLCode);
+            }
+        }
 
         for (final JournalEntry journalEntry : journalEntries) {
             JournalEntry reversalJournalEntry;

@@ -182,7 +182,7 @@ public class DatatableCommandFromApiJsonDeserializer {
 
                 final String newName = this.fromApiJsonHelper.extractStringNamed("newName", column);
                 baseDataValidator.reset().parameter("newName").value(newName).ignoreIfNull().notBlank().notExceedingLengthOf(50)
-                        .isNotOneOfTheseValues("id", fkColumnName).matchesRegularExpression(DATATABLE_NAME_REGEX_PATTERN);
+                        .isNotOneOfTheseValues("id", fkColumnName).matchesRegularExpression(DATATABLE_COLUMN_NAME_REGEX_PATTERN);
 
                 if (this.fromApiJsonHelper.parameterExists("length", column)) {
                     final String lengthStr = this.fromApiJsonHelper.extractStringNamed("length", column);

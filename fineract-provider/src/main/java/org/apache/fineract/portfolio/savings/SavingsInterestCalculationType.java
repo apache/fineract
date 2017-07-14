@@ -22,8 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <ul>
+ * 
  * There are two methods to calculate the interest on a savings account:
+ * <ul>
  * <li>The daily balance method; and</li>
  * <li>The average daily balance method.</li>
  * </ul>

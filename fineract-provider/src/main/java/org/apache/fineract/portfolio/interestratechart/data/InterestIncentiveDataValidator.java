@@ -19,8 +19,6 @@
 package org.apache.fineract.portfolio.interestratechart.data;
 
 import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants.INCENTIVE_RESOURCE_NAME;
-import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants.INTERESTRATE_INCENTIVE_CREATE_REQUEST_DATA_PARAMETERS;
-import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants.INTERESTRATE_INCENTIVE_UPDATE_REQUEST_DATA_PARAMETERS;
 import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants.amountParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants.attributeNameParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants.attributeValueParamName;
@@ -32,9 +30,12 @@ import static org.apache.fineract.portfolio.interestratechart.InterestRateChartA
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -43,6 +44,7 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.common.domain.ConditionType;
+import org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants;
 import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncentiveAttributeName;
 import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncentiveEntityType;
 import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncentiveType;
@@ -57,6 +59,14 @@ import com.google.gson.reflect.TypeToken;
 public class InterestIncentiveDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
+
+	private static final Set<String> INTERESTRATE_INCENTIVE_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(InterestIncentiveApiConstants.idParamName, entityTypeParamName, attributeNameParamName,
+					conditionTypeParamName, attributeValueParamName, incentiveTypeparamName, amountParamName));
+
+	private static final Set<String> INTERESTRATE_INCENTIVE_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(InterestIncentiveApiConstants.idParamName, entityTypeParamName, attributeNameParamName,
+					conditionTypeParamName, attributeValueParamName, incentiveTypeparamName, amountParamName));
 
     @Autowired
     public InterestIncentiveDataValidator(final FromJsonHelper fromApiJsonHelper) {

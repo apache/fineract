@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_REQUEST_DATA_PARAMETERS;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
@@ -52,9 +51,12 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToEs
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
@@ -64,6 +66,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
@@ -82,6 +85,34 @@ import com.google.gson.reflect.TypeToken;
 public class SavingsProductDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
+	private static final Set<String> SAVINGS_PRODUCT_REQUEST_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(SavingsApiConstants.localeParamName, SavingsApiConstants.monthDayFormatParamName,
+					nameParamName, shortNameParamName, descriptionParamName, currencyCodeParamName,
+					digitsAfterDecimalParamName, inMultiplesOfParamName, nominalAnnualInterestRateParamName,
+					interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName,
+					interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
+					minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
+					lockinPeriodFrequencyTypeParamName, SavingsApiConstants.withdrawalFeeAmountParamName,
+					SavingsApiConstants.withdrawalFeeTypeParamName, withdrawalFeeForTransfersParamName,
+					feeAmountParamName, feeOnMonthDayParamName, SavingsApiConstants.accountingRuleParamName,
+					SavingsApiConstants.chargesParamName, SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(),
+					SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(),
+					SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue(),
+					SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(),
+					SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_CONTROL.getValue(),
+					SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(),
+					SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue(),
+					SAVINGS_PRODUCT_ACCOUNTING_PARAMS.FEE_INCOME_ACCOUNT_MAPPING.getValue(),
+					SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PENALTY_INCOME_ACCOUNT_MAPPING.getValue(),
+					SAVINGS_PRODUCT_ACCOUNTING_PARAMS.OVERDRAFT_PORTFOLIO_CONTROL.getValue(),
+					SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(),
+					SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_INTEREST.getValue(),
+					SAVINGS_PRODUCT_ACCOUNTING_PARAMS.ESCHEAT_LIABILITY.getValue(), isDormancyTrackingActiveParamName,
+					daysToDormancyParamName, daysToInactiveParamName, daysToEscheatParamName, allowOverdraftParamName,
+					overdraftLimitParamName, nominalAnnualInterestRateOverdraftParamName,
+					minOverdraftForInterestCalculationParamName, SavingsApiConstants.minRequiredBalanceParamName,
+					SavingsApiConstants.enforceMinRequiredBalanceParamName, minBalanceForInterestCalculationParamName,
+					withHoldTaxParamName, taxGroupIdParamName));
 
     @Autowired
     public SavingsProductDataValidator(final FromJsonHelper fromApiJsonHelper) {

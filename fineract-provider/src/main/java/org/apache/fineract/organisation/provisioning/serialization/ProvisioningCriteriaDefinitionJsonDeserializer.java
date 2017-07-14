@@ -21,9 +21,12 @@ package org.apache.fineract.organisation.provisioning.serialization;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -41,9 +44,23 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 @Component
-public class ProvisioningCriteriaDefinitionJsonDeserializer implements ProvisioningCriteriaConstants{
+public class ProvisioningCriteriaDefinitionJsonDeserializer implements ProvisioningCriteriaConstants {
 
-    private final FromJsonHelper fromApiJsonHelper;
+	private final FromJsonHelper fromApiJsonHelper;
+
+	private final static Set<String> supportedParametersForCreate = new HashSet<>(Arrays.asList(JSON_LOCALE_PARAM,
+			JSON_CRITERIANAME_PARAM, JSON_LOANPRODUCTS_PARAM, JSON_PROVISIONING_DEFINITIONS_PARAM));
+
+	private final static Set<String> supportedParametersForUpdate = new HashSet<>(Arrays.asList(JSON_CRITERIAID_PARAM,
+			JSON_LOCALE_PARAM, JSON_CRITERIANAME_PARAM, JSON_LOANPRODUCTS_PARAM, JSON_PROVISIONING_DEFINITIONS_PARAM));
+
+	private final static Set<String> loanProductSupportedParams = new HashSet<>(Arrays
+			.asList(JSON_LOAN_PRODUCT_ID_PARAM, JSON_LOAN_PRODUCTNAME_PARAM, JSON_LOAN_PRODUCT_BORROWERCYCLE_PARAM));
+
+	private final static Set<String> provisioningcriteriaSupportedParams = new HashSet<>(
+			Arrays.asList(JSON_CATEOGRYID_PARAM, JSON_CATEOGRYNAME_PARAM, JSON_MINIMUM_AGE_PARAM,
+					JSON_MAXIMUM_AGE_PARAM, JSON_MINIMUM_AGE_PARAM, JSON_PROVISIONING_PERCENTAGE_PARAM,
+					JSON_EXPENSE_ACCOUNT_PARAM, JSON_LIABILITY_ACCOUNT_PARAM));
 
     @Autowired
     public ProvisioningCriteriaDefinitionJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {

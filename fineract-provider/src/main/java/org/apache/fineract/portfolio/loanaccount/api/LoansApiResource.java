@@ -267,6 +267,7 @@ public class LoansApiResource {
         Collection<CalendarData> calendarOptions = null;
         LoanAccountData newLoanAccount = null;
         Long officeId = null;
+        Collection<PortfolioAccountData> accountLinkingOptions = null;
 
         if (productId != null) {
             newLoanAccount = this.loanReadPlatformService.retrieveLoanProductDetailsTemplate(productId, clientId, groupId);
@@ -306,6 +307,7 @@ public class LoansApiResource {
                 calendarOptions = this.loanReadPlatformService.retrieveCalendars(groupId);
                 newLoanAccount = newLoanAccount == null ? loanAccountGroupData : LoanAccountData.populateGroupDefaults(newLoanAccount,
                         loanAccountGroupData);
+                accountLinkingOptions = getaccountLinkingOptions(newLoanAccount, clientId, groupId);
 
             } else if (templateType.equals("jlgbulk")) {
                 // get group details along with members in that group
@@ -317,10 +319,15 @@ public class LoansApiResource {
                 if (productId != null) {
                     Map<Long, Integer> memberLoanCycle = new HashMap<>();
                     Collection<ClientData> members = loanAccountGroupData.groupData().clientMembers();
-                    for (ClientData clientData : members) {
-                        Integer loanCounter = this.loanReadPlatformService.retriveLoanCounter(clientData.id(), productId);
-                        memberLoanCycle.put(clientData.id(), loanCounter);
+                    accountLinkingOptions = new ArrayList<>();
+                    if(members != null){
+                    	for (ClientData clientData : members) {
+                            Integer loanCounter = this.loanReadPlatformService.retriveLoanCounter(clientData.id(), productId);
+                            memberLoanCycle.put(clientData.id(), loanCounter);
+                            accountLinkingOptions.addAll(getaccountLinkingOptions(newLoanAccount, clientData.id(), groupId));
+                        }
                     }
+                    
                     newLoanAccount = LoanAccountData.associateMemberVariations(newLoanAccount, memberLoanCycle);
                 }
 
@@ -331,18 +338,8 @@ public class LoansApiResource {
 
             allowedLoanOfficers = this.loanReadPlatformService.retrieveAllowedLoanOfficers(officeId, staffInSelectedOfficeOnly);
 
-            Collection<PortfolioAccountData> accountLinkingOptions = null;
             if (clientId != null) {
-                final CurrencyData currencyData = newLoanAccount.currency();
-                String currencyCode = null;
-                if (currencyData != null) {
-                    currencyCode = currencyData.code();
-                }
-                final long[] accountStatus = { SavingsAccountStatusType.ACTIVE.getValue() };
-                PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(PortfolioAccountType.SAVINGS.getValue(), clientId,
-                        currencyCode, accountStatus, DepositAccountType.SAVINGS_DEPOSIT.getValue());
-                accountLinkingOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(portfolioAccountDTO);
-
+                accountLinkingOptions = getaccountLinkingOptions(newLoanAccount, clientId, groupId);
             }
 
             // add product options, allowed loan officers and calendar options
@@ -358,6 +355,22 @@ public class LoansApiResource {
         return this.toApiJsonSerializer.serialize(settings, newLoanAccount, this.LOAN_DATA_PARAMETERS);
     }
 
+    private Collection<PortfolioAccountData> getaccountLinkingOptions(final LoanAccountData newLoanAccount, final Long clientId,
+            final Long groupId) {
+        final CurrencyData currencyData = newLoanAccount.currency();
+        String currencyCode = null;
+        if (currencyData != null) {
+            currencyCode = currencyData.code();
+        }
+        final long[] accountStatus = { SavingsAccountStatusType.ACTIVE.getValue() };
+        final PortfolioAccountDTO portfolioAccountDTO = new PortfolioAccountDTO(PortfolioAccountType.SAVINGS.getValue(), clientId, currencyCode,
+                accountStatus, DepositAccountType.SAVINGS_DEPOSIT.getValue());
+        if (groupId != null) {
+            portfolioAccountDTO.setGroupId(groupId);
+        }
+        return this.portfolioAccountReadPlatformService.retrieveAllForLookup(portfolioAccountDTO);
+    }
+    
     @GET
     @Path("{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })

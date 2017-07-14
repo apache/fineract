@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.self.account.api;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -60,6 +62,13 @@ public class SelfBeneficiariesTPTApiResource {
 	private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 	private final ApiRequestParameterHelper apiRequestParameterHelper;
 	private final SelfBeneficiariesTPTReadPlatformService readPlatformService;
+	private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+			SelfBeneficiariesTPTApiConstants.NAME_PARAM_NAME, SelfBeneficiariesTPTApiConstants.OFFICE_NAME_PARAM_NAME,
+			SelfBeneficiariesTPTApiConstants.ACCOUNT_NUMBER_PARAM_NAME,
+			SelfBeneficiariesTPTApiConstants.ACCOUNT_TYPE_PARAM_NAME,
+			SelfBeneficiariesTPTApiConstants.TRANSFER_LIMIT_PARAM_NAME, SelfBeneficiariesTPTApiConstants.ID_PARAM_NAME,
+			SelfBeneficiariesTPTApiConstants.CLIENT_NAME_PARAM_NAME,
+			SelfBeneficiariesTPTApiConstants.ACCOUNT_TYPE_OPTIONS_PARAM_NAME));
 
 	@Autowired
 	public SelfBeneficiariesTPTApiResource(
@@ -94,8 +103,7 @@ public class SelfBeneficiariesTPTApiResource {
 
 		final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper
 				.process(uriInfo.getQueryParameters());
-		return this.toApiJsonSerializer.serialize(settings, templateData,
-				SelfBeneficiariesTPTApiConstants.RESPONSE_DATA_PARAMETERS);
+		return this.toApiJsonSerializer.serialize(settings, templateData, RESPONSE_DATA_PARAMETERS);
 	}
 
 	@POST
@@ -154,8 +162,7 @@ public class SelfBeneficiariesTPTApiResource {
 
 		final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper
 				.process(uriInfo.getQueryParameters());
-		return this.toApiJsonSerializer.serialize(settings, beneficiaries,
-				SelfBeneficiariesTPTApiConstants.RESPONSE_DATA_PARAMETERS);
+		return this.toApiJsonSerializer.serialize(settings, beneficiaries, RESPONSE_DATA_PARAMETERS);
 	}
 
 }

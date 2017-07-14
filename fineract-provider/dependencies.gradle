@@ -97,7 +97,7 @@ dependencies {
                 [group: 'org.mnode.ical4j', name: 'ical4j', version: '1.0.4'],
                 [group: 'com.googlecode.flyway', name: 'flyway-core', version: '2.1.1'],
                 [group: 'org.quartz-scheduler', name: 'quartz', version: '2.1.7'],
-                [group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.2.1'],
+                [group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.80'],
                 [group: 'net.sf.ehcache', name: 'ehcache', version: '2.7.2'],
                 [group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.8.12'],
                 [group: 'com.jayway.jsonpath', name: 'json-path', version: '0.9.1'],

@@ -29,7 +29,7 @@ public class LoanRescheduleRequestNotFoundException extends AbstractPlatformReso
 	 * LoanRescheduleRequestNotFoundException constructor 
 	 * 
 	 * @param requestId the loan reschedule request identifier
-	 * @return void
+	 * 
 	 **/
 	public LoanRescheduleRequestNotFoundException(final Long requestId) {
 		super("error.msg.loan.reschedule.request.id.invalid", 

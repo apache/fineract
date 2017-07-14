@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.collectionsheet.serialization;
 
-import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.INDIVIDUAL_COLLECTIONSHEET_SUPPORTED_PARAMS;
 import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.calendarIdParamName;
 import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.dateFormatParamName;
 import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.localeParamName;
@@ -53,8 +52,11 @@ public class CollectionSheetGenerateCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    final Set<String> supportedParameters = new HashSet<>(Arrays.asList(transactionDateParamName, localeParamName, dateFormatParamName,
-            calendarIdParamName));
+	final Set<String> supportedParameters = new HashSet<>(
+			Arrays.asList(transactionDateParamName, localeParamName, dateFormatParamName, calendarIdParamName));
+
+	private static final Set<String> INDIVIDUAL_COLLECTIONSHEET_SUPPORTED_PARAMS = new HashSet<>(Arrays.asList(
+			transactionDateParamName, localeParamName, dateFormatParamName, officeIdParamName, staffIdParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
 

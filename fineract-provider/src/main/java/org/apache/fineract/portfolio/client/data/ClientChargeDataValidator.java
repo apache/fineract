@@ -53,7 +53,7 @@ public class ClientChargeDataValidator {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                ClientApiConstants.CLIENT_CHARGES_ADD_REQUEST_DATA_PARAMETERS);
+                ClientApiCollectionConstants.CLIENT_CHARGES_ADD_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -75,7 +75,7 @@ public class ClientChargeDataValidator {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                ClientApiConstants.CLIENT_CHARGES_ADD_REQUEST_DATA_PARAMETERS);
+                ClientApiCollectionConstants.CLIENT_CHARGES_ADD_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -100,7 +100,7 @@ public class ClientChargeDataValidator {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                ClientApiConstants.CLIENT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS);
+                ClientApiCollectionConstants.CLIENT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)

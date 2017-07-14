@@ -98,11 +98,9 @@ public final class StaffCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter("isActive").value(activeFlag).notNull();
         }
         
-        if (this.fromApiJsonHelper.parameterExists("joiningDate", element)) {
-            final LocalDate joiningDate = this.fromApiJsonHelper.extractLocalDateNamed("joiningDate", element);
-            baseDataValidator.reset().parameter("joiningDate").value(joiningDate).notNull();
-        }
-
+        final LocalDate joiningDate = this.fromApiJsonHelper.extractLocalDateNamed("joiningDate", element);
+        baseDataValidator.reset().parameter("joiningDate").value(joiningDate).notNull();
+       
         if (this.fromApiJsonHelper.parameterExists("dateFormat", element)) {
         	final String dateFormat = this.fromApiJsonHelper.extractStringNamed("dateFormat", element);
         	baseDataValidator.reset().parameter("dateFormat").value(dateFormat).notBlank();

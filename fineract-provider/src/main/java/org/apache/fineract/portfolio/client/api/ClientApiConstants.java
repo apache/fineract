@@ -89,6 +89,7 @@ public class ClientApiConstants {
     public static final String activationDateParamName = "activationDate";
     public static final String reactivationDateParamName = "reactivationDate";
     public static final String staffIdParamName = "staffId";
+	public static final String isStaffParamName = "isStaff";
     public static final String closureDateParamName = "closureDate";
     public static final String closureReasonIdParamName = "closureReasonId";
     public static final String reopenedDateParamName = "reopenedDate";
@@ -179,74 +180,29 @@ public class ClientApiConstants {
 
     public static final String datatables = "datatables";
 
-    public static final Set<String> CLIENT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(address,localeParamName, dateFormatParamName, groupIdParamName, accountNoParamName, externalIdParamName,
-                    mobileNoParamName, firstnameParamName, middlenameParamName, lastnameParamName, fullnameParamName, officeIdParamName,
-                    activeParamName, activationDateParamName, staffIdParamName, submittedOnDateParamName, savingsProductIdParamName,
-                    dateOfBirthParamName, genderIdParamName, clientTypeIdParamName, clientClassificationIdParamName, 
-                    clientNonPersonDetailsParamName, displaynameParamName, legalFormIdParamName, datatables));
-    
-    public static final Set<String> CLIENT_NON_PERSON_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(address,localeParamName, dateFormatParamName, incorpNumberParamName, remarksParamName, incorpValidityTillParamName, 
-            		constitutionIdParamName, mainBusinessLineIdParamName, datatables));
-
-    public static final Set<String> CLIENT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
-            dateFormatParamName, accountNoParamName, externalIdParamName, mobileNoParamName, firstnameParamName, middlenameParamName,
-
-    lastnameParamName, fullnameParamName, activeParamName, activationDateParamName, staffIdParamName, savingsProductIdParamName,
-            dateOfBirthParamName, genderIdParamName, clientTypeIdParamName, clientClassificationIdParamName, submittedOnDateParamName, 
-            clientNonPersonDetailsParamName, displaynameParamName, legalFormIdParamName));
-    
-    public static final Set<String> CLIENT_NON_PERSON_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
-            dateFormatParamName, incorpNumberParamName, remarksParamName, incorpValidityTillParamName, 
-    		constitutionIdParamName, mainBusinessLineIdParamName));
 
     /**
      * These parameters will match the class level parameters of
      * {@link ClientData}. Where possible, we try to get response parameters to
      * match those of request parameters.
      */
-    public static final Set<String> CLIENT_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName, accountNoParamName,
+    protected static final Set<String> CLIENT_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
+            accountNoParamName,
             externalIdParamName, statusParamName, activeParamName, activationDateParamName, firstnameParamName, middlenameParamName,
             lastnameParamName, fullnameParamName, displayNameParamName, mobileNoParamName, officeIdParamName, officeNameParamName,
             transferToOfficeIdParamName, transferToOfficeNameParamName, hierarchyParamName, imageIdParamName, imagePresentParamName,
             staffIdParamName, staffNameParamName, timelineParamName, groupsParamName, officeOptionsParamName, staffOptionsParamName,
             dateOfBirthParamName, genderParamName, clientTypeParamName, clientClassificationParamName, legalFormParamName, 
-            clientNonPersonDetailsParamName));
+            clientNonPersonDetailsParamName, isStaffParamName));
 
-    public static final Set<String> ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(localeParamName, dateFormatParamName, activationDateParamName));
-    public static final Set<String> REACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(localeParamName, dateFormatParamName, reactivationDateParamName));
-
-    public static final Set<String> CLIENT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(localeParamName, dateFormatParamName, closureDateParamName, closureReasonIdParamName));
-
-    public static final Set<String> CLIENT_REJECT_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(localeParamName, dateFormatParamName, rejectionDateParamName, rejectionReasonIdParamName));
-
-	public static final Set<String> CLIENT_WITHDRAW_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(localeParamName, dateFormatParamName, withdrawalDateParamName, withdrawalReasonIdParamName));
-	
-	public static final Set<String> UNDOREJECTION_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(localeParamName, dateFormatParamName, reopenedDateParamName));
-	
-	public static final Set<String> UNDOWITHDRAWN_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(localeParamName, dateFormatParamName, reopenedDateParamName));
-
-    public static final Set<String> CLIENT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(chargeIdParamName,
+    protected static final Set<String> CLIENT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList
+            (chargeIdParamName,
             clientIdParamName, chargeNameParamName, penaltyParamName, chargeTimeTypeParamName, dueAsOfDateParamName,
             chargeCalculationTypeParamName, currencyParamName, amountWaivedParamName, amountWrittenOffParamName, amountOutstandingParamName,
             amountOrPercentageParamName, amountParamName, amountPaidParamName, chargeOptionsParamName, transactionsParamName));
 
-    public static final Set<String> CLIENT_CHARGES_ADD_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(chargeIdParamName, amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName));
-
-    public static final Set<String> CLIENT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(amountParamName,
-            transactionDateParamName, dateFormatParamName, localeParamName, paymentTypeIdParamName, transactionAccountNumberParamName,
-            checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
-
-    public static final Set<String> CLIENT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
+    protected static final Set<String> CLIENT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList
+            (idParamName,
             transactionAmountParamName, paymentDetailDataParamName, reversedParamName, dateParamName, officeIdParamName,
             officeNameParamName, transactionTypeParamName, transactionCurrencyParamName, externalIdParamName, submittedOnDateParamName));
 

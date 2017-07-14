@@ -34,7 +34,7 @@ public class LoanTrancheDisbursementCharge extends AbstractPersistableCustom<Lon
     @JoinColumn(name = "loan_charge_id", referencedColumnName = "id", nullable = false)
     private LoanCharge loancharge;
     
-    @ManyToOne(cascade = CascadeType.PERSIST, optional = false)
+    @ManyToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name="disbursement_detail_id", referencedColumnName = "id", nullable = false)
     private LoanDisbursementDetails loanDisbursementDetails; 
     

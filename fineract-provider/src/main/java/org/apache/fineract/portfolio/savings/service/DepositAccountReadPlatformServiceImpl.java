@@ -22,8 +22,11 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
@@ -122,6 +125,9 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    // allowed column names for sorting the query result
+    private final static Set<String> supportedOrderByValues = new HashSet<>(Arrays.asList("id", "accountNumbr",
+            "officeId", "officeName"));
 
     @Autowired
     public DepositAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -178,7 +184,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     public Page<DepositAccountData> retrieveAllPaged(final DepositAccountType depositAccountType,
             final PaginationParameters paginationParameters) {
 
-        this.paginationParametersDataValidator.validateParameterValues(paginationParameters, DepositsApiConstants.supportedOrderByValues,
+        this.paginationParametersDataValidator.validateParameterValues(paginationParameters, supportedOrderByValues,
                 depositAccountType.resourceName());
 
         final DepositAccountMapper depositAccountMapper = this.getDepositAccountMapper(depositAccountType);
@@ -480,8 +486,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         try {
             final String sql = "select " + this.rdTransactionTemplateMapper.schema()
                     + " where sa.id = ? and sa.deposit_type_enum = ? order by mss.installment limit 1";
-
-            return this.jdbcTemplate.queryForObject(sql, this.rdTransactionTemplateMapper, new Object[] { accountId,
+            return this.jdbcTemplate.queryForObject(sql, this.rdTransactionTemplateMapper, new Object[] { accountId, accountId,
                     DepositAccountType.RECURRING_DEPOSIT.getValue() });
         } catch (final EmptyResultDataAccessException e) {
             throw new DepositAccountNotFoundException(DepositAccountType.RECURRING_DEPOSIT, accountId);
@@ -739,9 +744,10 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                 taxGroupData = TaxGroupData.lookup(taxGroupId, taxGroupName);
             }
 
+            final BigDecimal availableBalance = null;
             final SavingsAccountSummaryData summary = new SavingsAccountSummaryData(currency, totalDeposits, totalWithdrawals,
                     totalWithdrawalFees, totalAnnualFees, totalInterestEarned, totalInterestPosted, accountBalance, totalFeeCharge,
-                    totalPenaltyCharge, totalOverdraftInterestDerived, totalWithholdTax, null, null);
+                    totalPenaltyCharge, totalOverdraftInterestDerived, totalWithholdTax, null, null, availableBalance);
 
             return DepositAccountData.instance(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                     fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
@@ -998,6 +1004,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
             final LocalDate date = JdbcSupport.getLocalDate(rs, "transactionDate");
             final BigDecimal amount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "transactionAmount");
+            final BigDecimal outstandingChargeAmount = null;
             final BigDecimal runningBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "runningBalance");
             final boolean reversed = rs.getBoolean("reversed");
 
@@ -1051,7 +1058,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             }
             final boolean postInterestAsOn = false;
             return SavingsAccountTransactionData.create(id, transactionType, paymentDetailData, savingsId, accountNo, date, currency,
-                    amount, runningBalance, reversed, transfer, postInterestAsOn);
+                    amount, outstandingChargeAmount, runningBalance, reversed, transfer, postInterestAsOn);
         }
     }
 
@@ -1405,10 +1412,17 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
             sqlBuilder.append("sa.account_balance_derived as runningBalance, ");
             sqlBuilder
-                    .append("mss.duedate as duedate, (mss.deposit_amount - ifnull(mss.deposit_amount_completed_derived,0)) as dueamount ");
+                    .append("mss.duedate as duedate, (mss.deposit_amount - ifnull(mss.deposit_amount_completed_derived,0)) as dueamount, ");
+            sqlBuilder.append("IFNULL(sac.amount_outstanding_derived,0.0) AS outstandingChargeAmount ");
             sqlBuilder.append("from m_savings_account sa ");
             sqlBuilder.append("join m_mandatory_savings_schedule mss  on mss.savings_account_id=sa.id and mss.completed_derived = false ");
             sqlBuilder.append("join m_currency curr on curr.code = sa.currency_code ");
+            sqlBuilder.append("LEFT JOIN(SELECT s.savings_account_id AS savings_account_id ");
+            sqlBuilder.append(",SUM(IFNULL(s.amount_outstanding_derived,0.0)) AS amount_outstanding_derived  ");
+            sqlBuilder.append("FROM m_savings_account_charge s  ");
+            sqlBuilder.append("JOIN m_charge c ON c.id = s.charge_id AND c.charge_time_enum = 3 ");
+            sqlBuilder.append("WHERE s.savings_account_id = ? ");
+            sqlBuilder.append("AND s.is_active = TRUE GROUP BY s.savings_account_id)sac ON sac.savings_account_id = sa.id ");
 
             this.schemaSql = sqlBuilder.toString();
         }
@@ -1423,6 +1437,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final Long savingsId = rs.getLong("id");
             final String accountNo = rs.getString("accountNo");
             final BigDecimal dueamount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "dueamount");
+            final BigDecimal outstandingChargeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "outstandingChargeAmount");
             final LocalDate duedate = JdbcSupport.getLocalDate(rs, "duedate");
             final String currencyCode = rs.getString("currencyCode");
             final String currencyName = rs.getString("currencyName");
@@ -1439,7 +1454,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final BigDecimal runningBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "runningBalance");
             final boolean postInterestAsOn = false;
             return SavingsAccountTransactionData.create(savingsId, transactionType, paymentDetailData, savingsId, accountNo, duedate,
-                    currency, dueamount, runningBalance, false, transfer, postInterestAsOn);
+                    currency, dueamount, outstandingChargeAmount, runningBalance, false, transfer, postInterestAsOn);
         }
     }
 

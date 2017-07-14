@@ -242,10 +242,11 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
     @Override
     public ProvisioningEntryData retrieveProvisioningEntryData(String date) {
         ProvisioningEntryDataMapper mapper1 = new ProvisioningEntryDataMapper();
-        final String sql1 = "select " + mapper1.getSchema() + " where entry.created_date like " + "'" + date + "%'";
+        date = date+"%";
+        final String sql1 = "select " + mapper1.getSchema() + " where entry.created_date like ? ";
         ProvisioningEntryData data = null;
         try {
-            data = this.jdbcTemplate.queryForObject(sql1, mapper1, new Object[] {});
+            data = this.jdbcTemplate.queryForObject(sql1, mapper1, new Object[] {date});
         } catch (EmptyResultDataAccessException e) {
 
         }

@@ -40,13 +40,15 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.PaginationParametersDataValidator;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
+import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -90,6 +92,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     private final ConfigurationDomainService configurationDomainService;
     private final CalendarReadPlatformService calendarReadPlatformService;
     private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
+    private final ColumnValidator columnValidator;
 
     // data mappers
     private final CenterDataMapper centerMapper = new CenterDataMapper();
@@ -104,7 +107,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
             final StaffReadPlatformService staffReadPlatformService, final CodeValueReadPlatformService codeValueReadPlatformService,
             final PaginationParametersDataValidator paginationParametersDataValidator, final ConfigurationDomainService configurationDomainService,
-            final CalendarReadPlatformService calendarReadPlatformService) {
+            final CalendarReadPlatformService calendarReadPlatformService, final ColumnValidator columnValidator) {
         this.context = context;
         this.clientReadPlatformService = clientReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -114,41 +117,48 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         this.paginationParametersDataValidator = paginationParametersDataValidator;
         this.configurationDomainService = configurationDomainService;
         this.calendarReadPlatformService = calendarReadPlatformService;
+        this.columnValidator = columnValidator;
     }
 
     // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where
     // clause is ambiguous
     // caused by the same name of columns in m_office and m_group tables
-    private String getCenterExtraCriteria(final SearchParameters searchCriteria) {
+    private String getCenterExtraCriteria(String schemaSl, List<Object> paramList,final SearchParameters searchCriteria) {
 
         StringBuffer extraCriteria = new StringBuffer(200);
         extraCriteria.append(" and g.level_id = " + GroupTypes.CENTER.getId());
 
         String sqlQueryCriteria = searchCriteria.getSqlSearch();
         if (StringUtils.isNotBlank(sqlQueryCriteria)) {
+        	SQLInjectionValidator.validateSQLInput(sqlQueryCriteria);
             sqlQueryCriteria = sqlQueryCriteria.replaceAll(" display_name ", " g.display_name ");
             sqlQueryCriteria = sqlQueryCriteria.replaceAll("display_name ", "g.display_name ");
             extraCriteria.append(" and (").append(sqlQueryCriteria).append(") ");
+            this.columnValidator.validateSqlInjection(schemaSl, sqlQueryCriteria);
         }
 
         final Long officeId = searchCriteria.getOfficeId();
         if (officeId != null) {
-            extraCriteria.append(" and g.office_id = ").append(officeId);
+            extraCriteria.append(" and g.office_id = ? ");
+            paramList.add(officeId);
         }
 
         final String externalId = searchCriteria.getExternalId();
         if (externalId != null) {
-            extraCriteria.append(" and g.external_id = ").append(ApiParameterHelper.sqlEncodeString(externalId));
+        	paramList.add(ApiParameterHelper.sqlEncodeString(externalId));
+            extraCriteria.append(" and g.external_id = ? ");
         }
 
         final String name = searchCriteria.getName();
         if (name != null) {
-            extraCriteria.append(" and g.display_name like ").append(ApiParameterHelper.sqlEncodeString(name + "%"));
+        	paramList.add(ApiParameterHelper.sqlEncodeString(name + "%"));
+            extraCriteria.append(" and g.display_name like ? ");
         }
 
         final String hierarchy = searchCriteria.getHierarchy();
         if (hierarchy != null) {
-            extraCriteria.append(" and o.hierarchy like ").append(ApiParameterHelper.sqlEncodeString(hierarchy + "%"));
+        	paramList.add(ApiParameterHelper.sqlEncodeString(hierarchy + "%"));
+            extraCriteria.append(" and o.hierarchy like ? ");
         }
 
         if (StringUtils.isNotBlank(extraCriteria.toString())) {
@@ -157,7 +167,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         final Long staffId = searchCriteria.getStaffId();
         if (staffId != null) {
-            extraCriteria.append(" and g.staff_id = ").append(staffId);
+        	paramList.add(staffId);
+            extraCriteria.append(" and g.staff_id = ? ");
         }
 
         return extraCriteria.toString();
@@ -372,9 +383,10 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(this.centerMapper.schema());
         sqlBuilder.append(" where o.hierarchy like ?");
-
-        final String extraCriteria = getCenterExtraCriteria(searchParameters);
-
+        List<Object> paramList = new ArrayList<>(
+                Arrays.asList(hierarchySearchString));
+        final String extraCriteria = getCenterExtraCriteria(this.centerMapper.schema(), paramList, searchParameters);
+        this.columnValidator.validateSqlInjection(sqlBuilder.toString(), extraCriteria);
         if (StringUtils.isNotBlank(extraCriteria)) {
             sqlBuilder.append(" and (").append(extraCriteria).append(")");
         }
@@ -392,7 +404,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
-                new Object[] { hierarchySearchString }, this.centerMapper);
+        		paramList.toArray(), this.centerMapper);
     }
 
     @Override
@@ -407,9 +419,11 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         sqlBuilder.append("select ");
         sqlBuilder.append(this.centerMapper.schema());
         sqlBuilder.append(" where o.hierarchy like ?");
-
-        final String extraCriteria = getCenterExtraCriteria(searchParameters);
-
+        List<Object> paramList = new ArrayList<>(
+                Arrays.asList(hierarchySearchString));
+        
+        final String extraCriteria = getCenterExtraCriteria(this.centerMapper.schema(), paramList, searchParameters);
+        this.columnValidator.validateSqlInjection(sqlBuilder.toString(), extraCriteria);
         if (StringUtils.isNotBlank(extraCriteria)) {
             sqlBuilder.append(" and (").append(extraCriteria).append(")");
         }
@@ -425,7 +439,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             }
         }
 
-        return this.jdbcTemplate.query(sqlBuilder.toString(), this.centerMapper, new Object[] { hierarchySearchString });
+        return this.jdbcTemplate.query(sqlBuilder.toString(), this.centerMapper, paramList.toArray());
     }
 
     @Override
@@ -549,9 +563,9 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         validateForGenerateCollectionSheet(staffId);
         LocalDate localDate = new LocalDate(meetingDate);
         final CenterCalendarDataMapper centerCalendarMapper = new CenterCalendarDataMapper();
+        String passeddate = formatter.print(localDate);
         String sql = centerCalendarMapper.schema();
         Collection<CenterData> centerDataArray = null;
-        String passeddate = formatter.print(localDate);
         if (staffId != null) {
             sql += " and g.staff_id=? ";
             sql += "and lrs.duedate<='" + passeddate + "' and l.loan_type_enum=3";

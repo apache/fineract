@@ -96,7 +96,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 result.getSavingsId(), result.getProductId(), result.getTransactionId());
 
         String changesOnlyJson = null;
-        if (result.hasChanges()) {
+        boolean rollBack = (rollbackTransaction || result.isRollbackTransaction()) && !isApprovedByChecker ;
+        if (result.hasChanges() && !rollBack) {
             changesOnlyJson = this.toApiJsonSerializer.serializeResult(result.getChanges());
             commandSourceResult.updateJsonTo(changesOnlyJson);
         }
