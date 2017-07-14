@@ -2,11 +2,12 @@
 -- Host:                         127.0.0.1
 -- Server version:               5.6.33-log - MySQL Community Server (GPL)
 -- Server OS:                    Win64
--- HeidiSQL Version:             9.3.0.4984
+-- HeidiSQL Version:             9.4.0.5125
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET NAMES utf8mb4 */;
+/*!40101 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
@@ -36,7 +37,6 @@ CREATE TABLE IF NOT EXISTS `acc_accounting_rule` (
 /*!40000 ALTER TABLE `acc_accounting_rule` DISABLE KEYS */;
 /*!40000 ALTER TABLE `acc_accounting_rule` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.acc_gl_account
 DROP TABLE IF EXISTS `acc_gl_account`;
 CREATE TABLE IF NOT EXISTS `acc_gl_account` (
@@ -62,7 +62,6 @@ CREATE TABLE IF NOT EXISTS `acc_gl_account` (
 -- Dumping data for table mifostenant-default.acc_gl_account: ~0 rows (approximately)
 /*!40000 ALTER TABLE `acc_gl_account` DISABLE KEYS */;
 /*!40000 ALTER TABLE `acc_gl_account` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.acc_gl_closure
 DROP TABLE IF EXISTS `acc_gl_closure`;
@@ -90,7 +89,6 @@ CREATE TABLE IF NOT EXISTS `acc_gl_closure` (
 /*!40000 ALTER TABLE `acc_gl_closure` DISABLE KEYS */;
 /*!40000 ALTER TABLE `acc_gl_closure` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.acc_gl_financial_activity_account
 DROP TABLE IF EXISTS `acc_gl_financial_activity_account`;
 CREATE TABLE IF NOT EXISTS `acc_gl_financial_activity_account` (
@@ -106,7 +104,6 @@ CREATE TABLE IF NOT EXISTS `acc_gl_financial_activity_account` (
 -- Dumping data for table mifostenant-default.acc_gl_financial_activity_account: ~0 rows (approximately)
 /*!40000 ALTER TABLE `acc_gl_financial_activity_account` DISABLE KEYS */;
 /*!40000 ALTER TABLE `acc_gl_financial_activity_account` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.acc_gl_journal_entry
 DROP TABLE IF EXISTS `acc_gl_journal_entry`;
@@ -165,7 +162,6 @@ CREATE TABLE IF NOT EXISTS `acc_gl_journal_entry` (
 /*!40000 ALTER TABLE `acc_gl_journal_entry` DISABLE KEYS */;
 /*!40000 ALTER TABLE `acc_gl_journal_entry` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.acc_product_mapping
 DROP TABLE IF EXISTS `acc_product_mapping`;
 CREATE TABLE IF NOT EXISTS `acc_product_mapping` (
@@ -187,7 +183,6 @@ CREATE TABLE IF NOT EXISTS `acc_product_mapping` (
 /*!40000 ALTER TABLE `acc_product_mapping` DISABLE KEYS */;
 /*!40000 ALTER TABLE `acc_product_mapping` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.acc_rule_tags
 DROP TABLE IF EXISTS `acc_rule_tags`;
 CREATE TABLE IF NOT EXISTS `acc_rule_tags` (
@@ -206,7 +201,6 @@ CREATE TABLE IF NOT EXISTS `acc_rule_tags` (
 -- Dumping data for table mifostenant-default.acc_rule_tags: ~0 rows (approximately)
 /*!40000 ALTER TABLE `acc_rule_tags` DISABLE KEYS */;
 /*!40000 ALTER TABLE `acc_rule_tags` ENABLE KEYS */;
-
 
 -- Dumping structure for procedure mifostenant-default.CashierTransactionSummary
 DROP PROCEDURE IF EXISTS `CashierTransactionSummary`;
@@ -496,7 +490,6 @@ DROP TEMPORARY TABLE IF EXISTS final_temp_cashier_report;
 END//
 DELIMITER ;
 
-
 -- Dumping structure for table mifostenant-default.c_account_number_format
 DROP TABLE IF EXISTS `c_account_number_format`;
 CREATE TABLE IF NOT EXISTS `c_account_number_format` (
@@ -511,7 +504,6 @@ CREATE TABLE IF NOT EXISTS `c_account_number_format` (
 /*!40000 ALTER TABLE `c_account_number_format` DISABLE KEYS */;
 /*!40000 ALTER TABLE `c_account_number_format` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.c_cache
 DROP TABLE IF EXISTS `c_cache`;
 CREATE TABLE IF NOT EXISTS `c_cache` (
@@ -525,7 +517,6 @@ CREATE TABLE IF NOT EXISTS `c_cache` (
 INSERT INTO `c_cache` (`id`, `cache_type_enum`) VALUES
 	(1, 1);
 /*!40000 ALTER TABLE `c_cache` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.c_configuration
 DROP TABLE IF EXISTS `c_configuration`;
@@ -573,7 +564,6 @@ INSERT INTO `c_configuration` (`id`, `name`, `value`, `date_value`, `enabled`, `
 	(32, 'Enable-Address', NULL, NULL, 0, 0, NULL);
 /*!40000 ALTER TABLE `c_configuration` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.c_external_service
 DROP TABLE IF EXISTS `c_external_service`;
 CREATE TABLE IF NOT EXISTS `c_external_service` (
@@ -590,7 +580,6 @@ INSERT INTO `c_external_service` (`id`, `name`) VALUES
 	(1, 'S3'),
 	(2, 'SMTP_Email_Account');
 /*!40000 ALTER TABLE `c_external_service` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.c_external_service_properties
 DROP TABLE IF EXISTS `c_external_service_properties`;
@@ -619,7 +608,6 @@ INSERT INTO `c_external_service_properties` (`name`, `value`, `external_service_
 	('tenant_app_key', NULL, 3);
 /*!40000 ALTER TABLE `c_external_service_properties` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.job
 DROP TABLE IF EXISTS `job`;
 CREATE TABLE IF NOT EXISTS `job` (
@@ -645,35 +633,33 @@ CREATE TABLE IF NOT EXISTS `job` (
 -- Dumping data for table mifostenant-default.job: ~26 rows (approximately)
 /*!40000 ALTER TABLE `job` DISABLE KEYS */;
 INSERT INTO `job` (`id`, `name`, `display_name`, `cron_expression`, `create_time`, `task_priority`, `group_name`, `previous_run_start_time`, `next_run_time`, `job_key`, `initializing_errorlog`, `is_active`, `currently_running`, `updates_allowed`, `scheduler_group`, `is_misfired`) VALUES
-	(1, 'Update loan Summary', 'Update loan Summary', '0 0 22 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-12-14 22:00:00', 'Update loan SummaryJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(2, 'Update Loan Arrears Ageing', 'Update Loan Arrears Ageing', '0 1 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-12-15 00:01:00', 'Update Loan Arrears AgeingJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(3, 'Update Loan Paid In Advance', 'Update Loan Paid In Advance', '0 5 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-12-15 00:05:00', 'Update Loan Paid In AdvanceJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(4, 'Apply Annual Fee For Savings', 'Apply Annual Fee For Savings', '0 20 22 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-12-14 22:20:00', 'Apply Annual Fee For SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(5, 'Apply Holidays To Loans', 'Apply Holidays To Loans', '0 0 12 * * ?', '2015-06-03 02:56:57', 5, NULL, NULL, '2016-12-14 12:00:00', 'Apply Holidays To LoansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(6, 'Post Interest For Savings', 'Post Interest For Savings', '0 0 0 1/1 * ? *', '2015-06-03 02:56:58', 5, NULL, NULL, '2016-12-15 00:00:00', 'Post Interest For SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
-	(7, 'Transfer Fee For Loans From Savings', 'Transfer Fee For Loans From Savings', '0 1 0 1/1 * ? *', '2015-06-03 02:57:00', 5, NULL, NULL, '2016-12-15 00:01:00', 'Transfer Fee For Loans From SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(8, 'Pay Due Savings Charges', 'Pay Due Savings Charges', '0 0 12 * * ?', '2013-09-23 00:00:00', 5, NULL, NULL, '2016-12-14 12:00:00', 'Pay Due Savings ChargesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(9, 'Update Accounting Running Balances', 'Update Accounting Running Balances', '0 1 0 1/1 * ? *', '2015-06-03 02:57:00', 5, NULL, NULL, '2016-12-15 00:01:00', 'Update Accounting Running BalancesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(10, 'Execute Standing Instruction', 'Execute Standing Instruction', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 5, NULL, NULL, '2016-12-15 00:00:00', 'Execute Standing InstructionJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(11, 'Add Accrual Transactions', 'Add Accrual Transactions', '0 1 0 1/1 * ? *', '2015-06-03 02:57:04', 3, NULL, NULL, '2016-12-15 00:01:00', 'Add Accrual TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(12, 'Apply penalty to overdue loans', 'Apply penalty to overdue loans', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 5, NULL, NULL, '2016-12-15 00:00:00', 'Apply penalty to overdue loansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(13, 'Update Non Performing Assets', 'Update Non Performing Assets', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 6, NULL, NULL, '2016-12-15 00:00:00', 'Update Non Performing AssetsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(14, 'Transfer Interest To Savings', 'Transfer Interest To Savings', '0 2 0 1/1 * ? *', '2015-06-03 02:57:05', 4, NULL, NULL, '2016-12-15 00:02:00', 'Transfer Interest To SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
-	(15, 'Update Deposit Accounts Maturity details', 'Update Deposit Accounts Maturity details', '0 0 0 1/1 * ? *', '2015-06-03 02:57:05', 5, NULL, NULL, '2016-12-15 00:00:00', 'Update Deposit Accounts Maturity detailsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(16, 'Add Periodic Accrual Transactions', 'Add Periodic Accrual Transactions', '0 2 0 1/1 * ? *', '2015-06-03 02:57:06', 2, NULL, NULL, '2016-12-15 00:02:00', 'Add Periodic Accrual TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(17, 'Recalculate Interest For Loans', 'Recalculate Interest For Loans', '0 1 0 1/1 * ? *', '2015-06-03 02:57:07', 4, NULL, NULL, '2016-12-15 00:01:00', 'Recalculate Interest For LoansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(18, 'Generate Mandatory Savings Schedule', 'Generate Mandatory Savings Schedule', '0 5 0 1/1 * ? *', '2015-06-03 02:57:12', 5, NULL, NULL, '2016-12-15 00:05:00', 'Generate Mandatory Savings ScheduleJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(19, 'Generate Loan Loss Provisioning', 'Generate Loan Loss Provisioning', '0 0 0 1/1 * ? *', '2015-10-20 19:57:53', 5, NULL, NULL, '2016-12-15 00:00:00', 'Generate Loan Loss ProvisioningJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(20, 'Post Dividends For Shares', 'Post Dividends For Shares', '0 0 0 1/1 * ? *', '2016-11-18 17:26:49', 5, NULL, NULL, '2016-12-15 00:00:00', 'Post Dividends For SharesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(21, 'Update Savings Dormant Accounts', 'Update Savings Dormant Accounts', '0 0 0 1/1 * ? *', '2016-11-18 17:26:55', 3, NULL, NULL, '2016-12-15 00:00:00', 'Update Savings Dormant AccountsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
-	(22, 'Add Accrual Transactions For Loans With Income Posted As Transactions', 'Add Accrual Transactions For Loans With Income Posted As Transactions', '0 1 0 1/1 * ? *', '2016-11-18 17:27:00', 5, NULL, NULL, '2016-12-15 00:01:00', 'Add Accrual Transactions For Loans With Income Posted As TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
-	(23, 'Execute Report Mailing Jobs', 'Execute Report Mailing Jobs', '0 0/15 * * * ?', '2016-11-18 17:27:13', 5, NULL, '2016-12-14 11:30:00', '2016-12-14 11:45:00', 'Execute Report Mailing JobsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
-	(24, 'Update SMS Outbound with Campaign Message', 'Update SMS Outbound with Campaign Message', '0 0 5 1/1 * ? *', '2016-11-18 17:27:19', 3, NULL, NULL, '2016-12-15 05:00:00', 'Update SMS Outbound with Campaign MessageJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 4, 0),
-	(25, 'Send Messages to SMS Gateway', 'Send Messages to SMS Gateway', '0 0 5 1/1 * ? *', '2016-11-18 17:27:19', 2, NULL, NULL, '2016-12-15 05:00:00', 'Send Messages to SMS GatewayJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 4, 0),
-	(26, 'Get Delivery Reports from SMS Gateway', 'Get Delivery Reports from SMS Gateway', '0 0 5 1/1 * ? *', '2016-11-18 17:27:19', 1, NULL, NULL, '2016-12-15 05:00:00', 'Get Delivery Reports from SMS GatewayJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 4, 0);
-
+	(1, 'Update loan Summary', 'Update loan Summary', '0 0 22 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2017-07-14 22:00:00', 'Update loan SummaryJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(2, 'Update Loan Arrears Ageing', 'Update Loan Arrears Ageing', '0 1 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2017-07-15 00:01:00', 'Update Loan Arrears AgeingJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(3, 'Update Loan Paid In Advance', 'Update Loan Paid In Advance', '0 5 0 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2017-07-15 00:05:00', 'Update Loan Paid In AdvanceJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(4, 'Apply Annual Fee For Savings', 'Apply Annual Fee For Savings', '0 20 22 1/1 * ? *', '2015-06-03 02:56:57', 5, NULL, NULL, '2017-07-14 22:20:00', 'Apply Annual Fee For SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(5, 'Apply Holidays To Loans', 'Apply Holidays To Loans', '0 0 12 * * ?', '2015-06-03 02:56:57', 5, NULL, NULL, '2017-07-15 12:00:00', 'Apply Holidays To LoansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(6, 'Post Interest For Savings', 'Post Interest For Savings', '0 0 0 1/1 * ? *', '2015-06-03 02:56:58', 5, NULL, NULL, '2017-07-15 00:00:00', 'Post Interest For SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
+	(7, 'Transfer Fee For Loans From Savings', 'Transfer Fee For Loans From Savings', '0 1 0 1/1 * ? *', '2015-06-03 02:57:00', 5, NULL, NULL, '2017-07-15 00:01:00', 'Transfer Fee For Loans From SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(8, 'Pay Due Savings Charges', 'Pay Due Savings Charges', '0 0 12 * * ?', '2013-09-23 00:00:00', 5, NULL, NULL, '2017-07-15 12:00:00', 'Pay Due Savings ChargesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(9, 'Update Accounting Running Balances', 'Update Accounting Running Balances', '0 1 0 1/1 * ? *', '2015-06-03 02:57:00', 5, NULL, NULL, '2017-07-15 00:01:00', 'Update Accounting Running BalancesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(10, 'Execute Standing Instruction', 'Execute Standing Instruction', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 5, NULL, NULL, '2017-07-15 00:00:00', 'Execute Standing InstructionJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(11, 'Add Accrual Transactions', 'Add Accrual Transactions', '0 1 0 1/1 * ? *', '2015-06-03 02:57:04', 3, NULL, NULL, '2017-07-15 00:01:00', 'Add Accrual TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(12, 'Apply penalty to overdue loans', 'Apply penalty to overdue loans', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 5, NULL, NULL, '2017-07-15 00:00:00', 'Apply penalty to overdue loansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(13, 'Update Non Performing Assets', 'Update Non Performing Assets', '0 0 0 1/1 * ? *', '2015-06-03 02:57:04', 6, NULL, NULL, '2017-07-15 00:00:00', 'Update Non Performing AssetsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(14, 'Transfer Interest To Savings', 'Transfer Interest To Savings', '0 2 0 1/1 * ? *', '2015-06-03 02:57:05', 4, NULL, NULL, '2017-07-15 00:02:00', 'Transfer Interest To SavingsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
+	(15, 'Update Deposit Accounts Maturity details', 'Update Deposit Accounts Maturity details', '0 0 0 1/1 * ? *', '2015-06-03 02:57:05', 5, NULL, NULL, '2017-07-15 00:00:00', 'Update Deposit Accounts Maturity detailsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(16, 'Add Periodic Accrual Transactions', 'Add Periodic Accrual Transactions', '0 2 0 1/1 * ? *', '2015-06-03 02:57:06', 2, NULL, NULL, '2017-07-15 00:02:00', 'Add Periodic Accrual TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(17, 'Recalculate Interest For Loans', 'Recalculate Interest For Loans', '0 1 0 1/1 * ? *', '2015-06-03 02:57:07', 4, NULL, NULL, '2017-07-15 00:01:00', 'Recalculate Interest For LoansJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(18, 'Generate Mandatory Savings Schedule', 'Generate Mandatory Savings Schedule', '0 5 0 1/1 * ? *', '2015-06-03 02:57:12', 5, NULL, NULL, '2017-07-15 00:05:00', 'Generate Mandatory Savings ScheduleJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(19, 'Generate Loan Loss Provisioning', 'Generate Loan Loss Provisioning', '0 0 0 1/1 * ? *', '2015-10-20 19:57:53', 5, NULL, NULL, '2017-07-15 00:00:00', 'Generate Loan Loss ProvisioningJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(20, 'Post Dividends For Shares', 'Post Dividends For Shares', '0 0 0 1/1 * ? *', '2016-11-18 17:26:49', 5, NULL, NULL, '2017-07-15 00:00:00', 'Post Dividends For SharesJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(21, 'Update Savings Dormant Accounts', 'Update Savings Dormant Accounts', '0 0 0 1/1 * ? *', '2016-11-18 17:26:55', 3, NULL, NULL, '2017-07-15 00:00:00', 'Update Savings Dormant AccountsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 1, 0),
+	(22, 'Add Accrual Transactions For Loans With Income Posted As Transactions', 'Add Accrual Transactions For Loans With Income Posted As Transactions', '0 1 0 1/1 * ? *', '2016-11-18 17:27:00', 5, NULL, NULL, '2017-07-15 00:01:00', 'Add Accrual Transactions For Loans With Income Posted As TransactionsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 3, 0),
+	(23, 'Execute Report Mailing Jobs', 'Execute Report Mailing Jobs', '0 0/15 * * * ?', '2016-11-18 17:27:13', 5, NULL, '2017-07-14 18:00:00', '2017-07-14 18:15:00', 'Execute Report Mailing JobsJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 0, 0),
+	(24, 'Update SMS Outbound with Campaign Message', 'Update SMS Outbound with Campaign Message', '0 0 5 1/1 * ? *', '2016-11-18 17:27:19', 3, NULL, NULL, '2017-07-15 05:00:00', 'Update SMS Outbound with Campaign MessageJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 4, 0),
+	(25, 'Send Messages to SMS Gateway', 'Send Messages to SMS Gateway', '0 0 5 1/1 * ? *', '2016-11-18 17:27:19', 2, NULL, NULL, '2017-07-15 05:00:00', 'Send Messages to SMS GatewayJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 4, 0),
+	(26, 'Get Delivery Reports from SMS Gateway', 'Get Delivery Reports from SMS Gateway', '0 0 5 1/1 * ? *', '2016-11-18 17:27:19', 1, NULL, NULL, '2017-07-15 05:00:00', 'Get Delivery Reports from SMS GatewayJobDetail1 _ DEFAULT', NULL, 1, 0, 1, 4, 0);
 /*!40000 ALTER TABLE `job` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.job_run_history
 DROP TABLE IF EXISTS `job_run_history`;
@@ -690,14 +676,14 @@ CREATE TABLE IF NOT EXISTS `job_run_history` (
   PRIMARY KEY (`id`),
   KEY `scheduledjobsFK` (`job_id`),
   CONSTRAINT `scheduledjobsFK` FOREIGN KEY (`job_id`) REFERENCES `job` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-default.job_run_history: ~0 rows (approximately)
+-- Dumping data for table mifostenant-default.job_run_history: ~1 rows (approximately)
 /*!40000 ALTER TABLE `job_run_history` DISABLE KEYS */;
 INSERT INTO `job_run_history` (`id`, `job_id`, `version`, `start_time`, `end_time`, `status`, `error_message`, `trigger_type`, `error_log`) VALUES
-	(1, 23, 1, '2016-12-14 11:30:00', '2016-12-14 11:30:00', 'success', NULL, 'cron', NULL);
+	(1, 23, 1, '2016-12-14 11:30:00', '2016-12-14 11:30:00', 'success', NULL, 'cron', NULL),
+	(2, 23, 2, '2017-07-14 18:00:00', '2017-07-14 18:00:00', 'success', NULL, 'cron', NULL);
 /*!40000 ALTER TABLE `job_run_history` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.mix_taxonomy
 DROP TABLE IF EXISTS `mix_taxonomy`;
@@ -765,7 +751,6 @@ INSERT INTO `mix_taxonomy` (`id`, `name`, `namespace_id`, `dimension`, `type`, `
 	(48, 'WriteOffsOnGrossLoanPortfolio', 3, NULL, 2, 'The value of loans that have been recognized as uncollectible for accounting purposes. A write-off is an accounting procedure that removes the outstanding balance of the loan from the gross loan portfolio and impairment loss allowance. Thus, the write-off does not affect the net loan portfolio, total assets, or any equity account. If the impairment loss allowance is insufficient to cover the amount written off, the excess amount will result in an additional impairment loss on loans recognised in profit or loss of the period.', NULL);
 /*!40000 ALTER TABLE `mix_taxonomy` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.mix_taxonomy_mapping
 DROP TABLE IF EXISTS `mix_taxonomy_mapping`;
 CREATE TABLE IF NOT EXISTS `mix_taxonomy_mapping` (
@@ -782,7 +767,6 @@ CREATE TABLE IF NOT EXISTS `mix_taxonomy_mapping` (
 INSERT INTO `mix_taxonomy_mapping` (`id`, `identifier`, `config`, `last_update_date`, `currency`) VALUES
 	(1, 'default', NULL, NULL, '');
 /*!40000 ALTER TABLE `mix_taxonomy_mapping` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.mix_xbrl_namespace
 DROP TABLE IF EXISTS `mix_xbrl_namespace`;
@@ -805,7 +789,6 @@ INSERT INTO `mix_xbrl_namespace` (`id`, `prefix`, `url`) VALUES
 	(6, 'link', 'http://www.xbrl.org/2003/linkbase'),
 	(7, 'dc-all', 'http://www.themix.org/int/fr/ifrs/basi/2010-08-31/dc-all');
 /*!40000 ALTER TABLE `mix_xbrl_namespace` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_account_transfer_details
 DROP TABLE IF EXISTS `m_account_transfer_details`;
@@ -843,7 +826,6 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_details` (
 /*!40000 ALTER TABLE `m_account_transfer_details` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_account_transfer_details` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_account_transfer_standing_instructions
 DROP TABLE IF EXISTS `m_account_transfer_standing_instructions`;
 CREATE TABLE IF NOT EXISTS `m_account_transfer_standing_instructions` (
@@ -872,7 +854,6 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_standing_instructions` (
 /*!40000 ALTER TABLE `m_account_transfer_standing_instructions` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_account_transfer_standing_instructions` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_account_transfer_standing_instructions_history
 DROP TABLE IF EXISTS `m_account_transfer_standing_instructions_history`;
 CREATE TABLE IF NOT EXISTS `m_account_transfer_standing_instructions_history` (
@@ -890,7 +871,6 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_standing_instructions_history` (
 -- Dumping data for table mifostenant-default.m_account_transfer_standing_instructions_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_account_transfer_standing_instructions_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_account_transfer_standing_instructions_history` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_account_transfer_transaction
 DROP TABLE IF EXISTS `m_account_transfer_transaction`;
@@ -925,7 +905,6 @@ CREATE TABLE IF NOT EXISTS `m_account_transfer_transaction` (
 /*!40000 ALTER TABLE `m_account_transfer_transaction` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_account_transfer_transaction` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_address
 DROP TABLE IF EXISTS `m_address`;
 CREATE TABLE IF NOT EXISTS `m_address` (
@@ -956,7 +935,6 @@ CREATE TABLE IF NOT EXISTS `m_address` (
 -- Dumping data for table mifostenant-default.m_address: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_address` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_address` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_appuser
 DROP TABLE IF EXISTS `m_appuser`;
@@ -994,7 +972,6 @@ INSERT INTO `m_appuser` (`id`, `is_deleted`, `office_id`, `staff_id`, `username`
 	(2, 0, 1, NULL, 'system', 'system', 'system', '5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a', 'demomfi@mifos.org', b'0', b'1', b'1', b'1', b'1', '2014-03-07', 0, b'0');
 /*!40000 ALTER TABLE `m_appuser` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_appuser_previous_password
 DROP TABLE IF EXISTS `m_appuser_previous_password`;
 CREATE TABLE IF NOT EXISTS `m_appuser_previous_password` (
@@ -1010,7 +987,6 @@ CREATE TABLE IF NOT EXISTS `m_appuser_previous_password` (
 -- Dumping data for table mifostenant-default.m_appuser_previous_password: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_appuser_previous_password` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_appuser_previous_password` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_appuser_role
 DROP TABLE IF EXISTS `m_appuser_role`;
@@ -1029,7 +1005,6 @@ CREATE TABLE IF NOT EXISTS `m_appuser_role` (
 INSERT INTO `m_appuser_role` (`appuser_id`, `role_id`) VALUES
 	(1, 1);
 /*!40000 ALTER TABLE `m_appuser_role` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_calendar
 DROP TABLE IF EXISTS `m_calendar`;
@@ -1059,7 +1034,6 @@ CREATE TABLE IF NOT EXISTS `m_calendar` (
 /*!40000 ALTER TABLE `m_calendar` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_calendar` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_calendar_history
 DROP TABLE IF EXISTS `m_calendar_history`;
 CREATE TABLE IF NOT EXISTS `m_calendar_history` (
@@ -1086,7 +1060,6 @@ CREATE TABLE IF NOT EXISTS `m_calendar_history` (
 /*!40000 ALTER TABLE `m_calendar_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_calendar_history` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_calendar_instance
 DROP TABLE IF EXISTS `m_calendar_instance`;
 CREATE TABLE IF NOT EXISTS `m_calendar_instance` (
@@ -1102,7 +1075,6 @@ CREATE TABLE IF NOT EXISTS `m_calendar_instance` (
 -- Dumping data for table mifostenant-default.m_calendar_instance: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_calendar_instance` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_calendar_instance` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_cashiers
 DROP TABLE IF EXISTS `m_cashiers`;
@@ -1127,7 +1099,6 @@ CREATE TABLE IF NOT EXISTS `m_cashiers` (
 /*!40000 ALTER TABLE `m_cashiers` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_cashiers` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_cashier_transactions
 DROP TABLE IF EXISTS `m_cashier_transactions`;
 CREATE TABLE IF NOT EXISTS `m_cashier_transactions` (
@@ -1149,7 +1120,6 @@ CREATE TABLE IF NOT EXISTS `m_cashier_transactions` (
 -- Dumping data for table mifostenant-default.m_cashier_transactions: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_cashier_transactions` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_cashier_transactions` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_charge
 DROP TABLE IF EXISTS `m_charge`;
@@ -1185,7 +1155,6 @@ CREATE TABLE IF NOT EXISTS `m_charge` (
 /*!40000 ALTER TABLE `m_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_charge` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_client
 DROP TABLE IF EXISTS `m_client`;
 CREATE TABLE IF NOT EXISTS `m_client` (
@@ -1205,6 +1174,7 @@ CREATE TABLE IF NOT EXISTS `m_client` (
   `fullname` varchar(100) DEFAULT NULL,
   `display_name` varchar(100) NOT NULL,
   `mobile_no` varchar(50) DEFAULT NULL,
+  `is_staff` tinyint(1) NOT NULL DEFAULT '0',
   `gender_cv_id` int(11) DEFAULT NULL,
   `date_of_birth` date DEFAULT NULL,
   `image_id` bigint(20) DEFAULT NULL,
@@ -1267,7 +1237,6 @@ CREATE TABLE IF NOT EXISTS `m_client` (
 /*!40000 ALTER TABLE `m_client` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_client` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_client_address
 DROP TABLE IF EXISTS `m_client_address`;
 CREATE TABLE IF NOT EXISTS `m_client_address` (
@@ -1288,7 +1257,6 @@ CREATE TABLE IF NOT EXISTS `m_client_address` (
 /*!40000 ALTER TABLE `m_client_address` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_client_address` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_client_attendance
 DROP TABLE IF EXISTS `m_client_attendance`;
 CREATE TABLE IF NOT EXISTS `m_client_attendance` (
@@ -1306,7 +1274,6 @@ CREATE TABLE IF NOT EXISTS `m_client_attendance` (
 -- Dumping data for table mifostenant-default.m_client_attendance: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client_attendance` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_client_attendance` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_client_charge
 DROP TABLE IF EXISTS `m_client_charge`;
@@ -1338,7 +1305,6 @@ CREATE TABLE IF NOT EXISTS `m_client_charge` (
 /*!40000 ALTER TABLE `m_client_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_client_charge` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_client_charge_paid_by
 DROP TABLE IF EXISTS `m_client_charge_paid_by`;
 CREATE TABLE IF NOT EXISTS `m_client_charge_paid_by` (
@@ -1356,7 +1322,6 @@ CREATE TABLE IF NOT EXISTS `m_client_charge_paid_by` (
 -- Dumping data for table mifostenant-default.m_client_charge_paid_by: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client_charge_paid_by` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_client_charge_paid_by` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_client_identifier
 DROP TABLE IF EXISTS `m_client_identifier`;
@@ -1385,7 +1350,6 @@ CREATE TABLE IF NOT EXISTS `m_client_identifier` (
 /*!40000 ALTER TABLE `m_client_identifier` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_client_identifier` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_client_non_person
 DROP TABLE IF EXISTS `m_client_non_person`;
 CREATE TABLE IF NOT EXISTS `m_client_non_person` (
@@ -1405,7 +1369,6 @@ CREATE TABLE IF NOT EXISTS `m_client_non_person` (
 -- Dumping data for table mifostenant-default.m_client_non_person: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client_non_person` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_client_non_person` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_client_transaction
 DROP TABLE IF EXISTS `m_client_transaction`;
@@ -1433,7 +1396,6 @@ CREATE TABLE IF NOT EXISTS `m_client_transaction` (
 -- Dumping data for table mifostenant-default.m_client_transaction: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_client_transaction` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_client_transaction` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_code
 DROP TABLE IF EXISTS `m_code`;
@@ -1478,7 +1440,6 @@ INSERT INTO `m_code` (`id`, `code_name`, `is_system_defined`) VALUES
 	(29, 'ADDRESS_TYPE', 1);
 /*!40000 ALTER TABLE `m_code` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_code_value
 DROP TABLE IF EXISTS `m_code_value`;
 CREATE TABLE IF NOT EXISTS `m_code_value` (
@@ -1514,6 +1475,60 @@ INSERT INTO `m_code_value` (`id`, `code_id`, `code_value`, `code_description`, `
 	(13, 13, 'Leader', 'Group Leader Role', 1, NULL, 1, 0);
 /*!40000 ALTER TABLE `m_code_value` ENABLE KEYS */;
 
+-- Dumping structure for table mifostenant-default.m_creditbureau
+DROP TABLE IF EXISTS `m_creditbureau`;
+CREATE TABLE IF NOT EXISTS `m_creditbureau` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `product` varchar(100) NOT NULL,
+  `country` varchar(100) NOT NULL,
+  `implementationKey` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique impl` (`name`,`product`,`country`,`implementationKey`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_creditbureau: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_creditbureau` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_creditbureau` ENABLE KEYS */;
+
+-- Dumping structure for table mifostenant-default.m_creditbureau_configuration
+DROP TABLE IF EXISTS `m_creditbureau_configuration`;
+CREATE TABLE IF NOT EXISTS `m_creditbureau_configuration` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `configkey` varchar(50) DEFAULT NULL,
+  `value` varchar(50) DEFAULT NULL,
+  `organisation_creditbureau_id` bigint(20) DEFAULT NULL,
+  `description` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `mcbconfig` (`configkey`,`organisation_creditbureau_id`),
+  KEY `cbConfigfk1` (`organisation_creditbureau_id`),
+  CONSTRAINT `cbConfigfk1` FOREIGN KEY (`organisation_creditbureau_id`) REFERENCES `m_organisation_creditbureau` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_creditbureau_configuration: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_creditbureau_configuration` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_creditbureau_configuration` ENABLE KEYS */;
+
+-- Dumping structure for table mifostenant-default.m_creditbureau_loanproduct_mapping
+DROP TABLE IF EXISTS `m_creditbureau_loanproduct_mapping`;
+CREATE TABLE IF NOT EXISTS `m_creditbureau_loanproduct_mapping` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `organisation_creditbureau_id` bigint(20) NOT NULL,
+  `loan_product_id` bigint(20) NOT NULL,
+  `is_creditcheck_mandatory` tinyint(1) DEFAULT NULL,
+  `skip_creditcheck_in_failure` tinyint(1) DEFAULT NULL,
+  `stale_period` int(11) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `cblpunique_key` (`organisation_creditbureau_id`,`loan_product_id`),
+  KEY `fk_cb_lp2` (`loan_product_id`),
+  CONSTRAINT `cblpfk2` FOREIGN KEY (`organisation_creditbureau_id`) REFERENCES `m_organisation_creditbureau` (`id`),
+  CONSTRAINT `fk_cb_lp2` FOREIGN KEY (`loan_product_id`) REFERENCES `m_product_loan` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_creditbureau_loanproduct_mapping: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_creditbureau_loanproduct_mapping` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_creditbureau_loanproduct_mapping` ENABLE KEYS */;
 
 -- Dumping structure for table mifostenant-default.m_currency
 DROP TABLE IF EXISTS `m_currency`;
@@ -1697,7 +1712,6 @@ INSERT INTO `m_currency` (`id`, `code`, `decimal_places`, `currency_multiplesof`
 	(163, 'ZWD', 2, NULL, NULL, 'Zimbabwe Dollar', 'currency.ZWD');
 /*!40000 ALTER TABLE `m_currency` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_deposit_account_on_hold_transaction
 DROP TABLE IF EXISTS `m_deposit_account_on_hold_transaction`;
 CREATE TABLE IF NOT EXISTS `m_deposit_account_on_hold_transaction` (
@@ -1716,7 +1730,6 @@ CREATE TABLE IF NOT EXISTS `m_deposit_account_on_hold_transaction` (
 -- Dumping data for table mifostenant-default.m_deposit_account_on_hold_transaction: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_deposit_account_on_hold_transaction` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_deposit_account_on_hold_transaction` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_deposit_account_recurring_detail
 DROP TABLE IF EXISTS `m_deposit_account_recurring_detail`;
@@ -1738,7 +1751,6 @@ CREATE TABLE IF NOT EXISTS `m_deposit_account_recurring_detail` (
 -- Dumping data for table mifostenant-default.m_deposit_account_recurring_detail: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_deposit_account_recurring_detail` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_deposit_account_recurring_detail` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_deposit_account_term_and_preclosure
 DROP TABLE IF EXISTS `m_deposit_account_term_and_preclosure`;
@@ -1771,7 +1783,6 @@ CREATE TABLE IF NOT EXISTS `m_deposit_account_term_and_preclosure` (
 /*!40000 ALTER TABLE `m_deposit_account_term_and_preclosure` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_deposit_account_term_and_preclosure` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_deposit_product_interest_rate_chart
 DROP TABLE IF EXISTS `m_deposit_product_interest_rate_chart`;
 CREATE TABLE IF NOT EXISTS `m_deposit_product_interest_rate_chart` (
@@ -1786,7 +1797,6 @@ CREATE TABLE IF NOT EXISTS `m_deposit_product_interest_rate_chart` (
 -- Dumping data for table mifostenant-default.m_deposit_product_interest_rate_chart: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_deposit_product_interest_rate_chart` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_deposit_product_interest_rate_chart` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_deposit_product_recurring_detail
 DROP TABLE IF EXISTS `m_deposit_product_recurring_detail`;
@@ -1804,7 +1814,6 @@ CREATE TABLE IF NOT EXISTS `m_deposit_product_recurring_detail` (
 -- Dumping data for table mifostenant-default.m_deposit_product_recurring_detail: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_deposit_product_recurring_detail` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_deposit_product_recurring_detail` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_deposit_product_term_and_preclosure
 DROP TABLE IF EXISTS `m_deposit_product_term_and_preclosure`;
@@ -1832,7 +1841,6 @@ CREATE TABLE IF NOT EXISTS `m_deposit_product_term_and_preclosure` (
 /*!40000 ALTER TABLE `m_deposit_product_term_and_preclosure` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_deposit_product_term_and_preclosure` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_document
 DROP TABLE IF EXISTS `m_document`;
 CREATE TABLE IF NOT EXISTS `m_document` (
@@ -1853,7 +1861,6 @@ CREATE TABLE IF NOT EXISTS `m_document` (
 /*!40000 ALTER TABLE `m_document` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_document` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_entity_datatable_check
 DROP TABLE IF EXISTS `m_entity_datatable_check`;
 CREATE TABLE IF NOT EXISTS `m_entity_datatable_check` (
@@ -1873,7 +1880,6 @@ CREATE TABLE IF NOT EXISTS `m_entity_datatable_check` (
 -- Dumping data for table mifostenant-default.m_entity_datatable_check: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_entity_datatable_check` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_entity_datatable_check` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_entity_relation
 DROP TABLE IF EXISTS `m_entity_relation`;
@@ -1896,7 +1902,6 @@ INSERT INTO `m_entity_relation` (`id`, `from_entity_type`, `to_entity_type`, `co
 	(5, 5, 3, 'role_access_to_savings_products');
 /*!40000 ALTER TABLE `m_entity_relation` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_entity_to_entity_access
 DROP TABLE IF EXISTS `m_entity_to_entity_access`;
 CREATE TABLE IF NOT EXISTS `m_entity_to_entity_access` (
@@ -1917,7 +1922,6 @@ CREATE TABLE IF NOT EXISTS `m_entity_to_entity_access` (
 /*!40000 ALTER TABLE `m_entity_to_entity_access` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_entity_to_entity_access` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_entity_to_entity_mapping
 DROP TABLE IF EXISTS `m_entity_to_entity_mapping`;
 CREATE TABLE IF NOT EXISTS `m_entity_to_entity_mapping` (
@@ -1935,7 +1939,6 @@ CREATE TABLE IF NOT EXISTS `m_entity_to_entity_mapping` (
 -- Dumping data for table mifostenant-default.m_entity_to_entity_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_entity_to_entity_mapping` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_entity_to_entity_mapping` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_field_configuration
 DROP TABLE IF EXISTS `m_field_configuration`;
@@ -1973,7 +1976,6 @@ INSERT INTO `m_field_configuration` (`id`, `entity`, `subentity`, `field`, `is_e
 	(18, 'ADDRESS', 'CLIENT', 'isActive', 1, 0, '');
 /*!40000 ALTER TABLE `m_field_configuration` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_floating_rates
 DROP TABLE IF EXISTS `m_floating_rates`;
 CREATE TABLE IF NOT EXISTS `m_floating_rates` (
@@ -1992,7 +1994,6 @@ CREATE TABLE IF NOT EXISTS `m_floating_rates` (
 -- Dumping data for table mifostenant-default.m_floating_rates: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_floating_rates` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_floating_rates` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_floating_rates_periods
 DROP TABLE IF EXISTS `m_floating_rates_periods`;
@@ -2016,7 +2017,6 @@ CREATE TABLE IF NOT EXISTS `m_floating_rates_periods` (
 /*!40000 ALTER TABLE `m_floating_rates_periods` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_floating_rates_periods` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_fund
 DROP TABLE IF EXISTS `m_fund`;
 CREATE TABLE IF NOT EXISTS `m_fund` (
@@ -2031,7 +2031,6 @@ CREATE TABLE IF NOT EXISTS `m_fund` (
 -- Dumping data for table mifostenant-default.m_fund: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_fund` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_fund` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_group
 DROP TABLE IF EXISTS `m_group`;
@@ -2073,7 +2072,6 @@ CREATE TABLE IF NOT EXISTS `m_group` (
 /*!40000 ALTER TABLE `m_group` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_group` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_group_client
 DROP TABLE IF EXISTS `m_group_client`;
 CREATE TABLE IF NOT EXISTS `m_group_client` (
@@ -2088,7 +2086,6 @@ CREATE TABLE IF NOT EXISTS `m_group_client` (
 -- Dumping data for table mifostenant-default.m_group_client: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_group_client` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_group_client` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_group_level
 DROP TABLE IF EXISTS `m_group_level`;
@@ -2111,7 +2108,6 @@ INSERT INTO `m_group_level` (`id`, `parent_id`, `super_parent`, `level_name`, `r
 	(2, 1, 0, 'Group', 0, 1);
 /*!40000 ALTER TABLE `m_group_level` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_group_roles
 DROP TABLE IF EXISTS `m_group_roles`;
 CREATE TABLE IF NOT EXISTS `m_group_roles` (
@@ -2132,7 +2128,6 @@ CREATE TABLE IF NOT EXISTS `m_group_roles` (
 -- Dumping data for table mifostenant-default.m_group_roles: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_group_roles` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_group_roles` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_guarantor
 DROP TABLE IF EXISTS `m_guarantor`;
@@ -2166,7 +2161,6 @@ CREATE TABLE IF NOT EXISTS `m_guarantor` (
 /*!40000 ALTER TABLE `m_guarantor` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_guarantor` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_guarantor_funding_details
 DROP TABLE IF EXISTS `m_guarantor_funding_details`;
 CREATE TABLE IF NOT EXISTS `m_guarantor_funding_details` (
@@ -2189,7 +2183,6 @@ CREATE TABLE IF NOT EXISTS `m_guarantor_funding_details` (
 /*!40000 ALTER TABLE `m_guarantor_funding_details` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_guarantor_funding_details` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_guarantor_transaction
 DROP TABLE IF EXISTS `m_guarantor_transaction`;
 CREATE TABLE IF NOT EXISTS `m_guarantor_transaction` (
@@ -2211,7 +2204,6 @@ CREATE TABLE IF NOT EXISTS `m_guarantor_transaction` (
 /*!40000 ALTER TABLE `m_guarantor_transaction` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_guarantor_transaction` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_holiday
 DROP TABLE IF EXISTS `m_holiday`;
 CREATE TABLE IF NOT EXISTS `m_holiday` (
@@ -2231,7 +2223,6 @@ CREATE TABLE IF NOT EXISTS `m_holiday` (
 /*!40000 ALTER TABLE `m_holiday` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_holiday` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_holiday_office
 DROP TABLE IF EXISTS `m_holiday_office`;
 CREATE TABLE IF NOT EXISTS `m_holiday_office` (
@@ -2247,7 +2238,6 @@ CREATE TABLE IF NOT EXISTS `m_holiday_office` (
 -- Dumping data for table mifostenant-default.m_holiday_office: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_holiday_office` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_holiday_office` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_hook
 DROP TABLE IF EXISTS `m_hook`;
@@ -2272,7 +2262,6 @@ CREATE TABLE IF NOT EXISTS `m_hook` (
 /*!40000 ALTER TABLE `m_hook` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_hook` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_hook_configuration
 DROP TABLE IF EXISTS `m_hook_configuration`;
 CREATE TABLE IF NOT EXISTS `m_hook_configuration` (
@@ -2290,7 +2279,6 @@ CREATE TABLE IF NOT EXISTS `m_hook_configuration` (
 /*!40000 ALTER TABLE `m_hook_configuration` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_hook_configuration` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_hook_registered_events
 DROP TABLE IF EXISTS `m_hook_registered_events`;
 CREATE TABLE IF NOT EXISTS `m_hook_registered_events` (
@@ -2306,7 +2294,6 @@ CREATE TABLE IF NOT EXISTS `m_hook_registered_events` (
 -- Dumping data for table mifostenant-default.m_hook_registered_events: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_hook_registered_events` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_hook_registered_events` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_hook_schema
 DROP TABLE IF EXISTS `m_hook_schema`;
@@ -2334,7 +2321,6 @@ INSERT INTO `m_hook_schema` (`id`, `hook_template_id`, `field_type`, `field_name
 	(7, 2, 'string', 'SMS Provider Account Id', NULL, 0);
 /*!40000 ALTER TABLE `m_hook_schema` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_hook_templates
 DROP TABLE IF EXISTS `m_hook_templates`;
 CREATE TABLE IF NOT EXISTS `m_hook_templates` (
@@ -2350,7 +2336,6 @@ INSERT INTO `m_hook_templates` (`id`, `name`) VALUES
 	(2, 'SMS Bridge');
 /*!40000 ALTER TABLE `m_hook_templates` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_image
 DROP TABLE IF EXISTS `m_image`;
 CREATE TABLE IF NOT EXISTS `m_image` (
@@ -2363,7 +2348,6 @@ CREATE TABLE IF NOT EXISTS `m_image` (
 -- Dumping data for table mifostenant-default.m_image: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_image` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_image` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_interest_incentives
 DROP TABLE IF EXISTS `m_interest_incentives`;
@@ -2385,7 +2369,6 @@ CREATE TABLE IF NOT EXISTS `m_interest_incentives` (
 /*!40000 ALTER TABLE `m_interest_incentives` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_interest_incentives` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_interest_rate_chart
 DROP TABLE IF EXISTS `m_interest_rate_chart`;
 CREATE TABLE IF NOT EXISTS `m_interest_rate_chart` (
@@ -2401,7 +2384,6 @@ CREATE TABLE IF NOT EXISTS `m_interest_rate_chart` (
 -- Dumping data for table mifostenant-default.m_interest_rate_chart: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_interest_rate_chart` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_interest_rate_chart` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_interest_rate_slab
 DROP TABLE IF EXISTS `m_interest_rate_slab`;
@@ -2424,7 +2406,6 @@ CREATE TABLE IF NOT EXISTS `m_interest_rate_slab` (
 -- Dumping data for table mifostenant-default.m_interest_rate_slab: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_interest_rate_slab` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_interest_rate_slab` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_loan
 DROP TABLE IF EXISTS `m_loan`;
@@ -2571,7 +2552,6 @@ CREATE TABLE IF NOT EXISTS `m_loan` (
 /*!40000 ALTER TABLE `m_loan` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_loanproduct_provisioning_entry
 DROP TABLE IF EXISTS `m_loanproduct_provisioning_entry`;
 CREATE TABLE IF NOT EXISTS `m_loanproduct_provisioning_entry` (
@@ -2609,7 +2589,6 @@ CREATE TABLE IF NOT EXISTS `m_loanproduct_provisioning_entry` (
 /*!40000 ALTER TABLE `m_loanproduct_provisioning_entry` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loanproduct_provisioning_entry` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_loanproduct_provisioning_mapping
 DROP TABLE IF EXISTS `m_loanproduct_provisioning_mapping`;
 CREATE TABLE IF NOT EXISTS `m_loanproduct_provisioning_mapping` (
@@ -2626,7 +2605,6 @@ CREATE TABLE IF NOT EXISTS `m_loanproduct_provisioning_mapping` (
 -- Dumping data for table mifostenant-default.m_loanproduct_provisioning_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loanproduct_provisioning_mapping` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loanproduct_provisioning_mapping` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_loan_arrears_aging
 DROP TABLE IF EXISTS `m_loan_arrears_aging`;
@@ -2645,7 +2623,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_arrears_aging` (
 -- Dumping data for table mifostenant-default.m_loan_arrears_aging: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_arrears_aging` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_arrears_aging` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_loan_charge
 DROP TABLE IF EXISTS `m_loan_charge`;
@@ -2682,7 +2659,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_charge` (
 /*!40000 ALTER TABLE `m_loan_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_charge` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_loan_charge_paid_by
 DROP TABLE IF EXISTS `m_loan_charge_paid_by`;
 CREATE TABLE IF NOT EXISTS `m_loan_charge_paid_by` (
@@ -2701,7 +2677,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_charge_paid_by` (
 -- Dumping data for table mifostenant-default.m_loan_charge_paid_by: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_charge_paid_by` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_charge_paid_by` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_loan_collateral
 DROP TABLE IF EXISTS `m_loan_collateral`;
@@ -2722,7 +2697,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_collateral` (
 /*!40000 ALTER TABLE `m_loan_collateral` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_collateral` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_loan_disbursement_detail
 DROP TABLE IF EXISTS `m_loan_disbursement_detail`;
 CREATE TABLE IF NOT EXISTS `m_loan_disbursement_detail` (
@@ -2739,7 +2713,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_disbursement_detail` (
 -- Dumping data for table mifostenant-default.m_loan_disbursement_detail: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_disbursement_detail` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_disbursement_detail` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_loan_installment_charge
 DROP TABLE IF EXISTS `m_loan_installment_charge`;
@@ -2767,7 +2740,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_installment_charge` (
 /*!40000 ALTER TABLE `m_loan_installment_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_installment_charge` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_loan_interest_recalculation_additional_details
 DROP TABLE IF EXISTS `m_loan_interest_recalculation_additional_details`;
 CREATE TABLE IF NOT EXISTS `m_loan_interest_recalculation_additional_details` (
@@ -2783,7 +2755,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_interest_recalculation_additional_details` (
 -- Dumping data for table mifostenant-default.m_loan_interest_recalculation_additional_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_interest_recalculation_additional_details` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_interest_recalculation_additional_details` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_loan_officer_assignment_history
 DROP TABLE IF EXISTS `m_loan_officer_assignment_history`;
@@ -2808,7 +2779,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_officer_assignment_history` (
 /*!40000 ALTER TABLE `m_loan_officer_assignment_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_officer_assignment_history` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_loan_overdue_installment_charge
 DROP TABLE IF EXISTS `m_loan_overdue_installment_charge`;
 CREATE TABLE IF NOT EXISTS `m_loan_overdue_installment_charge` (
@@ -2827,7 +2797,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_overdue_installment_charge` (
 /*!40000 ALTER TABLE `m_loan_overdue_installment_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_overdue_installment_charge` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_loan_paid_in_advance
 DROP TABLE IF EXISTS `m_loan_paid_in_advance`;
 CREATE TABLE IF NOT EXISTS `m_loan_paid_in_advance` (
@@ -2844,7 +2813,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_paid_in_advance` (
 -- Dumping data for table mifostenant-default.m_loan_paid_in_advance: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_paid_in_advance` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_paid_in_advance` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_loan_recalculation_details
 DROP TABLE IF EXISTS `m_loan_recalculation_details`;
@@ -2873,7 +2841,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_recalculation_details` (
 -- Dumping data for table mifostenant-default.m_loan_recalculation_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_recalculation_details` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_recalculation_details` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_loan_repayment_schedule
 DROP TABLE IF EXISTS `m_loan_repayment_schedule`;
@@ -2919,7 +2886,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_repayment_schedule` (
 /*!40000 ALTER TABLE `m_loan_repayment_schedule` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_repayment_schedule` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_loan_repayment_schedule_history
 DROP TABLE IF EXISTS `m_loan_repayment_schedule_history`;
 CREATE TABLE IF NOT EXISTS `m_loan_repayment_schedule_history` (
@@ -2948,7 +2914,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_repayment_schedule_history` (
 -- Dumping data for table mifostenant-default.m_loan_repayment_schedule_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_repayment_schedule_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_repayment_schedule_history` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_loan_reschedule_request
 DROP TABLE IF EXISTS `m_loan_reschedule_request`;
@@ -2984,7 +2949,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_reschedule_request` (
 /*!40000 ALTER TABLE `m_loan_reschedule_request` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_reschedule_request` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_loan_reschedule_request_term_variations_mapping
 DROP TABLE IF EXISTS `m_loan_reschedule_request_term_variations_mapping`;
 CREATE TABLE IF NOT EXISTS `m_loan_reschedule_request_term_variations_mapping` (
@@ -3001,7 +2965,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_reschedule_request_term_variations_mapping` (
 -- Dumping data for table mifostenant-default.m_loan_reschedule_request_term_variations_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_reschedule_request_term_variations_mapping` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_reschedule_request_term_variations_mapping` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_loan_term_variations
 DROP TABLE IF EXISTS `m_loan_term_variations`;
@@ -3025,7 +2988,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_term_variations` (
 /*!40000 ALTER TABLE `m_loan_term_variations` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_term_variations` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_loan_topup
 DROP TABLE IF EXISTS `m_loan_topup`;
 CREATE TABLE IF NOT EXISTS `m_loan_topup` (
@@ -3047,7 +3009,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_topup` (
 /*!40000 ALTER TABLE `m_loan_topup` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_topup` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_loan_tranche_charges
 DROP TABLE IF EXISTS `m_loan_tranche_charges`;
 CREATE TABLE IF NOT EXISTS `m_loan_tranche_charges` (
@@ -3065,7 +3026,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_tranche_charges` (
 /*!40000 ALTER TABLE `m_loan_tranche_charges` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_tranche_charges` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_loan_tranche_disbursement_charge
 DROP TABLE IF EXISTS `m_loan_tranche_disbursement_charge`;
 CREATE TABLE IF NOT EXISTS `m_loan_tranche_disbursement_charge` (
@@ -3082,7 +3042,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_tranche_disbursement_charge` (
 -- Dumping data for table mifostenant-default.m_loan_tranche_disbursement_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_tranche_disbursement_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_tranche_disbursement_charge` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_loan_transaction
 DROP TABLE IF EXISTS `m_loan_transaction`;
@@ -3121,7 +3080,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_transaction` (
 /*!40000 ALTER TABLE `m_loan_transaction` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_transaction` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_loan_transaction_repayment_schedule_mapping
 DROP TABLE IF EXISTS `m_loan_transaction_repayment_schedule_mapping`;
 CREATE TABLE IF NOT EXISTS `m_loan_transaction_repayment_schedule_mapping` (
@@ -3143,7 +3101,6 @@ CREATE TABLE IF NOT EXISTS `m_loan_transaction_repayment_schedule_mapping` (
 -- Dumping data for table mifostenant-default.m_loan_transaction_repayment_schedule_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_loan_transaction_repayment_schedule_mapping` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan_transaction_repayment_schedule_mapping` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_mandatory_savings_schedule
 DROP TABLE IF EXISTS `m_mandatory_savings_schedule`;
@@ -3172,7 +3129,6 @@ CREATE TABLE IF NOT EXISTS `m_mandatory_savings_schedule` (
 /*!40000 ALTER TABLE `m_mandatory_savings_schedule` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_mandatory_savings_schedule` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_meeting
 DROP TABLE IF EXISTS `m_meeting`;
 CREATE TABLE IF NOT EXISTS `m_meeting` (
@@ -3187,7 +3143,6 @@ CREATE TABLE IF NOT EXISTS `m_meeting` (
 -- Dumping data for table mifostenant-default.m_meeting: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_meeting` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_meeting` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_note
 DROP TABLE IF EXISTS `m_note`;
@@ -3227,7 +3182,6 @@ CREATE TABLE IF NOT EXISTS `m_note` (
 /*!40000 ALTER TABLE `m_note` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_note` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_office
 DROP TABLE IF EXISTS `m_office`;
 CREATE TABLE IF NOT EXISTS `m_office` (
@@ -3249,7 +3203,6 @@ CREATE TABLE IF NOT EXISTS `m_office` (
 INSERT INTO `m_office` (`id`, `parent_id`, `hierarchy`, `external_id`, `name`, `opening_date`) VALUES
 	(1, NULL, '.', '1', 'Head Office', '2009-01-01');
 /*!40000 ALTER TABLE `m_office` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_office_transaction
 DROP TABLE IF EXISTS `m_office_transaction`;
@@ -3273,6 +3226,22 @@ CREATE TABLE IF NOT EXISTS `m_office_transaction` (
 /*!40000 ALTER TABLE `m_office_transaction` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_office_transaction` ENABLE KEYS */;
 
+-- Dumping structure for table mifostenant-default.m_organisation_creditbureau
+DROP TABLE IF EXISTS `m_organisation_creditbureau`;
+CREATE TABLE IF NOT EXISTS `m_organisation_creditbureau` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `alias` varchar(50) NOT NULL,
+  `creditbureau_id` bigint(20) NOT NULL,
+  `is_active` tinyint(4) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `morgcb` (`alias`,`creditbureau_id`),
+  KEY `orgcb_cbfk` (`creditbureau_id`),
+  CONSTRAINT `orgcb_cbfk` FOREIGN KEY (`creditbureau_id`) REFERENCES `m_creditbureau` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Dumping data for table mifostenant-default.m_organisation_creditbureau: ~0 rows (approximately)
+/*!40000 ALTER TABLE `m_organisation_creditbureau` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_organisation_creditbureau` ENABLE KEYS */;
 
 -- Dumping structure for table mifostenant-default.m_organisation_currency
 DROP TABLE IF EXISTS `m_organisation_currency`;
@@ -3293,7 +3262,6 @@ INSERT INTO `m_organisation_currency` (`id`, `code`, `decimal_places`, `currency
 	(21, 'USD', 2, NULL, 'US Dollar', '$', 'currency.USD');
 /*!40000 ALTER TABLE `m_organisation_currency` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_password_validation_policy
 DROP TABLE IF EXISTS `m_password_validation_policy`;
 CREATE TABLE IF NOT EXISTS `m_password_validation_policy` (
@@ -3311,7 +3279,6 @@ INSERT INTO `m_password_validation_policy` (`id`, `regex`, `description`, `activ
 	(1, '^.{1,50}$', 'Password most be at least 1 character and not more that 50 characters long', 1, 'simple'),
 	(2, '^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\\s).{6,50}$', 'Password must be at least 6 characters, no more than 50 characters long, must include at least one upper case letter, one lower case letter, one numeric digit and no space', 0, 'secure');
 /*!40000 ALTER TABLE `m_password_validation_policy` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_payment_detail
 DROP TABLE IF EXISTS `m_payment_detail`;
@@ -3332,7 +3299,6 @@ CREATE TABLE IF NOT EXISTS `m_payment_detail` (
 /*!40000 ALTER TABLE `m_payment_detail` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_payment_detail` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_payment_type
 DROP TABLE IF EXISTS `m_payment_type`;
 CREATE TABLE IF NOT EXISTS `m_payment_type` (
@@ -3348,7 +3314,6 @@ CREATE TABLE IF NOT EXISTS `m_payment_type` (
 /*!40000 ALTER TABLE `m_payment_type` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_payment_type` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_permission
 DROP TABLE IF EXISTS `m_permission`;
 CREATE TABLE IF NOT EXISTS `m_permission` (
@@ -3360,10 +3325,9 @@ CREATE TABLE IF NOT EXISTS `m_permission` (
   `can_maker_checker` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=768 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=788 DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-default.m_permission: ~742 rows (approximately)
-
+-- Dumping data for table mifostenant-default.m_permission: ~765 rows (approximately)
 /*!40000 ALTER TABLE `m_permission` DISABLE KEYS */;
 INSERT INTO `m_permission` (`id`, `grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES
 	(1, 'special', 'ALL_FUNCTIONS', NULL, NULL, 0),
@@ -4110,9 +4074,28 @@ INSERT INTO `m_permission` (`id`, `grouping`, `code`, `entity_name`, `action_nam
 	(764, 'report', 'READ_Daily Teller Cash Report (Pentaho)', 'Daily Teller Cash Report (Pentaho)', 'READ', 0),
 	(765, 'datatable', 'READ_ENTITY_DATATABLE_CHECK', 'ENTITY_DATATABLE_CHECK', 'READ', 0),
 	(766, 'datatable', 'CREATE_ENTITY_DATATABLE_CHECK', 'ENTITY_DATATABLE_CHECK', 'CREATE', 0),
-	(767, 'datatable', 'DELETE_ENTITY_DATATABLE_CHECK', 'ENTITY_DATATABLE_CHECK', 'DELETE', 0);
+	(767, 'datatable', 'DELETE_ENTITY_DATATABLE_CHECK', 'ENTITY_DATATABLE_CHECK', 'DELETE', 0),
+	(768, 'configuration', 'CREATE_CREDITBUREAU_LOANPRODUCT_MAPPING', 'CREDITBUREAU_LOANPRODUCT_MAPPING', 'CREATE', 0),
+	(769, 'configuration', 'CREATE_ORGANISATIONCREDITBUREAU', 'ORGANISATIONCREDITBUREAU', 'CREATE', 0),
+	(770, 'configuration', 'UPDATE_ORGANISATIONCREDITBUREAU', 'ORGANISATIONCREDITBUREAU', 'UPDATE', 0),
+	(771, 'configuration', 'UPDATE_CREDITBUREAU_LOANPRODUCT_MAPPING', 'CREDITBUREAU_LOANPRODUCT_MAPPING', 'UPDATE', 0),
+	(772, 'transaction_savings', 'HOLDAMOUNT_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'HOLDAMOUNT', 0),
+	(773, 'transaction_savings', 'HOLDAMOUNT_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'HOLDAMOUNT_CHECKER', 0),
+	(774, 'transaction_savings', 'BLOCKDEBIT_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'BLOCKDEBIT', 0),
+	(775, 'transaction_savings', 'BLOCKDEBIT_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'BLOCKDEBIT_CHECKER', 0),
+	(776, 'transaction_savings', 'UNBLOCKDEBIT_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'UNBLOCKDEBIT', 0),
+	(777, 'transaction_savings', 'UNBLOCKDEBIT_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'UNBLOCKDEBIT_CHECKER', 0),
+	(778, 'transaction_savings', 'BLOCKCREDIT_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'BLOCKCREDIT', 0),
+	(779, 'transaction_savings', 'BLOCKCREDIT_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'BLOCKCREDIT_CHECKER', 0),
+	(780, 'transaction_savings', 'UNBLOCKCREDIT_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'UNBLOCKCREDIT', 0),
+	(781, 'transaction_savings', 'UNBLOCKCREDIT_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'UNBLOCKCREDIT_CHECKER', 0),
+	(782, 'transaction_savings', 'BLOCK_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'BLOCK', 0),
+	(783, 'transaction_savings', 'BLOCK_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'BLOCK_CHECKER', 0),
+	(784, 'transaction_savings', 'UNBLOCK_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'UNBLOCK', 0),
+	(785, 'transaction_savings', 'UNBLOCK_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'UNBLOCK_CHECKER', 0),
+	(786, 'transaction_savings', 'RELEASEAMOUNT_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'RELEASEAMOUNT', 0),
+	(787, 'transaction_savings', 'RELEASEAMOUNT_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'RELEASEAMOUNT_CHECKER', 0);
 /*!40000 ALTER TABLE `m_permission` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_portfolio_account_associations
 DROP TABLE IF EXISTS `m_portfolio_account_associations`;
@@ -4139,7 +4122,6 @@ CREATE TABLE IF NOT EXISTS `m_portfolio_account_associations` (
 /*!40000 ALTER TABLE `m_portfolio_account_associations` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_portfolio_account_associations` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_portfolio_command_source
 DROP TABLE IF EXISTS `m_portfolio_command_source`;
 CREATE TABLE IF NOT EXISTS `m_portfolio_command_source` (
@@ -4162,6 +4144,8 @@ CREATE TABLE IF NOT EXISTS `m_portfolio_command_source` (
   `processing_result_enum` smallint(5) NOT NULL,
   `product_id` bigint(20) DEFAULT NULL,
   `transaction_id` varchar(100) DEFAULT NULL,
+  `creditbureau_id` bigint(20) DEFAULT NULL,
+  `organisation_creditbureau_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_maker_m_appuser` (`maker_id`),
   KEY `FK_m_checker_m_appuser` (`checker_id`),
@@ -4181,7 +4165,6 @@ CREATE TABLE IF NOT EXISTS `m_portfolio_command_source` (
 -- Dumping data for table mifostenant-default.m_portfolio_command_source: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_portfolio_command_source` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_portfolio_command_source` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_product_loan
 DROP TABLE IF EXISTS `m_product_loan`;
@@ -4255,7 +4238,6 @@ CREATE TABLE IF NOT EXISTS `m_product_loan` (
 /*!40000 ALTER TABLE `m_product_loan` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_loan` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_product_loan_charge
 DROP TABLE IF EXISTS `m_product_loan_charge`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_charge` (
@@ -4270,7 +4252,6 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_charge` (
 -- Dumping data for table mifostenant-default.m_product_loan_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_loan_charge` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_product_loan_configurable_attributes
 DROP TABLE IF EXISTS `m_product_loan_configurable_attributes`;
@@ -4294,7 +4275,6 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_configurable_attributes` (
 /*!40000 ALTER TABLE `m_product_loan_configurable_attributes` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_loan_configurable_attributes` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_product_loan_floating_rates
 DROP TABLE IF EXISTS `m_product_loan_floating_rates`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_floating_rates` (
@@ -4317,7 +4297,6 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_floating_rates` (
 /*!40000 ALTER TABLE `m_product_loan_floating_rates` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_loan_floating_rates` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_product_loan_guarantee_details
 DROP TABLE IF EXISTS `m_product_loan_guarantee_details`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_guarantee_details` (
@@ -4334,7 +4313,6 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_guarantee_details` (
 -- Dumping data for table mifostenant-default.m_product_loan_guarantee_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan_guarantee_details` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_loan_guarantee_details` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_product_loan_recalculation_details
 DROP TABLE IF EXISTS `m_product_loan_recalculation_details`;
@@ -4366,7 +4344,6 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_recalculation_details` (
 /*!40000 ALTER TABLE `m_product_loan_recalculation_details` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_loan_recalculation_details` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_product_loan_variable_installment_config
 DROP TABLE IF EXISTS `m_product_loan_variable_installment_config`;
 CREATE TABLE IF NOT EXISTS `m_product_loan_variable_installment_config` (
@@ -4382,7 +4359,6 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_variable_installment_config` (
 -- Dumping data for table mifostenant-default.m_product_loan_variable_installment_config: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_loan_variable_installment_config` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_loan_variable_installment_config` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_product_loan_variations_borrower_cycle
 DROP TABLE IF EXISTS `m_product_loan_variations_borrower_cycle`;
@@ -4404,7 +4380,6 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_variations_borrower_cycle` (
 /*!40000 ALTER TABLE `m_product_loan_variations_borrower_cycle` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_loan_variations_borrower_cycle` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_product_mix
 DROP TABLE IF EXISTS `m_product_mix`;
 CREATE TABLE IF NOT EXISTS `m_product_mix` (
@@ -4421,7 +4396,6 @@ CREATE TABLE IF NOT EXISTS `m_product_mix` (
 -- Dumping data for table mifostenant-default.m_product_mix: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_product_mix` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_product_mix` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_provisioning_criteria
 DROP TABLE IF EXISTS `m_provisioning_criteria`;
@@ -4443,7 +4417,6 @@ CREATE TABLE IF NOT EXISTS `m_provisioning_criteria` (
 -- Dumping data for table mifostenant-default.m_provisioning_criteria: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_provisioning_criteria` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_provisioning_criteria` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_provisioning_criteria_definition
 DROP TABLE IF EXISTS `m_provisioning_criteria_definition`;
@@ -4471,7 +4444,6 @@ CREATE TABLE IF NOT EXISTS `m_provisioning_criteria_definition` (
 /*!40000 ALTER TABLE `m_provisioning_criteria_definition` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_provisioning_criteria_definition` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_provisioning_history
 DROP TABLE IF EXISTS `m_provisioning_history`;
 CREATE TABLE IF NOT EXISTS `m_provisioning_history` (
@@ -4492,7 +4464,6 @@ CREATE TABLE IF NOT EXISTS `m_provisioning_history` (
 /*!40000 ALTER TABLE `m_provisioning_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_provisioning_history` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_provision_category
 DROP TABLE IF EXISTS `m_provision_category`;
 CREATE TABLE IF NOT EXISTS `m_provision_category` (
@@ -4511,7 +4482,6 @@ INSERT INTO `m_provision_category` (`id`, `category_name`, `description`) VALUES
 	(3, 'DOUBTFUL', 'Principal and/or Interest overdue by x days and less than y'),
 	(4, 'LOSS', 'Principal and/or Interest overdue by y days');
 /*!40000 ALTER TABLE `m_provision_category` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_report_mailing_job
 DROP TABLE IF EXISTS `m_report_mailing_job`;
@@ -4556,7 +4526,6 @@ CREATE TABLE IF NOT EXISTS `m_report_mailing_job` (
 /*!40000 ALTER TABLE `m_report_mailing_job` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_report_mailing_job` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_report_mailing_job_configuration
 DROP TABLE IF EXISTS `m_report_mailing_job_configuration`;
 CREATE TABLE IF NOT EXISTS `m_report_mailing_job_configuration` (
@@ -4575,7 +4544,6 @@ INSERT INTO `m_report_mailing_job_configuration` (`id`, `name`, `value`) VALUES
 	(3, 'GMAIL_SMTP_USERNAME', ''),
 	(4, 'GMAIL_SMTP_PASSWORD', '');
 /*!40000 ALTER TABLE `m_report_mailing_job_configuration` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_report_mailing_job_run_history
 DROP TABLE IF EXISTS `m_report_mailing_job_run_history`;
@@ -4596,7 +4564,6 @@ CREATE TABLE IF NOT EXISTS `m_report_mailing_job_run_history` (
 /*!40000 ALTER TABLE `m_report_mailing_job_run_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_report_mailing_job_run_history` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_role
 DROP TABLE IF EXISTS `m_role`;
 CREATE TABLE IF NOT EXISTS `m_role` (
@@ -4613,7 +4580,6 @@ CREATE TABLE IF NOT EXISTS `m_role` (
 INSERT INTO `m_role` (`id`, `name`, `description`, `is_disabled`) VALUES
 	(1, 'Super user', 'This role provides all application permissions.', 0);
 /*!40000 ALTER TABLE `m_role` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_role_permission
 DROP TABLE IF EXISTS `m_role_permission`;
@@ -4632,7 +4598,6 @@ CREATE TABLE IF NOT EXISTS `m_role_permission` (
 INSERT INTO `m_role_permission` (`role_id`, `permission_id`) VALUES
 	(1, 1);
 /*!40000 ALTER TABLE `m_role_permission` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_savings_account
 DROP TABLE IF EXISTS `m_savings_account`;
@@ -4697,6 +4662,7 @@ CREATE TABLE IF NOT EXISTS `m_savings_account` (
   `withhold_tax` tinyint(4) NOT NULL DEFAULT '0',
   `tax_group_id` bigint(20) DEFAULT NULL,
   `last_interest_calculation_date` date DEFAULT NULL,
+  `total_savings_amount_on_hold` decimal(19,6) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `sa_account_no_UNIQUE` (`account_no`),
   UNIQUE KEY `sa_externalid_UNIQUE` (`external_id`),
@@ -4713,7 +4679,6 @@ CREATE TABLE IF NOT EXISTS `m_savings_account` (
 -- Dumping data for table mifostenant-default.m_savings_account: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_account` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_savings_account_charge
 DROP TABLE IF EXISTS `m_savings_account_charge`;
@@ -4750,7 +4715,6 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_charge` (
 /*!40000 ALTER TABLE `m_savings_account_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_account_charge` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_savings_account_charge_paid_by
 DROP TABLE IF EXISTS `m_savings_account_charge_paid_by`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_charge_paid_by` (
@@ -4768,7 +4732,6 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_charge_paid_by` (
 -- Dumping data for table mifostenant-default.m_savings_account_charge_paid_by: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account_charge_paid_by` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_account_charge_paid_by` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_savings_account_interest_rate_chart
 DROP TABLE IF EXISTS `m_savings_account_interest_rate_chart`;
@@ -4788,7 +4751,6 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_chart` (
 -- Dumping data for table mifostenant-default.m_savings_account_interest_rate_chart: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account_interest_rate_chart` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_account_interest_rate_chart` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_savings_account_interest_rate_slab
 DROP TABLE IF EXISTS `m_savings_account_interest_rate_slab`;
@@ -4812,7 +4774,6 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_interest_rate_slab` (
 /*!40000 ALTER TABLE `m_savings_account_interest_rate_slab` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_account_interest_rate_slab` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_savings_account_transaction
 DROP TABLE IF EXISTS `m_savings_account_transaction`;
 CREATE TABLE IF NOT EXISTS `m_savings_account_transaction` (
@@ -4832,6 +4793,7 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_transaction` (
   `created_date` datetime NOT NULL,
   `appuser_id` bigint(20) DEFAULT NULL,
   `is_manual` tinyint(1) DEFAULT '0',
+  `release_id_of_hold_amount` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKSAT0000000001` (`savings_account_id`),
   KEY `FK_m_savings_account_transaction_m_payment_detail` (`payment_detail_id`),
@@ -4844,7 +4806,6 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_transaction` (
 -- Dumping data for table mifostenant-default.m_savings_account_transaction: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account_transaction` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_account_transaction` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_savings_account_transaction_tax_details
 DROP TABLE IF EXISTS `m_savings_account_transaction_tax_details`;
@@ -4863,7 +4824,6 @@ CREATE TABLE IF NOT EXISTS `m_savings_account_transaction_tax_details` (
 -- Dumping data for table mifostenant-default.m_savings_account_transaction_tax_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_account_transaction_tax_details` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_account_transaction_tax_details` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_savings_interest_incentives
 DROP TABLE IF EXISTS `m_savings_interest_incentives`;
@@ -4884,7 +4844,6 @@ CREATE TABLE IF NOT EXISTS `m_savings_interest_incentives` (
 -- Dumping data for table mifostenant-default.m_savings_interest_incentives: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_interest_incentives` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_interest_incentives` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_savings_officer_assignment_history
 DROP TABLE IF EXISTS `m_savings_officer_assignment_history`;
@@ -4908,7 +4867,6 @@ CREATE TABLE IF NOT EXISTS `m_savings_officer_assignment_history` (
 -- Dumping data for table mifostenant-default.m_savings_officer_assignment_history: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_officer_assignment_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_officer_assignment_history` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_savings_product
 DROP TABLE IF EXISTS `m_savings_product`;
@@ -4957,7 +4915,6 @@ CREATE TABLE IF NOT EXISTS `m_savings_product` (
 /*!40000 ALTER TABLE `m_savings_product` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_product` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_savings_product_charge
 DROP TABLE IF EXISTS `m_savings_product_charge`;
 CREATE TABLE IF NOT EXISTS `m_savings_product_charge` (
@@ -4972,7 +4929,6 @@ CREATE TABLE IF NOT EXISTS `m_savings_product_charge` (
 -- Dumping data for table mifostenant-default.m_savings_product_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_savings_product_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_savings_product_charge` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_selfservice_beneficiaries_tpt
 DROP TABLE IF EXISTS `m_selfservice_beneficiaries_tpt`;
@@ -4994,7 +4950,6 @@ CREATE TABLE IF NOT EXISTS `m_selfservice_beneficiaries_tpt` (
 /*!40000 ALTER TABLE `m_selfservice_beneficiaries_tpt` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_selfservice_beneficiaries_tpt` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_selfservice_user_client_mapping
 DROP TABLE IF EXISTS `m_selfservice_user_client_mapping`;
 CREATE TABLE IF NOT EXISTS `m_selfservice_user_client_mapping` (
@@ -5011,7 +4966,6 @@ CREATE TABLE IF NOT EXISTS `m_selfservice_user_client_mapping` (
 -- Dumping data for table mifostenant-default.m_selfservice_user_client_mapping: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_selfservice_user_client_mapping` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_selfservice_user_client_mapping` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_share_account
 DROP TABLE IF EXISTS `m_share_account`;
@@ -5071,7 +5025,6 @@ CREATE TABLE IF NOT EXISTS `m_share_account` (
 /*!40000 ALTER TABLE `m_share_account` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_share_account` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_share_account_charge
 DROP TABLE IF EXISTS `m_share_account_charge`;
 CREATE TABLE IF NOT EXISTS `m_share_account_charge` (
@@ -5105,7 +5058,6 @@ CREATE TABLE IF NOT EXISTS `m_share_account_charge` (
 /*!40000 ALTER TABLE `m_share_account_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_share_account_charge` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_share_account_charge_paid_by
 DROP TABLE IF EXISTS `m_share_account_charge_paid_by`;
 CREATE TABLE IF NOT EXISTS `m_share_account_charge_paid_by` (
@@ -5123,7 +5075,6 @@ CREATE TABLE IF NOT EXISTS `m_share_account_charge_paid_by` (
 -- Dumping data for table mifostenant-default.m_share_account_charge_paid_by: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_account_charge_paid_by` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_share_account_charge_paid_by` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_share_account_dividend_details
 DROP TABLE IF EXISTS `m_share_account_dividend_details`;
@@ -5144,7 +5095,6 @@ CREATE TABLE IF NOT EXISTS `m_share_account_dividend_details` (
 -- Dumping data for table mifostenant-default.m_share_account_dividend_details: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_account_dividend_details` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_share_account_dividend_details` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_share_account_transactions
 DROP TABLE IF EXISTS `m_share_account_transactions`;
@@ -5168,7 +5118,6 @@ CREATE TABLE IF NOT EXISTS `m_share_account_transactions` (
 -- Dumping data for table mifostenant-default.m_share_account_transactions: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_account_transactions` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_share_account_transactions` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_share_product
 DROP TABLE IF EXISTS `m_share_product`;
@@ -5213,7 +5162,6 @@ CREATE TABLE IF NOT EXISTS `m_share_product` (
 /*!40000 ALTER TABLE `m_share_product` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_share_product` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_share_product_charge
 DROP TABLE IF EXISTS `m_share_product_charge`;
 CREATE TABLE IF NOT EXISTS `m_share_product_charge` (
@@ -5228,7 +5176,6 @@ CREATE TABLE IF NOT EXISTS `m_share_product_charge` (
 -- Dumping data for table mifostenant-default.m_share_product_charge: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_product_charge` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_share_product_charge` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_share_product_dividend_pay_out
 DROP TABLE IF EXISTS `m_share_product_dividend_pay_out`;
@@ -5256,7 +5203,6 @@ CREATE TABLE IF NOT EXISTS `m_share_product_dividend_pay_out` (
 /*!40000 ALTER TABLE `m_share_product_dividend_pay_out` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_share_product_dividend_pay_out` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_share_product_market_price
 DROP TABLE IF EXISTS `m_share_product_market_price`;
 CREATE TABLE IF NOT EXISTS `m_share_product_market_price` (
@@ -5272,7 +5218,6 @@ CREATE TABLE IF NOT EXISTS `m_share_product_market_price` (
 -- Dumping data for table mifostenant-default.m_share_product_market_price: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_share_product_market_price` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_share_product_market_price` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_staff
 DROP TABLE IF EXISTS `m_staff`;
@@ -5304,7 +5249,6 @@ CREATE TABLE IF NOT EXISTS `m_staff` (
 /*!40000 ALTER TABLE `m_staff` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_staff` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_staff_assignment_history
 DROP TABLE IF EXISTS `m_staff_assignment_history`;
 CREATE TABLE IF NOT EXISTS `m_staff_assignment_history` (
@@ -5328,7 +5272,6 @@ CREATE TABLE IF NOT EXISTS `m_staff_assignment_history` (
 /*!40000 ALTER TABLE `m_staff_assignment_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_staff_assignment_history` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_surveys
 DROP TABLE IF EXISTS `m_surveys`;
 CREATE TABLE IF NOT EXISTS `m_surveys` (
@@ -5345,7 +5288,6 @@ CREATE TABLE IF NOT EXISTS `m_surveys` (
 -- Dumping data for table mifostenant-default.m_surveys: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_surveys` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_surveys` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_survey_components
 DROP TABLE IF EXISTS `m_survey_components`;
@@ -5364,7 +5306,6 @@ CREATE TABLE IF NOT EXISTS `m_survey_components` (
 -- Dumping data for table mifostenant-default.m_survey_components: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_survey_components` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_survey_components` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_survey_lookup_tables
 DROP TABLE IF EXISTS `m_survey_lookup_tables`;
@@ -5385,7 +5326,6 @@ CREATE TABLE IF NOT EXISTS `m_survey_lookup_tables` (
 /*!40000 ALTER TABLE `m_survey_lookup_tables` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_survey_lookup_tables` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_survey_questions
 DROP TABLE IF EXISTS `m_survey_questions`;
 CREATE TABLE IF NOT EXISTS `m_survey_questions` (
@@ -5405,7 +5345,6 @@ CREATE TABLE IF NOT EXISTS `m_survey_questions` (
 /*!40000 ALTER TABLE `m_survey_questions` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_survey_questions` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_survey_responses
 DROP TABLE IF EXISTS `m_survey_responses`;
 CREATE TABLE IF NOT EXISTS `m_survey_responses` (
@@ -5422,7 +5361,6 @@ CREATE TABLE IF NOT EXISTS `m_survey_responses` (
 -- Dumping data for table mifostenant-default.m_survey_responses: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_survey_responses` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_survey_responses` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_survey_scorecards
 DROP TABLE IF EXISTS `m_survey_scorecards`;
@@ -5451,7 +5389,6 @@ CREATE TABLE IF NOT EXISTS `m_survey_scorecards` (
 -- Dumping data for table mifostenant-default.m_survey_scorecards: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_survey_scorecards` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_survey_scorecards` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_tax_component
 DROP TABLE IF EXISTS `m_tax_component`;
@@ -5483,7 +5420,6 @@ CREATE TABLE IF NOT EXISTS `m_tax_component` (
 /*!40000 ALTER TABLE `m_tax_component` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_tax_component` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_tax_component_history
 DROP TABLE IF EXISTS `m_tax_component_history`;
 CREATE TABLE IF NOT EXISTS `m_tax_component_history` (
@@ -5509,7 +5445,6 @@ CREATE TABLE IF NOT EXISTS `m_tax_component_history` (
 /*!40000 ALTER TABLE `m_tax_component_history` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_tax_component_history` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_tax_group
 DROP TABLE IF EXISTS `m_tax_group`;
 CREATE TABLE IF NOT EXISTS `m_tax_group` (
@@ -5529,7 +5464,6 @@ CREATE TABLE IF NOT EXISTS `m_tax_group` (
 -- Dumping data for table mifostenant-default.m_tax_group: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_tax_group` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_tax_group` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_tax_group_mappings
 DROP TABLE IF EXISTS `m_tax_group_mappings`;
@@ -5558,7 +5492,6 @@ CREATE TABLE IF NOT EXISTS `m_tax_group_mappings` (
 /*!40000 ALTER TABLE `m_tax_group_mappings` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_tax_group_mappings` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_tellers
 DROP TABLE IF EXISTS `m_tellers`;
 CREATE TABLE IF NOT EXISTS `m_tellers` (
@@ -5585,7 +5518,6 @@ CREATE TABLE IF NOT EXISTS `m_tellers` (
 /*!40000 ALTER TABLE `m_tellers` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_tellers` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_template
 DROP TABLE IF EXISTS `m_template`;
 CREATE TABLE IF NOT EXISTS `m_template` (
@@ -5602,7 +5534,6 @@ CREATE TABLE IF NOT EXISTS `m_template` (
 /*!40000 ALTER TABLE `m_template` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_template` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_templatemappers
 DROP TABLE IF EXISTS `m_templatemappers`;
 CREATE TABLE IF NOT EXISTS `m_templatemappers` (
@@ -5617,7 +5548,6 @@ CREATE TABLE IF NOT EXISTS `m_templatemappers` (
 /*!40000 ALTER TABLE `m_templatemappers` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_templatemappers` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.m_template_m_templatemappers
 DROP TABLE IF EXISTS `m_template_m_templatemappers`;
 CREATE TABLE IF NOT EXISTS `m_template_m_templatemappers` (
@@ -5631,7 +5561,6 @@ CREATE TABLE IF NOT EXISTS `m_template_m_templatemappers` (
 -- Dumping data for table mifostenant-default.m_template_m_templatemappers: ~0 rows (approximately)
 /*!40000 ALTER TABLE `m_template_m_templatemappers` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_template_m_templatemappers` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.m_working_days
 DROP TABLE IF EXISTS `m_working_days`;
@@ -5650,7 +5579,6 @@ INSERT INTO `m_working_days` (`id`, `recurrence`, `repayment_rescheduling_enum`,
 	(1, 'FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU', 2, 0, 0);
 /*!40000 ALTER TABLE `m_working_days` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.oauth_access_token
 DROP TABLE IF EXISTS `oauth_access_token`;
 CREATE TABLE IF NOT EXISTS `oauth_access_token` (
@@ -5666,7 +5594,6 @@ CREATE TABLE IF NOT EXISTS `oauth_access_token` (
 -- Dumping data for table mifostenant-default.oauth_access_token: ~0 rows (approximately)
 /*!40000 ALTER TABLE `oauth_access_token` DISABLE KEYS */;
 /*!40000 ALTER TABLE `oauth_access_token` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.oauth_client_details
 DROP TABLE IF EXISTS `oauth_client_details`;
@@ -5691,7 +5618,6 @@ INSERT INTO `oauth_client_details` (`client_id`, `resource_ids`, `client_secret`
 	('community-app', NULL, '123', 'all', 'password,refresh_token', NULL, NULL, NULL, NULL, NULL, NULL);
 /*!40000 ALTER TABLE `oauth_client_details` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.oauth_refresh_token
 DROP TABLE IF EXISTS `oauth_refresh_token`;
 CREATE TABLE IF NOT EXISTS `oauth_refresh_token` (
@@ -5703,7 +5629,6 @@ CREATE TABLE IF NOT EXISTS `oauth_refresh_token` (
 -- Dumping data for table mifostenant-default.oauth_refresh_token: ~0 rows (approximately)
 /*!40000 ALTER TABLE `oauth_refresh_token` DISABLE KEYS */;
 /*!40000 ALTER TABLE `oauth_refresh_token` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.ppi_likelihoods
 DROP TABLE IF EXISTS `ppi_likelihoods`;
@@ -5718,7 +5643,6 @@ CREATE TABLE IF NOT EXISTS `ppi_likelihoods` (
 /*!40000 ALTER TABLE `ppi_likelihoods` DISABLE KEYS */;
 /*!40000 ALTER TABLE `ppi_likelihoods` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.ppi_likelihoods_ppi
 DROP TABLE IF EXISTS `ppi_likelihoods_ppi`;
 CREATE TABLE IF NOT EXISTS `ppi_likelihoods_ppi` (
@@ -5732,7 +5656,6 @@ CREATE TABLE IF NOT EXISTS `ppi_likelihoods_ppi` (
 -- Dumping data for table mifostenant-default.ppi_likelihoods_ppi: ~0 rows (approximately)
 /*!40000 ALTER TABLE `ppi_likelihoods_ppi` DISABLE KEYS */;
 /*!40000 ALTER TABLE `ppi_likelihoods_ppi` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.ppi_scores
 DROP TABLE IF EXISTS `ppi_scores`;
@@ -5768,7 +5691,6 @@ INSERT INTO `ppi_scores` (`id`, `score_from`, `score_to`) VALUES
 	(20, 95, 100);
 /*!40000 ALTER TABLE `ppi_scores` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.ref_loan_transaction_processing_strategy
 DROP TABLE IF EXISTS `ref_loan_transaction_processing_strategy`;
 CREATE TABLE IF NOT EXISTS `ref_loan_transaction_processing_strategy` (
@@ -5792,7 +5714,6 @@ INSERT INTO `ref_loan_transaction_processing_strategy` (`id`, `code`, `name`, `s
 	(7, 'early-repayment-strategy', 'Early Repayment Strategy', 5);
 /*!40000 ALTER TABLE `ref_loan_transaction_processing_strategy` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.rpt_sequence
 DROP TABLE IF EXISTS `rpt_sequence`;
 CREATE TABLE IF NOT EXISTS `rpt_sequence` (
@@ -5803,7 +5724,6 @@ CREATE TABLE IF NOT EXISTS `rpt_sequence` (
 -- Dumping data for table mifostenant-default.rpt_sequence: ~0 rows (approximately)
 /*!40000 ALTER TABLE `rpt_sequence` DISABLE KEYS */;
 /*!40000 ALTER TABLE `rpt_sequence` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.r_enum_value
 DROP TABLE IF EXISTS `r_enum_value`;
@@ -5982,7 +5902,6 @@ INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `en
 	('transaction_type_enum', 11, 'Apply Interest', 'Apply Interest', 0);
 /*!40000 ALTER TABLE `r_enum_value` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.scheduler_detail
 DROP TABLE IF EXISTS `scheduler_detail`;
 CREATE TABLE IF NOT EXISTS `scheduler_detail` (
@@ -5998,7 +5917,6 @@ CREATE TABLE IF NOT EXISTS `scheduler_detail` (
 INSERT INTO `scheduler_detail` (`id`, `is_suspended`, `execute_misfired_jobs`, `reset_scheduler_on_bootup`) VALUES
 	(1, 0, 1, 1);
 /*!40000 ALTER TABLE `scheduler_detail` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.schema_version
 DROP TABLE IF EXISTS `schema_version`;
@@ -6020,7 +5938,7 @@ CREATE TABLE IF NOT EXISTS `schema_version` (
   KEY `schema_version_s_idx` (`success`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Dumping data for table mifostenant-default.schema_version: ~336 rows (approximately)
+-- Dumping data for table mifostenant-default.schema_version: ~343 rows (approximately)
 /*!40000 ALTER TABLE `schema_version` DISABLE KEYS */;
 INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `description`, `type`, `script`, `checksum`, `installed_by`, `installed_on`, `execution_time`, `success`) VALUES
 	(1, 1, '1', 'mifosplatform-core-ddl-latest', 'SQL', 'V1__mifosplatform-core-ddl-latest.sql', 1800446512, 'root', '2015-06-03 15:26:50', 919, 1),
@@ -6287,8 +6205,12 @@ INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `desc
 	(335, 335, '322', 'sms campaign', 'SQL', 'V322__sms_campaign.sql', -1316831815, 'root', '2016-11-18 17:27:20', 1561, 1),
 	(336, 337, '323', 'spm replace dead fk with exisiting one', 'SQL', 'V323__spm_replace_dead_fk_with_exisiting_one.sql', 656055500, 'root', '2016-12-14 11:21:55', 576, 1),
 	(337, 338, '324', 'datatable checks', 'SQL', 'V324__datatable_checks.sql', -142308095, 'root', '2016-12-14 11:21:55', 676, 1),
-
+	(338, 339, '325', 'add is staff client data', 'SQL', 'V325__add_is_staff_client_data.sql', 1370025807, 'root', '2017-07-14 17:55:28', 2041, 1),
+	(339, 340, '326', 'data migration for client tr gl entries', 'SQL', 'V326__data_migration_for_client_tr_gl_entries.sql', -1103682583, 'root', '2017-07-14 17:55:28', 2, 1),
+	(340, 341, '327', 'creditbureau configuration', 'SQL', 'V327__creditbureau_configuration.sql', 108463042, 'root', '2017-07-14 17:55:32', 3674, 1),
+	(341, 342, '329', 'sms messages without campaign', 'SQL', 'V329__sms_messages_without_campaign.sql', 1747940025, 'root', '2017-07-14 17:55:33', 1055, 1),
 	(33, 33, '33', 'drop unique check on stretchy report parameter', 'SQL', 'V33__drop_unique_check_on_stretchy_report_parameter.sql', -1599579296, 'root', '2015-06-03 15:26:53', 23, 1),
+	(342, 343, '330', 'savings account transaction releaseId', 'SQL', 'V330__savings_account_transaction_releaseId.sql', -825985219, 'root', '2017-07-14 17:55:35', 1968, 1),
 	(34, 34, '34', 'add unique check on stretchy report parameter', 'SQL', 'V34__add_unique_check_on_stretchy_report_parameter.sql', -1286928230, 'root', '2015-06-03 15:26:53', 22, 1),
 	(35, 35, '35', 'add hierarchy column for acc gl account', 'SQL', 'V35__add_hierarchy_column_for_acc_gl_account.sql', -1387013309, 'root', '2015-06-03 15:26:54', 49, 1),
 	(36, 36, '36', 'add tag id column for acc gl account', 'SQL', 'V36__add_tag_id_column_for_acc_gl_account.sql', 414916166, 'root', '2015-06-03 15:26:54', 26, 1),
@@ -6308,7 +6230,7 @@ INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `desc
 	(49, 49, '49', 'track-loan-charge-payment-transactions', 'SQL', 'V49__track-loan-charge-payment-transactions.sql', -1735511516, 'root', '2015-06-03 15:26:54', 24, 1),
 	(5, 5, '5', 'update-savings-product-and-account-tables', 'SQL', 'V5__update-savings-product-and-account-tables.sql', 1349701479, 'root', '2015-06-03 15:26:51', 122, 1),
 	(50, 50, '50', 'add-grace-settings-to-loan-product', 'SQL', 'V50__add-grace-settings-to-loan-product.sql', -1807166173, 'root', '2015-06-03 15:26:55', 140, 1),
-	(338, 336, '5000', 'Daily Teller Cash Report pentaho', 'SQL', 'V5000__Daily_Teller_Cash_Report_pentaho.sql', -638871297, 'root', '2016-11-18 17:27:20', 145, 1),
+	(343, 336, '5000', 'Daily Teller Cash Report pentaho', 'SQL', 'V5000__Daily_Teller_Cash_Report_pentaho.sql', -638871297, 'root', '2016-11-18 17:27:20', 145, 1),
 	(51, 51, '51', 'track-additional-details-related-to-installment-performance', 'SQL', 'V51__track-additional-details-related-to-installment-performance.sql', 729891777, 'root', '2015-06-03 15:26:55', 102, 1),
 	(52, 52, '52', 'add boolean support cols to acc accounting rule', 'SQL', 'V52__add_boolean_support_cols_to_acc_accounting_rule.sql', 1853745947, 'root', '2015-06-03 15:26:55', 71, 1),
 	(53, 53, '53', 'track-advance-and-late-payments-on-installment', 'SQL', 'V53__track-advance-and-late-payments-on-installment.sql', 1135041990, 'root', '2015-06-03 15:26:55', 45, 1),
@@ -6364,7 +6286,6 @@ INSERT INTO `schema_version` (`version_rank`, `installed_rank`, `version`, `desc
 	(99, 99, '98', 'added currency roundof for multipleof', 'SQL', 'V98__added_currency_roundof_for_multipleof.sql', -107928515, 'root', '2015-06-03 15:26:58', 325, 1);
 /*!40000 ALTER TABLE `schema_version` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.sms_campaign
 DROP TABLE IF EXISTS `sms_campaign`;
 CREATE TABLE IF NOT EXISTS `sms_campaign` (
@@ -6397,7 +6318,6 @@ CREATE TABLE IF NOT EXISTS `sms_campaign` (
 /*!40000 ALTER TABLE `sms_campaign` DISABLE KEYS */;
 /*!40000 ALTER TABLE `sms_campaign` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.sms_messages_outbound
 DROP TABLE IF EXISTS `sms_messages_outbound`;
 CREATE TABLE IF NOT EXISTS `sms_messages_outbound` (
@@ -6408,7 +6328,7 @@ CREATE TABLE IF NOT EXISTS `sms_messages_outbound` (
   `status_enum` int(5) NOT NULL DEFAULT '100',
   `mobile_no` varchar(50) NOT NULL,
   `message` varchar(1000) NOT NULL,
-  `campaign_id` bigint(20) NOT NULL,
+  `campaign_id` bigint(20) DEFAULT NULL,
   `external_id` varchar(100) DEFAULT NULL,
   `submittedon_date` date DEFAULT NULL,
   `delivered_on_date` datetime DEFAULT NULL,
@@ -6426,7 +6346,6 @@ CREATE TABLE IF NOT EXISTS `sms_messages_outbound` (
 -- Dumping data for table mifostenant-default.sms_messages_outbound: ~0 rows (approximately)
 /*!40000 ALTER TABLE `sms_messages_outbound` DISABLE KEYS */;
 /*!40000 ALTER TABLE `sms_messages_outbound` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.stretchy_parameter
 DROP TABLE IF EXISTS `stretchy_parameter`;
@@ -6488,7 +6407,6 @@ INSERT INTO `stretchy_parameter` (`id`, `parameter_name`, `parameter_variable`, 
 	(1024, 'cashierIdSelectOne', 'cashierId', 'Cashier', 'select', 'number', '0', NULL, 'Y', 'N', 'select c.id, s.display_name from m_cashiers as c left join m_staff as s on c.staff_id = s.id where c.teller_id = ${tellerId}', 1023),
 	(1025, 'currencyCodeSelectOne', 'currencyCode', 'Currency', 'select', 'string', '0', NULL, 'Y', 'N', 'select `code`, `name` from m_organisation_currency order by `code`', NULL);
 /*!40000 ALTER TABLE `stretchy_parameter` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.stretchy_report
 DROP TABLE IF EXISTS `stretchy_report`;
@@ -6626,7 +6544,6 @@ INSERT INTO `stretchy_report` (`id`, `report_name`, `report_type`, `report_subty
 	(187, 'Savings Withdrawal', 'SMS', 'Triggered', NULL, 'SELECT sc.savingsId AS savingsId, sc.id AS clientId, sc.firstname, IFNULL(sc.middlename,\'\') AS middlename, sc.lastname, sc.display_name AS FullName, sc.mobile_no AS mobileNo,\r\nms.`account_no` AS savingsAccountNo, ROUND(mst.amountPaid, ms.currency_digits) AS withdrawAmount, ms.account_balance_derived AS balance, \r\nmst.transactionDate AS transactionDate\r\nFROM m_office mo\r\nJOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, \'%\') AND ounder.hierarchy LIKE CONCAT(\'.\', \'%\')\r\nLEFT JOIN (\r\nSELECT \r\n sa.id AS savingsId, mc.id AS id, mc.firstname AS firstname, mc.middlename AS middlename, mc.lastname AS lastname, \r\n mc.display_name AS display_name, mc.status_enum AS status_enum, \r\n mc.mobile_no AS mobile_no, mc.office_id AS office_id, \r\n mc.staff_id AS staff_id\r\nFROM\r\nm_savings_account sa\r\nLEFT JOIN m_client mc ON mc.id = sa.client_id\r\nORDER BY savingsId) sc ON sc.office_id = ounder.id\r\nRIGHT JOIN m_savings_account AS ms ON sc.savingsId = ms.id\r\nRIGHT JOIN(\r\nSELECT st.amount AS amountPaid, st.id, st.savings_account_id, st.id AS savingsTransactionId, st.transaction_date AS transactionDate\r\nFROM m_savings_account_transaction st\r\nWHERE st.is_reversed = 0\r\nGROUP BY st.savings_account_id\r\n) AS mst ON mst.savings_account_id = ms.id\r\nWHERE sc.mobile_no IS NOT NULL AND (mo.id = ${officeId} OR ${officeId} = -1) AND (sc.staff_id = ${loanOfficerId} OR ${loanOfficerId} = -1) AND mst.savingsTransactionId = ${savingsTransactionId}', 'Savings Withdrawal', 0, 1),
 	(188, 'Daily Teller Cash Report (Pentaho)', 'Pentaho', NULL, NULL, NULL, 'Daily Teller Cash Report', 1, 1);
 /*!40000 ALTER TABLE `stretchy_report` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.stretchy_report_parameter
 DROP TABLE IF EXISTS `stretchy_report_parameter`;
@@ -7068,7 +6985,6 @@ INSERT INTO `stretchy_report_parameter` (`id`, `report_id`, `parameter_id`, `rep
 	(526, 188, 1009, 'asOnDate');
 /*!40000 ALTER TABLE `stretchy_report_parameter` ENABLE KEYS */;
 
-
 -- Dumping structure for table mifostenant-default.x_registered_table
 DROP TABLE IF EXISTS `x_registered_table`;
 CREATE TABLE IF NOT EXISTS `x_registered_table` (
@@ -7081,7 +6997,6 @@ CREATE TABLE IF NOT EXISTS `x_registered_table` (
 -- Dumping data for table mifostenant-default.x_registered_table: ~0 rows (approximately)
 /*!40000 ALTER TABLE `x_registered_table` DISABLE KEYS */;
 /*!40000 ALTER TABLE `x_registered_table` ENABLE KEYS */;
-
 
 -- Dumping structure for table mifostenant-default.x_table_column_code_mappings
 DROP TABLE IF EXISTS `x_table_column_code_mappings`;
@@ -7096,6 +7011,7 @@ CREATE TABLE IF NOT EXISTS `x_table_column_code_mappings` (
 -- Dumping data for table mifostenant-default.x_table_column_code_mappings: ~0 rows (approximately)
 /*!40000 ALTER TABLE `x_table_column_code_mappings` DISABLE KEYS */;
 /*!40000 ALTER TABLE `x_table_column_code_mappings` ENABLE KEYS */;
+
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
