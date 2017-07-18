@@ -30,7 +30,7 @@ public class SQLInjectionValidator {
 
 	private final static String[] COMMENTS = { "--", "({", "/*", "#" };
 
-	private final static String SQL_PATTERN = "[a-zA-Z_=,'!><.?\"`% ()0-9]*";
+	private final static String SQL_PATTERN = "[a-zA-Z_=,\\-'!><.?\"`% ()0-9]*";
 
 	public final static void validateSQLInput(final String sqlSearch) {
 		String lowerCaseSQL = sqlSearch.toLowerCase();
