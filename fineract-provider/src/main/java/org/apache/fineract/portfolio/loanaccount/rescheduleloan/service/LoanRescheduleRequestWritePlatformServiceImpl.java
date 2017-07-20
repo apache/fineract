@@ -410,9 +410,9 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                     } else if (!activeLoanTermVariation.fetchTermApplicaDate().isBefore(fromScheduleDate)) {
                         while (currentScheduleDate.isBefore(activeLoanTermVariation.fetchTermApplicaDate())) {
                             currentScheduleDate = this.scheduledDateGenerator.generateNextRepaymentDate(currentScheduleDate,
-                                    loanApplicationTerms, false, loanApplicationTerms.getHolidayDetailDTO());
+                                    loanApplicationTerms, false);
                             modifiedScheduleDate = this.scheduledDateGenerator.generateNextRepaymentDate(modifiedScheduleDate,
-                                    loanApplicationTerms, false, loanApplicationTerms.getHolidayDetailDTO());
+                                    loanApplicationTerms, false);
                             changeMap.put(currentScheduleDate, modifiedScheduleDate);
                         }
                         if (changeMap.containsKey(activeLoanTermVariation.fetchTermApplicaDate())) {

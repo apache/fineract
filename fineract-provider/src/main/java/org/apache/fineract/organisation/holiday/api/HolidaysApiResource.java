@@ -180,4 +180,13 @@ public class HolidaysApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, holidays, HOLIDAY_RESPONSE_DATA_PARAMETERS);
     }
+    
+    @GET
+    @Path("/template")
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    public String retrieveRepaymentScheduleUpdationTyeOptions(@Context final UriInfo uriInfo){
+        this.context.authenticatedUser().validateHasReadPermission(HOLIDAY_RESOURCE_NAME);
+        return this.toApiJsonSerializer.serialize(this.holidayReadPlatformService.retrieveRepaymentScheduleUpdationTyeOptions());
+    }
 }
