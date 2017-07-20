@@ -246,7 +246,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         if (displayName != null) {
             //extraCriteria += " and concat(ifnull(c.firstname, ''), if(c.firstname > '',' ', '') , ifnull(c.lastname, '')) like "
-        	paramList.add(ApiParameterHelper.sqlEncodeString(ApiParameterHelper.sqlEncodeString("%" + displayName + "%")));
+        	paramList.add("%" + displayName + "%");
         	extraCriteria += " and c.display_name like ? ";
         }
 
