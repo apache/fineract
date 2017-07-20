@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.organisation.workingdays.data.AdjustedDateDetailsDTO;
 import org.apache.fineract.organisation.workingdays.domain.RepaymentRescheduleType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
@@ -121,7 +122,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         
         boolean isFirstRepayment = true;
         LocalDate firstRepaymentdate = this.scheduledDateGenerator.generateNextRepaymentDate(
-                loanApplicationTerms.getExpectedDisbursementDate(), loanApplicationTerms, isFirstRepayment, holidayDetailDTO);
+                loanApplicationTerms.getExpectedDisbursementDate(), loanApplicationTerms, isFirstRepayment);
         final LocalDate idealDisbursementDate = this.scheduledDateGenerator.idealDisbursementDateBasedOnFirstRepaymentDate(
                 loanApplicationTerms.getLoanTermPeriodFrequencyType(), loanApplicationTerms.getRepaymentEvery(), firstRepaymentdate,
                 loanApplicationTerms.getLoanCalendar(), loanApplicationTerms.getHolidayDetailDTO(), loanApplicationTerms);
@@ -179,10 +180,12 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         while (!scheduleParams.getOutstandingBalance().isZero() || !scheduleParams.getDisburseDetailMap().isEmpty()) {
             LocalDate previousRepaymentDate = scheduleParams.getActualRepaymentDate();
             scheduleParams.setActualRepaymentDate(this.scheduledDateGenerator.generateNextRepaymentDate(
-                    scheduleParams.getActualRepaymentDate(), loanApplicationTerms, isFirstRepayment, holidayDetailDTO));
+                    scheduleParams.getActualRepaymentDate(), loanApplicationTerms, isFirstRepayment));
+            AdjustedDateDetailsDTO adjustedDateDetailsDTO = this.scheduledDateGenerator.adjustRepaymentDate(
+                    scheduleParams.getActualRepaymentDate(), loanApplicationTerms, holidayDetailDTO);
+            scheduleParams.setActualRepaymentDate(adjustedDateDetailsDTO.getChangedActualRepaymentDate());
             isFirstRepayment = false;
-            LocalDate scheduledDueDate = this.scheduledDateGenerator.adjustRepaymentDate(scheduleParams.getActualRepaymentDate(),
-                    loanApplicationTerms, holidayDetailDTO);
+            LocalDate scheduledDueDate = adjustedDateDetailsDTO.getChangedScheduleDate();
             
             // calculated interest start date for the period
             LocalDate periodStartDateApplicableForInterest = calculateInterestStartDateForPeriod(loanApplicationTerms,
@@ -1320,7 +1323,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         do {
 
             params.setActualRepaymentDate(this.scheduledDateGenerator.generateNextRepaymentDate(params.getActualRepaymentDate(),
-                    loanApplicationTerms, isFirstRepayment, holidayDetailDTO));
+                    loanApplicationTerms, isFirstRepayment));
             if (params.getActualRepaymentDate().isAfter(currentDate)) {
                 params.setActualRepaymentDate(currentDate);
             }
@@ -2172,41 +2175,17 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     ArrayList<LoanTermVariationsData> dueDateVariationsDataList = new ArrayList<>();
                     
 
-                 // check for date changes
+                   // check for date changes
                    
-                    do {
-                        actualRepaymentDate = this.scheduledDateGenerator.generateNextRepaymentDate(actualRepaymentDate,
-                                loanApplicationTerms, isFirstRepayment, holidayDetailDTO);
-                        isFirstRepayment = false;
-                        lastInstallmentDate = this.scheduledDateGenerator.adjustRepaymentDate(actualRepaymentDate, loanApplicationTerms,
-                                holidayDetailDTO);
-                        while (loanApplicationTerms.getLoanTermVariations().hasDueDateVariation(lastInstallmentDate)) {
-                            LoanTermVariationsData variation = loanApplicationTerms.getLoanTermVariations().nextDueDateVariation();
-                            if (!variation.isSpecificToInstallment()) {
-                                actualRepaymentDate = variation.getDateValue();
-                                /*if (!isDueDateChangeApplied) {
-                                    previousRepaymentDate = actualRepaymentDate;
-                                    isDueDateChangeApplied = true;
-                                }*/
-                                lastInstallmentDate = actualRepaymentDate;
-                            }
-                            dueDateVariationsDataList.add(variation);
+                    while (loanApplicationTerms.getLoanTermVariations().hasDueDateVariation(lastInstallmentDate)) {
+                        LoanTermVariationsData variation = loanApplicationTerms.getLoanTermVariations().nextDueDateVariation();
+                        if (!variation.isSpecificToInstallment()) {
+                            actualRepaymentDate = variation.getDateValue();
+                            loanApplicationTerms.setSeedDate(actualRepaymentDate);
                         }
-                        loanTermVariationParams = applyExceptionLoanTermVariations(loanApplicationTerms, lastInstallmentDate,
-                                exceptionDataListIterator, instalmentNumber, totalCumulativePrincipal, totalCumulativeInterest, mc);
-                    } while (loanTermVariationParams != null && loanTermVariationParams.isSkipPeriod());
-
-                    /*if (!lastInstallmentDate.isBefore(rescheduleFrom)) {
-                        actualRepaymentDate = previousRepaymentDate;
-                        if(isDueDateChangeApplied){
-                            int numberOfDateChangesApplied = dueDateVariationsDataList.size();
-                            while(numberOfDateChangesApplied >0 ){
-                                loanApplicationTerms.getLoanTermVariations().previousDueDateVariation();
-                                numberOfDateChangesApplied--;
-                            }
-                        }
-                        break;
-                    }*/
+                        lastInstallmentDate = variation.getDateValue();
+                        dueDateVariationsDataList.add(variation);
+                    }
                     periodNumber++;
 
                     for (LoanTermVariationsData dueDateVariation : dueDateVariationsDataList) {
