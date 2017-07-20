@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.organisation.workingdays.service;
 
+import org.apache.fineract.organisation.workingdays.domain.NonWorkingDayRescheduleDetail;
 import org.apache.fineract.organisation.workingdays.domain.RepaymentRescheduleType;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDays;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
@@ -55,5 +56,14 @@ public class WorkingDaysUtil {
     
     public static boolean isNonWorkingDay(final WorkingDays workingDays, final LocalDate date) {
         return !isWorkingDay(workingDays, date);
+    }
+    
+    public static RepaymentRescheduleType getRepaymentRescheduleType(final WorkingDays workingDays, final LocalDate date) {
+        RepaymentRescheduleType rescheduleType = RepaymentRescheduleType.fromInt(workingDays.getRepaymentReschedulingType());
+        NonWorkingDayRescheduleDetail nonWorkingDayRescheduleDetail = workingDays.getNonWorkingDayRescheduleDetails().get(date.getDayOfWeek());
+        if(nonWorkingDayRescheduleDetail != null){
+            rescheduleType =  RepaymentRescheduleType.fromInt(nonWorkingDayRescheduleDetail.getRepaymentReschedulingType());
+        }
+        return rescheduleType;
     }
 }
