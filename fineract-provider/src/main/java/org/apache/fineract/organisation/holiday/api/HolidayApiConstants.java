@@ -41,6 +41,7 @@ public class HolidayApiConstants {
     public static final String repaymentsRescheduledToParamName = "repaymentsRescheduledTo";
     public static final String processed = "processed";
     public static final String status = "status";
+    public static final String reschedulingType = "reschedulingType";
 
 	protected static final Set<String> HOLIDAY_RESPONSE_DATA_PARAMETERS = new HashSet<>(
 			Arrays.asList(idParamName, nameParamName, fromDateParamName, descriptionParamName, toDateParamName,
