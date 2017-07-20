@@ -700,4 +700,112 @@ public class CalendarUtils {
         }
         return monthOnDay;
     }
+    
+    public static LocalDate getNextRepaymentMeetingDate(final String recurringRule, final LocalDate seedDate,
+            final LocalDate repaymentDate, final Integer loanRepaymentInterval, final String frequency, final WorkingDays workingDays,
+            boolean isSkipRepaymentOnFirstDayOfMonth, final Integer numberOfDays, boolean applyWorkingDays) {
+        boolean isCalledFirstTime = true;
+        return getNextRepaymentMeetingDate(recurringRule, seedDate, repaymentDate, loanRepaymentInterval, frequency,
+                workingDays, isSkipRepaymentOnFirstDayOfMonth, numberOfDays, isCalledFirstTime, applyWorkingDays);
+    }
+    
+    public static LocalDate getNextRepaymentMeetingDate(final String recurringRule, final LocalDate seedDate,
+            final LocalDate repaymentDate, final Integer loanRepaymentInterval, final String frequency, 
+            boolean isSkipRepaymentOnFirstDayOfMonth, final Integer numberOfDays) {
+        boolean isCalledFirstTime = true;
+        final WorkingDays workingDays = null;
+        boolean applyWorkingDays = false;
+        return getNextRepaymentMeetingDate(recurringRule, seedDate, repaymentDate, loanRepaymentInterval, frequency,
+                workingDays, isSkipRepaymentOnFirstDayOfMonth, numberOfDays, isCalledFirstTime, applyWorkingDays);
+    }
+    
+    public static LocalDate getNextRepaymentMeetingDate(final String recurringRule, final LocalDate seedDate,
+            final LocalDate repaymentDate, final Integer loanRepaymentInterval, final String frequency, final WorkingDays workingDays,
+            boolean isSkipRepaymentOnFirstDayOfMonth, final Integer numberOfDays, boolean isCalledFirstTime, boolean applyWorkingDays) {
+
+        final Recur recur = CalendarUtils.getICalRecur(recurringRule);
+        if (recur == null) { return null; }
+        LocalDate tmpDate = repaymentDate;
+        
+        final Integer repaymentInterval = getMeetingIntervalFromFrequency(loanRepaymentInterval, frequency, recur);
+        /*
+         * Recurring dates should follow loanRepaymentInterval.
+         * 
+         * e.g. The weekly meeting will have interval of 1, if the loan product
+         * with fortnightly frequency will have interval of 2, to generate right
+         * set of meeting dates reset interval same as loan repayment interval.
+         */
+        int meetingInterval = recur.getInterval();
+        if(meetingInterval < 1){
+                meetingInterval = 1;
+        }
+        int rep = repaymentInterval<meetingInterval ? 1: repaymentInterval / meetingInterval ;
+
+        /*
+         * Recurring dates should follow loanRepayment frequency. //e.g. daily
+         * meeting frequency should support all loan products with any type of
+         * frequency. to generate right set of meeting dates reset frequency
+         * same as loan repayment frequency.
+         */
+        if (recur.getFrequency().equals(Recur.DAILY)) {
+            recur.setFrequency(frequency);
+        }
+        
+        /**
+         * Below code modified as discussed with Pramod N 
+         */
+        LocalDate newRepaymentDate = tmpDate;
+        int newRepayment = rep;
+        while (newRepayment > 0) {
+            newRepaymentDate = getNextRecurringDate(recur, seedDate, newRepaymentDate);
+            newRepayment--;
+        }
+
+        LocalDate nextRepaymentDate = null;
+        if (applyWorkingDays) {
+            if (WorkingDaysUtil.isNonWorkingDay(workingDays, newRepaymentDate)
+                    && WorkingDaysUtil.getRepaymentRescheduleType(workingDays, newRepaymentDate).isMoveToNextRepaymentDay()) {
+                newRepaymentDate = getNextRepaymentMeetingDate(recurringRule, seedDate, newRepaymentDate.plusDays(1),
+                        loanRepaymentInterval, frequency, workingDays, isSkipRepaymentOnFirstDayOfMonth, numberOfDays, isCalledFirstTime,
+                        applyWorkingDays);
+            } else {
+                newRepaymentDate = WorkingDaysUtil.getOffSetDateIfNonWorkingDay(newRepaymentDate, nextRepaymentDate, workingDays);
+            }
+        }
+        
+        if(isCalledFirstTime && newRepaymentDate.equals(repaymentDate)){
+            isCalledFirstTime = false;
+            newRepaymentDate = getNextRepaymentMeetingDate(recurringRule, seedDate, repaymentDate.plusDays(1), loanRepaymentInterval,
+                    frequency, workingDays, isSkipRepaymentOnFirstDayOfMonth, numberOfDays, isCalledFirstTime, applyWorkingDays);
+        }
+        
+        if (isSkipRepaymentOnFirstDayOfMonth) {
+            final LocalDate newRepaymentDateTemp = adjustRecurringDate(newRepaymentDate, numberOfDays);
+            if (applyWorkingDays) {
+                if (WorkingDaysUtil.isNonWorkingDay(workingDays, newRepaymentDateTemp)
+                        && WorkingDaysUtil.getRepaymentRescheduleType(workingDays, newRepaymentDateTemp).isMoveToNextRepaymentDay()) {
+                    newRepaymentDate = getNextRepaymentMeetingDate(recurringRule, seedDate, newRepaymentDate.plusDays(1),
+                            loanRepaymentInterval, frequency, workingDays, isSkipRepaymentOnFirstDayOfMonth, numberOfDays,
+                            isCalledFirstTime, applyWorkingDays);
+                } else {
+                    newRepaymentDate = WorkingDaysUtil.getOffSetDateIfNonWorkingDay(newRepaymentDateTemp, nextRepaymentDate, workingDays);
+                }
+            }
+        }
+        return newRepaymentDate;
+    }
+    
+    public static Integer getMeetingIntervalFromFrequency(final Integer loanRepaymentInterval, final String frequency, final Recur recur) {
+        final Integer interval = 4;
+        Integer repaymentInterval = loanRepaymentInterval;
+        /*
+         * check loanRepaymentInterval equal to 1, if repayments frequency is
+         * monthly and meeting frequency is weekly, then generate repayments
+         * schedule as every 4 weeks
+         */
+        if (frequency.equals(Recur.MONTHLY) && recur.getFrequency().equals(Recur.WEEKLY)) {
+            repaymentInterval = loanRepaymentInterval*interval;
+        }
+        return repaymentInterval;
+    }
 }

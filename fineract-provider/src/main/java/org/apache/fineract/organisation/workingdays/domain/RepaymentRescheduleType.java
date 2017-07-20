@@ -26,7 +26,8 @@ public enum RepaymentRescheduleType {
     INVALID(0, "RepaymentRescheduleType.invalid"), SAME_DAY(1, "RepaymentRescheduleType.same.day"), MOVE_TO_NEXT_WORKING_DAY(2,
             "RepaymentRescheduleType.move.to.next.working.day"), MOVE_TO_NEXT_REPAYMENT_MEETING_DAY(3,
             "RepaymentRescheduleType.move.to.next.repayment.meeting.day"), MOVE_TO_PREVIOUS_WORKING_DAY(4,
-            "RepaymentRescheduleType.move.to.previous.working.day");
+            "RepaymentRescheduleType.move.to.previous.working.day"),
+            MOVE_TO_NEXT_MEETING_DAY(5, "RepaymentRescheduleType.move.to.next.meeting.day");
 
     private final Integer value;
     private final String code;
@@ -42,6 +43,10 @@ public enum RepaymentRescheduleType {
 
     public String getCode() {
         return this.code;
+    }
+    
+    public boolean isMoveToNextRepaymentDay() {
+        return this.value.equals(RepaymentRescheduleType.MOVE_TO_NEXT_REPAYMENT_MEETING_DAY.getValue());
     }
 
     private static final Map<Integer, RepaymentRescheduleType> intToEnumMap = new HashMap<>();

@@ -114,10 +114,10 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
         for (LoanTermVariationsData loanTermVariation : loanApplicationTerms.getLoanTermVariations().getDueDateVariation()) {
             if (rescheduleFromDate.isBefore(loanTermVariation.getTermApplicableFrom())) {
                 LocalDate applicableDate = this.scheduledDateGenerator.generateNextRepaymentDate(rescheduleFromDate, loanApplicationTerms,
-                        false, loanApplicationTerms.getHolidayDetailDTO());
+                        false);
                 if (loanTermVariation.getTermApplicableFrom().equals(applicableDate)) {
                     LocalDate adjustedDate = this.scheduledDateGenerator.generateNextRepaymentDate(adjustedApplicableDate,
-                            loanApplicationTerms, false, loanApplicationTerms.getHolidayDetailDTO());
+                            loanApplicationTerms, false);
                     loanTermVariation.setApplicableFromDate(adjustedDate);
                     loanTermVariationsData.add(loanTermVariation);
                 }
