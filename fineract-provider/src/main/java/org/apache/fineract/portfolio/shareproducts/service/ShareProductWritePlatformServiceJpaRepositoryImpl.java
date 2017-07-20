@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.shareproducts.service;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.PersistenceException;
@@ -30,6 +31,10 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
+import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
+import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.shareproducts.constants.ShareProductApiConstants;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProduct;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProductDividendPayOutDetails;
@@ -53,19 +58,22 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
     private final ShareProductDividentPayOutDetailsRepositoryWrapper shareProductDividentPayOutDetailsRepository;
     private final ShareProductDividendAssembler shareProductDividendAssembler;
     private final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Autowired
     public ShareProductWritePlatformServiceJpaRepositoryImpl(final ShareProductRepositoryWrapper repository,
             final ShareProductDataSerializer serializer, final FromJsonHelper fromApiJsonHelper,
             final ShareProductDividentPayOutDetailsRepositoryWrapper shareProductDividentPayOutDetailsRepositor,
             final ShareProductDividendAssembler shareProductDividendAssembler,
-            final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService) {
+            final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
+            final BusinessEventNotifierService businessEventNotifierService) {
         this.repository = repository;
         this.serializer = serializer;
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.shareProductDividentPayOutDetailsRepository = shareProductDividentPayOutDetailsRepositor;
         this.shareProductDividendAssembler = shareProductDividendAssembler;
         this.accountMappingWritePlatformService = accountMappingWritePlatformService;
+        this.businessEventNotifierService = businessEventNotifierService;
     }
 
     @Override
@@ -140,6 +148,9 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
                     "No eligible shares for creating dividends"); }
             this.shareProductDividentPayOutDetailsRepository.save(dividendPayOutDetails);
 
+            this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.SHARE_PRODUCT_DIVIDENDS_CREATE,
+            		constructEntityMap(BUSINESS_ENTITY.SHARE_PRODUCT, productId));
+            
             return new CommandProcessingResultBuilder() //
                     .withCommandId(jsonCommand.commandId()) //
                     .withEntityId(productId) //
@@ -202,6 +213,12 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
 
         throw new PlatformDataIntegrityException("error.msg.shareproduct.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
+    }
+    
+    private Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> constructEntityMap(final BusinessEventNotificationConstants.BUSINESS_ENTITY entityEvent, Object entity) {
+    	Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> map = new HashMap<>(1);
+    	map.put(entityEvent, entity);
+    	return map;
     }
 
 }
