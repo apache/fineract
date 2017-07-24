@@ -2176,16 +2176,25 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     
 
                    // check for date changes
-                   
-                    while (loanApplicationTerms.getLoanTermVariations().hasDueDateVariation(lastInstallmentDate)) {
-                        LoanTermVariationsData variation = loanApplicationTerms.getLoanTermVariations().nextDueDateVariation();
-                        if (!variation.isSpecificToInstallment()) {
-                            actualRepaymentDate = variation.getDateValue();
-                            loanApplicationTerms.setSeedDate(actualRepaymentDate);
+                    
+                    do {
+                        actualRepaymentDate = this.scheduledDateGenerator.generateNextRepaymentDate(actualRepaymentDate,
+                                loanApplicationTerms, isFirstRepayment);
+                        isFirstRepayment = false;
+                        lastInstallmentDate = this.scheduledDateGenerator.adjustRepaymentDate(actualRepaymentDate, loanApplicationTerms,
+                                holidayDetailDTO).getChangedScheduleDate();
+                        while (loanApplicationTerms.getLoanTermVariations().hasDueDateVariation(lastInstallmentDate)) {
+                            LoanTermVariationsData variation = loanApplicationTerms.getLoanTermVariations().nextDueDateVariation();
+                            if (!variation.isSpecificToInstallment()) {
+                                actualRepaymentDate = variation.getDateValue();
+                                lastInstallmentDate = actualRepaymentDate;
+                            }
+                            dueDateVariationsDataList.add(variation);
                         }
-                        lastInstallmentDate = variation.getDateValue();
-                        dueDateVariationsDataList.add(variation);
-                    }
+                        loanTermVariationParams = applyExceptionLoanTermVariations(loanApplicationTerms, lastInstallmentDate,
+                                exceptionDataListIterator, instalmentNumber, totalCumulativePrincipal, totalCumulativeInterest, mc);
+                    } while (loanTermVariationParams != null && loanTermVariationParams.isSkipPeriod());
+                   
                     periodNumber++;
 
                     for (LoanTermVariationsData dueDateVariation : dueDateVariationsDataList) {
