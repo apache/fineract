@@ -212,4 +212,13 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
                     + " join m_office o on o.id = u.office_id where o.hierarchy like ? and u.is_deleted=0 order by u.username";
         }
     }
+
+    @Override
+    public boolean isUsernameExist(String username) {
+        String sql = "select count(*) from m_appuser where username = ?";
+        Object[] params = new Object[] { username };
+        Integer count = this.jdbcTemplate.queryForObject(sql, params, Integer.class);
+        if (count == 0) { return false; }
+        return true;
+    }
 }

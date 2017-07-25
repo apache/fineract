@@ -16,17 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.client.domain;
+package org.apache.fineract.portfolio.self.registration.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-abstract interface ClientRepository extends JpaRepository<Client, Long>, JpaSpecificationExecutor<Client> {
-    
-    public static final String FIND_CLIENT_BY_ACCOUNT_NUMBER = "select client from Client client where client.accountNumber = :accountNumber";
+public interface SelfServiceRegistrationRepository extends JpaRepository<SelfServiceRegistration, Long>,
+        JpaSpecificationExecutor<SelfServiceRegistration> {
 
-    @Query(FIND_CLIENT_BY_ACCOUNT_NUMBER)
-    Client getClientByAccountNumber(@Param("accountNumber") String accountNumber);
+    public static final String FIND_BY_REQUEST_AND_AUTHENTICATION_TOKEN = "select request from SelfServiceRegistration request where request.id = :id and "
+            + "request.authenticationToken = :authenticationToken";
+
+    @Query(FIND_BY_REQUEST_AND_AUTHENTICATION_TOKEN)
+    SelfServiceRegistration getRequestByIdAndAuthenticationToken(@Param("id") Long id,
+            @Param("authenticationToken") String authenticationToken);
+
 }

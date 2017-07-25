@@ -122,6 +122,29 @@ public final class JsonCommand {
         this.organisationCreditBureauId=organisationCreditBureauId;
     }
     
+    public static JsonCommand fromJsonElement(final Long resourceId, final JsonElement parsedCommand) {
+        return new JsonCommand(resourceId, parsedCommand);
+    }
+    
+    public JsonCommand(final Long resourceId, final JsonElement parsedCommand) {
+        this.parsedCommand = parsedCommand;
+        this.resourceId = resourceId;
+        this.commandId = null;
+        this.jsonCommand = null;        
+        this.fromApiJsonHelper = null;
+        this.entityName = null;
+        this.subresourceId = null;
+        this.groupId = null;
+        this.clientId = null;
+        this.loanId = null;
+        this.savingsId = null;
+        this.transactionId = null;
+        this.url = null;
+        this.productId = null;
+        this.creditBureauId=null;
+        this.organisationCreditBureauId=null;
+    }
+    
     public Long getOrganisationCreditBureauId() {
         return this.organisationCreditBureauId;
     }

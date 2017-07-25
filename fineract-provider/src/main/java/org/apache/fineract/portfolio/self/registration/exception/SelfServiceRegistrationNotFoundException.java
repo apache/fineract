@@ -16,24 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.client.exception;
+package org.apache.fineract.portfolio.self.registration.exception;
 
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-/**
- * A {@link RuntimeException} thrown when client resources are not found.
- */
-public class ClientNotFoundException extends AbstractPlatformResourceNotFoundException {
+public class SelfServiceRegistrationNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public ClientNotFoundException(final Long id) {
-        super("error.msg.client.id.invalid", "Client with identifier " + id + " does not exist", id);
+    public SelfServiceRegistrationNotFoundException(Long requestId, String authenticationToken) {
+        super("error.msg.self.service.registration.not.found", "Self service registration not found with request id : " + requestId
+                + " and authentication token :" + authenticationToken);
     }
-    
-    public ClientNotFoundException() {
-        super("error.msg.client.not.found.with.basic.details", "Client not found with basic details.");
-    }
-    
-    public ClientNotFoundException(String accountNumber) {
-        super("error.msg.client.not.found.with.account.number", "Client not found with account number "+accountNumber+".");
-    }
+
 }

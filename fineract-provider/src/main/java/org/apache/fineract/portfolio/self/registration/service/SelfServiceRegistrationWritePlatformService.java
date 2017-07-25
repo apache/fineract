@@ -16,21 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.useradministration.service;
+package org.apache.fineract.portfolio.self.registration.service;
 
-import org.apache.fineract.useradministration.data.AppUserData;
+import org.apache.fineract.portfolio.self.registration.domain.SelfServiceRegistration;
+import org.apache.fineract.useradministration.domain.AppUser;
 
-import java.util.Collection;
+public interface SelfServiceRegistrationWritePlatformService {
 
-public interface AppUserReadPlatformService {
+    public SelfServiceRegistration createRegistrationRequest(String apiRequestBodyAsJson);
 
-    Collection<AppUserData> retrieveAllUsers();
-
-    Collection<AppUserData> retrieveSearchTemplate();
-
-    AppUserData retrieveNewUserDetails();
-
-    AppUserData retrieveUser(Long userId);
-    
-    boolean isUsernameExist(String username);
+    public AppUser createUser(String apiRequestBodyAsJson);
 }
