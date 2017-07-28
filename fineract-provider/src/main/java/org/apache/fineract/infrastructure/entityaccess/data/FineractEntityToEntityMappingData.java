@@ -77,4 +77,17 @@ public class FineractEntityToEntityMappingData implements Serializable {
 
     }
 
+	public Long getRelationId() {
+		return relationId;
+	}
+
+	public Long getToId() {
+		return toId;
+	}
+
+	public String getFromEntity() {
+		return fromEntity;
+	}
+
+    
 }

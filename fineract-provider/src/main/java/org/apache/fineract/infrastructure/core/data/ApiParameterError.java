@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.infrastructure.core.data;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ApiParameterError {
@@ -57,6 +59,8 @@ public class ApiParameterError {
      */
     private List<ApiErrorMessageArg> args = new ArrayList<>();
 
+    private final transient SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+
     public static ApiParameterError generalError(final String globalisationMessageCode, final String defaultUserMessage,
             final Object... defaultUserMessageArgs) {
         return new ApiParameterError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs);
@@ -86,7 +90,12 @@ public class ApiParameterError {
         final List<ApiErrorMessageArg> messageArgs = new ArrayList<>();
         if (defaultUserMessageArgs != null) {
             for (final Object object : defaultUserMessageArgs) {
-                messageArgs.add(ApiErrorMessageArg.from(object));
+                if(object instanceof Date){
+                    final String formattedDate = dateFormatter.format(object);
+                    messageArgs.add(ApiErrorMessageArg.from(formattedDate));
+                } else {
+                    messageArgs.add(ApiErrorMessageArg.from(object));
+                }
             }
         }
         this.args = messageArgs;

@@ -30,9 +30,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.collateral.data.CollateralData;
 import org.apache.fineract.portfolio.collateral.exception.CollateralNotFoundException;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -44,14 +42,14 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
-    private final LoanRepository loanRepository;
+    private final LoanRepositoryWrapper loanRepositoryWrapper;
 
     @Autowired
     public CollateralReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final LoanRepository loanRepository) {
+            final LoanRepositoryWrapper loanRepositoryWrapper) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.loanRepository = loanRepository;
+        this.loanRepositoryWrapper = loanRepositoryWrapper;
     }
 
     private static final class CollateralMapper implements RowMapper<CollateralData> {
@@ -119,8 +117,7 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
 
     @Override
     public List<CollateralData> retrieveCollateralsForValidLoan(final Long loanId) {
-        final Loan loan = this.loanRepository.findOne(loanId);
-        if (loan == null) { throw new LoanNotFoundException(loanId); }
+        this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
         return retrieveCollaterals(loanId);
     }
 

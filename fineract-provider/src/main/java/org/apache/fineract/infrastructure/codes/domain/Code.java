@@ -33,17 +33,17 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.codes.exception.SystemDefinedCodeCannotBeChangedException;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_code", uniqueConstraints = { @UniqueConstraint(columnNames = { "code_name" }, name = "code_name") })
-public class Code extends AbstractPersistable<Long> {
+public class Code extends AbstractPersistableCustom<Long> {
 
     @Column(name = "code_name", length = 100)
     private String name;
 
     @Column(name = "is_system_defined")
-    private final boolean systemDefined;
+    private boolean systemDefined;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "code", orphanRemoval = true)
     private Set<CodeValue> values;

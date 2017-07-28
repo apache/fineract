@@ -27,11 +27,11 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.meeting.domain.Meeting;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_client_attendance", uniqueConstraints = { @UniqueConstraint(columnNames = { "client_id", "meeting_id" }, name = "unique_client_meeting_attendance") })
-public class ClientAttendance extends AbstractPersistable<Long> {
+public class ClientAttendance extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)

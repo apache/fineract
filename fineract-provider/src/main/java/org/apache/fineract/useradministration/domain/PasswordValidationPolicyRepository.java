@@ -25,7 +25,7 @@ import org.springframework.data.jpa.repository.Query;
 public interface PasswordValidationPolicyRepository extends JpaRepository<PasswordValidationPolicy, Long>,
         JpaSpecificationExecutor<PasswordValidationPolicy> {
 
-    @Query("from PasswordValidationPolicy PVP WHERE PVP.active = 1")
+    @Query("select PVP from PasswordValidationPolicy PVP WHERE PVP.active = true")
     public PasswordValidationPolicy findActivePasswordValidationPolicy();
 
 

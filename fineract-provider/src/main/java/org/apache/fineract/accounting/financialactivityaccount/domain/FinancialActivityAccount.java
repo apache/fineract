@@ -26,11 +26,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "acc_gl_financial_activity_account")
-public class FinancialActivityAccount extends AbstractPersistable<Long> {
+public class FinancialActivityAccount extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "gl_account_id")

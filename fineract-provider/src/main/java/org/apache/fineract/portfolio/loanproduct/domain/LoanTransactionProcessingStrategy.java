@@ -23,11 +23,11 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "ref_loan_transaction_processing_strategy")
-public class LoanTransactionProcessingStrategy extends AbstractPersistable<Long> {
+public class LoanTransactionProcessingStrategy extends AbstractPersistableCustom<Long> {
 
     @Column(name = "code", unique = true)
     private String code;

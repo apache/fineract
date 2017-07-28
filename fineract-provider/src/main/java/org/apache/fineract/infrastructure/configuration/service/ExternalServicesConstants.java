@@ -35,6 +35,12 @@ public class ExternalServicesConstants {
     public static final String SMTP_PORT = "port";
     public static final String SMTP_USE_TLS = "useTLS";
 
+    public static final String SMS_SERVICE_NAME = "MESSAGE_GATEWAY";
+    public static final String SMS_HOST = "host_name";
+    public static final String SMS_PORT = "port_number";
+    public static final String SMS_END_POINT = "end_point";
+    public static final String SMS_TENANT_APP_KEY = "tenant_app_key";
+    
     public static enum EXTERNALSERVICEPROPERTIES_JSON_INPUT_PARAMS {
         EXTERNAL_SERVICE_ID("external_service_id"), NAME("name"), VALUE("value");
 
@@ -79,6 +85,37 @@ public class ExternalServicesConstants {
 
         static {
             for (final SMTP_JSON_INPUT_PARAMS type : SMTP_JSON_INPUT_PARAMS.values()) {
+                values.add(type.value);
+            }
+        }
+
+        public static Set<String> getAllValues() {
+            return values;
+        }
+
+        @Override
+        public String toString() {
+            return name().toString().replaceAll("_", " ");
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    }
+    
+    public static enum SMS_JSON_INPUT_PARAMS {
+        HASTNAME("host_name"), PORT("port_number"), END_POINT("end_point"), TENANT_APP_KEY("tenant_app_key");
+
+        private final String value;
+
+        private SMS_JSON_INPUT_PARAMS(final String value) {
+            this.value = value;
+        }
+
+        private static final Set<String> values = new HashSet<>();
+
+        static {
+            for (final SMS_JSON_INPUT_PARAMS type : SMS_JSON_INPUT_PARAMS.values()) {
                 values.add(type.value);
             }
         }

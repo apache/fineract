@@ -30,11 +30,11 @@ import javax.persistence.Table;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.entityaccess.FineractEntityAccessConstants;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_entity_to_entity_access")
-public class FineractEntityAccess extends AbstractPersistable<Long> {
+public class FineractEntityAccess extends AbstractPersistableCustom<Long> {
 	
 	@Column(name = "entity_type", length = 50)
     private String entityType;

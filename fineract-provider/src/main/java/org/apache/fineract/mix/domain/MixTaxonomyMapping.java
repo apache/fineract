@@ -24,11 +24,11 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "mix_taxonomy_mapping")
-public class MixTaxonomyMapping extends AbstractPersistable<Long> {
+public class MixTaxonomyMapping extends AbstractPersistableCustom<Long> {
 
     @Column(name = "identifier")
     private String identifier;

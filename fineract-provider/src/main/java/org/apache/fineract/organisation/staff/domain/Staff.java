@@ -22,21 +22,29 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.documentmanagement.domain.Image;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.joda.time.LocalDate;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_staff", uniqueConstraints = { @UniqueConstraint(columnNames = { "display_name" }, name = "display_name"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE"),
         @UniqueConstraint(columnNames = { "mobile_no" }, name = "mobile_no_UNIQUE") })
-public class Staff extends AbstractPersistable<Long> {
+public class Staff extends AbstractPersistableCustom<Long> {
 
     @Column(name = "firstname", length = 50)
     private String firstname;
@@ -57,7 +65,7 @@ public class Staff extends AbstractPersistable<Long> {
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
 
-    @Column(name = "is_loan_officer ", nullable = false)
+    @Column(name = "is_loan_officer", nullable = false)
     private boolean loanOfficer;
 
     @Column(name = "organisational_role_enum", nullable = true)
@@ -66,7 +74,7 @@ public class Staff extends AbstractPersistable<Long> {
     @Column(name = "is_active", nullable = false)
     private boolean active;
 
-    @Column(name = "joining_date", nullable = false)
+    @Column(name = "joining_date", nullable = true)
     @Temporal(TemporalType.DATE)
     private Date joiningDate;
 

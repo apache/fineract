@@ -72,6 +72,7 @@ public class FixedDepositAccountHelper {
     private static final String DAYS_360 = "360";
     private static final String DAYS_365 = "365";
     public final static String depositAmount = "100000";
+    private String newDepositAmount = null;
 
     private String interestCompoundingPeriodType = MONTHLY;
     private String interestPostingPeriodType = MONTHLY;
@@ -90,64 +91,15 @@ public class FixedDepositAccountHelper {
     private final boolean isActiveChart = true;
     private final String currencyCode = USD;
 
-    private final String depositPeriod = "14";
+    private String depositPeriod = "14";
     private final String depositPeriodFrequencyId = MONTHS;
     private String submittedOnDate = "";
     private String savingsId = null;
     private boolean transferInterest = false;
 
-    public String build(final String clientId, final String productId, final String validFrom, final String validTo,
-            final String penalInterestType) {
+    public String build(final String clientId, final String productId, final String penalInterestType) {
         final HashMap<String, Object> map = new HashMap<>();
 
-        List<HashMap<String, String>> chartSlabs = new ArrayList<HashMap<String, String>>();
-        HashMap<String, String> chartSlabsMap1 = new HashMap<>();
-        chartSlabsMap1.put("description", "First");
-        chartSlabsMap1.put("periodType", MONTHS);
-        chartSlabsMap1.put("fromPeriod", "1");
-        chartSlabsMap1.put("toPeriod", "6");
-        chartSlabsMap1.put("annualInterestRate", "5");
-        chartSlabsMap1.put("locale", LOCALE);
-        chartSlabs.add(0, chartSlabsMap1);
-
-        HashMap<String, String> chartSlabsMap2 = new HashMap<>();
-        chartSlabsMap2.put("description", "Second");
-        chartSlabsMap2.put("periodType", MONTHS);
-        chartSlabsMap2.put("fromPeriod", "7");
-        chartSlabsMap2.put("toPeriod", "12");
-        chartSlabsMap2.put("annualInterestRate", "6");
-        chartSlabsMap2.put("locale", LOCALE);
-        chartSlabs.add(1, chartSlabsMap2);
-
-        HashMap<String, String> chartSlabsMap3 = new HashMap<>();
-        chartSlabsMap3.put("description", "Third");
-        chartSlabsMap3.put("periodType", MONTHS);
-        chartSlabsMap3.put("fromPeriod", "13");
-        chartSlabsMap3.put("toPeriod", "18");
-        chartSlabsMap3.put("annualInterestRate", "7");
-        chartSlabsMap3.put("locale", LOCALE);
-        chartSlabs.add(2, chartSlabsMap3);
-
-        HashMap<String, String> chartSlabsMap4 = new HashMap<>();
-        chartSlabsMap4.put("description", "Fourth");
-        chartSlabsMap4.put("periodType", MONTHS);
-        chartSlabsMap4.put("fromPeriod", "19");
-        chartSlabsMap4.put("toPeriod", "24");
-        chartSlabsMap4.put("annualInterestRate", "8");
-        chartSlabsMap4.put("locale", LOCALE);
-        chartSlabs.add(3, chartSlabsMap4);
-
-        List<HashMap<String, Object>> charts = new ArrayList<HashMap<String, Object>>();
-        HashMap<String, Object> chartsMap = new HashMap<>();
-        chartsMap.put("fromDate", validFrom);
-        chartsMap.put("endDate", validTo);
-        chartsMap.put("dateFormat", "dd MMMM yyyy");
-        chartsMap.put("locale", LOCALE);
-        chartsMap.put("isActiveChart", this.isActiveChart);
-        chartsMap.put("chartSlabs", chartSlabs);
-        charts.add(chartsMap);
-
-        map.put("charts", charts);
         map.put("productId", productId);
         map.put("clientId", clientId);
         map.put("interestCalculationDaysInYearType", this.interestCalculationDaysInYearType);
@@ -169,7 +121,7 @@ public class FixedDepositAccountHelper {
         map.put("inMultiplesOfDepositTermTypeId", this.inMultiplesOfDepositTermTypeId);
         map.put("preClosurePenalInterest", this.preClosurePenalInterest);
         map.put("preClosurePenalInterestOnTypeId", penalInterestType);
-        map.put("depositAmount", depositAmount);
+        map.put("depositAmount", getDepositAmount());
         map.put("depositPeriod", this.depositPeriod);
         map.put("depositPeriodFrequencyId", this.depositPeriodFrequencyId);
         map.put("submittedOnDate", this.submittedOnDate);
@@ -196,8 +148,16 @@ public class FixedDepositAccountHelper {
     }
 
     public HashMap getFixedDepositSummary(final Integer accountID) {
+        return getFixedDepositDetails(accountID, "summary");
+    }
+
+    public HashMap getFixedDepositDetails(final Integer accountID) {
+        return getFixedDepositDetails(accountID, "");
+    }
+
+    private HashMap getFixedDepositDetails(final Integer accountID, final String jsonAttributeToGetBack) {
         final String URL = FIXED_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?" + Utils.TENANT_IDENTIFIER;
-        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "summary");
+        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, jsonAttributeToGetBack);
         return response;
     }
 
@@ -251,7 +211,7 @@ public class FixedDepositAccountHelper {
 
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec) //
                 .withSubmittedOnDate(submittedOnDate) //
-                .build(clientID, productID, validFrom, validTo, penalInterestType);
+                .build(clientID, productID, penalInterestType);
 
         return Utils.performServerPut(this.requestSpec, this.responseSpec, FIXED_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?"
                 + Utils.TENANT_IDENTIFIER, fixedDepositApplicationJSON, CommonConstants.RESPONSE_CHANGES);
@@ -268,7 +228,7 @@ public class FixedDepositAccountHelper {
                 .withInterestCalculationPeriodType(interestCalculationType) //
                 .withInterestCompoundingPeriodType(interestCompoundingPeriodType) //
                 .withInterestPostingPeriodType(interestPostingPeriodType) //
-                .build(clientID, productID, validFrom, validTo, penalInterestType);
+                .build(clientID, productID, penalInterestType);
 
         return Utils.performServerPut(this.requestSpec, this.responseSpec, FIXED_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?"
                 + Utils.TENANT_IDENTIFIER, fixedDepositApplicationJSON, CommonConstants.RESPONSE_CHANGES);
@@ -486,5 +446,20 @@ public class FixedDepositAccountHelper {
         this.lockingPeriodFrequencyType = lockingPeriodFrequencyType;
         this.lockinPeriodFrequency = lockinPeriodFrequency;
         return this;
+    }
+
+    public FixedDepositAccountHelper withDepositPeriod(final String depositPeriod) {
+        this.depositPeriod = depositPeriod;
+        return this;
+    }
+
+    public FixedDepositAccountHelper withDepositAmount(final String depositAmount) {
+        this.newDepositAmount = depositAmount;
+        return this;
+    }
+
+    private String getDepositAmount() {
+        if (this.newDepositAmount == null) { return depositAmount; }
+        return this.newDepositAmount;
     }
 }

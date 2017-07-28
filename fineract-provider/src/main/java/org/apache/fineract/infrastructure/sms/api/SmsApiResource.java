@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.sms.api;
 
 import java.util.Collection;
+import java.util.Date;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -28,10 +29,12 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.fineract.accounting.journalentry.api.DateParam;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -39,6 +42,8 @@ import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.Page;
+import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.sms.data.SmsData;
 import org.apache.fineract.infrastructure.sms.service.SmsReadPlatformService;
@@ -101,6 +106,35 @@ public class SmsApiResource {
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, smsMessage);
+    }
+
+    @GET
+    @Path("{campaignId}/messageByStatus")
+    public String retrieveAllSmsByStatus(@PathParam("campaignId") final Long campaignId, @Context final UriInfo uriInfo,
+            @QueryParam("status") final Long status, @QueryParam("fromDate") final DateParam fromDateParam,
+            @QueryParam("toDate") final DateParam toDateParam, @QueryParam("locale") final String locale,
+            @QueryParam("dateFormat") final String dateFormat, @QueryParam("sqlSearch") final String sqlSearch,
+            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
+            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
+
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+
+        final SearchParameters searchParameters = SearchParameters.forSMSCampaign(sqlSearch, offset, limit, orderBy, sortOrder);
+
+        Date fromDate = null;
+        if (fromDateParam != null) {
+            fromDate = fromDateParam.getDate("fromDate", dateFormat, locale);
+        }
+        Date toDate = null;
+        if (toDateParam != null) {
+            toDate = toDateParam.getDate("toDate", dateFormat, locale);
+        }
+
+        final Page<SmsData> smsMessages = this.readPlatformService.retrieveSmsByStatus(campaignId, searchParameters, status.intValue(), fromDate,
+                toDate);
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, smsMessages);
     }
 
     @PUT

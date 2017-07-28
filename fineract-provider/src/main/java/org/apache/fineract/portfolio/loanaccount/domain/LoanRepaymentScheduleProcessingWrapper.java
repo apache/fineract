@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -71,7 +72,6 @@ public class LoanRepaymentScheduleProcessingWrapper {
             final Money totalInterest, boolean isInstallmentChargeApplicable) {
 
         Money cumulative = Money.zero(monetaryCurrency);
-
         for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isFeeCharge() && !loanCharge.isDueAtDisbursement()) {
                 if (loanCharge.isInstalmentFee() && isInstallmentChargeApplicable) {
@@ -102,7 +102,19 @@ public class LoanRepaymentScheduleProcessingWrapper {
                     } else if (loanCharge.getChargeCalculation().isPercentageOfInterest()) {
                         amount = amount.add(totalInterest.getAmount());
                     } else {
-                        amount = amount.add(totalPrincipal.getAmount());
+                        // If charge type is specified due date and loan is
+                        // multi disburment loan.
+                        // Then we need to get as of this loan charge due date
+                        // how much amount disbursed.
+                        if (loanCharge.getLoan() != null && loanCharge.isSpecifiedDueDate() && loanCharge.getLoan().isMultiDisburmentLoan()) {
+                            for (final LoanDisbursementDetails loanDisbursementDetails : loanCharge.getLoan().getDisbursementDetails()) {
+                                if (!loanDisbursementDetails.expectedDisbursementDate().after(loanCharge.getDueDate())) {
+                                    amount = amount.add(loanDisbursementDetails.principal());
+                                }
+                            }
+                        } else {
+                            amount = amount.add(totalPrincipal.getAmount());
+                        }
                     }
                     BigDecimal loanChargeAmt = amount.multiply(loanCharge.getPercentage()).divide(BigDecimal.valueOf(100));
                     cumulative = cumulative.plus(loanChargeAmt);

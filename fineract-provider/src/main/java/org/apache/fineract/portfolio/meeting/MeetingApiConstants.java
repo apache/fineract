@@ -48,10 +48,4 @@ public class MeetingApiConstants {
     public static final String calendarData = "calendarData";
     public static final String attendanceTypeOptions = "attendanceTypeOptions";
 
-    public static final Set<String> MEETING_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(meetingDateParamName,
-            localeParamName, dateFormatParamName, calendarIdParamName, clientsAttendanceParamName));
-
-    public static final Set<String> MEETING_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName, meetingDateParamName,
-            clientsAttendance, clients, calendarData, attendanceTypeOptions));
-
 }

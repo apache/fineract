@@ -32,11 +32,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.codes.CodeConstants.CODEVALUE_JSON_INPUT_PARAMS;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_code_value", uniqueConstraints = { @UniqueConstraint(columnNames = { "code_id", "code_value" }, name = "code_value_duplicate") })
-public class CodeValue extends AbstractPersistable<Long> {
+public class CodeValue extends AbstractPersistableCustom<Long> {
 
     @Column(name = "code_value", length = 100)
     private String label;
@@ -53,22 +53,27 @@ public class CodeValue extends AbstractPersistable<Long> {
 
     @Column(name = "is_active")
     private boolean isActive;
+    
+    @Column(name = "is_mandatory")
+    private boolean mandatory;
 
     public static CodeValue createNew(final Code code, final String label, final int position, final String description,
-            final boolean isActive) {
-        return new CodeValue(code, label, position, description, isActive);
+            final boolean isActive, final boolean mandatory) {
+        return new CodeValue(code, label, position, description, isActive, mandatory);
     }
 
     protected CodeValue() {
         //
     }
 
-    private CodeValue(final Code code, final String label, final int position, final String description, final boolean isActive) {
+    private CodeValue(final Code code, final String label, final int position, final String description, 
+            final boolean isActive, final boolean mandatory) {
         this.code = code;
         this.label = StringUtils.defaultIfEmpty(label, null);
         this.position = position;
         this.description = description;
         this.isActive = isActive;
+        this.mandatory = mandatory;
     }
 
     public String label() {
@@ -92,7 +97,16 @@ public class CodeValue extends AbstractPersistable<Long> {
         if (position == null) {
             position = new Integer(0);
         }
-        return new CodeValue(code, label, position.intValue(), description, isActive);
+        
+        Boolean mandatory = command.booleanPrimitiveValueOfParameterNamed(
+                CODEVALUE_JSON_INPUT_PARAMS.IS_MANDATORY.getValue());
+        
+        // if the "mandatory" Boolean object is null, then set it to false by default
+        if (mandatory == null) {
+            mandatory = false;
+        }
+        
+        return new CodeValue(code, label, position.intValue(), description, isActive, mandatory);
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -131,6 +145,6 @@ public class CodeValue extends AbstractPersistable<Long> {
     }
 
     public CodeValueData toData() {
-        return CodeValueData.instance(getId(), this.label, this.position, this.isActive);
+        return CodeValueData.instance(getId(), this.label, this.position, this.isActive, this.mandatory);
     }
 }

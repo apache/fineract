@@ -46,4 +46,6 @@ public interface LoanProductReadPlatformService {
     Collection<LoanProductData> retrieveAllowedProductsForMix(Long productId);
 
     Collection<LoanProductBorrowerCycleVariationData> retrieveLoanProductBorrowerCycleVariations(Long loanProductId);
+
+    LoanProductData retrieveLoanProductFloatingDetails(Long loanProductId);
 }

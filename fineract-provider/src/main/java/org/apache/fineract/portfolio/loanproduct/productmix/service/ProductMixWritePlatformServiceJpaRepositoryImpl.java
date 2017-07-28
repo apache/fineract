@@ -135,7 +135,7 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
             final Map<String, Object> changes = new LinkedHashMap<>();
 
-            final List<ProductMix> existedProductMixes = this.productMixRepository.findByProductId(productId);
+            final List<ProductMix> existedProductMixes = new ArrayList<>(this.productMixRepository.findByProductId(productId));
             if (CollectionUtils.isEmpty(existedProductMixes)) { throw new ProductMixNotFoundException(productId); }
             final Set<String> restrictedIds = new HashSet<>(Arrays.asList(command.arrayValueOfParameterNamed("restrictedProducts")));
 

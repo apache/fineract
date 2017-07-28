@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.core.serialization.AbstractFromApiJson
 import org.apache.fineract.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.client.command.ClientIdentifierCommand;
+import org.apache.fineract.portfolio.client.domain.ClientIdentifierStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +47,7 @@ public final class ClientIdentifierCommandFromApiJsonDeserializer extends Abstra
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("documentTypeId", "documentKey", "description"));
+    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("documentTypeId", "documentKey","status", "description"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -67,7 +68,7 @@ public final class ClientIdentifierCommandFromApiJsonDeserializer extends Abstra
         final Long documentTypeId = this.fromApiJsonHelper.extractLongNamed("documentTypeId", element);
         final String documentKey = this.fromApiJsonHelper.extractStringNamed("documentKey", element);
         final String documentDescription = this.fromApiJsonHelper.extractStringNamed("documentDescription", element);
-
-        return new ClientIdentifierCommand(documentTypeId, documentKey, documentDescription);
+        final String statusString = this.fromApiJsonHelper.extractStringNamed("status", element);
+        return new ClientIdentifierCommand(documentTypeId, documentKey, statusString, documentDescription);
     }
 }

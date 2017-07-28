@@ -31,7 +31,6 @@ import org.joda.time.LocalDate;
 
 public class QuarterlyCompoundingPeriod implements CompoundingPeriod {
 
-    @SuppressWarnings("unused")
     private final LocalDateInterval periodInterval;
     private final List<EndOfDayBalance> endOfDayBalances;
 
@@ -178,4 +177,9 @@ public class QuarterlyCompoundingPeriod implements CompoundingPeriod {
         this.periodInterval = periodInterval;
         this.endOfDayBalances = endOfDayBalances;
     }
+
+	@Override
+	public LocalDateInterval getPeriodInterval() {
+		return this.periodInterval;
+	}
 }

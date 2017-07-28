@@ -26,20 +26,20 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_loan_installment_charge")
-public class LoanInstallmentCharge extends AbstractPersistable<Long> {
+public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> implements Comparable<LoanInstallmentCharge> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_charge_id", referencedColumnName = "id", nullable = false)
     private LoanCharge loancharge;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "loan_schedule_id", referencedColumnName = "id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "loan_schedule_id", nullable = false)
     private LoanRepaymentScheduleInstallment installment;
 
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
@@ -70,6 +70,11 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
         // TODO Auto-generated constructor stub
     }
 
+    @Override
+    public int compareTo(LoanInstallmentCharge o) {
+        return this.installment.getInstallmentNumber().compareTo(o.installment.getInstallmentNumber());
+    }
+    
     public LoanInstallmentCharge(final BigDecimal amount, final LoanCharge loanCharge, final LoanRepaymentScheduleInstallment installment) {
         this.loancharge = loanCharge;
         this.installment = installment;
@@ -288,4 +293,12 @@ public class LoanInstallmentCharge extends AbstractPersistable<Long> {
         return amountToDeductOnThisCharge;
     }
 
+	public LoanCharge getLoancharge() {
+		return this.loancharge;
+	}
+	public LoanRepaymentScheduleInstallment getInstallment() {
+		return this.installment;
+	}
+
+    
 }

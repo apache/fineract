@@ -23,7 +23,7 @@ import java.util.Map;
 
 public enum EntityAccountType {
     CLIENT(1, "accountType.client"), LOAN(2, "accountType.loan"), SAVINGS(3, "accountType.savings"), CENTER(4, "accountType.center"), 
-    GROUP(5, "accountType.group");
+    GROUP(5, "accountType.group"), SHARES(6, "accountType.shares");
 
     private final Integer value;
     private final String code;

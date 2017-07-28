@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.joda.time.LocalDate;
 
@@ -52,6 +53,9 @@ public class LoanTransactionHelper {
     private static final String WITHDRAW_LOAN_APPLICATION_COMMAND = "withdrawnByApplicant";
     private static final String RECOVER_FROM_GUARANTORS_COMMAND = "recoverGuarantees";
     private static final String MAKE_REFUND_BY_CASH_COMMAND = "refundByCash";
+    private static final String FORECLOSURE_COMMAND = "foreclosure";
+
+    public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
 
     public LoanTransactionHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
@@ -64,6 +68,10 @@ public class LoanTransactionHelper {
 
     public Integer getLoanId(final String loanApplicationJSON) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, APPLY_LOAN_URL, loanApplicationJSON, "loanId");
+    }
+
+    public Object getLoanError(final String loanApplicationJSON, final String responseAttribute) {
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, APPLY_LOAN_URL, loanApplicationJSON, responseAttribute);
     }
 
     public Integer getLoanOfficerId(final String loanId) {
@@ -175,6 +183,10 @@ public class LoanTransactionHelper {
         return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID), getDisburseLoanAsJSON(date, disburseAmt));
     }
 
+    public Object disburseLoan(final String date, final Integer loanID, ResponseSpecification responseValidationError) {
+        return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID), getDisburseLoanAsJSON(date, null),  responseValidationError);
+    }
+    
     public HashMap disburseLoanToSavings(final String date, final Integer loanID) {
         return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_TO_SAVINGS_COMMAND, loanID), getDisburseLoanAsJSON(date, null));
     }
@@ -215,6 +227,11 @@ public class LoanTransactionHelper {
     public HashMap makeRepayment(final String date, final Float amountToBePaid, final Integer loanID) {
         return (HashMap) performLoanTransaction(createLoanTransactionURL(MAKE_REPAYMENT_COMMAND, loanID),
                 getRepaymentBodyAsJSON(date, amountToBePaid), "");
+    }
+
+    public HashMap forecloseLoan(final String transactionDate, final Integer loanID) {
+        return (HashMap) performLoanTransaction(createLoanTransactionURL(FORECLOSURE_COMMAND, loanID),
+                getForeclosureBodyAsJSON(transactionDate, loanID), "");
     }
 
     public HashMap withdrawLoanApplicationByClient(final String date, final Integer loanID) {
@@ -324,6 +341,17 @@ public class LoanTransactionHelper {
         map.put("transactionAmount", transactionAmount.toString());
         map.put("note", "Repayment Made!!!");
         return new Gson().toJson(map);
+    }
+
+    private String getForeclosureBodyAsJSON(final String transactionDate, final Integer loanId) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("locale", "en");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("transactionDate", transactionDate);
+        map.put("note", "Foreclosure Made!!!");
+        String json = new Gson().toJson(map);
+        System.out.println(json);
+        return json;
     }
 
     private String getWriteOffBodyAsJSON(final String transactionDate) {
@@ -475,6 +503,11 @@ public class LoanTransactionHelper {
     private Object performLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent, final String responseAttribute) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForLoanTransaction, jsonToBeSent, responseAttribute);
     }
+    
+    private Object performLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent, ResponseSpecification responseValidationError) {
+    	
+        return  Utils.performServerPost(this.requestSpec, responseValidationError, postURLForLoanTransaction, jsonToBeSent, CommonConstants.RESPONSE_ERROR);    	       
+   }
 
     public Object adjustLoanTransaction(final Integer loanId, final Integer transactionId, final String date,
             final String transactionAmount, final String responseAttribute) {
@@ -644,5 +677,21 @@ public class LoanTransactionHelper {
         String json = new Gson().toJson(map);
         System.out.println(json);
         return json;
+    }
+
+    public static List<HashMap<String, Object>> getTestDatatableAsJson(final String registeredTableName) {
+        List<HashMap<String, Object>> datatablesListMap = new ArrayList<>();
+        HashMap<String, Object> datatableMap = new HashMap<>();
+        HashMap<String, Object> dataMap = new HashMap<>();
+        dataMap.put("locale", "en");
+        dataMap.put("Spouse Name", Utils.randomNameGenerator("Spouse_name", 4));
+        dataMap.put("Number of Dependents", 5);
+        dataMap.put("Time of Visit", "01 December 2016 04:03");
+        dataMap.put("dateFormat", DATE_TIME_FORMAT);
+        dataMap.put("Date of Approval", "02 December 2016 00:00");
+        datatableMap.put("registeredTableName", registeredTableName);
+        datatableMap.put("data", dataMap);
+        datatablesListMap.add(datatableMap);
+        return datatablesListMap;
     }
 }

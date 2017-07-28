@@ -18,16 +18,26 @@
  */
 package org.apache.fineract.portfolio.savings.service;
 
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargesParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.PersistenceException;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.charge.domain.Charge;
@@ -38,6 +48,7 @@ import org.apache.fineract.portfolio.savings.domain.DepositProductAssembler;
 import org.apache.fineract.portfolio.savings.domain.RecurringDepositProduct;
 import org.apache.fineract.portfolio.savings.domain.RecurringDepositProductRepository;
 import org.apache.fineract.portfolio.savings.exception.RecurringDepositProductNotFoundException;
+import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,8 +101,12 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
                     .withEntityId(product.getId()) //
                     .build();
         } catch (final DataAccessException e) {
-            handleDataIntegrityIssues(command, e);
+            handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleDataIntegrityIssues(command, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -118,6 +133,19 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
                 }
             }
 
+            if (changes.containsKey(taxGroupIdParamName)) {
+                final TaxGroup taxGroup = this.depositProductAssembler.assembleTaxGroup(command);
+                product.setTaxGroup(taxGroup);
+                if (product.withHoldTax() && product.getTaxGroup() == null) {
+                    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                    final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                            .resource(RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME);
+                    final Long taxGroupId = null;
+                    baseDataValidator.reset().parameter(taxGroupIdParamName).value(taxGroupId).notBlank();
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
+            }
+
             // accounting related changes
             final boolean accountingTypeChanged = changes.containsKey(accountingRuleParamName);
             final Map<String, Object> accountingMappingChanges = this.accountMappingWritePlatformService
@@ -133,8 +161,12 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
                     .withEntityId(product.getId()) //
                     .with(changes).build();
         } catch (final DataAccessException e) {
-            handleDataIntegrityIssues(command, e);
+            handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleDataIntegrityIssues(command, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -157,9 +189,8 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleDataIntegrityIssues(final JsonCommand command, final DataAccessException dae) {
+    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dae) {
 
-        final Throwable realCause = dae.getMostSpecificCause();
         if (realCause.getMessage().contains("sp_unq_name")) {
 
             final String name = command.stringValueOfParameterNamed("name");
@@ -177,7 +208,7 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
                 "Unknown data integrity issue with resource.");
     }
 
-    private void logAsErrorUnexpectedDataIntegrityException(final DataAccessException dae) {
+    private void logAsErrorUnexpectedDataIntegrityException(final Exception dae) {
         this.logger.error(dae.getMessage(), dae);
     }
 }

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -175,15 +176,26 @@ public class FixedDepositAccountsApiResource {
 
         final FixedDepositAccountData account = (FixedDepositAccountData) this.depositAccountReadPlatformService.retrieveOneWithChartSlabs(
                 DepositAccountType.FIXED_DEPOSIT, accountId);
-
+        
         final Set<String> mandatoryResponseParameters = new HashSet<>();
         final FixedDepositAccountData accountTemplate = populateTemplateAndAssociations(accountId, account, staffInSelectedOfficeOnly,
                 chargeStatus, uriInfo, mandatoryResponseParameters);
-
+        accountTemplate.setActivationCharge(getActivationCharge(accountId));
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
         return this.toApiJsonSerializer.serialize(settings, accountTemplate,
                 DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESPONSE_DATA_PARAMETERS);
+    }
+    
+    private BigDecimal getActivationCharge(Long accountId){
+        BigDecimal activationCharge = BigDecimal.ZERO;
+        Collection<SavingsAccountChargeData> savingCharges = this.savingsAccountChargeReadPlatformService.retrieveSavingsAccountCharges(accountId, "active");
+        for (SavingsAccountChargeData savingsAccountChargeData : savingCharges) {
+            if(savingsAccountChargeData.isSavingsActivation()){
+                activationCharge = activationCharge.add(savingsAccountChargeData.getAmountOutstanding());
+            }
+        }
+        return activationCharge;
     }
 
     private FixedDepositAccountData populateTemplateAndAssociations(final Long accountId, final FixedDepositAccountData savingsAccount,

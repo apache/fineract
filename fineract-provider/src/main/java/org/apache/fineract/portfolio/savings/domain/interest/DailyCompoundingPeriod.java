@@ -30,7 +30,6 @@ import org.joda.time.LocalDate;
 
 public class DailyCompoundingPeriod implements CompoundingPeriod {
 
-    @SuppressWarnings("unused")
     private final LocalDateInterval periodInterval;
     private final List<EndOfDayBalance> endOfDayBalances;
 
@@ -77,8 +76,8 @@ public class DailyCompoundingPeriod implements CompoundingPeriod {
 
     @Override
     public BigDecimal calculateInterest(
-            @SuppressWarnings("unused") final SavingsCompoundingInterestPeriodType compoundingInterestPeriodType,
-            @SuppressWarnings("unused") final SavingsInterestCalculationType interestCalculationType,
+            final SavingsCompoundingInterestPeriodType compoundingInterestPeriodType,
+            final SavingsInterestCalculationType interestCalculationType,
             final BigDecimal interestFromPreviousPostingPeriod, final BigDecimal interestRateAsFraction, final long daysInYear,
             final BigDecimal minBalanceForInterestCalculation,
             final BigDecimal overdraftInterestRateAsFraction, final BigDecimal minOverdraftForInterestCalculation) {
@@ -97,4 +96,9 @@ public class DailyCompoundingPeriod implements CompoundingPeriod {
 
         return interestEarned;
     }
+
+	@Override
+	public LocalDateInterval getPeriodInterval() {
+		return this.periodInterval;
+	}
 }

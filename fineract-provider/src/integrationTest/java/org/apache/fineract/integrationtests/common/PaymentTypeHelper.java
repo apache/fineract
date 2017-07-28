@@ -64,7 +64,8 @@ public class PaymentTypeHelper {
             final Integer paymentTypeId) {
         final String GET_PAYMENTTYPE_URL = PAYMENTTYPE_URL + "/" + paymentTypeId + "?" + Utils.TENANT_IDENTIFIER;
         System.out.println("---------------------------------GET PAYMENT TYPE---------------------------------------------");
-        final String jsonData = new Gson().toJson(Utils.performServerGet(requestSpec, responseSpec, GET_PAYMENTTYPE_URL, ""));
+        Object get = Utils.performServerGet(requestSpec, responseSpec, GET_PAYMENTTYPE_URL, ""); 
+        final String jsonData = new Gson().toJson(get);
         return new Gson().fromJson(jsonData, new TypeToken<PaymentTypeDomain>() {}.getType());
 
     }

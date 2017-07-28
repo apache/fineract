@@ -26,7 +26,7 @@ import org.springframework.data.repository.query.Param;
 public interface FinancialActivityAccountRepository extends JpaRepository<FinancialActivityAccount, Long>,
         JpaSpecificationExecutor<FinancialActivityAccount> {
 
-    @Query("from FinancialActivityAccount faa where faa.financialActivityType = :financialActivityType")
+    @Query("select faa from FinancialActivityAccount faa where faa.financialActivityType = :financialActivityType")
     FinancialActivityAccount findByFinancialActivityType(@Param("financialActivityType") int financialAccountType);
 
 }

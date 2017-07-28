@@ -273,10 +273,16 @@ public class ClientsApiResource {
         } else if (is(commandParam, "withdraw")) {
             commandRequest = builder.withdrawClient(clientId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "reactivate")) {
-            commandRequest = builder.reActivateClient(clientId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        }
+		} else if (is(commandParam, "reactivate")) {
+			commandRequest = builder.reActivateClient(clientId).build();
+			result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+		} else if (is(commandParam, "undoRejection")) {
+			commandRequest = builder.undoRejection(clientId).build();
+			result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+		} else if (is(commandParam, "undoWithdrawal")) {
+			commandRequest = builder.undoWithdrawal(clientId).build();
+			result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+		}
 
         if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate",
                 "unassignStaff", "assignStaff", "close", "proposeTransfer", "withdrawTransfer", "acceptTransfer", "rejectTransfer",
@@ -299,7 +305,7 @@ public class ClientsApiResource {
 
         final AccountSummaryCollectionData clientAccount = this.accountDetailsReadPlatformService.retrieveClientAccountDetails(clientId);
 
-        final Set<String> CLIENT_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("loanAccounts", "savingsAccounts"));
+        final Set<String> CLIENT_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("loanAccounts", "savingsAccounts", "shareAccounts"));
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.clientAccountSummaryToApiJsonSerializer.serialize(settings, clientAccount, CLIENT_ACCOUNTS_DATA_PARAMETERS);

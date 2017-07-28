@@ -28,16 +28,15 @@ import org.apache.fineract.accounting.closure.domain.GLClosureRepository;
 import org.apache.fineract.accounting.closure.exception.GLClosureDuplicateException;
 import org.apache.fineract.accounting.closure.exception.GLClosureInvalidDeleteException;
 import org.apache.fineract.accounting.closure.exception.GLClosureInvalidException;
-import org.apache.fineract.accounting.closure.exception.GLClosureNotFoundException;
 import org.apache.fineract.accounting.closure.exception.GLClosureInvalidException.GL_CLOSURE_INVALID_REASON;
+import org.apache.fineract.accounting.closure.exception.GLClosureNotFoundException;
 import org.apache.fineract.accounting.closure.serialization.GLClosureCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.organisation.office.domain.OfficeRepository;
-import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
+import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,14 +51,14 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
     private final static Logger logger = LoggerFactory.getLogger(GLClosureWritePlatformServiceJpaRepositoryImpl.class);
 
     private final GLClosureRepository glClosureRepository;
-    private final OfficeRepository officeRepository;
+    private final OfficeRepositoryWrapper officeRepositoryWrapper;
     private final GLClosureCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
     @Autowired
     public GLClosureWritePlatformServiceJpaRepositoryImpl(final GLClosureRepository glClosureRepository,
-            final OfficeRepository officeRepository, final GLClosureCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+            final OfficeRepositoryWrapper officeRepositoryWrapper, final GLClosureCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.glClosureRepository = glClosureRepository;
-        this.officeRepository = officeRepository;
+        this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
     }
 
@@ -72,9 +71,7 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
 
             // check office is valid
             final Long officeId = command.longValueOfParameterNamed(GLClosureJsonInputParams.OFFICE_ID.getValue());
-            final Office office = this.officeRepository.findOne(officeId);
-            if (office == null) { throw new OfficeNotFoundException(officeId); }
-
+            final Office office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
             // TODO: Get Tenant specific date
             // ensure closure date is not in the future
             final Date todaysDate = new Date();

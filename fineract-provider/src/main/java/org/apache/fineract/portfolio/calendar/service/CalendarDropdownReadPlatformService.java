@@ -33,5 +33,6 @@ public interface CalendarDropdownReadPlatformService {
     List<EnumOptionData> retrieveCalendarFrequencyTypeOptions();
 
     List<EnumOptionData> retrieveCalendarWeekDaysTypeOptions();
+    List<EnumOptionData> retrieveCalendarFrequencyNthDayTypeOptions();
 
 }

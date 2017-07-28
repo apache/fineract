@@ -25,7 +25,6 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.quartz.CronExpression;
 import org.springframework.util.ObjectUtils;
-
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Arrays;
@@ -146,7 +145,7 @@ public class DataValidatorBuilder {
      * param and if it has invalid value or value not passed then call this
      * method, this method is always used with input as false
      */
-    public DataValidatorBuilder trueOrFalseRequired(final boolean trueOfFalseFieldProvided) {
+    public DataValidatorBuilder trueOrFalseRequired1(final boolean trueOfFalseFieldProvided) {
         if (!trueOfFalseFieldProvided && !this.ignoreNullValue) {
             final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                     .append(this.parameter).append(".must.be.true.or.false");
@@ -157,6 +156,27 @@ public class DataValidatorBuilder {
             this.dataValidationErrors.add(error);
         }
         return this;
+    }
+    
+    
+    public DataValidatorBuilder trueOrFalseRequired(final Object trueOfFalseField)
+    {
+    	
+    	if(trueOfFalseField!=null)
+    	{
+    		if((!trueOfFalseField.toString().equalsIgnoreCase("true")) && (!trueOfFalseField.toString().equalsIgnoreCase("false")) )
+    		{
+    			  final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
+    	                    .append(this.parameter).append(".must.be.true.or.false");
+    	            final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(this.parameter).append(
+    	                    " must be set as true or false.");
+    	            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+    	                    defaultEnglishMessage.toString(), this.parameter);
+    	            this.dataValidationErrors.add(error);	
+    		}
+    	}
+    	
+    	  return this;
     }
 
     public DataValidatorBuilder notNull() {
@@ -203,7 +223,7 @@ public class DataValidatorBuilder {
         }
         return this;
     }
-
+   
     public DataValidatorBuilder notExceedingLengthOf(final Integer maxLength) {
         if (this.value == null && this.ignoreNullValue) { return this; }
 
@@ -272,6 +292,26 @@ public class DataValidatorBuilder {
 
             final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
                     defaultEnglishMessage.toString(), this.parameter, this.value, values);
+
+            this.dataValidationErrors.add(error);
+        }
+
+        return this;
+    }
+
+    public DataValidatorBuilder isOneOfTheseStringValues(final List<String> valuesList) {
+        if (this.value == null && this.ignoreNullValue) { return this; }
+
+        final String valuesListStr = StringUtils.join(valuesList, ", ");
+
+        if (this.value == null || !valuesList.contains(this.value.toString().toLowerCase())) {
+            final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
+                    .append(this.parameter).append(".is.not.one.of.expected.enumerations");
+            final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(this.parameter)
+                    .append(" must be one of [ ").append(valuesListStr).append(" ] ").append(".");
+
+            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                    defaultEnglishMessage.toString(), this.parameter, this.value, valuesList);
 
             this.dataValidationErrors.add(error);
         }

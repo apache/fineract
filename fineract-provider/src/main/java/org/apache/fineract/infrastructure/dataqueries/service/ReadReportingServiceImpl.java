@@ -45,6 +45,7 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeader
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetRowData;
 import org.apache.fineract.infrastructure.dataqueries.exception.ReportNotFoundException;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
+import org.apache.fineract.infrastructure.report.provider.ReportingProcessServiceProvider;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
@@ -69,15 +70,17 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     private final DataSource dataSource;
     private final PlatformSecurityContext context;
     private final GenericDataService genericDataService;
+    private final ReportingProcessServiceProvider reportingProcessServiceProvider;
 
     @Autowired
     public ReadReportingServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final GenericDataService genericDataService) {
+            final GenericDataService genericDataService, final ReportingProcessServiceProvider reportingProcessServiceProvider) {
 
         this.context = context;
         this.dataSource = dataSource;
         this.jdbcTemplate = new JdbcTemplate(this.dataSource);
         this.genericDataService = genericDataService;
+        this.reportingProcessServiceProvider = reportingProcessServiceProvider;
     }
 
     @Override
@@ -389,6 +392,15 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         return parameters;
     }
 
+    @Override
+    public Collection<String> getAllowedReportTypes() {
+        final List<String> reportTypes = new ArrayList<>();
+        reportTypes.add("Table");
+        reportTypes.add("Chart");
+        reportTypes.addAll(this.reportingProcessServiceProvider.findAllReportingTypes());
+        return reportTypes;
+    }
+
     private static final class ReportParameterJoinMapper implements RowMapper<ReportParameterJoinData> {
 
         public String schema(final Long reportId) {
@@ -473,4 +485,34 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         }
     }
 
+    @Override
+    public GenericResultsetData retrieveGenericResultSetForSmsCampaign(String name, String type, Map<String, String> queryParams) {
+        final long startTime = System.currentTimeMillis();
+        logger.info("STARTING REPORT: " + name + "   Type: " + type);
+
+        final String sql = sqlToRunForSmsCampaign(name, type, queryParams);
+
+        final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
+
+        final long elapsed = System.currentTimeMillis() - startTime;
+        logger.info("FINISHING Report/Request Name: " + name + " - " + type + "     Elapsed Time: " + elapsed);
+        return result;
+    }
+    
+    @Override
+    public String sqlToRunForSmsCampaign(final String name, final String type, final Map<String, String> queryParams) {
+        String sql = getSql(name, type);
+
+        final Set<String> keys = queryParams.keySet();
+        for (String key : keys) {
+            final String pValue = queryParams.get(key);
+            // logger.info("(" + key + " : " + pValue + ")");
+            key = "${" + key + "}";
+            sql = this.genericDataService.replace(sql, key, pValue);
+        }
+
+        sql = this.genericDataService.wrapSQL(sql);
+
+        return sql;
+    }
 }

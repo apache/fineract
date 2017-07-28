@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.dataqueries.domain;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -38,15 +40,13 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 import com.google.gson.JsonArray;
 
 @Entity
 @Table(name = "stretchy_report", uniqueConstraints = { @UniqueConstraint(columnNames = { "report_name" }, name = "unq_report_name") })
-public final class Report extends AbstractPersistable<Long> {
+public final class Report extends AbstractPersistableCustom<Long> {
 
     @Column(name = "report_name", nullable = false, unique = true)
     private String reportName;
@@ -73,11 +73,10 @@ public final class Report extends AbstractPersistable<Long> {
     @Column(name = "report_sql")
     private String reportSql;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "report", orphanRemoval = true)
-    private final Set<ReportParameterUsage> reportParameterUsages = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "report", orphanRemoval = true, fetch=FetchType.EAGER)
+    private Set<ReportParameterUsage> reportParameterUsages = new HashSet<>();
 
-    public static Report fromJson(final JsonCommand command) {
+    public static Report fromJson(final JsonCommand command, final Collection<String> reportTypes) {
 
         String reportName = null;
         String reportType = null;
@@ -109,7 +108,7 @@ public final class Report extends AbstractPersistable<Long> {
             reportSql = command.stringValueOfParameterNamed("reportSql");
         }
 
-        return new Report(reportName, reportType, reportSubType, reportCategory, description, useReport, reportSql);
+        return new Report(reportName, reportType, reportSubType, reportCategory, description, useReport, reportSql, reportTypes);
     }
 
     protected Report() {
@@ -117,7 +116,7 @@ public final class Report extends AbstractPersistable<Long> {
     }
 
     public Report(final String reportName, final String reportType, final String reportSubType, final String reportCategory,
-            final String description, final boolean useReport, final String reportSql) {
+            final String description, final boolean useReport, final String reportSql, final Collection<String> reportTypes) {
         this.reportName = reportName;
         this.reportType = reportType;
         this.reportSubType = reportSubType;
@@ -126,10 +125,10 @@ public final class Report extends AbstractPersistable<Long> {
         this.coreReport = false;
         this.useReport = useReport;
         this.reportSql = reportSql;
-        validate();
+        validate(reportTypes);
     }
 
-    public Map<String, Object> update(final JsonCommand command) {
+    public Map<String, Object> update(final JsonCommand command, final Collection<String> reportTypes) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(8);
 
@@ -184,7 +183,7 @@ public final class Report extends AbstractPersistable<Long> {
             }
         }
 
-        validate();
+        validate(reportTypes);
 
         if (!actualChanges.isEmpty()) {
             if (isCoreReport()) {
@@ -214,15 +213,14 @@ public final class Report extends AbstractPersistable<Long> {
         return reportParameterUsage;
     }
 
-    private void validate() {
+    private void validate(final Collection<String> reportTypes) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("report");
 
         baseDataValidator.reset().parameter("reportName").value(this.reportName).notBlank().notExceedingLengthOf(100);
 
-        baseDataValidator.reset().parameter("reportType").value(this.reportType).notBlank()
-                .isOneOfTheseValues(new Object[] { "Table", "Pentaho", "Chart" });
+        baseDataValidator.reset().parameter("reportType").value(this.reportType).notBlank().isOneOfTheseValues(reportTypes.toArray());
 
         baseDataValidator.reset().parameter("reportSubType").value(this.reportSubType).notExceedingLengthOf(20);
 

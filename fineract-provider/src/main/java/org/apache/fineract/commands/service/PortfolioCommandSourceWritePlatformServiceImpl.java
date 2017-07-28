@@ -92,7 +92,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         final JsonElement parsedCommand = this.fromApiJsonHelper.parse(json);
         command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(), wrapper.getEntityId(),
                 wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getSavingsId(),
-                wrapper.getTransactionId(), wrapper.getHref(), wrapper.getProductId());
+                wrapper.getTransactionId(), wrapper.getHref(), wrapper.getProductId(),wrapper.getCreditBureauId(),wrapper.getOrganisationCreditBureauId());
         while (numberOfRetries <= maxNumberOfRetries) {
             try {
                 result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
@@ -139,13 +139,14 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                 commandSourceInput.getEntityName(), commandSourceInput.resourceId(), commandSourceInput.subresourceId(),
                 commandSourceInput.getResourceGetUrl(), commandSourceInput.getProductId(), commandSourceInput.getOfficeId(),
                 commandSourceInput.getGroupId(), commandSourceInput.getClientId(), commandSourceInput.getLoanId(),
-                commandSourceInput.getSavingsId(), commandSourceInput.getTransactionId());
+                commandSourceInput.getSavingsId(), commandSourceInput.getTransactionId(),commandSourceInput.getCreditBureauId(),commandSourceInput.getOrganisationCreditBureauId());
         final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSourceInput.json());
         final JsonCommand command = JsonCommand.fromExistingCommand(makerCheckerId, commandSourceInput.json(), parsedCommand,
                 this.fromApiJsonHelper, commandSourceInput.getEntityName(), commandSourceInput.resourceId(),
                 commandSourceInput.subresourceId(), commandSourceInput.getGroupId(), commandSourceInput.getClientId(),
                 commandSourceInput.getLoanId(), commandSourceInput.getSavingsId(), commandSourceInput.getTransactionId(),
-                commandSourceInput.getResourceGetUrl(), commandSourceInput.getProductId());
+                commandSourceInput.getResourceGetUrl(), commandSourceInput.getProductId(),commandSourceInput.getCreditBureauId(),
+                commandSourceInput.getOrganisationCreditBureauId());
 
         final boolean makerCheckerApproval = true;
         return this.processAndLogCommandService.processAndLogCommand(wrapper, command, makerCheckerApproval);

@@ -34,11 +34,11 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_product_loan_floating_rates")
-public class LoanProductFloatingRates extends AbstractPersistable<Long> {
+public class LoanProductFloatingRates extends AbstractPersistableCustom<Long> {
 
     @OneToOne
     @JoinColumn(name = "loan_product_id", nullable = false)

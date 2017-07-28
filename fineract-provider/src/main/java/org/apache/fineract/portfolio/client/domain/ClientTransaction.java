@@ -30,6 +30,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -48,14 +49,12 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OrganisationCurrency;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_client_transaction", uniqueConstraints = { @UniqueConstraint(columnNames = { "external_id" }, name = "external_id") })
-public class ClientTransaction extends AbstractPersistable<Long> {
+public class ClientTransaction extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "client_id", nullable = false)
@@ -96,8 +95,7 @@ public class ClientTransaction extends AbstractPersistable<Long> {
     @JoinColumn(name = "appuser_id", nullable = true)
     private AppUser appUser;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "clientTransaction", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "clientTransaction", orphanRemoval = true, fetch=FetchType.EAGER)
     private Set<ClientChargePaidBy> clientChargePaidByCollection = new HashSet<>();
 
     @Transient
@@ -146,8 +144,8 @@ public class ClientTransaction extends AbstractPersistable<Long> {
      * Converts the content of this Client Transaction to a map which can be
      * passed to the accounting module
      * 
-     * @param currencyData
-     * @return
+     * 
+     * 
      */
     public Map<String, Object> toMapData() {
         final Map<String, Object> thisTransactionData = new LinkedHashMap<>();
@@ -207,6 +205,10 @@ public class ClientTransaction extends AbstractPersistable<Long> {
         return client.getId();
     }
 
+    public Client getClient() {
+        return this.client ;
+    }
+    
     public Money getAmount() {
         return Money.of(getCurrency(), this.amount);
     }

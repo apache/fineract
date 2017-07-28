@@ -48,6 +48,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 @Path("/provisioningentries")
 @Component
 @Scope("singleton")
@@ -59,7 +63,10 @@ public class ProvisioningEntriesApiResource {
     private final DefaultToApiJsonSerializer<Object> entriesApiJsonSerializer;
     private final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-
+	private static final Set<String> PROVISIONING_ENTRY_PARAMETERS = new HashSet<>(Arrays.asList(
+			ProvisioningEntriesApiConstants.PROVISIONINGENTRY_PARAM, ProvisioningEntriesApiConstants.ENTRIES_PARAM));
+    private static final Set<String> ALL_PROVISIONING_ENTRIES = new HashSet<>(Arrays.asList
+            (ProvisioningEntriesApiConstants.PROVISIONINGENTRY_PARAM));
     @Autowired
     public ProvisioningEntriesApiResource(final PlatformSecurityContext platformSecurityContext,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
@@ -115,7 +122,7 @@ public class ProvisioningEntriesApiResource {
         platformSecurityContext.authenticatedUser();
         ProvisioningEntryData data = this.provisioningEntriesReadPlatformService.retrieveProvisioningEntryData(entryId);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, data, ProvisioningEntriesApiConstants.PROVISIONING_ENTRY_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, data, PROVISIONING_ENTRY_PARAMETERS);
     }
 
     @GET
@@ -129,7 +136,7 @@ public class ProvisioningEntriesApiResource {
         SearchParameters params = SearchParameters.forProvisioningEntries(entryId, officeId, productId, categoryId, offset, limit);
         Page<LoanProductProvisioningEntryData> entries = this.provisioningEntriesReadPlatformService.retrieveProvisioningEntries(params);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.entriesApiJsonSerializer.serialize(settings, entries, ProvisioningEntriesApiConstants.PROVISIONING_ENTRY_PARAMETERS);
+        return this.entriesApiJsonSerializer.serialize(settings, entries, PROVISIONING_ENTRY_PARAMETERS);
     }
 
     @GET
@@ -140,6 +147,6 @@ public class ProvisioningEntriesApiResource {
         platformSecurityContext.authenticatedUser();
         Page<ProvisioningEntryData> data = this.provisioningEntriesReadPlatformService.retrieveAllProvisioningEntries(offset, limit);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.entriesApiJsonSerializer.serialize(settings, data, ProvisioningEntriesApiConstants.ALL_PROVISIONING_ENTRIES);
+        return this.entriesApiJsonSerializer.serialize(settings, data, ALL_PROVISIONING_ENTRIES);
     }
 }

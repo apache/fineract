@@ -1,3 +1,21 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 description = '''\
 Run as:
 gradle clean tomcatrunwar
@@ -6,6 +24,8 @@ gradle clean tomcatrunwar
 buildscript {
   repositories {
   	 jcenter()
+  	 mavenCentral()
+  	 maven { url "https://plugins.gradle.org/m2/" }
   }
 
   dependencies {
@@ -13,9 +33,13 @@ buildscript {
                'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0',
                'org.zeroturnaround:gradle-jrebel-plugin:1.1.2',
                'org.springframework.boot:spring-boot-gradle-plugin:1.1.6.RELEASE' // also change springDataJpaVersion below
+     classpath 'org.apache.openjpa:openjpa-all:2.4.1'
+     classpath 'at.schmutterer.oss.gradle:gradle-openjpa:0.2.0'
+     classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.2.2'
   }
 }
 
+apply plugin: "org.nosphere.apache.rat"
 apply plugin: 'rebel'
 apply plugin: 'license'
 apply plugin: 'war'
@@ -25,11 +49,14 @@ apply plugin: 'idea'
 apply plugin: 'tomcat'
 apply plugin: 'project-report'
 apply plugin: 'java'
+apply plugin: 'openjpa'
+apply plugin: 'pmd'
+apply plugin: 'findbugs'
 
 /* define the valid syntax level for source files */
-sourceCompatibility = JavaVersion.VERSION_1_7
+sourceCompatibility = JavaVersion.VERSION_1_8
 /* define binary compatibility version */
-targetCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_8
 
 project.ext.springBootVersion = '1.1.6.RELEASE'
 project.ext.springVersion = '4.0.7.RELEASE'
@@ -42,16 +69,122 @@ project.ext.mysqlPassword='mysql'
 
 
 group = 'org.apache.fineract'
-
+buildDir = new File(rootProject.projectDir, "../build")
 repositories {
 	jcenter()
+	maven {
+	url "http://nexus.pentaho.org/content/repositories/omni/"
+    }
 	// mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
+}
+openjpa {
+    files = fileTree(sourceSets.main.output.classesDir).matching {
+		include '**/AbstractPersistableCustom.class'
+		include '**/domain/*.class'
+		
+    }
+    enforcePropertyRestrictions = true
+}
+
+rat {
+  xmlOutput = false
+  htmlOutput = false
+  plainOutput = true
+  verbose = false 
+//  inputDir = './..'
+  reportDir = new File(buildDir,'reports/rat')
+ excludes = [
+	'**/licenses/**',
+	'**/*.md',
+	'**/MANIFEST.MF',
+	'**/*.txt',
+	'**/*.log',
+	'**/fineractdev-eclipse-preferences.epf',
+	'**/template-expected.html',
+	'**/template.mustache',
+	'**/.classpath',
+	'**/.project',
+	'**/.idea/**',
+	'**/.settings/**',
+	'**/bin/**',
+	'**/.git/**',
+    '**/.gitignore',
+    '**/.gitkeep',
+	'**/*.iml',
+	//Notice files
+	'**/NOTICE_RELEASE',
+	'**/NOTICE_SOURCE',	
+    // gradle
+    '**/.gradle/**',
+    '**/gradlew',
+    '**/gradlew.bat',
+    '**/gradle/wrapper/gradle-wrapper.properties',
+    '**/caches/**',
+    '**/daemon/**',
+    '**/native/**',
+    '**/wrapper/**',
+	'**/build/**',
+	
+	//Api Docs 
+	'**/api-docs/*.*',
+	'**/docs/system-architecture/.htaccess',
+	'**/docs/system-architecture/404.html',
+	'**/docs/system-architecture/index.html',
+	'**/docs/system-architecture/**/*.xml',
+	'**/bootstrap-3.0.0/assets/application.js',
+	'**/system-architecture/js/plugins.js',
+	
+	//Apache License
+	'**/bootstrap-3.0.0/assets/less.js',
+	'**/css/bootstrap-3.0.0/**/*.*',
+	
+	//Public Domain See http://www.JSON.org/js.html
+	'**/bootstrap-3.0.0/assets/json2.js.htm',
+	
+	// MIT License
+	'**/modernizr-2.6.2.min.js',
+	'**/css/normalize.css',
+	'**/assets/filesaver.js',
+	'**/css/fonts/glyphicons-halflings-regular.svg',
+	'**/assets/jszip.js',
+	'**/assets/jquery.js',
+	'**/api-docs/jquery-1.7.min.js',
+	'**/css/toc-0.1.2/**/*.*',
+	'**/docs/system-architecture/css/main.css',
+	'**/system-architecture/js/vendor/jquery-1.9.1.min.js',
+	'**/system-architecture/js/vendor/toc-0.1.2/jquery.toc.min.js',
+	'**/assets/respond.min.js',
+	'**/assets/html5shiv.js',
+	
+	//BSD License
+	'**/assets/uglify.js'
+	]
 }
 
 configurations {
 	providedRuntime // needed for Spring Boot executable WAR
     providedCompile
-	compile
+	compile() {
+		exclude module: 'hibernate-entitymanager'
+		exclude module: 'hibernate-validator'
+		exclude module: 'activation'
+		exclude module: 'bcmail-jdk14'
+		exclude module: 'bcprov-jdk14'
+		exclude module: 'bctsp-jdk14'
+		exclude module: 'bval-core'
+		exclude module: 'org.apache.bval.bundle'
+		exclude module: 'bval-jsr303'
+		exclude module: 'c3p0'
+		exclude module: 'stax-api'
+		exclude module: 'jaxb-api'
+		exclude module: 'jaxb-impl'
+		exclude module: 'jboss-logging'
+		exclude module: 'itext-rtf'
+		exclude module: 'classworlds'
+		exclude module: 'jcl-over-slf4j'
+		exclude module: 'jul-to-slf4j'
+		exclude module: 'serp'
+	}
 	runtime
 	all*.exclude group: 'commons-logging'
 }
@@ -94,6 +227,11 @@ task dist(type:Zip){
         include '**/*'
 		into('apps')
 	}
+	from('src/main/pentahoReports/') {
+        fileMode = 0755
+        include '*'
+        into('pentahoReports')
+    }
     from('../api-docs/') {
         fileMode = 0755
         include '*'
@@ -114,15 +252,59 @@ task dist(type:Zip){
     into(baseName + '-' + version)
 }
 
+task deployPentahoReports() {
+	def pentahoReportDir = System.properties['user.home'] + System.properties['file.separator'] + '.mifosx' + System.properties['file.separator'] + 'pentahoReports'
+	copy {
+        from "src/main/pentahoReports"
+        into pentahoReportDir
+    }
+
+    doLast {
+        println ':deployPentahoReports - moving pentaho reports under: ' + pentahoReportDir
+    }
+}
+pmd {
+    sourceSets = [sourceSets.main]
+    ignoreFailures = true
+}
+findbugs {
+    ignoreFailures = true
+    sourceSets = [sourceSets.main] 
+}
+
+//compileJava{
+//    dependsOn rat
+//}
+
 war {
+	from('../licenses/binary/') { // notice the parens
+		into "WEB-INF/licenses/binary/" // no leading slash
+	}
+	from('../LICENSE_RELEASE') { // notice the parens
+		into "WEB-INF/" // no leading slash
+	}
+	from('../NOTICE_RELEASE') { // notice the parens
+		into "WEB-INF/" // no leading slash
+	}
+	rename ('LICENSE_RELEASE', 'LICENSE')
+	rename ('NOTICE_RELEASE', 'NOTICE')
+	
+	from('../DISCLAIMER') { // notice the parens
+		into "WEB-INF/" // no leading slash
+	}
     war.finalizedBy(bootRepackage)
 }
 
 license {
-    header rootProject.file('../LICENSE.md')
-    excludes(["**/*.html", "**/*.mustache", "**/*.sql", "**/package-info.java", "**/keystore.jks"])
+    header rootProject.file('../APACHE_LICENSETEXT.md')
+    excludes(["**/*.html", "**/*.mustache", "**/package-info.java", "**/keystore.jks"])
     strictCheck true
 }
+
+task licenseFormatBuildScripts (type:nl.javadude.gradle.plugins.license.License) {
+    source = fileTree(dir: '../', includes: ['**/*.bat', '**/*.sh', '**/*.sql'])
+}
+licenseFormat.dependsOn licenseFormatBuildScripts
 
 tomcatRun {
     httpPort = 8080
@@ -204,6 +386,13 @@ dependencies {
     driver 'mysql:mysql-connector-java:5.1.16'
 }
 
+test {
+	filter {
+        //includeTestsMatching "org.apache.fineract.infrastructure.configuration.spring.SpringConfigurationTest.*"
+        includeTestsMatching "org.apache.fineract.template.TemplateMergeServiceTest.*"
+    }
+}
+
 URLClassLoader loader = GroovyObject.class.classLoader
 configurations.driver.each {File file ->
     loader.addURL(file.toURL())
@@ -235,13 +424,14 @@ buildscript {
 
     dependencies {
         classpath "org.flywaydb:flyway-gradle-plugin:3.0" // version upgraded during Spring Boot & MariaDB4j work, as prev. used v0.2 didn't work well after *.sql moved from fineract-db to fineract-provider/src/main/resources (new version also has clearer errors, e.g. in case of missing DB)
-        classpath 'mysql:mysql-connector-java:5.1.22'
+        classpath 'org.drizzle.jdbc:drizzle-jdbc:1.3'
     }
 }
 
 
 flyway {
     url = "jdbc:mysql://localhost:3306/mifostenant-default"
+	driver = "com.mysql.jdbc.Driver"
     user = mysqlUser
     password = mysqlPassword
 }
@@ -256,6 +446,7 @@ task migrateTenantDB<<{
 	}
 	
     flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
+	flyway.driver = "com.mysql.jdbc.Driver"
     flyway.locations= [filePath]
     /**We use ${ as the prefix for strecthy reporting, do not want them to be interpreted by Flyway**/
     flyway.placeholderPrefix = "\$\${"
@@ -272,6 +463,7 @@ task showTenantDBInfo<<{
 	}
 	
     flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
+	flyway.driver = "com.mysql.jdbc.Driver"
     flyway.locations= [filePath]
     flywayInfo.execute()
 }
@@ -287,6 +479,7 @@ task migrateTenantListDB<<{
 	}
 	
     flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
+	flyway.driver = "com.mysql.jdbc.Driver"
     flyway.locations= [filePath]
 
     flywayMigrate.execute()
@@ -302,6 +495,7 @@ task showTenantListDBInfo<<{
 	}
     
     flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
+	flyway.driver = "com.mysql.jdbc.Driver"
     flyway.locations= [filePath]
     flywayInfo.execute()
 }
@@ -316,6 +510,7 @@ task repairTenantDB<<{
     }
     
     flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
+	flyway.driver = "com.mysql.jdbc.Driver"
     flyway.locations= [filePath]
     flywayRepair.execute()
 }

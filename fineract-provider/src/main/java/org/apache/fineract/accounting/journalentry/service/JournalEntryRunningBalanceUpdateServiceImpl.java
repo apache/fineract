@@ -21,6 +21,7 @@ package org.apache.fineract.accounting.journalentry.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -41,9 +42,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.organisation.office.domain.OfficeRepository;
-import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
+import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +58,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final OfficeRepository officeRepository;
+    private final OfficeRepositoryWrapper officeRepositoryWrapper;
 
     private final JournalEntryDataValidator dataValidator;
 
@@ -88,10 +87,10 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
             + "where je2.id = je.id and je.entry_date = je3.date group by je.id order by je.entry_date DESC " + selectRunningBalanceSqlLimit;
 
     @Autowired
-    public JournalEntryRunningBalanceUpdateServiceImpl(final RoutingDataSource dataSource, final OfficeRepository officeRepository,
+    public JournalEntryRunningBalanceUpdateServiceImpl(final RoutingDataSource dataSource, final OfficeRepositoryWrapper officeRepositoryWrapper,
             final JournalEntryDataValidator dataValidator, final FromJsonHelper fromApiJsonHelper) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.officeRepository = officeRepository;
+        this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.dataValidator = dataValidator;
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
@@ -119,9 +118,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
         if (officeId == null) {
             updateRunningBalance();
         } else {
-            final Office office = this.officeRepository.findOne(officeId);
-            if (office == null) { throw new OfficeNotFoundException(officeId); }
-
+            this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
             String dateFinder = "select MIN(je.entry_date) as entityDate " + "from acc_gl_journal_entry  je "
                     + "where je.is_running_balance_calculated=0  and je.office_id=?";
             try {
@@ -141,7 +138,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
 
         List<Map<String, Object>> list = jdbcTemplate.queryForList(organizationRunningBalanceSql, entityDate, entityDate);
         for (Map<String, Object> entries : list) {
-            Long accountId = (Long) entries.get("accountId");
+        	Long accountId = Long.parseLong(entries.get("accountId").toString()); //Drizzle is returning Big Integer where as MySQL returns Long.
             if (!runningBalanceMap.containsKey(accountId)) {
                 runningBalanceMap.put(accountId, (BigDecimal) entries.get("runningBalance"));
             }
@@ -149,8 +146,8 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
 
         List<Map<String, Object>> officesRunningBalanceList = jdbcTemplate.queryForList(officesRunningBalanceSql, entityDate, entityDate);
         for (Map<String, Object> entries : officesRunningBalanceList) {
-            Long accountId = (Long) entries.get("accountId");
-            Long officeId = (Long) entries.get("officeId");
+            Long accountId = Long.parseLong(entries.get("accountId").toString());
+            Long officeId = Long.parseLong(entries.get("officeId").toString());
             Map<Long, BigDecimal> runningBalance = null;
             if (officesRunningBalance.containsKey(officeId)) {
                 runningBalance = officesRunningBalance.get(officeId);
@@ -168,10 +165,10 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
         if (entryDatas.size() > 0) {
             // run a batch update of 1000 SQL statements at a time
             final Integer batchUpdateSize = 1000;
-            final Integer batchUpdateSizeMinusOne = batchUpdateSize - 1;
-            String[] updateSql = new String[batchUpdateSize];
-            int i = 0;
-            for (JournalEntryData entryData : entryDatas) {
+            ArrayList<String> updateSql = new ArrayList<>();
+            int batchIndex = 0;
+            for (int index = 0 ; index < entryDatas.size() ; index++) {
+            	JournalEntryData entryData = entryDatas.get(index) ;
                 Map<Long, BigDecimal> officeRunningBalanceMap = null;
                 if (officesRunningBalance.containsKey(entryData.getOfficeId())) {
                     officeRunningBalanceMap = officesRunningBalance.get(entryData.getOfficeId());
@@ -183,18 +180,18 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
                 BigDecimal runningBalance = calculateRunningBalance(entryData, runningBalanceMap);
                 String sql = "UPDATE acc_gl_journal_entry je SET je.is_running_balance_calculated=1, je.organization_running_balance="
                         + runningBalance + ",je.office_running_balance=" + officeRunningBalance + " WHERE  je.id=" + entryData.getId();
-                updateSql[i++] = sql;
-                
-                if (i == batchUpdateSizeMinusOne) {
+                updateSql.add(sql) ;
+                batchIndex++ ;
+                if (batchIndex == batchUpdateSize || index == entryDatas.size()-1) {
                     // run a batch update of the 1000 update SQL statements
-                    this.jdbcTemplate.batchUpdate(updateSql);
-                    
+                	String[] batch = new String[updateSql.size()] ;
+                	updateSql.toArray(batch) ;
+                    this.jdbcTemplate.batchUpdate(batch);
                     // reset counter and string array
-                    i = 0;
-                    updateSql = new String[batchUpdateSize];
+                    batchIndex = 0;
+                    updateSql.clear();
                 }
             }
-            this.jdbcTemplate.batchUpdate(updateSql);
         }
 
     }

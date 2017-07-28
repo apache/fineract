@@ -20,12 +20,14 @@ package org.apache.fineract.accounting.producttoaccountmapping.serialization;
 
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isDormancyTrackingActiveParamName;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.fineract.accounting.common.AccountingConstants.SHARES_PRODUCT_ACCOUNTING_PARAMS;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.common.AccountingConstants.LOAN_PRODUCT_ACCOUNTING_PARAMS;
 import org.apache.fineract.accounting.common.AccountingConstants.SAVINGS_PRODUCT_ACCOUNTING_PARAMS;
@@ -38,6 +40,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
+import org.apache.fineract.portfolio.shareproducts.constants.ShareProductApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -118,8 +121,8 @@ public final class ProductToGLAccountMappingFromApiJsonDeserializer {
 
             final Long incomeFromRecoveryAccountId = this.fromApiJsonHelper.extractLongNamed(
                     LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_RECOVERY.getValue(), element);
-            baseDataValidator.reset().parameter(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_RECOVERY.getValue()).value(incomeFromRecoveryAccountId)
-                    .notNull().integerGreaterThanZero();
+            baseDataValidator.reset().parameter(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_RECOVERY.getValue())
+                    .value(incomeFromRecoveryAccountId).notNull().integerGreaterThanZero();
 
             final Long writeOffAccountId = this.fromApiJsonHelper.extractLongNamed(
                     LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), element);
@@ -204,6 +207,14 @@ public final class ProductToGLAccountMappingFromApiJsonDeserializer {
                     SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), element);
             baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue())
                     .value(incomeFromPenaltyId).notNull().integerGreaterThanZero();
+            
+            final Boolean isDormancyTrackingActive = this.fromApiJsonHelper.extractBooleanNamed(isDormancyTrackingActiveParamName, element);
+            if(null != isDormancyTrackingActive && isDormancyTrackingActive){
+                final Long escheatLiabilityId = this.fromApiJsonHelper.extractLongNamed(
+                        SAVINGS_PRODUCT_ACCOUNTING_PARAMS.ESCHEAT_LIABILITY.getValue(), element);
+                baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.ESCHEAT_LIABILITY.getValue())
+                        .value(escheatLiabilityId).notNull().integerGreaterThanZero();
+            }
 
             if (!accountType.equals(DepositAccountType.RECURRING_DEPOSIT) && !accountType.equals(DepositAccountType.FIXED_DEPOSIT)) {
                 final Long overdraftAccount = this.fromApiJsonHelper.extractLongNamed(
@@ -221,6 +232,47 @@ public final class ProductToGLAccountMappingFromApiJsonDeserializer {
                 baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue()).value(writtenOff)
                         .notNull().integerGreaterThanZero();
             }
+
+        }
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateForShareProductCreate(final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(ShareProductApiConstants.SHARE_PRODUCT_RESOURCE_NAME);
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        // accounting related data validation
+        final Integer accountingRuleType = this.fromApiJsonHelper
+                .extractIntegerNamed(accountingRuleParamName, element, Locale.getDefault());
+        baseDataValidator.reset().parameter(accountingRuleParamName).value(accountingRuleType).notNull().inMinMaxRange(1, 3);
+
+        if (isCashBasedAccounting(accountingRuleType)) {
+
+            final Long shareReferenceId = this.fromApiJsonHelper.extractLongNamed(
+                    SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_REFERENCE.getValue(), element);
+            baseDataValidator.reset().parameter(SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_REFERENCE.getValue())
+                    .value(shareReferenceId).notNull().integerGreaterThanZero();
+            
+            final Long shareSuspenseId = this.fromApiJsonHelper.extractLongNamed(
+                    SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_SUSPENSE.getValue(), element);
+            baseDataValidator.reset().parameter(SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_SUSPENSE.getValue())
+                    .value(shareSuspenseId).notNull().integerGreaterThanZero();
+            
+            final Long incomeFromFeeAccountId = this.fromApiJsonHelper.extractLongNamed(
+                    SHARES_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), element);
+            baseDataValidator.reset().parameter(SHARES_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue())
+                    .value(incomeFromFeeAccountId).notNull().integerGreaterThanZero();
+            
+            final Long shareEquityId = this.fromApiJsonHelper.extractLongNamed(
+                    SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_EQUITY.getValue(), element);
+            baseDataValidator.reset().parameter(SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_EQUITY.getValue())
+                    .value(shareEquityId).notNull().integerGreaterThanZero();
 
         }
 

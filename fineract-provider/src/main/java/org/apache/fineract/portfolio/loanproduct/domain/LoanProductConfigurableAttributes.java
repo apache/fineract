@@ -25,15 +25,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_product_loan_configurable_attributes")
-public class LoanProductConfigurableAttributes extends AbstractPersistable<Long> {
+public class LoanProductConfigurableAttributes extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
-    @JoinColumn(name = "loan_product_id", nullable = true)
+    @JoinColumn(name = "loan_product_id", nullable = false)
     private LoanProduct loanProduct;
 
     @Column(name = "amortization_method_enum", nullable = true)
@@ -60,9 +60,12 @@ public class LoanProductConfigurableAttributes extends AbstractPersistable<Long>
     @Column(name = "grace_on_arrears_ageing", nullable = true)
     private Boolean graceOnArrearsAgeing;
 
-    public static String[] supportedloanConfigurableAttributes = { "amortizationType", "interestType", "transactionProcessingStrategyId",
-            "interestCalculationPeriodType", "inArrearsTolerance", "repaymentEvery", "graceOnPrincipalAndInterestPayment",
-            "graceOnArrearsAgeing" };
+	private static final String[] supportedloanConfigurableAttributes = {LoanProductConstants.amortizationTypeParamName,
+			LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyIdParamName,
+			LoanProductConstants.interestCalculationPeriodTypeParamName,
+			LoanProductConstants.inArrearsToleranceParamName, LoanProductConstants.repaymentEveryParamName,
+			LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName,
+			LoanProductConstants.graceOnArrearsAgeingParameterName};
 
     public static LoanProductConfigurableAttributes createFrom(JsonCommand command) {
 

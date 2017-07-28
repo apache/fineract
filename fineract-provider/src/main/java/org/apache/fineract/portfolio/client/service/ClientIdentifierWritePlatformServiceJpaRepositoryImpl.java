@@ -20,6 +20,9 @@ package org.apache.fineract.portfolio.client.service;
 
 import java.util.Map;
 
+import javax.persistence.PersistenceException;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.codes.exception.CodeValueNotFoundException;
@@ -97,8 +100,12 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
                     .withEntityId(clientIdentifier.getId()) //
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve);
+            handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch(final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, throwable, dve);
+         	return CommandProcessingResult.empty();
         }
     }
 
@@ -155,8 +162,12 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
                     .with(changes) //
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve);
+            handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve.getMostSpecificCause(), dve);
             return new CommandProcessingResult(Long.valueOf(-1));
+        }catch(final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, throwable, dve);
+         	return CommandProcessingResult.empty();
         }
     }
 
@@ -179,11 +190,10 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
     }
 
     private void handleClientIdentifierDataIntegrityViolation(final String documentTypeLabel, final Long documentTypeId,
-            final String documentKey, final DataIntegrityViolationException dve) {
-
-        if (dve.getMostSpecificCause().getMessage().contains("unique_client_identifier")) {
+            final String documentKey, final Throwable cause, final Exception dve) {
+        if (cause.getMessage().contains("unique_active_client_identifier")) {
             throw new DuplicateClientIdentifierException(documentTypeLabel);
-        } else if (dve.getMostSpecificCause().getMessage().contains("unique_identifier_key")) { throw new DuplicateClientIdentifierException(
+        } else if (cause.getMessage().contains("unique_identifier_key")) { throw new DuplicateClientIdentifierException(
                 documentTypeId, documentTypeLabel, documentKey); }
 
         logAsErrorUnexpectedDataIntegrityException(dve);
@@ -191,7 +201,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
                 "Unknown data integrity issue with resource.");
     }
 
-    private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
+    private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
         logger.error(dve.getMessage(), dve);
     }
 }

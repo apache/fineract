@@ -26,25 +26,23 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_hook_templates")
-public class HookTemplate extends AbstractPersistable<Long> {
+public class HookTemplate extends AbstractPersistableCustom<Long> {
 
 	@Column(name = "name", nullable = false, length = 100)
 	private String name;
 
-	@LazyCollection(LazyCollectionOption.FALSE)
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "template", orphanRemoval = true)
-	private final Set<Schema> fields = new HashSet<>();
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "template", orphanRemoval = true, fetch=FetchType.EAGER)
+	private Set<Schema> fields = new HashSet<>();
 
 	private HookTemplate(final String name) {
 

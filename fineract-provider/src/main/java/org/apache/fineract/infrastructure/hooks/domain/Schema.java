@@ -24,11 +24,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_hook_schema")
-public class Schema extends AbstractPersistable<Long> {
+public class Schema extends AbstractPersistableCustom<Long> {
 
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "hook_template_id", referencedColumnName = "id", nullable = false)
@@ -44,7 +44,7 @@ public class Schema extends AbstractPersistable<Long> {
 	private String placeholder;
 
 	@Column(name = "optional", nullable = false)
-	private final boolean optional = false;
+	private boolean optional = false;
 
 	public Schema() {
 		//

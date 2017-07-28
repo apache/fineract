@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.meeting.data;
 
-import static org.apache.fineract.portfolio.meeting.MeetingApiConstants.MEETING_REQUEST_DATA_PARAMETERS;
 import static org.apache.fineract.portfolio.meeting.MeetingApiConstants.MEETING_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.meeting.MeetingApiConstants.attendanceTypeParamName;
 import static org.apache.fineract.portfolio.meeting.MeetingApiConstants.calendarIdParamName;
@@ -28,8 +27,11 @@ import static org.apache.fineract.portfolio.meeting.MeetingApiConstants.meetingD
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -38,6 +40,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.portfolio.meeting.MeetingApiConstants;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -50,7 +53,11 @@ import com.google.gson.reflect.TypeToken;
 @Component
 public class MeetingDataValidator {
 
-    private final FromJsonHelper fromApiJsonHelper;
+	private final FromJsonHelper fromApiJsonHelper;
+	private static final Set<String> MEETING_REQUEST_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(MeetingApiConstants.meetingDateParamName, MeetingApiConstants.localeParamName,
+					MeetingApiConstants.dateFormatParamName, MeetingApiConstants.calendarIdParamName,
+					MeetingApiConstants.clientsAttendanceParamName));
 
     @Autowired
     public MeetingDataValidator(final FromJsonHelper fromApiJsonHelper) {

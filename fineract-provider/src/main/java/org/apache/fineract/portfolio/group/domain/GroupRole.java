@@ -29,13 +29,13 @@ import javax.persistence.Table;
 
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_group_roles")
-public class GroupRole extends AbstractPersistable<Long> {
+public class GroupRole extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")

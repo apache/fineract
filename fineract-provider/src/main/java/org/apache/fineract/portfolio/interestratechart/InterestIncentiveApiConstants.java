@@ -35,14 +35,6 @@ public interface InterestIncentiveApiConstants {
     
     public static final String INCENTIVE_RESOURCE_NAME = "interest.rate.incentives";
 
-    public static final Set<String> INTERESTRATE_INCENTIVE_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
-            entityTypeParamName, attributeNameParamName, conditionTypeParamName, attributeValueParamName, incentiveTypeparamName,
-            amountParamName));
-
-    public static final Set<String> INTERESTRATE_INCENTIVE_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
-            entityTypeParamName, attributeNameParamName, conditionTypeParamName, attributeValueParamName, incentiveTypeparamName,
-            amountParamName));
-
     public static final Set<String> INTERESTRATE_INCENTIVE_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
             entityTypeParamName, attributeNameParamName, conditionTypeParamName, attributeValueParamName, incentiveTypeparamName,
             amountParamName));

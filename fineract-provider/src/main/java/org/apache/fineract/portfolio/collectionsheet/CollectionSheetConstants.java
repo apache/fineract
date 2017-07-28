@@ -50,19 +50,5 @@ public class CollectionSheetConstants {
     public static final String loanIdParamName = "loanId";
     public static final String savingsIdParamName = "savingsId";
     public static final String transactionAmountParamName = "transactionAmount";
-
-    public static final Set<String> COLLECTIONSHEET_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
-            dateFormatParamName, transactionDateParamName, actualDisbursementDateParamName, bulkRepaymentTransactionsParamName,
-            bulkDisbursementTransactionsParamName, noteParamName, calendarIdParamName, clientsAttendanceParamName,
-            bulkSavingsDueTransactionsParamName, PaymentDetailConstants.paymentTypeParamName,
-            PaymentDetailConstants.accountNumberParamName, PaymentDetailConstants.checkNumberParamName,
-            PaymentDetailConstants.routingCodeParamName, PaymentDetailConstants.receiptNumberParamName,
-            PaymentDetailConstants.bankNumberParamName, isTransactionDateOnNonMeetingDateParamName));
-
-    public static final Set<String> INDIVIDUAL_COLLECTIONSHEET_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
-            dateFormatParamName, transactionDateParamName, actualDisbursementDateParamName, bulkRepaymentTransactionsParamName,
-            bulkDisbursementTransactionsParamName, noteParamName, bulkSavingsDueTransactionsParamName));
-
-    public static final Set<String> INDIVIDUAL_COLLECTIONSHEET_SUPPORTED_PARAMS = new HashSet<>(Arrays.asList(transactionDateParamName,
-            localeParamName, dateFormatParamName, officeIdParamName, staffIdParamName));
+    public static final String depositAccountTypeParamName = "depositAccountType";
 }

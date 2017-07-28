@@ -18,6 +18,29 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
+
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -30,31 +53,8 @@ import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.springframework.data.jpa.domain.AbstractPersistable;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * All monetary transactions against a loan are modelled through this entity.
@@ -62,7 +62,7 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "m_loan_transaction", uniqueConstraints = { @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE") })
-public final class LoanTransaction extends AbstractPersistable<Long> {
+public class LoanTransaction extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", nullable = false)
@@ -77,15 +77,15 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     private PaymentDetail paymentDetail;
 
     @Column(name = "transaction_type_enum", nullable = false)
-    private final Integer typeOf;
+    private Integer typeOf;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "transaction_date", nullable = false)
-    private final Date dateOf;
+    private Date dateOf;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "submitted_on_date", nullable = false)
-    private final Date submittedOnDate;
+    private Date submittedOnDate;
 
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
@@ -116,14 +116,13 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date", nullable = false)
-    private final Date createdDate;
+    private Date createdDate;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "appuser_id", nullable = true)
-    private final AppUser appUser;
+    private AppUser appUser;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanTransaction", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanTransaction", orphanRemoval = true, fetch=FetchType.EAGER)
     private Set<LoanChargePaidBy> loanChargesPaid = new HashSet<>();
 
     @Column(name = "outstanding_loan_balance_derived", scale = 6, precision = 19, nullable = true)
@@ -132,18 +131,31 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     @Column(name = "manually_adjusted_or_reversed", nullable = false)
     private boolean manuallyAdjustedOrReversed;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL,  orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL,  orphanRemoval = true, fetch=FetchType.EAGER)
     @JoinColumn(name = "loan_transaction_id", referencedColumnName= "id" , nullable = false)
     private Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings = new HashSet<>();
 
     protected LoanTransaction() {
-        this.loan = null;
+       /* this.loan = null;
         this.dateOf = null;
         this.typeOf = null;
         this.submittedOnDate = DateUtils.getDateOfTenant();
         this.createdDate = new Date();
-        this.appUser = null;
+        this.appUser = null;*/
+    }
+
+    public static LoanTransaction incomePosting(final Loan loan, final Office office, final Date dateOf, final BigDecimal amount,
+            final BigDecimal interestPortion, final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion,
+            final AppUser appUser) {
+        final Integer typeOf = LoanTransactionType.INCOME_POSTING.getValue();
+        final BigDecimal principalPortion = BigDecimal.ZERO;
+        final BigDecimal overPaymentPortion = BigDecimal.ZERO;
+        final boolean reversed = false;
+        final PaymentDetail paymentDetail = null;
+        final String externalId = null;
+        final LocalDateTime createdDate = DateUtils.getLocalDateTimeOfTenant();
+        return new LoanTransaction(loan, office, typeOf, dateOf, amount, principalPortion, interestPortion, feeChargesPortion,
+                penaltyChargesPortion, overPaymentPortion, reversed, paymentDetail, externalId, createdDate, appUser);
     }
 
     public static LoanTransaction disbursement(final Office office, final Money amount, final PaymentDetail paymentDetail,
@@ -197,6 +209,27 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         String externalId = null;
         return new LoanTransaction(loan, office, LoanTransactionType.ACCRUAL.getValue(), interestAppliedDate.toDate(), interestPortion,
                 principalPortion, interestPortion, feesPortion, penaltiesPortion, overPaymentPortion, reversed, paymentDetail, externalId,
+                createdDate, appUser);
+    }
+
+    public static LoanTransaction accrual(final Loan loan, final Office office, final Money amount, final Money interest,
+            final Money feeCharges, final Money penaltyCharges, final LocalDate transactionDate) {
+        final AppUser appUser = null;
+        return accrueTransaction(loan, office, transactionDate, amount.getAmount(), interest.getAmount(), feeCharges.getAmount(),
+                penaltyCharges.getAmount(), appUser);
+    }
+
+    public static LoanTransaction accrueTransaction(final Loan loan, final Office office, final LocalDate dateOf, final BigDecimal amount,
+            final BigDecimal interestPortion, final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion,
+            final AppUser appUser) {
+        BigDecimal principalPortion = null;
+        BigDecimal overPaymentPortion = null;
+        boolean reversed = false;
+        PaymentDetail paymentDetail = null;
+        String externalId = null;
+        LocalDateTime createdDate = DateUtils.getLocalDateTimeOfTenant();
+        return new LoanTransaction(loan, office, LoanTransactionType.ACCRUAL.getValue(), dateOf.toDate(), amount, principalPortion,
+                interestPortion, feeChargesPortion, penaltyChargesPortion, overPaymentPortion, reversed, paymentDetail, externalId,
                 createdDate, appUser);
     }
 
@@ -353,6 +386,11 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
      * 
      * This accumulates the values passed to the already existent values for
      * each of the portions.
+     * 
+     * @param principal principal
+     * @param interest interest
+     * @param feeCharges feeCharges
+     * @param penaltyCharges penaltyCharges
      */
     public void updateComponents(final Money principal, final Money interest, final Money feeCharges, final Money penaltyCharges) {
         final MonetaryCurrency currency = principal.getCurrency();
@@ -459,6 +497,14 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
     public boolean isNotRepayment() {
         return !isRepayment();
+    }
+
+    public boolean isIncomePosting() {
+        return LoanTransactionType.INCOME_POSTING.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isNotIncomePosting() {
+        return !isIncomePosting();
     }
 
     public boolean isDisbursement() {
@@ -630,15 +676,14 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     public boolean isAccrual() {
         return LoanTransactionType.ACCRUAL.equals(getTypeOf()) && isNotReversed();
     }
-    
-    public boolean isNonMonetaryTransaction(){
-    	return isNotReversed() 
-    			&& (LoanTransactionType.CONTRA.equals(getTypeOf())
-    					|| LoanTransactionType.MARKED_FOR_RESCHEDULING.equals(getTypeOf())
-    					|| LoanTransactionType.APPROVE_TRANSFER.equals(getTypeOf())
-    					|| LoanTransactionType.INITIATE_TRANSFER.equals(getTypeOf())
-    					|| LoanTransactionType.REJECT_TRANSFER.equals(getTypeOf())
-    					|| LoanTransactionType.WITHDRAW_TRANSFER.equals(getTypeOf()));
+
+    public boolean isNonMonetaryTransaction() {
+        return isNotReversed()
+                && (LoanTransactionType.CONTRA.equals(getTypeOf()) || LoanTransactionType.MARKED_FOR_RESCHEDULING.equals(getTypeOf())
+                        || LoanTransactionType.APPROVE_TRANSFER.equals(getTypeOf())
+                        || LoanTransactionType.INITIATE_TRANSFER.equals(getTypeOf())
+                        || LoanTransactionType.REJECT_TRANSFER.equals(getTypeOf()) || LoanTransactionType.WITHDRAW_TRANSFER
+                            .equals(getTypeOf()));
     }
 
     public void updateOutstandingLoanBalance(BigDecimal outstandingLoanBalance) {
@@ -722,13 +767,33 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return isMappingUpdated;
     }
 
-    
     public Set<LoanTransactionToRepaymentScheduleMapping> getLoanTransactionToRepaymentScheduleMappings() {
         return this.loanTransactionToRepaymentScheduleMappings;
     }
-        
-    public Boolean isAllowTypeTransactionAtTheTimeOfLastUndo(){
-    	return isDisbursement() || isAccrual() || isRepaymentAtDisbursement();
+
+    public Boolean isAllowTypeTransactionAtTheTimeOfLastUndo() {
+        return isDisbursement() || isAccrual() || isRepaymentAtDisbursement();
     }
 
+    public void updateCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public boolean isAccrualTransaction() {
+        return isAccrual();
+    }
+    
+    public BigDecimal getOutstandingLoanBalance() {
+        return outstandingLoanBalance;
+    }
+    
+    public PaymentDetail getPaymentDetail() {
+        return this.paymentDetail;
+    }
+    
+    public boolean isPaymentTransaction() {
+        return this.isNotReversed()
+                && !(this.isDisbursement() || this.isAccrual() || this.isRepaymentAtDisbursement() || this.isNonMonetaryTransaction() || this
+                        .isIncomePosting());
+    }
 }

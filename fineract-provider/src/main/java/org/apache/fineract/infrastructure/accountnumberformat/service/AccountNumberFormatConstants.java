@@ -49,18 +49,11 @@ public class AccountNumberFormatConstants {
     public static final String accountTypeOptionsParamName = "accountTypeOptions";
     public static final String prefixTypeOptionsParamName = "prefixTypeOptions";
 
-    public static final Set<String> ACCOUNT_NUMBER_FORMAT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-            accountTypeParamName, prefixTypeParamName));
-
-    public static final Set<String> ACCOUNT_NUMBER_FORMAT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(prefixTypeParamName));
-
     /**
      * These parameters will match the class level parameters of
      * {@link AccountNumberFormatData}. Where possible, we try to get response
      * parameters to match those of request parameters.
      */
-    public static final Set<String> ACCOUNT_NUMBER_FORMAT_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
-            accountTypeParamName, prefixTypeParamName, accountTypeOptionsParamName, prefixTypeOptionsParamName));
 
     // Error messages codes
     public static final String EXCEPTION_DUPLICATE_ACCOUNT_TYPE = "error.msg.account.number.format.duplicate.account.type";

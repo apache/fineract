@@ -32,9 +32,9 @@ import org.springframework.stereotype.Component;
 /**
  * Implements {@link org.apache.fineract.batch.command.CommandStrategy} and Create
  * Charge for a Loan. It passes the contents of the body from the BatchRequest
- * to {@link org.apache.fineract.portfolio.client.api.LoanChargesApiResource} and
+ * to {@link org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource} and
  * gets back the response. This class will also catch any errors raised by
- * {@link org.apache.fineract.portfolio.client.api.LoanChargesApiResource} and map
+ * {@link org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource} and map
  * those errors to appropriate status codes in BatchResponse.
  * 
  * @author Rishabh Shukla

@@ -33,6 +33,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.joda.time.MonthDay;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
@@ -114,7 +115,7 @@ public class FromJsonHelper {
     /**
      * @param parentPropertyName
      *            The full json path to this property,the value is appended to
-     *            the parameter name while generating an error message <br/>
+     *            the parameter name while generating an error message <br>
      *            Ex: property "name" in Object "person" would be named as
      *            "person.name"
      * @param object
@@ -197,7 +198,11 @@ public class FromJsonHelper {
     public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element) {
         return this.helperDelegator.extractLocalDateNamed(parameterName, element, new HashSet<String>());
     }
-
+    
+    public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonElement element) {
+        return this.helperDelegator.extractLocalTimeNamed(parameterName, element, new HashSet<String>());
+    }
+    
     public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element, final String dateFormat,
             final Locale locale) {
         return this.helperDelegator.extractLocalDateNamed(parameterName, element.getAsJsonObject(), dateFormat, locale,
@@ -263,6 +268,10 @@ public class FromJsonHelper {
 
     public String extractMonthDayFormatParameter(final JsonObject element) {
         return this.helperDelegator.extractMonthDayFormatParameter(element);
+    }
+
+    public JsonObject extractJsonObjectNamed(final String parameterName, final JsonElement element) {
+        return this.helperDelegator.extractJsonObjectNamed(parameterName, element);
     }
 
     public Gson getGsonConverter() {

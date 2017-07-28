@@ -25,6 +25,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transfe
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -35,16 +36,25 @@ import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumb
 import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
-import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
+import org.apache.fineract.portfolio.calendar.domain.Calendar;
+import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
+import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
+import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
+import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
+import org.apache.fineract.portfolio.calendar.domain.CalendarType;
+import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
+import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.DepositAccountOnClosureType;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
@@ -62,6 +72,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DepositAccountDomainServiceJpa implements DepositAccountDomainService {
 
+    private final PlatformSecurityContext context;
     private final SavingsAccountRepositoryWrapper savingsAccountRepository;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
@@ -71,15 +82,18 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
     private final ConfigurationDomainService configurationDomainService;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
+    private final CalendarInstanceRepository calendarInstanceRepository;
 
     @Autowired
-    public DepositAccountDomainServiceJpa(final SavingsAccountRepositoryWrapper savingsAccountRepository,
+    public DepositAccountDomainServiceJpa(final PlatformSecurityContext context,final SavingsAccountRepositoryWrapper savingsAccountRepository,
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
             final JournalEntryWritePlatformService journalEntryWritePlatformService, final AccountNumberGenerator accountNumberGenerator,
             final DepositAccountAssembler depositAccountAssembler, final SavingsAccountDomainService savingsAccountDomainService,
             final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
             final ConfigurationDomainService configurationDomainService,
-            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository) {
+            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
+            final CalendarInstanceRepository calendarInstanceRepository) {
+        this.context = context;
         this.savingsAccountRepository = savingsAccountRepository;
         this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
@@ -89,6 +103,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         this.accountTransfersWritePlatformService = accountTransfersWritePlatformService;
         this.configurationDomainService = configurationDomainService;
         this.accountNumberFormatRepository = accountNumberFormatRepository;
+        this.calendarInstanceRepository = calendarInstanceRepository;
     }
 
     @Transactional
@@ -121,7 +136,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
     public SavingsAccountTransaction handleRDDeposit(final RecurringDepositAccount account, final DateTimeFormatter fmt,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
             final boolean isRegularTransaction) {
-
+        AppUser user = getAppUserIfPresent();
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
@@ -129,13 +144,47 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         boolean isAccountTransfer = false;
         final boolean isPreMatureClosure = false;
         final MathContext mc = MathContext.DECIMAL64;
+        account.updateDepositAmount(transactionAmount);
         final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(account, fmt, transactionDate,
                 transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction);
-
+        final Set<Long> existingTransactionIds = new HashSet<>();
+        final Set<Long> existingReversedTransactionIds = new HashSet<>();
+        final boolean isAnyActivationChargesDue = isAnyActivationChargesDue(account);
+        if(isAnyActivationChargesDue){
+            updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
+            account.processAccountUponActivation(isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, user);
+            this.savingsAccountRepository.saveAndFlush(account);
+        }
         account.handleScheduleInstallments(deposit);
         account.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
         account.updateOverduePayments(DateUtils.getLocalDateOfTenant());
+        if(isAnyActivationChargesDue){
+            postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
+        }
         return deposit;
+    }
+    
+    @Transactional
+    @Override
+    public SavingsAccountTransaction handleSavingDeposit(final SavingsAccount account, final DateTimeFormatter fmt,
+            final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail,
+            final boolean isRegularTransaction) {
+        boolean isAccountTransfer = false;
+        final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(account, fmt, transactionDate,
+                transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction);
+        final Set<Long> existingTransactionIds = new HashSet<>();
+        final Set<Long> existingReversedTransactionIds = new HashSet<>();
+        updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
+        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
+        return deposit;
+    }
+
+    private boolean isAnyActivationChargesDue(final RecurringDepositAccount account) {
+        for (final SavingsAccountCharge savingsAccountCharge : account.charges()) {
+            if (savingsAccountCharge.isSavingsActivation() && savingsAccountCharge.amoutOutstanding() != null
+                    && savingsAccountCharge.amoutOutstanding().compareTo(BigDecimal.ZERO) > 0) { return true; }
+        }
+        return false;
     }
 
     @Transactional
@@ -152,9 +201,12 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         final boolean isPreMatureClosure = false;
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
+        /***
+         * Update account transactionIds for post journal entries.
+         */
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         /*
-         * <<<<<<< HEAD final SavingsAccountTransactionDTO transactionDTO = new
+         *  final SavingsAccountTransactionDTO transactionDTO = new
          * SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
          * paymentDetail, new Date()); final SavingsAccountTransaction deposit =
          * account.deposit(transactionDTO); boolean isInterestTransfer = false;
@@ -195,16 +247,13 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account,
                     isAccountTransfer, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
+            updateAlreadyPostedTransactions(existingTransactionIds, account);  
         } else {
             final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
                     paymentDetail, false, isRegularTransaction);
             savingsTransactionId = withdrawal.getId();
         }
 
-        /***
-         * Update account transactionIds for post journal entries.
-         */
-        updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         account.close(user, command, tenantsTodayDate, changes);
         this.savingsAccountRepository.save(account);
 
@@ -227,6 +276,9 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         final boolean isPreMatureClosure = false;
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
+        /***
+         * Update account transactionIds for post journal entries.
+         */
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
 
         final MathContext mc = MathContext.DECIMAL64;
@@ -241,18 +293,15 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         if (onClosureType.isReinvest()) {
             RecurringDepositAccount reinvestedDeposit = account.reInvest(transactionAmount);
             depositAccountAssembler.assignSavingAccountHelpers(reinvestedDeposit);
-            reinvestedDeposit.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                    financialYearBeginningMonth);
-            reinvestedDeposit.processAccountUponActivation(fmt, user);
-            reinvestedDeposit.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
-                    financialYearBeginningMonth);
             this.savingsAccountRepository.save(reinvestedDeposit);
-
-            Money amountForDeposit = reinvestedDeposit.activateWithBalance();
-            if (amountForDeposit.isGreaterThanZero()) {
-                handleRDDeposit(reinvestedDeposit, fmt, reinvestedDeposit.getActivationLocalDate(), amountForDeposit.getAmount(),
-                        paymentDetail, isRegularTransaction);
-            }
+            final CalendarInstance calendarInstance = getCalendarInstance(account, reinvestedDeposit);
+            this.calendarInstanceRepository.save(calendarInstance);
+            final Calendar calendar = calendarInstance.getCalendar();
+            final PeriodFrequencyType frequencyType = CalendarFrequencyType.from(CalendarUtils.getFrequency(calendar.getRecurrence()));
+            Integer frequency = CalendarUtils.getInterval(calendar.getRecurrence());
+            frequency = frequency == -1 ? 1 : frequency;
+            reinvestedDeposit.generateSchedule(frequencyType, frequency, calendar);
+            reinvestedDeposit.processAccountUponActivation(fmt, user);
             reinvestedDeposit.updateMaturityDateAndAmount(mc, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
                     financialYearBeginningMonth);
             this.savingsAccountRepository.save(reinvestedDeposit);
@@ -273,16 +322,13 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account,
                     isRegularTransaction, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
+            updateAlreadyPostedTransactions(existingTransactionIds, account);  
         } else {
             final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
                     paymentDetail, false, isRegularTransaction);
             savingsTransactionId = withdrawal.getId();
         }
 
-        /***
-         * Update account transactionIds for post journal entries.
-         */
-        updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         account.close(user, command, tenantsTodayDate, changes);
 
         this.savingsAccountRepository.save(account);
@@ -290,6 +336,31 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
 
         return savingsTransactionId;
+    }
+
+    private CalendarInstance getCalendarInstance(final RecurringDepositAccount account, RecurringDepositAccount reinvestedDeposit) {
+        CalendarInstance calendarInstance = null;
+        CalendarInstance parentCalendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
+                account.getId(), CalendarEntityType.SAVINGS.getValue(), CalendarType.COLLECTION.getValue());
+        if (account.isCalendarInherited()) {
+            calendarInstance = CalendarInstance.from(parentCalendarInstance.getCalendar(), account.getId(),
+                    CalendarEntityType.SAVINGS.getValue());
+        } else {
+            LocalDate calendarStartDate = reinvestedDeposit.depositStartDate();
+            Calendar parentCalendar = parentCalendarInstance.getCalendar();
+            final String recurrence = parentCalendar.getRecurrence();
+            final String title = "recurring_savings_" + reinvestedDeposit.getId();
+            final Calendar calendar = Calendar.createRepeatingCalendar(title, calendarStartDate, CalendarType.COLLECTION.getValue(),
+                    recurrence);
+            calendarInstance = CalendarInstance.from(calendar, reinvestedDeposit.getId(), CalendarEntityType.SAVINGS.getValue());
+        }
+        if (calendarInstance == null) {
+            final String defaultUserMessage = "No valid recurring details available for recurring depost account creation.";
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.recurring.deposit.account.cannot.create.no.valid.recurring.details.available", defaultUserMessage,
+                    account.clientId());
+        }
+        return calendarInstance;
     }
 
     private void autoGenerateAccountNumber(final SavingsAccount account) {
@@ -314,12 +385,17 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         final boolean isPreMatureClosure = true;
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
+        /***
+         * Update account transactionIds for post journal entries.
+         */
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
 
         final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
         Long savingsTransactionId = null;
+       
+        
         // post interest
         account.postPreMaturityInterest(closedDate, isPreMatureClosure, isSavingsInterestPostingAtCurrentPeriodEnd,
                 financialYearBeginningMonth);
@@ -338,16 +414,14 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account,
                     isRegularTransaction, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
+            updateAlreadyPostedTransactions(existingTransactionIds, account);          
         } else {
             final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
                     paymentDetail, false, isRegularTransaction);
             savingsTransactionId = withdrawal.getId();
         }
 
-        /***
-         * Update account transactionIds for post journal entries.
-         */
-        updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
+      
         account.prematureClosure(user, command, tenantsTodayDate, changes);
 
         this.savingsAccountRepository.save(account);
@@ -370,6 +444,9 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         boolean isRegularTransaction = false;
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
+        /***
+         * Update account transactionIds for post journal entries.
+         */
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
 
         final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);
@@ -394,16 +471,13 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
                     null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account,
                     isRegularTransaction, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
+            updateAlreadyPostedTransactions(existingTransactionIds, account);  
         } else {
             final SavingsAccountTransaction withdrawal = this.handleWithdrawal(account, fmt, closedDate, account.getAccountBalance(),
                     paymentDetail, false, isRegularTransaction);
             savingsTransactionId = withdrawal.getId();
         }
 
-        /***
-         * Update account transactionIds for post journal entries.
-         */
-        updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
         account.prematureClosure(user, command, tenantsTodayDate, changes);
         this.savingsAccountRepository.save(account);
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
@@ -425,5 +499,26 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
         final Map<String, Object> accountingBridgeData = savingsAccount.deriveAccountingBridgeData(applicationCurrency.toData(),
                 existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
         this.journalEntryWritePlatformService.createJournalEntriesForSavings(accountingBridgeData);
+    }
+
+    private void updateAlreadyPostedTransactions(final Set<Long> existingTransactionIds, final SavingsAccount savingsAccount) {
+        List<SavingsAccountTransaction> transactions = savingsAccount.getTransactions() ;
+        int size = transactions.size();
+        for (int i = size - 1;; i--) {
+            SavingsAccountTransaction transaction = transactions.get(i);
+            if (transaction.isWithdrawal() || transaction.isWithdrawalFee()) {
+                existingTransactionIds.add(transaction.getId());
+            } else {
+                break;
+            }
+        }
+    }
+    
+    private AppUser getAppUserIfPresent() {
+        AppUser user = null;
+        if (this.context != null) {
+            user = this.context.getAuthenticatedUserIfPresent();
+        }
+        return user;
     }
 }

@@ -23,30 +23,31 @@ import java.util.Collection;
 /**
  * Immutable data object representing a summary of various accounts.
  */
+@SuppressWarnings("unused")
 public class AccountSummaryCollectionData {
 
-    @SuppressWarnings("unused")
     private final Collection<LoanAccountSummaryData> loanAccounts;
-    @SuppressWarnings("unused")
     private final Collection<SavingsAccountSummaryData> savingsAccounts;
-    @SuppressWarnings("unused")
+    private final Collection<ShareAccountSummaryData> shareAccounts ;
+    
     private final Collection<LoanAccountSummaryData> memberLoanAccounts;
-    @SuppressWarnings("unused")
     private final Collection<SavingsAccountSummaryData> memberSavingsAccounts;
 
     public AccountSummaryCollectionData(final Collection<LoanAccountSummaryData> loanAccounts,
-            final Collection<SavingsAccountSummaryData> savingsAccounts) {
+            final Collection<SavingsAccountSummaryData> savingsAccounts, final Collection<ShareAccountSummaryData> shareAccounts) {
         this.loanAccounts = defaultLoanAccountsIfEmpty(loanAccounts);
         this.savingsAccounts = defaultSavingsAccountsIfEmpty(savingsAccounts);
+        this.shareAccounts = defaultShareAccountsIfEmpty(shareAccounts) ;
         this.memberLoanAccounts = null;
         this.memberSavingsAccounts = null;
     }
-
+    
     public AccountSummaryCollectionData(final Collection<LoanAccountSummaryData> loanAccounts,
             final Collection<SavingsAccountSummaryData> savingsAccounts, final Collection<LoanAccountSummaryData> memberLoanAccounts,
             final Collection<SavingsAccountSummaryData> memberSavingsAccounts) {
         this.loanAccounts = defaultLoanAccountsIfEmpty(loanAccounts);
         this.savingsAccounts = defaultSavingsAccountsIfEmpty(savingsAccounts);
+        this.shareAccounts = null ;
         this.memberLoanAccounts = defaultLoanAccountsIfEmpty(memberLoanAccounts);
         this.memberSavingsAccounts = defaultSavingsAccountsIfEmpty(memberSavingsAccounts);
     }
@@ -61,6 +62,14 @@ public class AccountSummaryCollectionData {
 
     private Collection<SavingsAccountSummaryData> defaultSavingsAccountsIfEmpty(final Collection<SavingsAccountSummaryData> collection) {
         Collection<SavingsAccountSummaryData> returnCollection = null;
+        if (collection != null && !collection.isEmpty()) {
+            returnCollection = collection;
+        }
+        return returnCollection;
+    }
+    
+    private Collection<ShareAccountSummaryData> defaultShareAccountsIfEmpty(final Collection<ShareAccountSummaryData> collection) {
+        Collection<ShareAccountSummaryData> returnCollection = null;
         if (collection != null && !collection.isEmpty()) {
             returnCollection = collection;
         }

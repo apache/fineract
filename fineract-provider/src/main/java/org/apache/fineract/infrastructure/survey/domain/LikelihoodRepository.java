@@ -29,7 +29,7 @@ import java.util.List;
 
 public interface LikelihoodRepository extends JpaRepository<Likelihood, Long>, JpaSpecificationExecutor<Likelihood> {
 
-   @Query("FROM Likelihood WHERE ppi_name =:ppiName AND id !=:id")
+   @Query("select liklihood FROM Likelihood liklihood WHERE ppi_name =:ppiName AND id <>:id")
    List<Likelihood> findByPpiNameAndLikeliHoodId(@Param("ppiName") String ppiName,@Param("id") Long likeliHoodId);
 
 }

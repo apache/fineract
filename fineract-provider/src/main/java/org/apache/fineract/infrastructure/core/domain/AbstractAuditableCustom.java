@@ -22,16 +22,17 @@ import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.DateTime;
 import org.springframework.data.domain.Auditable;
 import org.springframework.data.jpa.domain.AbstractAuditable;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 /**
  * A custom copy of {@link AbstractAuditable} to override the column names used
@@ -46,21 +47,21 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
  *            the type of the auditing type's identifier
  */
 @MappedSuperclass
-public abstract class AbstractAuditableCustom<U, PK extends Serializable> extends AbstractPersistable<PK> implements Auditable<U, PK> {
+public abstract class AbstractAuditableCustom<U, PK extends Serializable> extends AbstractPersistableCustom<PK> implements Auditable<AppUser, Long> {
 
     private static final long serialVersionUID = 141481953116476081L;
 
-    @OneToOne
+    @OneToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "createdby_id")
-    private U createdBy;
+    private AppUser createdBy;
 
     @Column(name = "created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
 
-    @OneToOne
+    @OneToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "lastmodifiedby_id")
-    private U lastModifiedBy;
+    private AppUser lastModifiedBy;
 
     @Column(name = "lastmodified_date")
     @Temporal(TemporalType.TIMESTAMP)
@@ -72,7 +73,7 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
      * @see org.springframework.data.domain.Auditable#getCreatedBy()
      */
     @Override
-    public U getCreatedBy() {
+    public AppUser getCreatedBy() {
 
         return this.createdBy;
     }
@@ -84,7 +85,7 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
      * org.springframework.data.domain.Auditable#setCreatedBy(java.lang.Object)
      */
     @Override
-    public void setCreatedBy(final U createdBy) {
+    public void setCreatedBy(final AppUser createdBy) {
 
         this.createdBy = createdBy;
     }
@@ -119,7 +120,7 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
      * @see org.springframework.data.domain.Auditable#getLastModifiedBy()
      */
     @Override
-    public U getLastModifiedBy() {
+    public AppUser getLastModifiedBy() {
 
         return this.lastModifiedBy;
     }
@@ -132,7 +133,7 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
      * .Object)
      */
     @Override
-    public void setLastModifiedBy(final U lastModifiedBy) {
+    public void setLastModifiedBy(final AppUser lastModifiedBy) {
 
         this.lastModifiedBy = lastModifiedBy;
     }

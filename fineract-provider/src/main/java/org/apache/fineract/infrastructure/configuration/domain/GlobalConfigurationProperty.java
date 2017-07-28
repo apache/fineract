@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.configuration.domain;
 
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -25,26 +26,30 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.exception.GlobalConfigurationPropertyCannotBeModfied;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.security.exception.ForcePasswordResetException;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "c_configuration")
-public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
+public class GlobalConfigurationProperty extends AbstractPersistableCustom<Long> {
 
     @Column(name = "name", nullable = false)
-    private final String name;
+    private String name;
 
     @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
     @Column(name = "value", nullable = true)
     private Long value;
+    
+    @Column(name = "date_value", nullable = true)
+    private Date dateValue;
 
     @Column(name = "description", nullable = true)
-    private final String description;
+    private String description;
 
     @Column(name = "is_trap_door", nullable = false)
     private boolean isTrapDoor;
@@ -53,15 +58,17 @@ public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
         this.name = null;
         this.enabled = false;
         this.value = null;
+        this.dateValue = null;
         this.description = null;
         this.isTrapDoor = false;
     }
 
-    public GlobalConfigurationProperty(final String name, final boolean enabled, final Long value, final String description,
+    public GlobalConfigurationProperty(final String name, final boolean enabled, final Long value, final Date dateValue ,final String description,
             final boolean isTrapDoor) {
         this.name = name;
         this.enabled = enabled;
         this.value = value;
+        this.dateValue = dateValue;
         this.description = description;
         this.isTrapDoor = isTrapDoor;
     }
@@ -73,12 +80,11 @@ public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
     public Long getValue() {
         return this.value;
     }
-
-    public boolean updateTo(final boolean value) {
-        final boolean updated = this.enabled != value;
-        this.enabled = value;
-        return updated;
+    
+    public Date getDateValue(){
+        return this.dateValue;
     }
+
 
     public Map<String, Object> update(final JsonCommand command) {
 
@@ -100,6 +106,13 @@ public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
             actualChanges.put(valueParamName, newValue);
             this.value = newValue;
         }
+        
+        final String dateValueParamName = "dateValue";
+        if(command.isChangeInDateParameterNamed(dateValueParamName, this.dateValue)){
+            final Date newDateValue = command.DateValueOfParameterNamed(dateValueParamName);
+            actualChanges.put(dateValueParamName, newDateValue);
+            this.dateValue = newDateValue;
+        }
 
         final String passwordPropertyName = "force-password-reset-days";
         if (this.name.equalsIgnoreCase(passwordPropertyName)) {
@@ -112,7 +125,16 @@ public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
     }
 
     public static GlobalConfigurationProperty newSurveyConfiguration(final String name) {
-        return new GlobalConfigurationProperty(name, false, null, null, false);
+        return new GlobalConfigurationProperty(name, false, null, null, null, false);
+    }
+    
+    public GlobalConfigurationPropertyData toData() {
+        return new GlobalConfigurationPropertyData(getName(), isEnabled(), getValue(), getDateValue(), this.getId(), this.description,
+                this.isTrapDoor);
+    }
+    
+    public String getName() {
+        return this.name;
     }
 
 }

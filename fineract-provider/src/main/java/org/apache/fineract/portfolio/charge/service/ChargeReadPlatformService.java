@@ -116,5 +116,11 @@ public interface ChargeReadPlatformService {
 
     /** Retrieve savings account charges **/
     Collection<ChargeData> retrieveSavingsAccountApplicableCharges(Long savingsId);
+  
+    /**
+     * Returns charge definitions which are applicable for shares 
+     */
+    Collection<ChargeData> retrieveSharesApplicableCharges();
 
+    public Collection<ChargeData> retrieveShareProductCharges(final Long shareProductId) ;
 }

@@ -98,6 +98,12 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
                 GLAccountType.LIABILITY, PortfolioProductType.SAVING);
     }
 
+    public void createOrmergeSavingsToLiabilityAccountMappingChanges(final JsonElement element, final String paramName, final Long productId,
+            final int accountTypeId, final Map<String, Object> changes) {
+        createOrmergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, changes,
+                GLAccountType.LIABILITY, PortfolioProductType.SAVING);
+    }
+    
     /*** Abstractions for payments channel related to savings products ***/
 
     public void savePaymentChannelToFundSourceMappings(final JsonCommand command, final JsonElement element, final Long productId,
@@ -222,6 +228,9 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
                 mergeSavingsToLiabilityAccountMappingChanges(element, SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(),
                         savingsProductId, CASH_ACCOUNTS_FOR_SAVINGS.TRANSFERS_SUSPENSE.getValue(),
                         CASH_ACCOUNTS_FOR_SAVINGS.TRANSFERS_SUSPENSE.toString(), changes);
+                createOrmergeSavingsToLiabilityAccountMappingChanges(element, SAVINGS_PRODUCT_ACCOUNTING_PARAMS.ESCHEAT_LIABILITY.getValue(),
+                        savingsProductId, CASH_ACCOUNTS_FOR_SAVINGS.ESCHEAT_LIABILITY.getValue(),
+                         changes);
             break;
             case ACCRUAL_PERIODIC:
             break;

@@ -37,8 +37,4 @@ public class PaymentDetailConstants {
 
     // template related part of response
     public static final String officeOptionsParamName = "paymentTypeOptions";
-
-    public static final Set<String> PAYMENT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(accountNumberParamName,
-            checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
-
 }

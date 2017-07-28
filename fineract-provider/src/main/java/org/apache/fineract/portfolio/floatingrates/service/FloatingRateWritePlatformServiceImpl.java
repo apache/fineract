@@ -20,6 +20,9 @@ package org.apache.fineract.portfolio.floatingrates.service;
 
 import java.util.Map;
 
+import javax.persistence.PersistenceException;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -70,8 +73,12 @@ public class FloatingRateWritePlatformServiceImpl implements
 					.withEntityId(newFloatingRate.getId()) //
 					.build();
 		} catch (final DataIntegrityViolationException dve) {
-			handleDataIntegrityIssues(command, dve);
+			handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
 			return CommandProcessingResult.empty();
+		}catch (final PersistenceException dve) {
+			Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
+         	return CommandProcessingResult.empty();
 		}
 	}
 
@@ -97,14 +104,17 @@ public class FloatingRateWritePlatformServiceImpl implements
 					.with(changes) //
 					.build();
 		} catch (final DataIntegrityViolationException dve) {
-			handleDataIntegrityIssues(command, dve);
+			handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
 			return CommandProcessingResult.empty();
+		}catch (final PersistenceException dve) {
+			Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
+         	return CommandProcessingResult.empty();
 		}
 	}
 
-	private void handleDataIntegrityIssues(final JsonCommand command,
-			final DataIntegrityViolationException dve) {
-		final Throwable realCause = dve.getMostSpecificCause();
+	private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
+			final Exception dve) {
 
 		if (realCause.getMessage().contains("unq_name")) {
 
@@ -129,7 +139,7 @@ public class FloatingRateWritePlatformServiceImpl implements
 	}
 
 	private void logAsErrorUnexpectedDataIntegrityException(
-			DataIntegrityViolationException dve) {
+			Exception dve) {
 		logger.error(dve.getMessage(), dve);
 
 	}

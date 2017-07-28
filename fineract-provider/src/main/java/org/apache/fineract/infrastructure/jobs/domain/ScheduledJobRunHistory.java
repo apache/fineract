@@ -28,11 +28,11 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "job_run_history")
-public class ScheduledJobRunHistory extends AbstractPersistable<Long> {
+public class ScheduledJobRunHistory extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "job_id")

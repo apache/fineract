@@ -34,22 +34,22 @@ public interface ProductToGLAccountMappingRepository extends JpaRepository<Produ
     ProductToGLAccountMapping findByProductIdAndProductTypeAndFinancialAccountTypeAndChargeId(Long productId, int productType,
             int financialAccountType, Long chargeId);
 
-    @Query("from ProductToGLAccountMapping mapping where mapping.productId =:productId and mapping.productType =:productType and mapping.financialAccountType=:financialAccountType and mapping.paymentType is NULL and mapping.charge is NULL")
+    @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId and mapping.productType =:productType and mapping.financialAccountType=:financialAccountType and mapping.paymentType is NULL and mapping.charge is NULL")
     ProductToGLAccountMapping findCoreProductToFinAccountMapping(@Param("productId") Long productId, @Param("productType") int productType,
             @Param("financialAccountType") int financialAccountType);
 
     /*** The financial Account Type for a fund source will always be an asset (1) ***/
-    @Query("from ProductToGLAccountMapping mapping where mapping.productId =:productId and mapping.productType =:productType and mapping.financialAccountType=1 and mapping.paymentType is not NULL")
+    @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId and mapping.productType =:productType and mapping.financialAccountType=1 and mapping.paymentType is not NULL")
     List<ProductToGLAccountMapping> findAllPaymentTypeToFundSourceMappings(@Param("productId") Long productId,
             @Param("productType") int productType);
 
     /*** The financial Account Type for income from interest will always be 4 ***/
-    @Query("from ProductToGLAccountMapping mapping where mapping.productId =:productId and mapping.productType =:productType and mapping.financialAccountType=4 and mapping.charge is not NULL")
+    @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId and mapping.productType =:productType and mapping.financialAccountType=4 and mapping.charge is not NULL")
     List<ProductToGLAccountMapping> findAllFeeToIncomeAccountMappings(@Param("productId") Long productId,
             @Param("productType") int productType);
 
     /*** The financial Account Type for income from interest will always be 5 ***/
-    @Query("from ProductToGLAccountMapping mapping where mapping.productId =:productId and mapping.productType =:productType and mapping.financialAccountType=5 and mapping.charge is not NULL")
+    @Query("select mapping from ProductToGLAccountMapping mapping where mapping.productId =:productId and mapping.productType =:productType and mapping.financialAccountType=5 and mapping.charge is not NULL")
     List<ProductToGLAccountMapping> findAllPenaltyToIncomeAccountMappings(@Param("productId") Long productId,
             @Param("productType") int productType);
 

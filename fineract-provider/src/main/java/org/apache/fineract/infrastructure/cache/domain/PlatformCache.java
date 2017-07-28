@@ -22,11 +22,11 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "c_cache")
-public class PlatformCache extends AbstractPersistable<Long> {
+public class PlatformCache extends AbstractPersistableCustom<Long> {
 
     @Column(name = "cache_type_enum")
     private Integer cacheType;

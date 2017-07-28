@@ -20,6 +20,9 @@ package org.apache.fineract.infrastructure.codes.service;
 
 import java.util.Map;
 
+import javax.persistence.PersistenceException;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.codes.domain.Code;
 import org.apache.fineract.infrastructure.codes.domain.CodeRepository;
 import org.apache.fineract.infrastructure.codes.exception.CodeNotFoundException;
@@ -70,8 +73,12 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(code.getId()).build();
         } catch (final DataIntegrityViolationException dve) {
-            handleCodeDataIntegrityIssues(command, dve);
+            handleCodeDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException ee) {
+        	Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
+        	handleCodeDataIntegrityIssues(command, throwable, ee);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -98,8 +105,12 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
                     .with(changes) //
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleCodeDataIntegrityIssues(command, dve);
-            return null;
+            handleCodeDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
+            return CommandProcessingResult.empty();
+        }catch (final PersistenceException ee) {
+        	Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
+        	handleCodeDataIntegrityIssues(command, throwable, ee);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -133,8 +144,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleCodeDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
-        final Throwable realCause = dve.getMostSpecificCause();
+    private void handleCodeDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
         if (realCause.getMessage().contains("code_name")) {
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.code.duplicate.name", "A code with name '" + name + "' already exists",

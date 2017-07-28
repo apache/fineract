@@ -22,13 +22,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.PersistenceException;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
-import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.charge.domain.Charge;
@@ -38,7 +40,7 @@ import org.apache.fineract.portfolio.floatingrates.domain.FloatingRateRepository
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.fund.domain.FundRepository;
 import org.apache.fineract.portfolio.fund.exception.FundNotFoundException;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionProcessingStrategyRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionProcessingStrategyNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
@@ -75,7 +77,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     private final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService;
     private final FineractEntityAccessUtil fineractEntityAccessUtil;
     private final FloatingRateRepositoryWrapper floatingRateRepository;
-    private final LoanRepository loanRepository;
+    private final LoanRepositoryWrapper loanRepositoryWrapper;
 
     @Autowired
     public LoanProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -86,7 +88,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
             final FineractEntityAccessUtil fineractEntityAccessUtil,
             final FloatingRateRepositoryWrapper floatingRateRepository,
-            final LoanRepository loanRepository) {
+            final LoanRepositoryWrapper loanRepositoryWrapper) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.loanProductRepository = loanProductRepository;
@@ -97,7 +99,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         this.accountMappingWritePlatformService = accountMappingWritePlatformService;
         this.fineractEntityAccessUtil = fineractEntityAccessUtil;
         this.floatingRateRepository = floatingRateRepository;
-        this.loanRepository = loanRepository;
+        this.loanRepositoryWrapper = loanRepositoryWrapper;
     }
 
     @Transactional
@@ -136,7 +138,6 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             // i.e. this savings product is specific for this office.
             fineractEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
             		FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS, 
-            		FineractEntityType.LOAN_PRODUCT, 
             		loanproduct.getId());
             
             return new CommandProcessingResultBuilder() //
@@ -145,8 +146,12 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                     .build();
 
         } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(command, dve);
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch(final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
+         	return CommandProcessingResult.empty();
         }
 
     }
@@ -183,7 +188,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             validateInputDates(command);
 
             if(anyChangeInCriticalFloatingRateLinkedParams(command, product) 
-            		&& this.loanRepository.doNonClosedLoanAccountsExistForProduct(product.getId())){
+            		&& this.loanRepositoryWrapper.doNonClosedLoanAccountsExistForProduct(product.getId())){
             	throw new LoanProductCannotBeModifiedDueToNonClosedLoansException(product.getId());
             }
             
@@ -232,8 +237,12 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                     .build();
 
         } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(command, dve);
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return new CommandProcessingResult(Long.valueOf(-1));
+        }catch(final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
+         	return CommandProcessingResult.empty();
         }
 
     }
@@ -283,21 +292,19 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
+    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 
-        final Throwable realCause = dve.getMostSpecificCause();
-
-        if (realCause.getMessage().contains("external_id")) {
+        if (realCause.getMessage().contains("'external_id'")) {
 
             final String externalId = command.stringValueOfParameterNamed("externalId");
             throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.externalId", "Loan Product with externalId `"
                     + externalId + "` already exists", "externalId", externalId);
-        } else if (realCause.getMessage().contains("unq_name")) {
+        } else if (realCause.getMessage().contains("'unq_name'")) {
 
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.name", "Loan product with name `" + name
                     + "` already exists", "name", name);
-        } else if (realCause.getMessage().contains("unq_short_name")) {
+        } else if (realCause.getMessage().contains("'unq_short_name'")) {
 
             final String shortName = command.stringValueOfParameterNamed("shortName");
             throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.short.name", "Loan product with short name `"
@@ -322,7 +329,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         }
     }
 
-    private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
+    private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
         logger.error(dve.getMessage(), dve);
     }
 }

@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -52,7 +53,7 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
         this.context.authenticatedUser();
 
-        String sql = "SELECT c.id, c.name, c.enabled, c.value, c.description, c.is_trap_door FROM c_configuration c ";
+        String sql = "SELECT c.id, c.name, c.enabled, c.value, c.date_value, c.description, c.is_trap_door FROM c_configuration c ";
 
         if (survey) {
             sql += " JOIN x_registered_table on x_registered_table.registered_table_name = c.name ";
@@ -65,13 +66,28 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
         return new GlobalConfigurationData(globalConfiguration);
     }
+    
+  
+    
+    @Override
+    public GlobalConfigurationPropertyData retrieveGlobalConfiguration(String name) {
+
+        this.context.authenticatedUser();
+
+        final String sql = "SELECT c.id, c.name, c.enabled, c.value, c.date_value, c.description, c.is_trap_door FROM "
+                + "c_configuration c where c.name=? order by c.id";
+        final GlobalConfigurationPropertyData globalConfiguration = this.jdbcTemplate.queryForObject(sql, this.rm,
+                new Object[] { name });
+
+        return globalConfiguration;
+    }
 
     @Override
     public GlobalConfigurationPropertyData retrieveGlobalConfiguration(Long configId) {
 
         this.context.authenticatedUser();
 
-        final String sql = "SELECT c.id, c.name, c.enabled, c.value, c.description, c.is_trap_door FROM "
+        final String sql = "SELECT c.id, c.name, c.enabled, c.value, c.date_value, c.description, c.is_trap_door FROM "
                 + "c_configuration c where c.id=? order by c.id";
         final GlobalConfigurationPropertyData globalConfiguration = this.jdbcTemplate.queryForObject(sql, this.rm,
                 new Object[] { configId });
@@ -79,6 +95,7 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
         return globalConfiguration;
     }
 
+  
     private static final class GlobalConfigurationRowMapper implements RowMapper<GlobalConfigurationPropertyData> {
 
         @Override
@@ -88,10 +105,11 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
             final String name = rs.getString("name");
             final boolean enabled = rs.getBoolean("enabled");
             final Long value = rs.getLong("value");
+            final Date dateValue = rs.getDate("date_value");
             final String description = rs.getString("description");
             final Long id = rs.getLong("id");
             final boolean isTrapDoor = rs.getBoolean("is_trap_door");
-            return new GlobalConfigurationPropertyData(name, enabled, value, id, description, isTrapDoor);
+            return new GlobalConfigurationPropertyData(name, enabled, value, dateValue, id, description, isTrapDoor);
         }
     }
 

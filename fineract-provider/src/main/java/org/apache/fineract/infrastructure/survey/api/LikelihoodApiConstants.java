@@ -30,8 +30,6 @@ public class LikelihoodApiConstants {
 
     public static final String LIKELIHOOD_RESOURCE_NAME = "likelihood";
 
-    public static final Set<String> UPDATE_LIKELIHOOD_DATA_PARAMETERS = new HashSet<>(Arrays.asList(ACTIVE));
-
-    public static final Set<Long> VALID_LIKELIHOOD_ENABLED_VALUES = new HashSet<>(Arrays.asList(LikelihoodStatus.DISABLED,
-            LikelihoodStatus.ENABLED));
+	protected static final Set<Long> VALID_LIKELIHOOD_ENABLED_VALUES = new HashSet<>(
+			Arrays.asList(LikelihoodStatus.DISABLED, LikelihoodStatus.ENABLED));
 }

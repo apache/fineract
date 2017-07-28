@@ -21,10 +21,8 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
@@ -161,7 +159,8 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         MonetaryCurrency currency = loan.getCurrency();
         Money totalPrincipal = Money.zero(currency);
         final List<LoanSchedulePeriodData> futureInstallments = new ArrayList<>();
-        for (final LoanRepaymentScheduleInstallment currentInstallment : loan.fetchRepaymentScheduleInstallments()) {
+        List<LoanRepaymentScheduleInstallment> installments = loan.getRepaymentScheduleInstallments() ;
+        for (final LoanRepaymentScheduleInstallment currentInstallment : installments) {
             if (currentInstallment.isNotFullyPaidOff()) {
                 if (!currentInstallment.getDueDate().isAfter(today)) {
                     totalPrincipal = totalPrincipal.plus(currentInstallment.getPrincipalOutstanding(currency));
@@ -170,9 +169,8 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         }
         LoanApplicationTerms loanApplicationTerms = constructLoanApplicationTerms(loan);
         LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = this.loanScheduleAssembler.calculatePrepaymentAmount(currency,
-                today, loanApplicationTerms, loan.charges(), loan.getOfficeId(),
-                loan.retreiveListOfTransactionsPostDisbursementExcludeAccruals(), loanRepaymentScheduleTransactionProcessor,
-                loan.fetchRepaymentScheduleInstallments());
+                today, loanApplicationTerms, loan, loan.getOfficeId(),
+                loanRepaymentScheduleTransactionProcessor);
         Money totalAmount = totalPrincipal.plus(loanRepaymentScheduleInstallment.getFeeChargesOutstanding(currency)).plus(
                 loanRepaymentScheduleInstallment.getPenaltyChargesOutstanding(currency));
         Money interestDue = Money.zero(currency);
@@ -193,8 +191,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         }
 
         LoanScheduleModel model = this.loanScheduleAssembler.assembleForInterestRecalculation(loanApplicationTerms, loan.getOfficeId(),
-                modifiedTransactions, loan.charges(), loanRepaymentScheduleTransactionProcessor, loan.fetchRepaymentScheduleInstallments(),
-                loan.fetchInterestRecalculateFromDate());
+                loan, loanRepaymentScheduleTransactionProcessor, loan.fetchInterestRecalculateFromDate());
         LoanScheduleData scheduleDate = model.toData();
         Collection<LoanSchedulePeriodData> periodDatas = scheduleDate.getPeriods();
         for (LoanSchedulePeriodData periodData : periodDatas) {
@@ -228,7 +225,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
         final MonetaryCurrency currency = loan.getCurrency();
         Money outstanding = loan.getPrincpal();
 
-        Set<LoanDisbursementDetails> disbursementDetails = new HashSet<>();
+        List<LoanDisbursementDetails> disbursementDetails = new ArrayList<>();
         if (loan.isMultiDisburmentLoan()) {
             disbursementDetails = loan.getDisbursementDetails();
             outstanding = outstanding.zero();

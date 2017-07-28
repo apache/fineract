@@ -48,10 +48,12 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.minRequi
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.productIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
@@ -60,6 +62,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
+import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -70,6 +73,7 @@ import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
+import org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.exception.CenterNotActiveException;
@@ -166,6 +170,7 @@ public class DepositAccountAssembler {
         }
 
         if (product == null) { throw new SavingsProductNotFoundException(productId); }
+        
 
         Client client = null;
         Group group = null;
@@ -173,7 +178,8 @@ public class DepositAccountAssembler {
         AccountType accountType = AccountType.INVALID;
         final Long clientId = this.fromApiJsonHelper.extractLongNamed(clientIdParamName, element);
         if (clientId != null) {
-            client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+            final boolean isCalendarInherited = command.booleanPrimitiveValueOfParameterNamed(isCalendarInheritedParamName);
+            client = this.clientRepository.findOneWithNotFoundDetection(clientId, isCalendarInherited); //we need group collection if isCalendarInherited is true
             accountType = AccountType.INDIVIDUAL;
             if (client.isNotActive()) { throw new ClientNotActiveException(clientId); }
         }
@@ -286,6 +292,14 @@ public class DepositAccountAssembler {
         if (productChart != null) {
             accountChart = DepositAccountInterestRateChart.from(productChart);
         }
+        
+        boolean withHoldTax = product.withHoldTax();
+        if (command.parameterExists(withHoldTaxParamName)) {
+            withHoldTax = command.booleanPrimitiveValueOfParameterNamed(withHoldTaxParamName);
+            if(withHoldTax && product.getTaxGroup()  == null){
+                throw new UnsupportedParameterException(Arrays.asList(withHoldTaxParamName));
+            }
+        }
 
         SavingsAccount account = null;
         if (depositAccountType.isFixedDeposit()) {
@@ -297,7 +311,7 @@ public class DepositAccountAssembler {
                     accountNo, externalId, accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                     lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, charges,
-                    accountTermAndPreClosure, accountChart);
+                    accountTermAndPreClosure, accountChart, withHoldTax);
             accountTermAndPreClosure.updateAccountReference(fdAccount);
             fdAccount.validateDomainRules();
             account = fdAccount;
@@ -315,7 +329,7 @@ public class DepositAccountAssembler {
                     fieldOfficer, accountNo, externalId, accountType, submittedOnDate, submittedBy, interestRate,
                     interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                     minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer,
-                    charges, accountTermAndPreClosure, accountRecurringDetail, accountChart);
+                    charges, accountTermAndPreClosure, accountRecurringDetail, accountChart, withHoldTax);
 
             accountTermAndPreClosure.updateAccountReference(rdAccount);
             accountRecurringDetail.updateAccountReference(rdAccount);
@@ -431,12 +445,14 @@ public class DepositAccountAssembler {
                     final Long savingsId = this.fromApiJsonHelper.extractLongNamed(savingsIdParamName, savingsTransactionElement);
                     final BigDecimal dueAmount = this.fromApiJsonHelper.extractBigDecimalNamed(transactionAmountParamName,
                             savingsTransactionElement, locale);
+                    final Integer depositAccountType = this.fromApiJsonHelper.extractIntegerNamed(
+                            CollectionSheetConstants.depositAccountTypeParamName, savingsTransactionElement, locale);
                     PaymentDetail detail = paymentDetail;
                     if (paymentDetail == null) {
                         detail = this.paymentDetailAssembler.fetchPaymentDetail(savingsTransactionElement);
                     }
                     final SavingsAccountTransactionDTO savingsAccountTransactionDTO = new SavingsAccountTransactionDTO(formatter,
-                            transactionDate, dueAmount, detail, new Date(), savingsId, user);
+                            transactionDate, dueAmount, detail, new Date(), savingsId, user, depositAccountType);
                     savingsAccountTransactions.add(savingsAccountTransactionDTO);
                 }
             }

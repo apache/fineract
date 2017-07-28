@@ -124,6 +124,12 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                 }
             }
 
+            /** Handle Deposits and reversals of Dividend pay outs **/
+            else if (savingsTransactionDTO.getTransactionType().isDividendPayout()) {
+                this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
+                        FINANCIAL_ACTIVITY.PAYABLE_DIVIDENDS.getValue(), CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL.getValue(),
+                        savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
+            }
             /** Handle withdrawals and reversals of withdrawals **/
             else if (savingsTransactionDTO.getTransactionType().isWithdrawal()) {
                 if (savingsTransactionDTO.isAccountTransfer()) {
@@ -137,6 +143,11 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                 }
             }
 
+            else if (savingsTransactionDTO.getTransactionType().isEscheat()) {
+                this.helper.createCashBasedJournalEntriesAndReversalsForSavings(office, currencyCode,
+                		CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL.getValue(), CASH_ACCOUNTS_FOR_SAVINGS.ESCHEAT_LIABILITY.getValue(),
+                        savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
+            }
             /**
              * Handle Interest Applications and reversals of Interest
              * Applications
@@ -166,6 +177,13 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                             CASH_ACCOUNTS_FOR_SAVINGS.INTEREST_ON_SAVINGS.getValue(), CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL.getValue(),
                             savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
                 }
+            }
+
+            else if (savingsTransactionDTO.getTransactionType().isWithholdTax()) {
+                this.helper.createCashBasedJournalEntriesAndReversalsForSavingsTax(office, currencyCode,
+                        CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL, CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_REFERENCE, savingsProductId,
+                        paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal,
+                        savingsTransactionDTO.getTaxPayments());
             }
 
             /** Handle Fees Deductions and reversals of Fees Deductions **/

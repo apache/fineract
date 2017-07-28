@@ -91,7 +91,7 @@ public class ResolutionHelper {
      * dependency hierarchy of that particular list.
      * 
      * @param batchRequests
-     * @return List<ArrayList<BatchRequestNode>>
+     * @return List&lt;ArrayList&lt;BatchRequestNode&gt;&gt;
      */
     public List<BatchRequestNode> getDependingRequests(final List<BatchRequest> batchRequests) {
         final List<BatchRequestNode> rootRequests = new ArrayList<>();
@@ -128,7 +128,7 @@ public class ResolutionHelper {
      * Request.
      * 
      * @param request
-     * @param lastResponse
+     * @param parentResponse
      * @return BatchRequest
      */
     public BatchRequest resoluteRequest(final BatchRequest request, final BatchResponse parentResponse) {

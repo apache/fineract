@@ -166,8 +166,7 @@ public class AccountingScenarioIntegrationTest {
         float expected_value = this.LP_PRINCIPAL - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, expected_value, loanID);
         final JournalEntry[] assetAccountFirstEntry = { new JournalEntry(this.REPAYMENT_AMOUNT[1], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(FIRST_INTEREST, JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(FIRST_PRINCIPAL, JournalEntry.TransactionType.CREDIT), };
+                new JournalEntry(FIRST_INTEREST + FIRST_PRINCIPAL, JournalEntry.TransactionType.CREDIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.REPAYMENT_DATE[1], assetAccountFirstEntry);
         System.out.println("Repayment 1 Done......");
 
@@ -179,8 +178,7 @@ public class AccountingScenarioIntegrationTest {
         expected_value = expected_value - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(2, expected_value, loanID);
         final JournalEntry[] assetAccountSecondEntry = { new JournalEntry(this.REPAYMENT_AMOUNT[2], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(SECOND_AND_THIRD_INTEREST, JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(SECOND_PRINCIPAL, JournalEntry.TransactionType.CREDIT), };
+                new JournalEntry(SECOND_AND_THIRD_INTEREST + SECOND_PRINCIPAL, JournalEntry.TransactionType.CREDIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.REPAYMENT_DATE[2], assetAccountSecondEntry);
         System.out.println("Repayment 2 Done ......");
 
@@ -316,7 +314,7 @@ public class AccountingScenarioIntegrationTest {
                 ChargesHelper.getSavingsWithdrawalFeeJSON());
         Assert.assertNotNull(withdrawalChargeId);
 
-        this.savingsAccountHelper.addChargesForSavings(savingsID, withdrawalChargeId);
+        this.savingsAccountHelper.addChargesForSavings(savingsID, withdrawalChargeId, false);
         ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsID);
         Assert.assertEquals(1, chargesPendingState.size());
         HashMap savingsChargeForPay = chargesPendingState.get(0);
@@ -521,6 +519,7 @@ public class AccountingScenarioIntegrationTest {
         System.out.println("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
         FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
         final String fixedDepositProductJSON = fixedDepositProductHelper //
+                .withPeriodRangeChart()//
                 .withAccountingRuleAsCashBased(accounts).build(validFrom, validTo);
         return FixedDepositProductHelper.createFixedDepositProduct(fixedDepositProductJSON, requestSpec, responseSpec);
     }
@@ -529,7 +528,7 @@ public class AccountingScenarioIntegrationTest {
             final String validTo, final String submittedOnDate, final String penalInterestType) {
         System.out.println("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
         final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec) //
-                .withSubmittedOnDate(submittedOnDate).build(clientID, productID, validFrom, validTo, penalInterestType);
+                .withSubmittedOnDate(submittedOnDate).build(clientID, productID, penalInterestType);
         return this.fixedDepositAccountHelper
                 .applyFixedDepositApplication(fixedDepositApplicationJSON, this.requestSpec, this.responseSpec);
     }
@@ -538,6 +537,7 @@ public class AccountingScenarioIntegrationTest {
         System.out.println("------------------------------CREATING NEW RECURRING DEPOSIT PRODUCT ---------------------------------------");
         RecurringDepositProductHelper recurringDepositProductHelper = new RecurringDepositProductHelper(this.requestSpec, this.responseSpec);
         final String recurringDepositProductJSON = recurringDepositProductHelper //
+                .withPeriodRangeChart()//
                 .withAccountingRuleAsCashBased(accounts).build(validFrom, validTo);
         return RecurringDepositProductHelper.createRecurringDepositProduct(recurringDepositProductJSON, requestSpec, responseSpec);
     }
@@ -548,7 +548,7 @@ public class AccountingScenarioIntegrationTest {
         final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec)
                 //
                 .withSubmittedOnDate(submittedOnDate).withExpectedFirstDepositOnDate(expectedFirstDepositOnDate)
-                .build(clientID, productID, validFrom, validTo, penalInterestType);
+                .build(clientID, productID, penalInterestType);
         return this.recurringDepositAccountHelper.applyRecurringDepositApplication(recurringDepositApplicationJSON, this.requestSpec,
                 this.responseSpec);
     }
@@ -603,8 +603,7 @@ public class AccountingScenarioIntegrationTest {
         float expected_value = this.LP_PRINCIPAL - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, expected_value, loanID);
         final JournalEntry[] assetAccountFirstEntry = { new JournalEntry(this.REPAYMENT_AMOUNT[1], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(FIRST_INTEREST, JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(FIRST_PRINCIPAL, JournalEntry.TransactionType.CREDIT), };
+                new JournalEntry(FIRST_INTEREST + FIRST_PRINCIPAL, JournalEntry.TransactionType.CREDIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.REPAYMENT_DATE[1], assetAccountFirstEntry);
         System.out.println("Repayment 1 Done......");
 
@@ -620,8 +619,7 @@ public class AccountingScenarioIntegrationTest {
                 FEE_PORTION, PENALTY_PORTION, loanID);
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(2, expected_value, loanID);
         final JournalEntry[] assetAccountSecondEntry = { new JournalEntry(this.REPAYMENT_AMOUNT[2], JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(SECOND_AND_THIRD_INTEREST, JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(SECOND_PRINCIPAL, JournalEntry.TransactionType.CREDIT), };
+                new JournalEntry(SECOND_AND_THIRD_INTEREST + SECOND_PRINCIPAL, JournalEntry.TransactionType.CREDIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.REPAYMENT_DATE[2], assetAccountSecondEntry);
         System.out.println("Repayment 2 Done ......");
 
@@ -721,7 +719,7 @@ public class AccountingScenarioIntegrationTest {
         float expected_value = this.LP_PRINCIPAL - PRINCIPAL_VALUE_FOR_EACH_PERIOD;
         this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, expected_value, loanID);
         final JournalEntry[] assetAccountEntry = { new JournalEntry(15000f, JournalEntry.TransactionType.DEBIT),
-                new JournalEntry(1000f, JournalEntry.TransactionType.CREDIT), new JournalEntry(10000f, JournalEntry.TransactionType.CREDIT) };
+                new JournalEntry(11000f, JournalEntry.TransactionType.CREDIT) };
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, this.REPAYMENT_DATE[1], assetAccountEntry);
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, this.REPAYMENT_DATE[1], new JournalEntry(4000f,
                 JournalEntry.TransactionType.CREDIT));

@@ -18,10 +18,20 @@
  */
 package org.apache.fineract.spm.api;
 
+import java.util.Collections;
+import java.util.List;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.domain.Client;
-import org.apache.fineract.portfolio.client.domain.ClientRepository;
-import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
+import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.spm.data.ScorecardData;
 import org.apache.fineract.spm.domain.Scorecard;
 import org.apache.fineract.spm.domain.Survey;
@@ -35,11 +45,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import java.util.Collections;
-import java.util.List;
-
 @Path("/surveys/{surveyId}/scorecards")
 @Component
 @Scope("singleton")
@@ -48,16 +53,16 @@ public class ScorecardApiResource {
     private final PlatformSecurityContext securityContext;
     private final SpmService spmService;
     private final ScorecardService scorecardService;
-    private final ClientRepository clientRepository;
+    private final ClientRepositoryWrapper clientRepositoryWrapper;
 
     @Autowired
     public ScorecardApiResource(final PlatformSecurityContext securityContext, final SpmService spmService,
-                                final ScorecardService scorecardService, final ClientRepository clientRepository) {
+                                final ScorecardService scorecardService, final ClientRepositoryWrapper clientRepositoryWrapper) {
         super();
         this.securityContext = securityContext;
         this.spmService = spmService;
         this.scorecardService = scorecardService;
-        this.clientRepository = clientRepository;
+        this.clientRepositoryWrapper = clientRepositoryWrapper;
     }
 
     @GET
@@ -71,7 +76,7 @@ public class ScorecardApiResource {
 
         final List<Scorecard> scorecards = this.scorecardService.findBySurvey(survey);
 
-        if (scorecards == null) {
+        if (scorecards != null) {
             return ScorecardMapper.map(scorecards);
         }
 
@@ -84,15 +89,8 @@ public class ScorecardApiResource {
     @Transactional
     public void createScorecard(@PathParam("surveyId") final Long surveyId, final ScorecardData scorecardData) {
         final AppUser appUser = this.securityContext.authenticatedUser();
-
         final Survey survey = findSurvey(surveyId);
-
-        final Client client = this.clientRepository.findOne(scorecardData.getClientId());
-
-        if (client == null) {
-            throw new ClientNotFoundException(scorecardData.getClientId());
-        }
-
+        final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(scorecardData.getClientId());
         this.scorecardService.createScorecard(ScorecardMapper.map(scorecardData, survey, appUser, client));
     }
 
@@ -104,21 +102,12 @@ public class ScorecardApiResource {
     public List<ScorecardData> findBySurveyClient(@PathParam("surveyId") final Long surveyId,
                                                   @PathParam("clientId") final Long clientId) {
         this.securityContext.authenticatedUser();
-
         final Survey survey = findSurvey(surveyId);
-
-        final Client client = this.clientRepository.findOne(clientId);
-
-        if (client == null) {
-            throw new ClientNotFoundException(clientId);
-        }
-
+        final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
         final List<Scorecard> scorecards = this.scorecardService.findBySurveyAndClient(survey, client);
-
-        if (scorecards == null) {
+        if (scorecards != null) {
             return ScorecardMapper.map(scorecards);
         }
-
         return Collections.EMPTY_LIST;
     }
 

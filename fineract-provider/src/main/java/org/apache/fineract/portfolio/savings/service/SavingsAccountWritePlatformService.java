@@ -41,21 +41,19 @@ public interface SavingsAccountWritePlatformService {
 
     CommandProcessingResult calculateInterest(Long savingsId);
 
-    CommandProcessingResult postInterest(Long savingsId);
-
     CommandProcessingResult undoTransaction(Long savingsId, Long transactionId, boolean allowAccountTransferModification);
 
     CommandProcessingResult adjustSavingsTransaction(Long savingsId, Long transactionId, JsonCommand command);
 
     CommandProcessingResult close(Long savingsId, JsonCommand command);
 
-    SavingsAccountTransaction initiateSavingsTransfer(Long accountId, LocalDate transferDate);
+    SavingsAccountTransaction initiateSavingsTransfer(SavingsAccount account, LocalDate transferDate);
 
-    SavingsAccountTransaction withdrawSavingsTransfer(Long accountId, LocalDate transferDate);
+    SavingsAccountTransaction withdrawSavingsTransfer(SavingsAccount account, LocalDate transferDate);
 
-    void rejectSavingsTransfer(Long accountId);
+    void rejectSavingsTransfer(SavingsAccount account);
 
-    SavingsAccountTransaction acceptSavingsTransfer(Long accountId, LocalDate transferDate, Office acceptedInOffice, Staff staff);
+    SavingsAccountTransaction acceptSavingsTransfer(SavingsAccount account, LocalDate transferDate, Office acceptedInOffice, Staff staff);
 
     CommandProcessingResult addSavingsAccountCharge(JsonCommand command);
 
@@ -78,5 +76,32 @@ public interface SavingsAccountWritePlatformService {
     void processPostActiveActions(SavingsAccount account, DateTimeFormatter fmt, Set<Long> existingTransactionIds,
             Set<Long> existingReversedTransactionIds);
 
-    void postInterest(SavingsAccount account);
+
+    CommandProcessingResult modifyWithHoldTax(Long savingsAccountId, JsonCommand command);
+
+	void setSubStatusInactive(Long savingsId);
+
+	void setSubStatusDormant(Long savingsId);
+
+	void escheat(Long savingsId);
+
+    CommandProcessingResult postInterest(JsonCommand command);
+
+    void postInterest(SavingsAccount account, boolean postInterestAs, LocalDate transactionDate);
+    
+    CommandProcessingResult blockAccount(Long savingsId);
+
+    CommandProcessingResult unblockAccount(Long savingsId);
+
+    CommandProcessingResult holdAmount(Long savingsId, JsonCommand command);
+
+    CommandProcessingResult blockCredits(Long savingsId);
+
+    CommandProcessingResult unblockCredits(Long savingsId);
+
+    CommandProcessingResult blockDebits(Long savingsId);
+
+    CommandProcessingResult unblockDebits(Long savingsId);
+
+    CommandProcessingResult releaseAmount(Long savingsId, Long transactionId);
 }

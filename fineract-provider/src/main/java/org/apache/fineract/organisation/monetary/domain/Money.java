@@ -29,16 +29,16 @@ import javax.persistence.Embeddable;
 public class Money implements Comparable<Money> {
 
     @Column(name = "currency_code", length = 3)
-    private final String currencyCode;
+    private String currencyCode;
 
     @Column(name = "currency_digits")
-    private final int currencyDigitsAfterDecimal;
+    private int currencyDigitsAfterDecimal;
 
     @Column(name = "currency_multiplesof")
-    private final Integer inMultiplesOf;
+    private Integer inMultiplesOf;
 
     @Column(name = "amount", scale = 6, precision = 19)
-    private final BigDecimal amount;
+    private BigDecimal amount;
 
     public static Money total(final Money... monies) {
         if (monies.length == 0) { throw new IllegalArgumentException("Money array must not be empty"); }

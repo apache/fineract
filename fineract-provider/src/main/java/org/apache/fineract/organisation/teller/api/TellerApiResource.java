@@ -37,6 +37,8 @@ import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.Page;
+import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.teller.data.CashierData;
 import org.apache.fineract.organisation.teller.data.CashierTransactionData;
@@ -248,15 +250,16 @@ public class TellerApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     public String getTransactionsForCashier(@PathParam("tellerId") final Long tellerId, @PathParam("cashierId") final Long cashierId,
-            @QueryParam("currencyCode") final String currencyCode) {
+            @QueryParam("currencyCode") final String currencyCode, @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
+            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
         final TellerData teller = this.readPlatformService.findTeller(tellerId);
         final CashierData cashier = this.readPlatformService.findCashier(cashierId);
 
         final Date fromDate = null;
         final Date toDate = null;
-
-        final Collection<CashierTransactionData> cashierTxns = this.readPlatformService.retrieveCashierTransactions(cashierId, false,
-                fromDate, toDate, currencyCode);
+        final SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
+        final Page<CashierTransactionData> cashierTxns = this.readPlatformService.retrieveCashierTransactions(cashierId, false,
+                fromDate, toDate, currencyCode, searchParameters);
 
         return this.jsonSerializer.serialize(cashierTxns);
     }
@@ -266,15 +269,19 @@ public class TellerApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     public String getTransactionsWtihSummaryForCashier(@PathParam("tellerId") final Long tellerId,
-            @PathParam("cashierId") final Long cashierId, @QueryParam("currencyCode") final String currencyCode) {
+            @PathParam("cashierId") final Long cashierId, @QueryParam("currencyCode") final String currencyCode,
+            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
+            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
         final TellerData teller = this.readPlatformService.findTeller(tellerId);
         final CashierData cashier = this.readPlatformService.findCashier(cashierId);
 
         final Date fromDate = null;
         final Date toDate = null;
+        
+        final SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
 
-        final CashierTransactionsWithSummaryData cashierTxnWithSummary = this.readPlatformService
-                .retrieveCashierTransactionsWithSummary(cashierId, false, fromDate, toDate, currencyCode);
+        final CashierTransactionsWithSummaryData cashierTxnWithSummary = this.readPlatformService.retrieveCashierTransactionsWithSummary(
+                cashierId, false, fromDate, toDate, currencyCode, searchParameters);
 
         return this.jsonSerializer.serialize(cashierTxnWithSummary);
     }

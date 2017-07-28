@@ -117,4 +117,24 @@ public class LoanAccrualPlatformServiceImpl implements LoanAccrualPlatformServic
         return sb.toString();
     }
 
+    @Override
+    @CronTarget(jobName = JobName.ADD_PERIODIC_ACCRUAL_ENTRIES_FOR_LOANS_WITH_INCOME_POSTED_AS_TRANSACTIONS)
+    public void addPeriodicAccrualsForLoansWithIncomePostedAsTransactions() throws JobExecutionException {
+        Collection<Long> loanIds = this.loanReadPlatformService.retrieveLoanIdsWithPendingIncomePostingTransactions();
+        if(loanIds != null && loanIds.size() > 0){
+            StringBuilder sb = new StringBuilder();
+            for (Long loanId : loanIds) {
+                try {
+                    this.loanAccrualWritePlatformService.addIncomeAndAccrualTransactions(loanId);
+                } catch (Exception e) {
+                    Throwable realCause = e;
+                    if (e.getCause() != null) {
+                        realCause = e.getCause();
+                    }
+                    sb.append("failed to add income and accrual transaction for loan " + loanId + " with message " + realCause.getMessage());
+                }
+            }
+            if (sb.length() > 0) { throw new JobExecutionException(sb.toString()); }
+        }
+    }
 }

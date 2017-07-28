@@ -22,7 +22,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.joda.time.LocalDate;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -40,7 +40,7 @@ import java.util.Map;
 @Entity
 @Table(name = "m_cashiers", uniqueConstraints = { @UniqueConstraint(name = "ux_cashiers_staff_teller", columnNames = { "staff_id",
         "teller_id" }) })
-public class Cashier extends AbstractPersistable<Long> {
+public class Cashier extends AbstractPersistableCustom<Long> {
 
     // ManyToOne(fetch = FetchType.LAZY)
     // JoinColumn(name = "office_id", nullable = false)
@@ -324,7 +324,7 @@ public class Cashier extends AbstractPersistable<Long> {
 
     /**
      * Returns the valid from date of this cashier.
-     * <p/>
+     * 
      * <p>
      * The valid from/to dates may be used to define a time period in which the
      * cashier is assignable to a teller.
@@ -346,13 +346,13 @@ public class Cashier extends AbstractPersistable<Long> {
 
     /**
      * Sets the valid from date of this cashier.
-     * <p/>
+     * 
      * <p>
      * The valid from/to dates may be used to define a time period in which the
      * cashier is assignable to a teller.
      * </p>
      * 
-     * @param validFrom
+     * @param  startDate validFrom
      *            the valid from date of this cashier
      */
     public void setStartDate(Date startDate) {
@@ -361,7 +361,7 @@ public class Cashier extends AbstractPersistable<Long> {
 
     /**
      * Returns the valid to date of this cashier.
-     * <p/>
+     * 
      * <p>
      * The valid from/to dates may be used to define a time period in which the
      * cashier is assignable to a teller.
@@ -383,13 +383,13 @@ public class Cashier extends AbstractPersistable<Long> {
 
     /**
      * Sets the valid to date of this cashier.
-     * <p/>
+     * 
      * <p>
      * The valid from/to dates may be used to define a time period in which the
      * cashier is assignable to a teller.
      * </p>
      * 
-     * @param validTo
+     * @param endDate validTo
      *            the valid to date of this cashier
      */
     public void setEndDate(Date endDate) {
@@ -409,7 +409,7 @@ public class Cashier extends AbstractPersistable<Long> {
     /**
      * Sets the part time flag of this cashier.
      * 
-     * @param partTime
+     * @param isFullDay partTime
      *            the part time flag of this cashier
      */
     public void setFullDay(Boolean isFullDay) {
@@ -418,7 +418,7 @@ public class Cashier extends AbstractPersistable<Long> {
 
     /**
      * Returns the start time of this cashier.
-     * <p/>
+     * 
      * <p>
      * The start/end times may be used to define a time period in which the
      * cashier works part time.
@@ -432,7 +432,7 @@ public class Cashier extends AbstractPersistable<Long> {
 
     /**
      * Set the start time of this cashier.
-     * <p/>
+     * 
      * <p>
      * The start/end times may be used to define a time period in which the
      * cashier works part time.
@@ -447,7 +447,7 @@ public class Cashier extends AbstractPersistable<Long> {
 
     /**
      * Returns the end time of this cashier.
-     * <p/>
+     * 
      * <p>
      * The start/end times may be used to define a time period in which the
      * cashier works part time.
@@ -461,7 +461,7 @@ public class Cashier extends AbstractPersistable<Long> {
 
     /**
      * Sets the end time of this cashier.
-     * <p/>
+     * 
      * <p>
      * The start/end times may be used to define a time period in which the
      * cashier works part time.

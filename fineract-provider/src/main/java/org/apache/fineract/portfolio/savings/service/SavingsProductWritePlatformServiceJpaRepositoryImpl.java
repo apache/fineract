@@ -18,19 +18,28 @@
  */
 package org.apache.fineract.portfolio.savings.service;
 
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargesParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.PersistenceException;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
-import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.charge.domain.Charge;
@@ -40,6 +49,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
 import org.apache.fineract.portfolio.savings.domain.SavingsProductAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
+import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,8 +73,7 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
             final SavingsProductRepository savingProductRepository, final SavingsProductDataValidator fromApiJsonDataValidator,
             final SavingsProductAssembler savingsProductAssembler,
             final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
-            final FineractEntityAccessUtil fineractEntityAccessUtil
-            ) {
+            final FineractEntityAccessUtil fineractEntityAccessUtil) {
         this.context = context;
         this.savingProductRepository = savingProductRepository;
         this.fromApiJsonDataValidator = fromApiJsonDataValidator;
@@ -78,9 +87,8 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleDataIntegrityIssues(final JsonCommand command, final DataAccessException dae) {
+    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dae) {
 
-        final Throwable realCause = dae.getMostSpecificCause();
         if (realCause.getMessage().contains("sp_unq_name")) {
 
             final String name = command.stringValueOfParameterNamed("name");
@@ -98,7 +106,7 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
                 "Unknown data integrity issue with resource.");
     }
 
-    private void logAsErrorUnexpectedDataIntegrityException(final DataAccessException dae) {
+    private void logAsErrorUnexpectedDataIntegrityException(final Exception dae) {
         this.logger.error(dae.getMessage(), dae);
     }
 
@@ -116,20 +124,23 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
             // save accounting mappings
             this.accountMappingWritePlatformService.createSavingProductToGLAccountMapping(product.getId(), command,
                     DepositAccountType.SAVINGS_DEPOSIT);
-            
-            // check if the office specific products are enabled. If yes, then save this savings product against a specific office
+
+            // check if the office specific products are enabled. If yes, then
+            // save this savings product against a specific office
             // i.e. this savings product is specific for this office.
             fineractEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
-            		FineractEntityAccessType.OFFICE_ACCESS_TO_SAVINGS_PRODUCTS, 
-            		FineractEntityType.SAVINGS_PRODUCT, 
-            		product.getId());
+                    FineractEntityAccessType.OFFICE_ACCESS_TO_SAVINGS_PRODUCTS, product.getId());
 
             return new CommandProcessingResultBuilder() //
                     .withEntityId(product.getId()) //
                     .build();
         } catch (final DataAccessException e) {
-            handleDataIntegrityIssues(command, e);
+            handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleDataIntegrityIssues(command, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -139,10 +150,10 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
 
         try {
             this.context.authenticatedUser();
-            this.fromApiJsonDataValidator.validateForUpdate(command.json());
-
             final SavingsProduct product = this.savingProductRepository.findOne(productId);
             if (product == null) { throw new SavingsProductNotFoundException(productId); }
+
+            this.fromApiJsonDataValidator.validateForUpdate(command.json(), product);
 
             final Map<String, Object> changes = product.update(command);
 
@@ -152,6 +163,19 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
                 final boolean updated = product.update(savingsProductCharges);
                 if (!updated) {
                     changes.remove(chargesParamName);
+                }
+            }
+
+            if (changes.containsKey(taxGroupIdParamName)) {
+                final TaxGroup taxGroup = this.savingsProductAssembler.assembleTaxGroup(command);
+                product.setTaxGroup(taxGroup);
+                if (product.withHoldTax() && product.getTaxGroup() == null) {
+                    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                    final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                            .resource(SAVINGS_PRODUCT_RESOURCE_NAME);
+                    final Long taxGroupId = null;
+                    baseDataValidator.reset().parameter(taxGroupIdParamName).value(taxGroupId).notBlank();
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
                 }
             }
 
@@ -170,8 +194,12 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
                     .withEntityId(product.getId()) //
                     .with(changes).build();
         } catch (final DataAccessException e) {
-            handleDataIntegrityIssues(command, e);
+            handleDataIntegrityIssues(command, e.getMostSpecificCause(), e);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleDataIntegrityIssues(command, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 

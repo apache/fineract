@@ -18,22 +18,24 @@
  */
 package org.apache.fineract.portfolio.interestratechart.data;
 
-import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.INTERESTRATE_CHART_CREATE_REQUEST_DATA_PARAMETERS;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.INTERESTRATE_CHART_RESOURCE_NAME;
-import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.INTERESTRATE_CHART_UPDATE_REQUEST_DATA_PARAMETERS;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.chartSlabs;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.descriptionParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.endDateParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.fromDateParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.idParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.isPrimaryGroupingByAmountParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.nameParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.productIdParamName;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -41,6 +43,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -55,6 +58,15 @@ public class InterestRateChartDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final InterestRateChartSlabDataValidator chartSlabDataValidator;
+	private static final Set<String> INTERESTRATE_CHART_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+			InterestRateChartApiConstants.localeParamName, InterestRateChartApiConstants.dateFormatParamName,
+			nameParamName, descriptionParamName, fromDateParamName, endDateParamName, productIdParamName, chartSlabs,
+			isPrimaryGroupingByAmountParamName));
+
+	private static final Set<String> INTERESTRATE_CHART_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+			InterestRateChartApiConstants.localeParamName, InterestRateChartApiConstants.dateFormatParamName,
+			idParamName, nameParamName, descriptionParamName, fromDateParamName, endDateParamName, chartSlabs,
+			InterestRateChartApiConstants.deleteParamName, isPrimaryGroupingByAmountParamName));
 
     @Autowired
     public InterestRateChartDataValidator(final FromJsonHelper fromApiJsonHelper,
@@ -98,6 +110,11 @@ public class InterestRateChartDataValidator {
             toDate = this.fromApiJsonHelper.extractLocalDateNamed(endDateParamName, element);
             baseDataValidator.reset().parameter(endDateParamName).value(toDate).notNull();
         }
+        
+        Boolean isPrimaryGroupingByAmount = this.fromApiJsonHelper.extractBooleanNamed(isPrimaryGroupingByAmountParamName, element);
+        if (isPrimaryGroupingByAmount == null) {
+            isPrimaryGroupingByAmount = false;
+        }
 
         if (fromDate != null && toDate != null) {
             if (fromDate.isAfter(toDate)) {
@@ -106,7 +123,7 @@ public class InterestRateChartDataValidator {
         }
 
         // validate chart Slabs
-        validateChartSlabs(element, baseDataValidator);
+        validateChartSlabs(element, baseDataValidator, isPrimaryGroupingByAmount);
     }
 
     public void validateUpdate(final String json) {
@@ -151,6 +168,11 @@ public class InterestRateChartDataValidator {
             toDate = this.fromApiJsonHelper.extractLocalDateNamed(endDateParamName, element);
             baseDataValidator.reset().parameter(endDateParamName).value(toDate).notNull();
         }
+        
+        Boolean isPrimaryGroupingByAmount = this.fromApiJsonHelper.extractBooleanNamed(isPrimaryGroupingByAmountParamName, element);
+        if (isPrimaryGroupingByAmount == null) {
+            isPrimaryGroupingByAmount = false;
+        }
 
         if (fromDate != null && toDate != null) {
             if (fromDate.isAfter(toDate)) {
@@ -158,7 +180,7 @@ public class InterestRateChartDataValidator {
             }
         }
 
-        validateChartSlabs(element, baseDataValidator);
+        validateChartSlabs(element, baseDataValidator, isPrimaryGroupingByAmount);
 
     }
 
@@ -166,7 +188,7 @@ public class InterestRateChartDataValidator {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
-    private void validateChartSlabs(JsonElement element, DataValidatorBuilder baseDataValidator) {
+    private void validateChartSlabs(JsonElement element, DataValidatorBuilder baseDataValidator,final boolean isPrimaryGroupingByAmount) {
 
         if (element.isJsonObject()) {
             final JsonObject topLevelJsonElement = element.getAsJsonObject();
@@ -178,9 +200,9 @@ public class InterestRateChartDataValidator {
                     if (this.fromApiJsonHelper.parameterExists(idParamName, interstRateChartElement)) {
                         final Long id = this.fromApiJsonHelper.extractLongNamed(idParamName, interstRateChartElement);
                         baseDataValidator.reset().parameter(idParamName).value(id).notNull().integerGreaterThanZero();
-                        this.chartSlabDataValidator.validateChartSlabsUpdate(interstRateChartElement, baseDataValidator, locale);
+                        this.chartSlabDataValidator.validateChartSlabsUpdate(interstRateChartElement, baseDataValidator, locale, isPrimaryGroupingByAmount);
                     } else {
-                        this.chartSlabDataValidator.validateChartSlabsCreate(interstRateChartElement, baseDataValidator, locale);
+                        this.chartSlabDataValidator.validateChartSlabsCreate(interstRateChartElement, baseDataValidator, locale, isPrimaryGroupingByAmount);
                     }
                 }
             }

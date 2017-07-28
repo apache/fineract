@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings.domain;
 
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.allowOverdraftParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.descriptionParamName;
@@ -41,7 +42,12 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalA
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.overdraftLimitParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.shortNameParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.taxGroupIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isDormancyTrackingActiveParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToInactiveParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToDormancyParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.daysToEscheatParamName;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -59,6 +65,8 @@ import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYea
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.apache.fineract.portfolio.tax.domain.TaxGroup;
+import org.apache.fineract.portfolio.tax.domain.TaxGroupRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -69,10 +77,12 @@ import com.google.gson.JsonObject;
 public class SavingsProductAssembler {
 
     private final ChargeRepositoryWrapper chargeRepository;
+    private final TaxGroupRepositoryWrapper taxGroupRepository;
 
     @Autowired
-    public SavingsProductAssembler(final ChargeRepositoryWrapper chargeRepository) {
+    public SavingsProductAssembler(final ChargeRepositoryWrapper chargeRepository, final TaxGroupRepositoryWrapper taxGroupRepository) {
         this.chargeRepository = chargeRepository;
+        this.taxGroupRepository = taxGroupRepository;
     }
 
     public SavingsProduct assemble(final JsonCommand command) {
@@ -139,18 +149,18 @@ public class SavingsProductAssembler {
         }
 
         BigDecimal overdraftLimit = BigDecimal.ZERO;
-        if(command.parameterExists(overdraftLimitParamName)){
+        if (command.parameterExists(overdraftLimitParamName)) {
             overdraftLimit = command.bigDecimalValueOfParameterNamed(overdraftLimitParamName);
         }
 
         BigDecimal nominalAnnualInterestRateOverdraft = BigDecimal.ZERO;
-        if(command.parameterExists(nominalAnnualInterestRateOverdraftParamName)){
-        	nominalAnnualInterestRateOverdraft = command.bigDecimalValueOfParameterNamed(nominalAnnualInterestRateOverdraftParamName);
+        if (command.parameterExists(nominalAnnualInterestRateOverdraftParamName)) {
+            nominalAnnualInterestRateOverdraft = command.bigDecimalValueOfParameterNamed(nominalAnnualInterestRateOverdraftParamName);
         }
-        
+
         BigDecimal minOverdraftForInterestCalculation = BigDecimal.ZERO;
-        if(command.parameterExists(minOverdraftForInterestCalculationParamName)){
-        	minOverdraftForInterestCalculation = command.bigDecimalValueOfParameterNamed(minOverdraftForInterestCalculationParamName);
+        if (command.parameterExists(minOverdraftForInterestCalculationParamName)) {
+            minOverdraftForInterestCalculation = command.bigDecimalValueOfParameterNamed(minOverdraftForInterestCalculationParamName);
         }
 
         boolean enforceMinRequiredBalance = false;
@@ -159,17 +169,26 @@ public class SavingsProductAssembler {
         }
 
         BigDecimal minRequiredBalance = BigDecimal.ZERO;
-        if(command.parameterExists(minRequiredBalanceParamName)){
+        if (command.parameterExists(minRequiredBalanceParamName)) {
             minRequiredBalance = command.bigDecimalValueOfParameterNamed(minRequiredBalanceParamName);
         }
         final BigDecimal minBalanceForInterestCalculation = command
                 .bigDecimalValueOfParameterNamedDefaultToNullIfZero(minBalanceForInterestCalculationParamName);
 
+        boolean withHoldTax = command.booleanPrimitiveValueOfParameterNamed(withHoldTaxParamName);
+        final TaxGroup taxGroup = assembleTaxGroup(command);
+        
+        final Boolean isDormancyTrackingActive = command.booleanObjectValueOfParameterNamed(isDormancyTrackingActiveParamName);
+        final Long daysToInactive = command.longValueOfParameterNamed(daysToInactiveParamName);
+        final Long daysToDormancy = command.longValueOfParameterNamed(daysToDormancyParamName);
+        final Long daysToEscheat = command.longValueOfParameterNamed(daysToEscheatParamName);
+
         return SavingsProduct.createNew(name, shortName, description, currency, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, iswithdrawalFeeApplicableForTransfer, accountingRuleType, charges,
                 allowOverdraft, overdraftLimit, enforceMinRequiredBalance, minRequiredBalance, minBalanceForInterestCalculation,
-                nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation);
+                nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroup,
+                isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat);
     }
 
     public Set<Charge> assembleListOfSavingsProductCharges(final JsonCommand command, final String savingsProductCurrencyCode) {
@@ -204,5 +223,14 @@ public class SavingsProductAssembler {
         }
 
         return charges;
+    }
+
+    public TaxGroup assembleTaxGroup(final JsonCommand command) {
+        final Long taxGroupId = command.longValueOfParameterNamed(taxGroupIdParamName);
+        TaxGroup taxGroup = null;
+        if (taxGroupId != null) {
+            taxGroup = this.taxGroupRepository.findOneWithNotFoundDetection(taxGroupId);
+        }
+        return taxGroup;
     }
 }

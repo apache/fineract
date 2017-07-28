@@ -60,10 +60,8 @@ import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -81,7 +79,7 @@ import com.google.gson.JsonObject;
 @Table(name = "m_product_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE"),
         @UniqueConstraint(columnNames = { "short_name" }, name = "unq_short_name") })
-public class LoanProduct extends AbstractPersistable<Long> {
+public class LoanProduct extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "fund_id", nullable = true)
@@ -105,7 +103,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     private List<Charge> charges;
 
     @Embedded
-    private final LoanProductRelatedDetail loanProductRelatedDetail;
+    private LoanProductRelatedDetail loanProductRelatedDetail;
 
     @Embedded
     private LoanProductMinMaxConstraints loanProductMinMaxConstraints;
@@ -133,8 +131,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private String externalId;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanProduct", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanProduct", orphanRemoval = true, fetch=FetchType.EAGER)
     private Set<LoanProductBorrowerCycleVariations> borrowerCycleVariations = new HashSet<>();
 
     @Column(name = "overdue_days_for_npa", nullable = true)
@@ -143,15 +140,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
     @Column(name = "min_days_between_disbursal_and_first_repayment", nullable = true)
     private Integer minimumDaysBetweenDisbursalAndFirstRepayment;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true, fetch=FetchType.EAGER)
     private LoanProductInterestRecalculationDetails productInterestRecalculationDetails;
 
     @Column(name = "hold_guarantee_funds")
     private boolean holdGuaranteeFunds;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true, fetch=FetchType.EAGER)
     private LoanProductGuaranteeDetails loanProductGuaranteeDetails;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
@@ -172,16 +167,21 @@ public class LoanProduct extends AbstractPersistable<Long> {
     @Column(name = "is_linked_to_floating_interest_rates", nullable = false)
     private boolean isLinkedToFloatingInterestRate;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true, fetch=FetchType.EAGER)
     private LoanProductFloatingRates floatingRates;
 
     @Column(name = "allow_variabe_installments", nullable = false)
     private boolean allowVariabeInstallments;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true, fetch=FetchType.EAGER)
     private LoanProductVariableInstallmentConfig variableInstallmentConfig;
+    
+    @Column(name = "sync_expected_with_disbursement_date")
+    private boolean syncExpectedWithDisbursementDate;
+
+
+    @Column(name = "can_use_for_topup", nullable = false)
+    private boolean canUseForTopup = false;
 
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate) {
@@ -251,6 +251,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
         // grace details
         final Integer graceOnPrincipalPayment = command.integerValueOfParameterNamed("graceOnPrincipalPayment");
+        final Integer recurringMoratoriumOnPrincipalPeriods = command.integerValueOfParameterNamed("recurringMoratoriumOnPrincipalPeriods");
         final Integer graceOnInterestPayment = command.integerValueOfParameterNamed("graceOnInterestPayment");
         final Integer graceOnInterestCharged = command.integerValueOfParameterNamed("graceOnInterestCharged");
         final Integer minimumDaysBetweenDisbursalAndFirstRepayment = command
@@ -324,10 +325,17 @@ public class LoanProduct extends AbstractPersistable<Long> {
         final Integer installmentAmountInMultiplesOf = command
                 .integerValueOfParameterNamed(LoanProductConstants.installmentAmountInMultiplesOfParamName);
 
+        final boolean syncExpectedWithDisbursementDate = command.booleanPrimitiveValueOfParameterNamed("syncExpectedWithDisbursementDate");
+        
+        
+		final boolean canUseForTopup = command.parameterExists(LoanProductConstants.canUseForTopup)
+				? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.canUseForTopup)
+				: false;
+
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, shortName, description, currency, principal, minPrincipal,
                 maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType,
                 annualInterestRate, interestMethod, interestCalculationPeriodMethod, allowPartialPeriodInterestCalcualtion, repaymentEvery,
-                repaymentFrequencyType, numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, graceOnPrincipalPayment,
+                repaymentFrequencyType, numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods,
                 graceOnInterestPayment, graceOnInterestCharged, amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType,
                 includeInBorrowerCycle, startDate, closeDate, externalId, useBorrowerCycle, loanProductBorrowerCycleVariations,
                 multiDisburseLoan, maxTrancheCount, outstandingLoanBalance, graceOnArrearsAgeing, overdueDaysForNPA, daysInMonthType,
@@ -337,7 +345,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
                 installmentAmountInMultiplesOf, loanConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRate,
                 interestRateDifferential, minDifferentialLendingRate, maxDifferentialLendingRate, defaultDifferentialLendingRate,
                 isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGapBetweenInstallments,
-                maximumGapBetweenInstallments);
+                maximumGapBetweenInstallments, syncExpectedWithDisbursementDate, canUseForTopup);
 
     }
 
@@ -552,13 +560,11 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final boolean considerPartialPeriodInterest,
             final Integer repayEvery, final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfInstallments,
             final Integer defaultMinNumberOfInstallments, final Integer defaultMaxNumberOfInstallments,
-            final Integer graceOnPrincipalPayment, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
-            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance, final List<Charge> charges,
-            final AccountingRuleType accountingRuleType, final boolean includeInBorrowerCycle, final LocalDate startDate,
-            final LocalDate closeDate, final String externalId, final boolean useBorrowerCycle,
-            final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations, final boolean multiDisburseLoan,
-            final Integer maxTrancheCount, final BigDecimal outstandingLoanBalance, final Integer graceOnArrearsAgeing,
-            final Integer overdueDaysForNPA, final DaysInMonthType daysInMonthType, final DaysInYearType daysInYearType,
+            final Integer graceOnPrincipalPayment, final Integer recurringMoratoriumOnPrincipalPeriods, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
+            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance, final List<Charge> charges, final AccountingRuleType accountingRuleType,
+            final boolean includeInBorrowerCycle, final LocalDate startDate, final LocalDate closeDate, final String externalId, final boolean useBorrowerCycle,
+            final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations, final boolean multiDisburseLoan, final Integer maxTrancheCount, final BigDecimal outstandingLoanBalance,
+            final Integer graceOnArrearsAgeing, final Integer overdueDaysForNPA, final DaysInMonthType daysInMonthType, final DaysInYearType daysInYearType,
             final boolean isInterestRecalculationEnabled,
             final LoanProductInterestRecalculationDetails productInterestRecalculationDetails,
             final Integer minimumDaysBetweenDisbursalAndFirstRepayment, final boolean holdGuarantorFunds,
@@ -568,7 +574,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
             Boolean isLinkedToFloatingInterestRates, FloatingRate floatingRate, BigDecimal interestRateDifferential,
             BigDecimal minDifferentialLendingRate, BigDecimal maxDifferentialLendingRate, BigDecimal defaultDifferentialLendingRate,
             Boolean isFloatingInterestRateCalculationAllowed, final Boolean isVariableInstallmentsAllowed,
-            final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments) {
+            final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments,
+            final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -598,7 +605,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
         this.loanProductRelatedDetail = new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod,
                 interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod,
-                considerPartialPeriodInterest, repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, graceOnPrincipalPayment,
+                considerPartialPeriodInterest, repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods,
                 graceOnInterestPayment, graceOnInterestCharged, amortizationMethod, inArrearsTolerance, graceOnArrearsAgeing,
                 daysInMonthType.getValue(), daysInYearType.getValue(), isInterestRecalculationEnabled);
 
@@ -642,6 +649,9 @@ public class LoanProduct extends AbstractPersistable<Long> {
         this.accountMovesOutOfNPAOnlyOnArrearsCompletion = accountMovesOutOfNPAOnlyOnArrearsCompletion;
         this.canDefineInstallmentAmount = canDefineEmiAmount;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
+        this.syncExpectedWithDisbursementDate = 
+        		syncExpectedWithDisbursementDate;
+        this.canUseForTopup = canUseForTopup;
     }
 
     public MonetaryCurrency getCurrency() {
@@ -864,6 +874,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
             actualChanges.put("locale", localeAsInput);
             this.minimumDaysBetweenDisbursalAndFirstRepayment = newValue;
         }
+        
+        if(command.isChangeInBooleanParameterNamed("syncExpectedWithDisbursementDate"
+        		, this.syncExpectedWithDisbursementDate)){
+        	final boolean newValue = command.booleanPrimitiveValueOfParameterNamed("syncExpectedWithDisbursementDate");
+        	actualChanges.put("syncExpectedWithDisbursementDate", newValue);
+        	this.syncExpectedWithDisbursementDate = newValue;
+        }
 
         /**
          * Update interest recalculation settings
@@ -1014,6 +1031,12 @@ public class LoanProduct extends AbstractPersistable<Long> {
             this.installmentAmountInMultiplesOf = newValue;
         }
 
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.canUseForTopup, this.canUseForTopup)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.canUseForTopup);
+            actualChanges.put(LoanProductConstants.canUseForTopup, newValue);
+            this.canUseForTopup = newValue;
+        }
+
         return actualChanges;
     }
 
@@ -1160,8 +1183,16 @@ public class LoanProduct extends AbstractPersistable<Long> {
         }
         return borrowerCycleVariation;
     }
+    
+    public boolean syncExpectedWithDisbursementDate() {
+		return syncExpectedWithDisbursementDate;
+	}
 
-    public Map<String, BigDecimal> fetchBorrowerCycleVariationsForCycleNumber(final Integer cycleNumber) {
+	public void setSyncExpectedWithDisbursementDate(boolean syncExpectedWithDisbursementDate) {
+		this.syncExpectedWithDisbursementDate = syncExpectedWithDisbursementDate;
+	}
+
+	public Map<String, BigDecimal> fetchBorrowerCycleVariationsForCycleNumber(final Integer cycleNumber) {
         Map<String, BigDecimal> borrowerCycleVariations = new HashMap<>();
         borrowerCycleVariations.put(LoanProductConstants.principal, this.loanProductRelatedDetail.getPrincipal().getAmount());
         borrowerCycleVariations.put(LoanProductConstants.interestRatePerPeriod,
@@ -1328,6 +1359,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     public boolean allowVariabeInstallments() {
         return this.allowVariabeInstallments;
+    }
+
+    public boolean canUseForTopup(){
+        return this.canUseForTopup;
     }
 
 }

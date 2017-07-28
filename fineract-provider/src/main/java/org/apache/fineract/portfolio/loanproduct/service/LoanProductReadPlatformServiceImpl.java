@@ -121,7 +121,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         String sql = "select " + rm.schema();
 
         if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
-            sql += " where lp.id in ( " + inClause + " ) ";
+            sql += " where lp.id in ("+inClause+") ";
+            //Here no need to check injection as this is internal where clause
+           // SQLInjectionValidator.validateSQLInput(inClause);
         }
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
@@ -184,7 +186,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.nominal_interest_rate_per_period as interestRatePerPeriod, lp.min_nominal_interest_rate_per_period as minInterestRatePerPeriod, lp.max_nominal_interest_rate_per_period as maxInterestRatePerPeriod, lp.interest_period_frequency_enum as interestRatePerPeriodFreq, "
                     + "lp.annual_nominal_interest_rate as annualInterestRate, lp.interest_method_enum as interestMethod, lp.interest_calculated_in_period_enum as interestCalculationInPeriodMethod,lp.allow_partial_period_interest_calcualtion as allowPartialPeriodInterestCalcualtion, "
                     + "lp.repay_every as repaidEvery, lp.repayment_period_frequency_enum as repaymentPeriodFrequency, lp.number_of_repayments as numberOfRepayments, lp.min_number_of_repayments as minNumberOfRepayments, lp.max_number_of_repayments as maxNumberOfRepayments, "
-                    + "lp.grace_on_principal_periods as graceOnPrincipalPayment, lp.grace_on_interest_periods as graceOnInterestPayment, lp.grace_interest_free_periods as graceOnInterestCharged,lp.grace_on_arrears_ageing as graceOnArrearsAgeing,lp.overdue_days_for_npa as overdueDaysForNPA, "
+                    + "lp.grace_on_principal_periods as graceOnPrincipalPayment, lp.recurring_moratorium_principal_periods as recurringMoratoriumOnPrincipalPeriods, lp.grace_on_interest_periods as graceOnInterestPayment, lp.grace_interest_free_periods as graceOnInterestCharged,lp.grace_on_arrears_ageing as graceOnArrearsAgeing,lp.overdue_days_for_npa as overdueDaysForNPA, "
                     + "lp.min_days_between_disbursal_and_first_repayment As minimumDaysBetweenDisbursalAndFirstRepayment, "
                     + "lp.amortization_method_enum as amortizationMethod, lp.arrearstolerance_amount as tolerance, "
                     + "lp.accounting_type as accountingType, lp.include_in_borrower_cycle as includeInBorrowerCycle,lp.use_borrower_cycle as useBorrowerCycle, lp.start_date as startDate, lp.close_date as closeDate,  "
@@ -194,11 +196,19 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lpr.pre_close_interest_calculation_strategy as preCloseInterestCalculationStrategy, "
                     + "lpr.id as lprId, lpr.product_id as productId, lpr.compound_type_enum as compoundType, lpr.reschedule_strategy_enum as rescheduleStrategy, "
                     + "lpr.rest_frequency_type_enum as restFrequencyEnum, lpr.rest_frequency_interval as restFrequencyInterval, "
-                    + "lpr.rest_freqency_date as restFrequencyDate, lpr.arrears_based_on_original_schedule as isArrearsBasedOnOriginalSchedule, "
+                    + "lpr.rest_frequency_nth_day_enum as restFrequencyNthDayEnum, "
+                    + "lpr.rest_frequency_weekday_enum as restFrequencyWeekDayEnum, "
+                    + "lpr.rest_frequency_on_day as restFrequencyOnDay, "
+                    + "lpr.arrears_based_on_original_schedule as isArrearsBasedOnOriginalSchedule, "
                     + "lpr.compounding_frequency_type_enum as compoundingFrequencyTypeEnum, lpr.compounding_frequency_interval as compoundingInterval, "
-                    + "lpr.compounding_freqency_date as compoundingFrequencyDate,  "
+                    + "lpr.compounding_frequency_nth_day_enum as compoundingFrequencyNthDayEnum, "
+                    + "lpr.compounding_frequency_weekday_enum as compoundingFrequencyWeekDayEnum, "
+                    + "lpr.compounding_frequency_on_day as compoundingFrequencyOnDay, "
+                    + "lpr.is_compounding_to_be_posted_as_transaction as isCompoundingToBePostedAsTransaction, "
+                    + "lpr.allow_compounding_on_eod as allowCompoundingOnEod, "
                     + "lp.hold_guarantee_funds as holdGuaranteeFunds, "
                     + "lp.principal_threshold_for_last_installment as principalThresholdForLastInstallment, "
+                    + "lp.sync_expected_with_disbursement_date as syncExpectedWithDisbursementDate, "
                     + "lpg.id as lpgId, lpg.mandatory_guarantee as mandatoryGuarantee, "
                     + "lpg.minimum_guarantee_from_own_funds as minimumGuaranteeFromOwnFunds, lpg.minimum_guarantee_from_guarantor_funds as minimumGuaranteeFromGuarantor, "
                     + "lp.account_moves_out_of_npa_only_on_arrears_completion as accountMovesOutOfNPAOnlyOnArrearsCompletion, "
@@ -216,7 +226,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lfr.is_floating_interest_rate_calculation_allowed as isFloatingInterestRateCalculationAllowed, "
                     + "lp.allow_variabe_installments as isVariableIntallmentsAllowed, "
                     + "lvi.minimum_gap as minimumGap, "
-                    + "lvi.maximum_gap as maximumGap "
+                    + "lvi.maximum_gap as maximumGap, "
+                    + "lp.can_use_for_topup as canUseForTopup "
                     + " from m_product_loan lp "
                     + " left join m_fund f on f.id = lp.fund_id "
                     + " left join m_product_loan_recalculation_details lpr on lpr.product_id=lp.id "
@@ -263,6 +274,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final Integer repaymentEvery = JdbcSupport.getInteger(rs, "repaidEvery");
 
             final Integer graceOnPrincipalPayment = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "graceOnPrincipalPayment");
+            final Integer recurringMoratoriumOnPrincipalPeriods = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "recurringMoratoriumOnPrincipalPeriods");
             final Integer graceOnInterestPayment = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "graceOnInterestPayment");
             final Integer graceOnInterestCharged = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "graceOnInterestCharged");
             final Integer graceOnArrearsAgeing = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "graceOnArrearsAgeing");
@@ -360,23 +372,50 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                 final int restFrequencyEnumValue = JdbcSupport.getInteger(rs, "restFrequencyEnum");
                 final EnumOptionData restFrequencyType = LoanEnumerations.interestRecalculationFrequencyType(restFrequencyEnumValue);
                 final int restFrequencyInterval = JdbcSupport.getInteger(rs, "restFrequencyInterval");
-                final LocalDate restFrequencyDate = JdbcSupport.getLocalDate(rs, "restFrequencyDate");
+                final Integer restFrequencyNthDayEnumValue = JdbcSupport.getInteger(rs, "restFrequencyNthDayEnum");
+                EnumOptionData restFrequencyNthDayEnum = null;
+                if (restFrequencyNthDayEnumValue != null) {
+                    restFrequencyNthDayEnum = LoanEnumerations.interestRecalculationCompoundingNthDayType(restFrequencyNthDayEnumValue);
+                }
+                final Integer restFrequencyWeekDayEnumValue = JdbcSupport.getInteger(rs, "restFrequencyWeekDayEnum");
+                EnumOptionData restFrequencyWeekDayEnum = null;
+                if (restFrequencyWeekDayEnumValue != null) {
+                    restFrequencyWeekDayEnum = LoanEnumerations
+                            .interestRecalculationCompoundingDayOfWeekType(restFrequencyWeekDayEnumValue);
+                }
+                final Integer restFrequencyOnDay = JdbcSupport.getInteger(rs, "restFrequencyOnDay");
                 final Integer compoundingFrequencyEnumValue = JdbcSupport.getInteger(rs, "compoundingFrequencyTypeEnum");
                 EnumOptionData compoundingFrequencyType = null;
                 if (compoundingFrequencyEnumValue != null) {
                     compoundingFrequencyType = LoanEnumerations.interestRecalculationFrequencyType(compoundingFrequencyEnumValue);
                 }
                 final Integer compoundingInterval = JdbcSupport.getInteger(rs, "compoundingInterval");
-                final LocalDate compoundingFrequencyDate = JdbcSupport.getLocalDate(rs, "compoundingFrequencyDate");
+                final Integer compoundingFrequencyNthDayEnumValue = JdbcSupport.getInteger(rs, "compoundingFrequencyNthDayEnum");
+                EnumOptionData compoundingFrequencyNthDayEnum = null;
+                if (compoundingFrequencyNthDayEnumValue != null) {
+                    compoundingFrequencyNthDayEnum = LoanEnumerations
+                            .interestRecalculationCompoundingNthDayType(compoundingFrequencyNthDayEnumValue);
+                }
+                final Integer compoundingFrequencyWeekDayEnumValue = JdbcSupport.getInteger(rs, "compoundingFrequencyWeekDayEnum");
+                EnumOptionData compoundingFrequencyWeekDayEnum = null;
+                if (compoundingFrequencyWeekDayEnumValue != null) {
+                    compoundingFrequencyWeekDayEnum = LoanEnumerations
+                            .interestRecalculationCompoundingDayOfWeekType(compoundingFrequencyWeekDayEnumValue);
+                }
+                final Integer compoundingFrequencyOnDay = JdbcSupport.getInteger(rs, "compoundingFrequencyOnDay");
                 final boolean isArrearsBasedOnOriginalSchedule = rs.getBoolean("isArrearsBasedOnOriginalSchedule");
+                final boolean isCompoundingToBePostedAsTransaction = rs.getBoolean("isCompoundingToBePostedAsTransaction");
                 final int preCloseInterestCalculationStrategyEnumValue = JdbcSupport.getInteger(rs, "preCloseInterestCalculationStrategy");
                 final EnumOptionData preCloseInterestCalculationStrategy = LoanEnumerations
                         .preCloseInterestCalculationStrategy(preCloseInterestCalculationStrategyEnumValue);
+                final boolean allowCompoundingOnEod = rs.getBoolean("allowCompoundingOnEod");
 
                 interestRecalculationData = new LoanProductInterestRecalculationData(lprId, productId,
                         interestRecalculationCompoundingType, rescheduleStrategyType, restFrequencyType, restFrequencyInterval,
-                        restFrequencyDate, compoundingFrequencyType, compoundingInterval, compoundingFrequencyDate,
-                        isArrearsBasedOnOriginalSchedule, preCloseInterestCalculationStrategy);
+                        restFrequencyNthDayEnum, restFrequencyWeekDayEnum, restFrequencyOnDay, compoundingFrequencyType,
+                        compoundingInterval, compoundingFrequencyNthDayEnum, compoundingFrequencyWeekDayEnum, compoundingFrequencyOnDay,
+                        isArrearsBasedOnOriginalSchedule, isCompoundingToBePostedAsTransaction, preCloseInterestCalculationStrategy, 
+                        allowCompoundingOnEod);
             }
 
             final boolean amortization = rs.getBoolean("amortizationBoolean");
@@ -406,13 +445,16 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
             final BigDecimal principalThresholdForLastInstallment = rs.getBigDecimal("principalThresholdForLastInstallment");
             final boolean accountMovesOutOfNPAOnlyOnArrearsCompletion = rs.getBoolean("accountMovesOutOfNPAOnlyOnArrearsCompletion");
+            final boolean syncExpectedWithDisbursementDate = rs.getBoolean("syncExpectedWithDisbursementDate");
+            
+            final boolean canUseForTopup = rs.getBoolean("canUseForTopup");
 
             return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                     minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType,
                     interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType,
                     allowPartialPeriodInterestCalcualtion, fundId, fundName, transactionStrategyId, transactionStrategyName,
-                    graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, this.charges, accountingRuleType,
+                    graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged, this.charges, accountingRuleType,
                     includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId,
                     principalVariationsForBorrowerCycle, interestRateVariationsForBorrowerCycle,
                     numberOfRepaymentVariationsForBorrowerCycle, multiDisburseLoan, maxTrancheCount, outstandingLoanBalance,
@@ -422,14 +464,14 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     installmentAmountInMultiplesOf, allowAttributeOverrides, isLinkedToFloatingInterestRates, floatingRateId,
                     floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                     maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableIntallmentsAllowed, minimumGap,
-                    maximumGap);
+                    maximumGap, syncExpectedWithDisbursementDate, canUseForTopup);
         }
     }
 
     private static final class LoanProductLookupMapper implements RowMapper<LoanProductData> {
 
         public String schema() {
-            return "lp.id as id, lp.name as name from m_product_loan lp";
+            return "lp.id as id, lp.name as name, lp.allow_multiple_disbursals as multiDisburseLoan from m_product_loan lp";
         }
 
         public String activeOnlySchema() {
@@ -437,16 +479,16 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         }
 
         public String productMixSchema() {
-            return "lp.id as id, lp.name as name FROM m_product_loan lp left join m_product_mix pm on pm.product_id=lp.id where lp.id not IN("
+            return "lp.id as id, lp.name as name, lp.allow_multiple_disbursals as multiDisburseLoan FROM m_product_loan lp left join m_product_mix pm on pm.product_id=lp.id where lp.id not IN("
                     + "select lp.id from m_product_loan lp inner join m_product_mix pm on pm.product_id=lp.id)";
         }
 
         public String restrictedProductsSchema() {
-            return "pm.restricted_product_id as id, rp.name as name from m_product_mix pm join m_product_loan rp on rp.id = pm.restricted_product_id ";
+            return "pm.restricted_product_id as id, rp.name as name, rp.allow_multiple_disbursals as multiDisburseLoan from m_product_mix pm join m_product_loan rp on rp.id = pm.restricted_product_id ";
         }
 
         public String derivedRestrictedProductsSchema() {
-            return "pm.product_id as id, lp.name as name from m_product_mix pm join m_product_loan lp on lp.id=pm.product_id";
+            return "pm.product_id as id, lp.name as name, lp.allow_multiple_disbursals as multiDisburseLoan from m_product_mix pm join m_product_loan lp on lp.id=pm.product_id";
         }
 
         @Override
@@ -454,8 +496,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
             final Long id = rs.getLong("id");
             final String name = rs.getString("name");
+            final Boolean multiDisburseLoan = rs.getBoolean("multiDisburseLoan");
 
-            return LoanProductData.lookup(id, name);
+            return LoanProductData.lookup(id, name, multiDisburseLoan);
         }
     }
 
@@ -493,17 +536,17 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         final LoanProductMapper rm = new LoanProductMapper(null, null);
 
-        String sql = "select " + rm.loanProductSchema() + " where lp.currency_code='" + currencyCode + "'";
+        String sql = "select " + rm.loanProductSchema() + " where lp.currency_code= ? ";
 
         // Check if branch specific products are enabled. If yes, fetch only
         // products mapped to current user's office
         String inClause = fineractEntityAccessUtil
                 .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
         if ((inClause != null) && (!(inClause.trim().isEmpty()))) {
-            sql += " and id in ( " + inClause + " ) ";
+            sql += " and id in (" + inClause + ") ";
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm, new Object[] {currencyCode});
     }
 
     @Override
@@ -576,6 +619,59 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                 + "Select pm.product_id from m_product_mix pm where pm.restricted_product_id=?)";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId });
+    }
+    
+    @Override
+    public LoanProductData retrieveLoanProductFloatingDetails(final Long loanProductId) {
+
+        try {
+            final LoanProductFloatingRateMapper rm = new LoanProductFloatingRateMapper();
+            final String sql = "select " + rm.schema() + " where lp.id = ?";
+
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId });
+
+        } catch (final EmptyResultDataAccessException e) {
+            throw new LoanProductNotFoundException(loanProductId);
+        }
+    }
+    
+    
+    private static final class LoanProductFloatingRateMapper implements RowMapper<LoanProductData> {
+
+        public LoanProductFloatingRateMapper() {}
+
+        public String schema() {
+            return "lp.id as id,  lp.name as name," 
+                    + "lp.is_linked_to_floating_interest_rates as isLinkedToFloatingInterestRates, "
+                    + "lfr.floating_rates_id as floatingRateId, " + "fr.name as floatingRateName, "
+                    + "lfr.interest_rate_differential as interestRateDifferential, "
+                    + "lfr.min_differential_lending_rate as minDifferentialLendingRate, "
+                    + "lfr.default_differential_lending_rate as defaultDifferentialLendingRate, "
+                    + "lfr.max_differential_lending_rate as maxDifferentialLendingRate, "
+                    + "lfr.is_floating_interest_rate_calculation_allowed as isFloatingInterestRateCalculationAllowed "
+                    + " from m_product_loan lp " + " left join m_product_loan_floating_rates as lfr on lfr.loan_product_id = lp.id "
+                    + " left join m_floating_rates as fr on lfr.floating_rates_id = fr.id ";
+        }
+
+        @Override
+        public LoanProductData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = JdbcSupport.getLong(rs, "id");
+            final String name = rs.getString("name");
+
+            final boolean isLinkedToFloatingInterestRates = rs.getBoolean("isLinkedToFloatingInterestRates");
+            final Integer floatingRateId = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "floatingRateId");
+            final String floatingRateName = rs.getString("floatingRateName");
+            final BigDecimal interestRateDifferential = rs.getBigDecimal("interestRateDifferential");
+            final BigDecimal minDifferentialLendingRate = rs.getBigDecimal("minDifferentialLendingRate");
+            final BigDecimal defaultDifferentialLendingRate = rs.getBigDecimal("defaultDifferentialLendingRate");
+            final BigDecimal maxDifferentialLendingRate = rs.getBigDecimal("maxDifferentialLendingRate");
+            final boolean isFloatingInterestRateCalculationAllowed = rs.getBoolean("isFloatingInterestRateCalculationAllowed");
+
+            return LoanProductData.loanProductWithFloatingRates(id, name, isLinkedToFloatingInterestRates, floatingRateId,
+                    floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
+                    maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed);
+        }
     }
 
 }

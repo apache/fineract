@@ -87,13 +87,13 @@ public class FloatingRatesReadPlatformServiceImpl implements
 
 	@Override
 	public List<InterestRatePeriodData> retrieveInterestRatePeriods(
-			final Long floatingRateId) {
+			final Long productId) {
 		try {
 			FloatingInterestRatePeriodRowMapper mapper = new FloatingInterestRatePeriodRowMapper();
 			return this.jdbcTemplate.query(mapper.schema(), mapper,
-					new Object[] { floatingRateId });
+					new Object[] { productId });
 		} catch (final EmptyResultDataAccessException e) {
-			throw new FloatingRateNotFoundException(floatingRateId);
+			throw new FloatingRateNotFoundException("error.msg.floatingrate.not.found.for.product");
 		}
 	}
 
@@ -242,7 +242,9 @@ public class FloatingRatesReadPlatformServiceImpl implements
 				.append("    linkedrateperiods.is_differential_to_base_lending_rate as linkedrateperiods_is_differential_to_base_lending_rate, ")
 				.append("    baserate.from_date as baserate_from_date, ")
 				.append("    baserate.interest_rate as baserate_interest_rate ")
-				.append("from m_floating_rates as linkedrate ")
+				.append(" from m_product_loan as lp ")
+                                .append(" join m_product_loan_floating_rates as plfr on lp.id = plfr.loan_product_id ")
+                                .append(" join  m_floating_rates as linkedrate on linkedrate.id = plfr.floating_rates_id ")
 				.append("left join m_floating_rates_periods as linkedrateperiods on (linkedrate.id = linkedrateperiods.floating_rates_id and linkedrateperiods.is_active = 1) ")
 				.append("left join ( ")
 				.append("    select blr.name, ")
@@ -266,7 +268,7 @@ public class FloatingRatesReadPlatformServiceImpl implements
 				.append("            where blr.is_base_lending_rate = 1 and blr.is_active = 1 ")
 				.append("        ) as b ")
 				.append("        where b.from_date <= linkedrateperiods.from_date)) ")
-				.append("and linkedrate.id = ? ")
+				.append("and lp.id = ? ")
 				.append("order by linkedratePeriods_from_date desc ");
 
 		@Override

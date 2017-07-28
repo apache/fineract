@@ -27,6 +27,6 @@ public interface HookTemplateRepository extends
 		JpaRepository<HookTemplate, Long>,
 		JpaSpecificationExecutor<HookTemplate> {
 
-	@Query("from HookTemplate template where template.name = :name")
+	@Query("select template from HookTemplate template where template.name = :name")
 	HookTemplate findOne(@Param("name") String name);
 }

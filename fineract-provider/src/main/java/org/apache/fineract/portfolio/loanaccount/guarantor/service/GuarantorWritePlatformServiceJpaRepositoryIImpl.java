@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
@@ -97,7 +98,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
     @Transactional
     public CommandProcessingResult createGuarantor(final Long loanId, final JsonCommand command) {
         final GuarantorCommand guarantorCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
-        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
         return createGuarantor(loan, command, guarantorCommand, existGuarantorList);
     }
@@ -111,6 +112,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             AccountAssociations accountAssociations = null;
             if (guarantorCommand.getSavingsId() != null) {
                 final SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(guarantorCommand.getSavingsId());
+                validateGuarantorSavingsAccountActivationDateWithLoanSubmittedOnDate(loan,savingsAccount);
                 accountAssociations = AccountAssociations.associateSavingsAccount(loan, savingsAccount,
                         AccountAssociationType.GUARANTOR_ACCOUNT_ASSOCIATION.getValue(), true);
 
@@ -179,6 +181,14 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
         }
     }
 
+    private void validateGuarantorSavingsAccountActivationDateWithLoanSubmittedOnDate(final Loan loan, final SavingsAccount savingsAccount) {
+        if (loan.getSubmittedOnDate().isBefore(savingsAccount.getActivationLocalDate())) { throw new GeneralPlatformDomainRuleException(
+                "error.msg.guarantor.saving.account.activation.date.is.on.or.before.loan.submitted.on.date",
+                "Guarantor saving account activation date [" + savingsAccount.getActivationLocalDate()
+                        + "] is on or before the loan submitted on date [" + loan.getSubmittedOnDate() + "]",
+                savingsAccount.getActivationLocalDate(), loan.getSubmittedOnDate()); }
+    }
+
     @Override
     @Transactional
     public CommandProcessingResult updateGuarantor(final Long loanId, final Long guarantorId, final JsonCommand command) {
@@ -186,7 +196,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             final GuarantorCommand guarantorCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
             guarantorCommand.validateForUpdate();
 
-            final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+            final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
             validateLoanStatus(loan);
             final Guarantor guarantorForUpdate = this.guarantorRepository.findByLoanAndId(loan, guarantorId);
             if (guarantorForUpdate == null) { throw new GuarantorNotFoundException(loanId, guarantorId); }
@@ -239,7 +249,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
     @Override
     @Transactional
     public CommandProcessingResult removeGuarantor(final Long loanId, final Long guarantorId, final Long guarantorFundingId) {
-        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         validateLoanStatus(loan);
         final Guarantor guarantorForDelete = this.guarantorRepository.findByLoanAndId(loan, guarantorId);
         if (guarantorForDelete == null || (guarantorFundingId == null && !guarantorForDelete.getGuarantorFundDetails().isEmpty())) { throw new GuarantorNotFoundException(

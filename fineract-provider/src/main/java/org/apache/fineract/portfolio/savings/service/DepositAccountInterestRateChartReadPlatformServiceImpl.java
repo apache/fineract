@@ -90,8 +90,20 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
     @Override
     public DepositAccountInterestRateChartData retrieveOneWithSlabs(Long chartId) {
         this.context.authenticatedUser();
-        final String sql = "select " + this.chartExtractor.schema() + " where irc.id = ? order by ircd.id asc";
-        Collection<DepositAccountInterestRateChartData> chartDatas = this.jdbcTemplate.query(sql, this.chartExtractor,
+        StringBuilder sql = new StringBuilder();
+        sql.append("select ");
+        sql.append(this.chartExtractor.schema());
+        sql.append(" where irc.id = ? order by irc.id asc, ");
+        sql.append("CASE ");
+        sql.append("WHEN isPrimaryGroupingByAmount then ircd.amount_range_from ");
+        sql.append("WHEN isPrimaryGroupingByAmount then ircd.amount_range_to ");
+        sql.append("END,");
+        sql.append("ircd.from_period, ircd.to_period,");
+        sql.append("CASE ");
+        sql.append("WHEN !isPrimaryGroupingByAmount then ircd.amount_range_from ");
+        sql.append("WHEN !isPrimaryGroupingByAmount then ircd.amount_range_to ");
+        sql.append("END");
+        Collection<DepositAccountInterestRateChartData> chartDatas = this.jdbcTemplate.query(sql.toString(), this.chartExtractor,
                 new Object[] { chartId });
         if (chartDatas == null || chartDatas.isEmpty()) { throw new DepositAccountInterestRateChartNotFoundException(chartId); }
 
@@ -122,8 +134,21 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
     @Override
     public DepositAccountInterestRateChartData retrieveOneWithSlabsOnAccountId(Long accountId) {
         this.context.authenticatedUser();
-        final String sql = "select " + this.chartExtractor.schema() + " where irc.savings_account_id = ? order by ircd.id asc";
-        Collection<DepositAccountInterestRateChartData> chartDatas = this.jdbcTemplate.query(sql, this.chartExtractor,
+        StringBuilder sql = new StringBuilder();
+        sql.append("select ");
+        sql.append(this.chartExtractor.schema());
+        sql.append(" where irc.savings_account_id = ? order by irc.id asc, ");
+        sql.append("CASE ");
+        sql.append("WHEN isPrimaryGroupingByAmount then ircd.amount_range_from ");
+        sql.append("WHEN isPrimaryGroupingByAmount then ircd.amount_range_to ");
+        sql.append("END,");
+        sql.append("ircd.from_period, ircd.to_period,");
+        sql.append("CASE ");
+        sql.append("WHEN !isPrimaryGroupingByAmount then ircd.amount_range_from ");
+        sql.append("WHEN !isPrimaryGroupingByAmount then ircd.amount_range_to ");
+        sql.append("END");
+
+        Collection<DepositAccountInterestRateChartData> chartDatas = this.jdbcTemplate.query(sql.toString(), this.chartExtractor,
                 new Object[] { accountId });
         if (chartDatas == null || chartDatas.isEmpty()) { throw new DepositAccountInterestRateChartNotFoundException(accountId); }
 
@@ -167,6 +192,7 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
             sqlBuilder
                     .append("irc.id as ircId, irc.name as ircName, irc.description as ircDescription,")
                     .append("irc.from_date as ircFromDate, irc.end_date as ircEndDate, ")
+                    .append("irc.is_primary_grouping_by_amount as isPrimaryGroupingByAmount,")
                     .append("ircd.id as ircdId, ircd.description as ircdDescription, ircd.period_type_enum ircdPeriodTypeId, ")
                     .append("ircd.from_period as ircdFromPeriod, ircd.to_period as ircdToPeriod, ircd.amount_range_from as ircdAmountRangeFrom, ")
                     .append("ircd.amount_range_to as ircdAmountRangeTo, ircd.annual_interest_rate as ircdAnnualInterestRate, ")
@@ -231,6 +257,7 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
 
             sqlBuilder.append("irc.id as ircId, irc.name as ircName, irc.description as ircDescription, ")
                     .append("irc.from_date as ircFromDate, irc.end_date as ircEndDate, ")
+                    .append("irc.is_primary_grouping_by_amount as isPrimaryGroupingByAmount,")
                     .append("sa.id as accountId, sa.account_no as accountNumber ").append("from ")
                     .append("m_savings_account_interest_rate_chart irc left join m_savings_account sa on irc.savings_account_id=sa.id ");
             this.schemaSql = sqlBuilder.toString();
@@ -243,12 +270,13 @@ public class DepositAccountInterestRateChartReadPlatformServiceImpl implements D
             final String description = rs.getString("ircDescription");
             final LocalDate fromDate = JdbcSupport.getLocalDate(rs, "ircFromDate");
             final LocalDate endDate = JdbcSupport.getLocalDate(rs, "ircEndDate");
+            final boolean isPrimaryGroupingByAmount = rs.getBoolean("isPrimaryGroupingByAmount");
             final Long accountId = rs.getLong("accountId");
             final String accountNumber = rs.getString("accountNumber");
             final Collection<EnumOptionData> periodTypes = InterestRateChartEnumerations.periodType(PeriodFrequencyType.values());
 
-            return DepositAccountInterestRateChartData.instance(id, name, description, fromDate, endDate, accountId, accountNumber, null,
-                    periodTypes);
+            return DepositAccountInterestRateChartData.instance(id, name, description, fromDate, endDate, isPrimaryGroupingByAmount,
+                    accountId, accountNumber, null, periodTypes);
         }
 
     }

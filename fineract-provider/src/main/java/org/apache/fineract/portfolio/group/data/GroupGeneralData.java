@@ -19,9 +19,11 @@
 package org.apache.fineract.portfolio.group.data;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
@@ -69,6 +71,8 @@ public class GroupGeneralData {
     private final GroupRoleData selectedRole;
     private final Collection<CodeValueData> closureReasons;
     private final GroupTimelineData timeline;
+
+    private List<DatatableData> datatables = null;
 
     public static GroupGeneralData lookup(final Long groupId, final String accountNo, final String groupName) {
         final Collection<ClientData> clientMembers = null;
@@ -255,5 +259,9 @@ public class GroupGeneralData {
 
     public Collection<ClientData> clientMembers() {
         return this.clientMembers;
+    }
+
+    public void setDatatables(final List<DatatableData> datatables) {
+            this.datatables = datatables;
     }
 }

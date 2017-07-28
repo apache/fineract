@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.organisation.teller.service;
 
+import org.apache.fineract.infrastructure.core.service.Page;
+import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.organisation.teller.data.CashierData;
 import org.apache.fineract.organisation.teller.data.CashierTransactionData;
 import org.apache.fineract.organisation.teller.data.CashierTransactionsWithSummaryData;
@@ -60,10 +62,10 @@ public interface TellerManagementReadPlatformService {
 
     public Collection<CashierData> retrieveCashiersForTellers(String sqlSearch, Long tellerId);
 
-    public Collection<CashierTransactionData> retrieveCashierTransactions(Long cashierId, boolean includeAllTellers, Date fromDate,
-            Date toDate, String currencyCode);
+    public Page<CashierTransactionData> retrieveCashierTransactions(Long cashierId, boolean includeAllTellers, Date fromDate,
+            Date toDate, String currencyCode, final SearchParameters searchParameters);
 
     public CashierTransactionsWithSummaryData retrieveCashierTransactionsWithSummary(Long cashierId, boolean includeAllTellers,
-            Date fromDate, Date toDate, String currencyCode);
+            Date fromDate, Date toDate, String currencyCode, final SearchParameters searchParameters);
 
 }

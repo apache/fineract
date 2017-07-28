@@ -18,7 +18,10 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -62,7 +65,13 @@ public class FixedDepositAccountTransactionsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
-    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+	private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+	private static final Set<String> FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(DepositsApiConstants.idParamName, DepositsApiConstants.accountIdParamName,
+					DepositsApiConstants.accountNoParamName, DepositsApiConstants.currencyParamName,
+					DepositsApiConstants.amountParamName, DepositsApiConstants.dateParamName,
+					DepositsApiConstants.paymentDetailDataParamName, DepositsApiConstants.runningBalanceParamName,
+					DepositsApiConstants.reversedParamName));
 
     @Autowired
     public FixedDepositAccountTransactionsApiResource(final PlatformSecurityContext context,
@@ -101,7 +110,7 @@ public class FixedDepositAccountTransactionsApiResource {
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, savingsAccount,
-                SavingsApiConstants.SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS);
+                SavingsApiSetConstants.SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -120,8 +129,8 @@ public class FixedDepositAccountTransactionsApiResource {
             transactionData = SavingsAccountTransactionData.templateOnTop(transactionData, paymentTypeOptions);
         }
 
-        return this.toApiJsonSerializer.serialize(settings, transactionData,
-                DepositsApiConstants.FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS);
+		return this.toApiJsonSerializer.serialize(settings, transactionData,
+				FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS);
     }
 
     @POST

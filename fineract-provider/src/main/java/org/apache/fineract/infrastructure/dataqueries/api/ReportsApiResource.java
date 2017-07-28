@@ -54,8 +54,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ReportsApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "reportName", "reportType",
-            "reportSubType", "reportCategory", "description", "reportSql", "coreReport", "useReport", "reportParameters"));
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "reportName", "reportType", "reportSubType",
+            "reportCategory", "description", "reportSql", "coreReport", "useReport", "reportParameters"));
 
     private final String resourceNameForPermissions = "REPORT";
     private final PlatformSecurityContext context;
@@ -102,7 +102,7 @@ public class ReportsApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         if (settings.isTemplate()) {
-            result.appendedTemplate(this.readReportingService.getAllowedParameters());
+            result.appendedTemplate(this.readReportingService.getAllowedParameters(), this.readReportingService.getAllowedReportTypes());
         }
         return this.toApiJsonSerializer.serialize(settings, result, this.RESPONSE_DATA_PARAMETERS);
     }
@@ -116,7 +116,7 @@ public class ReportsApiResource {
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         final ReportData result = new ReportData();
-        result.appendedTemplate(this.readReportingService.getAllowedParameters());
+        result.appendedTemplate(this.readReportingService.getAllowedParameters(), this.readReportingService.getAllowedReportTypes());
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, result, this.RESPONSE_DATA_PARAMETERS);

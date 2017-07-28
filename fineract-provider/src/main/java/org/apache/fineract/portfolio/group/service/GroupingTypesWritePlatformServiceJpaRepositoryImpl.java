@@ -18,14 +18,11 @@
  */
 package org.apache.fineract.portfolio.group.service;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import javax.persistence.PersistenceException;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandProcessingService;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -40,42 +37,31 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
+import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
+import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.organisation.office.domain.OfficeRepository;
+import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.exception.InvalidOfficeException;
-import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
+import org.apache.fineract.portfolio.calendar.domain.*;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
-import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
-import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
-import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
-import org.apache.fineract.portfolio.calendar.domain.CalendarType;
 import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.service.LoanStatusMapper;
 import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
-import org.apache.fineract.portfolio.group.domain.Group;
-import org.apache.fineract.portfolio.group.domain.GroupLevel;
-import org.apache.fineract.portfolio.group.domain.GroupLevelRepository;
-import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
-import org.apache.fineract.portfolio.group.domain.GroupTypes;
-import org.apache.fineract.portfolio.group.exception.GroupAccountExistsException;
-import org.apache.fineract.portfolio.group.exception.GroupHasNoStaffException;
-import org.apache.fineract.portfolio.group.exception.GroupMemberCountNotInPermissibleRangeException;
-import org.apache.fineract.portfolio.group.exception.GroupMustBePendingToBeDeletedException;
-import org.apache.fineract.portfolio.group.exception.InvalidGroupLevelException;
-import org.apache.fineract.portfolio.group.exception.InvalidGroupStateTransitionException;
+import org.apache.fineract.portfolio.group.domain.*;
+import org.apache.fineract.portfolio.group.exception.*;
 import org.apache.fineract.portfolio.group.serialization.GroupingTypesDataValidator;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -95,50 +81,49 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     private final PlatformSecurityContext context;
     private final GroupRepositoryWrapper groupRepository;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
-    private final OfficeRepository officeRepository;
+    private final OfficeRepositoryWrapper officeRepositoryWrapper;
     private final StaffRepositoryWrapper staffRepository;
     private final NoteRepository noteRepository;
     private final GroupLevelRepository groupLevelRepository;
     private final GroupingTypesDataValidator fromApiJsonDeserializer;
-    private final LoanRepository loanRepository;
+    private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final CodeValueRepositoryWrapper codeValueRepository;
-    private final SavingsAccountRepository savingsRepository;
     private final CommandProcessingService commandProcessingService;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final ConfigurationDomainService configurationDomainService;
-    private final SavingsAccountRepository savingsAccountRepository;
-    private final LoanRepositoryWrapper loanRepositoryWrapper;
+    private final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
     private final AccountNumberGenerator accountNumberGenerator;
+    private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
 
     @Autowired
     public GroupingTypesWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final GroupRepositoryWrapper groupRepository, final ClientRepositoryWrapper clientRepositoryWrapper,
-            final OfficeRepository officeRepository, final StaffRepositoryWrapper staffRepository, final NoteRepository noteRepository,
+            final OfficeRepositoryWrapper officeRepositoryWrapper, final StaffRepositoryWrapper staffRepository, final NoteRepository noteRepository,
             final GroupLevelRepository groupLevelRepository, final GroupingTypesDataValidator fromApiJsonDeserializer,
-            final LoanRepository loanRepository, final SavingsAccountRepository savingsRepository,
+            final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
             final CodeValueRepositoryWrapper codeValueRepository, final CommandProcessingService commandProcessingService,
             final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
-            final SavingsAccountRepository savingsAccountRepository, final LoanRepositoryWrapper loanRepositoryWrapper, 
-            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final AccountNumberGenerator accountNumberGenerator) {
+            final LoanRepositoryWrapper loanRepositoryWrapper, 
+            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final AccountNumberGenerator accountNumberGenerator,
+            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService) {
         this.context = context;
         this.groupRepository = groupRepository;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
-        this.officeRepository = officeRepository;
+        this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.staffRepository = staffRepository;
         this.noteRepository = noteRepository;
         this.groupLevelRepository = groupLevelRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.loanRepository = loanRepository;
-        this.savingsRepository = savingsRepository;
+        this.savingsAccountRepositoryWrapper = savingsAccountRepositoryWrapper;
         this.codeValueRepository = codeValueRepository;
         this.commandProcessingService = commandProcessingService;
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.configurationDomainService = configurationDomainService;
-        this.savingsAccountRepository = savingsAccountRepository;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.accountNumberFormatRepository = accountNumberFormatRepository;
         this.accountNumberGenerator = accountNumberGenerator;
+        this.entityDatatableChecksWritePlatformService = entityDatatableChecksWritePlatformService;
     }
 
     private CommandProcessingResult createGroupingType(final JsonCommand command, final GroupTypes groupingType, final Long centerId) {
@@ -158,8 +143,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 officeId = parentGroup.officeId();
             }
 
-            final Office groupOffice = this.officeRepository.findOne(officeId);
-            if (groupOffice == null) { throw new OfficeNotFoundException(officeId); }
+            final Office groupOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
 
             final LocalDate activationDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
             final GroupLevel groupLevel = this.groupLevelRepository.findOne(groupingType.getId());
@@ -190,6 +174,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
             boolean rollbackTransaction = false;
             if (newGroup.isActive()) {
+                this.groupRepository.save(newGroup);
                 // validate Group creation rules for Group
                 if (newGroup.isGroup()) {
                     validateGroupRulesBeforeActivation(newGroup);
@@ -223,6 +208,18 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
             this.groupRepository.saveAndFlush(newGroup);
             newGroup.captureStaffHistoryDuringCenterCreation(staff, activationDate);
+
+            if (newGroup.isGroup()) {
+                if (command.parameterExists(GroupingTypesApiConstants.datatables)) {
+                    this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getCode().longValue(),
+                            EntityTables.GROUP.getName(), newGroup.getId(), null,
+                            command.arrayOfParameterNamed(GroupingTypesApiConstants.datatables));
+                }
+
+                this.entityDatatableChecksWritePlatformService.runTheCheck(newGroup.getId(), EntityTables.GROUP.getName(),
+                        StatusEnum.CREATE.getCode().longValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
+            }
+
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withOfficeId(groupOffice.getId()) //
@@ -232,8 +229,12 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     .build();
 
         } catch (final DataIntegrityViolationException dve) {
-            handleGroupDataIntegrityIssues(command, dve, groupingType);
+            handleGroupDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, groupingType);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleGroupDataIntegrityIssues(command, throwable, dve, groupingType);
+         	return CommandProcessingResult.empty();
         }
     }
 
@@ -296,6 +297,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final LocalDate activationDate = command.localDateValueOfParameterNamed("activationDate");
 
             validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(group.getOffice(), group.getGroupLevel(), activationDate);
+
             group.activate(currentUser, activationDate);
 
             this.groupRepository.saveAndFlush(group);
@@ -307,8 +309,12 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     .withEntityId(groupId) //
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleGroupDataIntegrityIssues(command, dve, GroupTypes.GROUP);
+            handleGroupDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, GroupTypes.GROUP);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleGroupDataIntegrityIssues(command, throwable, dve, GroupTypes.GROUP);
+         	return CommandProcessingResult.empty();
         }
     }
 
@@ -317,6 +323,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         Integer maxClients = configurationDomainService.retrieveMaxAllowedClientsInGroup();
         boolean isGroupClientCountValid = group.isGroupsClientCountWithinMinMaxRange(minClients, maxClients);
         if (!isGroupClientCountValid) { throw new GroupMemberCountNotInPermissibleRangeException(group.getId(), minClients, maxClients); }
+        entityDatatableChecksWritePlatformService.runTheCheck(group.getId(), EntityTables.GROUP.getName(),
+                StatusEnum.ACTIVATE.getCode().longValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
     }
 
     public void validateGroupRulesBeforeClientAssociation(final Group group) {
@@ -441,8 +449,12 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     .build();
 
         } catch (final DataIntegrityViolationException dve) {
-            handleGroupDataIntegrityIssues(command, dve, groupingType);
+            handleGroupDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, groupingType);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleGroupDataIntegrityIssues(command, throwable, dve, groupingType);
+         	return CommandProcessingResult.empty();
         }
     }
 
@@ -506,15 +518,15 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             if (clients != null) {
                 for (Client client : clients) {
                     client.updateStaff(staff);
-                    if (this.loanRepository.doNonClosedLoanAccountsExistForClient(client.getId())) {
-                        for (final Loan loan : this.loanRepository.findLoanByClientId(client.getId())) {
+                    if (this.loanRepositoryWrapper.doNonClosedLoanAccountsExistForClient(client.getId())) {
+                        for (final Loan loan : this.loanRepositoryWrapper.findLoanByClientId(client.getId())) {
                             if (loan.isDisbursed() && !loan.isClosed()) {
                                 loan.reassignLoanOfficer(staff, loanOfficerReassignmentDate);
                             }
                         }
                     }
-                    if (this.savingsAccountRepository.doNonClosedSavingAccountsExistForClient(client.getId())) {
-                        for (final SavingsAccount savingsAccount : this.savingsAccountRepository
+                    if (this.savingsAccountRepositoryWrapper.doNonClosedSavingAccountsExistForClient(client.getId())) {
+                        for (final SavingsAccount savingsAccount : this.savingsAccountRepositoryWrapper
                                 .findSavingAccountByClientId(client.getId())) {
                             if (!savingsAccount.isClosed()) {
                                 savingsAccount.reassignSavingsOfficer(staff, loanOfficerReassignmentDate);
@@ -539,21 +551,28 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     @Transactional
     @Override
     public CommandProcessingResult deleteGroup(final Long groupId) {
+        try {
 
-        final Group groupForDelete = this.groupRepository.findOneWithNotFoundDetection(groupId);
+            final Group groupForDelete = this.groupRepository.findOneWithNotFoundDetection(groupId);
 
-        if (groupForDelete.isNotPending()) { throw new GroupMustBePendingToBeDeletedException(groupId); }
+            if (groupForDelete.isNotPending()) { throw new GroupMustBePendingToBeDeletedException(groupId); }
 
-        final List<Note> relatedNotes = this.noteRepository.findByGroupId(groupId);
-        this.noteRepository.deleteInBatch(relatedNotes);
+            final List<Note> relatedNotes = this.noteRepository.findByGroupId(groupId);
+            this.noteRepository.deleteInBatch(relatedNotes);
 
-        this.groupRepository.delete(groupForDelete);
-
-        return new CommandProcessingResultBuilder() //
-                .withOfficeId(groupForDelete.getId()) //
-                .withGroupId(groupForDelete.officeId()) //
-                .withEntityId(groupForDelete.getId()) //
-                .build();
+            this.groupRepository.delete(groupForDelete);
+            this.groupRepository.flush();
+            return new CommandProcessingResultBuilder() //
+                    .withOfficeId(groupForDelete.getId()) //
+                    .withGroupId(groupForDelete.officeId()) //
+                    .withEntityId(groupForDelete.getId()) //
+                    .build();
+        } catch (DataIntegrityViolationException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+            logger.error(throwable.getMessage());
+            throw new PlatformDataIntegrityException("error.msg.group.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.");
+        }
     }
 
     @Override
@@ -577,6 +596,9 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         validateLoansAndSavingsForGroupOrCenterClose(group, closureDate);
 
+        entityDatatableChecksWritePlatformService.runTheCheck(groupId, EntityTables.GROUP.getName(),
+                StatusEnum.CLOSE.getCode().longValue(),EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
+
         group.close(currentUser, closureReason, closureDate);
 
         this.groupRepository.saveAndFlush(group);
@@ -588,7 +610,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     }
 
     private void validateLoansAndSavingsForGroupOrCenterClose(final Group groupOrCenter, final LocalDate closureDate) {
-        final Collection<Loan> groupLoans = this.loanRepository.findByGroupId(groupOrCenter.getId());
+        final Collection<Loan> groupLoans = this.loanRepositoryWrapper.findByGroupId(groupOrCenter.getId());
         for (final Loan loan : groupLoans) {
             final LoanStatusMapper loanStatus = new LoanStatusMapper(loan.status().getValue());
             if (loanStatus.isOpen()) {
@@ -611,7 +633,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             }
         }
 
-        final List<SavingsAccount> groupSavingAccounts = this.savingsRepository.findByGroupId(groupOrCenter.getId());
+        final List<SavingsAccount> groupSavingAccounts = this.savingsAccountRepositoryWrapper.findByGroupId(groupOrCenter.getId());
 
         for (final SavingsAccount saving : groupSavingAccounts) {
             if (saving.isActive() || saving.isSubmittedAndPendingApproval() || saving.isApproved()) {
@@ -648,6 +670,10 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         }
 
         validateLoansAndSavingsForGroupOrCenterClose(center, closureDate);
+
+        entityDatatableChecksWritePlatformService.runTheCheck(centerId, EntityTables.GROUP.getName(),
+                StatusEnum.ACTIVATE.getCode().longValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable());
+
 
         center.close(currentUser, closureReason, closureDate);
 
@@ -704,7 +730,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleGroupDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve,
+    private void handleGroupDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve,
             final GroupTypes groupLevel) {
 
         String levelName = "Invalid";
@@ -719,18 +745,17 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             break;
         }
 
-        final Throwable realCause = dve.getMostSpecificCause();
         String errorMessageForUser = null;
         String errorMessageForMachine = null;
 
-        if (realCause.getMessage().contains("external_id")) {
+        if (realCause.getMessage().contains("'external_id'")) {
 
             final String externalId = command.stringValueOfParameterNamed(GroupingTypesApiConstants.externalIdParamName);
             errorMessageForUser = levelName + " with externalId `" + externalId + "` already exists.";
             errorMessageForMachine = "error.msg." + levelName.toLowerCase() + ".duplicate.externalId";
             throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser,
                     GroupingTypesApiConstants.externalIdParamName, externalId);
-        } else if (realCause.getMessage().contains("name")) {
+        } else if (realCause.getMessage().contains("'name'")) {
 
             final String name = command.stringValueOfParameterNamed(GroupingTypesApiConstants.nameParamName);
             errorMessageForUser = levelName + " with name `" + name + "` already exists.";
@@ -871,7 +896,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     @Transactional
     private void validateForJLGSavings(final Long groupId, final Set<Client> clientMembers) {
         for (final Client client : clientMembers) {
-            final Collection<SavingsAccount> savings = this.savingsRepository.findByClientIdAndGroupId(client.getId(), groupId);
+            final Collection<SavingsAccount> savings = this.savingsAccountRepositoryWrapper.findByClientIdAndGroupId(client.getId(), groupId);
             if (!CollectionUtils.isEmpty(savings)) {
                 final String defaultUserMessage = "Client with identifier " + client.getId()
                         + " cannot be disassociated it has group savings.";

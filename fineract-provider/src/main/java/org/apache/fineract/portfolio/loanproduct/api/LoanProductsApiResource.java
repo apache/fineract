@@ -81,7 +81,7 @@ public class LoanProductsApiResource {
 
     private final Set<String> LOAN_PRODUCT_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "shortName", "description",
             "fundId", "fundName", "includeInBorrowerCycle", "currency", "principal", "minPrincipal", "maxPrincipal", "numberOfRepayments",
-            "minNumberOfRepayments", "maxNumberOfRepayments", "repaymentEvery", "repaymentFrequencyType", "graceOnPrincipalPayment",
+            "minNumberOfRepayments", "maxNumberOfRepayments", "repaymentEvery", "repaymentFrequencyType", "graceOnPrincipalPayment", "recurringMoratoriumOnPrincipalPeriods",
             "graceOnInterestPayment", "graceOnInterestCharged", "interestRatePerPeriod", "minInterestRatePerPeriod",
             "maxInterestRatePerPeriod", "interestRateFrequencyType", "annualInterestRate", "amortizationType", "interestType",
             "interestCalculationPeriodType", LoanProductConstants.allowPartialPeriodInterestCalcualtionParamName, "inArrearsTolerance",
@@ -91,7 +91,7 @@ public class LoanProductsApiResource {
             "interestCalculationPeriodTypeOptions", "transactionProcessingStrategyOptions", "chargeOptions", "accountingOptions",
             "accountingRuleOptions", "accountingMappingOptions", "floatingRateOptions", "isLinkedToFloatingInterestRates",
             "floatingRatesId", "interestRateDifferential", "minDifferentialLendingRate", "defaultDifferentialLendingRate",
-            "maxDifferentialLendingRate", "isFloatingInterestRateCalculationAllowed"));
+            "maxDifferentialLendingRate", "isFloatingInterestRateCalculationAllowed", LoanProductConstants.canUseForTopup));
 
     private final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<>(Arrays.asList("productId", "productName", "restrictedProducts",
             "allowedProducts", "productOptions"));
@@ -298,6 +298,10 @@ public class LoanProductsApiResource {
         final List<EnumOptionData> rescheduleStrategyTypeOptions = dropdownReadPlatformService.retrieveRescheduleStrategyTypeOptions();
         final List<EnumOptionData> interestRecalculationFrequencyTypeOptions = dropdownReadPlatformService
                 .retrieveInterestRecalculationFrequencyTypeOptions();
+        final List<EnumOptionData> interestRecalculationNthDayTypeOptions = dropdownReadPlatformService
+                .retrieveInterestRecalculationNthDayTypeOptions();
+        final List<EnumOptionData> interestRecalculationDayOfWeekTypeOptions = dropdownReadPlatformService
+                .retrieveInterestRecalculationDayOfWeekTypeOptions();
         final List<EnumOptionData> preCloseInterestCalculationStrategyOptions = dropdownReadPlatformService
                 .retrivePreCloseInterestCalculationStrategyOptions();
         final List<FloatingRateData> floatingRateOptions = this.floatingRateReadPlatformService.retrieveLookupActive();
@@ -307,7 +311,8 @@ public class LoanProductsApiResource {
                 interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions, accountOptions,
                 accountingRuleTypeOptions, loanCycleValueConditionTypeOptions, daysInMonthTypeOptions, daysInYearTypeOptions,
                 interestRecalculationCompoundingTypeOptions, rescheduleStrategyTypeOptions, interestRecalculationFrequencyTypeOptions,
-                preCloseInterestCalculationStrategyOptions, floatingRateOptions);
+                preCloseInterestCalculationStrategyOptions, floatingRateOptions, interestRecalculationNthDayTypeOptions, 
+                interestRecalculationDayOfWeekTypeOptions);
     }
 
 }

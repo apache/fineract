@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.calendar.domain;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
@@ -28,8 +29,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import ch.qos.logback.core.net.server.Client;
 
 public interface CalendarInstanceRepository extends JpaRepository<CalendarInstance, Long>, JpaSpecificationExecutor<CalendarInstance> {
 
@@ -45,13 +44,13 @@ public interface CalendarInstanceRepository extends JpaRepository<CalendarInstan
      */
     CalendarInstance findByEntityIdAndEntityTypeIdAndCalendarTypeId(Long entityId, Integer entityTypeId, Integer calendarTypeId);
 
-    @Query("from CalendarInstance ci where ci.entityId = :entityId and ci.entityTypeId = :entityTypeId")
+    @Query("select ci from CalendarInstance ci where ci.entityId = :entityId and ci.entityTypeId = :entityTypeId")
     CalendarInstance findCalendarInstaneByEntityId(@Param("entityId") Long entityId, @Param("entityTypeId") Integer entityTypeId);
 
     Collection<CalendarInstance> findByCalendarIdAndEntityTypeId(Long calendarId, Integer entityTypeId);
 
     /** Should use in clause, can I do it without creating a new class? **/
-    @Query("from CalendarInstance ci where ci.entityId in (select id from Loan loan where loan.client.id = :clientId and loan.group.id = :groupId and (loan.loanStatus = 100 or loan.loanStatus = 200 or loan.loanStatus = 300)) and ci.entityTypeId = 3")
+    @Query("select ci from CalendarInstance ci where ci.entityId in (select id from Loan loan where loan.client.id = :clientId and loan.group.id = :groupId and (loan.loanStatus = 100 or loan.loanStatus = 200 or loan.loanStatus = 300)) and ci.entityTypeId = 3")
     List<CalendarInstance> findCalendarInstancesForActiveLoansByGroupIdAndClientId(@Param("groupId") Long groupId,
             @Param("clientId") Long clientId);
     

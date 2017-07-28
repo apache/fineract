@@ -38,6 +38,10 @@ public class SmsMessageEnumerations {
                 optionData = new EnumOptionData(SmsMessageStatusType.PENDING.getValue().longValue(),
                         SmsMessageStatusType.PENDING.getCode(), "Pending");
             break;
+            case WAITING_FOR_DELIVERY_REPORT:
+                optionData = new EnumOptionData(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue().longValue(),
+                        SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getCode(), "Waiting");
+            break;
             case SENT:
                 optionData = new EnumOptionData(SmsMessageStatusType.SENT.getValue().longValue(), SmsMessageStatusType.SENT.getCode(),
                         "Sent");

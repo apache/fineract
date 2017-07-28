@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests.common.savings;
 
 import java.util.HashMap;
+import java.util.List;
 
 import com.google.gson.Gson;
 
@@ -28,18 +29,28 @@ public class SavingsApplicationTestBuilder {
 
     private String submittedOnDate = "";
 
+    private HashMap<String, String> addParams = null;
+
+    private List<HashMap<String, Object>> datatables = null;
+
     public String build(final String ID, final String savingsProductId, final String accountType) {
 
-        final HashMap<String, String> map = new HashMap<>();
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("dateFormat", "dd MMMM yyyy");
         if (accountType == "GROUP") {
             map.put("groupId", ID);
         } else {
             map.put("clientId", ID);
-        }        
+        }
         map.put("productId", savingsProductId);
         map.put("locale", LOCALE);
         map.put("submittedOnDate", this.submittedOnDate);
+        if (addParams != null && addParams.size() > 0) {
+            map.putAll(addParams);
+        }
+        if (datatables != null) {
+            map.put("datatables", this.datatables);
+        }
         String savingsApplicationJSON = new Gson().toJson(map);
         System.out.println(savingsApplicationJSON);
         return savingsApplicationJSON;
@@ -47,6 +58,16 @@ public class SavingsApplicationTestBuilder {
 
     public SavingsApplicationTestBuilder withSubmittedOnDate(final String savingsApplicationSubmittedDate) {
         this.submittedOnDate = savingsApplicationSubmittedDate;
+        return this;
+    }
+
+    public SavingsApplicationTestBuilder withParams(HashMap<String, String> params) {
+        this.addParams = params;
+        return this;
+    }
+
+    public SavingsApplicationTestBuilder withDatatables(final List<HashMap<String, Object>> datatables) {
+        this.datatables = datatables;
         return this;
     }
 }

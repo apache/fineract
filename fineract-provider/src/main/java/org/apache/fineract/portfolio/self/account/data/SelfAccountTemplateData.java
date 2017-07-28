@@ -103,4 +103,13 @@ public class SelfAccountTemplateData implements
 				.toHashCode();
 	}
 
+	public Long getAccountId() {
+		return this.accountId;
+	}
+
+	public Integer getAccountType() {
+		return this.accountType.getId().intValue();
+	}
+
+	
 }

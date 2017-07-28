@@ -32,18 +32,26 @@ import javax.sql.DataSource;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
+import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
+import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,16 +64,23 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
+    private final AppUserRepositoryWrapper userRepository;
+    private final LoanRepositoryWrapper loanRepositoryWrapper;
+    private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
 
     @Autowired
     public LoanAccrualWritePlatformServiceImpl(final RoutingDataSource dataSource, final LoanReadPlatformService loanReadPlatformService,
             final JournalEntryWritePlatformService journalEntryWritePlatformService,
-            final LoanChargeReadPlatformService loanChargeReadPlatformService) {
+            final LoanChargeReadPlatformService loanChargeReadPlatformService, final AppUserRepositoryWrapper userRepository,
+            final LoanRepositoryWrapper loanRepositoryWrapper, final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository) {
         this.loanReadPlatformService = loanReadPlatformService;
         this.dataSource = dataSource;
         this.jdbcTemplate = new JdbcTemplate(this.dataSource);
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
         this.loanChargeReadPlatformService = loanChargeReadPlatformService;
+        this.userRepository = userRepository;
+        this.loanRepositoryWrapper = loanRepositoryWrapper;
+        this.applicationCurrencyRepository = applicationCurrencyRepository;
     }
 
     @Override
@@ -252,7 +267,7 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
 
     private void addAccrualAccounting(LoanScheduleAccrualData scheduleAccrualData, BigDecimal amount, BigDecimal interestportion,
             BigDecimal totalAccInterest, BigDecimal feeportion, BigDecimal totalAccFee, BigDecimal penaltyportion,
-            BigDecimal totalAccPenalty, final LocalDate accruedTill) throws Exception {
+            BigDecimal totalAccPenalty, final LocalDate accruedTill) throws DataAccessException {
         String transactionSql = "INSERT INTO m_loan_transaction  (loan_id,office_id,is_reversed,transaction_type_enum,transaction_date,amount,interest_portion_derived,"
                 + "fee_charges_portion_derived,penalty_charges_portion_derived, submitted_on_date) VALUES (?, ?, 0, ?, ?, ?, ?, ?, ?, ?)";
         this.jdbcTemplate.update(transactionSql, scheduleAccrualData.getLoanId(), scheduleAccrualData.getOfficeId(),
@@ -469,4 +484,29 @@ public class LoanAccrualWritePlatformServiceImpl implements LoanAccrualWritePlat
         accrualData.updateAccruableIncome(interestIncome);
     }
 
+    @Override
+    @Transactional
+    public void addIncomeAndAccrualTransactions(Long loanId) throws LoanNotFoundException {
+        if (loanId != null) {
+            Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+            if (loan == null) { throw new LoanNotFoundException(loanId); }
+            final List<Long> existingTransactionIds = new ArrayList<>();
+            final List<Long> existingReversedTransactionIds = new ArrayList<>();
+            existingTransactionIds.addAll(loan.findExistingTransactionIds());
+            existingReversedTransactionIds.addAll(loan.findExistingReversedTransactionIds());
+            loan.processIncomeTransactions(this.userRepository.fetchSystemUser());
+            this.loanRepositoryWrapper.saveAndFlush(loan);
+            postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+        }
+    }
+
+    private void postJournalEntries(final Loan loan, final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds) {
+        final MonetaryCurrency currency = loan.getCurrency();
+        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
+        boolean isAccountTransfer = false;
+        final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(applicationCurrency.toData(),
+                existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
+        this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
+    }
 }

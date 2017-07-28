@@ -35,13 +35,11 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_account_transfer_details")
-public class AccountTransferDetails extends AbstractPersistable<Long> {
+public class AccountTransferDetails extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "from_office_id", nullable = false)
@@ -78,11 +76,10 @@ public class AccountTransferDetails extends AbstractPersistable<Long> {
     @Column(name = "transfer_type")
     private Integer transferType;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "accountTransferDetails", orphanRemoval = true)
-    private final List<AccountTransferTransaction> accountTransferTransactions = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "accountTransferDetails", orphanRemoval = true, fetch=FetchType.EAGER)
+    private List<AccountTransferTransaction> accountTransferTransactions = new ArrayList<>();
 
-    @OneToOne(mappedBy = "accountTransferDetails", cascade = CascadeType.ALL, optional = true, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "accountTransferDetails", cascade = CascadeType.ALL, optional = true, orphanRemoval = true, fetch = FetchType.EAGER)
     private AccountTransferStandingInstruction accountTransferStandingInstruction;
 
     public static AccountTransferDetails savingsToSavingsTransfer(final Office fromOffice, final Client fromClient,
@@ -159,4 +156,9 @@ public class AccountTransferDetails extends AbstractPersistable<Long> {
         return AccountTransferType.fromInt(this.transferType);
     }
 
+    public static AccountTransferDetails LoanToLoanTransfer(Office fromOffice, Client fromClient, Loan fromLoanAccount, Office toOffice, Client toClient,
+            Loan toLoanAccount, Integer transferType) {
+        return new AccountTransferDetails(fromOffice, fromClient, null, fromLoanAccount, toOffice, toClient, null, toLoanAccount,
+                transferType, null);
+    }
 }

@@ -42,6 +42,7 @@ import javax.persistence.TemporalType;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.savings.DepositAccountOnClosureType;
 import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
@@ -50,11 +51,10 @@ import org.joda.time.LocalDate;
 import org.joda.time.Months;
 import org.joda.time.Weeks;
 import org.joda.time.Years;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_deposit_account_term_and_preclosure")
-public class DepositAccountTermAndPreClosure extends AbstractPersistable<Long> {
+public class DepositAccountTermAndPreClosure extends AbstractPersistableCustom<Long> {
 
     @Column(name = "deposit_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal depositAmount;
@@ -76,7 +76,7 @@ public class DepositAccountTermAndPreClosure extends AbstractPersistable<Long> {
     @Column(name = "deposit_period_frequency_enum", nullable = true)
     private Integer depositPeriodFrequency;
 
-    @Column(name = "on_account_closure_enum", nullable = false)
+    @Column(name = "on_account_closure_enum", nullable = true)
     private Integer onAccountClosureType;
 
     @Embedded

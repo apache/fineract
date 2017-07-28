@@ -27,6 +27,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -38,8 +39,6 @@ import org.apache.fineract.organisation.provisioning.constants.ProvisioningCrite
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaDefinitionData;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.DateTime;
 
 @Entity
@@ -49,12 +48,10 @@ public class ProvisioningCriteria extends AbstractAuditableCustom<AppUser, Long>
     @Column(name = "criteria_name", nullable = false)
     private String criteriaName;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "criteria", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "criteria", orphanRemoval = true, fetch=FetchType.EAGER)
     Set<ProvisioningCriteriaDefinition> provisioningCriteriaDefinition = new HashSet<>();
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "criteria", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "criteria", orphanRemoval = true, fetch=FetchType.EAGER)
     Set<LoanProductProvisionCriteria> loanProductMapping = new HashSet<>();
 
     public String getCriteriaName() {
@@ -119,7 +116,7 @@ public class ProvisioningCriteria extends AbstractAuditableCustom<AppUser, Long>
     
     public void update(ProvisioningCriteriaDefinitionData data, GLAccount liability, GLAccount expense) {
         for(ProvisioningCriteriaDefinition def: provisioningCriteriaDefinition) {
-            if(data.getId() == def.getId()) {
+            if(data.getId().equals(def.getId())) {
                 def.update(data.getMinAge(), data.getMaxAge(), data.getProvisioningPercentage(), liability, expense) ;
                 break ;
             }

@@ -23,13 +23,11 @@ import java.util.List;
 
 import org.apache.fineract.integrationtests.common.Utils;
 
-import ch.qos.logback.classic.pattern.Util;
-
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
-@SuppressWarnings({ "unused", "rawtypes", "unchecked" })
+@SuppressWarnings({"unused", "rawtypes", "unchecked" })
 public class StandingInstructionsHelper {
 
     private static final String STANDING_INSTRUCTIONS_URL = "/fineract-provider/api/v1/standinginstructions";

@@ -61,12 +61,11 @@ public class LoanApplicationTestBuilder {
     private List<HashMap> disbursementData = null;
     @SuppressWarnings("rawtypes")
     private List<HashMap> charges = new ArrayList<>();
-    private String recalculationRestFrequencyDate = null;
-    private String recalculationCompoundingFrequencyDate = null;
     private String repaymentsStartingFromDate = null;
 
     private String calendarId;
     private boolean syncDisbursementWithMeeting = false;
+    private List<HashMap<String, Object>> datatables = null;
 
     public String build(final String clientID, final String groupID, final String loanProductId, final String savingsID) {
         final HashMap<String, Object> map = new HashMap<>();
@@ -135,13 +134,10 @@ public class LoanApplicationTestBuilder {
             map.put("maxOutstandingLoanBalance", maxOutstandingLoanBalance);
 
         }
-        if (recalculationRestFrequencyDate != null) {
-            map.put("recalculationRestFrequencyDate", recalculationRestFrequencyDate);
-        }
-        if (recalculationCompoundingFrequencyDate != null) {
-            map.put("recalculationCompoundingFrequencyDate", recalculationCompoundingFrequencyDate);
-        }
 
+        if (datatables != null) {
+            map.put("datatables", this.datatables);
+        }
         System.out.println("Loan Application request : " + map);
         return new Gson().toJson(map);
     }
@@ -281,15 +277,7 @@ public class LoanApplicationTestBuilder {
         return this;
     }
 
-    public LoanApplicationTestBuilder withRestFrequencyDate(final String recalculationRestFrequencyDate) {
-        this.recalculationRestFrequencyDate = recalculationRestFrequencyDate;
-        return this;
-    }
 
-    public LoanApplicationTestBuilder withCompoundingFrequencyDate(final String recalculationCompoundingFrequencyDate) {
-        this.recalculationCompoundingFrequencyDate = recalculationCompoundingFrequencyDate;
-        return this;
-    }
 
     public LoanApplicationTestBuilder withFirstRepaymentDate(final String firstRepaymentDate) {
         this.repaymentsStartingFromDate = firstRepaymentDate;
@@ -325,6 +313,11 @@ public class LoanApplicationTestBuilder {
 
     public LoanApplicationTestBuilder withFixedEmiAmount(final String installmentAmount) {
         this.fixedEmiAmount = installmentAmount;
+        return this;
+    }
+
+    public LoanApplicationTestBuilder withDatatables(final List<HashMap<String, Object>> datatables) {
+        this.datatables = datatables;
         return this;
     }
 }

@@ -92,7 +92,7 @@ public class SelfSavingsApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveSavingsTransaction(
-			@PathParam("savingsId") final Long accountId,
+			@PathParam("accountId") final Long accountId,
 			@PathParam("transactionId") final Long transactionId,
 			@Context final UriInfo uriInfo) {
 
@@ -109,7 +109,7 @@ public class SelfSavingsApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveAllSavingsAccountCharges(
-			@PathParam("savingsAccountId") final Long accountId,
+			@PathParam("accountId") final Long accountId,
 			@DefaultValue("all") @QueryParam("chargeStatus") final String chargeStatus,
 			@Context final UriInfo uriInfo) {
 
@@ -125,7 +125,7 @@ public class SelfSavingsApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveSavingsAccountCharge(
-			@PathParam("savingsAccountId") final Long accountId,
+			@PathParam("accountId") final Long accountId,
 			@PathParam("savingsAccountChargeId") final Long savingsAccountChargeId,
 			@Context final UriInfo uriInfo) {
 

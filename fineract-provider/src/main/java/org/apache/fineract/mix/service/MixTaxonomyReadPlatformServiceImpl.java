@@ -70,7 +70,7 @@ public class MixTaxonomyReadPlatformServiceImpl implements MixTaxonomyReadPlatfo
 
     @Override
     public MixTaxonomyData retrieveOne(final Long id) {
-        final String sql = "select " + this.mixTaxonomyMapper.schema() + " where tx.id =" + id;
-        return this.jdbcTemplate.queryForObject(sql, this.mixTaxonomyMapper);
+        final String sql = "select " + this.mixTaxonomyMapper.schema() + " where tx.id = ? ";
+        return this.jdbcTemplate.queryForObject(sql, this.mixTaxonomyMapper, new Object[] { id });
     }
 }

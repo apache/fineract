@@ -19,6 +19,7 @@
 package org.apache.fineract.batch.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -31,10 +32,12 @@ import org.apache.fineract.batch.command.CommandStrategy;
 import org.apache.fineract.batch.command.CommandStrategyProvider;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.batch.exception.ClientDetailsNotFoundException;
 import org.apache.fineract.batch.exception.ErrorHandler;
 import org.apache.fineract.batch.exception.ErrorInfo;
 import org.apache.fineract.batch.service.ResolutionHelper.BatchRequestNode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
@@ -42,8 +45,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.google.gson.Gson;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * Implementation for {@link BatchApiService} to iterate through all the
@@ -95,7 +96,14 @@ public class BatchApiServiceImpl implements BatchApiService {
 
         final List<BatchRequestNode> batchRequestNodes = this.resolutionHelper.getDependingRequests(requestList);
         checkList.clear();
-
+        if(batchRequestNodes.isEmpty()) {
+        	 final BatchResponse response = new BatchResponse();
+        	 ErrorInfo ex = ErrorHandler.handler(new ClientDetailsNotFoundException());
+             response.setStatusCode(500);
+             response.setBody(ex.getMessage());
+             responseList.add(response) ;
+             return responseList ;
+        }
         for (BatchRequestNode rootNode : batchRequestNodes) {
             final BatchRequest rootRequest = rootNode.getRequest();
             final CommandStrategy commandStrategy = this.strategyProvider.getCommandStrategy(CommandContext
@@ -216,7 +224,22 @@ public class BatchApiServiceImpl implements BatchApiService {
             errResponseList.add(errResponse);
 
             return errResponseList;
-        }
+        }catch (final NonTransientDataAccessException ex) {
+        	 ErrorInfo e = ErrorHandler.handler(ex);
+             BatchResponse errResponse = new BatchResponse();
+             errResponse.setStatusCode(e.getStatusCode());
 
+             for (BatchResponse res : checkList) {
+                 if (!res.getStatusCode().equals(200)) {
+                     errResponse.setBody("Transaction is being rolled back. First erroneous request: \n" + new Gson().toJson(res));
+                     break;
+                 }
+             }
+             checkList.clear();
+             List<BatchResponse> errResponseList = new ArrayList<>();
+             errResponseList.add(errResponse);
+
+             return errResponseList;
+        }
     }
 }

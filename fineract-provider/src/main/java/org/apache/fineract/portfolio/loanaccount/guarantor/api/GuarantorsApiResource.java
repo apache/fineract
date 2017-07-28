@@ -48,6 +48,7 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.account.AccountDetailConstants;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountDTO;
@@ -68,10 +69,15 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class GuarantorsApiResource {
 
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "loanId", "clientRelationshipType",
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "loanId",
+            "clientRelationshipType",
             "guarantorType", "firstname", "lastname", "entityId", "externalId", "officeName", "joinedDate", "addressLine1", "addressLine2",
             "city", "state", "zip", "country", "mobileNumber", "housePhoneNumber", "comment", "dob", "guarantorTypeOptions",
             "allowedClientRelationshipTypes"));
+
+	private static final Set<String> ACCOUNT_TRANSFER_API_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(AccountDetailConstants.idParamName, AccountTransfersApiConstants.transferDescriptionParamName,
+					AccountTransfersApiConstants.currencyParamName));
 
     private final String resourceNameForPermission = "GUARANTOR";
 
@@ -210,6 +216,6 @@ public class GuarantorsApiResource {
         }
         final GuarantorData guarantorData = GuarantorData.template(null, null, accountLinkingOptions);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.apiJsonSerializerService.serialize(settings, guarantorData, AccountTransfersApiConstants.RESPONSE_DATA_PARAMETERS);
+        return this.apiJsonSerializerService.serialize(settings, guarantorData, ACCOUNT_TRANSFER_API_RESPONSE_DATA_PARAMETERS);
     }
 }

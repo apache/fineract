@@ -439,7 +439,7 @@ public class GroupSavingsIntegrationTest {
                 ChargesHelper.getSavingsWithdrawalFeeJSON());
         Assert.assertNotNull(withdrawalChargeId);
 
-        this.savingsAccountHelper.addChargesForSavings(savingsId, withdrawalChargeId);
+        this.savingsAccountHelper.addChargesForSavings(savingsId, withdrawalChargeId, false);
         ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsId);
         Assert.assertEquals(1, chargesPendingState.size());
 
@@ -465,7 +465,7 @@ public class GroupSavingsIntegrationTest {
         ArrayList<HashMap> charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
         Assert.assertTrue(charges == null || charges.size() == 0);
 
-        this.savingsAccountHelper.addChargesForSavings(savingsId, chargeId);
+        this.savingsAccountHelper.addChargesForSavings(savingsId, chargeId, true);
         charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
         Assert.assertEquals(1, charges.size());
 
@@ -486,7 +486,7 @@ public class GroupSavingsIntegrationTest {
                 ChargesHelper.getSavingsMonthlyFeeJSON());
         Assert.assertNotNull(monthlyFeechargeId);
 
-        this.savingsAccountHelper.addChargesForSavings(savingsId, monthlyFeechargeId);
+        this.savingsAccountHelper.addChargesForSavings(savingsId, monthlyFeechargeId, true);
         charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
         Assert.assertEquals(2, charges.size());
 
@@ -504,7 +504,7 @@ public class GroupSavingsIntegrationTest {
         final Integer weeklyFeeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec, ChargesHelper.getSavingsWeeklyFeeJSON());
         Assert.assertNotNull(weeklyFeeId);
         
-        this.savingsAccountHelper.addChargesForSavings(savingsId, weeklyFeeId);
+        this.savingsAccountHelper.addChargesForSavings(savingsId, weeklyFeeId, true);
         charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
         Assert.assertEquals(3, charges.size());
 

@@ -18,28 +18,15 @@
  */
 package org.apache.fineract.portfolio.collectionsheet.data;
 
-import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.COLLECTIONSHEET_REQUEST_DATA_PARAMETERS;
-import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.COLLECTIONSHEET_RESOURCE_NAME;
-import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.INDIVIDUAL_COLLECTIONSHEET_REQUEST_DATA_PARAMETERS;
-import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.attendanceTypeParamName;
-import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.bulkDisbursementTransactionsParamName;
-import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.bulkRepaymentTransactionsParamName;
-import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.bulkSavingsDueTransactionsParamName;
-import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.calendarIdParamName;
-import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.clientIdParamName;
-import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.clientsAttendanceParamName;
-import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.loanIdParamName;
-import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.noteParamName;
-import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.savingsIdParamName;
-import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.transactionAmountParamName;
-import static org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants.transactionDateParamName;
-
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -48,6 +35,8 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +51,30 @@ import com.google.gson.reflect.TypeToken;
 public class CollectionSheetTransactionDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
+    private static final Set<String> COLLECTIONSHEET_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList
+            (CollectionSheetConstants.localeParamName,
+            CollectionSheetConstants.dateFormatParamName, CollectionSheetConstants.transactionDateParamName,
+            CollectionSheetConstants.actualDisbursementDateParamName,
+            CollectionSheetConstants.bulkRepaymentTransactionsParamName,
+            CollectionSheetConstants.bulkDisbursementTransactionsParamName, CollectionSheetConstants.noteParamName,
+            CollectionSheetConstants.calendarIdParamName,
+            CollectionSheetConstants.clientsAttendanceParamName,
+            CollectionSheetConstants.bulkSavingsDueTransactionsParamName, PaymentDetailConstants.paymentTypeParamName,
+            PaymentDetailConstants.accountNumberParamName, PaymentDetailConstants.checkNumberParamName,
+            PaymentDetailConstants.routingCodeParamName, PaymentDetailConstants.receiptNumberParamName,
+            PaymentDetailConstants.bankNumberParamName, CollectionSheetConstants.isTransactionDateOnNonMeetingDateParamName));
+
+	private static final Set<String> INDIVIDUAL_COLLECTIONSHEET_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+			CollectionSheetConstants.localeParamName, CollectionSheetConstants.dateFormatParamName,
+			CollectionSheetConstants.transactionDateParamName, CollectionSheetConstants.actualDisbursementDateParamName,
+			CollectionSheetConstants.bulkRepaymentTransactionsParamName,
+			CollectionSheetConstants.bulkDisbursementTransactionsParamName, CollectionSheetConstants.noteParamName,
+			CollectionSheetConstants.bulkSavingsDueTransactionsParamName));
+
+	private static final Set<String> PAYMENT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+			Arrays.asList(PaymentDetailConstants.accountNumberParamName, PaymentDetailConstants.checkNumberParamName,
+					PaymentDetailConstants.routingCodeParamName, PaymentDetailConstants.receiptNumberParamName,
+					PaymentDetailConstants.bankNumberParamName));
 
     @Autowired
     public CollectionSheetTransactionDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -77,20 +90,24 @@ public class CollectionSheetTransactionDataValidator {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(COLLECTIONSHEET_RESOURCE_NAME);
+                .resource(CollectionSheetConstants.COLLECTIONSHEET_RESOURCE_NAME);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
-        baseDataValidator.reset().parameter(transactionDateParamName).value(transactionDate).notNull();
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(CollectionSheetConstants
+                .transactionDateParamName, element);
+        baseDataValidator.reset().parameter(CollectionSheetConstants.transactionDateParamName).value(transactionDate)
+                .notNull();
 
-        final String note = this.fromApiJsonHelper.extractStringNamed(noteParamName, element);
+        final String note = this.fromApiJsonHelper.extractStringNamed(CollectionSheetConstants.noteParamName, element);
         if (StringUtils.isNotBlank(note)) {
-            baseDataValidator.reset().parameter(noteParamName).value(note).notExceedingLengthOf(1000);
+            baseDataValidator.reset().parameter(CollectionSheetConstants.noteParamName).value(note)
+                    .notExceedingLengthOf(1000);
         }
 
-        final Long calendarId = this.fromApiJsonHelper.extractLongNamed(calendarIdParamName, element);
-        baseDataValidator.reset().parameter(calendarIdParamName).value(calendarId).notNull();
+        final Long calendarId = this.fromApiJsonHelper.extractLongNamed(CollectionSheetConstants.calendarIdParamName,
+                element);
+        baseDataValidator.reset().parameter(CollectionSheetConstants.calendarIdParamName).value(calendarId).notNull();
 
         validateAttendanceDetails(element, baseDataValidator);
 
@@ -110,20 +127,24 @@ public class CollectionSheetTransactionDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, INDIVIDUAL_COLLECTIONSHEET_REQUEST_DATA_PARAMETERS);
+		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+				INDIVIDUAL_COLLECTIONSHEET_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(COLLECTIONSHEET_RESOURCE_NAME);
+                .resource(CollectionSheetConstants.COLLECTIONSHEET_RESOURCE_NAME);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
-        baseDataValidator.reset().parameter(transactionDateParamName).value(transactionDate).notNull();
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(CollectionSheetConstants
+                .transactionDateParamName, element);
+        baseDataValidator.reset().parameter(CollectionSheetConstants.transactionDateParamName).value(transactionDate)
+                .notNull().validateDateBeforeOrEqual(DateUtils.getLocalDateOfTenant());
 
-        final String note = this.fromApiJsonHelper.extractStringNamed(noteParamName, element);
+        final String note = this.fromApiJsonHelper.extractStringNamed(CollectionSheetConstants.noteParamName, element);
         if (StringUtils.isNotBlank(note)) {
-            baseDataValidator.reset().parameter(noteParamName).value(note).notExceedingLengthOf(1000);
+            baseDataValidator.reset().parameter(CollectionSheetConstants.noteParamName).value(note)
+                    .notExceedingLengthOf(1000);
         }
 
         validateDisbursementTransactions(element, baseDataValidator);
@@ -138,15 +159,21 @@ public class CollectionSheetTransactionDataValidator {
     private void validateAttendanceDetails(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
         if (element.isJsonObject()) {
-            if (topLevelJsonElement.has(clientsAttendanceParamName) && topLevelJsonElement.get(clientsAttendanceParamName).isJsonArray()) {
-                final JsonArray array = topLevelJsonElement.get(clientsAttendanceParamName).getAsJsonArray();
+            if (topLevelJsonElement.has(CollectionSheetConstants.clientsAttendanceParamName) && topLevelJsonElement
+                    .get(CollectionSheetConstants.clientsAttendanceParamName).isJsonArray()) {
+                final JsonArray array = topLevelJsonElement.get(CollectionSheetConstants.clientsAttendanceParamName)
+                        .getAsJsonArray();
                 for (int i = 0; i < array.size(); i++) {
                     final JsonObject attendanceElement = array.get(i).getAsJsonObject();
-                    final Long clientId = this.fromApiJsonHelper.extractLongNamed(clientIdParamName, attendanceElement);
-                    final Long attendanceType = this.fromApiJsonHelper.extractLongNamed(attendanceTypeParamName, attendanceElement);
-                    baseDataValidator.reset().parameter(clientsAttendanceParamName + "[" + i + "]." + clientIdParamName).value(clientId)
+                    final Long clientId = this.fromApiJsonHelper.extractLongNamed(CollectionSheetConstants
+                            .clientIdParamName, attendanceElement);
+                    final Long attendanceType = this.fromApiJsonHelper.extractLongNamed(CollectionSheetConstants
+                            .attendanceTypeParamName, attendanceElement);
+                    baseDataValidator.reset().parameter(CollectionSheetConstants.clientsAttendanceParamName + "[" + i
+                            + "]." + CollectionSheetConstants.clientIdParamName).value(clientId)
                             .notNull().integerGreaterThanZero();
-                    baseDataValidator.reset().parameter(clientsAttendanceParamName + "[" + i + "]." + attendanceTypeParamName)
+                    baseDataValidator.reset().parameter(CollectionSheetConstants.clientsAttendanceParamName + "[" + i
+                            + "]." + CollectionSheetConstants.attendanceTypeParamName)
                             .value(attendanceType).notNull().integerGreaterThanZero();
                 }
             }
@@ -157,14 +184,18 @@ public class CollectionSheetTransactionDataValidator {
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
         if (element.isJsonObject()) {
-            if (topLevelJsonElement.has(bulkDisbursementTransactionsParamName)
-                    && topLevelJsonElement.get(bulkDisbursementTransactionsParamName).isJsonArray()) {
-                final JsonArray array = topLevelJsonElement.get(bulkDisbursementTransactionsParamName).getAsJsonArray();
+            if (topLevelJsonElement.has(CollectionSheetConstants.bulkDisbursementTransactionsParamName)
+                    && topLevelJsonElement.get(CollectionSheetConstants.bulkDisbursementTransactionsParamName)
+                    .isJsonArray()) {
+                final JsonArray array = topLevelJsonElement.get(CollectionSheetConstants
+                        .bulkDisbursementTransactionsParamName).getAsJsonArray();
 
                 for (int i = 0; i < array.size(); i++) {
                     final JsonObject loanTransactionElement = array.get(i).getAsJsonObject();
-                    final Long loanId = this.fromApiJsonHelper.extractLongNamed(loanIdParamName, loanTransactionElement);
-                    final BigDecimal disbursementAmount = this.fromApiJsonHelper.extractBigDecimalNamed(transactionAmountParamName,
+                    final Long loanId = this.fromApiJsonHelper.extractLongNamed(CollectionSheetConstants
+                            .loanIdParamName, loanTransactionElement);
+                    final BigDecimal disbursementAmount = this.fromApiJsonHelper.extractBigDecimalNamed
+                            (CollectionSheetConstants.transactionAmountParamName,
                             loanTransactionElement, locale);
 
                     baseDataValidator.reset().parameter("bulktransaction" + "[" + i + "].loan.id").value(loanId).notNull()
@@ -180,14 +211,18 @@ public class CollectionSheetTransactionDataValidator {
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
         if (element.isJsonObject()) {
-            if (topLevelJsonElement.has(bulkRepaymentTransactionsParamName)
-                    && topLevelJsonElement.get(bulkRepaymentTransactionsParamName).isJsonArray()) {
-                final JsonArray array = topLevelJsonElement.get(bulkRepaymentTransactionsParamName).getAsJsonArray();
+            if (topLevelJsonElement.has(CollectionSheetConstants.bulkRepaymentTransactionsParamName)
+                    && topLevelJsonElement.get(CollectionSheetConstants.bulkRepaymentTransactionsParamName)
+                    .isJsonArray()) {
+                final JsonArray array = topLevelJsonElement.get(CollectionSheetConstants
+                        .bulkRepaymentTransactionsParamName).getAsJsonArray();
 
                 for (int i = 0; i < array.size(); i++) {
                     final JsonObject loanTransactionElement = array.get(i).getAsJsonObject();
-                    final Long loanId = this.fromApiJsonHelper.extractLongNamed(loanIdParamName, loanTransactionElement);
-                    final BigDecimal disbursementAmount = this.fromApiJsonHelper.extractBigDecimalNamed(transactionAmountParamName,
+                    final Long loanId = this.fromApiJsonHelper.extractLongNamed(CollectionSheetConstants
+                            .loanIdParamName, loanTransactionElement);
+                    final BigDecimal disbursementAmount = this.fromApiJsonHelper.extractBigDecimalNamed
+                            (CollectionSheetConstants.transactionAmountParamName,
                             loanTransactionElement, locale);
 
                     baseDataValidator.reset().parameter("bulktransaction" + "[" + i + "].loan.id").value(loanId).notNull()
@@ -205,14 +240,18 @@ public class CollectionSheetTransactionDataValidator {
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
         if (element.isJsonObject()) {
-            if (topLevelJsonElement.has(bulkSavingsDueTransactionsParamName)
-                    && topLevelJsonElement.get(bulkSavingsDueTransactionsParamName).isJsonArray()) {
-                final JsonArray array = topLevelJsonElement.get(bulkSavingsDueTransactionsParamName).getAsJsonArray();
+            if (topLevelJsonElement.has(CollectionSheetConstants.bulkSavingsDueTransactionsParamName)
+                    && topLevelJsonElement.get(CollectionSheetConstants.bulkSavingsDueTransactionsParamName)
+                    .isJsonArray()) {
+                final JsonArray array = topLevelJsonElement.get(CollectionSheetConstants
+                        .bulkSavingsDueTransactionsParamName).getAsJsonArray();
 
                 for (int i = 0; i < array.size(); i++) {
                     final JsonObject savingsTransactionElement = array.get(i).getAsJsonObject();
-                    final Long savingsId = this.fromApiJsonHelper.extractLongNamed(savingsIdParamName, savingsTransactionElement);
-                    final BigDecimal dueAmount = this.fromApiJsonHelper.extractBigDecimalNamed(transactionAmountParamName,
+                    final Long savingsId = this.fromApiJsonHelper.extractLongNamed(CollectionSheetConstants
+                            .savingsIdParamName, savingsTransactionElement);
+                    final BigDecimal dueAmount = this.fromApiJsonHelper.extractBigDecimalNamed
+                            (CollectionSheetConstants.transactionAmountParamName,
                             savingsTransactionElement, locale);
 
                     baseDataValidator.reset().parameter("bulktransaction" + "[" + i + "].savings.id").value(savingsId).notNull()
@@ -231,7 +270,7 @@ public class CollectionSheetTransactionDataValidator {
                 locale);
         baseDataValidator.reset().parameter(PaymentDetailConstants.paymentTypeParamName).value(paymentTypeId).ignoreIfNull()
                 .integerGreaterThanZero();
-        for (final String paymentDetailParameterName : PaymentDetailConstants.PAYMENT_CREATE_REQUEST_DATA_PARAMETERS) {
+        for (final String paymentDetailParameterName : PAYMENT_CREATE_REQUEST_DATA_PARAMETERS) {
             final String paymentDetailParameterValue = this.fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
             baseDataValidator.reset().parameter(paymentDetailParameterName).value(paymentDetailParameterValue).ignoreIfNull()
                     .notExceedingLengthOf(50);

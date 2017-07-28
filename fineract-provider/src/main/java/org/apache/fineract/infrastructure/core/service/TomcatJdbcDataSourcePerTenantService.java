@@ -23,6 +23,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.fineract.infrastructure.core.boot.JDBCDriverConfig;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
@@ -45,6 +46,9 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
     private final Map<Long, DataSource> tenantToDataSourceMap = new HashMap<>(1);
     private final DataSource tenantDataSource;
 
+    @Autowired
+    private JDBCDriverConfig driverConfig ;
+    
     @Autowired
     public TomcatJdbcDataSourcePerTenantService(final @Qualifier("tenantDataSourceJndi") DataSource tenantDataSource) {
         this.tenantDataSource = tenantDataSource;
@@ -83,10 +87,10 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         // http://www.tomcatexpert.com/blog/2010/04/01/configuring-jdbc-pool-high-concurrency
 
         // see also org.apache.fineract.DataSourceProperties.setDefaults()
-
-        final String jdbcUrl = tenantConnectionObj.databaseURL();
+    	 String jdbcUrl = this.driverConfig.constructProtocol(tenantConnectionObj.getSchemaServer(), tenantConnectionObj.getSchemaServerPort(), tenantConnectionObj.getSchemaName()) ;
+        //final String jdbcUrl = tenantConnectionObj.databaseURL();
         final PoolConfiguration poolConfiguration = new PoolProperties();
-        poolConfiguration.setDriverClassName("com.mysql.jdbc.Driver");
+        poolConfiguration.setDriverClassName(this.driverConfig.getDriverClassName());
         poolConfiguration.setName(tenantConnectionObj.getSchemaName() + "_pool");
         poolConfiguration.setUrl(jdbcUrl);
         poolConfiguration.setUsername(tenantConnectionObj.getSchemaUsername());
@@ -102,7 +106,8 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
         poolConfiguration.setRemoveAbandonedTimeout(tenantConnectionObj.getRemoveAbandonedTimeout());
         poolConfiguration.setLogAbandoned(tenantConnectionObj.isLogAbandoned());
         poolConfiguration.setAbandonWhenPercentageFull(tenantConnectionObj.getAbandonWhenPercentageFull());
-
+        poolConfiguration.setDefaultAutoCommit(true);
+        
         /**
          * Vishwas- Do we need to enable the below properties and add
          * ResetAbandonedTimer for long running batch Jobs?

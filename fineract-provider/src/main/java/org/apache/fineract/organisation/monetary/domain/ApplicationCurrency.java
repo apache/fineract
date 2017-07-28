@@ -24,29 +24,29 @@ import javax.persistence.Table;
 
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.office.domain.OrganisationCurrency;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_currency")
-public class ApplicationCurrency extends AbstractPersistable<Long> {
+public class ApplicationCurrency extends AbstractPersistableCustom<Long> {
 
     @Column(name = "code", nullable = false, length = 3)
-    private final String code;
+    private String code;
 
     @Column(name = "decimal_places", nullable = false)
-    private final Integer decimalPlaces;
+    private Integer decimalPlaces;
 
     @Column(name = "currency_multiplesof")
-    private final Integer inMultiplesOf;
+    private Integer inMultiplesOf;
 
     @Column(name = "name", nullable = false, length = 50)
-    private final String name;
+    private String name;
 
     @Column(name = "internationalized_name_code", nullable = false, length = 50)
-    private final String nameCode;
+    private String nameCode;
 
     @Column(name = "display_symbol", nullable = true, length = 10)
-    private final String displaySymbol;
+    private String displaySymbol;
 
     protected ApplicationCurrency() {
         this.code = null;

@@ -43,6 +43,7 @@
 										  org.apache.fineract.commands.service.*,
 										  org.apache.fineract.commands.*,
 										  org.apache.fineract.audit.*,
+										 org.apache.fineract.infrastructure.creditbureau.*,
 										  org.apache.fineract.infrastructure.*,
 										  org.apache.fineract.scheduledjobs.*,
 										  org.apache.fineract.organisation.*,
@@ -54,7 +55,8 @@
 										  org.apache.fineract.template.*,
 										  org.apache.fineract.template.service.*,
 										  org.apache.fineract.useradministration.*,
-										  org.apache.fineract.batch">
+										  org.apache.fineract.batch,
+										  org.mifosplatform.infrastructure.report.service">
 		<context:exclude-filter expression="org.springframework.stereotype.Controller"
 			type="annotation" />
 
@@ -69,7 +71,6 @@
 	<bean id="auditorAware"
 		class="org.apache.fineract.infrastructure.core.domain.AuditorAwareImpl" />
 	<jpa:auditing auditor-aware-ref="auditorAware" />
-
 	<jpa:repositories base-package="org.apache.fineract.commands.domain" />
 	<jpa:repositories base-package="org.apache.fineract.infrastructure.*.domain" />
 	<jpa:repositories base-package="org.apache.fineract.accounting.*.domain" />
@@ -79,6 +80,7 @@
 	<jpa:repositories base-package="org.apache.fineract.mix.domain" />
 	<jpa:repositories base-package="org.apache.fineract.scheduledjobs.domain" />
 	<jpa:repositories base-package="org.apache.fineract.template.domain" />
+	<jpa:repositories base-package="org.apache.fineract.infrastructure.campaigns.sms.domain" />
 	
 	<import resource="infrastructure.xml" />
 

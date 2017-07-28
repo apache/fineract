@@ -20,6 +20,9 @@ package org.apache.fineract.portfolio.fund.service;
 
 import java.util.Map;
 
+import javax.persistence.PersistenceException;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -70,8 +73,12 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(fund.getId()).build();
         } catch (final DataIntegrityViolationException dve) {
-            handleFundDataIntegrityIssues(command, dve);
+            handleFundDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleFundDataIntegrityIssues(command, throwable, dve);
+         	return CommandProcessingResult.empty();
         }
     }
 
@@ -95,8 +102,12 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(fund.getId()).with(changes).build();
         } catch (final DataIntegrityViolationException dve) {
-            handleFundDataIntegrityIssues(command, dve);
+            handleFundDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleFundDataIntegrityIssues(command, throwable, dve);
+         	return CommandProcessingResult.empty();
         }
     }
 
@@ -104,9 +115,7 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleFundDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
-
-        final Throwable realCause = dve.getMostSpecificCause();
+    private void handleFundDataIntegrityIssues(final JsonCommand command,  final Throwable realCause, final Exception dve) {
         if (realCause.getMessage().contains("fund_externalid_org")) {
             final String externalId = command.stringValueOfParameterNamed("externalId");
             throw new PlatformDataIntegrityException("error.msg.fund.duplicate.externalId", "A fund with external id '" + externalId

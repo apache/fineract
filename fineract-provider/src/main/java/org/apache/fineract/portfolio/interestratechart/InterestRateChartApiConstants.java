@@ -27,10 +27,10 @@ public class InterestRateChartApiConstants {
     public static final String INTERESTRATE_CHART_RESOURCE_NAME = "interestchart";
 
     // actions
-    public static String summitalAction = ".summital";
+    public static final String summitalAction = ".summital";
 
     // command
-    public static String COMMAND_UNDO_TRANSACTION = "undo";
+    public static final String COMMAND_UNDO_TRANSACTION = "undo";
 
     // general
     public static final String localeParamName = "locale";
@@ -44,6 +44,7 @@ public class InterestRateChartApiConstants {
     public static final String endDateParamName = "endDate";
     public static final String productIdParamName = "productId";
     public static final String productNameParamName = "productName";
+    public static final String isPrimaryGroupingByAmountParamName = "isPrimaryGroupingByAmount";
 
     // interest rate chart Slabs parameters
 //    public static final String periodTypeParamName = "periodType";
@@ -61,15 +62,4 @@ public class InterestRateChartApiConstants {
 
     // to delete chart Slabs from chart
     public static final String deleteParamName = "delete";
-
-    public static final Set<String> INTERESTRATE_CHART_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
-            dateFormatParamName, nameParamName, descriptionParamName, fromDateParamName, endDateParamName, productIdParamName,
-            chartSlabs));
-
-    public static final Set<String> INTERESTRATE_CHART_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
-            dateFormatParamName, idParamName, nameParamName, descriptionParamName, fromDateParamName, endDateParamName, chartSlabs,
-            deleteParamName));
-
-    public static final Set<String> INTERESTRATE_CHART_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
-            dateFormatParamName, idParamName, nameParamName, descriptionParamName, fromDateParamName, endDateParamName, chartSlabs));
 }

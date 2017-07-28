@@ -54,6 +54,8 @@ public interface ReadWriteNonCoreDataService {
 
     CommandProcessingResult createNewDatatableEntry(String datatable, Long appTableId, JsonCommand command);
 
+    CommandProcessingResult createNewDatatableEntry(String datatable, Long appTableId, String json);
+
     CommandProcessingResult createPPIEntry(String datatable, Long appTableId, JsonCommand command);
 
     CommandProcessingResult updateDatatableEntryOneToOne(String datatable, Long appTableId, JsonCommand command);
@@ -68,4 +70,5 @@ public interface ReadWriteNonCoreDataService {
 
     String getDataTableName(String Url);
 
+    Long countDatatableEntries(String datatableName,Long appTableId,String foreignKeyColumn);
 }

@@ -62,4 +62,8 @@ public class GroupRepositoryWrapper {
     public void delete(final Group entity) {
         this.repository.delete(entity);
     }
+
+    public void flush() {
+        this.repository.flush();
+    }
 }

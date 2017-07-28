@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositProductHelper;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -95,46 +96,13 @@ public class RecurringDepositProductHelper {
     private final String minDepositAmount = "100";
     private final String maxDepositAmount = "1000000";
     private Account[] accountList = null;
+    private List<HashMap<String, String>> chartSlabs = null;
+    private boolean isPrimaryGroupingByAmount = false;
+    private Boolean withHoldTax = false;
+    private String taxGroupId = null;
 
     public String build(final String validFrom, final String validTo) {
         final HashMap<String, Object> map = new HashMap<>();
-
-        List<HashMap<String, String>> chartSlabs = new ArrayList<HashMap<String, String>>();
-        HashMap<String, String> chartSlabsMap1 = new HashMap<>();
-        chartSlabsMap1.put("description", "First");
-        chartSlabsMap1.put("periodType", MONTHS);
-        chartSlabsMap1.put("fromPeriod", "1");
-        chartSlabsMap1.put("toPeriod", "6");
-        chartSlabsMap1.put("annualInterestRate", "5");
-        chartSlabsMap1.put("locale", LOCALE);
-        chartSlabs.add(0, chartSlabsMap1);
-
-        HashMap<String, String> chartSlabsMap2 = new HashMap<>();
-        chartSlabsMap2.put("description", "Second");
-        chartSlabsMap2.put("periodType", MONTHS);
-        chartSlabsMap2.put("fromPeriod", "7");
-        chartSlabsMap2.put("toPeriod", "12");
-        chartSlabsMap2.put("annualInterestRate", "6");
-        chartSlabsMap2.put("locale", LOCALE);
-        chartSlabs.add(1, chartSlabsMap2);
-
-        HashMap<String, String> chartSlabsMap3 = new HashMap<>();
-        chartSlabsMap3.put("description", "Third");
-        chartSlabsMap3.put("periodType", MONTHS);
-        chartSlabsMap3.put("fromPeriod", "13");
-        chartSlabsMap3.put("toPeriod", "18");
-        chartSlabsMap3.put("annualInterestRate", "7");
-        chartSlabsMap3.put("locale", LOCALE);
-        chartSlabs.add(2, chartSlabsMap3);
-
-        HashMap<String, String> chartSlabsMap4 = new HashMap<>();
-        chartSlabsMap4.put("description", "Fourth");
-        chartSlabsMap4.put("periodType", MONTHS);
-        chartSlabsMap4.put("fromPeriod", "19");
-        chartSlabsMap4.put("toPeriod", "24");
-        chartSlabsMap4.put("annualInterestRate", "8");
-        chartSlabsMap4.put("locale", LOCALE);
-        chartSlabs.add(3, chartSlabsMap4);
 
         List<HashMap<String, Object>> charts = new ArrayList<HashMap<String, Object>>();
         HashMap<String, Object> chartsMap = new HashMap<>();
@@ -143,6 +111,7 @@ public class RecurringDepositProductHelper {
         chartsMap.put("dateFormat", "dd MMMM yyyy");
         chartsMap.put("locale", LOCALE);
         chartsMap.put("chartSlabs", chartSlabs);
+        chartsMap.put("isPrimaryGroupingByAmount", this.isPrimaryGroupingByAmount);
         charts.add(chartsMap);
 
         map.put("charts", charts);
@@ -177,6 +146,10 @@ public class RecurringDepositProductHelper {
         map.put("depositAmount", this.depositAmount);
         map.put("minDepositAmount", this.minDepositAmount);
         map.put("maxDepositAmount", this.maxDepositAmount);
+        map.put("withHoldTax", this.withHoldTax.toString());
+        if (withHoldTax) {
+            map.put("taxGroupId", taxGroupId);
+        }
 
         if (this.accountingRule.equals(CASH_BASED)) {
             map.putAll(getAccountMappingForCashBased());
@@ -197,6 +170,35 @@ public class RecurringDepositProductHelper {
         this.accountList = account_list;
         return this;
     }
+
+    public RecurringDepositProductHelper withPeriodRangeChart() {
+        this.chartSlabs = constructChartSlabWithPeriodRange();
+        return this;
+    }
+
+    public RecurringDepositProductHelper withPeriodAndAmountRangeChart() {
+        this.chartSlabs = constructChartSlabWithPeriodAndAmountRange();
+        return this;
+    }
+
+    public RecurringDepositProductHelper withAmountRangeChart() {
+        this.chartSlabs = constructChartSlabWithAmountRange();
+        return this;
+    }
+
+    public RecurringDepositProductHelper withAmountAndPeriodRangeChart() {
+        this.chartSlabs = constructChartSlabWithAmountAndPeriodRange();
+        return this;
+    }
+    
+    public RecurringDepositProductHelper withWithHoldTax(final String taxGroupId) {
+        if (taxGroupId != null) {
+            this.withHoldTax = true;
+            this.taxGroupId = taxGroupId;
+        }
+        return this;
+    }
+
 
     private Map<String, String> getAccountMappingForCashBased() {
         final Map<String, String> map = new HashMap<>();
@@ -254,6 +256,207 @@ public class RecurringDepositProductHelper {
         final ArrayList response = Utils.performServerGet(requestSpec, responseSpec, INTEREST_CHART_URL + "?productId=" + productId,
                 "chartSlabs");
         return response;
+    }
+
+    public List<HashMap<String, String>> constructChartSlabWithPeriodRange() {
+        List<HashMap<String, String>> chartSlabs = new ArrayList<HashMap<String, String>>();
+        HashMap<String, String> chartSlabsMap1 = new HashMap<>();
+        chartSlabsMap1.put("description", "First");
+        chartSlabsMap1.put("periodType", MONTHS);
+        chartSlabsMap1.put("fromPeriod", "1");
+        chartSlabsMap1.put("toPeriod", "6");
+        chartSlabsMap1.put("annualInterestRate", "5");
+        chartSlabsMap1.put("locale", LOCALE);
+        chartSlabs.add(0, chartSlabsMap1);
+
+        HashMap<String, String> chartSlabsMap2 = new HashMap<>();
+        chartSlabsMap2.put("description", "Second");
+        chartSlabsMap2.put("periodType", MONTHS);
+        chartSlabsMap2.put("fromPeriod", "7");
+        chartSlabsMap2.put("toPeriod", "12");
+        chartSlabsMap2.put("annualInterestRate", "6");
+        chartSlabsMap2.put("locale", LOCALE);
+        chartSlabs.add(1, chartSlabsMap2);
+
+        HashMap<String, String> chartSlabsMap3 = new HashMap<>();
+        chartSlabsMap3.put("description", "Third");
+        chartSlabsMap3.put("periodType", MONTHS);
+        chartSlabsMap3.put("fromPeriod", "13");
+        chartSlabsMap3.put("toPeriod", "18");
+        chartSlabsMap3.put("annualInterestRate", "7");
+        chartSlabsMap3.put("locale", LOCALE);
+        chartSlabs.add(2, chartSlabsMap3);
+
+        HashMap<String, String> chartSlabsMap4 = new HashMap<>();
+        chartSlabsMap4.put("description", "Fourth");
+        chartSlabsMap4.put("periodType", MONTHS);
+        chartSlabsMap4.put("fromPeriod", "19");
+        chartSlabsMap4.put("annualInterestRate", "8");
+        chartSlabsMap4.put("locale", LOCALE);
+        chartSlabs.add(3, chartSlabsMap4);
+        return chartSlabs;
+    }
+
+    public List<HashMap<String, String>> constructChartSlabWithPeriodAndAmountRange() {
+        List<HashMap<String, String>> chartSlabs = new ArrayList<HashMap<String, String>>();
+        HashMap<String, String> chartSlabsMap1 = new HashMap<>();
+        chartSlabsMap1.put("description", "First");
+        chartSlabsMap1.put("periodType", MONTHS);
+        chartSlabsMap1.put("fromPeriod", "1");
+        chartSlabsMap1.put("toPeriod", "6");
+        chartSlabsMap1.put("amountRangeFrom", "1");
+        chartSlabsMap1.put("amountRangeTo", "5000");
+        chartSlabsMap1.put("annualInterestRate", "5");
+        chartSlabsMap1.put("locale", LOCALE);
+        chartSlabs.add(0, chartSlabsMap1);
+
+        HashMap<String, String> chartSlabsMap1_1 = new HashMap<>();
+        chartSlabsMap1_1.put("description", "First");
+        chartSlabsMap1_1.put("periodType", MONTHS);
+        chartSlabsMap1_1.put("fromPeriod", "1");
+        chartSlabsMap1_1.put("toPeriod", "6");
+        chartSlabsMap1_1.put("amountRangeFrom", "5001");
+        chartSlabsMap1_1.put("annualInterestRate", "6");
+        chartSlabsMap1_1.put("locale", LOCALE);
+        chartSlabs.add(0, chartSlabsMap1_1);
+
+        HashMap<String, String> chartSlabsMap2 = new HashMap<>();
+        chartSlabsMap2.put("description", "Second");
+        chartSlabsMap2.put("periodType", MONTHS);
+        chartSlabsMap2.put("fromPeriod", "7");
+        chartSlabsMap2.put("toPeriod", "12");
+        chartSlabsMap2.put("amountRangeFrom", "1");
+        chartSlabsMap2.put("amountRangeTo", "5000");
+        chartSlabsMap2.put("annualInterestRate", "6");
+        chartSlabsMap2.put("locale", LOCALE);
+        chartSlabs.add(1, chartSlabsMap2);
+
+        HashMap<String, String> chartSlabsMap2_2 = new HashMap<>();
+        chartSlabsMap2_2.put("description", "Second");
+        chartSlabsMap2_2.put("periodType", MONTHS);
+        chartSlabsMap2_2.put("fromPeriod", "7");
+        chartSlabsMap2_2.put("toPeriod", "12");
+        chartSlabsMap2_2.put("amountRangeFrom", "5001");
+        chartSlabsMap2_2.put("annualInterestRate", "7");
+        chartSlabsMap2_2.put("locale", LOCALE);
+        chartSlabs.add(1, chartSlabsMap2_2);
+
+        HashMap<String, String> chartSlabsMap3 = new HashMap<>();
+        chartSlabsMap3.put("description", "Third");
+        chartSlabsMap3.put("periodType", MONTHS);
+        chartSlabsMap3.put("fromPeriod", "13");
+        chartSlabsMap3.put("toPeriod", "18");
+        chartSlabsMap3.put("amountRangeFrom", "1");
+        chartSlabsMap3.put("amountRangeTo", "5000");
+        chartSlabsMap3.put("annualInterestRate", "7");
+        chartSlabsMap3.put("locale", LOCALE);
+        chartSlabs.add(2, chartSlabsMap3);
+
+        HashMap<String, String> chartSlabsMap3_1 = new HashMap<>();
+        chartSlabsMap3_1.put("description", "Third");
+        chartSlabsMap3_1.put("periodType", MONTHS);
+        chartSlabsMap3_1.put("fromPeriod", "13");
+        chartSlabsMap3_1.put("toPeriod", "18");
+        chartSlabsMap3_1.put("amountRangeFrom", "5001");
+        chartSlabsMap3_1.put("annualInterestRate", "8");
+        chartSlabsMap3_1.put("locale", LOCALE);
+        chartSlabs.add(2, chartSlabsMap3_1);
+
+        HashMap<String, String> chartSlabsMap4 = new HashMap<>();
+        chartSlabsMap4.put("description", "Fourth");
+        chartSlabsMap4.put("periodType", MONTHS);
+        chartSlabsMap4.put("fromPeriod", "19");
+        chartSlabsMap4.put("amountRangeFrom", "1");
+        chartSlabsMap4.put("amountRangeTo", "5000");
+        chartSlabsMap4.put("annualInterestRate", "8");
+        chartSlabsMap4.put("locale", LOCALE);
+        chartSlabs.add(3, chartSlabsMap4);
+
+        HashMap<String, String> chartSlabsMap4_1 = new HashMap<>();
+        chartSlabsMap4_1.put("description", "Fourth");
+        chartSlabsMap4_1.put("periodType", MONTHS);
+        chartSlabsMap4_1.put("fromPeriod", "19");
+        chartSlabsMap4_1.put("amountRangeFrom", "5001");
+        chartSlabsMap4_1.put("annualInterestRate", "9");
+        chartSlabsMap4_1.put("locale", LOCALE);
+        chartSlabs.add(3, chartSlabsMap4_1);
+
+        return chartSlabs;
+    }
+
+    public List<HashMap<String, String>> constructChartSlabWithAmountAndPeriodRange() {
+        this.isPrimaryGroupingByAmount = true;
+        List<HashMap<String, String>> chartSlabs = new ArrayList<HashMap<String, String>>();
+        HashMap<String, String> chartSlabsMap1 = new HashMap<>();
+        chartSlabsMap1.put("description", "First");
+        chartSlabsMap1.put("periodType", MONTHS);
+        chartSlabsMap1.put("amountRangeFrom", "1");
+        chartSlabsMap1.put("amountRangeTo", "5000");
+        chartSlabsMap1.put("fromPeriod", "1");
+        chartSlabsMap1.put("toPeriod", "6");
+        chartSlabsMap1.put("annualInterestRate", "5");
+        chartSlabsMap1.put("locale", LOCALE);
+        chartSlabs.add(0, chartSlabsMap1);
+
+        HashMap<String, String> chartSlabsMap2 = new HashMap<>();
+        chartSlabsMap2.put("description", "Second");
+        chartSlabsMap2.put("periodType", MONTHS);
+        chartSlabsMap2.put("fromPeriod", "7");
+        chartSlabsMap2.put("amountRangeFrom", "1");
+        chartSlabsMap2.put("amountRangeTo", "5000");
+        chartSlabsMap2.put("annualInterestRate", "6");
+        chartSlabsMap2.put("locale", LOCALE);
+        chartSlabs.add(1, chartSlabsMap2);
+
+        HashMap<String, String> chartSlabsMap3 = new HashMap<>();
+        chartSlabsMap3.put("description", "Third");
+        chartSlabsMap3.put("periodType", MONTHS);
+        chartSlabsMap3.put("fromPeriod", "1");
+        chartSlabsMap3.put("toPeriod", "6");
+        chartSlabsMap3.put("amountRangeFrom", "5001");
+        chartSlabsMap3.put("annualInterestRate", "7");
+        chartSlabsMap3.put("locale", LOCALE);
+        chartSlabs.add(2, chartSlabsMap3);
+
+        HashMap<String, String> chartSlabsMap4 = new HashMap<>();
+        chartSlabsMap4.put("description", "Fourth");
+        chartSlabsMap4.put("periodType", MONTHS);
+        chartSlabsMap4.put("fromPeriod", "7");
+        chartSlabsMap4.put("amountRangeFrom", "5001");
+        chartSlabsMap4.put("annualInterestRate", "8");
+        chartSlabsMap4.put("locale", LOCALE);
+        chartSlabs.add(3, chartSlabsMap4);
+
+        return chartSlabs;
+    }
+
+    public List<HashMap<String, String>> constructChartSlabWithAmountRange() {
+        this.isPrimaryGroupingByAmount = true;
+        List<HashMap<String, String>> chartSlabs = new ArrayList<HashMap<String, String>>();
+        HashMap<String, String> chartSlabsMap1 = new HashMap<>();
+        chartSlabsMap1.put("description", "First");
+        chartSlabsMap1.put("amountRangeFrom", "1");
+        chartSlabsMap1.put("amountRangeTo", "5000");
+        chartSlabsMap1.put("annualInterestRate", "5");
+        chartSlabsMap1.put("locale", LOCALE);
+        chartSlabs.add(0, chartSlabsMap1);
+
+        HashMap<String, String> chartSlabsMap3 = new HashMap<>();
+        chartSlabsMap3.put("description", "Third");
+        chartSlabsMap3.put("amountRangeFrom", "5001");
+        chartSlabsMap3.put("amountRangeTo", "10000");
+        chartSlabsMap3.put("annualInterestRate", "7");
+        chartSlabsMap3.put("locale", LOCALE);
+        chartSlabs.add(1, chartSlabsMap3);
+
+        HashMap<String, String> chartSlabsMap4 = new HashMap<>();
+        chartSlabsMap4.put("description", "Fourth");
+        chartSlabsMap4.put("amountRangeFrom", "10001");
+        chartSlabsMap4.put("annualInterestRate", "8");
+        chartSlabsMap4.put("locale", LOCALE);
+        chartSlabs.add(2, chartSlabsMap4);
+
+        return chartSlabs;
     }
 
 }

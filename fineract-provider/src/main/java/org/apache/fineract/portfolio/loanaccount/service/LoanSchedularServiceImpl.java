@@ -171,6 +171,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
 								+ realCause.getMessage());
 						sb.append("Interest recalculation for loans failed for account:").append(loanId).append(" with message ")
                         .append(realCause.getMessage());
+						numberOfRetries = maxNumberOfRetries + 1;
 					}
 					i++;
 				}

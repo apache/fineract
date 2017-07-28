@@ -147,4 +147,15 @@ public class AccountingDropdownReadPlatformServiceImpl implements AccountingDrop
         return accountOptions;
     }
 
+    @Override
+    public Map<String, List<GLAccountData>> retrieveAccountMappingOptionsForShareProducts() {
+        boolean includeAssetAccounts = true;
+        boolean includeIncomeAccounts = true;
+        boolean includeExpenseAccounts = false;
+        boolean includeLiabilityAccounts = true;
+        boolean includeEquityAccounts = true;
+        return retrieveAccountMappingOptions(includeAssetAccounts, includeIncomeAccounts, includeExpenseAccounts, includeLiabilityAccounts,
+                includeEquityAccounts);
+    }
+
 }

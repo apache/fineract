@@ -27,7 +27,6 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.localePa
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -43,6 +42,7 @@ import javax.persistence.TemporalType;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -52,7 +52,6 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.SavingsAccountChargeWithoutMandatoryFieldException;
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 /**
  * @author dv6
@@ -60,7 +59,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
  */
 @Entity
 @Table(name = "m_savings_account_charge")
-public class SavingsAccountCharge extends AbstractPersistable<Long> {
+public class SavingsAccountCharge extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "savings_account_id", referencedColumnName = "id", nullable = false)
@@ -225,7 +224,8 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
 
         populateDerivedFields(transactionAmount, chargeAmount);
 
-        if (this.isWithdrawalFee()) {
+        if (this.isWithdrawalFee()
+        		|| this.isSavingsNoActivity()) {
             this.amountOutstanding = BigDecimal.ZERO;
         }
 
@@ -656,6 +656,10 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
     public boolean isSavingsActivation() {
         return ChargeTimeType.fromInt(this.chargeTime).isSavingsActivation();
     }
+    
+    public boolean isSavingsNoActivity(){
+    	return ChargeTimeType.fromInt(this.chargeTime).isSavingsNoActivityFee();
+    }
 
     public boolean isSavingsClosure() {
         return ChargeTimeType.fromInt(this.chargeTime).isSavingsClosure();
@@ -698,15 +702,6 @@ public class SavingsAccountCharge extends AbstractPersistable<Long> {
                 .append(this.amount, rhs.amount) //
                 .append(getDueLocalDate(), rhs.getDueLocalDate()) //
                 .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(3, 5) //
-                .append(getId()) //
-                .append(this.charge.getId()) //
-                .append(this.amount).append(getDueLocalDate()) //
-                .toHashCode();
     }
 
     public BigDecimal updateWithdralFeeAmount(final BigDecimal transactionAmount) {

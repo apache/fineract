@@ -103,7 +103,8 @@ public class SavingsAccountsApiResource {
                 staffInSelectedOfficeOnly);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, savingsAccount, SavingsApiConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
+		return this.toApiJsonSerializer.serialize(settings, savingsAccount,
+				SavingsApiSetConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -122,7 +123,8 @@ public class SavingsAccountsApiResource {
         final Page<SavingsAccountData> products = this.savingsAccountReadPlatformService.retrieveAll(searchParameters);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, products, SavingsApiConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
+		return this.toApiJsonSerializer.serialize(settings, products,
+				SavingsApiSetConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
@@ -159,7 +161,7 @@ public class SavingsAccountsApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
         return this.toApiJsonSerializer.serialize(settings, savingsAccountTemplate,
-                SavingsApiConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
+                SavingsApiSetConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
     }
 
     private SavingsAccountData populateTemplateAndAssociations(final Long accountId, final SavingsAccountData savingsAccount,
@@ -209,7 +211,15 @@ public class SavingsAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String update(@PathParam("accountId") final Long accountId, final String apiRequestBodyAsJson) {
+    public String update(@PathParam("accountId") final Long accountId, final String apiRequestBodyAsJson,
+            @QueryParam("command") final String commandParam) {
+
+        if (is(commandParam, "updateWithHoldTax")) {
+            final CommandWrapper commandRequest = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson).updateWithHoldTax(accountId)
+                    .build();
+            final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
+        }
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSavingsAccount(accountId).withJson(apiRequestBodyAsJson)
                 .build();
@@ -269,13 +279,33 @@ public class SavingsAccountsApiResource {
             final CommandWrapper commandRequest = builder.unassignSavingsOfficer(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return this.toApiJsonSerializer.serialize(result);
+        } else if (is(commandParam, SavingsApiConstants.COMMAND_BLOCK_DEBIT)) {
+            final CommandWrapper commandRequest = builder.blockDebitsFromSavingsAccount(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_DEBIT)) {
+            final CommandWrapper commandRequest = builder.unblockDebitsFromSavingsAccount(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, SavingsApiConstants.COMMAND_BLOCK_CREDIT)) {
+            final CommandWrapper commandRequest = builder.blockCreditsToSavingsAccount(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_CREDIT)) {
+            final CommandWrapper commandRequest = builder.unblockCreditsToSavingsAccount(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, SavingsApiConstants.COMMAND_BLOCK_ACCOUNT)) {
+            final CommandWrapper commandRequest = builder.withNoJsonBody().blockSavingsAccount(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT)) {
+            final CommandWrapper commandRequest = builder.withNoJsonBody().unblockSavingsAccount(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (result == null) {
             //
-            throw new UnrecognizedQueryParamException("command", commandParam,
-                    new Object[] { "reject", "withdrawnByApplicant", "approve", "undoapproval", "activate", "calculateInterest",
-                            "postInterest", "close", "assignSavingsOfficer", "unassignSavingsOfficer" });
+            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "reject", "withdrawnByApplicant", "approve",
+                    "undoapproval", "activate", "calculateInterest", "postInterest", "close", "assignSavingsOfficer",
+                    "unassignSavingsOfficer", SavingsApiConstants.COMMAND_BLOCK_DEBIT, SavingsApiConstants.COMMAND_UNBLOCK_DEBIT,
+                    SavingsApiConstants.COMMAND_BLOCK_CREDIT, SavingsApiConstants.COMMAND_UNBLOCK_CREDIT,
+                    SavingsApiConstants.COMMAND_BLOCK_ACCOUNT, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT });
         }
 
         return this.toApiJsonSerializer.serialize(result);

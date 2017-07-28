@@ -35,11 +35,11 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.joda.time.LocalDate;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_account_transfer_transaction")
-public class AccountTransferTransaction extends AbstractPersistable<Long> {
+public class AccountTransferTransaction extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "account_transfer_details_id", nullable = true)
@@ -145,4 +145,10 @@ public class AccountTransferTransaction extends AbstractPersistable<Long> {
     public AccountTransferDetails accountTransferDetails() {
         return this.accountTransferDetails;
     }
+
+        public static AccountTransferTransaction LoanToLoanTransfer(AccountTransferDetails accountTransferDetails, LoanTransaction disburseTransaction,
+                LoanTransaction repaymentTransaction, LocalDate transactionDate, Money transactionMonetaryAmount, String description) {
+            return new AccountTransferTransaction(accountTransferDetails, null, null, repaymentTransaction, disburseTransaction, transactionDate,
+                    transactionMonetaryAmount, description);
+        }
 }

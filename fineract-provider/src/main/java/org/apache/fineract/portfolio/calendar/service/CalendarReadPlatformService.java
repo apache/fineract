@@ -50,4 +50,6 @@ public interface CalendarReadPlatformService {
 
     LocalDate generateNextEligibleMeetingDateForCollection(CalendarData calendarData, MeetingData lastMeetingData);
 
+    Boolean isCalendarAssociatedWithEntity(final Long entityId, final Long calendarId, Long entityTypeId);
+
 }

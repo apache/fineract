@@ -28,11 +28,11 @@ import javax.persistence.Table;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.survey.api.LikelihoodApiConstants;
 import org.apache.fineract.infrastructure.survey.data.LikelihoodStatus;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "ppi_likelihoods_ppi")
-public final class Likelihood extends AbstractPersistable<Long> {
+public final class Likelihood extends AbstractPersistableCustom<Long> {
 
     @Column(name = "ppi_name", nullable = false)
     private String ppiName;

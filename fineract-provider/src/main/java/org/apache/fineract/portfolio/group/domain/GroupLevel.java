@@ -22,20 +22,20 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_group_level")
-public class GroupLevel extends AbstractPersistable<Long> {
+public class GroupLevel extends AbstractPersistableCustom<Long> {
 
     @Column(name = "parent_id")
-    private final Long parentId;
+    private Long parentId;
 
     @Column(name = "super_parent", nullable = false)
-    private final boolean superParent;
+    private boolean superParent;
 
     @Column(name = "level_name", nullable = false, length = 100, unique = true)
-    private final String levelName;
+    private String levelName;
 
     @Column(name = "recursable", nullable = false)
     private boolean recursable = false;

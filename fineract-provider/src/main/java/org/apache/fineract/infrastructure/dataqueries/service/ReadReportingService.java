@@ -42,4 +42,11 @@ public interface ReadReportingService {
     Collection<ReportParameterData> getAllowedParameters();
 
     ReportData retrieveReport(final Long id);
+
+    Collection<String> getAllowedReportTypes();
+    
+  //needed for smsCampaign jobs where securityContext is null
+    GenericResultsetData retrieveGenericResultSetForSmsCampaign(String name, String type, Map<String, String> extractedQueryParams);
+    
+    String  sqlToRunForSmsCampaign(String name, String type, Map<String, String> queryParams);
 }

@@ -31,8 +31,11 @@ import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelati
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityToEntityMappingData;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntity;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelation;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepositoryWrapper;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityAccessConfigurationException;
+import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityMappingConfigurationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
@@ -48,11 +51,14 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
     private final static Logger logger = LoggerFactory.getLogger(GenericDataServiceImpl.class);
+    private final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepository;
 
     @Autowired
-    public FineractEntityAccessReadServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
+    public FineractEntityAccessReadServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
+    		final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepository) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.fineractEntityRelationRepository = fineractEntityRelationRepository;
     }
 
     /*
@@ -71,38 +77,32 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
      * null if there is no entity restrictions or if there
      */
     @Override
-    public String getSQLQueryInClause_WithListOfIDsForEntityAccess(Long firstEntityId, FineractEntityType firstEntityType,
-            FineractEntityAccessType accessType, FineractEntityType secondEntityType, boolean includeAllOffices) {
-        Collection<FineractEntityAccessData> accesslist = retrieveEntityAccessFor(firstEntityId, firstEntityType, accessType, secondEntityType,
-                includeAllOffices);
+    public String getSQLQueryInClause_WithListOfIDsForEntityAccess( FineractEntityType firstEntityType,
+    		           final Long relId, final Long fromEntityId, boolean includeAllOffices) {
+    		        Collection<FineractEntityToEntityMappingData> accesslist = retrieveEntityAccessFor(firstEntityType, relId, fromEntityId, 
+    		        		includeAllOffices);
         String returnIdListStr = null;
         StringBuffer accessListCSVStrBuf = null;
         if ((accesslist != null) && (accesslist.size() > 0)) {
-            logger.debug("Found " + accesslist.size() + " access type restrictions while getting entity access configuration for "
-                    + firstEntityType.getType() + ":" + firstEntityId + " with type " + accessType.toStr() + " against "
-                    + secondEntityType.getType());
-            accessListCSVStrBuf = new StringBuffer(" ");
-            for (int i = 0; i < accesslist.size(); i++) {
-                FineractEntityAccessData accessData = (FineractEntityAccessData) accesslist.toArray()[i];
-                if (accessData == null) { throw new FineractEntityAccessConfigurationException(firstEntityId, firstEntityType, accessType,
-                        secondEntityType); }
-                if (accessData.getSecondEntity().getId() == 0) { // If there is
-                                                                 // any ID that
-                                                                 // zero, then
-                                                                 // allow access
-                                                                 // to all
-                    accessListCSVStrBuf = null;
-                    break;
+        	for(FineractEntityToEntityMappingData accessData: accesslist){
+        		            	if (accessData == null) {  
+        		                	throw new FineractEntityMappingConfigurationException();
+        		                 }
+        		              
+        		            	if(accessListCSVStrBuf == null){
+        		            		accessListCSVStrBuf = new StringBuffer() ;
+        		            	}else{
+        		            		accessListCSVStrBuf.append(",");
+        		            	}
+        		            	accessListCSVStrBuf.append(accessData.getToId());
+        		            	if(accessData.getToId() == 0){
+        		            		accessListCSVStrBuf =null; 
+        		            		break;
+        		            	}
                 }
-                if (i > 0) {
-                    accessListCSVStrBuf.append(',');
-                }
-                accessListCSVStrBuf.append(accessData.getSecondEntity().getId());
-            }
 
         } else {
-            logger.debug("Found zero access type restrictions while getting entity access configuration for " + firstEntityType.getType()
-                    + ":" + firstEntityId + " with type " + accessType.toStr() + " against " + secondEntityType.getType());
+           
             accessListCSVStrBuf = new StringBuffer();
             accessListCSVStrBuf.append("false"); // Append false so that no rows
                                                  // will be returned
@@ -115,8 +115,8 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
     }
 
     @Override
-    public Collection<FineractEntityAccessData> retrieveEntityAccessFor(Long firstEntityId, FineractEntityType firstEntityType,
-            FineractEntityAccessType accessType, FineractEntityType secondEntityType, boolean includeAllSubOffices) {
+    public Collection<FineractEntityToEntityMappingData> retrieveEntityAccessFor(FineractEntityType firstEntityType,
+    		    		final Long relId, final Long fromEntityId,boolean includeAllSubOffices) {
         final AppUser currentUser = this.context.authenticatedUser();
 
         final String hierarchy = currentUser.getOffice().getHierarchy();
@@ -126,52 +126,27 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
         } else {
             hierarchySearchString = hierarchy + "%";
         }
-        String sql = getSQLForRetriveEntityAccessFor(firstEntityType, accessType, secondEntityType);
-
-        Collection<FineractEntityAccessData> entityAccessData = null;
-        FineractEntityAccessDataMapper mapper = new FineractEntityAccessDataMapper();
+        String sql = getSQLForRetriveEntityAccessFor();
+        
+        Collection<FineractEntityToEntityMappingData> entityAccessData = null;
+        GetOneEntityMapper mapper = new GetOneEntityMapper();
 
         if (includeAllSubOffices && (firstEntityType.getTable().equals("m_office"))) {
             sql += " where firstentity.hierarchy like ? order by firstEntity.hierarchy";
-            entityAccessData = this.jdbcTemplate.query(sql, mapper, new Object[] { firstEntityId, hierarchySearchString });
+            entityAccessData = this.jdbcTemplate.query(sql, mapper, new Object[] { fromEntityId, fromEntityId, hierarchySearchString });
         } else {
-            entityAccessData = this.jdbcTemplate.query(sql, mapper, new Object[] { firstEntityId });
+        	entityAccessData = this.jdbcTemplate.query(sql, mapper, new Object[] { relId, fromEntityId});
         }
 
         return entityAccessData;
     }
 
-    private String getSQLForRetriveEntityAccessFor(FineractEntityType firstEntityType, FineractEntityAccessType accessType,
-            FineractEntityType secondEntityType) {
-        StringBuffer str = new StringBuffer("select eea.entity_id as entity_id, entity_type as entity_type, ");
-        str.append("access_type_code_value_id as access_id, cv.code_value as access_type_desc, c.code_name as code, ");
-        str.append("firstentity.id as first_entity_id, firstentity.name as entity_name, ");
-        str.append("otherentity.id as second_entity_id, otherentity.name as second_entity_name, ");
-        str.append("eea.second_entity_type as second_entity_type ");
-        str.append("from m_entity_to_entity_access eea ");
-        str.append("left join m_code_value cv on (cv.code_value = ");
-        str.append("'");
-        str.append(accessType.toStr());
-        str.append("' ");
-        str.append("and eea.access_type_code_value_id = cv.id) ");
-        str.append("left join m_code c on (c.code_name = '");
-        str.append(FineractEntityAccessConstants.ENTITY_ACCESS_CODENAME);
-        str.append("' and cv.code_id = c.id) ");
-        str.append("left join ");
-        str.append(firstEntityType.getTable());
-        str.append(" firstentity on (eea.entity_type = ");
-        str.append("'");
-        str.append(firstEntityType.getType());
-        str.append("'");
-        str.append(" and eea.entity_id = firstentity.id)        left join ");
-        str.append(secondEntityType.getTable());
-        str.append(" otherentity on (eea.second_entity_type = ");
-        str.append("'");
-        str.append(secondEntityType.getType());
-        str.append("' ");
-        str.append("and eea.second_entity_id = otherentity.id) ");
-        str.append("where eea.access_type_code_value_id = cv.id ");
-        str.append("and eea.entity_id = ? ");
+    private String getSQLForRetriveEntityAccessFor() {
+    	StringBuffer str = new StringBuffer("select  eem.rel_id as relId,eem.from_id as fromId, ");
+    	        str.append("eem.to_id as toId, eem.start_date as startDate, eem.end_date as endDate ");
+    	        str.append("from  m_entity_to_entity_mapping eem ");
+    	        str.append("where eem.rel_id = ? ");
+    	        str.append("and eem.from_id = ? ");
         logger.debug(str.toString());
         return str.toString();
     }
@@ -220,30 +195,32 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
     public String getSQLQueryInClauseIDList_ForLoanProductsForOffice(Long officeId, boolean includeAllOffices) {
 
         FineractEntityType firstEntityType = FineractEntityType.OFFICE;
-        FineractEntityAccessType accessType = FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS;
-        FineractEntityType secondEntityType = FineractEntityType.LOAN_PRODUCT;
-
-        return getSQLQueryInClause_WithListOfIDsForEntityAccess(officeId, firstEntityType, accessType, secondEntityType, includeAllOffices);
+        FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
+        						.findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.toStr());
+        Long relId = fineractEntityRelation.getId();
+        return getSQLQueryInClause_WithListOfIDsForEntityAccess(firstEntityType, relId, officeId, includeAllOffices);
     }
 
     @Override
     public String getSQLQueryInClauseIDList_ForSavingsProductsForOffice(Long officeId, boolean includeAllOffices) {
 
         FineractEntityType firstEntityType = FineractEntityType.OFFICE;
-        FineractEntityAccessType accessType = FineractEntityAccessType.OFFICE_ACCESS_TO_SAVINGS_PRODUCTS;
-        FineractEntityType secondEntityType = FineractEntityType.SAVINGS_PRODUCT;
+        FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
+        		      .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_SAVINGS_PRODUCTS.toStr());
+        Long relId = fineractEntityRelation.getId();
 
-        return getSQLQueryInClause_WithListOfIDsForEntityAccess(officeId, firstEntityType, accessType, secondEntityType, includeAllOffices);
+        return getSQLQueryInClause_WithListOfIDsForEntityAccess(firstEntityType, relId, officeId, includeAllOffices);
     }
 
     @Override
     public String getSQLQueryInClauseIDList_ForChargesForOffice(Long officeId, boolean includeAllOffices) {
 
         FineractEntityType firstEntityType = FineractEntityType.OFFICE;
-        FineractEntityAccessType accessType = FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES;
-        FineractEntityType secondEntityType = FineractEntityType.CHARGE;
+        FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
+        						.findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES.toStr());
+        Long relId = fineractEntityRelation.getId();
 
-        return getSQLQueryInClause_WithListOfIDsForEntityAccess(officeId, firstEntityType, accessType, secondEntityType, includeAllOffices);
+        return getSQLQueryInClause_WithListOfIDsForEntityAccess(firstEntityType, relId, officeId, includeAllOffices);
     }
 
     @Override

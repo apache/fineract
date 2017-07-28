@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -41,8 +42,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -53,14 +54,11 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeWithoutMandatoryFieldException;
 import org.apache.fineract.portfolio.loanaccount.command.LoanChargeCommand;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidDetail;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_loan_charge")
-public class LoanCharge extends AbstractPersistable<Long> {
+public class LoanCharge extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", referencedColumnName = "id", nullable = false)
@@ -122,17 +120,16 @@ public class LoanCharge extends AbstractPersistable<Long> {
     @Column(name = "max_cap", scale = 6, precision = 19, nullable = true)
     private BigDecimal maxCap;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loancharge", orphanRemoval = true)
-    private final Set<LoanInstallmentCharge> loanInstallmentCharge = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loancharge", orphanRemoval = true, fetch=FetchType.EAGER)
+    private Set<LoanInstallmentCharge> loanInstallmentCharge = new HashSet<>();
 
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
 
-    @OneToOne(mappedBy = "loancharge", cascade = CascadeType.ALL, optional = true, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "loancharge", cascade = CascadeType.ALL, optional = true, orphanRemoval = true, fetch = FetchType.EAGER)
     private LoanOverdueInstallmentCharge overdueInstallmentCharge;
 
-    @OneToOne(mappedBy = "loancharge", cascade = CascadeType.ALL, optional = true, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "loancharge", cascade = CascadeType.ALL, optional = true, orphanRemoval = true, fetch = FetchType.EAGER)
     private LoanTrancheDisbursementCharge loanTrancheDisbursementCharge;
 
     public static LoanCharge createNewFromJson(final Loan loan, final Charge chargeDefinition, final JsonCommand command) {
@@ -185,6 +182,19 @@ public class LoanCharge extends AbstractPersistable<Long> {
                     percentage);
         }
 
+        // If charge type is specified due date and loan is multi disburment
+        // loan.
+        // Then we need to get as of this loan charge due date how much amount
+        // disbursed.
+        if (chargeDefinition.getChargeTimeType().equals(ChargeTimeType.SPECIFIED_DUE_DATE.getValue()) && loan.isMultiDisburmentLoan()) {
+            amountPercentageAppliedTo = BigDecimal.ZERO;
+            for (final LoanDisbursementDetails loanDisbursementDetails : loan.getDisbursementDetails()) {
+                if (!loanDisbursementDetails.expectedDisbursementDate().after(dueDate.toDate())) {
+                    amountPercentageAppliedTo = amountPercentageAppliedTo.add(loanDisbursementDetails.principal());
+                }
+            }
+        }
+        
         return new LoanCharge(loan, chargeDefinition, amountPercentageAppliedTo, amount, chargeTime, chargeCalculation, dueDate,
                 chargePaymentMode, null, loanCharge);
     }
@@ -411,7 +421,19 @@ public class LoanCharge extends AbstractPersistable<Long> {
         if (this.loan != null) {
             switch (ChargeCalculationType.fromInt(this.chargeCalculation)) {
                 case PERCENT_OF_AMOUNT:
-                    amountPercentageAppliedTo = this.loan.getPrincpal().getAmount();
+                    // If charge type is specified due date and loan is multi
+                    // disburment loan.
+                    // Then we need to get as of this loan charge due date how
+                    // much amount disbursed.
+                    if (this.loan.isMultiDisburmentLoan() && this.isSpecifiedDueDate()) {
+                        for (final LoanDisbursementDetails loanDisbursementDetails : this.loan.getDisbursementDetails()) {
+                            if (!loanDisbursementDetails.expectedDisbursementDate().after(this.getDueDate())) {
+                                amountPercentageAppliedTo = amountPercentageAppliedTo.add(loanDisbursementDetails.principal());
+                            }
+                        }
+                    } else {
+                        amountPercentageAppliedTo = this.loan.getPrincpal().getAmount();
+                    }
                 break;
                 case PERCENT_OF_AMOUNT_AND_INTEREST:
                     amountPercentageAppliedTo = this.loan.getPrincpal().getAmount().add(this.loan.getTotalInterest());
@@ -493,14 +515,18 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     private void updateInstallmentCharges() {
         final Collection<LoanInstallmentCharge> remove = new HashSet<>();
-        final Set<LoanInstallmentCharge> chargePerInstallments = this.loan.generateInstallmentLoanCharges(this);
+        final List<LoanInstallmentCharge> newChargeInstallments = this.loan.generateInstallmentLoanCharges(this);
         if (this.loanInstallmentCharge.isEmpty()) {
-            this.loanInstallmentCharge.addAll(chargePerInstallments);
+            this.loanInstallmentCharge.addAll(newChargeInstallments);
         } else {
             int index = 0;
-            final LoanInstallmentCharge[] loanChargePerInstallments = new LoanInstallmentCharge[chargePerInstallments.size()];
-            final LoanInstallmentCharge[] loanChargePerInstallmentArray = chargePerInstallments.toArray(loanChargePerInstallments);
-            for (final LoanInstallmentCharge chargePerInstallment : this.loanInstallmentCharge) {
+            final List<LoanInstallmentCharge> oldChargeInstallments = new ArrayList<>();
+            if(this.loanInstallmentCharge != null && !this.loanInstallmentCharge.isEmpty()){
+                oldChargeInstallments.addAll(this.loanInstallmentCharge);
+            }
+            Collections.sort(oldChargeInstallments);
+            final LoanInstallmentCharge[] loanChargePerInstallmentArray = newChargeInstallments.toArray(new LoanInstallmentCharge[newChargeInstallments.size()]);
+            for (final LoanInstallmentCharge chargePerInstallment : oldChargeInstallments) {
                 if (index == loanChargePerInstallmentArray.length) {
                     remove.add(chargePerInstallment);
                     chargePerInstallment.updateInstallment(null);
@@ -509,10 +535,15 @@ public class LoanCharge extends AbstractPersistable<Long> {
                 }
             }
             this.loanInstallmentCharge.removeAll(remove);
-            while (index < loanChargePerInstallmentArray.length - 1) {
+            while (index < loanChargePerInstallmentArray.length) {
                 this.loanInstallmentCharge.add(loanChargePerInstallmentArray[index++]);
             }
         }
+        Money amount = Money.zero(this.loan.getCurrency());
+        for(LoanInstallmentCharge charge:this.loanInstallmentCharge){
+            amount =amount.plus(charge.getAmount());
+        }
+        this.amount =amount.getAmount();
     }
 
     public boolean isDueAtDisbursement() {
@@ -546,6 +577,10 @@ public class LoanCharge extends AbstractPersistable<Long> {
             dueDate = new LocalDate(this.dueDate);
         }
         return dueDate;
+    }
+    
+    public Date getDueDate() {
+        return this.dueDate;
     }
 
     private boolean determineIfFullyPaid() {
@@ -706,10 +741,14 @@ public class LoanCharge extends AbstractPersistable<Long> {
     }
 
     /**
+     * @param incrementBy
+     * 
+     * @param installmentNumber
+     * 
      * @param feeAmount
      *            TODO
-     * @param processAmount
-     *            Amount used to pay off this charge
+     * 
+     * 
      * @return Actual amount paid on this charge
      */
     public Money updatePaidAmountBy(final Money incrementBy, final Integer installmentNumber, final Money feeAmount) {
@@ -760,7 +799,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
         return this.charge;
     }
 
-    @Override
+    /*@Override
     public boolean equals(final Object obj) {
         if (obj == null) { return false; }
         if (obj == this) { return true; }
@@ -777,12 +816,12 @@ public class LoanCharge extends AbstractPersistable<Long> {
     @Override
     public int hashCode() {
         return 1;
-        /*
+        
          * return new HashCodeBuilder(3, 5) // .append(getId()) //
          * .append(this.charge.getId()) //
          * .append(this.amount).append(getDueLocalDate()) // .toHashCode();
-         */
-    }
+         
+    }*/
 
     public ChargePaymentMode getChargePaymentMode() {
         return ChargePaymentMode.fromInt(this.chargePaymentMode);
@@ -865,6 +904,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
         this.active = active;
         if (!active) {
             this.overdueInstallmentCharge = null;
+            this.loanTrancheDisbursementCharge = null;
             this.clearLoanInstallmentCharges();
         }
     }
@@ -983,7 +1023,15 @@ public class LoanCharge extends AbstractPersistable<Long> {
         return this.loan;
     }
     
+    public boolean isDisbursementCharge() {
+        return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.DISBURSEMENT);
+    }
+    
     public boolean isTrancheDisbursementCharge() {
         return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.TRANCHE_DISBURSEMENT);
+    }
+    
+    public boolean isDueDateCharge() {
+        return this.dueDate != null;
     }
 }

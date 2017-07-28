@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.persistence.PersistenceException;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
 import org.apache.fineract.accounting.provisioning.service.ProvisioningEntriesReadPlatformService;
@@ -84,8 +87,12 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             this.provisioningCriteriaRepository.save(provisioningCriteria);
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCriteria.getId()).build();
         } catch (final DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(command, dve);
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleDataIntegrityIssues(command, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -104,19 +111,27 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
 
     @Override
     public CommandProcessingResult updateProvisioningCriteria(final Long criteriaId, JsonCommand command) {
-        this.fromApiJsonDeserializer.validateForUpdate(command.json());
-        ProvisioningCriteria provisioningCriteria = provisioningCriteriaRepository.findOne(criteriaId) ;
-        if(provisioningCriteria == null) {
-            throw new ProvisioningCategoryNotFoundException(criteriaId) ;
+    	try {
+    		this.fromApiJsonDeserializer.validateForUpdate(command.json());
+            ProvisioningCriteria provisioningCriteria = provisioningCriteriaRepository.findOne(criteriaId) ;
+            if(provisioningCriteria == null) {
+                throw new ProvisioningCategoryNotFoundException(criteriaId) ;
+            }
+            List<LoanProduct> products = this.provisioningCriteriaAssembler.parseLoanProducts(command.parsedJson()) ;
+            final Map<String, Object> changes = provisioningCriteria.update(command, products) ;
+            if(!changes.isEmpty()) {
+                updateProvisioningCriteriaDefinitions(provisioningCriteria, command) ;
+                provisioningCriteriaRepository.saveAndFlush(provisioningCriteria) ;    
+            }
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCriteria.getId()).build();	
+    	} catch (final DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
+            return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleDataIntegrityIssues(command, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
-        List<LoanProduct> products = this.provisioningCriteriaAssembler.parseLoanProducts(command.parsedJson()) ;
-        
-        final Map<String, Object> changes = provisioningCriteria.update(command, products) ;
-        if(!changes.isEmpty()) {
-            updateProvisioningCriteriaDefinitions(provisioningCriteria, command) ;
-            provisioningCriteriaRepository.save(provisioningCriteria) ;    
-        }
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCriteria.getId()).build();
     }
 
     private void updateProvisioningCriteriaDefinitions(ProvisioningCriteria provisioningCriteria, JsonCommand command) {
@@ -149,14 +164,16 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
-
-        final Throwable realCause = dve.getMostSpecificCause();
+    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
         if (realCause.getMessage().contains("criteria_name")) {
             final String name = command.stringValueOfParameterNamed("criteria_name");
             throw new PlatformDataIntegrityException("error.msg.provisioning.duplicate.criterianame", "Provisioning Criteria with name `"
                     + name + "` already exists", "category name", name);
-        }
+        }else if (realCause.getMessage().contains("product_id")) {
+			throw new PlatformDataIntegrityException(
+					"error.msg.provisioning.product.id(s).already.associated.existing.criteria",
+					"The selected products already associated with another Provisioning Criteria");
+		}
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.provisioning.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());

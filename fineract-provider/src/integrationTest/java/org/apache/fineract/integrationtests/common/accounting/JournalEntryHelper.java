@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.apache.fineract.integrationtests.common.Utils;
+import org.junit.Assert;
 
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
@@ -81,9 +82,17 @@ public class JournalEntryHelper {
     private void checkJournalEntry(final Integer officeId, final Account account, final String date, final JournalEntry... accountEntries) {
         final String url = createURLForGettingAccountEntries(account, date, officeId);
         final ArrayList<HashMap> response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, "pageItems");
-        for (int i = 0; i < accountEntries.length; i++) {
-            assertThat(getEntryValueFromJournalEntry(response, i), equalTo(accountEntries[i].getTransactionType()));
-            assertThat(getTransactionAmountFromJournalEntry(response, i), equalTo(accountEntries[i].getTransactionAmount()));
+
+        for (JournalEntry entry : accountEntries) {
+            boolean matchFound = false;
+            for (HashMap map : response) {
+                final HashMap entryType = (HashMap) map.get("entryType");
+                if (entry.getTransactionType().equals(entryType.get("value")) && entry.getTransactionAmount().equals(map.get("amount"))) {
+                    matchFound = true;
+                    break;
+                }
+            }
+            Assert.assertTrue("Journal Entry not found", matchFound);
         }
     }
 

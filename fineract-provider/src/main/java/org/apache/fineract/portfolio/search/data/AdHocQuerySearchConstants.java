@@ -46,18 +46,17 @@ public interface AdHocQuerySearchConstants {
     public static final String maxOutstandingAmountParamName = "maxOutstandingAmount";
     public static final String outstandingAmountParamName = "outstandingAmount";
 
-    public static final Set<String> AD_HOC_SEARCH_QUERY_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(entitiesParamName, loanStatusParamName,
-            loanProductsParamName, officesParamName, loanDateOptionParamName, loanFromDateParamName, loanToDateParamName,
-            includeOutStandingAmountPercentageParamName, outStandingAmountPercentageConditionParamName,
-            minOutStandingAmountPercentageParamName, maxOutStandingAmountPercentageParamName, outStandingAmountPercentageParamName,
-            includeOutstandingAmountParamName, outstandingAmountConditionParamName, minOutstandingAmountParamName,
-            maxOutstandingAmountParamName, outstandingAmountParamName, localeParamName, dateFormatParamName));
+    public static final String approvalDateOption = "approvalDate";
+    public static final String createDateOption = "createdDate";
+    public static final String disbursalDateOption = "disbursalDate";
 
-    public static final Set<String> AD_HOC_SEARCH_QUERY_CONDITIONS = new HashSet<>(
-            Arrays.asList("between", "<=", ">=", "<", ">", "="));
-
-    public static final Object[] loanDateOptions = { "approvalDate", "createdDate", "disbursalDate" };
+    public static final String allLoanStatusOption= "all";
+    public static final String activeLoanStatusOption= "active";
+    public static final String overpaidLoanStatusOption= "overpaid";
+    public static final String arrearsLoanStatusOption= "arrears";
+    public static final String closedLoanStatusOption= "closed";
+    public static final String writeoffLoanStatusOption= "writeoff";
+    
     public static final Object[] entityTypeOptions = { "clients", "groups", "loans", "clientIdentifiers" };
-    public static final Object[] loanStatusOptions = { "all", "active", "overpaid", "arrears", "closed", "writeoff" };
 
 }

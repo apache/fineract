@@ -21,11 +21,11 @@ package org.apache.fineract.infrastructure.dataqueries.domain;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "stretchy_parameter")
-public class ReportParameter extends AbstractPersistable<Long> {
+public class ReportParameter extends AbstractPersistableCustom<Long> {
 
     protected ReportParameter() {
         //

@@ -25,13 +25,13 @@ import javax.persistence.Embeddable;
 public class MonetaryCurrency {
 
     @Column(name = "currency_code", length = 3, nullable = false)
-    private final String code;
+    private String code;
 
     @Column(name = "currency_digits", nullable = false)
-    private final int digitsAfterDecimal;
+    private int digitsAfterDecimal;
 
     @Column(name = "currency_multiplesof")
-    private final Integer inMultiplesOf;
+    private Integer inMultiplesOf;
 
     protected MonetaryCurrency() {
         this.code = null;

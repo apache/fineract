@@ -1,0 +1,79 @@
+Apache Fineract
+Copyright 2008-2016 The Apache Software Foundation
+
+This product includes software developed by The Apache Software
+Foundation (http://www.apache.org/).
+
+Apache Fineract - notice for binary distribution
+==========================================
+Apache Fineract includes JavaMail API(compat) v1.5.0-b01.
+Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+Fineract elects to include this software in this distribution under the
+CDDL license. You can obtain a copy of the License at:
+https://glassfish.java.net/public/CDDL+GPL.html
+
+Apache Fineract includes all Jersey libraries (Jersey Core v1.17, 
+Jersey Json v1.17, Jersey Multipart v1.17, Jersey Server v1.17,
+Jersey Servlet v1.17, Jersey Spring v1.17). 
+Copyright (c) 2010-2011 Oracle and/or its affiliates. All rights reserved.
+Fineract elects to include this software in this distribution under the 
+CDDL license.  You can obtain a copy of the License at:
+https://glassfish.java.net/public/CDDL+GPL.html
+
+Apache Fineract includes Logback Classic Module v1.1.2 and Logback Core
+Module v1.1.2, Copyright (C) 1999-2012, QOS.ch. 
+All rights reserved. Fineract elects to include this software in this
+distribution under the EPL license. You can obtain a copy of the License at:
+http://www.eclipse.org/legal/epl-v10.html
+
+Apache Fineract includes MIME Streaming Extension v1.6, 
+Copyright (c) 1997-2010 Oracle and/or its affiliates. 
+All rights reserved. Fineract elects to include this software in this
+distribution under the CDDL license. You can obtain a copy of the License at:
+https://glassfish.java.net/public/CDDL+GPL_1_1.html
+
+Apache Fineract includes JUnit v3.8.1 created by Erich Gamma and Kent Beck. 
+Fineract elects to include this software in this distribution under the
+CPL license. You can obtain a copy of the License at:
+https://opensource.org/licenses/cpl1.0.txt
+
+Apache Fineract includes Log4j Implemented Over SLF4J. Fineract elects to
+include this software in this distribution under the Apache license. 
+You can obtain a copy of the License at:
+http://apache.org/licenses/LICENSE-2.0
+
+Apache Fineract includes Jackson Core v2.3.4, Jackson Annotations v2.3.0,
+Jackson Databind v2.3.4, JAX RS Provider For JSON Content Type v1.9.2, 
+Xml Compatibility Extensions For Jackson v1.9.2 libraries. 
+Fineract elects to include this software in this distribution under the
+Apache license. You can obtain a copy of the License at:
+http://apache.org/licenses/LICENSE-2.0
+
+Apache Fineract includes AspectJ Runtime v1.8.2, Copyright (c) 1999-2001
+Xerox Corporation, 2002 Palo Alto Research Center, Incorporated (PARC) and
+AspectJ Weaver v1.8.2 Copyright (c) 2002 Palo Alto Research Center,
+Incorporated (PARC)., libraries. The library information is available at
+(https://eclipse.org/aspectj/)
+
+Apache Fineract includes IText(A Free Java PDF Library) v2.1.7 library,
+Copyright 2007 Bruno Lowagie. The library information is available at
+(http://developers.itextpdf.com/itext-java)
+
+=====================
+Apache OpenJPA NOTICE
+
+OpenJPA includes software developed by the SERP project
+Copyright (c) 2002-2006, A. Abram White. All rights reserved.
+
+OpenJPA includes the persistence and orm schemas from the JPA specifications.
+Copyright 2005-2014 Sun Microsystems, Inc. All rights reserved.
+
+OpenJPA includes the persistence and orm schemas from the JPA specifications.
+Copyright 2005-2009 Sun Microsystems, Inc. All rights reserved.
+OpenJPA elects to include this software in this distribution under the
+CDDL license.  You can obtain a copy of the License at:
+    https://glassfish.dev.java.net/public/CDDL+GPL.html
+The source code is available at:
+    https://glassfish.dev.java.net/source/browse/glassfish/
+
+OpenJPA includes software written by Miroslav Nachev

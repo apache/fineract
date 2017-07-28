@@ -96,7 +96,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 result.getSavingsId(), result.getProductId(), result.getTransactionId());
 
         String changesOnlyJson = null;
-        if (result.hasChanges()) {
+        boolean rollBack = (rollbackTransaction || result.isRollbackTransaction()) && !isApprovedByChecker ;
+        if (result.hasChanges() && !rollBack) {
             changesOnlyJson = this.toApiJsonSerializer.serializeResult(result.getChanges());
             commandSourceResult.updateJsonTo(changesOnlyJson);
         }
@@ -211,7 +212,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         final String authToken = ThreadLocalContextUtil.getAuthToken();
         final String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
-        final AppUser appUser = this.context.authenticatedUser();
+        final AppUser appUser = this.context.authenticatedUser(CommandWrapper.wrap(actionName, 
+                entityName, null, null));
 
         final HookEventSource hookEventSource = new HookEventSource(entityName, actionName);
 

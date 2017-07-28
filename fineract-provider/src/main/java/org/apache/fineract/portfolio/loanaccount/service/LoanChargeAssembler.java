@@ -65,7 +65,7 @@ public class LoanChargeAssembler {
         this.loanProductRepository = loanProductRepository;
     }
 
-    public Set<LoanCharge> fromParsedJson(final JsonElement element, Set<LoanDisbursementDetails> disbursementDetails) {
+    public Set<LoanCharge> fromParsedJson(final JsonElement element, List<LoanDisbursementDetails> disbursementDetails) {
         JsonArray jsonDisbursement = this.fromApiJsonHelper.extractJsonArrayNamed("disbursementData", element);
         List<Long> disbursementChargeIds = new ArrayList<>();
 
@@ -162,8 +162,11 @@ public class LoanChargeAssembler {
                                         final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition, principal, amount,
                                                 chargeTime, chargeCalculation, dueDate, chargePaymentModeEnum, numberOfRepayments);
                                         loanCharges.add(loanCharge);
-                                        loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge, disbursementDetail);
-                                        loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
+                                        if (loanCharge.isTrancheDisbursementCharge()) {
+                                            loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge,
+                                                    disbursementDetail);
+                                            loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
+                                        }
                                     } else {
                                         if (disbursementDetail.expectedDisbursementDateAsLocalDate().equals(expectedDisbursementDate)) {
                                             final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition,
@@ -171,9 +174,11 @@ public class LoanChargeAssembler {
                                                     disbursementDetail.expectedDisbursementDateAsLocalDate(), chargePaymentModeEnum,
                                                     numberOfRepayments);
                                             loanCharges.add(loanCharge);
-                                            loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge,
-                                                    disbursementDetail);
-                                            loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
+                                            if (loanCharge.isTrancheDisbursementCharge()) {
+                                                loanTrancheDisbursementCharge = new LoanTrancheDisbursementCharge(loanCharge,
+                                                        disbursementDetail);
+                                                loanCharge.updateLoanTrancheDisbursementCharge(loanTrancheDisbursementCharge);
+                                            }
                                         }
                                     }
                                 }
@@ -199,13 +204,12 @@ public class LoanChargeAssembler {
                     } else {
                         final Long loanChargeId = id;
                         final LoanCharge loanCharge = this.loanChargeRepository.findOne(loanChargeId);
-                        if (disbursementChargeIds.contains(loanChargeId) && loanCharge == null) {
-                            // throw new
-                            // LoanChargeNotFoundException(loanChargeId);
-                        }
                         if (loanCharge != null) {
-                            loanCharge.update(amount, dueDate, numberOfRepayments);
-                            loanCharges.add(loanCharge);
+                            if(!loanCharge.isTrancheDisbursementCharge()
+                                    || disbursementChargeIds.contains(loanChargeId)){
+                                loanCharge.update(amount, dueDate, numberOfRepayments);
+                                loanCharges.add(loanCharge);
+                            }
                         }
                     }
                 }

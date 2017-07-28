@@ -27,13 +27,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_loan_transaction_repayment_schedule_mapping")
-public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistable<Long> {
+public class LoanTransactionToRepaymentScheduleMapping extends AbstractPersistableCustom<Long> {
 
     @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "loan_repayment_schedule_id", nullable = false)

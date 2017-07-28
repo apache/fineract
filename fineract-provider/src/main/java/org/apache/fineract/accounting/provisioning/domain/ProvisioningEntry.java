@@ -21,10 +21,12 @@ package org.apache.fineract.accounting.provisioning.domain;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -33,20 +35,17 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_provisioning_history")
-public class ProvisioningEntry extends AbstractPersistable<Long> {
+public class ProvisioningEntry extends AbstractPersistableCustom<Long> {
 
     @Column(name = "journal_entry_created")
     private Boolean isJournalEntryCreated;
     
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true)
-    Collection<LoanProductProvisioningEntry> provisioningEntries = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch=FetchType.EAGER)
+    private Set<LoanProductProvisioningEntry> provisioningEntries = new HashSet<>();
     
     @OneToOne
     @JoinColumn(name = "createdby_id")
@@ -68,7 +67,7 @@ public class ProvisioningEntry extends AbstractPersistable<Long> {
         
     }
     
-    public ProvisioningEntry(AppUser createdBy, Date createdDate, AppUser lastModifiedBy, Date lastModifiedDate, Collection<LoanProductProvisioningEntry> provisioningEntries ) {
+    public ProvisioningEntry(AppUser createdBy, Date createdDate, AppUser lastModifiedBy, Date lastModifiedDate, Set<LoanProductProvisioningEntry> provisioningEntries ) {
         this.provisioningEntries = provisioningEntries ;
         this.createdBy = createdBy ;
         this.createdDate = createdDate ;

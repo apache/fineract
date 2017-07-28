@@ -19,9 +19,22 @@
 package org.apache.fineract.portfolio.interestratechart.api;
 
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.INTERESTRATE_CHART_SLAB_RESOURCE_NAME;
-import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.INTERESTRATE_CHART_SLAB_RESPONSE_DATA_PARAMETERS;
 
+
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.amountRangeFromParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.amountRangeToParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.annualInterestRateParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.currencyCodeParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.descriptionParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.fromPeriodParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.incentivesParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.periodTypeParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.toPeriodParamName;
+
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -43,6 +56,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants;
 import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartSlabData;
 import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartSlabReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +73,11 @@ public class InterestRateChartSlabsApiResource {
     private final DefaultToApiJsonSerializer<InterestRateChartSlabData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private static final Set<String> INTERESTRATE_CHART_SLAB_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            InterestRateChartSlabApiConstants.localeParamName, InterestRateChartSlabApiConstants.idParamName,
+            descriptionParamName, periodTypeParamName, fromPeriodParamName, toPeriodParamName, amountRangeFromParamName,
+            amountRangeToParamName, annualInterestRateParamName, currencyCodeParamName, incentivesParamName));
+
 
     @Autowired
     public InterestRateChartSlabsApiResource(final InterestRateChartSlabReadPlatformService interestRateChartSlabReadPlatformService,

@@ -42,5 +42,6 @@ public enum LoanEvent {
     LOAN_CHARGE_PAYMENT, //
     LOAN_CLOSED, //
     LOAN_EDIT_MULTI_DISBURSE_DATE, //
-    LOAN_REFUND;
+    LOAN_REFUND, //
+    LOAN_FORECLOSURE;
 }

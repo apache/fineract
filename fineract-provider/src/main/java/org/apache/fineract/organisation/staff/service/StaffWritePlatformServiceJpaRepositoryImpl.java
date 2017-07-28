@@ -20,14 +20,16 @@ package org.apache.fineract.organisation.staff.service;
 
 import java.util.Map;
 
+import javax.persistence.PersistenceException;
+
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.organisation.office.domain.OfficeRepository;
-import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
+import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepository;
 import org.apache.fineract.organisation.staff.exception.StaffNotFoundException;
@@ -46,14 +48,14 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
 
     private final StaffCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final StaffRepository staffRepository;
-    private final OfficeRepository officeRepository;
+    private final OfficeRepositoryWrapper officeRepositoryWrapper;
 
     @Autowired
     public StaffWritePlatformServiceJpaRepositoryImpl(final StaffCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final StaffRepository staffRepository, final OfficeRepository officeRepository) {
+            final StaffRepository staffRepository, final OfficeRepositoryWrapper officeRepositoryWrapper) {
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.staffRepository = staffRepository;
-        this.officeRepository = officeRepository;
+        this.officeRepositoryWrapper = officeRepositoryWrapper;
     }
 
     @Transactional
@@ -65,9 +67,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
 
             final Long officeId = command.longValueOfParameterNamed("officeId");
 
-            final Office staffOffice = this.officeRepository.findOne(officeId);
-            if (staffOffice == null) { throw new OfficeNotFoundException(officeId); }
-
+            final Office staffOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
             final Staff staff = Staff.fromJson(staffOffice, command);
 
             this.staffRepository.save(staff);
@@ -77,8 +77,12 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
                     .withEntityId(staff.getId()).withOfficeId(officeId) //
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleStaffDataIntegrityIssues(command, dve);
+            handleStaffDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleStaffDataIntegrityIssues(command, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -96,9 +100,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
 
             if (changesOnly.containsKey("officeId")) {
                 final Long officeId = (Long) changesOnly.get("officeId");
-                final Office newOffice = this.officeRepository.findOne(officeId);
-                if (newOffice == null) { throw new OfficeNotFoundException(officeId); }
-
+                final Office newOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
                 staffForUpdate.changeOffice(newOffice);
             }
 
@@ -109,8 +111,12 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(staffId)
                     .withOfficeId(staffForUpdate.officeId()).with(changesOnly).build();
         } catch (final DataIntegrityViolationException dve) {
-            handleStaffDataIntegrityIssues(command, dve);
+            handleStaffDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleStaffDataIntegrityIssues(command, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -118,8 +124,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleStaffDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
-        final Throwable realCause = dve.getMostSpecificCause();
+    private void handleStaffDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 
         if (realCause.getMessage().contains("external_id")) {
 

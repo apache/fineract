@@ -1,72 +1,82 @@
 Apache Fineract: A Platform for Microfinance
-======
-
-The next evolution of fineract focussing on being faster, lighter and cheaper to change (than existing mifos) so that it is more responsive to the needs of MFI’s and Integrators
-
-Build Status
 ============
 
-Travis
+The next evolution of Apache Fineract focuses on being faster, lighter and cheaper to change (than the existing Mifos) so that it is more responsive to the needs of Microfinance Institutions and Integrators.
 
-[![Build
-Status](https://travis-ci.org/openMF/mifosx.png?branch=master)](https://travis-ci.org/openMF/mifosx)
+Requirements
+============
+* Java >= 1.8 (Oracle JVMS have been tested)
+* gradle-wrapper.jar version 2.10
+* MySQL 5.5
 
-Cloudbees Jenkins
+Instructions to download gradle wrapper
+============
+By running following command, it will download the gradle wrapper from Fineract git repository and puts under fineract-provider/gradle/wrapper
 
-[![Build
-Status](https://openmf.ci.cloudbees.com/job/MIFOSX%20INTEGRATION%20TEST/badge/icon)](https://openmf.ci.cloudbees.com/job/MIFOSX%20INTEGRATION%20TEST/)
+wget --no-check-certificate -P fineract-provider/gradle/wrapper https://github.com/apache/incubator-fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar
+(or)
+curl --insecure -L https://github.com/apache/incubator-fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar > fineract-provider/gradle/wrapper/gradle-wrapper.jar
 
-<a target="_blank" href="https://openmf.ci.cloudbees.com/job/MIFOSX%20INTEGRATION%20TEST/"  title="Jenkins@CloudBees">Jenkins@CloudBees Unit + Integration Tests</a>
+Instructions to run Apache RAT (Release Audit Tool)
+============
+1. Extract the archive file to your local directory.
+2. Download gradle-wrapper.jar version 2.10 and place it in the fineract-provider/gradle/wrapper folder. See 'Instructions to download gradle wrapper' above.
+3. Run `./gradlew rat`. Report will be generated under build/reports/rat/rat-report.txt
 
+Instructions to build war file
+============
+1. Extract the archive file to your local directory.
+2. Download gradle-wrapper.jar version 2.10 and place it in the fineract-provider/gradle/wrapper folder. See 'Instructions to download gradle wrapper' above.
+3. Run `./gradlew clean war` or `./gradlew build` to build deployable war file which will be created at build/libs directory.
+
+
+Instructions to execute Integration tests
+============
+1. Login to mysql DB using `mysql -u root -pmysql`
+2. Create the mifosplatform-tenants database using `CREATE DATABASE mifosplatform-tenants`.
+3. Create the default tenant database using `CREATE DATABASE mifostenant-default`.
+4. Download gradle-wrapper.jar version 2.10 and place it in the fineract-provider/gradle/wrapper folder. See 'Instructions to download gradle wrapper' above.
+5. Run the following commands:
+	1. `./gradlew migrateTenantListDB -PdbName=mifosplatform-tenants`
+	2. `./gradlew migrateTenantDB -PdbName=mifostenant-default`
+6. Run `./gradlew clean integrationTest`
 
 Version
-==========
+============
 
-The API for the fineract-platform (project named 'Apache Fineract')is documented in the api-docs under <b>Full API Matrix</b> and can be viewed <a target="_blank" href="https://demo.openmf.org/api-docs/apiLive.htm" title="API Documentation"> here
-</a>
-
-Latest stable release can always been viewed on master branch: <a target="_blank" href="https://github.com/openMF/mifosx/tree/master" title="Latest Release">Latest Release on Master</a>, <a target="_blank" href="https://github.com/openMF/mifosx/blob/master/CHANGELOG.md" title="Latest release change log">View change log</a>
+The latest stable release can be viewed on the develop branch: [Latest Release on Develop](https://github.com/apache/incubator-fineract/tree/develop "Latest Release"), [View change log](https://github.com/apache/incubator-fineract/blob/develop/CHANGELOG.md "Latest release change log")
 
 License
-=============
+============
 
-This project is licensed under the open source MPL V2. See https://github.com/openMF/mifosx/blob/master/LICENSE.md
+This project is licensed under Apache License Version 2.0. See <https://github.com/apache/incubator-fineract/blob/develop/LICENSE.md>.
 
-Fineract Platform API
-=====================
+Apache Fineract Platform API
+============
 
-<a target="_blank" href="https://demo.openmf.org/api-docs/apiLive.htm" title="fineract platform api">API Documentation (Demo Server)</a>
-
+The API for the Fineract-platform (project named 'Apache Fineract') is documented in the API-docs under <b>Full API Matrix</b> and can be viewed [here](https://demo.openmf.org/api-docs/apiLive.htm "API Documentation").
 
 Online Demos
-=============================
+============
 
-* <a target="_blank" href="https://demo.openmf.org" title="Reference Client App">Community App</a>
-* ~~<a target="_blank" href="https://demo.openmf.org/old/" title="Community App">Reference Client App (Deprecated)</a>~~
+* [Community App](https://demo.openmf.org "Reference Client App")
 
 Developers
-==========
-see https://mifosforge.jira.com/wiki/display/MIFOSX/MifosX+Technical - Developers Wiki Page
+============
+Please see <https://cwiki.apache.org/confluence/display/FINERACT/Contributor%27s+Zone> for the developers wiki page.
 
-see https://mifosforge.jira.com/wiki/display/MIFOSX/Getting+started+-+Contributing+to+MifosX  - Getting Started.
-
-see https://mifosforge.jira.com/wiki/display/MIFOSX/The+Basic+Design - Overview of Platform Implementation
-
-see https://github.com/openMF/mifosx/wiki/Screen-Based-Reporting for info around reporting
-
-see https://github.com/openMF/mifosx/wiki/Git-Usuage for info around using git
-
-see https://www.ohloh.net/p/mifosx for activity overview and basic code analysis.
+Please see <https://cwiki.apache.org/confluence/display/FINERACT/How-to+articles> for technical details to get started.
 
 Roadmap
-==============
+============
 
-<a target="_blank" href="http://goo.gl/IXS9Q" title="Community Roadmap (High Level)">Community Roadmap (High Level)</a>
-
-<a target="_blank" href="https://mifosforge.jira.com/browse/MIFOSX#selectedTab=com.atlassian.jira.plugin.system.project%3Aroadmap-panel" 
-   title="Project Release Roadmap on JIRA (Detailed View)">Project Release Roadmap on JIRA (Detailed View)</a>
+[Project Release Roadmap on JIRA (Detailed View)](https://issues.apache.org/jira/browse/FINERACT-268?jql=project%20%3D%20FINERACT "Project Release Roadmap on JIRA (Detailed View)")
 
 Video Demonstration
-===============
+============
 
-Demonstration of first Prototype of this platform with browser App (April 2012) - http://www.youtube.com/watch?v=zN5Dn1Lc_js
+Apache Fineract / Mifos X Demo (November 2016) - <https://www.youtube.com/watch?v=h61g9TptMBo>
+
+More Information
+============
+More details of the project can be found at <https://cwiki.apache.org/confluence/display/FINERACT>.

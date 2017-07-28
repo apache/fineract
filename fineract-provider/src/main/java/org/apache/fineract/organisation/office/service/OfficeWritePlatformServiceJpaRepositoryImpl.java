@@ -20,6 +20,9 @@ package org.apache.fineract.organisation.office.service;
 
 import java.util.Map;
 
+import javax.persistence.PersistenceException;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -31,10 +34,9 @@ import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepos
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.organisation.office.domain.OfficeRepository;
+import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.domain.OfficeTransaction;
 import org.apache.fineract.organisation.office.domain.OfficeTransactionRepository;
-import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
 import org.apache.fineract.organisation.office.serialization.OfficeCommandFromApiJsonDeserializer;
 import org.apache.fineract.organisation.office.serialization.OfficeTransactionCommandFromApiJsonDeserializer;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -55,7 +57,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     private final PlatformSecurityContext context;
     private final OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final OfficeTransactionCommandFromApiJsonDeserializer moneyTransferCommandFromApiJsonDeserializer;
-    private final OfficeRepository officeRepository;
+    private final OfficeRepositoryWrapper officeRepositoryWrapper;
     private final OfficeTransactionRepository officeTransactionRepository;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
 
@@ -63,12 +65,12 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     public OfficeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final OfficeTransactionCommandFromApiJsonDeserializer moneyTransferCommandFromApiJsonDeserializer,
-            final OfficeRepository officeRepository, final OfficeTransactionRepository officeMonetaryTransferRepository,
+            final OfficeRepositoryWrapper officeRepositoryWrapper, final OfficeTransactionRepository officeMonetaryTransferRepository,
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.moneyTransferCommandFromApiJsonDeserializer = moneyTransferCommandFromApiJsonDeserializer;
-        this.officeRepository = officeRepository;
+        this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.officeTransactionRepository = officeMonetaryTransferRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
     }
@@ -94,11 +96,11 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
             final Office office = Office.fromJson(parent, command);
 
             // pre save to generate id for use in office hierarchy
-            this.officeRepository.save(office);
+            this.officeRepositoryWrapper.save(office);
 
             office.generateHierarchy();
 
-            this.officeRepository.save(office);
+            this.officeRepositoryWrapper.save(office);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -106,8 +108,12 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
                     .withOfficeId(office.getId()) //
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleOfficeDataIntegrityIssues(command, dve);
+            handleOfficeDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleOfficeDataIntegrityIssues(command, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -139,7 +145,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
             }
 
             if (!changes.isEmpty()) {
-                this.officeRepository.saveAndFlush(office);
+                this.officeRepositoryWrapper.saveAndFlush(office);
             }
 
             return new CommandProcessingResultBuilder() //
@@ -149,8 +155,12 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
                     .with(changes) //
                     .build();
         } catch (final DataIntegrityViolationException dve) {
-            handleOfficeDataIntegrityIssues(command, dve);
+            handleOfficeDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        	handleOfficeDataIntegrityIssues(command, throwable, dve);
+        	return CommandProcessingResult.empty();
         }
     }
 
@@ -166,17 +176,15 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
         Office fromOffice = null;
         final Long fromOfficeId = command.longValueOfParameterNamed("fromOfficeId");
         if (fromOfficeId != null) {
-            fromOffice = this.officeRepository.findOne(fromOfficeId);
+            fromOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(fromOfficeId);
             officeId = fromOffice.getId();
         }
         Office toOffice = null;
         final Long toOfficeId = command.longValueOfParameterNamed("toOfficeId");
         if (toOfficeId != null) {
-            toOffice = this.officeRepository.findOne(toOfficeId);
+            toOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(toOfficeId);
             officeId = toOffice.getId();
         }
-
-        if (fromOffice == null && toOffice == null) { throw new OfficeNotFoundException(toOfficeId); }
 
         final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
         final ApplicationCurrency appCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currencyCode);
@@ -214,9 +222,8 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleOfficeDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
+    private void handleOfficeDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 
-        final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("externalid_org")) {
             final String externalId = command.stringValueOfParameterNamed("externalId");
             throw new PlatformDataIntegrityException("error.msg.office.duplicate.externalId", "Office with externalId `" + externalId
@@ -239,16 +246,13 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     private Office validateUserPriviledgeOnOfficeAndRetrieve(final AppUser currentUser, final Long officeId) {
 
         final Long userOfficeId = currentUser.getOffice().getId();
-        final Office userOffice = this.officeRepository.findOne(userOfficeId);
-        if (userOffice == null) { throw new OfficeNotFoundException(userOfficeId); }
-
+        final Office userOffice = this.officeRepositoryWrapper.findOfficeHierarchy(userOfficeId);
         if (userOffice.doesNotHaveAnOfficeInHierarchyWithId(officeId)) { throw new NoAuthorizationException(
                 "User does not have sufficient priviledges to act on the provided office."); }
 
         Office officeToReturn = userOffice;
         if (!userOffice.identifiedBy(officeId)) {
-            officeToReturn = this.officeRepository.findOne(officeId);
-            if (officeToReturn == null) { throw new OfficeNotFoundException(officeId); }
+            officeToReturn = this.officeRepositoryWrapper.findOfficeHierarchy(officeId);
         }
 
         return officeToReturn;

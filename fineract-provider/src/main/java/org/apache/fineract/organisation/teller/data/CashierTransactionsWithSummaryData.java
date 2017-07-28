@@ -20,7 +20,8 @@ package org.apache.fineract.organisation.teller.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Collection;
+
+import org.apache.fineract.infrastructure.core.service.Page;
 
 public final class CashierTransactionsWithSummaryData implements Serializable {
 	
@@ -35,10 +36,10 @@ public final class CashierTransactionsWithSummaryData implements Serializable {
 	private final long cashierId;
 	private final String cashierName;
 
-    private final Collection<CashierTransactionData> cashierTransactions;
+    private final Page<CashierTransactionData> cashierTransactions;
 
     private CashierTransactionsWithSummaryData(
-    		final Collection<CashierTransactionData> cashierTransactions, 
+    		final Page<CashierTransactionData> cashierTransactions, 
     		final BigDecimal sumCashAllocation,
     		final BigDecimal sumInwardCash,
     		final BigDecimal sumOutwardCash,
@@ -64,7 +65,7 @@ public final class CashierTransactionsWithSummaryData implements Serializable {
     }
 
     public static CashierTransactionsWithSummaryData instance(
-    		final Collection<CashierTransactionData> cashierTransactions, 
+    		final Page<CashierTransactionData> cashierTransactions, 
     		final BigDecimal sumCashAllocation,
     		final BigDecimal sumInwardCash,
     		final BigDecimal sumOutwardCash,
@@ -128,7 +129,7 @@ public final class CashierTransactionsWithSummaryData implements Serializable {
 	public String getCashierName() {
 		return cashierName;
 	}
-	public Collection<CashierTransactionData> getCashierTransactions() {
+	public Page<CashierTransactionData> getCashierTransactions() {
 		return cashierTransactions;
 	}
     

@@ -27,6 +27,7 @@ import java.util.Map;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -39,13 +40,11 @@ import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.guarantor.GuarantorConstants.GUARANTOR_JSON_INPUT_PARAMS;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_guarantor")
-public class Guarantor extends AbstractPersistable<Long> {
+public class Guarantor extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)
@@ -101,9 +100,8 @@ public class Guarantor extends AbstractPersistable<Long> {
     @Column(name = "is_active", nullable = false)
     private boolean active;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "guarantor", orphanRemoval = true)
-    private final List<GuarantorFundingDetails> guarantorFundDetails = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "guarantor", orphanRemoval = true, fetch=FetchType.EAGER)
+    private List<GuarantorFundingDetails> guarantorFundDetails = new ArrayList<>();
 
     protected Guarantor() {
 

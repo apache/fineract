@@ -94,7 +94,7 @@ public class FixedDepositAccount extends SavingsAccount {
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
-            final DepositAccountTermAndPreClosure accountTermAndPreClosure, final DepositAccountInterestRateChart chart) {
+            final DepositAccountTermAndPreClosure accountTermAndPreClosure, final DepositAccountInterestRateChart chart, boolean withHoldTax) {
 
         final SavingsAccountStatusType status = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
         final boolean allowOverdraft = false;
@@ -103,7 +103,7 @@ public class FixedDepositAccount extends SavingsAccount {
                 accountType, submittedOnDate, submittedBy, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
                 lockinPeriodFrequencyType, withdrawalFeeApplicableForTransfer, savingsAccountCharges, accountTermAndPreClosure, chart,
-                allowOverdraft, overdraftLimit);
+                allowOverdraft, overdraftLimit, withHoldTax);
 
         return account;
     }
@@ -117,12 +117,12 @@ public class FixedDepositAccount extends SavingsAccount {
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final boolean withdrawalFeeApplicableForTransfer, final Set<SavingsAccountCharge> savingsAccountCharges,
             final DepositAccountTermAndPreClosure accountTermAndPreClosure, DepositAccountInterestRateChart chart,
-            final boolean allowOverdraft, final BigDecimal overdraftLimit) {
+            final boolean allowOverdraft, final BigDecimal overdraftLimit, boolean withHoldTax) {
 
         super(client, group, product, fieldOfficer, accountNo, externalId, status, accountType, submittedOnDate, submittedBy,
                 nominalAnnualInterestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
                 interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
-                withdrawalFeeApplicableForTransfer, savingsAccountCharges, allowOverdraft, overdraftLimit);
+                withdrawalFeeApplicableForTransfer, savingsAccountCharges, allowOverdraft, overdraftLimit, withHoldTax);
 
         this.accountTermAndPreClosure = accountTermAndPreClosure;
         this.chart = chart;
@@ -297,9 +297,11 @@ public class FixedDepositAccount extends SavingsAccount {
 
         final SavingsInterestCalculationDaysInYearType daysInYearType = SavingsInterestCalculationDaysInYearType
                 .fromInt(this.interestCalculationDaysInYearType);
-
+        List<LocalDate> postedAsOnTransactionDates= getManualPostingDates();
+        
         final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(
-                accountSubmittedOrActivationDate(), maturityDate, postingPeriodType, financialYearBeginningMonth);
+                accountSubmittedOrActivationDate(), maturityDate, postingPeriodType, financialYearBeginningMonth,
+                postedAsOnTransactionDates);
 
         final List<PostingPeriod> allPostingPeriods = new ArrayList<>();
 
@@ -311,11 +313,14 @@ public class FixedDepositAccount extends SavingsAccount {
         boolean isInterestTransfer = false;
         final Money minBalanceForInterestCalculation = Money.of(getCurrency(), minBalanceForInterestCalculation());
         for (final LocalDateInterval periodInterval : postingPeriodIntervals) {
-
+            boolean isUserPosting = false;
+            if (postedAsOnTransactionDates.contains(periodInterval.endDate())) {
+                isUserPosting = true;
+            }
             final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance, transactions,
                     this.currency, compoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYearType.getValue(),
                     maturityDate, interestPostTransactions, isInterestTransfer, minBalanceForInterestCalculation,
-                    isSavingsInterestPostingAtCurrentPeriodEnd);
+                    isSavingsInterestPostingAtCurrentPeriodEnd, isUserPosting);
 
             periodStartingBalance = postingPeriod.closingBalance();
 
@@ -490,8 +495,9 @@ public class FixedDepositAccount extends SavingsAccount {
         final LocalDate interestPostingUpToDate = maturityDate();
         final MathContext mc = MathContext.DECIMAL64;
         final boolean isInterestTransfer = false;
+        final LocalDate postInterestOnDate = null;
         final List<PostingPeriod> postingPeriods = calculateInterestUsing(mc, interestPostingUpToDate, isInterestTransfer,
-                isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth);
+                isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth, postInterestOnDate);
 
         Money interestPostedToDate = Money.zero(this.currency);
 
@@ -511,7 +517,7 @@ public class FixedDepositAccount extends SavingsAccount {
             final SavingsAccountTransaction postingTransaction = findInterestPostingTransactionFor(interestPostingTransactionDate);
             if (postingTransaction == null) {
                 final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
-                        interestPostingTransactionDate, interestEarnedToBePostedForPeriod);
+                        interestPostingTransactionDate, interestEarnedToBePostedForPeriod, interestPostingPeriod.isUserPosting());
                 this.transactions.add(newPostingTransaction);
                 recalucateDailyBalanceDetails = true;
             } else {
@@ -519,13 +525,13 @@ public class FixedDepositAccount extends SavingsAccount {
                 if (correctionRequired) {
                     postingTransaction.reverse();
                     final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
-                            interestPostingTransactionDate, interestEarnedToBePostedForPeriod);
+                            interestPostingTransactionDate, interestEarnedToBePostedForPeriod, interestPostingPeriod.isUserPosting());
                     this.transactions.add(newPostingTransaction);
                     recalucateDailyBalanceDetails = true;
                 }
             }
         }
-
+        recalucateDailyBalanceDetails = applyWithholdTaxForDepositAccounts(interestPostingUpToDate, recalucateDailyBalanceDetails);
         if (recalucateDailyBalanceDetails) {
             // update existing transactions so derived balance fields are
             // correct.
@@ -549,11 +555,14 @@ public class FixedDepositAccount extends SavingsAccount {
         // post remaining interest
         final Money remainigInterestToBePosted = interestOnMaturity.minus(interestPostedToDate);
         if (!remainigInterestToBePosted.isZero()) {
+            final boolean postInterestAsOn = false;
             final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
-                    accountCloseDate, remainigInterestToBePosted);
+                    accountCloseDate, remainigInterestToBePosted, postInterestAsOn);
             this.transactions.add(newPostingTransaction);
             recalucateDailyBalance = true;
         }
+
+        recalucateDailyBalance = applyWithholdTaxForDepositAccounts(accountCloseDate, recalucateDailyBalance);
 
         if (recalucateDailyBalance) {
             // update existing transactions so derived balance fields are
@@ -598,18 +607,20 @@ public class FixedDepositAccount extends SavingsAccount {
 
     @Override
     public void postInterest(final MathContext mc, final LocalDate postingDate, boolean isInterestTransfer,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
+            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
+            final LocalDate postInterestOnDate) {
         final LocalDate interestPostingUpToDate = interestPostingUpToDate(postingDate);
         super.postInterest(mc, interestPostingUpToDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth);
+                financialYearBeginningMonth, postInterestOnDate);
     }
 
     @Override
     public List<PostingPeriod> calculateInterestUsing(final MathContext mc, final LocalDate postingDate, boolean isInterestTransfer,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth) {
+            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final Integer financialYearBeginningMonth,
+            final LocalDate  postAsInterestOn) {
         final LocalDate interestPostingUpToDate = interestPostingUpToDate(postingDate);
         return super.calculateInterestUsing(mc, interestPostingUpToDate, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
-                financialYearBeginningMonth);
+                financialYearBeginningMonth, postAsInterestOn);
     }
 
     private LocalDate interestPostingUpToDate(final LocalDate interestPostingDate) {
@@ -768,11 +779,12 @@ public class FixedDepositAccount extends SavingsAccount {
         final Integer lockinPeriodFrequency = this.lockinPeriodFrequency;
         final boolean withdrawalFeeApplicableForTransfer = false;
         final String accountNumber = null;
-        final FixedDepositAccount reInvestedAccount = FixedDepositAccount
-                .createNewApplicationForSubmittal(client, group, product, savingsOfficer, accountNumber, externalId, accountType,
-                        getClosedOnDate(), closedBy, interestRate, compoundingPeriodType, postingPeriodType, interestCalculationType,
-                        daysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
-                        withdrawalFeeApplicableForTransfer, savingsAccountCharges, newAccountTermAndPreClosure, newChart);
+        final boolean withHoldTax = this.withHoldTax;
+        final FixedDepositAccount reInvestedAccount = FixedDepositAccount.createNewApplicationForSubmittal(client, group, product,
+                savingsOfficer, accountNumber, externalId, accountType, getClosedOnDate(), closedBy, interestRate, compoundingPeriodType,
+                postingPeriodType, interestCalculationType, daysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
+                lockinPeriodFrequencyType, withdrawalFeeApplicableForTransfer, savingsAccountCharges, newAccountTermAndPreClosure,
+                newChart, withHoldTax);
 
         newAccountTermAndPreClosure.updateAccountReference(reInvestedAccount);
         newChart.updateDepositAccountReference(reInvestedAccount);
@@ -813,5 +825,11 @@ public class FixedDepositAccount extends SavingsAccount {
     @Override
     public BigDecimal minBalanceForInterestCalculation() {
         return null;
+    }
+    
+    @Override
+    public void loadLazyCollections() {
+    	super.loadLazyCollections();
+    	this.chart.getId() ;
     }
 }

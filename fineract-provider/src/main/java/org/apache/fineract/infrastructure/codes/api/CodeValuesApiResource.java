@@ -46,6 +46,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.codes.CodeConstants.CODEVALUE_JSON_INPUT_PARAMS;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -58,7 +59,11 @@ public class CodeValuesApiResource {
     /**
      * The set of parameters that are supported in response for {@link CodeData}
      */
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "position", "description"));
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(CODEVALUE_JSON_INPUT_PARAMS.CODEVALUE_ID.getValue(), 
+                    CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue(), CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(), 
+                    CODEVALUE_JSON_INPUT_PARAMS.IS_MANDATORY.getValue(), 
+                    CODEVALUE_JSON_INPUT_PARAMS.DESCRIPTION.getValue()));
     private final String resourceNameForPermissions = "CODEVALUE";
 
     private final PlatformSecurityContext context;

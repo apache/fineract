@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.integrationtests.common;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.junit.Assert;
 import org.junit.Before;
@@ -60,7 +64,7 @@ public class ClientChargesTest {
         Assert.assertNotNull(chargeId);
 
         // creates client with activation date
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 November 2012");
+        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 October 2011");
         Assert.assertNotNull(clientId);
 
         /**
@@ -103,8 +107,12 @@ public class ClientChargesTest {
          * updated properly
          */
         ResponseSpecification responseSpecFailure = new ResponseSpecBuilder().expectStatusCode(400).build();
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
+        Calendar today = Calendar.getInstance(Utils.getTimeZoneOfTenant());
+        today.add(Calendar.DAY_OF_MONTH, 2);
         final String responseId_futureDate_failure = ClientHelper.payChargesForClients(this.requestSpec, responseSpecFailure, clientId,
-                clientChargeId, ClientHelper.getPayChargeJSON("28 AUGUST 2016", "20"));
+                clientChargeId, ClientHelper.getPayChargeJSON(dateFormat.format(today.getTime()), "20"));
         Assert.assertNull(responseId_futureDate_failure);
 
         // waived off the outstanding client charge
@@ -127,7 +135,7 @@ public class ClientChargesTest {
          */
 
         final String responseId_activationDate_failure = ClientHelper.payChargesForClients(this.requestSpec, responseSpecFailure, clientId,
-                clientChargeId, ClientHelper.getPayChargeJSON("30 October 2011", "20"));
+                clientChargeId, ClientHelper.getPayChargeJSON("30 September 2011", "20"));
         Assert.assertNull(responseId_activationDate_failure);
         /**
          * pay client charge more than outstanding amount amount and ensured its

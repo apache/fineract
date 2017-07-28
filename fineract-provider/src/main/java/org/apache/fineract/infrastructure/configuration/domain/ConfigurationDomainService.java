@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.configuration.domain;
 
+import java.util.Date;
+
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 
 public interface ConfigurationDomainService {
@@ -63,4 +65,25 @@ public interface ConfigurationDomainService {
     int getRoundingMode();
 
     boolean isBackdatePenaltiesEnabled();
+    
+    boolean isOrganisationstartDateEnabled();
+    
+    Date retrieveOrganisationStartDate();
+    
+    boolean isPaymnetypeApplicableforDisbursementCharge();
+
+    boolean isInterestChargedFromDateSameAsDisbursementDate();
+
+    boolean isSkippingMeetingOnFirstDayOfMonthEnabled();
+    
+    Long retreivePeroidInNumberOfDaysForSkipMeetingDate();
+    
+    boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled();
+    
+    boolean isDailyTPTLimitEnabled();
+    
+    Long getDailyTPTLimit();
+
+    void removeGlobalConfigurationPropertyDataFromCache(String propertyName);
+    
 }

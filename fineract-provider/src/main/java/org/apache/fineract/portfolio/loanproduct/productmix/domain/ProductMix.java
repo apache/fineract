@@ -24,11 +24,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_product_mix")
-public class ProductMix extends AbstractPersistable<Long> {
+public class ProductMix extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)

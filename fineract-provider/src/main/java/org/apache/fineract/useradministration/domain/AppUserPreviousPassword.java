@@ -27,11 +27,11 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_appuser_previous_password")
-public class AppUserPreviousPassword extends AbstractPersistable<Long> {
+public class AppUserPreviousPassword extends AbstractPersistableCustom<Long> {
 
     @Column(name = "user_id", nullable = false)
     private Long userId;

@@ -22,7 +22,7 @@ package org.apache.fineract.organisation.teller.domain;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.joda.time.LocalDate;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 import javax.persistence.*;
 
@@ -33,7 +33,7 @@ import java.util.Map;
 
 @Entity
 @Table(name = "m_cashier_transactions")
-public class CashierTransaction extends AbstractPersistable<Long> {
+public class CashierTransaction extends AbstractPersistableCustom<Long> {
 
 	@Transient
     private Office office;
@@ -58,10 +58,10 @@ public class CashierTransaction extends AbstractPersistable<Long> {
     @Column(name = "txn_note", nullable = true)
     private String txnNote;
     
-    @Column(name = "entity_type", nullable = false)
+    @Column(name = "entity_type", nullable = true)
     private String entityType;
     
-    @Column(name = "entity_id", nullable = false)
+    @Column(name = "entity_id", nullable = true)
     private Long entityId;
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -213,7 +213,7 @@ public class CashierTransaction extends AbstractPersistable<Long> {
     /**
      * Sets the transaction type of this cashier transaction.
      *
-     * @param description the transaction type of this cashier transaction
+     * @param txnType description the transaction type of this cashier transaction
      */
     public void setTxnType(Integer txnType) {
         this.txnType = txnType;
@@ -239,7 +239,7 @@ public class CashierTransaction extends AbstractPersistable<Long> {
     /**
      * Sets the transaction date of this cashier transaction.
      *
-     * @param transaction date of this cashier transaction
+     * @param txnDate transaction date of this cashier transaction
      */
     public void setTxnDate(Date txnDate) {
         this.txnDate = txnDate;

@@ -19,34 +19,18 @@
 package org.apache.fineract.portfolio.floatingrates.domain;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -54,7 +38,7 @@ import com.google.gson.JsonObject;
 
 @Entity
 @Table(name = "m_floating_rates", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name") })
-public class FloatingRate extends AbstractPersistable<Long> {
+public class FloatingRate extends AbstractPersistableCustom<Long> {
 
 	@Column(name = "name", length = 200, unique = true, nullable = false)
 	private String name;
@@ -66,15 +50,14 @@ public class FloatingRate extends AbstractPersistable<Long> {
 	private boolean isActive;
 
 	@OrderBy(value = "fromDate,id")
-	@LazyCollection(LazyCollectionOption.FALSE)
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "floatingRate", orphanRemoval = true)
-	private Set<FloatingRatePeriod> floatingRatePeriods;
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "floatingRate", orphanRemoval = true, fetch=FetchType.EAGER)
+	private List<FloatingRatePeriod> floatingRatePeriods;
 
-	@ManyToOne(optional = true)
+	@ManyToOne(optional = true, fetch=FetchType.LAZY)
 	@JoinColumn(name = "createdby_id", nullable = false)
 	private AppUser createdBy;
 
-	@ManyToOne(optional = true)
+	@ManyToOne(optional = true, fetch=FetchType.LAZY)
 	@JoinColumn(name = "lastmodifiedby_id", nullable = false)
 	private AppUser modifiedBy;
 
@@ -89,7 +72,7 @@ public class FloatingRate extends AbstractPersistable<Long> {
 	}
 
 	public FloatingRate(String name, boolean isBaseLendingRate,
-			boolean isActive, Set<FloatingRatePeriod> floatingRatePeriods,
+			boolean isActive, List<FloatingRatePeriod> floatingRatePeriods,
 			AppUser createdBy, AppUser modifiedBy, Date createdOn,
 			Date modifiedOn) {
 		this.name = name;
@@ -117,7 +100,7 @@ public class FloatingRate extends AbstractPersistable<Long> {
 				: false;
 		final boolean isActive = command.parameterExists("isActive") ? command
 				.booleanPrimitiveValueOfParameterNamed("isActive") : true;
-		final Set<FloatingRatePeriod> floatingRatePeriods = getRatePeriods(
+		final List<FloatingRatePeriod> floatingRatePeriods = getRatePeriods(
 				currentUser, command);
 		final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
 
@@ -126,12 +109,12 @@ public class FloatingRate extends AbstractPersistable<Long> {
 				currentDate.toDate(), currentDate.toDate());
 	}
 
-	private static Set<FloatingRatePeriod> getRatePeriods(
+	private static List<FloatingRatePeriod> getRatePeriods(
 			final AppUser currentUser, final JsonCommand command) {
 		if (!command.parameterExists("ratePeriods")) {
 			return null;
 		}
-		Set<FloatingRatePeriod> ratePeriods = new HashSet<>();
+		List<FloatingRatePeriod> ratePeriods = new ArrayList<>();
 		JsonArray arrayOfParameterNamed = command
 				.arrayOfParameterNamed("ratePeriods");
 		for (final JsonElement ratePeriod : arrayOfParameterNamed) {
@@ -167,7 +150,7 @@ public class FloatingRate extends AbstractPersistable<Long> {
 		return this.isActive;
 	}
 
-	public Set<FloatingRatePeriod> getFloatingRatePeriods() {
+	public List<FloatingRatePeriod> getFloatingRatePeriods() {
 		return this.floatingRatePeriods;
 	}
 
@@ -213,7 +196,7 @@ public class FloatingRate extends AbstractPersistable<Long> {
 			this.isActive = newValue;
 		}
 
-		final Set<FloatingRatePeriod> newRatePeriods = getRatePeriods(appUser,
+		final List<FloatingRatePeriod> newRatePeriods = getRatePeriods(appUser,
 				command);
 		if (newRatePeriods != null && !newRatePeriods.isEmpty()) {
 			updateRatePeriods(newRatePeriods, appUser);
@@ -225,7 +208,7 @@ public class FloatingRate extends AbstractPersistable<Long> {
 	}
 
 	private void updateRatePeriods(
-			final Set<FloatingRatePeriod> newRatePeriods, final AppUser appUser) {
+			final List<FloatingRatePeriod> newRatePeriods, final AppUser appUser) {
 		final LocalDate today = DateUtils.getLocalDateOfTenant();
 		if (this.floatingRatePeriods != null) {
 			for (FloatingRatePeriod ratePeriod : this.floatingRatePeriods) {

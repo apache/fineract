@@ -19,15 +19,20 @@
 package org.apache.fineract.portfolio.savings.domain;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
+import org.joda.time.LocalDate;
 
 /**
  * {@link SavingsAccountSummary} encapsulates all the summary details of a
@@ -71,7 +76,14 @@ public final class SavingsAccountSummary {
     private BigDecimal totalPenaltyChargesWaived = BigDecimal.ZERO;
 
     @Column(name = "total_overdraft_interest_derived", scale = 6, precision = 19)
-	private BigDecimal totalOverdraftInterestDerived;
+    private BigDecimal totalOverdraftInterestDerived;
+
+    @Column(name = "total_withhold_tax_derived", scale = 6, precision = 19)
+    private BigDecimal totalWithholdTax;
+    
+    @Temporal(TemporalType.DATE)
+    @Column(name = "last_interest_calculation_date")
+    private Date lastInterestCalculationDate;
 
     protected SavingsAccountSummary() {
         //
@@ -90,22 +102,24 @@ public final class SavingsAccountSummary {
         this.totalFeeChargesWaived = wrapper.calculateTotalFeesChargeWaived(currency, transactions);
         this.totalPenaltyChargesWaived = wrapper.calculateTotalPenaltyChargeWaived(currency, transactions);
         this.totalOverdraftInterestDerived = wrapper.calculateTotalOverdraftInterest(currency, transactions);
+        this.totalWithholdTax = wrapper.calculateTotalWithholdTaxWithdrawal(currency, transactions);
+        
 
         this.accountBalance = Money.of(currency, this.totalDeposits).plus(this.totalInterestPosted).minus(this.totalWithdrawals)
                 .minus(this.totalWithdrawalFees).minus(this.totalAnnualFees).minus(this.totalFeeCharge).minus(this.totalPenaltyCharge)
-                .minus(totalOverdraftInterestDerived).getAmount();
+                .minus(totalOverdraftInterestDerived).minus(totalWithholdTax).getAmount();
     }
 
     public void updateFromInterestPeriodSummaries(final MonetaryCurrency currency, final List<PostingPeriod> allPostingPeriods) {
 
         Money totalEarned = Money.zero(currency);
-
+        LocalDate interestCalculationDate = DateUtils.getLocalDateOfTenant();
         for (final PostingPeriod period : allPostingPeriods) {
             Money interestEarned = period.interest();
             interestEarned = interestEarned == null ? Money.zero(currency) : interestEarned;
             totalEarned = totalEarned.plus(interestEarned);
         }
-
+        this.lastInterestCalculationDate = interestCalculationDate.toDate();
         this.totalInterestEarned = totalEarned.getAmount();
     }
 
@@ -120,6 +134,10 @@ public final class SavingsAccountSummary {
 
     public BigDecimal getAccountBalance() {
         return this.accountBalance;
+    }
+
+    public BigDecimal getTotalInterestPosted() {
+        return this.totalInterestPosted;
     }
 
 }

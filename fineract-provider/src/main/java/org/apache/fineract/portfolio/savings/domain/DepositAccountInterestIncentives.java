@@ -24,12 +24,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.interestratechart.domain.InterestIncentivesFields;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_savings_interest_incentives")
-public class DepositAccountInterestIncentives extends AbstractPersistable<Long> {
+public class DepositAccountInterestIncentives extends AbstractPersistableCustom<Long> {
 
     @ManyToOne
     @JoinColumn(name = "deposit_account_interest_rate_slab_id", nullable = false)

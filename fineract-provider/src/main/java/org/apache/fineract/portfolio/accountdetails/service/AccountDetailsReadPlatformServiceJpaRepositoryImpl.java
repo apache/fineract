@@ -27,10 +27,12 @@ import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.accountdetails.data.AccountSummaryCollectionData;
 import org.apache.fineract.portfolio.accountdetails.data.LoanAccountSummaryData;
 import org.apache.fineract.portfolio.accountdetails.data.SavingsAccountSummaryData;
+import org.apache.fineract.portfolio.accountdetails.data.ShareAccountSummaryData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApplicationTimelineData;
@@ -38,7 +40,11 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountApplicationTimelineData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountStatusEnumData;
+import org.apache.fineract.portfolio.savings.data.SavingsAccountSubStatusEnumData;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
+import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountApplicationTimelineData;
+import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountStatusEnumData;
+import org.apache.fineract.portfolio.shareaccounts.service.SharesEnumerations;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -51,13 +57,16 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
     private final JdbcTemplate jdbcTemplate;
     private final ClientReadPlatformService clientReadPlatformService;
     private final GroupReadPlatformService groupReadPlatformService;
+    private final ColumnValidator columnValidator;
 
     @Autowired
     public AccountDetailsReadPlatformServiceJpaRepositoryImpl(final ClientReadPlatformService clientReadPlatformService,
-            final RoutingDataSource dataSource, final GroupReadPlatformService groupReadPlatformService) {
+            final RoutingDataSource dataSource, final GroupReadPlatformService groupReadPlatformService,
+            final ColumnValidator columnValidator) {
         this.clientReadPlatformService = clientReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.groupReadPlatformService = groupReadPlatformService;
+        this.columnValidator = columnValidator;
     }
 
     @Override
@@ -68,7 +77,8 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         final String savingswhereClause = " where sa.client_id = ? order by sa.status_enum ASC, sa.account_no ASC";
         final List<LoanAccountSummaryData> loanAccounts = retrieveLoanAccountDetails(loanwhereClause, new Object[] { clientId });
         final List<SavingsAccountSummaryData> savingsAccounts = retrieveAccountDetails(savingswhereClause, new Object[] { clientId });
-        return new AccountSummaryCollectionData(loanAccounts, savingsAccounts);
+        final List<ShareAccountSummaryData> shareAccounts = retrieveShareAccountDetails(clientId) ;
+        return new AccountSummaryCollectionData(loanAccounts, savingsAccounts, shareAccounts);
     }
 
     @Override
@@ -105,9 +115,15 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         return retrieveLoanAccountDetails(loanWhereClause, new Object[] { groupId, loanOfficerId });
     }
 
+    @Override public Collection<LoanAccountSummaryData> retrieveClientActiveLoanAccountSummary(final Long clientId) {
+        final String loanWhereClause = " where l.client_id = ? and l.loan_status_id = 300 ";
+        return retrieveLoanAccountDetails(loanWhereClause, new Object[] { clientId });
+    }
+
     private List<LoanAccountSummaryData> retrieveLoanAccountDetails(final String loanwhereClause, final Object[] inputs) {
         final LoanAccountSummaryDataMapper rm = new LoanAccountSummaryDataMapper();
         final String sql = "select " + rm.loanAccountSummarySchema() + loanwhereClause;
+        this.columnValidator.validateSqlInjection(rm.loanAccountSummarySchema(), loanwhereClause);
         return this.jdbcTemplate.query(sql, rm, inputs);
     }
 
@@ -118,9 +134,112 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
     private List<SavingsAccountSummaryData> retrieveAccountDetails(final String savingswhereClause, final Object[] inputs) {
         final SavingsAccountSummaryDataMapper savingsAccountSummaryDataMapper = new SavingsAccountSummaryDataMapper();
         final String savingsSql = "select " + savingsAccountSummaryDataMapper.schema() + savingswhereClause;
+        this.columnValidator.validateSqlInjection(savingsAccountSummaryDataMapper.schema() , savingswhereClause);
         return this.jdbcTemplate.query(savingsSql, savingsAccountSummaryDataMapper, inputs);
     }
 
+    private List<ShareAccountSummaryData> retrieveShareAccountDetails(final Long clientId) {
+    	final ShareAccountSummaryDataMapper mapper = new ShareAccountSummaryDataMapper() ;
+    	final String query = "select " + mapper.schema() + " where sa.client_id = ?" ;
+    	  return this.jdbcTemplate.query(query, mapper, new Object [] {clientId});
+    }
+    
+    private final static class ShareAccountSummaryDataMapper implements RowMapper<ShareAccountSummaryData> {
+
+    	private final String schema ;
+    	
+    	ShareAccountSummaryDataMapper() {
+    		final StringBuffer buff = new StringBuffer()
+    		.append("sa.id as id, sa.external_id as externalId, sa.status_enum as statusEnum, ")
+    		.append("sa.account_no as accountNo, sa.total_approved_shares as approvedShares, sa.total_pending_shares as pendingShares, ")
+    		.append("sa.savings_account_id as savingsAccountNo, sa.minimum_active_period_frequency as minimumactivePeriod,")
+    		.append("sa.minimum_active_period_frequency_enum as minimumactivePeriodEnum,") 
+    		.append("sa.lockin_period_frequency as lockinPeriod, sa.lockin_period_frequency_enum as lockinPeriodEnum, ")
+    		.append("sa.submitted_date as submittedDate, sbu.username as submittedByUsername, ")
+    		.append("sbu.firstname as submittedByFirstname, sbu.lastname as submittedByLastname, ") 
+    		.append("sa.rejected_date as rejectedDate, rbu.username as rejectedByUsername, ")
+    		.append("rbu.firstname as rejectedByFirstname, rbu.lastname as rejectedByLastname, ")
+    		.append("sa.approved_date as approvedDate, abu.username as approvedByUsername, ")
+    		.append("abu.firstname as approvedByFirstname, abu.lastname as approvedByLastname, ")
+    		.append("sa.activated_date as activatedDate, avbu.username as activatedByUsername, ")
+    		.append("avbu.firstname as activatedByFirstname, avbu.lastname as activatedByLastname, ")
+    		.append("sa.closed_date as closedDate, cbu.username as closedByUsername, ")
+    		.append("cbu.firstname as closedByFirstname, cbu.lastname as closedByLastname, ")
+    		.append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMultiplesOf, ")
+    		.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ")
+    		.append("curr.display_symbol as currencyDisplaySymbol, sa.product_id as productId, p.name as productName, p.short_name as shortProductName ")
+    		.append("from m_share_account sa ")
+    		.append("join m_share_product as p on p.id = sa.product_id ")
+    		.append("join m_currency curr on curr.code = sa.currency_code ")
+    		.append("left join m_appuser sbu on sbu.id = sa.submitted_userid ")
+    		.append("left join m_appuser rbu on rbu.id = sa.rejected_userid ")
+    		.append("left join m_appuser abu on abu.id = sa.approved_userid ")
+    		.append("left join m_appuser avbu on avbu.id = sa.activated_userid ")
+    		.append("left join m_appuser cbu on cbu.id = sa.closed_userid ") ;
+    		schema = buff.toString() ;
+		}
+		@Override
+		public ShareAccountSummaryData mapRow(ResultSet rs, int rowNum)
+				throws SQLException {
+
+            final Long id = JdbcSupport.getLong(rs, "id");
+            final String accountNo = rs.getString("accountNo");
+            final Long approvedShares = JdbcSupport.getLong(rs, "approvedShares");
+            final Long pendingShares = JdbcSupport.getLong(rs, "pendingShares");
+            final String externalId = rs.getString("externalId");
+            final Long productId = JdbcSupport.getLong(rs, "productId");
+            final String productName = rs.getString("productName");
+            final String shortProductName = rs.getString("shortProductName");
+            final Integer statusId = JdbcSupport.getInteger(rs, "statusEnum");
+            final ShareAccountStatusEnumData status = SharesEnumerations.status(statusId) ;
+            final String currencyCode = rs.getString("currencyCode");
+            final String currencyName = rs.getString("currencyName");
+            final String currencyNameCode = rs.getString("currencyNameCode");
+            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
+                    currencyDisplaySymbol, currencyNameCode);
+
+            final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedDate");
+            final String submittedByUsername = rs.getString("submittedByUsername");
+            final String submittedByFirstname = rs.getString("submittedByFirstname");
+            final String submittedByLastname = rs.getString("submittedByLastname");
+
+            final LocalDate rejectedOnDate = JdbcSupport.getLocalDate(rs, "rejectedDate");
+            final String rejectedByUsername = rs.getString("rejectedByUsername");
+            final String rejectedByFirstname = rs.getString("rejectedByFirstname");
+            final String rejectedByLastname = rs.getString("rejectedByLastname");
+
+            final LocalDate approvedOnDate = JdbcSupport.getLocalDate(rs, "approvedDate");
+            final String approvedByUsername = rs.getString("approvedByUsername");
+            final String approvedByFirstname = rs.getString("approvedByFirstname");
+            final String approvedByLastname = rs.getString("approvedByLastname");
+
+            final LocalDate activatedOnDate = JdbcSupport.getLocalDate(rs, "activatedDate");
+            final String activatedByUsername = rs.getString("activatedByUsername");
+            final String activatedByFirstname = rs.getString("activatedByFirstname");
+            final String activatedByLastname = rs.getString("activatedByLastname");
+
+            final LocalDate closedOnDate = JdbcSupport.getLocalDate(rs, "closedDate");
+            final String closedByUsername = rs.getString("closedByUsername");
+            final String closedByFirstname = rs.getString("closedByFirstname");
+            final String closedByLastname = rs.getString("closedByLastname");
+
+            final ShareAccountApplicationTimelineData timeline = new ShareAccountApplicationTimelineData(submittedOnDate,
+                    submittedByUsername, submittedByFirstname, submittedByLastname, rejectedOnDate, rejectedByUsername,
+                    rejectedByFirstname, rejectedByLastname, approvedOnDate, approvedByUsername, approvedByFirstname, approvedByLastname, activatedOnDate,
+                    activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate, closedByUsername, closedByFirstname,
+                    closedByLastname);
+
+            return new ShareAccountSummaryData(id, accountNo, externalId, productId, productName, shortProductName, status, currency,
+                    approvedShares, pendingShares, timeline);
+        }
+    	
+		public String schema() {
+			return this.schema ;
+		}
+    }
     private static final class SavingsAccountSummaryDataMapper implements RowMapper<SavingsAccountSummaryData> {
 
         final String schemaSql;
@@ -150,6 +269,13 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             accountsSummary.append("sa.activatedon_date as activatedOnDate,");
             accountsSummary.append("avbu.username as activatedByUsername,");
             accountsSummary.append("avbu.firstname as activatedByFirstname, avbu.lastname as activatedByLastname,");
+
+            accountsSummary.append("sa.sub_status_enum as subStatusEnum, ");
+            accountsSummary.append("(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
+            accountsSummary.append("from m_savings_account_transaction as sat ");
+            accountsSummary.append("where sat.is_reversed = 0 ");
+            accountsSummary.append("and sat.transaction_type_enum in (1,2) ");
+            accountsSummary.append("and sat.savings_account_id = sa.id) as lastActiveTransactionDate, ");
 
             accountsSummary.append("sa.closedon_date as closedOnDate,");
             accountsSummary.append("cbu.username as closedByUsername,");
@@ -233,6 +359,10 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             final String closedByUsername = rs.getString("closedByUsername");
             final String closedByFirstname = rs.getString("closedByFirstname");
             final String closedByLastname = rs.getString("closedByLastname");
+            final Integer subStatusEnum = JdbcSupport.getInteger(rs, "subStatusEnum");
+            final SavingsAccountSubStatusEnumData subStatus = SavingsEnumerations.subStatus(subStatusEnum);
+            
+            final LocalDate lastActiveTransactionDate = JdbcSupport.getLocalDate(rs, "lastActiveTransactionDate");
 
             final SavingsAccountApplicationTimelineData timeline = new SavingsAccountApplicationTimelineData(submittedOnDate,
                     submittedByUsername, submittedByFirstname, submittedByLastname, rejectedOnDate, rejectedByUsername,
@@ -242,7 +372,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     closedByLastname);
 
             return new SavingsAccountSummaryData(id, accountNo, externalId, productId, productName, shortProductName, status, currency, accountBalance,
-                    accountTypeData, timeline, depositTypeData);
+                    accountTypeData, timeline, depositTypeData, subStatus, lastActiveTransactionDate);
         }
     }
 

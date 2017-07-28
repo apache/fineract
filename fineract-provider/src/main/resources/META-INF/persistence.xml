@@ -1,24 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    This Source Code Form is subject to the terms of the Mozilla Public
-    License, v. 2.0. If a copy of the MPL was not distributed with this file,
-    You can obtain one at http://mozilla.org/MPL/2.0/.
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
 
 -->
-<!-- This Source Code Form is subject to the terms of the Mozilla Public 
-	License, v. 2.0. If a copy of the MPL was not distributed with this file, 
-	You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+
 <persistence version="2.0"
 	xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
 
 	<persistence-unit name="jpa-pu" transaction-type="RESOURCE_LOCAL">
-		<provider>org.hibernate.ejb.HibernatePersistence</provider>
-		<properties>
-			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLInnoDBDialect" />
-			<property name="hibernate.jdbc.batch_size" value="100" />
-			<property name="hibernate.order_inserts" value="true" />
-		</properties>
+		<provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
+	<properties>
+        <property name="openjpa.Compatibility" value="QuotedNumbersInQueries=true"/>
+        <property name="openjpa.jdbc.DBDictionary" value="org.apache.fineract.infrastructure.core.domain.MySQLDictionaryCustom"/>
+        <!--<property name="openjpa.InverseManager" value="true(Action=warn)"/> -->
+      <!-- <property name="openjpa.Log" value="DefaultLevel=WARN, Runtime=INFO, Tool=INFO, SQL=TRACE"/>-->
+       <property name="openjpa.jdbc.MappingDefaults" value="ForeignKeyDeleteAction=CASCADE"/>
+	</properties>
 	</persistence-unit>
 </persistence>

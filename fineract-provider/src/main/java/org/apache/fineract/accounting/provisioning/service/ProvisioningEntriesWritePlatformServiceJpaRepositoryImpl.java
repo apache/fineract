@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
@@ -49,7 +50,7 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.organisation.office.domain.OfficeRepository;
+import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaData;
 import org.apache.fineract.organisation.provisioning.domain.ProvisioningCategory;
 import org.apache.fineract.organisation.provisioning.domain.ProvisioningCategoryRepository;
@@ -58,8 +59,6 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -69,13 +68,11 @@ import com.google.gson.JsonObject;
 @Service
 public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements ProvisioningEntriesWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl.class);
-
     private final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService;
     private final ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService ;
     private final LoanProductRepository loanProductRepository;
     private final GLAccountRepository glAccountRepository;
-    private final OfficeRepository officeRepository;
+    private final OfficeRepositoryWrapper officeRepositoryWrapper;
     private final ProvisioningCategoryRepository provisioningCategoryRepository;
     private final PlatformSecurityContext platformSecurityContext;
     private final ProvisioningEntryRepository provisioningEntryRepository;
@@ -88,7 +85,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService,
             final ProvisioningCriteriaReadPlatformService provisioningCriteriaReadPlatformService,
             final LoanProductRepository loanProductRepository, final GLAccountRepository glAccountRepository,
-            final OfficeRepository officeRepository, final ProvisioningCategoryRepository provisioningCategoryRepository,
+            final OfficeRepositoryWrapper officeRepositoryWrapper, final ProvisioningCategoryRepository provisioningCategoryRepository,
             final PlatformSecurityContext platformSecurityContext, final ProvisioningEntryRepository provisioningEntryRepository,
             final JournalEntryWritePlatformService journalEntryWritePlatformService,
             final ProvisioningEntriesDefinitionJsonDeserializer fromApiJsonDeserializer, final FromJsonHelper fromApiJsonHelper) {
@@ -96,7 +93,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
         this.provisioningCriteriaReadPlatformService = provisioningCriteriaReadPlatformService ;
         this.loanProductRepository = loanProductRepository;
         this.glAccountRepository = glAccountRepository;
-        this.officeRepository = officeRepository;
+        this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.provisioningCategoryRepository = provisioningCategoryRepository;
         this.platformSecurityContext = platformSecurityContext;
         this.provisioningEntryRepository = provisioningEntryRepository;
@@ -192,7 +189,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
         AppUser currentUser = this.platformSecurityContext.authenticatedUser();
         AppUser lastModifiedBy = null;
         Date lastModifiedDate = null;
-        Collection<LoanProductProvisioningEntry> nullEntries = null;
+        Set<LoanProductProvisioningEntry> nullEntries = null;
         ProvisioningEntry requestedEntry = new ProvisioningEntry(currentUser, date, lastModifiedBy, lastModifiedDate, nullEntries);
         Collection<LoanProductProvisioningEntry> entries = generateLoanProvisioningEntry(requestedEntry, date);
         requestedEntry.setProvisioningEntries(entries);
@@ -224,7 +221,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
         Map<LoanProductProvisioningEntry, LoanProductProvisioningEntry> provisioningEntries = new HashMap<>();
         for (LoanProductProvisioningEntryData data : entries) {
             LoanProduct loanProduct = this.loanProductRepository.findOne(data.getProductId());
-            Office office = this.officeRepository.findOne(data.getOfficeId());
+            Office office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(data.getOfficeId());
             ProvisioningCategory provisioningCategory = provisioningCategoryRepository.findOne(data.getCategoryId());
             GLAccount liabilityAccount = glAccountRepository.findOne(data.getLiablityAccount());
             GLAccount expenseAccount = glAccountRepository.findOne(data.getExpenseAccount());

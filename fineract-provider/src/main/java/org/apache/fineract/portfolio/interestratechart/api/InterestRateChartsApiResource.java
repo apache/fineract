@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.portfolio.interestratechart.api;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -50,6 +52,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.chartSlabs;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.descriptionParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.endDateParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.fromDateParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.idParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.isPrimaryGroupingByAmountParamName;
+import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.nameParamName;
+
 @Path("/interestratecharts")
 @Component
 @Scope("singleton")
@@ -60,6 +70,10 @@ public class InterestRateChartsApiResource {
     private final DefaultToApiJsonSerializer<InterestRateChartData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private static final Set<String> INTERESTRATE_CHART_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(InterestRateChartApiConstants.localeParamName,
+                    InterestRateChartApiConstants.dateFormatParamName, idParamName, nameParamName, descriptionParamName,
+                    fromDateParamName, endDateParamName, chartSlabs, isPrimaryGroupingByAmountParamName));
 
     @Autowired
     public InterestRateChartsApiResource(final InterestRateChartReadPlatformService chartReadPlatformService,
@@ -84,8 +98,7 @@ public class InterestRateChartsApiResource {
         InterestRateChartData chartData = this.chartReadPlatformService.template();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, chartData,
-                InterestRateChartApiConstants.INTERESTRATE_CHART_RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, chartData, INTERESTRATE_CHART_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -98,8 +111,7 @@ public class InterestRateChartsApiResource {
         Collection<InterestRateChartData> chartDatas = this.chartReadPlatformService.retrieveAllWithSlabs(productId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, chartDatas,
-                InterestRateChartApiConstants.INTERESTRATE_CHART_RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, chartDatas, INTERESTRATE_CHART_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -123,8 +135,7 @@ public class InterestRateChartsApiResource {
             chartData = this.chartReadPlatformService.retrieveWithTemplate(chartData);
         }
 
-        return this.toApiJsonSerializer.serialize(settings, chartData,
-                InterestRateChartApiConstants.INTERESTRATE_CHART_RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, chartData, INTERESTRATE_CHART_RESPONSE_DATA_PARAMETERS);
     }
 
     @POST

@@ -53,7 +53,15 @@ public enum ChargeCalculationType {
         return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue() };
     }
 
+    public static Object[] validValuesForShares() {
+        return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue() };
+    }
+    
     public static Object[] validValuesForClients() {
+        return new Integer[] { ChargeCalculationType.FLAT.getValue() };
+    }
+    
+    public static Object[] validValuesForShareAccountActivation() {
         return new Integer[] { ChargeCalculationType.FLAT.getValue() };
     }
     

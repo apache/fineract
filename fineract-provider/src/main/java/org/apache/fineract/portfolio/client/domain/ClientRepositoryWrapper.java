@@ -18,11 +18,15 @@
  */
 package org.apache.fineract.portfolio.client.domain;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
@@ -43,11 +47,22 @@ public class ClientRepositoryWrapper {
     }
 
     public Client findOneWithNotFoundDetection(final Long id) {
-        final Client client = this.repository.findOne(id);
-        if (client == null) { throw new ClientNotFoundException(id); }
-        return client;
+       return this.findOneWithNotFoundDetection(id, false) ;
     }
 
+    @Transactional(readOnly=true)
+    public Client findOneWithNotFoundDetection(final Long clientId, final boolean loadLazyCollections) {
+        final Client client = this.repository.findOne(clientId);
+        if (client == null) { throw new ClientNotFoundException(clientId); }
+        if(loadLazyCollections) {
+            client.loadLazyCollections();
+        }
+        return client;
+    }
+    
+    public List<Client> findAll(final Collection<Long> clientIds) {
+        return this.repository.findAll(clientIds) ;   
+    }
     public void save(final Client client) {
         this.repository.save(client);
     }
@@ -58,6 +73,10 @@ public class ClientRepositoryWrapper {
 
     public void delete(final Client client) {
         this.repository.delete(client);
+    }
+    
+    public void flush() {
+        this.repository.flush();
     }
 
     public Client getActiveClientInUserScope(Long clientId) {

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.batch.exception;
 
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -31,6 +32,7 @@ import org.apache.fineract.infrastructure.core.exceptionmapper.PlatformResourceN
 import org.apache.fineract.infrastructure.core.exceptionmapper.UnsupportedParameterExceptionMapper;
 import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
+import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.transaction.TransactionException;
 
 import com.google.gson.Gson;
@@ -68,7 +70,12 @@ public class ErrorHandler extends RuntimeException {
      */
     public static ErrorInfo handler(final RuntimeException exception) {
 
-        if (exception instanceof AbstractPlatformResourceNotFoundException) {
+    	if(exception instanceof AbstractPlatformDomainRuleException) {
+    		PlatformDomainRuleExceptionMapper mapper = new PlatformDomainRuleExceptionMapper() ;
+    		final String errorBody = jsonHelper
+                    .toJson(mapper.toResponse((AbstractPlatformDomainRuleException) exception).getEntity());
+    		return new ErrorInfo(500, 9999, errorBody);
+    	}else if (exception instanceof AbstractPlatformResourceNotFoundException) {
 
             final PlatformResourceNotFoundExceptionMapper mapper = new PlatformResourceNotFoundExceptionMapper();
             final String errorBody = jsonHelper
@@ -120,6 +127,8 @@ public class ErrorHandler extends RuntimeException {
             final String errorBody = jsonHelper.toJson(mapper.toResponse((PlatformInternalServerException) exception).getEntity());
 
             return new ErrorInfo(500, 5001, errorBody);
+        }else if(exception instanceof NonTransientDataAccessException) {
+        	return new ErrorInfo(400, 4001, "{\"Exception\": " + exception.getMessage()+"}");
         }
 
         return new ErrorInfo(500, 9999, "{\"Exception\": " + exception.toString() + "}");

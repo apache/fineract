@@ -25,6 +25,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.configuration.exception.ExternalServiceConfigurationNotFoundException;
 import org.apache.fineract.infrastructure.configuration.service.ExternalServicesConstants.S3_JSON_INPUT_PARAMS;
+import org.apache.fineract.infrastructure.configuration.service.ExternalServicesConstants.SMS_JSON_INPUT_PARAMS;
 import org.apache.fineract.infrastructure.configuration.service.ExternalServicesConstants.SMTP_JSON_INPUT_PARAMS;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -38,6 +39,7 @@ public class ExternalServicesPropertiesCommandFromApiJsonDeserializer {
 
     private final Set<String> S3SupportedParameters = S3_JSON_INPUT_PARAMS.getAllValues();
     private final Set<String> SMTPSupportedParameters = SMTP_JSON_INPUT_PARAMS.getAllValues();
+    private final Set<String> SMSSupportedParameters = SMS_JSON_INPUT_PARAMS.getAllValues();
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -56,6 +58,10 @@ public class ExternalServicesPropertiesCommandFromApiJsonDeserializer {
 
             case "SMTP":
                 this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.SMTPSupportedParameters);
+            break;
+
+            case "SMS":
+                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.SMSSupportedParameters);
             break;
 
             default:

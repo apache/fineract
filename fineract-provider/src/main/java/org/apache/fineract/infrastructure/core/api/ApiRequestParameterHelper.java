@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
  * <li>Pretty printing through pretty=true, defaults to false</li>
  * <li>Partial response through fields=id, name etc, when empty, the full data
  * is returned by default.</li>
- * </ul
+ * </ul>
  */
 @Component
 public class ApiRequestParameterHelper {

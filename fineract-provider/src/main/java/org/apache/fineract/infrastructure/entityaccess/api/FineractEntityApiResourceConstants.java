@@ -41,14 +41,9 @@ public class FineractEntityApiResourceConstants {
     public static final String ROLE_ACCESS_TO_LOAN_PRODUCTS = " role_access_to_loan_products ";
     public static final String ROLE_ACCESS_TO_SAVINGS_PRODUCTS = " role_access_to_savings_products ";
 
-    public static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(mappingTypes));
+    protected static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(mappingTypes));
 
-    public static final Set<String> FETCH_ENTITY_TO_ENTITY_MAPPINGS = new HashSet<>(Arrays.asList(mapId,relId,fromEnityType, toEntityType));
-
-    public static final Set<String> CREATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(fromEnityType,
-            toEntityType, startDate, LOCALE, DATE_FORMAT, endDate));
-
-    public static final Set<String> UPDATE_ENTITY_MAPPING_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(relId,fromEnityType,
-            toEntityType, startDate,LOCALE, DATE_FORMAT, endDate));
+    protected static final Set<String> FETCH_ENTITY_TO_ENTITY_MAPPINGS = new HashSet<>(Arrays.asList(mapId,relId,
+            fromEnityType, toEntityType));
 
 }

@@ -87,6 +87,12 @@ public class FixedDepositAccountStatusChecker {
         assertTrue("ERROR IN PREMATURELY CLOSING THE FIXED DEPOSIT ACCOUNT", getStatus(fixedDepositStatusHashMap, "prematureClosed"));
         System.out.println(fixedDepositStatusHashMap);
     }
+    
+    public static void verifyFixedDepositAccountIsMatured(HashMap fixedDepositStatusHashMap) {
+        System.out.println("--------------------- VERIFYING FIXED DEPOSIT APPLICATION IS MATURED ---------------------");
+        assertTrue("ERROR IN MATURITY JOB OF THE FIXED DEPOSIT ACCOUNT", getStatus(fixedDepositStatusHashMap, "matured"));
+        System.out.println(fixedDepositStatusHashMap);
+    }
 
     private static boolean getStatus(final HashMap fixedDepositStatusMap, final String fixedDepositStatusString) {
         return (Boolean) fixedDepositStatusMap.get(fixedDepositStatusString);
