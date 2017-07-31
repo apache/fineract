@@ -27,5 +27,7 @@ public interface RoleRepository extends JpaRepository<Role, Long>, JpaSpecificat
 
     @Query("SELECT COUNT(a) FROM AppUser a JOIN a.roles r WHERE r.id = :roleId AND a.deleted = false")
     Integer getCountOfRolesAssociatedWithUsers(@Param("roleId") Long roleId);
+    
+    Role findByName(String name);
   
 }
