@@ -38,6 +38,10 @@
 				method="POST" requires-channel="https" />
 			<intercept-url pattern="/api/*/self/authentication" access="permitAll"
 				method="POST" requires-channel="https" />
+			<intercept-url pattern="/api/*/self/registration" access="permitAll"
+				method="POST" requires-channel="https" />
+			<intercept-url pattern="/api/*/self/registration/user" access="permitAll"
+				method="POST" requires-channel="https" />
 			<intercept-url pattern="/api/**" access="isFullyAuthenticated()"
 				method="GET" requires-channel="https" />
 			<intercept-url pattern="/api/**" access="isFullyAuthenticated()"
