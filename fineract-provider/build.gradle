@@ -106,6 +106,7 @@ rat {
 	'**/.git/**',
     '**/.gitignore',
     '**/.gitkeep',
+    '**/toif/**',
 	'**/*.iml',
 	//Notice files
 	'**/NOTICE_RELEASE',
@@ -350,6 +351,11 @@ task integrationTest(type:Test){
     classpath = project.sourceSets.integrationTest.runtimeClasspath
 }
 
+task toif(type:Exec) {
+    workingDir 'toif'
+    commandLine 'python', 'toifscan.py'
+    args buildDir
+}
 
 import groovy.sql.Sql
 

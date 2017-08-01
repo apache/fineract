@@ -1,0 +1,36 @@
+###########################
+#		  Facts
+###########################
+
+TOIFSegmentIsRelatedToProject=project1
+TOIFSegmentIsProducedByOrganization=org1
+TOIFSegmentIsOwnedByOrganization=org1
+TOIFSegmentIsGeneratedByPerson=person1
+TOIFSegmentIsSupervisedByPerson=person1
+
+PersonIsInvolvedInProjectAsRole=person1;project1;role1
+OrganizationIsInvolvedInProjectAsRole=org1;project1;role2
+OrganizationIsPartOfOrganizationAsRole=org1;org2;role2
+PersonIsEmployedByOrganizationAsRole=person1;org1;role1
+
+###########################
+#		Entities
+###########################
+
+SegmentDescription=Segment.
+
+#projectId=name;description
+project1=apache-fineract;Apache Fineract:A Platform for Microfinance.
+
+#personId=name;email;phone
+person1=mifos-developer;dev@fineract.apache.org;555-1234
+
+#organizationId=name;description;address;phone;email
+org1=mifos;Fineract initial organization;mifos-developer;555-5555;mifos-developer@lists.sourceforge.net
+
+#organizationId=name;description;address;phone;email
+org2=apache;Fineract new organization;blah;555-5555;dev@fineract.apache.org
+
+#roleId=name;description
+role1=Software Developer;Developer on the TOIF Adaptors project
+role2=company;employer
