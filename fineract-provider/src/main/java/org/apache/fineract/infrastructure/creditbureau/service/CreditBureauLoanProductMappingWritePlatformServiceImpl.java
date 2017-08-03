@@ -64,10 +64,9 @@ public class CreditBureauLoanProductMappingWritePlatformServiceImpl implements C
 	public CommandProcessingResult addCreditBureauLoanProductMapping(Long creditBureau_id, JsonCommand command) {
 		this.context.authenticatedUser();
 		
-		System.out.println("mapping called for creditBureau_id "+creditBureau_id);
 		this.fromApiJsonDeserializer.validateForCreate(command.json(), creditBureau_id);
 
-		final long lpid = command.longValueOfParameterNamed("loan_product_id");
+		final long lpid = command.longValueOfParameterNamed("loanProductId");
 
 		final OrganisationCreditBureau orgcb = this.organisationCreditBureauRepository.getOne(creditBureau_id);
 
@@ -84,6 +83,9 @@ public class CreditBureauLoanProductMappingWritePlatformServiceImpl implements C
 
 	@Override
 	public CommandProcessingResult updateCreditBureauLoanProductMapping(JsonCommand command) {
+		
+		this.context.authenticatedUser();
+		this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
 		final Long mappingid = command.longValueOfParameterNamed("creditbureauLoanProductMappingId");
 		final boolean is_active = command.booleanPrimitiveValueOfParameterNamed("is_active");
