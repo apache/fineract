@@ -21,6 +21,8 @@ package org.apache.fineract.portfolio.client.data;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.joda.time.LocalDate;
 
+import java.util.Locale;
+
 /**
  * Immutable data object representing the ClientNonPerson
  */
@@ -32,6 +34,26 @@ public class ClientNonPersonData {
 	private final LocalDate incorpValidityTillDate;
     private final CodeValueData mainBusinessLine;
     private final String remarks;
+
+	//import fields
+	private Long mainBusinessLineId;
+	private Long constitutionId;
+	private Locale locale;
+	private String dateFormat;
+
+	public ClientNonPersonData(String incorpNumber, LocalDate incorpValidityTillDate,
+			String remarks, Long mainBusinessLineId, Long constitutionId) {
+
+		this.incorpNumber = incorpNumber;
+		this.incorpValidityTillDate = incorpValidityTillDate;
+		this.remarks = remarks;
+		this.mainBusinessLineId = mainBusinessLineId;
+		this.constitutionId = constitutionId;
+		this.locale = Locale.ENGLISH;
+		this.dateFormat = "yyyy-MM-dd";
+		this.constitution = null;
+		this.mainBusinessLine = null;
+	}
     
 	public ClientNonPersonData(CodeValueData constitution, String incorpNo, LocalDate incorpValidityTillDate,
 			CodeValueData mainBusinessLine, String remarks) {
