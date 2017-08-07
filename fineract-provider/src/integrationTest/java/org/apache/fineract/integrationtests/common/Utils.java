@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -165,4 +166,27 @@ public class Utils {
         return TimeZone.getTimeZone(TENANT_TIME_ZONE);
     }
 
+    public static String performServerTemplatePost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+                                                   final String postURL, final String legalFormType, final File file, final String locale, final String dateFormat) {
+
+        final String importDocumentId=given().spec(requestSpec)
+                .queryParam("legalFormType",legalFormType)
+                .multiPart("file",file)
+                .formParam("locale",locale)
+                .formParam("dateFormat",dateFormat)
+                .expect().spec(responseSpec).
+                        log().ifError().when().post(postURL)
+                .andReturn().asString();
+        return importDocumentId;
+    }
+
+    public static String performServerOutputTemplateLocationGet(final RequestSpecification requestSpec,final ResponseSpecification responseSpec,
+                                                                final String getURL,final String importDocumentId){
+        final String templateLocation=given().spec(requestSpec).
+                queryParam("importDocumentId",importDocumentId)
+                .expect().spec(responseSpec)
+                .log().ifError().when().get(getURL)
+                .andReturn().asString();
+        return templateLocation.substring(1,templateLocation.length()-1);
+    }
 }
