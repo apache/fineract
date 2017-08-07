@@ -58,7 +58,9 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.PasswordValidationPolicy;
 import org.apache.fineract.useradministration.domain.PasswordValidationPolicyRepository;
 import org.apache.fineract.useradministration.domain.Role;
+import org.apache.fineract.useradministration.domain.RoleRepository;
 import org.apache.fineract.useradministration.domain.UserDomainService;
+import org.apache.fineract.useradministration.exception.RoleNotFoundException;
 import org.apache.fineract.useradministration.service.AppUserReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -85,6 +87,7 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
     private SmsMessageScheduledJobService smsMessageScheduledJobService;
     private final SmsCampaignDropdownReadPlatformService smsCampaignDropdownReadPlatformService;
     private final AppUserReadPlatformService appUserReadPlatformService;
+    private final RoleRepository roleRepository;
 
     @Autowired
     public SelfServiceRegistrationWritePlatformServiceImpl(final SelfServiceRegistrationRepository selfServiceRegistrationRepository,
@@ -94,7 +97,7 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
             final UserDomainService userDomainService, final GmailBackedPlatformEmailService gmailBackedPlatformEmailService,
             final SmsMessageRepository smsMessageRepository, SmsMessageScheduledJobService smsMessageScheduledJobService,
             final SmsCampaignDropdownReadPlatformService smsCampaignDropdownReadPlatformService,
-            final AppUserReadPlatformService appUserReadPlatformService) {
+            final AppUserReadPlatformService appUserReadPlatformService,final RoleRepository roleRepository) {
         this.selfServiceRegistrationRepository = selfServiceRegistrationRepository;
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.selfServiceRegistrationReadPlatformService = selfServiceRegistrationReadPlatformService;
@@ -106,6 +109,7 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
         this.smsMessageScheduledJobService = smsMessageScheduledJobService;
         this.smsCampaignDropdownReadPlatformService = smsCampaignDropdownReadPlatformService;
         this.appUserReadPlatformService = appUserReadPlatformService;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -262,6 +266,12 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
             final Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority("DUMMY_ROLE_NOT_USED_OR_PERSISTED_TO_AVOID_EXCEPTION"));
             final Set<Role> allRoles = new HashSet<>();
+            Role role = this.roleRepository.getRoleByName(SelfServiceApiConstants.SELF_SERVICE_USER_ROLE);
+            if(role != null){
+                allRoles.add(role);
+            }else{
+                throw new RoleNotFoundException(SelfServiceApiConstants.SELF_SERVICE_USER_ROLE);
+            }
             List<Client> clients = new ArrayList<>(Arrays.asList(client));
             User user = new User(selfServiceRegistration.getUsername(), selfServiceRegistration.getPassword(), authorities);
             AppUser appUser = new AppUser(client.getOffice(), user, allRoles, selfServiceRegistration.getEmail(), client.getFirstname(),
