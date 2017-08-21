@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.client.api;
 
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -35,12 +36,17 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataParam;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookPopulatorService;
+import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
@@ -72,6 +78,8 @@ public class ClientsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
+    private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
+    private final BulkImportWorkbookService bulkImportWorkbookService;
 
     @Autowired
     public ClientsApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
@@ -80,7 +88,9 @@ public class ClientsApiResource {
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
-            final SavingsAccountReadPlatformService savingsAccountReadPlatformService) {
+            final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
+            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService,
+            final BulkImportWorkbookService bulkImportWorkbookService) {
         this.context = context;
         this.clientReadPlatformService = readPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
@@ -89,6 +99,8 @@ public class ClientsApiResource {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
         this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
+        this.bulkImportWorkbookPopulatorService=bulkImportWorkbookPopulatorService;
+        this.bulkImportWorkbookService=bulkImportWorkbookService;
     }
 
     @GET
@@ -310,4 +322,22 @@ public class ClientsApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.clientAccountSummaryToApiJsonSerializer.serialize(settings, clientAccount, CLIENT_ACCOUNTS_DATA_PARAMETERS);
     }
+
+    @GET
+    @Path("bulkimporttemplate")
+    @Produces("application/vnd.ms-excel")
+    //@Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response getClientTemplate(@QueryParam("entityType")final String entityType ,@QueryParam("officeId")final Long officeId,@QueryParam("staffId")final Long staffId) {
+        return bulkImportWorkbookPopulatorService.getTemplate(entityType, officeId, staffId,null,
+                null,null,null,null,null,null,null);
+    }
+
+    @POST
+    @Path("bulkuploadtemplate")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response postClientTemplate(@QueryParam("entityType")final String entityType ,@FormDataParam("file") InputStream uploadedInputStream,
+            @FormDataParam("file") FormDataContentDisposition fileDetail){
+        return bulkImportWorkbookService.importWorkbook(entityType, uploadedInputStream,fileDetail);
+    }
+
 }
