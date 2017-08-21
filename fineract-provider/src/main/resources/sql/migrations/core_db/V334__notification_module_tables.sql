@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `notification_generator` (
   `notification_content` text,
   `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=15 ;
+);
 
 
 CREATE TABLE IF NOT EXISTS `notification_mapper` (
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS `notification_mapper` (
   PRIMARY KEY (`id`),
   KEY `notification_mapper` (`user_id`),
   KEY `notification_id` (`notification_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=15 ;
+);
 
 ALTER TABLE `notification_mapper`
   ADD CONSTRAINT `notification_mapper_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `m_appuser` (`id`),
