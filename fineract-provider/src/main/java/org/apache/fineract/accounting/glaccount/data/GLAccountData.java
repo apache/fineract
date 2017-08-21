@@ -62,6 +62,40 @@ public class GLAccountData {
     final Collection<CodeValueData> allowedIncomeTagOptions;
     final Collection<CodeValueData> allowedExpensesTagOptions;
 
+    //import fields
+    private transient Integer rowIndex;
+
+    public GLAccountData(String name, Long parentId, String glCode, Boolean manualEntriesAllowed,
+            EnumOptionData type, EnumOptionData usage, String description, CodeValueData tagId,
+            Integer rowIndex) {
+
+        this.name = name;
+        this.parentId = parentId;
+        this.glCode = glCode;
+        this.manualEntriesAllowed = manualEntriesAllowed;
+        this.type = type;
+        this.usage = usage;
+        this.description = description;
+        this.tagId = tagId;
+        this.rowIndex = rowIndex;
+        this.id = null;
+        this.disabled = null;
+        this.nameDecorated = null;
+        this.organizationRunningBalance = null;
+        this.accountTypeOptions = null;
+        this.usageOptions = null;
+        this.assetHeaderAccountOptions = null;
+        this.liabilityHeaderAccountOptions = null;
+        this.equityHeaderAccountOptions = null;
+        this.incomeHeaderAccountOptions = null;
+        this.expenseHeaderAccountOptions = null;
+        this.allowedAssetsTagOptions = null;
+        this.allowedLiabilitiesTagOptions = null;
+        this.allowedEquityTagOptions = null;
+        this.allowedIncomeTagOptions = null;
+        this.allowedExpensesTagOptions = null;
+    }
+
     public GLAccountData(final Long id, final String name, final Long parentId, final String glCode, final boolean disabled,
             final boolean manualEntriesAllowed, final EnumOptionData type, final EnumOptionData usage, final String description,
             final String nameDecorated, final CodeValueData tagId, final Long organizationRunningBalance) {
@@ -89,6 +123,13 @@ public class GLAccountData {
         this.allowedEquityTagOptions = null;
         this.allowedIncomeTagOptions = null;
         this.allowedExpensesTagOptions = null;
+    }
+    public CodeValueData getTagId() {
+        return tagId;
+    }
+
+    public Integer getRowIndex() {
+        return rowIndex;
     }
 
     public GLAccountData(final GLAccountData accountData, final List<EnumOptionData> accountTypeOptions,
