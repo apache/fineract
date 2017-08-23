@@ -18,13 +18,25 @@
  */
 package org.apache.fineract.notification.service;
 
-import java.util.List;
+import org.apache.fineract.notification.domain.TopicSubscriber;
+import org.apache.fineract.notification.domain.TopicSubscriberRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-public interface NotificationWritePlatformService {
-    Long notify(Long userId, String objectType, Long objectId, String action,
-                Long actorId, String notificationContent, boolean isSystemGenerated);
+@Service
+public class TopicSubscriberWritePlatformServiceJpaRepositoryImpl implements TopicSubscriberWritePlatformService {
 
-    Long notify(List<Long> userIds, String objectType, Long objectId, String action,
-                Long actorId, String notificationContent, boolean isSystemGenerated);
+private final TopicSubscriberRepository topicSubscriberRepository;
+	
+	@Autowired
+	public TopicSubscriberWritePlatformServiceJpaRepositoryImpl(TopicSubscriberRepository topicSubscriberRepository) {
+		this.topicSubscriberRepository = topicSubscriberRepository;
+	}
+	
+	@Override
+	public Long create(TopicSubscriber topicSubscriber) {
+		topicSubscriberRepository.save(topicSubscriber);
+		return topicSubscriber.getId();
+	}
 
 }
