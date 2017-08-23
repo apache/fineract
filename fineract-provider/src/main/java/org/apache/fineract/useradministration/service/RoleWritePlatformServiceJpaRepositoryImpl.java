@@ -20,6 +20,7 @@ package org.apache.fineract.useradministration.service;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.PersistenceException;
@@ -30,6 +31,10 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.notification.domain.Topic;
+import org.apache.fineract.notification.domain.TopicRepository;
+import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.organisation.office.domain.OfficeRepository;
 import org.apache.fineract.useradministration.command.PermissionsCommand;
 import org.apache.fineract.useradministration.domain.Permission;
 import org.apache.fineract.useradministration.domain.PermissionRepository;
@@ -55,18 +60,23 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     private final PlatformSecurityContext context;
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
+    private final TopicRepository topicRepository;
+    private final OfficeRepository officeRepository;
     private final RoleDataValidator roleCommandFromApiJsonDeserializer;
     private final PermissionsCommandFromApiJsonDeserializer permissionsFromApiJsonDeserializer;
 
     @Autowired
     public RoleWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final RoleRepository roleRepository,
             final PermissionRepository permissionRepository, final RoleDataValidator roleCommandFromApiJsonDeserializer,
-            final PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+            final PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer, TopicRepository topicRepository,
+            final OfficeRepository officeRepository) {
         this.context = context;
         this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
         this.roleCommandFromApiJsonDeserializer = roleCommandFromApiJsonDeserializer;
         this.permissionsFromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.topicRepository = topicRepository;
+        this.officeRepository = officeRepository;
     }
 
     @Transactional
@@ -78,10 +88,22 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
             this.roleCommandFromApiJsonDeserializer.validateForCreate(command.json());
 
-            final Role entity = Role.fromJson(command);
-            this.roleRepository.save(entity);
+            final Role role = Role.fromJson(command);
+            List<Office> offices = officeRepository.findAll();
+            for (Office office : offices) {
+            	String entityType = "";
+            	if (office.getParent() == null) {
+            		entityType = "OFFICE";
+            	} else {
+            		entityType = "BRANCH";
+            	}
+            	String title = role.getName() + " of " + office.getName();
+            	Topic newTopic = new Topic(title, true, office.getId(), entityType, role.getName().toUpperCase());
+            	topicRepository.save(newTopic);
+            }
+            this.roleRepository.save(role);
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(entity.getId()).build();
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(role.getId()).build();
         } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return new CommandProcessingResultBuilder() //
@@ -129,8 +151,22 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
             final Role role = this.roleRepository.findOne(roleId);
             if (role == null) { throw new RoleNotFoundException(roleId); }
-
+            
+            String oldMemberType = role.getName().toUpperCase();
             final Map<String, Object> changes = role.update(command);
+            
+            if (changes.containsKey("name")) {
+            	String newMemberType = (String) changes.get("name");
+            	List<Topic> entityTopics = topicRepository.findByMemberType(oldMemberType);
+            	for (Topic topic : entityTopics) {
+            		Office office = officeRepository.findOne(topic.getEntityId());
+            		String title = role.getName() + " of " + office.getName();
+            		topic.setTitle(title);
+	            	topic.setMemberType(newMemberType.toUpperCase());
+	            	topicRepository.save(topic);
+            	}
+            }
+            
             if (!changes.isEmpty()) {
                 this.roleRepository.saveAndFlush(role);
             }
@@ -222,6 +258,10 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             final Integer count = this.roleRepository.getCountOfRolesAssociatedWithUsers(roleId);
             if (count > 0) { throw new RoleAssociatedException("error.msg.role.associated.with.users.deleted", roleId); }
             
+            List<Topic> topics = topicRepository.findByMemberType(role.getName().toUpperCase());
+            for (Topic topic : topics) {
+            	topicRepository.delete(topic);
+            }
             this.roleRepository.delete(role);
             return new CommandProcessingResultBuilder().withEntityId(roleId).build();
         } catch (final DataIntegrityViolationException e) {

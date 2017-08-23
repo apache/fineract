@@ -16,34 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.notification.cache;
+package org.apache.fineract.notification.exception;
 
-public class CacheNotificationResponseHeader {
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-    private boolean hasNotifications;
-    private Long lastFetch;
+/**
+ * A {@link RuntimeException} thrown when topic resources are not found.
+ */
+public class TopicNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public CacheNotificationResponseHeader() {
-    }
+	public TopicNotFoundException(final Long id) {
+		super("error.msg.topic.id.invalid", "Topic with identifier " + id + " does not exist", id);
+	}
 
-    public CacheNotificationResponseHeader(boolean hasNotifications, Long lastFetch) {
-        this.hasNotifications = hasNotifications;
-        this.lastFetch = lastFetch;
-    }
-
-    public boolean hasNotifications() {
-        return hasNotifications;
-    }
-
-    public void setHasNotifications(boolean hasNotifications) {
-        this.hasNotifications = hasNotifications;
-    }
-
-    public Long getLastFetch() {
-        return lastFetch;
-    }
-
-    public void setLastFetch(Long lastFetch) {
-        this.lastFetch = lastFetch;
-    }
 }

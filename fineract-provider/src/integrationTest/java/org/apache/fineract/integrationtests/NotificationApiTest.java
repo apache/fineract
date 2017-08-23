@@ -1,5 +1,3 @@
-package org.apache.fineract.integrationtests;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -18,7 +16,7 @@ package org.apache.fineract.integrationtests;
  * specific language governing permissions and limitations
  * under the License.
  */
-
+package org.apache.fineract.integrationtests;
 
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
@@ -54,4 +52,5 @@ public class NotificationApiTest {
         System.out.println("Response : " + response.toString());
         Assert.assertNotNull(response);
     }
+
 }

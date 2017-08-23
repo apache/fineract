@@ -16,34 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.notification.cache;
+package org.apache.fineract.notification.service;
 
-public class CacheNotificationResponseHeader {
+import org.apache.fineract.notification.domain.Topic;
+import org.apache.fineract.notification.domain.TopicRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-    private boolean hasNotifications;
-    private Long lastFetch;
+@Service
+public class TopicWritePlatformServiceJpaRepositoryImpl implements TopicWritePlatformService {
 
-    public CacheNotificationResponseHeader() {
-    }
+	private final TopicRepository topicRepository;
+	
+	@Autowired
+	public TopicWritePlatformServiceJpaRepositoryImpl(TopicRepository topicRepository) {
+		this.topicRepository = topicRepository;
+	}
 
-    public CacheNotificationResponseHeader(boolean hasNotifications, Long lastFetch) {
-        this.hasNotifications = hasNotifications;
-        this.lastFetch = lastFetch;
-    }
+	@Override
+	public Long create(Topic topic) {
+		topicRepository.save(topic);
+		return topic.getId();
+	}
 
-    public boolean hasNotifications() {
-        return hasNotifications;
-    }
-
-    public void setHasNotifications(boolean hasNotifications) {
-        this.hasNotifications = hasNotifications;
-    }
-
-    public Long getLastFetch() {
-        return lastFetch;
-    }
-
-    public void setLastFetch(Long lastFetch) {
-        this.lastFetch = lastFetch;
-    }
 }
