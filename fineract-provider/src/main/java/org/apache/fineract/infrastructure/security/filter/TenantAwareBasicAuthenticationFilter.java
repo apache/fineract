@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.time.StopWatch;
+import org.apache.fineract.notification.service.NotificationReadPlatformService;
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 import org.apache.fineract.infrastructure.cache.service.CacheWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -78,6 +79,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
     private final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer;
     private final ConfigurationDomainService configurationDomainService;
     private final CacheWritePlatformService cacheWritePlatformService;
+
     private final NotificationReadPlatformService notificationReadPlatformService;
     private final String tenantRequestHeader = "Fineract-Platform-TenantId";
     private final boolean exceptionIfHeaderMissing = true;
@@ -176,6 +178,12 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
         } else {
             response.addHeader("X-Notification-Refresh", "false");
         }
+		
+		if(notificationReadPlatformService.hasUnreadNotifications(user.getId())) {
+			response.addHeader("X-Notification-Refresh", "true");
+		} else {
+			response.addHeader("X-Notification-Refresh", "false");
+		}
 		
 		String pathURL = request.getRequestURI();
 		boolean isSelfServiceRequest = (pathURL != null && pathURL.contains("/self/"));

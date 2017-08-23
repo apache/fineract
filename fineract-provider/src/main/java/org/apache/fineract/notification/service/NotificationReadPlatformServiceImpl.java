@@ -61,16 +61,12 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
                 Long lastFetch = notificationResponseHeaderCache.get(appUserId).getLastFetch();
                 if ((now - lastFetch) > 1) {
                     return this.createUpdateCacheValue(appUserId, now, notificationResponseHeaderCache);
-                } else {
-                    return notificationResponseHeaderCache.get(appUserId).hasNotifications();
                 }
-            } else {
-                return this.createUpdateCacheValue(appUserId, now, notificationResponseHeaderCache);
+				return notificationResponseHeaderCache.get(appUserId).hasNotifications();
             }
-        } else {
-            return this.initializeTenantNotificationResponseHeaderCache(tenantId, now, appUserId);
-
+			return this.createUpdateCacheValue(appUserId, now, notificationResponseHeaderCache);
         }
+		return this.initializeTenantNotificationResponseHeaderCache(tenantId, now, appUserId);
     }
 
     private boolean initializeTenantNotificationResponseHeaderCache(Long tenantId, Long now, Long appUserId) {

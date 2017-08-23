@@ -20,9 +20,7 @@ package org.apache.fineract.notification.domain;
 
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "notification_generator")
@@ -90,7 +88,7 @@ public class Notification extends AbstractPersistableCustom<Long> {
         return actorId;
     }
 
-    public void setActor(Long actor) {
+    public void setActor(Long actorId) {
         this.actorId = actorId;
     }
 
