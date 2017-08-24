@@ -217,6 +217,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
     }
     
+
+    
     @Override
     public LoanAccountData retrieveLoanByLoanAccount(String loanAccountNumber)
     {
@@ -230,6 +232,23 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanAccountNumber });
+       
+    }
+    
+    @Override
+    public List<LoanAccountData> retrieveGLIMChildLoansByGLIMParentAccount(String parentloanAccountNumber)
+    {
+
+       
+            //final AppUser currentUser = this.context.authenticatedUser();
+    		this.context.authenticatedUser();
+            final LoanMapper rm = new LoanMapper();
+
+            String sql="select "+rm.loanSchema()+" left join glim_parent_child_mapping as glim on glim.glim_child_account_id=l.account_no "+
+                   "where glim.glim_parent_account_id=?"; 
+            
+
+            return this.jdbcTemplate.query(sql, rm, new Object[] { parentloanAccountNumber });
        
     }
 
@@ -275,6 +294,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             return null;
         }
     }
+    
 
     @Override
     public Page<LoanAccountData> retrieveAll(final SearchParameters searchParameters) {
@@ -1523,6 +1543,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final String sql = "select " + rm.schema() + " where dd.loan_id=? group by dd.id order by dd.expected_disburse_date";
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
     }
+  
 
     private static final class LoanDisbursementDetailMapper implements RowMapper<DisbursementData> {
 
@@ -1562,6 +1583,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final String sql = "select " + rm.schema() + " where tv.loan_id=? and tv.term_type=?";
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanId, termType });
     }
+    
+  
 
     private static final class LoanTermVariationsMapper implements RowMapper<LoanTermVariationsData> {
 

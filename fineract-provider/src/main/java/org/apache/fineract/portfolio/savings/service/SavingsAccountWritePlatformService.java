@@ -104,4 +104,6 @@ public interface SavingsAccountWritePlatformService {
     CommandProcessingResult unblockDebits(Long savingsId);
 
     CommandProcessingResult releaseAmount(Long savingsId, Long transactionId);
+
+	CommandProcessingResult gsimActivate(Long gsimId, JsonCommand command);
 }

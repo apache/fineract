@@ -31,6 +31,7 @@ public interface LoanApiConstants {
     public static final String loanChargeIdParameterName = "loanChargeId";
     public static final String principalDisbursedParameterName = "transactionAmount";
     public static final String chargesParameterName = "charges";
+    public static final String loanIdTobeApproved="loanId";
 
     public static final String approvedLoanAmountParameterName = "approvedLoanAmount";
     public static final String approvedOnDateParameterName = "approvedOnDate";
@@ -109,6 +110,8 @@ public interface LoanApiConstants {
     public static final String dueDateParamName = "dueDate";
     public static final String modifiedDueDateParamName = "modifiedDueDate";
     public static final String principalParamName = "principal";
+    public static final String parentAccountParamName="isParentAccount";
+    public static final String totalLoanParamName="totalLoan";
     public static final String installmentAmountParamName = "installmentAmount";
     //loan write off
     public static final String WRITEOFFREASONS = "WriteOffReasons";
