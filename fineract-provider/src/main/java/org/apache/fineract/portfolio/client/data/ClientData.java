@@ -21,6 +21,8 @@ package org.apache.fineract.portfolio.client.data;
 import java.util.Collection;
 import java.util.List;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -62,17 +64,22 @@ final public class ClientData implements Comparable<ClientData> {
     private final CodeValueData gender;
     private final CodeValueData clientType;
     private final CodeValueData clientClassification;
-	private final Boolean isStaff;
+    private final Boolean isStaff;
 
+    @ApiModelProperty(required = true, hidden = false, dataType = "long")
     private final Long officeId;
+
     private final String officeName;
     private final Long transferToOfficeId;
     private final String transferToOfficeName;
 
+    @ApiModelProperty(required = false, hidden = true)
     private final Long imageId;
+    @ApiModelProperty(required = false, hidden = true)
     private final Boolean imagePresent;
     private final Long staffId;
     private final String staffName;
+    @ApiModelProperty(required = false, hidden = true)
     private final ClientTimelineData timeline;
 
     private final Long savingsProductId;
@@ -421,14 +428,17 @@ final public class ClientData implements Comparable<ClientData> {
         return this.officeName;
     }
 
+    @ApiModelProperty(required = false, hidden = true)
     public Long getImageId() {
         return this.imageId;
     }
 
+    @ApiModelProperty(required = false, hidden = true)
     public Boolean getImagePresent() {
         return this.imagePresent;
     }
 
+    @ApiModelProperty(required = false, hidden = true)
     public ClientTimelineData getTimeline() {
         return this.timeline;
     }
@@ -483,4 +493,48 @@ final public class ClientData implements Comparable<ClientData> {
     public Boolean getIsAddressEnabled() {
 		return this.isAddressEnabled;
 	}
+
+
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getFullname() {
+        return fullname;
+    }
+
+    public CodeValueData getGender() {
+        return gender;
+    }
+
+    @ApiModelProperty(required = false, hidden = false)
+    public Boolean getStaff() {
+        return isStaff;
+    }
+    @ApiModelProperty(required = true, hidden = false)
+    public Long getOfficeId() {
+        return officeId;
+    }
+    @ApiModelProperty(required = true, hidden = false)
+    public AddressData getAddress() {
+        return address;
+    }
+    @ApiModelProperty(required = true, hidden = false)
+    public Boolean getAddressEnabled() {
+        return isAddressEnabled;
+    }
+
+    public String getAccountNo() {
+        return accountNo;
+    }
+    @ApiModelProperty(required = true, hidden = false)
+    public String getMiddlename() {
+        return middlename;
+    }
+    @ApiModelProperty(required = true, hidden = false)
+    public Boolean getActive() {
+        return active;
+    }
 }

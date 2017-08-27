@@ -29,6 +29,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.*;
 import org.apache.fineract.accounting.provisioning.constant.ProvisioningEntriesApiConstants;
 import org.apache.fineract.accounting.provisioning.data.LoanProductProvisioningEntryData;
 import org.apache.fineract.accounting.provisioning.data.ProvisioningEntryData;
@@ -55,6 +56,7 @@ import java.util.Set;
 @Path("/provisioningentries")
 @Component
 @Scope("singleton")
+@Api(value = "Provisioning Entries", description = "This defines the Provisioning Entries for all active loan products\n" + "\n" + "Field Descriptions\n" + "date\n" + "Date on which day provisioning entries should be created\n" + "createjournalentries\n" + "Boolean variable whether to add journal entries for generated provisioning entries\n")
 public class ProvisioningEntriesApiResource {
 
     private final PlatformSecurityContext platformSecurityContext;
@@ -84,7 +86,10 @@ public class ProvisioningEntriesApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createProvisioningEntries(final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Create new Provisioning Entries", notes = "Creates a new Provisioning Entries\n" + "\n" + "Mandatory Fields\n" + "date\n" + "dateFormat\n" + "locale\n" + "Optional Fields\n" + "createjournalentries")
+    @ApiImplicitParams({@ApiImplicitParam(paramType = "body", value = "body", dataType = "body", dataTypeClass = ProvisioningEntriesApiResourceSwagger.PostProvisioningEntriesRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = ProvisioningEntriesApiResourceSwagger.PostProvisioningEntriesResponse.class)})
+    public String createProvisioningEntries(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         CommandWrapper commandWrapper = null;
         this.platformSecurityContext.authenticatedUser();
         commandWrapper = new CommandWrapperBuilder().createProvisioningEntries().withJson(apiRequestBodyAsJson).build();
@@ -96,8 +101,11 @@ public class ProvisioningEntriesApiResource {
     @Path("{entryId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String modifyProvisioningEntry(@PathParam("entryId") final Long entryId, @QueryParam("command") final String commandParam,
-            final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Recreates Provisioning Entry", notes = "Recreates Provisioning Entry | createjournalentry.")
+    @ApiImplicitParams({@ApiImplicitParam(paramType = "body", value = "body", dataType = "body", dataTypeClass = ProvisioningEntriesApiResourceSwagger.PutProvisioningEntriesRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = ProvisioningEntriesApiResourceSwagger.PutProvisioningEntriesResponse.class)})
+    public String modifyProvisioningEntry(@PathParam("entryId") @ApiParam(value = "entryId") final Long entryId, @QueryParam("command") @ApiParam(value = "command=createjournalentry\ncommand=recreateprovisioningentry") final String commandParam,
+           @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         CommandWrapper commandWrapper = null;
         this.platformSecurityContext.authenticatedUser();
         if ("createjournalentry".equals(commandParam)) {
@@ -118,7 +126,9 @@ public class ProvisioningEntriesApiResource {
     @Path("{entryId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveProvisioningEntry(@PathParam("entryId") final Long entryId, @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "Retrieves a Provisioning Entry", notes = "Returns the details of a generated Provisioning Entry.")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = ProvisioningEntryData.class)})
+    public String retrieveProvisioningEntry(@PathParam("entryId") @ApiParam(value = "entryId") final Long entryId, @Context final UriInfo uriInfo) {
         platformSecurityContext.authenticatedUser();
         ProvisioningEntryData data = this.provisioningEntriesReadPlatformService.retrieveProvisioningEntryData(entryId);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -129,6 +139,7 @@ public class ProvisioningEntriesApiResource {
     @Path("entries")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = LoanProductProvisioningEntryData.class)})
     public String retrieveProviioningEntries(@QueryParam("entryId") final Long entryId, @QueryParam("offset") final Integer offset,
             @QueryParam("limit") final Integer limit, @QueryParam("officeId") final Long officeId,
             @QueryParam("productId") final Long productId, @QueryParam("categoryId") final Long categoryId, @Context final UriInfo uriInfo) {
@@ -142,7 +153,9 @@ public class ProvisioningEntriesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllProvisioningEntries(@QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
+    @ApiOperation(value = "List all Provisioning Entries")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = ProvisioningEntryData.class, responseContainer = "list")})
+    public String retrieveAllProvisioningEntries(@QueryParam("offset") @ApiParam(value = "offset") final Integer offset, @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
             @Context final UriInfo uriInfo) {
         platformSecurityContext.authenticatedUser();
         Page<ProvisioningEntryData> data = this.provisioningEntriesReadPlatformService.retrieveAllProvisioningEntries(offset, limit);

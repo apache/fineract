@@ -35,6 +35,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.*;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -46,6 +47,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.useradministration.data.AppUserData;
+import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.service.AppUserReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -56,6 +58,7 @@ import org.springframework.stereotype.Component;
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
 @Scope("singleton")
+@Api(value = "Users", description = "An API capability to support administration of application users.")
 public class UsersApiResource {
 
     /**
@@ -88,6 +91,8 @@ public class UsersApiResource {
     }
 
     @GET
+    @ApiOperation(value = "Retrieve list of users", notes = "Example Requests:\n" + "\n" + "users\n" + "\n" + "\n" + "users?fields=id,username,email,officeName")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.GetUsersResponse.class, responseContainer = "List")})
     public String retrieveAll(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
@@ -100,7 +105,9 @@ public class UsersApiResource {
 
     @GET
     @Path("{userId}")
-    public String retrieveOne(@PathParam("userId") final Long userId, @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "Retrieve a User", notes = "Example Requests:\n" + "\n" + "users/1\n" + "\n" + "\n" + "users/1?template=true\n" + "\n" + "\n" + "users/1?fields=username,officeName")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.GetUsersUserIdResponse.class)})
+    public String retrieveOne(@PathParam("userId") @ApiParam(value = "userId") final Long userId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions, userId);
 
@@ -117,6 +124,8 @@ public class UsersApiResource {
 
     @GET
     @Path("template")
+    @ApiOperation(value = "Retrieve User Details Template", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "users/template")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.GetUsersTemplateResponse.class)})
     public String template(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
@@ -128,7 +137,10 @@ public class UsersApiResource {
     }
 
     @POST
-    public String create(final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Create a User", notes = "Adds new application user.\n" + "\n" + "Note: Password information is not required (or processed). Password details at present are auto-generated and then sent to the email account given (which is why it can take a few seconds to complete).\n" + "\n" + "Mandatory Fields: \n" + "username, firstname, lastname, email, officeId, roles, sendPasswordToEmail\n" + "\n" + "Optional Fields: \n" + "staffId,passwordNeverExpires,isSelfServiceUser,clients")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = UsersApiResourceSwagger.PostUsersRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.PostUsersResponse.class)})
+    public String create(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createUser() //
@@ -142,7 +154,10 @@ public class UsersApiResource {
 
     @PUT
     @Path("{userId}")
-    public String update(@PathParam("userId") final Long userId, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Update a User", notes = "When updating a password you must provide the repeatPassword parameter also.")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = UsersApiResourceSwagger.PutUsersUserIdRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.PutUsersUserIdResponse.class)})
+    public String update(@PathParam("userId") @ApiParam(value = "userId") final Long userId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateUser(userId) //
@@ -156,7 +171,9 @@ public class UsersApiResource {
 
     @DELETE
     @Path("{userId}")
-    public String delete(@PathParam("userId") final Long userId) {
+    @ApiOperation(value = "Delete a User", notes = "Removes the user and the associated roles and permissions.")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = UsersApiResourceSwagger.DeleteUsersUserIdResponse.class)})
+    public String delete(@PathParam("userId") @ApiParam(value = "userId") final Long userId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .deleteUser(userId) //

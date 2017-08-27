@@ -3,4 +3,5 @@
 *.war
 *.ear
 .gradle
+.idea
 build
