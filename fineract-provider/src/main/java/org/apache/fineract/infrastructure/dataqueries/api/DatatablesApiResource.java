@@ -33,6 +33,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.*;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -55,6 +56,7 @@ import org.springframework.stereotype.Component;
 @Path("/datatables")
 @Component
 @Scope("singleton")
+@Api(value = "Data Tables", description = "The datatables API allows you to plug-in your own tables (MySql) that have a relationship to a Apache Fineract core table. For example, you might want to add some extra client fields and record information about each of the clients' family members. Via the API you can create, read, update and delete entries for each 'plugged-in' table. The API checks for permission and for 'data scoping' (only data within the users' office hierarchy can be managed by the user).\n" + "\n" + "The Apache Fineract Reference App uses a JQuery plug-in called stretchydatatables (which in turn uses this datatables resource) to provide a pretty flexible CRUD (Create, Read, Update, Delete) User Interface.")
 public class DatatablesApiResource {
 
     private final PlatformSecurityContext context;
@@ -79,7 +81,10 @@ public class DatatablesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String getDatatables(@QueryParam("apptable") final String apptable, @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "List Data Tables", notes = "Lists registered data tables and the Apache Fineract Core application table they are registered to.\n" + "\n" + "ARGUMENTS\n" + "\n" + "apptable  - optional" + "\n"+ "The Apache Fineract core application table.\n" + "\n" + "Example Requests:\n" + "\n" + "datatables?apptable=m_client\n" + "\n" + "\n" + "datatables",
+    responseContainer = "List", response = DatatablesApiResourceSwagger.GetDataTablesResponse.class)
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = DatatablesApiResourceSwagger.GetDataTablesResponse.class, responseContainer = "list")})
+    public String getDatatables(@QueryParam("apptable") @ApiParam(value = "apptable") final String apptable, @Context final UriInfo uriInfo) {
 
         final List<DatatableData> result = this.readWriteNonCoreDataService.retrieveDatatableNames(apptable);
 
@@ -90,7 +95,13 @@ public class DatatablesApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createDatatable(final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Create Data Table", notes = "Create a new data table and registers it with the Apache Fineract Core application table.\n" + "\n" + "Field Descriptions\n" + "\n" + "Mandatory - datatableName : \n"+ "\nThe name of the Data Table.\n" + "\n" + "Mandatory - apptableName\n" + "\n" + "Application table name. Must be one of the following:\n" + "\n" + "m_client\n" + "\n" + "m_group" +"\n" + "\n" + "m_loan" + "\n" + "\n" + "m_office" + "\n" + "\n" + "m_saving_account" + "\n" + "\n" + "m_product_loan" + "\n" + "\n" + "m_savings_product" + "\n" + "\n" + "Mandatory - columns  " + "\n" + "An array of columns in the new Data Table." + "\n" + "\n" + "Optional - multiRow" + "\n" +
+            "\n" + "Allows to create multiple entries in the Data Table. Optional, defaults to false. If this property is not provided Data Table will allow only one entry." + "\n" + "\n" + "Field Descriptions - columns" + "\n" + "\n" + "Mandatory - name" + "\n" + "\n" + "Name of the created column. Can contain only alphanumeric characters, underscores and spaces, but cannot start with a number. Cannot start or end with an underscore or space." + "\n" + "\n" + "Mandatory - type" + "\n" + "\n" + "Column type. Must be one of the following:" + "\n" + "\n" + "Boolean" + "\n" + "\n" + "Date" + "\n" + "\n" + "DateTime" + "\n" + "\n" + "Decimal" + "\n" + "\n" + "Dropdown" + "\n" +
+            "\n" + "\n" + "Number" + "\n" + "\n" + "String" + "\n" + "\n" + "Text" + "\n" + "\n" + "Mandatory [type = Dropdown] - code" + "\n" + "\n" + "Used in Code Value fields. Column name becomes: code_cd_name. Mandatory if using type Dropdown, otherwise an error is returned." + "\n" + "\n" + "Optional - mandatory" + "\n" + "\n" +
+            "Determines whether this column must have a value in every entry. Optional, defaults to false." + "\n" + "\n" + "Mandatory [type = String] - length" + "\n" + "\n" + "Length of the text field. Mandatory if type String is used, otherwise an error is returned.")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = DatatablesApiResourceSwagger.PostDataTablesRequest.class )})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = DatatablesApiResourceSwagger.PostDataTablesResponse.class)})
+    public String createDatatable(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createDBDatatable(apiRequestBodyAsJson).build();
 
@@ -102,7 +113,10 @@ public class DatatablesApiResource {
     @Path("{datatableName}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateDatatable(@PathParam("datatableName") final String datatableName, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Update Data Table", notes = "Modifies fields of a data table. If the apptableName parameter is passed, data table is deregistered and registered with the new application table.")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = DatatablesApiResourceSwagger.PutDataTablesRequest.class )})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = DatatablesApiResourceSwagger.PutDataTablesResponse.class)})
+    public String updateDatatable(@PathParam("datatableName") @ApiParam(value = "datatableName") final String datatableName, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateDBDatatable(datatableName, apiRequestBodyAsJson).build();
 
@@ -114,7 +128,9 @@ public class DatatablesApiResource {
     @Path("{datatableName}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteDatatable(@PathParam("datatableName") final String datatableName, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Delete Data Table", notes = "Deletes a data table and deregisters it from the Apache Fineract Core application table.")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = DatatablesApiResourceSwagger.DeleteDataTablesResponse.class)})
+    public String deleteDatatable(@PathParam("datatableName") @ApiParam(value = "datatableName") final String datatableName, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteDBDatatable(datatableName, apiRequestBodyAsJson).build();
 
@@ -126,8 +142,11 @@ public class DatatablesApiResource {
     @Path("register/{datatable}/{apptable}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String registerDatatable(@PathParam("datatable") final String datatable, @PathParam("apptable") final String apptable,
-            final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Register Data Table", notes = "Registers a data table with the Apache Fineract Core application table. This allows the data table to be maintained through the API. In case the datatable is a PPI (survey table), a parameter category should be pass along with the request. The API currently support one category (200)")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", paramType = "body", dataType = "body", format = "body", dataTypeClass = DatatablesApiResourceSwagger.PostDataTablesRegisterDatatableAppTable.class )})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = DatatablesApiResourceSwagger.PutDataTablesResponse.class)})
+    public String registerDatatable(@PathParam("datatable") @ApiParam(value = "datatable") final String datatable, @PathParam("apptable") @ApiParam(value = "apptable") final String apptable,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().registerDBDatatable(datatable, apptable)
                 .withJson(apiRequestBodyAsJson).build();
@@ -141,7 +160,9 @@ public class DatatablesApiResource {
     @Path("deregister/{datatable}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deregisterDatatable(@PathParam("datatable") final String datatable) {
+    @ApiOperation(value = "Deregister Data Table", notes = "Deregisters a data table. It will no longer be available through the API.")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = DatatablesApiResourceSwagger.PutDataTablesResponse.class)})
+    public String deregisterDatatable(@PathParam("datatable") @ApiParam(value = "datatable") final String datatable) {
 
         this.readWriteNonCoreDataService.deregisterDatatable(datatable);
 
@@ -154,7 +175,9 @@ public class DatatablesApiResource {
     @Path("{datatable}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String getDatatable(@PathParam("datatable") final String datatable, @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "Retrieve Data Table Details", notes = "Lists a registered data table details and the Apache Fineract Core application table they are registered to.")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = DatatablesApiResourceSwagger.GetDataTablesResponse.class)})
+    public String getDatatable(@PathParam("datatable") @ApiParam(value = "datatable") final String datatable, @Context final UriInfo uriInfo) {
 
         final DatatableData result = this.readWriteNonCoreDataService.retrieveDatatable(datatable);
 
@@ -166,8 +189,10 @@ public class DatatablesApiResource {
     @Path("{datatable}/{apptableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String getDatatable(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
-            @QueryParam("order") final String order, @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "Retrieve Entry(s) from Data Table", notes = "Gets the entry (if it exists) for data tables that are one to one with the application table. \n" + "Gets the entries (if they exist) for data tables that are one to many with the application table.\n" + "\n" + "Note: The 'fields' parameter is not available for datatables.\n" + "\n" + "ARGUMENTS\n" + "orderoptional Specifies the order in which data is returned.genericResultSetoptional, defaults to false If 'true' an optimised JSON format is returned suitable for tabular display of data. This format is used by the default data tables UI functionality.\n" + "Example Requests:\n" + "\n" + "datatables/extra_client_details/1\n" + "\n" + "\n" + "datatables/extra_family_details/1?order=`Date of Birth` desc\n" + "\n" + "\n" + "datatables/extra_client_details/1?genericResultSet=true")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = DatatablesApiResourceSwagger.GetDataTablesAppTableIdResponse.class)})
+    public String getDatatable(@PathParam("datatable") @ApiParam(value = "datatable") final String datatable, @PathParam("apptableId") @ApiParam(value = "apptableId") final Long apptableId,
+            @QueryParam("order") @ApiParam(value = "order") final String order, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasDatatableReadPermission(datatable);
 
@@ -216,8 +241,11 @@ public class DatatablesApiResource {
     @Path("{datatable}/{apptableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createDatatableEntry(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
-            final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Create Entry in Data Table", notes = "Adds a row to the data table.\n" + "\n" + "Note that the default datatable UI functionality converts any field name containing spaces to underscores when using the API. This means the field name \"Business Description\" is considered the same as \"Business_Description\". So you shouldn't have both \"versions\" in any data table.")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = DatatablesApiResourceSwagger.PostDataTablesAppTableIdRequest.class )})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = DatatablesApiResourceSwagger.PostDataTablesAppTableIdResponse.class)})
+    public String createDatatableEntry(@PathParam("datatable") @ApiParam(value = "datatable") final String datatable, @PathParam("apptableId") @ApiParam(value = "apptableId") final Long apptableId,
+                                       @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createDatatable(datatable, apptableId, null) //
@@ -233,8 +261,11 @@ public class DatatablesApiResource {
     @Path("{datatable}/{apptableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateDatatableEntryOnetoOne(@PathParam("datatable") final String datatable,
-            @PathParam("apptableId") final Long apptableId, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Update Entry in Data Table (One to One)", notes = "Updates the row (if it exists) of the data table.")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = DatatablesApiResourceSwagger.PutDataTablesAppTableIdRequest.class )})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = DatatablesApiResourceSwagger.PutDataTablesAppTableIdResponse.class)})
+    public String updateDatatableEntryOnetoOne(@PathParam("datatable") @ApiParam(value = "datatable") final String datatable,
+            @PathParam("apptableId") @ApiParam(value = "apptableId") final Long apptableId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateDatatable(datatable, apptableId, null) //
@@ -250,9 +281,12 @@ public class DatatablesApiResource {
     @Path("{datatable}/{apptableId}/{datatableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateDatatableEntryOneToMany(@PathParam("datatable") final String datatable,
-            @PathParam("apptableId") final Long apptableId, @PathParam("datatableId") final Long datatableId,
-            final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Update Entry in Data Table (One to Many)", notes = "Updates the row (if it exists) of the data table.")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = DatatablesApiResourceSwagger.PutDataTablesAppTableIdDatatableIdRequest.class )})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = DatatablesApiResourceSwagger.PutDataTablesAppTableIdDatatableIdResponse.class)})
+    public String updateDatatableEntryOneToMany(@PathParam("datatable") @ApiParam(value = "datatable") final String datatable,
+            @PathParam("apptableId") @ApiParam(value = "apptableId") final Long apptableId, @PathParam("datatableId") @ApiParam(value = "datatableId") final Long datatableId,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateDatatable(datatable, apptableId, datatableId) //
@@ -268,7 +302,9 @@ public class DatatablesApiResource {
     @Path("{datatable}/{apptableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteDatatableEntries(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId) {
+    @ApiOperation(value = "Delete Entry(s) in Data Table", notes = "Deletes the entry (if it exists) for data tables that are one-to-one with the application table. \n" + "Deletes the entries (if they exist) for data tables that are one-to-many with the application table.")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = DatatablesApiResourceSwagger.DeleteDataTablesDatatableAppTableIdResponse.class)})
+    public String deleteDatatableEntries(@PathParam("datatable") @ApiParam(value = "datatable") final String datatable, @PathParam("apptableId") @ApiParam(value = "apptableId") final Long apptableId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .deleteDatatable(datatable, apptableId, null) //
@@ -283,8 +319,10 @@ public class DatatablesApiResource {
     @Path("{datatable}/{apptableId}/{datatableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteDatatableEntries(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
-            @PathParam("datatableId") final Long datatableId) {
+    @ApiOperation(value = "Delete Entry in Datatable (One to Many)", notes = "Deletes the entry (if it exists) for data tables that are one to many with the application table.\n" + "\n")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = DatatablesApiResourceSwagger.DeleteDataTablesDatatableAppTableIdDatatableIdResponse.class)})
+    public String deleteDatatableEntries(@PathParam("datatable") @ApiParam(value = "datatable", type = "body", example = "{}") final String datatable, @PathParam("apptableId") @ApiParam(value = "apptableId") final Long apptableId,
+            @PathParam("datatableId") @ApiParam(value = "datatableId") final Long datatableId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .deleteDatatable(datatable, apptableId, datatableId) //

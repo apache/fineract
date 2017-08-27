@@ -35,6 +35,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.*;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -53,6 +54,7 @@ import org.springframework.stereotype.Component;
 @Path("/provisioningcriteria")
 @Component
 @Scope("singleton")
+@Api(value = "Provisioning Criteria", description = "This defines the Provisioning Criteria")
 public class ProvisioningCriteriaApiResource {
 
     private final PlatformSecurityContext platformSecurityContext;
@@ -101,7 +103,9 @@ public class ProvisioningCriteriaApiResource {
     @Path("{criteriaId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveProvisioningCriteria(@PathParam("criteriaId") final Long criteriaId, @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "Retrieves a Provisioning Criteria", notes = "Retrieves a Provisioning Criteria")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = ProvisioningCriteriaApiResourceSwagger.GetProvisioningCriteriaCriteriaIdResponse.class)})
+    public String retrieveProvisioningCriteria(@PathParam("criteriaId") @ApiParam(value = "criteriaId") final Long criteriaId, @Context final UriInfo uriInfo) {
         platformSecurityContext.authenticatedUser() ;
         ProvisioningCriteriaData criteria = this.provisioningCriteriaReadPlatformService.retrieveProvisioningCriteria(criteriaId) ;
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -114,6 +118,8 @@ public class ProvisioningCriteriaApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Retrieves all created Provisioning Criterias", notes = "Retrieves all created Provisioning Criterias")
+    @ApiResponses({@ApiResponse(code = 200, message = "", responseContainer = "List",response = ProvisioningCriteriaApiResourceSwagger.GetProvisioningCriteriaResponse.class)})
     public String retrieveAllProvisioningCriterias(@Context final UriInfo uriInfo) {
         platformSecurityContext.authenticatedUser() ;
         Collection<ProvisioningCriteriaData> data = this.provisioningCriteriaReadPlatformService.retrieveAllProvisioningCriterias() ;
@@ -124,7 +130,10 @@ public class ProvisioningCriteriaApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createProvisioningCriteria(final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Create a new Provisioning Criteria", notes = "Creates a new Provisioning Criteria\n" + "\n" + "Mandatory Fields: \n" + "criteriaName\n" + "provisioningcriteria\n" + "\n" + "Optional Fields: \n" + "loanProducts")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ProvisioningCriteriaApiResourceSwagger.PostProvisioningCriteriaRequest.class )})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = ProvisioningCriteriaApiResourceSwagger.PostProvisioningCriteriaResponse.class)})
+    public String createProvisioningCriteria(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         CommandWrapper commandWrapper = null;
         this.platformSecurityContext.authenticatedUser();
         commandWrapper = new CommandWrapperBuilder().createProvisioningCriteria().withJson(apiRequestBodyAsJson).build();
@@ -136,7 +145,10 @@ public class ProvisioningCriteriaApiResource {
     @Path("{criteriaId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateProvisioningCriteria(@PathParam("criteriaId") final Long criteriaId, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Updates a new Provisioning Criteria", notes = "Updates a new Provisioning Criteria\n" + "\n" + "Optional Fields\n" + "criteriaName, loanProducts, provisioningcriteria")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ProvisioningCriteriaApiResourceSwagger.PutProvisioningCriteriaRequest.class )})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = ProvisioningCriteriaApiResourceSwagger.PutProvisioningCriteriaResponse.class)})
+    public String updateProvisioningCriteria(@PathParam("criteriaId") @ApiParam(value = "criteriaId") final Long criteriaId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         this.platformSecurityContext.authenticatedUser();
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateProvisioningCriteria(criteriaId)
                 .withJson(apiRequestBodyAsJson).build();
@@ -148,7 +160,9 @@ public class ProvisioningCriteriaApiResource {
     @Path("{criteriaId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteProvisioningCriteria(@PathParam("criteriaId") final Long criteriaId) {
+    @ApiOperation(value = "Deletes Provisioning Criteria", notes = "Deletes Provisioning Criteria")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = ProvisioningCriteriaApiResourceSwagger.DeleteProvisioningCriteriaResponse.class)})
+    public String deleteProvisioningCriteria(@PathParam("criteriaId") @ApiParam(value = "criteriaId") final Long criteriaId) {
         this.platformSecurityContext.authenticatedUser();
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteProvisioningCriteria(criteriaId).build();
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

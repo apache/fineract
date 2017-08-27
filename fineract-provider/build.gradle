@@ -109,7 +109,9 @@ rat {
 	'**/*.iml',
 	//Notice files
 	'**/NOTICE_RELEASE',
-	'**/NOTICE_SOURCE',	
+	'**/NOTICE_SOURCE',
+    // Swagger License
+    '**/fineract-provider/src/main/resources/swaggerUI/*.*',
     // gradle
     '**/.gradle/**',
     '**/gradlew',

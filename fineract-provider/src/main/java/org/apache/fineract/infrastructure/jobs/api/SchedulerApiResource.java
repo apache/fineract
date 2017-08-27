@@ -29,6 +29,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
@@ -43,6 +44,7 @@ import org.springframework.stereotype.Component;
 
 @Path("/scheduler")
 @Component
+@Api(value = "Scheduler", description = "")
 public class SchedulerApiResource {
 
     private final PlatformSecurityContext context;
@@ -62,6 +64,8 @@ public class SchedulerApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Retrieve Scheduler Status", notes = "Returns the scheduler status.\n" + "\n" + "Example Requests:\n" + "\n" + "scheduler")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = SchedulerApiResourceSwagger.GetSchedulerResponse.class)})
     public String retrieveStatus(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
         final boolean isSchedulerRunning = this.jobRegisterService.isSchedulerRunning();
@@ -74,7 +78,9 @@ public class SchedulerApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response changeSchedulerStatus(@QueryParam(SchedulerJobApiConstants.COMMAND) final String commandParam) {
+    @ApiOperation(value = "Activate Scheduler Jobs | Suspend Scheduler Jobs", notes = "Activates the scheduler job service. | Suspends the scheduler job service.")
+    @ApiResponses({@ApiResponse(code = 200, message = "POST :  scheduler?command=start\n\n"+"\n"+"POST : scheduler?command=stop")})
+    public Response changeSchedulerStatus(@QueryParam(SchedulerJobApiConstants.COMMAND) @ApiParam(value = "command") final String commandParam) {
         // check the logged in user have permissions to update scheduler status
         final boolean hasNotPermission = this.context.authenticatedUser().hasNotPermissionForAnyOf("ALL_FUNCTIONS", "UPDATE_SCHEDULER");
         if (hasNotPermission) {
