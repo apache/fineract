@@ -27,6 +27,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.*;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -45,6 +46,7 @@ import org.springframework.stereotype.Component;
 @Path("/configurations")
 @Component
 @Scope("singleton")
+@Api(value = "Global Configuration", description = "Global configuration related to set of supported enable/disable configurations:\n" + "\n" + "maker-checker - defaults to false - if true turns on maker-checker functionality\n" + "reschedule-future-repayments - defaults to false - if true reschedules repayemnts which falls on a non-working day to configured repayment rescheduling rule\n" + "allow-transactions-on-non_workingday - defaults to false - if true allows transactions on non-working days\n" + "reschedule-repayments-on-holidays - defaults to false - if true reschedules repayemnts which falls on a non-working day to defined reschedule date\n" + "allow-transactions-on-holiday - defaults to false - if true allows transactions on holidays\n" + "savings-interest-posting-current-period-end - Set it at the database level before any savings interest is posted. When set as false(default), interest will be posted on the first date of next period. If set as true, interest will be posted on last date of current period. There is no difference in the interest amount posted.\n" + "financial-year-beginning-month - Set it at the database level before any savings interest is posted. Allowed values 1 - 12 (January - December). Interest posting periods are evaluated based on this configuration.\n" + "meetings-mandatory-for-jlg-loans - if set to true, enforces all JLG loans to follow a meeting schedule belonging to either the parent group or Center.")
 public class GlobalConfigurationApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("globalConfiguration"));
@@ -76,7 +78,9 @@ public class GlobalConfigurationApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveConfiguration(@Context final UriInfo uriInfo,@DefaultValue("false") @QueryParam("survey") final boolean survey) {
+    @ApiOperation(value = "Retrieve Global Configuration | Retrieve Global Configuration for surveys", notes = "Returns the list global enable/disable configurations.\n" + "\n" + "Example Requests:\n" + "\n" + "configurations\n\n" + "\n" + "Returns the list global enable/disable survey configurations.\n" + "\n" + "Example Requests:\n" + "\n" + "configurations/survey")
+    @ApiResponses({@ApiResponse(code = 200, message = "List of example \n response \nsurveys response   \ngiven below", response = GlobalConfigurationApiResourceSwagger.GetGlobalConfigurationsResponse.class, responseContainer = "list")})
+    public String retrieveConfiguration(@Context final UriInfo uriInfo,@DefaultValue("false") @QueryParam("survey") @ApiParam(value = "survey") final boolean survey) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
@@ -90,7 +94,9 @@ public class GlobalConfigurationApiResource {
     @Path("{configId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveOne(@PathParam("configId") final Long configId, @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "Retrieve Global Configuration", notes = "Returns a global enable/disable configurations.\n" + "\n" + "Example Requests:\n" + "\n" + "configurations/1")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = GlobalConfigurationApiResourceSwagger.GetGlobalConfigurationsResponse.class)})
+    public String retrieveOne(@PathParam("configId") @ApiParam(value = "configId") final Long configId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
@@ -105,7 +111,10 @@ public class GlobalConfigurationApiResource {
     @Path("{configId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateConfiguration(@PathParam("configId") final Long configId, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Update Global Configuration", notes = "Updates an enable/disable global configuration item.")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = GlobalConfigurationApiResourceSwagger.PutGlobalConfigurationsRequest.class )})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = GlobalConfigurationApiResourceSwagger.PutGlobalConfigurationsResponse.class)})
+    public String updateConfiguration(@PathParam("configId") @ApiParam(value = "configId") final Long configId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateGlobalConfiguration(configId) //

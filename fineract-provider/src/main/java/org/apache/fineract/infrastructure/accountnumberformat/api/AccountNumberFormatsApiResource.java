@@ -35,6 +35,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.*;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -54,6 +55,7 @@ import org.springframework.stereotype.Component;
 @Path(AccountNumberFormatConstants.resourceRelativeURL)
 @Component
 @Scope("singleton")
+@Api(value = "Account number format", description = "Account number preferences are used to describe custom formats for account numbers associated with Customer, Loan and Savings accounts." )
 public class AccountNumberFormatsApiResource {
 
     private final PlatformSecurityContext context;
@@ -83,6 +85,8 @@ public class AccountNumberFormatsApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Retrieve Account number format Template", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "\n" + "Example Request:\n" + "\n" + "accountnumberformats/template")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = AccountNumberFormatsApiResourceSwagger.GetAccountNumberFormatsResponseTemplate.class)})
     public String retrieveTemplate(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(AccountNumberFormatConstants.ENTITY_NAME);
@@ -98,6 +102,8 @@ public class AccountNumberFormatsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "List Account number formats", notes = "Example Requests:\n" + "\n" + "accountnumberformats\n" + "\n" + "\n" + "accountnumberformats?fields=accountType,prefixType", responseContainer = "List")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = AccountNumberFormatsApiResourceSwagger.GetAccountNumberFormatsIdResponse.class, responseContainer = "List")})
     public String retrieveAll(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(AccountNumberFormatConstants.ENTITY_NAME);
@@ -114,7 +120,9 @@ public class AccountNumberFormatsApiResource {
     @Path("{accountNumberFormatId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveOne(@Context final UriInfo uriInfo, @PathParam("accountNumberFormatId") final Long accountNumberFormatId) {
+    @ApiOperation(value = "Retrieve an Account number format", notes = "Example Requests:\n" + "\n" + "accountnumberformats/1\n" + "\n" + "\n" + "accountnumberformats/1?template=true\n" + "\n" + "\n" + "accountnumberformats/1?fields=accountType,prefixType")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = AccountNumberFormatsApiResourceSwagger.GetAccountNumberFormatsIdResponse.class)})
+    public String retrieveOne(@Context final UriInfo uriInfo, @PathParam("accountNumberFormatId") @ApiParam(value = "accountNumberFormatId") final Long accountNumberFormatId) {
 
         this.context.authenticatedUser().validateHasReadPermission(AccountNumberFormatConstants.ENTITY_NAME);
 
@@ -135,7 +143,10 @@ public class AccountNumberFormatsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String create(final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Create an Account number format", notes = "Note: You may associate a single Account number format for a given account type\n" + "Mandatory Fields for Account number formats\n" + "accountType")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", paramType = "body", dataType = "body", format = "body", dataTypeClass = AccountNumberFormatsApiResourceSwagger.PostAccountNumberFormatsRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = AccountNumberFormatsApiResourceSwagger.PostAccountNumberFormatsResponse.class)})
+    public String create(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createAccountNumberFormat() //
@@ -151,7 +162,10 @@ public class AccountNumberFormatsApiResource {
     @Path("{accountNumberFormatId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String update(@PathParam("accountNumberFormatId") final Long accountNumberFormatId, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Update an Account number format")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true,paramType = "body", dataType = "body", format = "body", dataTypeClass = AccountNumberFormatsApiResourceSwagger.PutAccountNumberFormatsRequest.class )})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = AccountNumberFormatsApiResourceSwagger.PutAccountNumberFormatsResponse.class)})
+    public String update(@PathParam("accountNumberFormatId") @ApiParam(value = "accountNumberFormatId") final Long accountNumberFormatId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateAccountNumberFormat(accountNumberFormatId) //
@@ -167,7 +181,9 @@ public class AccountNumberFormatsApiResource {
     @Path("{accountNumberFormatId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String delete(@PathParam("accountNumberFormatId") final Long accountNumberFormatId) {
+    @ApiOperation(value = "Delete an Account number format", notes = "Note: Account numbers created while this format was active would remain unchanged.")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = AccountNumberFormatsApiResourceSwagger.DeleteAccountNumberFormatsResponse.class)})
+    public String delete(@PathParam("accountNumberFormatId") @ApiParam(value = "accountNumberFormatId") final Long accountNumberFormatId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .deleteAccountNumberFormat(accountNumberFormatId) //

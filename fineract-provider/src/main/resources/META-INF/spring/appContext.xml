@@ -99,5 +99,8 @@
 
 	<import resource="spmContext.xml"/>
 
+	<import resource="swagger.xml"/>
+
 	<import resource="notificationContext.xml"/>
+
 </beans>

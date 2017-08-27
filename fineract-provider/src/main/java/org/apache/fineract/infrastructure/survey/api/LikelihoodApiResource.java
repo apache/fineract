@@ -28,6 +28,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import io.swagger.annotations.Api;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -46,6 +47,7 @@ import org.springframework.stereotype.Component;
 @Path("/likelihood")
 @Component
 @Scope("singleton")
+@Api(value = "Likelihood")
 public class LikelihoodApiResource {
 
     private final DefaultToApiJsonSerializer<LikelihoodData> toApiJsonSerializer;

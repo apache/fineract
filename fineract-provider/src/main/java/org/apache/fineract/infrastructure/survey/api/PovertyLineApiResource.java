@@ -25,6 +25,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import io.swagger.annotations.Api;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.survey.data.LikeliHoodPovertyLineData;
@@ -37,6 +38,7 @@ import org.springframework.stereotype.Component;
 @Path("/povertyLine")
 @Component
 @Scope("singleton")
+@Api(value = "Poverty Line")
 public class PovertyLineApiResource {
 
     private final DefaultToApiJsonSerializer<PpiPovertyLineData> toApiJsonSerializer;
