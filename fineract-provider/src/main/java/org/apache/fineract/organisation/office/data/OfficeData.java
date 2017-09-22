@@ -77,4 +77,12 @@ public class OfficeData implements Serializable {
     public String getHierarchy() {
         return this.hierarchy;
     }
+    
+    public Long getId() {
+      return id;
+    }
+    
+    public LocalDate getOpeningDate() {
+      return openingDate;
+    }
 }
