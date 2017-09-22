@@ -201,6 +201,28 @@ public class DataValidatorBuilder {
         return this;
     }
 
+    public DataValidatorBuilder notNullCheckbox() { 
+        if (this.value == null && !this.ignoreNullValue) {
+
+            String realParameterName = this.parameter;
+            final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".");
+                   // .append(this.parameter);
+            if (this.arrayIndex != null && StringUtils.isNotBlank(this.arrayPart)) {
+                validationErrorCode.append(".").append(this.arrayPart);
+                realParameterName = new StringBuilder(this.parameter).append('[').append(this.arrayIndex).append("][")
+                        .append(this.arrayPart).append(']').toString();
+            }
+            
+            validationErrorCode.append("User to check any one of the check boxes below");
+           // validationErrorCode.append(".cannot.be.blank");
+            final StringBuilder defaultEnglishMessage = new StringBuilder(" At least one of the check boxes is mandatory.");
+            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                    defaultEnglishMessage.toString(), realParameterName, this.arrayIndex);
+            this.dataValidationErrors.add(error);
+        }
+        return this;
+    }
+    
     public DataValidatorBuilder notBlank() {
         if (this.value == null && this.ignoreNullValue) { return this; }
 
