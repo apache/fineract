@@ -33,6 +33,8 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isCalen
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isMandatoryDepositParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.mandatoryRecommendedDepositAmountParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.recurringFrequencyParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.recurringFrequencyTypeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountNoParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.clientIdParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.externalIdParamName;
@@ -391,6 +393,8 @@ public class DepositAccountAssembler {
         boolean allowWithdrawal;
         boolean adjustAdvanceTowardsFuturePayments;
         boolean isCalendarInherited;
+        Integer recurringFrequency;
+        SavingsPeriodFrequencyType recurringFrequencyType;
 
         if (command.parameterExists(isMandatoryDepositParamName)) {
             isMandatoryDeposit = command.booleanObjectValueOfParameterNamed(isMandatoryDepositParamName);
@@ -416,8 +420,20 @@ public class DepositAccountAssembler {
             isCalendarInherited = false;
         }
 
+        if (command.parameterExists(recurringFrequencyParamName)) {
+            recurringFrequency = command.integerValueOfParameterNamed(recurringFrequencyParamName);
+        } else {
+            recurringFrequency = prodRecurringDetail.recurringFrequency();
+        }
+
+        if (command.parameterExists(recurringFrequencyTypeParamName)) {
+            recurringFrequencyType = SavingsPeriodFrequencyType.fromInt(command.integerValueOfParameterNamed(recurringFrequencyTypeParamName));
+        } else {
+            recurringFrequencyType = SavingsPeriodFrequencyType.fromInt(prodRecurringDetail.recurringFrequencyType());
+        }
+
         final DepositRecurringDetail depositRecurringDetail = DepositRecurringDetail.createFrom(isMandatoryDeposit, allowWithdrawal,
-                adjustAdvanceTowardsFuturePayments);
+                adjustAdvanceTowardsFuturePayments, recurringFrequency, recurringFrequencyType);
         final DepositAccountRecurringDetail depositAccountRecurringDetail = DepositAccountRecurringDetail.createNew(recurringDepositAmount,
                 depositRecurringDetail, null, isCalendarInherited);
         return depositAccountRecurringDetail;

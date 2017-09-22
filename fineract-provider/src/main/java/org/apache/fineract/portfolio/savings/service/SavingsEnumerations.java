@@ -574,11 +574,11 @@ public class SavingsEnumerations {
         return optionDatas;
     }
 
-    public static EnumOptionData recurringDepositFrequencyType(final int id) {
-        return recurringDepositFrequencyType(SavingsPeriodFrequencyType.fromInt(id));
+    public static EnumOptionData recurringFrequencyType(final int id) {
+        return recurringFrequencyType(SavingsPeriodFrequencyType.fromInt(id));
     }
 
-    public static EnumOptionData recurringDepositFrequencyType(final SavingsPeriodFrequencyType type) {
+    public static EnumOptionData recurringFrequencyType(final SavingsPeriodFrequencyType type) {
         final String codePrefix = "recurring.deposit.";
         EnumOptionData optionData = new EnumOptionData(SavingsPeriodFrequencyType.INVALID.getValue().longValue(),
                 SavingsPeriodFrequencyType.INVALID.getCode(), "Invalid");
@@ -605,11 +605,11 @@ public class SavingsEnumerations {
         return optionData;
     }
 
-    public static List<EnumOptionData> recurringDepositFrequencyType(final SavingsPeriodFrequencyType[] types) {
+    public static List<EnumOptionData> recurringFrequencyType(final SavingsPeriodFrequencyType[] types) {
         final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final SavingsPeriodFrequencyType type : types) {
             if (!type.isInvalid()) {
-                optionDatas.add(recurringDepositFrequencyType(type));
+                optionDatas.add(recurringFrequencyType(type));
             }
         }
         return optionDatas;
@@ -650,7 +650,7 @@ public class SavingsEnumerations {
         final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final SavingsPeriodFrequencyType type : types) {
             if (!type.isInvalid()) {
-                optionDatas.add(recurringDepositFrequencyType(type));
+                optionDatas.add(recurringFrequencyType(type));
             }
         }
         return optionDatas;
@@ -691,7 +691,7 @@ public class SavingsEnumerations {
         final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final SavingsPeriodFrequencyType type : types) {
             if (!type.isInvalid()) {
-                optionDatas.add(recurringDepositFrequencyType(type));
+                optionDatas.add(recurringFrequencyType(type));
             }
         }
         return optionDatas;
@@ -772,7 +772,7 @@ public class SavingsEnumerations {
         final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final SavingsPeriodFrequencyType type : types) {
             if (!type.isInvalid()) {
-                optionDatas.add(recurringDepositFrequencyType(type));
+                optionDatas.add(recurringFrequencyType(type));
             }
         }
         return optionDatas;

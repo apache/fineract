@@ -36,6 +36,8 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.minDepo
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalApplicableParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalInterestOnTypeIdParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.preClosurePenalInterestParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.recurringFrequencyParamName;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.recurringFrequencyTypeParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withHoldTaxParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
@@ -431,9 +433,16 @@ public class DepositProductAssembler {
         if (isMandatoryDeposit == null) isMandatoryDeposit = false;
         if (allowWithdrawal == null) allowWithdrawal = false;
         if (adjustAdvanceTowardsFuturePayments == null) adjustAdvanceTowardsFuturePayments = false;
-
+        
+        final Integer recurringFrequency = command.integerValueOfParameterNamedDefaultToNullIfZero(recurringFrequencyParamName);
+        SavingsPeriodFrequencyType recurringFrequencyType = null;
+        final Integer recurringFrequencyTypeValue = command.integerValueOfParameterNamed(recurringFrequencyTypeParamName);
+        if (recurringFrequencyTypeValue != null) {
+            recurringFrequencyType = SavingsPeriodFrequencyType.fromInt(recurringFrequencyTypeValue);
+        }
+        
         final DepositRecurringDetail depositRecurringDetail = DepositRecurringDetail.createFrom(isMandatoryDeposit, allowWithdrawal,
-                adjustAdvanceTowardsFuturePayments);
+                adjustAdvanceTowardsFuturePayments, recurringFrequency, recurringFrequencyType);
 
         return depositRecurringDetail;
     }

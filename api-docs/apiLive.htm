@@ -23673,12 +23673,12 @@ Content-Type: application/json
 	            <tr class=alt><td>lockinPeriodFrequencyType</td></tr>
 	            e.g. 2 <b>Months</b></td></tr>
 
-	            <tr class=alt><td>recurringDepositFrequency</td></tr>
+	            <tr class=alt><td>recurringFrequency</td></tr>
 	            <tr><td class=fielddesc>The frequency for depositing a fixed amount to recurring deposit account.</td></tr>
 
-	            <tr class=alt><td>recurringDepositFrequencyTypeId</td></tr>
+	            <tr class=alt><td>recurringFrequencyType</td></tr>
 	            <tr>
-	            	<td class=fielddesc>Used along with <i>recurringDepositFrequency</i> to define frequency for depositing a fixed amount to recurring deposit account. 0=Days, 1=Weeks, 2=Months, 3=Years
+	            	<td class=fielddesc>Used along with <i>recurringFrequency</i> to define frequency for depositing a fixed amount to recurring deposit account. 0=Days, 1=Weeks, 2=Months, 3=Years
 	            	e.g. deposit every 1 <b>Months</b>
 	            	</td>
 	            </tr>
@@ -23754,7 +23754,7 @@ Content-Type: application/json
                 <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields</div></td></tr>
                 <tr class=alt>
                 	<td>name, shortName, description, currencyCode, digitsAfterDecimal,inMultiplesOf,
-                		interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minDepositTerm, minDepositTermTypeId, recurringDepositFrequency, recurringDepositFrequencyTypeId, accountingRule, depositAmount </td>
+                		interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minDepositTerm, minDepositTermTypeId, recurringFrequency, recurringFrequencyType, accountingRule, depositAmount </td>
                 </tr>
             </table>
             <br/>
@@ -23788,8 +23788,8 @@ Request Body:
   "interestCalculationType": 1,
   "interestCalculationDaysInYearType": "365",
   "accountingRule":"1",
-  "recurringDepositFrequency":1,
-  "recurringDepositFrequencyTypeId":2,
+  "recurringFrequency":1,
+  "recurringFrequencyTypeId":2,
   "preClosurePenalApplicable":"true",
   "preClosurePenalInterest":"1.75",
   "preClosurePenalInterestOnTypeId":1,
@@ -23936,8 +23936,8 @@ Request Body:
       }
     }
   ],
-  "recurringDepositFrequency":1,
-  "recurringDepositFrequencyType": {
+  "recurringFrequency":1,
+  "recurringFrequencyType": {
     "id": 2,
     "code": "recurring.deposit.savingsPeriodFrequencyType.months",
     "value": "Months"
@@ -24100,8 +24100,8 @@ Content-Type: application/json
       "nameCode": "currency.USD",
       "displayLabel": "US Dollar ($)"
     },
-    "recurringDepositFrequency":1,
-    "recurringDepositFrequencyType": {
+    "recurringFrequency":1,
+    "recurringFrequencyType": {
       "id": 2,
       "code": "recurring.deposit.savingsPeriodFrequencyType.months",
       "value": "Months"
@@ -29330,12 +29330,12 @@ No Request Body:
 	            <tr class=alt><td>recurringDepositAmount</td></tr>
 	            <tr><td class=fielddesc>The recurring deposit amount to be deposited regularly on a specified by deposit frequency.</td></tr>
 
-	            <tr class=alt><td>recurringDepositFrequency</td></tr>
-	            <tr><td class=fielddesc>Used along with <i>recurringDepositFrequencyTypeId</i> to define the frequency at which <i>recurringDepositAmount</i> to be deposited into RD account. e.g. <b>6</b> Months</td></tr>
+	            <tr class=alt><td>recurringFrequency</td></tr>
+	            <tr><td class=fielddesc>Used along with <i>recurringFrequencyType</i> to define the frequency at which <i>recurringDepositAmount</i> to be deposited into RD account. e.g. <b>6</b> Months</td></tr>
 
-	            <tr class=alt><td>recurringDepositFrequencyTypeId</td></tr>
+	            <tr class=alt><td>recurringFrequencyType</td></tr>
 	            <tr>
-	            	<td class=fielddesc> Used along with <i>recurringDepositFrequency</i> to define the frequency at which <i>recurringDepositAmount</i> to be deposited into RD account. 0=Days, 1=Weeks, 2=Months, 3=Years
+	            	<td class=fielddesc> Used along with <i>recurringFrequency</i> to define the frequency at which <i>recurringDepositAmount</i> to be deposited into RD account. 0=Days, 1=Weeks, 2=Months, 3=Years
 	            	e.g. 6 <b>Months</b>
 	            	</td>
 	            </tr>
@@ -30549,8 +30549,8 @@ Request Body:
       3
     ],
     "recurringDepositAmount": 100,
-    "recurringDepositFrequency": 1,
-    "recurringDepositFrequencyType": {
+    "recurringFrequency": 1,
+    "recurringFrequencyType": {
       "id": 2,
       "code": "recurring.deposit.savingsPeriodFrequencyType.months",
       "value": "Months"
@@ -30685,13 +30685,13 @@ Request Body:
     "value": "Years"
   },
   "recurringDepositAmount": 100,
-  "recurringDepositFrequency": 1,
+  "recurringFrequency": 1,
   "expectedFirstDepositOnDate": [
   	2014,
   	4,
    	2
    ],
-  "recurringDepositFrequencyType": {
+  "recurringFrequencyType": {
       "id": 2,
       "code": "recurring.deposit.savingsPeriodFrequencyType.months",
       "value": "Months"
