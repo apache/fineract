@@ -219,7 +219,8 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
             sql.append("acu.username as activatedByUsername, ");
             sql.append("sc.approvedon_date as activatedOnDate, ");
             sql.append("sr.report_name as reportName, ");
-            sql.append("provider_id as providerId ");
+            sql.append("provider_id as providerId, ");
+            sql.append("sc.is_notification as isNotification ");
             sql.append("from sms_campaign sc ");
             sql.append("left join m_appuser sbu on sbu.id = sc.submittedon_userid ");
             sql.append("left join m_appuser acu on acu.id = sc.approvedon_userid ");
@@ -265,9 +266,9 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
                     activatedByUsername, closedOnDate, closedByUsername);
             final String reportName = rs.getString("reportName");
             final Long providerId = rs.getLong("providerId");
-
+            final Boolean isNotification = rs.getBoolean("isNotification");
             return SmsCampaignData.instance(id, campaignName, campaignTypeEnum, triggerTypeEnum, runReportId, reportName, paramValue, status, message, nextTriggerDate, lastTriggerDate,
-                    smsCampaignTimeLine, recurrenceStartDate, recurrence, providerId);
+                    smsCampaignTimeLine, recurrenceStartDate, recurrence, providerId, isNotification);
         }
     }
 

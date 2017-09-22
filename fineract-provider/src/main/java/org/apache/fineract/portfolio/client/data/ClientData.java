@@ -289,6 +289,12 @@ final public class ClientData implements Comparable<ClientData> {
                 clientNonPerson, clientLegalFormOptions,familyMemberOptions, legalForm,null,null, null, isStaff);
 
     }
+    
+    public static ClientData instance(final Long id, final String displayName){
+    	 final Long officeId = null;
+    	 final String officeName = null;
+    	 return lookup(id, displayName, officeId, officeName);
+    }
 
     public static ClientData instance(final String accountNo, final EnumOptionData status, final CodeValueData subStatus,
             final Long officeId, final String officeName, final Long transferToOfficeId, final String transferToOfficeName, final Long id,
