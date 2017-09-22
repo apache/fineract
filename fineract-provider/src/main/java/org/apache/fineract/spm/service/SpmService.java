@@ -19,6 +19,7 @@
 package org.apache.fineract.spm.service;
 
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.spm.domain.Survey;
 import org.apache.fineract.spm.domain.SurveyValidator;
@@ -26,11 +27,13 @@ import org.apache.fineract.spm.exception.SurveyNotFoundException;
 import org.apache.fineract.spm.repository.SurveyRepository;
 import org.apache.openjpa.persistence.EntityExistsException;
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -77,13 +80,13 @@ public class SpmService {
             this.deactivateSurvey(previousSurvey.getId());
         }
         // set valid from to start of today
-        final DateTime validFrom = getStartOfToday();
+        LocalDate validFrom = DateUtils.getLocalDateOfTenant() ;
+        // set valid to for 100 years
+        Calendar cal = Calendar.getInstance() ;
+        cal.setTime(validFrom.toDate());
+        cal.add(Calendar.YEAR, 100); 
         survey.setValidFrom(validFrom.toDate());
-        // set valid from to end in 100 years
-        final DateTime validTo = validFrom.withDayOfMonth(31).withMonthOfYear(12).withHourOfDay(23).withMinuteOfHour(59)
-                .withSecondOfMinute(59).withMillisOfSecond(999).plusYears(100);
-
-        survey.setValidTo(validTo.toDate());
+        survey.setValidTo(cal.getTime());
         try {
             this.surveyRepository.saveAndFlush(survey);
         } catch (final EntityExistsException dve) {
