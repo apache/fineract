@@ -32,7 +32,7 @@
 
     <tx:annotation-driven />
 
-    <context:component-scan base-package="org.apache.fineract.spm"/>
+    <context:component-scan base-package="org.apache.fineract.spm.**"/>
 
     <jpa:repositories base-package="org.apache.fineract.spm.repository"/>
 

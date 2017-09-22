@@ -21,6 +21,8 @@ package org.apache.fineract.spm.domain;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 import javax.persistence.*;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -28,11 +30,11 @@ import java.util.List;
 @Table(name = "m_surveys")
 public class Survey extends AbstractPersistableCustom<Long> {
 
-    @OneToMany(mappedBy = "survey", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "survey", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval=true)
     @OrderBy("sequenceNo")
     private List<Component> components;
 
-    @OneToMany(mappedBy = "survey", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "survey", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval=true)
     @OrderBy("sequenceNo")
     private List<Question> questions;
 
@@ -73,7 +75,13 @@ public class Survey extends AbstractPersistableCustom<Long> {
     }
 
     public void setQuestions(List<Question> questions) {
-        this.questions = questions;
+        if(this.questions != null){
+            this.questions.clear();;
+        }else{
+            this.questions = new ArrayList<>();
+        }
+        
+        this.questions.addAll(questions);
     }
 
     public String getKey() {

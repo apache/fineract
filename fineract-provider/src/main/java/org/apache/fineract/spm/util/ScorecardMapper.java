@@ -18,7 +18,10 @@
  */
 package org.apache.fineract.spm.util;
 
-import org.apache.fineract.organisation.staff.domain.Staff;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.spm.data.ScorecardData;
 import org.apache.fineract.spm.data.ScorecardValue;
@@ -28,36 +31,10 @@ import org.apache.fineract.spm.domain.Scorecard;
 import org.apache.fineract.spm.domain.Survey;
 import org.apache.fineract.useradministration.domain.AppUser;
 
-import java.util.*;
-
 public class ScorecardMapper {
 
     private ScorecardMapper() {
         super();
-    }
-
-    public static List<ScorecardData> map(final List<Scorecard> scorecards) {
-        final Map<Date, ScorecardData> scorecardDataMap = new HashMap<>();
-        ScorecardData scorecardData = null;
-        if (scorecards != null && scorecards.isEmpty()) {
-            for (Scorecard scorecard : scorecards) {
-                if ((scorecardData = scorecardDataMap.get(scorecard.getCreatedOn())) == null) {
-                    scorecardData = new ScorecardData();
-                    scorecardDataMap.put(scorecard.getCreatedOn(), scorecardData);
-                    scorecardData.setUserId(scorecard.getAppUser().getId());
-                    scorecardData.setClientId(scorecard.getClient().getId());
-                    scorecardData.setCreatedOn(scorecard.getCreatedOn());
-                    scorecardData.setScorecardValues(new ArrayList<ScorecardValue>());
-                }
-
-                scorecardData.getScorecardValues().add(new ScorecardValue(scorecard.getQuestion().getId(), scorecard.getResponse().getId(),
-                        scorecard.getValue()));
-            }
-
-            return new ArrayList<>(scorecardDataMap.values());
-        }
-
-        return Collections.EMPTY_LIST;
     }
 
     public static List<Scorecard> map(final ScorecardData scorecardData, final Survey survey,
@@ -74,7 +51,7 @@ public class ScorecardMapper {
                ScorecardMapper.setQuestionAndResponse(scorecardValue, scorecard, survey);
                scorecard.setAppUser(appUser);
                scorecard.setClient(client);
-               scorecard.setCreatedOn(scorecardData.getCreatedOn());
+               scorecard.setCreatedOn(DateUtils.getLocalDateOfTenant().toDate());
                scorecard.setValue(scorecardValue.getValue());
            }
         }
