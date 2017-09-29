@@ -32,6 +32,7 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepository;
+import org.apache.fineract.organisation.staff.exception.StaffCannotBeDeactivatedException;
 import org.apache.fineract.organisation.staff.exception.StaffNotFoundException;
 import org.apache.fineract.organisation.staff.serialization.StaffCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
@@ -95,6 +96,17 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
 
             final Staff staffForUpdate = this.staffRepository.findOne(staffId);
             if (staffForUpdate == null) { throw new StaffNotFoundException(staffId); }
+            
+            final boolean isActive = command.booleanPrimitiveValueOfParameterNamed("isActive");
+            
+            if(staffForUpdate.isActive() && !isActive) {
+                final boolean isAnyActiveEntityAssociatedWithStaff = this.staffRepository.
+                        isAnyActiveEntityAssociatedWithStaff(staffId);
+                
+                if (isAnyActiveEntityAssociatedWithStaff) {
+                    throw new StaffCannotBeDeactivatedException(staffId);
+                }
+            }
 
             final Map<String, Object> changesOnly = staffForUpdate.update(command);
 
