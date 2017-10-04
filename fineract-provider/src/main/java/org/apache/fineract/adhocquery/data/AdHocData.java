@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.adhocquery.data;
 
-import java.util.Collection;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import org.apache.fineract.organisation.office.data.OfficeData;
-import org.apache.fineract.useradministration.data.AppUserData;
-import org.apache.fineract.useradministration.data.RoleData;
+import org.apache.fineract.adhocquery.domain.ReportRunFrequency;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 
 /**
  * Immutable data object represent note or case information AdHocData
@@ -32,8 +32,8 @@ import org.joda.time.LocalDate;
  */
 public class AdHocData {
 
-	
-    
+
+
 	@SuppressWarnings("unused")
     private final Long id;
     @SuppressWarnings("unused")
@@ -59,13 +59,16 @@ public class AdHocData {
 	@SuppressWarnings("unused")
 	private final String createdBy;
 	
-    
-	
+    private final List<EnumOptionData> reportRunFrequencies;
 
-    public AdHocData(final Long id, final String name,final String query, final String tableName,final String tableFields, 
-    		final boolean isActive, final DateTime createdOn, final Long createdById,final Long updatedById,
-    		final DateTime updatedOn,final String createdBy,final String email
-            ) {
+    private final Long reportRunFrequency;
+
+    private final Long reportRunEvery;
+
+    public AdHocData(final Long id, final String name, final String query, final String tableName, final String tableFields,
+                     final boolean isActive, final DateTime createdOn, final Long createdById, final Long updatedById,
+                     final DateTime updatedOn, final String createdBy, final String email,
+                     final List<EnumOptionData> reportRunFrequencies, final Long reportRunFrequency, final Long reportRunEvery) {
         this.id = id;
         this.name=name;
         this.query=query;
@@ -78,9 +81,16 @@ public class AdHocData {
         this.updatedOn=updatedOn;
         this.createdBy=createdBy;
         this.email=email;
+	    this.reportRunFrequencies = reportRunFrequencies;
+	    this.reportRunFrequency = reportRunFrequency;
+	    this.reportRunEvery = reportRunEvery;
     }
     public static AdHocData template() {
-        AdHocData adHocData = new AdHocData(null,null,null,null,null,false,null,null,null,null,null,null);
+	    List<EnumOptionData> reportRunFrequencies = Arrays.stream(ReportRunFrequency.values()).map(rrf -> new EnumOptionData(
+		    (long) rrf.getValue(), rrf.getCode(), rrf.getCode()
+	    )).collect(Collectors.toList());
+
+	    AdHocData adHocData = new AdHocData(null,null,null,null,null,false,null,null,null,null,null,null, reportRunFrequencies, null, null);
 		return adHocData;
     }
     public Long getId() {
@@ -118,5 +128,14 @@ public class AdHocData {
 	}
 	public String getCreatedBy() {
 		return this.createdBy;
+	}
+	public List<EnumOptionData> getReportRunFrequencies() {
+		return this.reportRunFrequencies;
+	}
+	public Long getReportRunFrequency() {
+		return this.reportRunFrequency;
+	}
+	public Long getReportRunEvery() {
+		return this.reportRunEvery;
 	}
 }
