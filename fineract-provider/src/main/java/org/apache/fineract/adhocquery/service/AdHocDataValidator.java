@@ -80,7 +80,7 @@ public final class AdHocDataValidator {
         baseDataValidator.reset().parameter("tableFields").value(tableFields).notBlank().notExceedingLengthOf(1000);
 
         final String email = this.fromApiJsonHelper.extractStringNamed("email", element);
-        baseDataValidator.reset().parameter("email").value(email).notBlank().notExceedingLengthOf(500);
+        baseDataValidator.reset().parameter("email").value(email).ignoreIfNull().notExceedingLengthOf(500);
 
         final Long reportRunFrequencyCode = this.fromApiJsonHelper.extractLongNamed("reportRunFrequency", element);
         if (reportRunFrequencyCode != null) {
@@ -126,7 +126,7 @@ public final class AdHocDataValidator {
         }
         if (this.fromApiJsonHelper.parameterExists("email", element)) {
             final String email = this.fromApiJsonHelper.extractStringNamed("email", element);
-            baseDataValidator.reset().parameter("email").value(email).notBlank().notExceedingLengthOf(500);
+            baseDataValidator.reset().parameter("email").value(email).ignoreIfNull().notExceedingLengthOf(500);
         }
         if (this.fromApiJsonHelper.parameterExists("reportRunFrequency", element)) {
             final Long reportRunFrequencyCode = this.fromApiJsonHelper.extractLongNamed("reportRunFrequency", element);
