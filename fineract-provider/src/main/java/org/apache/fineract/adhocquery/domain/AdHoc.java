@@ -82,7 +82,7 @@ public class AdHoc extends AbstractAuditableCustom<AppUser, Long> {
         SQLInjectionValidator.validateAdhocQuery(commandQuery);
         final String query = commandQuery;
         final String tableName = command.stringValueOfParameterNamed(AdHocJsonInputParams.TABLENAME.getValue());
-        final String tableFields = command.stringValueOfParameterNamed(AdHocJsonInputParams.TABLEFIELD.getValue());
+        final String tableFields = command.stringValueOfParameterNamed(AdHocJsonInputParams.TABLEFIELDS.getValue());
         final String email = command.stringValueOfParameterNamed(AdHocJsonInputParams.EMAIL.getValue());
         final Long reportRunFrequency = command.longValueOfParameterNamed(AdHocJsonInputParams.REPORT_RUN_FREQUENCY.getValue());
         final Long reportRunEvery = command.longValueOfParameterNamed(AdHocJsonInputParams.REPORT_RUN_EVERY.getValue());
@@ -113,7 +113,7 @@ public class AdHoc extends AbstractAuditableCustom<AppUser, Long> {
             actualChanges.put(tableName, newValue);
             this.tableName = newValue;
         }
-        final String tableField = "tableField";
+        final String tableField = "tableFields";
         if (command.isChangeInStringParameterNamed(tableField, this.tableFields)) {
             final String newValue = command.stringValueOfParameterNamed(tableField);
             actualChanges.put(tableField, newValue);

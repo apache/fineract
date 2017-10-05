@@ -90,13 +90,14 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
             final String email=rs.getString("email");
             final Long reportRunFrequency=JdbcSupport.getLong(rs, "report_run_frequency_code");
             final Long reportRunEvery=JdbcSupport.getLong(rs, "report_run_every");
+            final DateTime lastRun = JdbcSupport.getDateTime(rs, "last_run");
 
-            return new AdHocData(id,name,query, tableName,tableFields,isActive,createdDate,createdById,updatedById,updatedOn,createdByUsername,email, AdHocData.template().getReportRunFrequencies(), reportRunFrequency, reportRunEvery);
+            return new AdHocData(id,name,query, tableName,tableFields,isActive,createdDate,createdById,updatedById,updatedOn,createdByUsername,email, AdHocData.template().getReportRunFrequencies(), reportRunFrequency, reportRunEvery, lastRun);
         }
 
         public String schema() {
             return " r.id as id, r.name as name, r.query as query, r.table_name as tableName,r.table_fields as tableField ,r.IsActive as isActive ,r.email as email ,"
-                    + " r.report_run_frequency_code, r.report_run_every, "
+                    + " r.report_run_frequency_code, r.report_run_every, r.last_run, "
             		+ " r.created_date as createdDate, r.createdby_id as createdById,cb.username as createdBy,r.lastmodifiedby_id as updatedById ,r.lastmodified_date as updatedOn "
                     + " from m_adhoc r left join m_appuser cb on cb.id=r.createdby_id left join m_appuser mb on mb.id=r.lastmodifiedby_id";
             		        

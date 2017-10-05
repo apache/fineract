@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.adhocquery.data;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.apache.fineract.adhocquery.domain.ReportRunFrequency;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.joda.time.DateTime;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Immutable data object represent note or case information AdHocData
@@ -65,10 +65,13 @@ public class AdHocData {
 
     private final Long reportRunEvery;
 
+    private final DateTime lastRun;
+
     public AdHocData(final Long id, final String name, final String query, final String tableName, final String tableFields,
                      final boolean isActive, final DateTime createdOn, final Long createdById, final Long updatedById,
                      final DateTime updatedOn, final String createdBy, final String email,
-                     final List<EnumOptionData> reportRunFrequencies, final Long reportRunFrequency, final Long reportRunEvery) {
+                     final List<EnumOptionData> reportRunFrequencies, final Long reportRunFrequency, final Long reportRunEvery,
+                     final DateTime lastRun) {
         this.id = id;
         this.name=name;
         this.query=query;
@@ -84,13 +87,14 @@ public class AdHocData {
 	    this.reportRunFrequencies = reportRunFrequencies;
 	    this.reportRunFrequency = reportRunFrequency;
 	    this.reportRunEvery = reportRunEvery;
+	    this.lastRun = lastRun;
     }
     public static AdHocData template() {
 	    List<EnumOptionData> reportRunFrequencies = Arrays.stream(ReportRunFrequency.values()).map(rrf -> new EnumOptionData(
 		    (long) rrf.getValue(), rrf.getCode(), rrf.getCode()
 	    )).collect(Collectors.toList());
 
-	    AdHocData adHocData = new AdHocData(null,null,null,null,null,false,null,null,null,null,null,null, reportRunFrequencies, null, null);
+	    AdHocData adHocData = new AdHocData(null,null,null,null,null,false,null,null,null,null,null,null, reportRunFrequencies, null, null, null);
 		return adHocData;
     }
     public Long getId() {
@@ -137,5 +141,8 @@ public class AdHocData {
 	}
 	public Long getReportRunEvery() {
 		return this.reportRunEvery;
+	}
+	public DateTime getLastRun() {
+		return this.lastRun;
 	}
 }

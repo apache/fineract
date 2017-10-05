@@ -85,7 +85,7 @@ public final class AdHocDataValidator {
         final Long reportRunFrequencyCode = this.fromApiJsonHelper.extractLongNamed("reportRunFrequency", element);
         if (reportRunFrequencyCode != null) {
             baseDataValidator.reset().parameter("reportRunFrequency").value(reportRunFrequencyCode)
-                .inMinMaxRange(ReportRunFrequency.DAILY.getValue(), ReportRunFrequency.CUSTOM.getValue());
+                .inMinMaxRange((int) ReportRunFrequency.DAILY.getValue(), (int) ReportRunFrequency.CUSTOM.getValue());
         }
 
         final Long reportRunEvery = this.fromApiJsonHelper.extractLongNamed("reportRunEvery", element);
@@ -131,7 +131,7 @@ public final class AdHocDataValidator {
         if (this.fromApiJsonHelper.parameterExists("reportRunFrequency", element)) {
             final Long reportRunFrequencyCode = this.fromApiJsonHelper.extractLongNamed("reportRunFrequency", element);
             baseDataValidator.reset().parameter("reportRunFrequency").value(reportRunFrequencyCode)
-                .inMinMaxRange(ReportRunFrequency.DAILY.getValue(), ReportRunFrequency.CUSTOM.getValue());
+                .inMinMaxRange((int) ReportRunFrequency.DAILY.getValue(), (int) ReportRunFrequency.CUSTOM.getValue());
         }
         if (this.fromApiJsonHelper.parameterExists("reportRunEvery", element)) {
             final Long reportRunEvery = this.fromApiJsonHelper.extractLongNamed("reportRunEvery", element);
