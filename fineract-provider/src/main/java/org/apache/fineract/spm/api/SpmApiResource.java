@@ -19,10 +19,24 @@
 package org.apache.fineract.spm.api;
 
 import io.swagger.annotations.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.spm.data.SurveyData;
 import org.apache.fineract.spm.domain.Survey;
-import org.apache.fineract.spm.exception.SurveyNotFoundException;
 import org.apache.fineract.spm.service.SpmService;
 import org.apache.fineract.spm.util.SurveyMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +44,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.gson.Gson;
 
 @Path("/surveys")
 @Component
@@ -45,8 +56,7 @@ public class SpmApiResource {
     private final SpmService spmService;
 
     @Autowired
-    public SpmApiResource(final PlatformSecurityContext securityContext,
-                          final SpmService spmService) {
+    public SpmApiResource(final PlatformSecurityContext securityContext, final SpmService spmService) {
         this.securityContext = securityContext;
         this.spmService = spmService;
     }
@@ -59,17 +69,13 @@ public class SpmApiResource {
     @ApiResponses({@ApiResponse(code = 200, message = "", response = SurveyData.class, responseContainer = "list")})
     public List<SurveyData> fetchActiveSurveys() {
         this.securityContext.authenticatedUser();
-
         final List<SurveyData> result = new ArrayList<>();
-
         final List<Survey> surveys = this.spmService.fetchValidSurveys();
-
         if (surveys != null) {
             for (final Survey survey : surveys) {
                 result.add(SurveyMapper.map(survey));
             }
         }
-
         return result;
     }
 
@@ -82,13 +88,7 @@ public class SpmApiResource {
     @ApiResponses({@ApiResponse(code = 200, message = "", response = SurveyData.class)})
     public SurveyData findSurvey(@PathParam("id") @ApiParam(value = "Enter id") final Long id) {
         this.securityContext.authenticatedUser();
-
         final Survey survey = this.spmService.findById(id);
-
-        if (survey == null) {
-            throw new SurveyNotFoundException(id);
-        }
-
         return SurveyMapper.map(survey);
     }
 
@@ -98,12 +98,25 @@ public class SpmApiResource {
     @Transactional
     @ApiOperation(value = "Create a Survey", notes = "Adds a new survey to collect client related data.\n" + "\n" + "Mandatory Fields\n" + "\n" + "countryCode, key, name, questions, responses, sequenceNo, text, value")
     @ApiResponses({@ApiResponse(code = 200, message = "OK")})
-    public void createSurvey(@ApiParam(value = "Create survey") final SurveyData surveyData) {
+    public String createSurvey(@ApiParam(value = "Create survey") final SurveyData surveyData) {
         this.securityContext.authenticatedUser();
-
-        final Survey survey = SurveyMapper.map(surveyData);
-
+        final Survey survey = SurveyMapper.map(surveyData, new Survey());
         this.spmService.createSurvey(survey);
+        return getResponse(survey.getId());
+
+    }
+
+    @PUT
+    @Path("/{id}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Transactional
+    public String editSurvey(@PathParam("id") final Long id, final SurveyData surveyData) {
+        this.securityContext.authenticatedUser();
+        final Survey surveyToUpdate = this.spmService.findById(id);
+        final Survey survey = SurveyMapper.map(surveyData, surveyToUpdate);
+        this.spmService.updateSurvey(survey);
+        return getResponse(survey.getId());
     }
 
     @DELETE
@@ -115,7 +128,13 @@ public class SpmApiResource {
     @ApiResponses({@ApiResponse(code = 200, message = "OK")})
     public void deactivateSurvey(@PathParam("id") @ApiParam(value = "Enter id") final Long id) {
         this.securityContext.authenticatedUser();
-
         this.spmService.deactivateSurvey(id);
+    }
+    
+    private String getResponse(Long id) {
+        Gson gson = new Gson();
+        HashMap<String, Object> response = new HashMap<>();
+        response.put("resourceId", id);
+        return gson.toJson(response);
     }
 }

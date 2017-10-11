@@ -1085,13 +1085,21 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
 
             // deal with potential minRequiredBalance and
             // enforceMinRequiredBalance
-            if (!isException && transaction.canProcessBalanceCheck()) {
+            if (!isException && transaction.canProcessBalanceCheck() && !isOverdraft()) {
                 if (runningBalance.minus(minRequiredBalance).isLessThanZero()) { throw new InsufficientAccountBalanceException(
                         "transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount); }
             }
             lastSavingsDate = transaction.transactionLocalDate();
 
         }
+        
+        //In overdraft cases, minRequiredBalance can be in violation after interest posting
+        //and should be checked after processing all transactions
+        if(isOverdraft()) {
+	        	if (runningBalance.minus(minRequiredBalance).isLessThanZero()) { throw new InsufficientAccountBalanceException(
+	                    "transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount); }
+        }
+        
 		if (this.getSavingsHoldAmount().compareTo(BigDecimal.ZERO) == 1) {
 			if (runningBalance.minus(this.getSavingsHoldAmount()).isLessThanZero()) {
 				throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee,
@@ -3047,6 +3055,10 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
 
     public void releaseAmount(BigDecimal amount) {
         this.savingsOnHoldAmount = getSavingsHoldAmount().subtract(amount);
+    }
+    
+    private boolean isOverdraft() {
+    		return allowOverdraft;
     }
 
 }
