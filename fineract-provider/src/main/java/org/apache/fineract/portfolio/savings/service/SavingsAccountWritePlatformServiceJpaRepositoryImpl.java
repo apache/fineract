@@ -84,10 +84,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements SavingsAccountWritePlatformService {
-
+    private final static org.slf4j.Logger logger = LoggerFactory.getLogger(SavingsAccountWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final SavingsAccountDataValidator fromApiJsonDeserializer;
     private final SavingsAccountRepositoryWrapper savingAccountRepositoryWrapper;
@@ -491,7 +492,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.savingAccountRepositoryWrapper.saveAndFlush(account);
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
         return new CommandProcessingResultBuilder() //
-                .withEntityId(savingsId) //
+                .withEntityId(transactionId) //
                 .withOfficeId(account.officeId()) //
                 .withClientId(account.clientId()) //
                 .withGroupId(account.groupId()) //
