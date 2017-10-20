@@ -36,4 +36,6 @@ public interface AuditReadPlatformService {
     AuditData retrieveAuditEntry(Long auditId);
 
     AuditSearchData retrieveSearchTemplate(String useType);
+
+    AuditData retrieveAuditEntryByGuid(String guid);
 }

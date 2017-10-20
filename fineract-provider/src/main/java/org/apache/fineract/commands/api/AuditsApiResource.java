@@ -216,4 +216,18 @@ public class AuditsApiResource {
 
         return extraCriteria;
     }
+    
+    @GET
+    @Path("guid/{guid}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveRequestResult(@PathParam("guid") final String guid, @Context final UriInfo uriInfo) {
+
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+
+        final AuditData auditEntry = this.auditReadPlatformService.retrieveAuditEntryByGuid(guid);
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, auditEntry, this.RESPONSE_DATA_PARAMETERS);
+    }
 }
