@@ -20,9 +20,12 @@ package org.apache.fineract.commands.service;
 
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.commands.domain.GuidMapping;
+import org.apache.fineract.commands.domain.GuidMappingRepository;
 import org.apache.fineract.commands.exception.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.apache.fineract.commands.exception.UnsupportedCommandException;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
@@ -53,13 +56,14 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private CommandSourceRepository commandSourceRepository;
     private final ConfigurationDomainService configurationDomainService;
     private final CommandHandlerProvider commandHandlerProvider;
+    private final GuidMappingRepository guidMappingRepository;
 
     @Autowired
     public SynchronousCommandProcessingService(final PlatformSecurityContext context, final ApplicationContext applicationContext,
             final ToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer,
             final ToApiJsonSerializer<CommandProcessingResult> toApiResultJsonSerializer,
             final CommandSourceRepository commandSourceRepository, final ConfigurationDomainService configurationDomainService,
-            final CommandHandlerProvider commandHandlerProvider) {
+            final CommandHandlerProvider commandHandlerProvider, final GuidMappingRepository guidMappingRepository) {
         this.context = context;
         this.context = context;
         this.applicationContext = applicationContext;
@@ -69,6 +73,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         this.commandSourceRepository = commandSourceRepository;
         this.configurationDomainService = configurationDomainService;
         this.commandHandlerProvider = commandHandlerProvider;
+        this.guidMappingRepository = guidMappingRepository;
     }
 
     @Transactional
@@ -108,6 +113,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         if (commandSourceResult.hasJson()) {
             this.commandSourceRepository.save(commandSourceResult);
+            updateGuidMapping(commandSourceResult.getId(), command);
         }
 
         if ((rollbackTransaction || result.isRollbackTransaction()) && !isApprovedByChecker) {
@@ -222,5 +228,16 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         final HookEvent applicationEvent = new HookEvent(hookEventSource, serializedResult, tenantIdentifier, appUser, authToken);
 
         applicationContext.publishEvent(applicationEvent);
+    }
+
+    private void updateGuidMapping(final Long commandSourceId, final JsonCommand command) {
+        final String guidParamName = "guid";
+        if (command.parameterExists(guidParamName)) {
+            final String guid = command.stringValueOfParameterNamed(guidParamName);
+            if (StringUtils.isNotBlank(guid)) {
+                final GuidMapping guidMapping = GuidMapping.instance(guid, commandSourceId);
+                this.guidMappingRepository.save(guidMapping);
+            }
+        }
     }
 }

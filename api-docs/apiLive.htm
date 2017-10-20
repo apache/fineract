@@ -3831,8 +3831,69 @@
 					<p>Normal Request (with pretty printing/formatting):</p>
 					<div class=apiClick>offices/1?pretty=true</div>
 					<p></p>
-				</div>
 
+				</div>
+			</div>
+
+			<a id="guid" name="guid" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Associate guid with request</h3>
+					<p>Parameter <b>guid</b> can be passed along with the request body 
+						and we can retrieve the request's result based on the guid</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>guid</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{accountsId}/transactions?command=deposit</code>
+					<code class="method-request">POST savingsaccounts/4/transactions?command=deposit
+Content-Type: application/json
+Request Body:
+{
+  "transactionDate": "20 October 2017",
+  "transactionAmount": "10",
+  "paymentTypeId": 1,
+  "locale": "en",
+  "guid": "1",
+  "dateFormat": "dd MMMM yyyy"
+}
+					</code>
+				</div>
+				<div class="method-description">
+					<h3>Retrieve response with guid</h3>
+					<p>Request:</p>
+					<div class=apiClick>audits/guid/1</div>
+					<p></p>					
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/audits/guid/{guid}
+					</code>
+					<code class="method-response">
+{
+	"id": 199,
+	"actionName": "DEPOSIT",
+	"entityName": "SAVINGSACCOUNT",
+	"resourceId": 61,
+	"maker": "mifos",
+	"madeOnDate": 1508491501000,
+	"processingResult": "processed",
+	"commandAsJson": "{"transactionDate":"20 October 2017","transactionAmount":"10","paymentTypeId":1,"locale":"en","guid":1,"dateFormat":"dd MMMM yyyy"}",
+	"officeName": "bangalore",
+	"clientName": "bangalore c",
+	"savingsAccountNo": "000000004",
+	"clientId": 4,
+	"url": "/savingsaccounts/4/transactions"
+}
+					</code>
+				</div>
+				
 			</div>
 
 			<a id="creates_and_updates" name="creates_and_updates"

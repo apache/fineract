@@ -16,20 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.commands.exception;
+package org.apache.fineract.commands.domain;
 
-import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-/**
- * A {@link RuntimeException} thrown when client resources are not found.
- */
-public class CommandNotFoundException extends AbstractPlatformResourceNotFoundException {
-
-    public CommandNotFoundException(final Long id) {
-        super("error.msg.command.id.invalid", "Audit with identifier " + id + " does not exist", id);
-    }
-
-    public CommandNotFoundException(final String guid) {
-        super("error.msg.command.guid.invalid", "Audit with guid identifier " + guid + " does not exist", guid);
-    }
+public interface GuidMappingRepository extends JpaRepository<GuidMapping, Long>, JpaSpecificationExecutor<GuidMapping> {
+    // no added behaviour
 }

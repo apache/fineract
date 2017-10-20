@@ -32,6 +32,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.data.AuditData;
 import org.apache.fineract.commands.data.AuditSearchData;
 import org.apache.fineract.commands.data.ProcessingResultLookup;
+import org.apache.fineract.commands.exception.CommandNotFoundException;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.data.PaginationParametersDataValidator;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -64,6 +65,7 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -532,6 +534,53 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             return " select enum_id as id, enum_message_property as processingResult from r_enum_value where enum_name = 'processing_result_enum' "
                     + " order by enum_id";
         }
+    }
+
+    @Override
+    public AuditData retrieveAuditEntryByGuid(final String guid) {
+        try {
+            final AppUser currentUser = this.context.authenticatedUser();
+            final String hierarchy = currentUser.getOffice().getHierarchy();
+
+            final AuditMapper rm = new AuditMapper();
+            final String sql = auditSchemaForGuid(hierarchy);
+            final AuditData auditResult = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { guid });
+
+            return replaceIdsOnAuditData(auditResult);
+        } catch (final EmptyResultDataAccessException e) {
+            throw new CommandNotFoundException(guid);
+        }
+    }
+
+    private String auditSchemaForGuid(final String hierarchy) {
+
+        final StringBuilder sb = new StringBuilder(200);
+        sb.append(" select aud.id as id, aud.action_name as actionName, aud.entity_name as entityName, aud.resource_id as resourceId,");
+        sb.append(" aud.subresource_id as subresourceId,aud.client_id as clientId, aud.loan_id as loanId,");
+        sb.append(" mk.username as maker, aud.made_on_date as madeOnDate, aud.api_get_url as resourceGetUrl,");
+        sb.append(" ck.username as checker, aud.checked_on_date as checkedOnDate, ev.enum_message_property as processingResult, ");
+        sb.append(" aud.command_as_json as commandAsJson, ");
+        sb.append(" o.name as officeName, gl.level_name as groupLevelName, g.display_name as groupName, c.display_name as clientName, ");
+        sb.append(" l.account_no as loanAccountNo, s.account_no as savingsAccountNo ");
+        sb.append(" from m_guid_mapping gm");
+        sb.append(" left join m_portfolio_command_source aud on gm.command_source_id = aud.id");
+        sb.append(" left join m_appuser mk on mk.id = aud.maker_id");
+        sb.append(" left join m_appuser ck on ck.id = aud.checker_id");
+        sb.append(" left join m_office o on o.id = aud.office_id");
+        sb.append(" left join m_group g on g.id = aud.group_id");
+        sb.append(" left join m_group_level gl on gl.id = g.level_id");
+        sb.append(" left join m_client c on c.id = aud.client_id");
+        sb.append(" left join m_loan l on l.id = aud.loan_id");
+        sb.append(" left join m_savings_account s on s.id = aud.savings_account_id");
+        sb.append(" left join r_enum_value ev on ev.enum_name = 'processing_result_enum' and ev.enum_id = aud.processing_result_enum");
+        // data scoping: head office (hierarchy = ".") can see all audit
+        // entries
+        if (!(hierarchy.equals("."))) {
+            sb.append(" join m_office o2 on o2.id = aud.office_id and o2.hierarchy like '" + hierarchy + "%' ");
+        }
+        sb.append(" where gm.guid = ? ");
+
+        return sb.toString();
     }
 
 }

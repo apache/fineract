@@ -51,6 +51,7 @@ public class FromJsonHelper {
     private final Gson gsonConverter;
     private final JsonParserHelper helperDelegator;
     private final JsonParser parser;
+    private static final String GUID_PARAMNAME = "guid";
 
     public FromJsonHelper() {
         this.gsonConverter = new Gson();
@@ -87,6 +88,8 @@ public class FromJsonHelper {
 
         final Map<String, Object> requestMap = this.gsonConverter.fromJson(json, typeOfMap);
 
+        addGUIDParam(supportedParams);
+
         final List<String> unsupportedParameterList = new ArrayList<>();
         for (final String providedParameter : requestMap.keySet()) {
             if (!supportedParams.contains(providedParameter)) {
@@ -100,6 +103,8 @@ public class FromJsonHelper {
     public void checkForUnsupportedParameters(final JsonObject object, final Set<String> supportedParams) {
         if (object == null) { throw new InvalidParameterException(); }
 
+        addGUIDParam(supportedParams);
+
         final Set<Entry<String, JsonElement>> entries = object.entrySet();
         final List<String> unsupportedParameterList = new ArrayList<>();
 
@@ -110,6 +115,10 @@ public class FromJsonHelper {
         }
 
         if (!unsupportedParameterList.isEmpty()) { throw new UnsupportedParameterException(unsupportedParameterList); }
+    }
+
+    private void addGUIDParam(final Set<String> supportedParams) {
+        supportedParams.add(GUID_PARAMNAME);
     }
 
     /**
