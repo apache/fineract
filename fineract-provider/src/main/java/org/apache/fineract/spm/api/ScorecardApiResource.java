@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.spm.api;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -33,9 +32,8 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.spm.data.ScorecardData;
-import org.apache.fineract.spm.domain.Scorecard;
 import org.apache.fineract.spm.domain.Survey;
-import org.apache.fineract.spm.exception.SurveyNotFoundException;
+import org.apache.fineract.spm.service.ScorecardReadPlatformService;
 import org.apache.fineract.spm.service.ScorecardService;
 import org.apache.fineract.spm.service.SpmService;
 import org.apache.fineract.spm.util.ScorecardMapper;
@@ -45,7 +43,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Path("/surveys/{surveyId}/scorecards")
+@Path("/surveys/scorecards")
 @Component
 @Scope("singleton")
 public class ScorecardApiResource {
@@ -54,68 +52,63 @@ public class ScorecardApiResource {
     private final SpmService spmService;
     private final ScorecardService scorecardService;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
+    private final ScorecardReadPlatformService scorecardReadPlatformService;
 
     @Autowired
     public ScorecardApiResource(final PlatformSecurityContext securityContext, final SpmService spmService,
-                                final ScorecardService scorecardService, final ClientRepositoryWrapper clientRepositoryWrapper) {
-        super();
+            final ScorecardService scorecardService, final ClientRepositoryWrapper clientRepositoryWrapper,
+            final ScorecardReadPlatformService scorecardReadPlatformService) {
         this.securityContext = securityContext;
         this.spmService = spmService;
         this.scorecardService = scorecardService;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
+        this.scorecardReadPlatformService = scorecardReadPlatformService;
     }
 
     @GET
+    @Path("{surveyId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
     public List<ScorecardData> findBySurvey(@PathParam("surveyId") final Long surveyId) {
         this.securityContext.authenticatedUser();
-
-        final Survey survey = findSurvey(surveyId);
-
-        final List<Scorecard> scorecards = this.scorecardService.findBySurvey(survey);
-
-        if (scorecards != null) {
-            return ScorecardMapper.map(scorecards);
-        }
-
-        return Collections.EMPTY_LIST;
+        this.spmService.findById(surveyId);
+        return (List<ScorecardData>) this.scorecardReadPlatformService.retrieveScorecardBySurvey(surveyId);
     }
 
     @POST
+    @Path("{surveyId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
     public void createScorecard(@PathParam("surveyId") final Long surveyId, final ScorecardData scorecardData) {
         final AppUser appUser = this.securityContext.authenticatedUser();
-        final Survey survey = findSurvey(surveyId);
+        final Survey survey = this.spmService.findById(surveyId);
         final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(scorecardData.getClientId());
         this.scorecardService.createScorecard(ScorecardMapper.map(scorecardData, survey, appUser, client));
     }
 
-    @Path("/clients/{clientId}")
     @GET
+    @Path("{surveyId}/clients/{clientId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
-    public List<ScorecardData> findBySurveyClient(@PathParam("surveyId") final Long surveyId,
-                                                  @PathParam("clientId") final Long clientId) {
+    public List<ScorecardData> findBySurveyAndClient(@PathParam("surveyId") final Long surveyId, @PathParam("clientId") final Long clientId) {
         this.securityContext.authenticatedUser();
-        final Survey survey = findSurvey(surveyId);
-        final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
-        final List<Scorecard> scorecards = this.scorecardService.findBySurveyAndClient(survey, client);
-        if (scorecards != null) {
-            return ScorecardMapper.map(scorecards);
-        }
-        return Collections.EMPTY_LIST;
+        this.spmService.findById(surveyId);
+        this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+        return (List<ScorecardData>) this.scorecardReadPlatformService.retrieveScorecardBySurveyAndClient(surveyId, clientId);
+
     }
 
-    private Survey findSurvey(final Long surveyId) {
-        final Survey survey = this.spmService.findById(surveyId);
-        if (survey == null) {
-            throw new SurveyNotFoundException(surveyId);
-        }
-        return survey;
+    @GET
+    @Path("clients/{clientId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Transactional
+    public List<ScorecardData> findByClient(@PathParam("clientId") final Long clientId) {
+        this.securityContext.authenticatedUser();
+        this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+        return (List<ScorecardData>) this.scorecardReadPlatformService.retrieveScorecardByClient(clientId);
     }
 }

@@ -45,8 +45,8 @@ public enum JobName {
     EXECUTE_REPORT_MAILING_JOBS("Execute Report Mailing Jobs"),
     UPDATE_SMS_OUTBOUND_WITH_CAMPAIGN_MESSAGE("Update SMS Outbound with Campaign Message"),
     SEND_MESSAGES_TO_SMS_GATEWAY("Send Messages to SMS Gateway"), 
-    GET_DELIVERY_REPORTS_FROM_SMS_GATEWAY("Get Delivery Reports from SMS Gateway");
-
+    GET_DELIVERY_REPORTS_FROM_SMS_GATEWAY("Get Delivery Reports from SMS Gateway"),
+	GENERATE_ADHOCCLIENT_SCEHDULE("Generate AdhocClient Schedule");
     private final String name;
 
     private JobName(final String name) {
