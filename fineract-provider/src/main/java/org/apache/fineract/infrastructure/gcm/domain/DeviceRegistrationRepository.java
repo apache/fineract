@@ -16,27 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.campaigns.sms.domain;
-
-import java.util.Collection;
-import java.util.List;
+package org.apache.fineract.infrastructure.gcm.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface SmsCampaignRepository extends JpaRepository<SmsCampaign, Long>, JpaSpecificationExecutor<SmsCampaign> {
+public interface DeviceRegistrationRepository extends
+		JpaRepository<DeviceRegistration, Long>,
+		JpaSpecificationExecutor<DeviceRegistration> {
 
-    List<SmsCampaign> findByCampaignType(final Integer campaignType);
+	public static final String FIND_DEVICE_REGISTRATION_BY_CLIENT = "select dr from DeviceRegistration dr where dr.client.id =:clientId ";
 
-    Collection<SmsCampaign> findByCampaignTypeAndTriggerTypeAndStatus(final Integer campaignType, final Integer triggerType,
-            final Integer status);
-    
-    Collection<SmsCampaign> findByTriggerTypeAndStatus(final Integer triggerType, final Integer status);
+	@Query(FIND_DEVICE_REGISTRATION_BY_CLIENT)
+	DeviceRegistration findDeviceRegistrationByClientId(
+			@Param("clientId") Long clientId);
 
-    Collection<SmsCampaign> findByTriggerType(final Integer triggerType) ;
-    
-    @Query("SELECT campaign FROM SmsCampaign campaign WHERE campaign.paramValue LIKE :reportPattern AND campaign.triggerType=:triggerType AND campaign.status=300")
-    List<SmsCampaign> findActiveSmsCampaigns(@Param("reportPattern") final String reportPattern, @Param("triggerType") final Integer triggerType) ;
 }

@@ -30,7 +30,6 @@ import org.apache.fineract.infrastructure.campaigns.helper.SmsConfigUtils;
 import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignEnumerations;
 import org.apache.fineract.infrastructure.campaigns.sms.constants.SmsCampaignTriggerType;
 import org.apache.fineract.infrastructure.campaigns.sms.data.SmsProviderData;
-import org.apache.fineract.infrastructure.campaigns.sms.exception.ConnectionFailureException;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.calendar.domain.CalendarWeekDaysType;
 import org.apache.fineract.portfolio.calendar.service.CalendarEnumerations;
@@ -81,10 +80,8 @@ public class SmsCampaignDropdownReadPlatformServiceImpl implements SmsCampaignDr
                     new ParameterizedTypeReference<Collection<SmsProviderData>>() {});
             smsProviderOptions = responseOne.getBody();
             if (!responseOne.getStatusCode().equals(HttpStatus.OK)) {
-                throw new ConnectionFailureException(hostName);
             }
         } catch (Exception e) {
-        	 throw new ConnectionFailureException(hostName);
         }
         return smsProviderOptions;
     }

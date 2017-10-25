@@ -41,6 +41,11 @@ public class ExternalServicesConstants {
     public static final String SMS_END_POINT = "end_point";
     public static final String SMS_TENANT_APP_KEY = "tenant_app_key";
     
+    public static final String NOTIFICATION_SERVICE_NAME = "NOTIFICATION";
+    public static final String NOTIFICATION_SERVER_KEY = "server_key";
+    public static final String NOTIFICATION_GCM_END_POINT = "gcm_end_point";
+    public static final String NOTIFICATION_FCM_END_POINT = "fcm_end_point";
+    
     public static enum EXTERNALSERVICEPROPERTIES_JSON_INPUT_PARAMS {
         EXTERNAL_SERVICE_ID("external_service_id"), NAME("name"), VALUE("value");
 
