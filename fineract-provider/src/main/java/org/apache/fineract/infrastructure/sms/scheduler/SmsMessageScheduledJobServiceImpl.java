@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.campaigns.sms.exception.ConnectionFail
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.gcm.service.NotificationSenderService;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.sms.data.SmsMessageApiQueueResourceData;
@@ -76,6 +77,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
     private  ExecutorService genericExecutorService ;
     private ExecutorService triggeredExecutorService ;
     private final SmsConfigUtils smsConfigUtils ;
+    private final NotificationSenderService notificationSenderService;
     
     
     /**
@@ -83,10 +85,11 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
      **/
     @Autowired
     public SmsMessageScheduledJobServiceImpl(SmsMessageRepository smsMessageRepository, SmsReadPlatformService smsReadPlatformService,
-            final SmsConfigUtils smsConfigUtils) {
+            final SmsConfigUtils smsConfigUtils, final NotificationSenderService notificationSenderService) {
         this.smsMessageRepository = smsMessageRepository;
         this.smsReadPlatformService = smsReadPlatformService;
         this.smsConfigUtils = smsConfigUtils ;
+        this.notificationSenderService = notificationSenderService;
     }
 
     @PostConstruct
@@ -110,6 +113,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
             org.springframework.data.domain.Page<SmsMessage> pendingMessages = this.smsMessageRepository.findByStatusType(
                     SmsMessageStatusType.PENDING.getValue(), pageRequest);
             List<SmsMessage> toSaveMessages = new ArrayList<>() ;
+            List<SmsMessage> toSendNotificationMessages = new ArrayList<>() ;
             try {
 
                 if (pendingMessages.getContent().size() > 0) {
@@ -118,18 +122,26 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                     Collection<SmsMessageApiQueueResourceData> apiQueueResourceDatas = new ArrayList<>();
                     while (pendingMessageIterator.hasNext()) {
                         SmsMessage smsData = pendingMessageIterator.next();
-
-                        SmsMessageApiQueueResourceData apiQueueResourceData = SmsMessageApiQueueResourceData.instance(smsData.getId(),
-                                tenantIdentifier, null, null, smsData.getMobileNo(), smsData.getMessage(), smsData.getSmsCampaign()
-                                        .getProviderId());
-                        apiQueueResourceDatas.add(apiQueueResourceData);
-                        smsData.setStatusType(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue());
-                        toSaveMessages.add(smsData) ;
+                        if(smsData.isNotification()){
+                        	smsData.setStatusType(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue());
+                        	toSendNotificationMessages.add(smsData);
+                        }else{
+                        	SmsMessageApiQueueResourceData apiQueueResourceData = SmsMessageApiQueueResourceData.instance(smsData.getId(),
+                                    tenantIdentifier, null, null, smsData.getMobileNo(), smsData.getMessage(), smsData.getSmsCampaign()
+                                            .getProviderId());
+                            apiQueueResourceDatas.add(apiQueueResourceData);
+                            smsData.setStatusType(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue());
+                            toSaveMessages.add(smsData) ;
+                        }
                     }
-                    this.smsMessageRepository.save(toSaveMessages);
-                    this.smsMessageRepository.flush();
-                    this.genericExecutorService.execute(new SmsTask(ThreadLocalContextUtil.getTenant(), apiQueueResourceDatas));
-
+                    if(toSaveMessages.size()>0){
+                    	this.smsMessageRepository.save(toSaveMessages);
+                        this.smsMessageRepository.flush();
+                        this.genericExecutorService.execute(new SmsTask(ThreadLocalContextUtil.getTenant(), apiQueueResourceDatas));
+                    }                    
+                    if(!toSendNotificationMessages.isEmpty()){
+                    	this.notificationSenderService.sendNotification(toSendNotificationMessages);
+                    }
 //                    new MyThread(ThreadLocalContextUtil.getTenant(), apiQueueResourceDatas).start();
                 }
             } catch (Exception e) {
