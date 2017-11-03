@@ -59,7 +59,7 @@ public class HolidayHelper {
         map.put("fromDate", "01 April 2013");
         map.put("toDate", "01 April 2013");
         map.put("repaymentsRescheduledTo", "08 April 2013");
-
+        map.put("reschedulingType", 2);
         String HolidayCreateJson = new Gson().toJson(map);
         System.out.println(HolidayCreateJson);
         return HolidayCreateJson;

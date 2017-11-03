@@ -29,10 +29,10 @@ import org.springframework.data.repository.query.Param;
 
 public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificationExecutor<Loan> {
 
-    public static final String FIND_GROUP_LOANS_DISBURSED_AFTER = "select l from Loan l where l.actualDisbursementDate > :disbursementDate and "
+    public static final String FIND_GROUP_LOANS_DISBURSED_AFTER = "select l from Loan l where ( l.actualDisbursementDate IS NOT NULL and l.actualDisbursementDate > :disbursementDate) and "
             + "l.group.id = :groupId and l.loanType = :loanType order by l.actualDisbursementDate";
 
-    public static final String FIND_CLIENT_OR_JLG_LOANS_DISBURSED_AFTER = "select l from Loan l where l.actualDisbursementDate > :disbursementDate and "
+    public static final String FIND_CLIENT_OR_JLG_LOANS_DISBURSED_AFTER = "select l from Loan l where (l.actualDisbursementDate IS NOT NULL and l.actualDisbursementDate > :disbursementDate) and "
             + "l.client.id = :clientId order by l.actualDisbursementDate";
 
     public static final String FIND_MAX_GROUP_LOAN_COUNTER_QUERY = "Select MAX(l.loanCounter) from Loan l where l.group.id = :groupId "
