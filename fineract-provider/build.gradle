@@ -62,10 +62,30 @@ project.ext.springVersion = '4.0.7.RELEASE'
 project.ext.springOauthVersion = '2.0.4.RELEASE'
 project.ext.jerseyVersion = '1.17'
 project.ext.springDataJpaVersion = '1.7.0.RELEASE' // also change spring-boot-gradle-plugin version above
+if(rootProject.hasProperty("mysqlUser")){
+    project.ext.mysqlUser = rootProject.getProperty("mysqlUser");
+}
+else{
+    project.ext.mysqlUser='root'
+}
 
-project.ext.mysqlUser='root'
-project.ext.mysqlPassword='mysql'
+if(rootProject.hasProperty("mysqlPassword")){
+    project.ext.mysqlPassword = rootProject.getProperty("mysqlPassword");
+}
+else{
+    project.ext.mysqlPassword='mysql'
+}
 
+if(rootProject.hasProperty("mysqlPath")){
+    project.ext.mysqlPath = rootProject.getProperty("mysqlPath");
+}
+else{
+    project.ext.mysqlPath= "localhost"
+}
+
+logger.info(mysqlPath);
+logger.info(mysqlUser);
+logger.info(mysqlPassword);
 
 group = 'org.apache.fineract'
 buildDir = new File(rootProject.projectDir, "../build")
@@ -283,6 +303,11 @@ license {
 task licenseFormatBuildScripts (type:nl.javadude.gradle.plugins.license.License) {
     source = fileTree(dir: '../', includes: ['**/*.bat', '**/*.sh', '**/*.sql'])
 }
+task printProps{
+        println mysqlPassword
+        println mysqlPath
+        println mysqlUser
+}
 licenseFormat.dependsOn licenseFormatBuildScripts
 
 tomcatRun {
@@ -377,19 +402,19 @@ configurations.driver.each {File file ->
 
 task createDB<<{
     description= "Creates the Database. Needs database name to be passed (like: -PdbName=someDBname)"
-    sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
+    sql = Sql.newInstance( 'jdbc:mysql:thin://' + mysqlPath + ':3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
     sql.execute( 'create database '+"`$dbName`" )
 }
 
 task dropDB<<{
     description= "Drops the specified database. The database name has to be passed (like: -PdbName=someDBname)"
-    sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
+    sql = Sql.newInstance( 'jdbc:mysql:thin://' + mysqlPath + ':3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
     sql.execute( 'DROP DATABASE '+"`$dbName`")
 }
 task setBlankPassword<<{
-    sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
+    sql = Sql.newInstance( 'jdbc:mysql:thin://' + mysqlPath + ':3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
     sql.execute('USE `mifosplatform-tenants`')
-    sql.execute('UPDATE mifosplatform-tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
+    sql.execute('UPDATE mifosplatform-tenants.tenants SET schema_server = \'' + mysqlPath + '\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
 }
 
 
@@ -407,7 +432,7 @@ buildscript {
 
 
 flyway {
-    url = "jdbc:mysql:thin://localhost:3306/mifostenant-default"
+    url = "jdbc:mysql:thin://" + mysqlPath + ":3306/mifostenant-default"
 	driver = "org.drizzle.jdbc.DrizzleDriver"
     user = mysqlUser
     password = mysqlPassword
@@ -422,7 +447,7 @@ task migrateTenantDB<<{
 		tenantDbName = rootProject.getProperty("dbName")
 	}
 	
-    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantDbName"
+    flyway.url= "jdbc:mysql:thin://" + mysqlPath + ":3306/$tenantDbName"
 	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
     /**We use ${ as the prefix for strecthy reporting, do not want them to be interpreted by Flyway**/
@@ -439,7 +464,7 @@ task showTenantDBInfo<<{
 		tenantDbName = rootProject.getProperty("dbName")
 	}
 	
-    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantDbName"
+    flyway.url= "jdbc:mysql:thin://" + mysqlPath + ":3306/$tenantDbName"
 	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
     flywayInfo.execute()
@@ -455,7 +480,7 @@ task migrateTenantListDB<<{
 		tenantsDbName = rootProject.getProperty("dbName")
 	}
 	
-    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
+    flyway.url= "jdbc:mysql:thin://" + mysqlPath + ":3306/$tenantsDbName"
 	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
 
@@ -471,7 +496,7 @@ task showTenantListDBInfo<<{
 		tenantsDbName = rootProject.getProperty("dbName")
 	}
     
-    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
+    flyway.url= "jdbc:mysql:thin://" + mysqlPath + ":3306/$tenantsDbName"
 	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
     flywayInfo.execute()
@@ -486,7 +511,7 @@ task repairTenantDB<<{
         tenantsDbName = rootProject.getProperty("dbName")
     }
     
-    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
+    flyway.url= "jdbc:mysql:thin://" + mysqlPath + ":3306/$tenantsDbName"
 	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
     flywayRepair.execute()
