@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.boot;
 
+import org.apache.fineract.notification.config.MessagingConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -40,7 +41,7 @@ import org.springframework.context.annotation.PropertySource;
  * and MariaDB4j (because those differ in the subclasses).
  */
 @Configuration
-@Import({ WebXmlConfiguration.class, WebXmlOauthConfiguration.class, WebFrontEndConfiguration.class })
+@Import({ WebXmlConfiguration.class, WebXmlOauthConfiguration.class, WebFrontEndConfiguration.class, MessagingConfiguration.class })
 @ImportResource({ "classpath*:META-INF/spring/appContext.xml" })
 @PropertySource(value="classpath:META-INF/spring/jdbc.properties")
 @EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class,
