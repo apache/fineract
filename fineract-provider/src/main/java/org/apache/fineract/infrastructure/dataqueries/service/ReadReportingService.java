@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.ws.rs.core.StreamingOutput;
@@ -26,6 +28,7 @@ import javax.ws.rs.core.StreamingOutput;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportParameterData;
+import org.apache.fineract.useradministration.domain.AppUser;
 
 public interface ReadReportingService {
 
@@ -45,8 +48,11 @@ public interface ReadReportingService {
 
     Collection<String> getAllowedReportTypes();
     
-  //needed for smsCampaign jobs where securityContext is null
-    GenericResultsetData retrieveGenericResultSetForSmsCampaign(String name, String type, Map<String, String> extractedQueryParams);
-    
-    String  sqlToRunForSmsCampaign(String name, String type, Map<String, String> queryParams);
+  //needed for smsCampaign and emailCampaign jobs where securityContext is null
+    GenericResultsetData retrieveGenericResultSetForSmsEmailCampaign(String name, String type, Map<String, String> extractedQueryParams);
+
+    String  sqlToRunForSmsEmailCampaign(String name, String type, Map<String, String> queryParams);
+
+	ByteArrayOutputStream generatePentahoReportAsOutputStream(String reportName, String outputTypeParam,
+            Map<String, String> queryParams, Locale locale, AppUser runReportAsUser, StringBuilder errorLog);
 }
