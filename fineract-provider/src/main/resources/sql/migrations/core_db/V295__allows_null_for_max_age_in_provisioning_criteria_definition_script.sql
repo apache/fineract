@@ -1,0 +1,1 @@
+ALTER TABLE `m_provisioning_criteria_definition` MODIFY `max_age` bigint(20) ;

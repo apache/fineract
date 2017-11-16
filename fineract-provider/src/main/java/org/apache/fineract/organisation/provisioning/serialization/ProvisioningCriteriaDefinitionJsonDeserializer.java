@@ -121,10 +121,20 @@ public class ProvisioningCriteriaDefinitionJsonDeserializer implements Provision
                         .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM, i + 1).value(minimumAge).notNull()
                         .longZeroOrGreater() ;
 
-                Long maximumAge = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM, jsonObject);
-                baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM)
-                        .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM, i + 1).value(maximumAge).notNull()
-                        .longGreaterThanNumber(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM, minimumAge, (i+1));
+
+                //Allow Max age of "Loss Category" to be blank => Symbolises infinity// NotNull check removed when  categoryId=4
+                if(categoryId == 4) {
+                    Long maximumAge = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM, jsonObject);
+                    baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM)
+                            .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM, i + 1).value(maximumAge)
+                            .longGreaterThanNumber(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM, minimumAge, (i + 1));
+                } else {
+                    Long maximumAge = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM, jsonObject);
+                    baseDataValidator.reset().parameter(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM)
+                            .parameterAtIndexArray(ProvisioningCriteriaConstants.JSON_MAXIMUM_AGE_PARAM, i + 1).value(maximumAge).notNull()
+                            .longGreaterThanNumber(ProvisioningCriteriaConstants.JSON_MINIMUM_AGE_PARAM, minimumAge, (i + 1));
+
+                }
 
                 
                 BigDecimal provisioningpercentage = this.fromApiJsonHelper.extractBigDecimalNamed(
