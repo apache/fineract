@@ -39,7 +39,8 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
-@Table(name = "acc_gl_closure", uniqueConstraints = { @UniqueConstraint(columnNames = { "office_id", "closing_date" }, name = "office_id_closing_date") })
+//@Table(name = "acc_gl_closure", uniqueConstraints = { @UniqueConstraint(columnNames = { "office_id", "closing_date" }, name = "office_id_closing_date") })
+@Table(name = "acc_gl_closure")
 public class GLClosure extends AbstractAuditableCustom<AppUser, Long> {
 
     @ManyToOne
@@ -102,4 +103,7 @@ public class GLClosure extends AbstractAuditableCustom<AppUser, Long> {
         return this.office;
     }
 
+	public void updateDeleted(boolean deleted) {
+		this.deleted = deleted;
+	}
 }

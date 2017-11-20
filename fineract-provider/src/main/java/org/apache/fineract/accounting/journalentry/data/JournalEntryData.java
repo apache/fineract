@@ -78,13 +78,16 @@ public class JournalEntryData {
     @SuppressWarnings("unused")
     private final TransactionDetailData transactionDetails;
 
+	private final Long glClosureId;
+	
     public JournalEntryData(final Long id, final Long officeId, final String officeName, final String glAccountName,
             final Long glAccountId, final String glAccountCode, final EnumOptionData glAccountClassification,
             final LocalDate transactionDate, final EnumOptionData entryType, final BigDecimal amount, final String transactionId,
             final Boolean manualEntry, final EnumOptionData entityType, final Long entityId, final Long createdByUserId,
             final LocalDate createdDate, final String createdByUserName, final String comments, final Boolean reversed,
             final String referenceNumber, final BigDecimal officeRunningBalance, final BigDecimal organizationRunningBalance,
-            final Boolean runningBalanceComputed, final TransactionDetailData transactionDetailData, final CurrencyData currency) {
+            final Boolean runningBalanceComputed, final TransactionDetailData transactionDetailData, final CurrencyData currency,
+            final Long glClosureId) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -110,6 +113,7 @@ public class JournalEntryData {
         this.runningBalanceComputed = runningBalanceComputed;
         this.transactionDetails = transactionDetailData;
         this.currency = currency;
+		this.glClosureId = glAccountId;
     }
 
     public static JournalEntryData fromGLAccountData(final GLAccountData glAccountData) {
@@ -139,10 +143,11 @@ public class JournalEntryData {
         final Boolean runningBalanceComputed = null;
         final TransactionDetailData transactionDetailData = null;
         final CurrencyData currency = null;
+		final Long glClosureId = glAccountData.getId();
         return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glAccountCode, glAccountClassification,
                 transactionDate, entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, createdDate,
                 createdByUserName, comments, reversed, referenceNumber, officeRunningBalance, organizationRunningBalance,
-                runningBalanceComputed, transactionDetailData, currency);
+                runningBalanceComputed, transactionDetailData, currency, glClosureId);
     }
 
     public Long getId() {

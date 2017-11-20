@@ -74,7 +74,7 @@
 	<jpa:auditing auditor-aware-ref="auditorAware" />
 	<jpa:repositories base-package="org.apache.fineract.commands.domain" />
 	<jpa:repositories base-package="org.apache.fineract.infrastructure.*.domain" />
-	<jpa:repositories base-package="org.apache.fineract.accounting.*.domain" />
+	<jpa:repositories base-package="org.apache.fineract.accounting.*" />
 	<jpa:repositories base-package="org.apache.fineract.useradministration.domain" />
 	<jpa:repositories base-package="org.apache.fineract.organisation.*.domain" />
 	<jpa:repositories base-package="org.apache.fineract.portfolio.*" />

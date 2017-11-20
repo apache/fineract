@@ -16,17 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.closure.service;
+package org.apache.fineract.accounting.closure.bookoffincomeandexpense.data;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import java.math.BigDecimal;
 
-public interface GLClosureWritePlatformService {
+public class SingleDebitOrCreditEntry {
 
-    CommandProcessingResult createGLClosure(JsonCommand command);
+    private final Long glAccountId;
+    private final String glAccountName;
+    private final BigDecimal amount;
+    private final String comments;
 
-    CommandProcessingResult updateGLClosure(Long glClosureId, JsonCommand command);
+    public SingleDebitOrCreditEntry(Long glAccountId, String glAccountName, BigDecimal amount, String comments) {
+        this.glAccountId = glAccountId;
+        this.glAccountName = glAccountName;
+        this.amount = amount;
+        this.comments = comments;
+    }
 
-    CommandProcessingResult deleteGLClosure(Long glClosureId, JsonCommand command);
+    public Long getGlAccountId() {return this.glAccountId;}
 
+    public String getGlAccountName() {return this.glAccountName;}
+
+    public BigDecimal getAmount() {return this.amount;}
+
+    public String getComments() {return this.comments;}
 }

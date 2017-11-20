@@ -124,7 +124,10 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                         .append(" pd.payment_type_id as paymentTypeId,").append(" pd.bank_number as bankNumber, ")
                         .append(" pd.routing_code as routingCode, ").append(" note.id as noteId, ")
                         .append(" note.note as transactionNote, ").append(" lt.transaction_type_enum as loanTransactionType, ")
-                        .append(" st.transaction_type_enum as savingsTransactionType ");
+                        .append(" st.transaction_type_enum as savingsTransactionType, ");
+            }
+			if(associationParametersData.isGlClosureRequired()){
+                sb.append(" ie.gl_closure_id ");
             }
             sb.append(" from acc_gl_journal_entry as journalEntry ")
                     .append(" left join acc_gl_account as glAccount on glAccount.id = journalEntry.account_id")
@@ -137,6 +140,9 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                         .append(" left join m_payment_detail as pd on lt.payment_detail_id = pd.id or st.payment_detail_id = pd.id or journalEntry.payment_details_id = pd.id")
                         .append(" left join m_payment_type as pt on pt.id = pd.payment_type_id ")
                         .append(" left join m_note as note on lt.id = note.loan_transaction_id or st.id = note.savings_account_transaction_id ");
+            }
+			if(associationParametersData.isGlClosureRequired()){
+                sb.append(" left join acc_income_and_expense_bookings as ie on ie.journal_entry_transaction_id =journalEntry.transaction_id ");
             }
             return sb.toString();
 
@@ -165,6 +171,8 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 entityType = AccountingEnumerations.portfolioProductType(entityTypeId);
 
             }
+			
+			Long glClosureId =  null;
 
             final Long entityId = JdbcSupport.getLong(rs, "entityId");
             final Long createdByUserId = rs.getLong("createdByUserId");
@@ -232,12 +240,16 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                             savingsTransactionType.getValue());
                 }
 
+				if(associationParametersData.isGlClosureRequired()){
+					glClosureId= rs.getLong("gl_closure_id");
+				}
+ 
                 transactionDetailData = new TransactionDetailData(transaction, paymentDetailData, noteData, transactionTypeEnumData);
             }
             return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glCode, accountType, transactionDate,
                     entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, createdDate, createdByUserName,
                     comments, reversed, referenceNumber, officeRunningBalance, organizationRunningBalance, runningBalanceComputed,
-                    transactionDetailData, currency);
+                    transactionDetailData, currency, glClosureId);
         }
     }
 
@@ -519,7 +531,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
     @Override
     public Page<JournalEntryData> retrieveJournalEntriesByEntityId(String transactionId, Long entityId, Integer entityType) {
         JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(true,
-                true);
+                true, true);
         try {
             final GLJournalEntryMapper rm = new GLJournalEntryMapper(associationParametersData);
             final String sql = "select " + rm.schema() + " where journalEntry.transaction_id = ? and journalEntry.entity_id = ? and journalEntry.entity_type_enum = ?";

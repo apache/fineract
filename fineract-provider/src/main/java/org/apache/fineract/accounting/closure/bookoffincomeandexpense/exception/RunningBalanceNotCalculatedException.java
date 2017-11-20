@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.closure.service;
+package org.apache.fineract.accounting.closure.bookoffincomeandexpense.exception;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface GLClosureWritePlatformService {
-
-    CommandProcessingResult createGLClosure(JsonCommand command);
-
-    CommandProcessingResult updateGLClosure(Long glClosureId, JsonCommand command);
-
-    CommandProcessingResult deleteGLClosure(Long glClosureId, JsonCommand command);
+public class RunningBalanceNotCalculatedException extends AbstractPlatformDomainRuleException {
+    public RunningBalanceNotCalculatedException(final Long officeId) {
+        super("error.msg.running.balance.not.calculated", "Office with identifier " + officeId + " running balance is not calculated");
+    }
 
 }

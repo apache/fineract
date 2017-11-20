@@ -242,4 +242,8 @@ public class Office extends AbstractPersistableCustom<Long> {
     public void loadLazyCollections() {
         this.children.size() ;
     }
+	
+	public List<Office> getChildren() {
+		return this.children;
+	}
 }

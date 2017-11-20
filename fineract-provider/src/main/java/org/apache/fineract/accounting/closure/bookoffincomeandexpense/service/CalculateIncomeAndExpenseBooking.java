@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.closure.service;
+package org.apache.fineract.accounting.closure.bookoffincomeandexpense.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.accounting.closure.bookoffincomeandexpense.data.IncomeAndExpenseBookingData;
+import org.apache.fineract.infrastructure.core.api.JsonQuery;
 
-public interface GLClosureWritePlatformService {
+import java.util.Collection;
 
-    CommandProcessingResult createGLClosure(JsonCommand command);
-
-    CommandProcessingResult updateGLClosure(Long glClosureId, JsonCommand command);
-
-    CommandProcessingResult deleteGLClosure(Long glClosureId, JsonCommand command);
-
+public interface CalculateIncomeAndExpenseBooking {
+    Collection<IncomeAndExpenseBookingData> CalculateIncomeAndExpenseBookings(JsonQuery query);
 }

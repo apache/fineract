@@ -112,7 +112,7 @@ public class JournalEntriesApiResource {
         final SearchParameters searchParameters = SearchParameters.forJournalEntries(officeId, offset, limit, orderBy, sortOrder, loanId,
                 savingsId);
         JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(transactionDetails,
-                runningBalance);
+                runningBalance, false);
 
         final Page<JournalEntryData> glJournalEntries = this.journalEntryReadPlatformService.retrieveAll(searchParameters, glAccountId,
                 onlyManualEntries, fromDate, toDate, transactionId, entityType, associationParametersData);
@@ -125,11 +125,12 @@ public class JournalEntriesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retreiveJournalEntryById(@PathParam("journalEntryId") final Long journalEntryId, @Context final UriInfo uriInfo,
-            @QueryParam("runningBalance") final boolean runningBalance, @QueryParam("transactionDetails") final boolean transactionDetails) {
+            @QueryParam("runningBalance") final boolean runningBalance, @QueryParam("transactionDetails") final boolean transactionDetails, 
+            @QueryParam("glClosure") final boolean glClosure) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
         JournalEntryAssociationParametersData associationParametersData = new JournalEntryAssociationParametersData(transactionDetails,
-                runningBalance);
+                runningBalance, glClosure);
         final JournalEntryData glJournalEntryData = this.journalEntryReadPlatformService.retrieveGLJournalEntryById(journalEntryId,
                 associationParametersData);
 

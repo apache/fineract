@@ -16,17 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.closure.service;
+package org.apache.fineract.accounting.closure.bookoffincomeandexpense.data;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.joda.time.LocalDate;
 
-public interface GLClosureWritePlatformService {
+import java.util.List;
 
-    CommandProcessingResult createGLClosure(JsonCommand command);
+public class IncomeAndExpenseBookingData {
+    private final LocalDate bookingDate;
 
-    CommandProcessingResult updateGLClosure(Long glClosureId, JsonCommand command);
+    private final String comments;
 
-    CommandProcessingResult deleteGLClosure(Long glClosureId, JsonCommand command);
+    private List<JournalEntry> journalEntries;
 
+    public IncomeAndExpenseBookingData(final LocalDate bookingDate, final String comments, final List<JournalEntry> journalEntries) {
+        this.bookingDate = bookingDate;
+        this.comments = comments;
+        this.journalEntries = journalEntries;
+    }
+
+    public LocalDate getBookingDate() {return this.bookingDate;}
+
+    public String getComments() {return this.comments;}
+
+    public List<JournalEntry> getJournalEntries() {return this.journalEntries;}
 }

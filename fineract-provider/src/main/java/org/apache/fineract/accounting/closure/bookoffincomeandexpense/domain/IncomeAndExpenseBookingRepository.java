@@ -16,17 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.accounting.closure.service;
+package org.apache.fineract.accounting.closure.bookoffincomeandexpense.domain;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.accounting.closure.domain.GLClosure;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface GLClosureWritePlatformService {
-
-    CommandProcessingResult createGLClosure(JsonCommand command);
-
-    CommandProcessingResult updateGLClosure(Long glClosureId, JsonCommand command);
-
-    CommandProcessingResult deleteGLClosure(Long glClosureId, JsonCommand command);
-
+public interface IncomeAndExpenseBookingRepository  extends JpaRepository<IncomeAndExpenseBooking, Long>, JpaSpecificationExecutor<IncomeAndExpenseBooking> {
+   IncomeAndExpenseBooking findByGlClosureAndReversedIsFalse(final GLClosure glClosure);
 }
