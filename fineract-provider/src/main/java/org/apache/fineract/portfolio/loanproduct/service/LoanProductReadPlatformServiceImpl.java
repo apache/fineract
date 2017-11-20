@@ -227,7 +227,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.allow_variabe_installments as isVariableIntallmentsAllowed, "
                     + "lvi.minimum_gap as minimumGap, "
                     + "lvi.maximum_gap as maximumGap, "
-                    + "lp.can_use_for_topup as canUseForTopup "
+                    + "lp.can_use_for_topup as canUseForTopup, lp.is_equal_amortization as isEqualAmortization "
                     + " from m_product_loan lp "
                     + " left join m_fund f on f.id = lp.fund_id "
                     + " left join m_product_loan_recalculation_details lpr on lpr.product_id=lp.id "
@@ -308,7 +308,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
             final int amortizationTypeId = JdbcSupport.getInteger(rs, "amortizationMethod");
             final EnumOptionData amortizationType = LoanEnumerations.amortizationType(amortizationTypeId);
-
+            final boolean isEqualAmortization = rs.getBoolean("isEqualAmortization");
+            
             final Integer interestRateFrequencyTypeId = JdbcSupport.getInteger(rs, "interestRatePerPeriodFreq");
             final EnumOptionData interestRateFrequencyType = LoanEnumerations.interestRateFrequencyType(interestRateFrequencyTypeId);
 
@@ -464,7 +465,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     installmentAmountInMultiplesOf, allowAttributeOverrides, isLinkedToFloatingInterestRates, floatingRateId,
                     floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                     maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableIntallmentsAllowed, minimumGap,
-                    maximumGap, syncExpectedWithDisbursementDate, canUseForTopup);
+                    maximumGap, syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization);
         }
     }
 

@@ -115,6 +115,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerUnassignme
 import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
 import org.apache.fineract.portfolio.loanaccount.exception.UndoLastTrancheDisbursementException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleParams;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
@@ -2616,10 +2617,24 @@ public class Loan extends AbstractPersistableCustom<Long> {
         final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
         final MathContext mc = new MathContext(8, roundingMode);
 
-        final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
         final LoanApplicationTerms loanApplicationTerms = constructLoanApplicationTerms(scheduleGeneratorDTO);
-
-        final LoanScheduleGenerator loanScheduleGenerator = scheduleGeneratorDTO.getLoanScheduleFactory().create(interestMethod);
+        LoanScheduleGenerator loanScheduleGenerator = null;
+        if (loanApplicationTerms.isEqualAmortization()) {
+            if (loanApplicationTerms.getInterestMethod().isDecliningBalnce()) {
+                final LoanScheduleGenerator decliningLoanScheduleGenerator = scheduleGeneratorDTO.getLoanScheduleFactory().create(
+                        InterestMethod.DECLINING_BALANCE);
+                Set<LoanCharge> loanCharges = charges();
+                LoanScheduleModel loanSchedule = decliningLoanScheduleGenerator.generate(mc, loanApplicationTerms, loanCharges, scheduleGeneratorDTO.getHolidayDetailDTO());
+                
+                loanApplicationTerms.updateTotalInterestDue(Money.of(loanApplicationTerms.getCurrency(), loanSchedule.getTotalInterestCharged()));
+                
+                
+            }
+            loanScheduleGenerator = scheduleGeneratorDTO.getLoanScheduleFactory().create(InterestMethod.FLAT);
+        } else {
+            loanScheduleGenerator = scheduleGeneratorDTO.getLoanScheduleFactory().create(loanApplicationTerms.getInterestMethod());
+        }
+        
         final LoanScheduleModel loanSchedule = loanScheduleGenerator.generate(mc, loanApplicationTerms, charges(),
                 scheduleGeneratorDTO.getHolidayDetailDTO());
         return loanSchedule;
