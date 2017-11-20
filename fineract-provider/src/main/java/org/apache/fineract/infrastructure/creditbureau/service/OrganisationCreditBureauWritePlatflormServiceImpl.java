@@ -72,12 +72,11 @@ public class OrganisationCreditBureauWritePlatflormServiceImpl
 	@Transactional
 	@Override
 	public CommandProcessingResult updateCreditBureau(JsonCommand command) {
-		// this.context.authenticatedUser();
-		// this.fromApiJsonDeserializer.validateForCreate(command.json());
+		 this.context.authenticatedUser();
+		this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
 		final long creditbureauID = command.longValueOfParameterNamed("creditBureauId");
-		//System.out.println("creditbureauID is " + creditbureauID);
-
+		
 		final boolean is_active = command.booleanPrimitiveValueOfParameterNamed("is_active");
 
 		final OrganisationCreditBureau orgcb = organisationCreditBureauRepository.getOne(creditbureauID);

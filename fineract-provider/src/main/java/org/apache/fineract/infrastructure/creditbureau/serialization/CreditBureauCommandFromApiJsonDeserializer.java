@@ -42,7 +42,7 @@ import com.google.gson.reflect.TypeToken;
 @Component
 public class CreditBureauCommandFromApiJsonDeserializer {
 
-	private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("alias", "is_active"));
+	private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("alias", "is_active","creditBureauId"));
 
 	private final FromJsonHelper fromApiJsonHelper;
 
@@ -78,6 +78,42 @@ public class CreditBureauCommandFromApiJsonDeserializer {
 		}
 
 		throwExceptionIfValidationWarningsExist(dataValidationErrors);
+	}
+	
+	
+	
+	public void validateForUpdate(final String json)
+	{
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+		
+		final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+		}.getType();
+		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+		
+		final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+				.resource("CreditBureau");
+
+		final JsonElement element = this.fromApiJsonHelper.parse(json);
+		
+		
+		final String creditBureauIdParameter = "creditBureauId";
+		if (this.fromApiJsonHelper.parameterExists(creditBureauIdParameter, element)) {
+			final Long creditBureauId = this.fromApiJsonHelper.extractLongNamed("creditBureauId", element);
+			baseDataValidator.reset().parameter("creditBureauId").value(creditBureauId).notNull().notBlank().longGreaterThanZero();
+		}
+		
+		final String is_activeParameter = "is_active";
+		if (this.fromApiJsonHelper.parameterExists(is_activeParameter, element)) {
+			final boolean is_active = this.fromApiJsonHelper.extractBooleanNamed("is_active", element);
+			baseDataValidator.reset().parameter("is_active").value(is_active).notNull().notBlank().trueOrFalseRequired(is_active);
+		}
+		
+		
+		throwExceptionIfValidationWarningsExist(dataValidationErrors);
+
 	}
 
 	private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
