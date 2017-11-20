@@ -1148,9 +1148,7 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
                     final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
                     final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                             .resource(depositAccountType().resourceName() + transactionAction);
-                    if (this.allowOverdraft) {
-                        baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("results.in.balance.exceeding.overdraft.limit");
-                    } else {
+                    if (!this.allowOverdraft) {
                         baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("results.in.balance.going.negative");
                     }
                     if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
@@ -1159,6 +1157,13 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
             }
             lastSavingsDate = transaction.transactionLocalDate();
 
+        }
+        
+        BigDecimal withdrawalFee = null;
+        BigDecimal transactionAmount = null;
+        if(isOverdraft()) {
+	        	if (runningBalance.minus(minRequiredBalance).isLessThanZero()) { throw new InsufficientAccountBalanceException(
+	                    "transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount); }
         }
     }
 
