@@ -61,6 +61,12 @@ public class SpmService {
 
         return this.surveyRepository.fetchActiveSurveys(new Date());
     }
+    
+    public List<Survey> fetchAllSurveys() {
+        this.securityContext.authenticatedUser();
+
+        return this.surveyRepository.fetchAllSurveys();
+    }
 
     public Survey findById(final Long id) {
         this.securityContext.authenticatedUser();
@@ -126,6 +132,21 @@ public class SpmService {
 
         this.surveyRepository.save(survey);
     }
+    
+    public void activateSurvey(final Long id) {
+        this.securityContext.authenticatedUser();
+
+        final Survey survey = findById(id);
+        LocalDate validFrom = DateUtils.getLocalDateOfTenant() ;
+        Calendar cal = Calendar.getInstance() ;
+        cal.setTime(validFrom.toDate());
+        cal.add(Calendar.YEAR, 100);
+        survey.setValidFrom(validFrom.toDate());
+        survey.setValidTo(cal.getTime());
+
+        this.surveyRepository.save(survey);
+    }
+    
     
     public static DateTime getStartOfToday() {
         return DateTime.now().withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0);
