@@ -61,6 +61,9 @@ public class Staff extends AbstractPersistableCustom<Long> {
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private String externalId;
 
+	@Column(name = "email_address", length = 50, unique = true)
+    private String emailAddress;
+
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
@@ -244,6 +247,10 @@ public class Staff extends AbstractPersistableCustom<Long> {
 
     public boolean identifiedBy(final Staff staff) {
         return getId().equals(staff.getId());
+    }
+
+	public String emailAddress() {
+        return emailAddress;
     }
 
     public Long officeId() {

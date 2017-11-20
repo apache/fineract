@@ -29,7 +29,7 @@ public class ClientApiCollectionConstants extends ClientApiConstants{
 
     protected static final Set<String> CLIENT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(familyMembers,address,localeParamName, dateFormatParamName, groupIdParamName, accountNoParamName, externalIdParamName,
-                    mobileNoParamName, firstnameParamName, middlenameParamName, lastnameParamName, fullnameParamName, officeIdParamName,
+                    mobileNoParamName, emailAddressParamName, firstnameParamName, middlenameParamName, lastnameParamName, fullnameParamName, officeIdParamName,
                     activeParamName, activationDateParamName, staffIdParamName, submittedOnDateParamName, savingsProductIdParamName,
                     dateOfBirthParamName, genderIdParamName, clientTypeIdParamName, clientClassificationIdParamName,
                     clientNonPersonDetailsParamName, displaynameParamName, legalFormIdParamName, datatables, isStaffParamName));
@@ -39,7 +39,7 @@ public class ClientApiCollectionConstants extends ClientApiConstants{
                     constitutionIdParamName, mainBusinessLineIdParamName, datatables));
 
     protected static final Set<String> CLIENT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
-            dateFormatParamName, accountNoParamName, externalIdParamName, mobileNoParamName, firstnameParamName, middlenameParamName,
+            dateFormatParamName, accountNoParamName, externalIdParamName, mobileNoParamName, emailAddressParamName, firstnameParamName, middlenameParamName,
 
             lastnameParamName, fullnameParamName, activeParamName, activationDateParamName, staffIdParamName, savingsProductIdParamName,
             dateOfBirthParamName, genderIdParamName, clientTypeIdParamName, clientClassificationIdParamName, submittedOnDateParamName, clientNonPersonDetailsParamName, displaynameParamName, legalFormIdParamName, isStaffParamName));

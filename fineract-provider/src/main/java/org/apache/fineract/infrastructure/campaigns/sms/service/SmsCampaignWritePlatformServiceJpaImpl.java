@@ -535,7 +535,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         final String reportType = "report";
 
         List<HashMap<String, Object>> resultList = new ArrayList<>();
-        final GenericResultsetData results = this.readReportingService.retrieveGenericResultSetForSmsCampaign(reportName, reportType,
+        final GenericResultsetData results = this.readReportingService.retrieveGenericResultSetForSmsEmailCampaign(reportName, reportType,
                 queryParams);
 
         try {
