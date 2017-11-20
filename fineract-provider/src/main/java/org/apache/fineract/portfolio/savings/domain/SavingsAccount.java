@@ -749,7 +749,7 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
                     retreiveOrderedNonInterestPostingTransactions(), this.currency, compoundingPeriodType, interestCalculationType,
                     interestRateAsFraction, daysInYearType.getValue(), upToInterestCalculationDate, interestPostTransactions,
                     isInterestTransfer, minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd,
-                    overdraftInterestRateAsFraction, minOverdraftForInterestCalculation, isUserPosting);
+                    overdraftInterestRateAsFraction, minOverdraftForInterestCalculation, isUserPosting, financialYearBeginningMonth);
 
             periodStartingBalance = postingPeriod.closingBalance();
 

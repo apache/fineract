@@ -352,7 +352,7 @@ public class RecurringDepositAccount extends SavingsAccount {
             final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance, transactions,
                     this.currency, compoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYearType.getValue(),
                     maturityDate, interestPostTransactions, isInterestTransfer, minBalanceForInterestCalculation,
-                    isSavingsInterestPostingAtCurrentPeriodEnd, isUserPosting);
+                    isSavingsInterestPostingAtCurrentPeriodEnd, isUserPosting, financialYearBeginningMonth);
 
             periodStartingBalance = postingPeriod.closingBalance();
 
