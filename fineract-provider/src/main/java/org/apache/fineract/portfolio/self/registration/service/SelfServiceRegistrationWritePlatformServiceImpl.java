@@ -203,8 +203,9 @@ public class SelfServiceRegistrationWritePlatformServiceImpl implements SelfServ
         Group group = null;
         Staff staff = null;
         SmsCampaign smsCampaign = null;
+        boolean isNotification = false;
         SmsMessage smsMessage = SmsMessage.instance(externalId, group, selfServiceRegistration.getClient(), staff,
-                SmsMessageStatusType.PENDING, message, selfServiceRegistration.getMobileNumber(), smsCampaign);
+                SmsMessageStatusType.PENDING, message, selfServiceRegistration.getMobileNumber(), smsCampaign, isNotification);
         this.smsMessageRepository.save(smsMessage);
         this.smsMessageScheduledJobService.sendTriggeredMessage(new ArrayList<>(Arrays.asList(smsMessage)), providerId);
     }

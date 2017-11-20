@@ -41,6 +41,11 @@ public class ExternalServicesConstants {
     public static final String SMS_END_POINT = "end_point";
     public static final String SMS_TENANT_APP_KEY = "tenant_app_key";
     
+    public static final String NOTIFICATION_SERVICE_NAME = "NOTIFICATION";
+    public static final String NOTIFICATION_SERVER_KEY = "server_key";
+    public static final String NOTIFICATION_GCM_END_POINT = "gcm_end_point";
+    public static final String NOTIFICATION_FCM_END_POINT = "fcm_end_point";
+    
     public static enum EXTERNALSERVICEPROPERTIES_JSON_INPUT_PARAMS {
         EXTERNAL_SERVICE_ID("external_service_id"), NAME("name"), VALUE("value");
 
@@ -147,6 +152,37 @@ public class ExternalServicesConstants {
 
         static {
             for (final S3_JSON_INPUT_PARAMS type : S3_JSON_INPUT_PARAMS.values()) {
+                values.add(type.value);
+            }
+        }
+
+        public static Set<String> getAllValues() {
+            return values;
+        }
+
+        @Override
+        public String toString() {
+            return name().toString().replaceAll("_", " ");
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    }
+    
+    public static enum NOTIFICATION_JSON_INPUT_PARAMS {
+        SERVER_KEY("server_key"), GCM_END_POINT("gcm_end_point"), FCM_END_POINT("fcm_end_point");
+
+        private final String value;
+
+        private NOTIFICATION_JSON_INPUT_PARAMS(final String value) {
+            this.value = value;
+        }
+
+        private static final Set<String> values = new HashSet<>();
+
+        static {
+            for (final NOTIFICATION_JSON_INPUT_PARAMS type : NOTIFICATION_JSON_INPUT_PARAMS.values()) {
                 values.add(type.value);
             }
         }
