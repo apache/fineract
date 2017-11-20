@@ -3039,6 +3039,7 @@ public class CommandWrapperBuilder {
         this.entityId = adHocId;
         this.href = "/adhocquery/" + adHocId;
         this.json = "{}";
+    }
 
     public CommandWrapperBuilder createEmail() {
         this.actionName = "CREATE";
