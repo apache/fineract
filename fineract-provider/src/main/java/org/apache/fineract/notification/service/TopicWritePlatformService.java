@@ -16,34 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.notification.cache;
+package org.apache.fineract.notification.service;
 
-public class CacheNotificationResponseHeader {
+import org.apache.fineract.notification.domain.Topic;
 
-    private boolean hasNotifications;
-    private Long lastFetch;
-
-    public CacheNotificationResponseHeader() {
-    }
-
-    public CacheNotificationResponseHeader(boolean hasNotifications, Long lastFetch) {
-        this.hasNotifications = hasNotifications;
-        this.lastFetch = lastFetch;
-    }
-
-    public boolean hasNotifications() {
-        return hasNotifications;
-    }
-
-    public void setHasNotifications(boolean hasNotifications) {
-        this.hasNotifications = hasNotifications;
-    }
-
-    public Long getLastFetch() {
-        return lastFetch;
-    }
-
-    public void setLastFetch(Long lastFetch) {
-        this.lastFetch = lastFetch;
-    }
+public interface TopicWritePlatformService {
+	
+	Long create(Topic topic);
+	
 }

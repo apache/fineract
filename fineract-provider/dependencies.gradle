@@ -93,7 +93,6 @@ dependencies {
                 //[group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0']
                 [group: 'org.springframework', name:'spring-jms'],
                 [group: 'org.apache.activemq', name: 'activemq-broker']
-
      )
      testCompile 'junit:junit:4.11',
                  'junit:junit-dep:4.11',

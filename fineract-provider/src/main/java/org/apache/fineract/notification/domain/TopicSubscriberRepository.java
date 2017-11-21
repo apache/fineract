@@ -16,34 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.notification.cache;
+package org.apache.fineract.notification.domain;
 
-public class CacheNotificationResponseHeader {
+import java.util.List;
 
-    private boolean hasNotifications;
-    private Long lastFetch;
+import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-    public CacheNotificationResponseHeader() {
-    }
-
-    public CacheNotificationResponseHeader(boolean hasNotifications, Long lastFetch) {
-        this.hasNotifications = hasNotifications;
-        this.lastFetch = lastFetch;
-    }
-
-    public boolean hasNotifications() {
-        return hasNotifications;
-    }
-
-    public void setHasNotifications(boolean hasNotifications) {
-        this.hasNotifications = hasNotifications;
-    }
-
-    public Long getLastFetch() {
-        return lastFetch;
-    }
-
-    public void setLastFetch(Long lastFetch) {
-        this.lastFetch = lastFetch;
-    }
+public interface TopicSubscriberRepository extends JpaRepository<TopicSubscriber, Long>, JpaSpecificationExecutor<TopicSubscriber> {
+	List<TopicSubscriber> findBySubscriber(AppUser subscriber);
 }

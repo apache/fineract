@@ -16,34 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.notification.cache;
+package org.apache.fineract.notification.eventandlistener;
 
-public class CacheNotificationResponseHeader {
+import org.apache.fineract.notification.data.NotificationData;
+import org.springframework.context.ApplicationEvent;
 
-    private boolean hasNotifications;
-    private Long lastFetch;
+@SuppressWarnings("serial")
+public class SpringEvent extends ApplicationEvent {
 
-    public CacheNotificationResponseHeader() {
+	private NotificationData notificationData;
+	 
+    public SpringEvent(Object source, NotificationData notificationData) {
+        super(source);
+        this.notificationData = notificationData;
     }
-
-    public CacheNotificationResponseHeader(boolean hasNotifications, Long lastFetch) {
-        this.hasNotifications = hasNotifications;
-        this.lastFetch = lastFetch;
+    
+    public NotificationData getNotificationData() {
+        return notificationData;
     }
-
-    public boolean hasNotifications() {
-        return hasNotifications;
-    }
-
-    public void setHasNotifications(boolean hasNotifications) {
-        this.hasNotifications = hasNotifications;
-    }
-
-    public Long getLastFetch() {
-        return lastFetch;
-    }
-
-    public void setLastFetch(Long lastFetch) {
-        this.lastFetch = lastFetch;
-    }
+	
 }
