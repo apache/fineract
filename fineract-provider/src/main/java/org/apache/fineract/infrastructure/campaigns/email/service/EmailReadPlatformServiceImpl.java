@@ -24,6 +24,7 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.campaigns.email.exception.EmailNotFoundException;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailData;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageEnumerations;
@@ -129,8 +130,8 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
     }
     
     @Override
-	public Collection<EmailData> retrieveAllPending(final Integer limit) {
-    	final String sqlPlusLimit = (limit > 0) ? " limit 0, " + limit : "";
+	public Collection<EmailData> retrieveAllPending(final SearchParameters searchParameters) {
+    	final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " limit 0, " + searchParameters.getLimit() : "";
     	final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = "
     			+ EmailMessageStatusType.PENDING.getValue() + sqlPlusLimit;
 
@@ -138,8 +139,8 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
     }
 
 	@Override
-	public Collection<EmailData> retrieveAllSent(final Integer limit) {
-		final String sqlPlusLimit = (limit > 0) ? " limit 0, " + limit : "";
+	public Collection<EmailData> retrieveAllSent(final SearchParameters searchParameters) {
+		final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " limit 0, " + searchParameters.getLimit() : "";
     	final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = "
     			+ EmailMessageStatusType.SENT.getValue() + sqlPlusLimit;
 
@@ -165,8 +166,8 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
     }
 
 	@Override
-	public Collection<EmailData> retrieveAllFailed(final Integer limit) {
-		final String sqlPlusLimit = (limit > 0) ? " limit 0, " + limit : "";
+	public Collection<EmailData> retrieveAllFailed(final SearchParameters searchParameters) {
+		final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " limit 0, " + searchParameters.getLimit() : "";
         final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = "
                 + EmailMessageStatusType.FAILED.getValue() + sqlPlusLimit;
 

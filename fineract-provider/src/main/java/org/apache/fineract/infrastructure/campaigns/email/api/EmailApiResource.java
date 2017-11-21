@@ -29,9 +29,7 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.infrastructure.campaigns.email.data.EmailConfigurationData;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailData;
-import org.apache.fineract.infrastructure.campaigns.email.service.EmailConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.campaigns.email.service.EmailReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -41,9 +39,9 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+
+import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @Path("/email")
 @Consumes({ MediaType.APPLICATION_JSON })
@@ -58,71 +56,61 @@ public class EmailApiResource {
     private final DefaultToApiJsonSerializer<EmailData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final EmailConfigurationReadPlatformService emailConfigurationReadPlatformService;
 
     @Autowired
     public EmailApiResource(final PlatformSecurityContext context, final EmailReadPlatformService readPlatformService,
             final DefaultToApiJsonSerializer<EmailData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            EmailConfigurationReadPlatformService emailConfigurationReadPlatformService) {
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.emailConfigurationReadPlatformService = emailConfigurationReadPlatformService;
     }
 
     @GET
-	public String retrieveAllEmails(@Context final UriInfo uriInfo) {
-
+    public String retrieveAllEmails(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-
         final Collection<EmailData> emailMessages = this.readPlatformService.retrieveAll();
-
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, emailMessages);
     }
 
     @GET
     @Path("pendingEmail")
-	public String retrievePendingEmail(@QueryParam("sqlSearch") final String sqlSearch,
-             @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-             @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder, @Context final UriInfo uriInfo) {
+    public String retrievePendingEmail(@QueryParam("sqlSearch") final String sqlSearch, @QueryParam("offset") final Integer offset,
+            @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
+            @QueryParam("sortOrder") final String sortOrder, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-
-		final SearchParameters searchParameters = SearchParameters.forEmailCampaign(sqlSearch, offset, limit, orderBy, sortOrder);
-         Page<EmailData> emailMessages = this.readPlatformService.retrieveAllPending(searchParameters);
-
+        final SearchParameters searchParameters = SearchParameters.forEmailCampaign(sqlSearch, offset, limit, orderBy, sortOrder);
+        Collection<EmailData> emailMessages = this.readPlatformService.retrieveAllPending(searchParameters);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, emailMessages);
     }
-    
+
     @GET
     @Path("sentEmail")
-	public String retrieveSentEmail(@QueryParam("sqlSearch") final String sqlSearch,
-             @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-             @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder, @Context final UriInfo uriInfo) {
+    public String retrieveSentEmail(@QueryParam("sqlSearch") final String sqlSearch, @QueryParam("offset") final Integer offset,
+            @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
+            @QueryParam("sortOrder") final String sortOrder, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-		final SearchParameters searchParameters = SearchParameters.forEmailCampaign(sqlSearch, offset, limit, orderBy, sortOrder);
-         Page<EmailData> emailMessages = this.readPlatformService.retrieveAllSent(searchParameters);
+        final SearchParameters searchParameters = SearchParameters.forEmailCampaign(sqlSearch, offset, limit, orderBy, sortOrder);
+        Collection<EmailData> emailMessages = this.readPlatformService.retrieveAllSent(searchParameters);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, emailMessages);
     }
-
 
     @GET
     @Path("messageByStatus")
-	public String retrieveAllEmailByStatus(@QueryParam("sqlSearch") final String sqlSearch,
-             @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-			 @QueryParam("status") final Long status,
-             @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder, 
-			 @QueryParam("fromDate") final DateParam fromDateParam, @QueryParam("toDate") final DateParam toDateParam,
-             @QueryParam("locale") final String locale, @QueryParam("dateFormat") final String dateFormat,@Context final UriInfo uriInfo) {
+    public String retrieveAllEmailByStatus(@QueryParam("sqlSearch") final String sqlSearch, @QueryParam("offset") final Integer offset,
+            @QueryParam("limit") final Integer limit, @QueryParam("status") final Integer status,
+            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder,
+            @QueryParam("fromDate") final DateParam fromDateParam, @QueryParam("toDate") final DateParam toDateParam,
+            @QueryParam("locale") final String locale, @QueryParam("dateFormat") final String dateFormat, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
         Date fromDate = null;
@@ -133,30 +121,26 @@ public class EmailApiResource {
         if (toDateParam != null) {
             toDate = toDateParam.getDate("toDate", dateFormat, locale);
         }
-
-		final SearchParameters searchParameters = SearchParameters.forEmailCampaign(sqlSearch, offset, limit, status, fromDate,toDate, orderBy, sortOrder);
-         Page<EmailData> emailMessages = this.readPlatformService.retrieveEmailByStatus(searchParameters);
-
+        Page<EmailData> emailMessages = this.readPlatformService.retrieveEmailByStatus(limit, status, fromDate, toDate);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, emailMessages);
     }
-    
+
     @GET
     @Path("failedEmail")
-	public String retrieveFailedEmail(@QueryParam("sqlSearch") final String sqlSearch,
-             @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-             @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder, @Context final UriInfo uriInfo) {
+    public String retrieveFailedEmail(@QueryParam("sqlSearch") final String sqlSearch, @QueryParam("offset") final Integer offset,
+            @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
+            @QueryParam("sortOrder") final String sortOrder, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-		final SearchParameters searchParameters = SearchParameters.forEmailCampaign(sqlSearch, offset, limit, orderBy, sortOrder);
-         Page<EmailData> emailMessages = this.readPlatformService.retrieveAllFailed(searchParameters);
+        final SearchParameters searchParameters = SearchParameters.forEmailCampaign(sqlSearch, offset, limit, orderBy, sortOrder);
+        Collection<EmailData> emailMessages = this.readPlatformService.retrieveAllFailed(searchParameters);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, emailMessages);
     }
 
-    
     @POST
     public String create(final String apiRequestBodyAsJson) {
 

@@ -51,13 +51,14 @@
 										  org.apache.fineract.portfolio.savingsaccount.*,
 										  org.apache.fineract.portfolio.*,
 										  org.apache.fineract.useradministration.*,
-										  org.apache.fineract.mix.*,
+										  org.apache.fineract.mix.*, 
 										  org.apache.fineract.notification.*,
 										  org.apache.fineract.template.*,
 										  org.apache.fineract.template.service.*,
 										  org.apache.fineract.useradministration.*,
 										  org.apache.fineract.batch,
-										  org.apache.fineract.adhocquery.*">
+										  org.apache.fineract.adhocquery.*,
+										  org.apache.fineract.infrastructure.campaigns.**">
 		<context:exclude-filter expression="org.springframework.stereotype.Controller"
 			type="annotation" />
 
@@ -84,6 +85,8 @@
 	<jpa:repositories base-package="org.apache.fineract.infrastructure.campaigns.sms.domain" />
 	<jpa:repositories base-package="org.apache.fineract.adhocquery.domain" />
 	<jpa:repositories base-package="org.apache.fineract.notification.domain"/>
+	<jpa:repositories base-package="org.apache.fineract.infrastructure.campaigns.email.domain"/>
+	
 	
 	<import resource="infrastructure.xml" />
 
