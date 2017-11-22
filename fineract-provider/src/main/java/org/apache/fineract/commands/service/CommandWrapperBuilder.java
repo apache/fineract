@@ -899,6 +899,50 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId;
         return this;
     }
+    
+    public CommandWrapperBuilder approveGLIMLoanApplication(final Long glimId) {
+        this.actionName = "APPROVE";
+        this.entityName = "GLIMLOAN";
+        this.entityId = glimId;
+        this.loanId = glimId;
+        this.href = "/loans/" + glimId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder disburseGlimLoanApplication(final Long glimId) {
+        this.actionName = "DISBURSE";
+        this.entityName = "GLIMLOAN";
+        this.entityId = glimId;
+        this.loanId = glimId;
+        this.href = "/loans/" + glimId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder repaymentGlimLoanApplication(final Long glimId) {
+        this.actionName = "REPAYMENT";
+        this.entityName = "GLIMLOAN";
+        this.entityId = glimId;
+        this.loanId = glimId;
+        this.href = "/loans/" + glimId;
+        return this;
+    }
+    public CommandWrapperBuilder undoGLIMLoanDisbursal(final Long glimId) {
+        this.actionName = "UNDODISBURSAL";
+        this.entityName = "GLIMLOAN";
+        this.entityId = glimId;
+        this.loanId = glimId;
+        this.href = "/loans/" + glimId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder undoGLIMLoanApproval(final Long glimId) {
+        this.actionName = "UNDOAPPROVAL";
+        this.entityName = "GLIMLOAN";
+        this.entityId = glimId;
+        this.loanId = glimId;
+        this.href = "/loans/" + glimId;
+        return this;
+    }
 
     public CommandWrapperBuilder disburseLoanApplication(final Long loanId) {
         this.actionName = "DISBURSE";
@@ -1124,12 +1168,28 @@ public class CommandWrapperBuilder {
         this.href = "/savingsaccounts/template";
         return this;
     }
+    
+    public CommandWrapperBuilder createGSIMAccount() {
+        this.actionName = "CREATE";
+        this.entityName = "GSIMACCOUNT";
+        this.entityId = null;
+        this.href = "/gsimaccounts/template";
+        return this;
+    }
 
     public CommandWrapperBuilder updateSavingsAccount(final Long accountId) {
         this.actionName = "UPDATE";
         this.entityName = "SAVINGSACCOUNT";
         this.entityId = accountId;
         this.href = "/savingsaccounts/" + accountId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder updateGSIMAccount(final Long accountId) {
+        this.actionName = "UPDATE";
+        this.entityName = "GSIMACCOUNT";
+        this.entityId = accountId;
+        this.href = "/gsimaccounts/" + accountId;
         return this;
     }
 
@@ -1144,6 +1204,15 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder rejectSavingsAccountApplication(final Long accountId) {
         this.actionName = "REJECT";
         this.entityName = "SAVINGSACCOUNT";
+        this.entityId = accountId;
+        this.savingsId = accountId;
+        this.href = "/savingsaccounts/" + accountId + "?command=reject";
+        return this;
+    }
+    
+    public CommandWrapperBuilder rejectGSIMAccountApplication(final Long accountId) {
+        this.actionName = "REJECT";
+        this.entityName = "GSIMACCOUNT";
         this.entityId = accountId;
         this.savingsId = accountId;
         this.href = "/savingsaccounts/" + accountId + "?command=reject";
@@ -1167,6 +1236,15 @@ public class CommandWrapperBuilder {
         this.href = "/savingsaccounts/" + accountId + "?command=approve";
         return this;
     }
+    
+    public CommandWrapperBuilder approveGSIMAccountApplication(final Long accountId) {
+        this.actionName = "APPROVE";
+        this.entityName = "GSIMACCOUNT";
+        this.entityId = accountId;
+        this.savingsId = accountId;
+        this.href = "/gsimsaccounts/" + accountId + "?command=approve";
+        return this;
+    }
 
     public CommandWrapperBuilder undoSavingsAccountApplication(final Long accountId) {
         this.actionName = "APPROVALUNDO";
@@ -1176,10 +1254,29 @@ public class CommandWrapperBuilder {
         this.href = "/savingsaccounts/" + accountId + "?command=undoapproval";
         return this;
     }
-
+    
+    public CommandWrapperBuilder undoGSIMApplicationApproval(final Long accountId) {
+        this.actionName = "APPROVALUNDO";
+        this.entityName = "GSIMACCOUNT";
+        this.entityId = accountId;
+        this.savingsId = accountId;
+        this.href = "/savingsaccounts/" + accountId + "?command=undoapproval";
+        return this;
+    }
+    
+    
     public CommandWrapperBuilder savingsAccountActivation(final Long accountId) {
         this.actionName = "ACTIVATE";
         this.entityName = "SAVINGSACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = null;
+        this.href = "/savingsaccounts/" + accountId + "?command=activate";
+        return this;
+    }
+    
+    public CommandWrapperBuilder gsimAccountActivation(final Long accountId) {
+        this.actionName = "ACTIVATE";
+        this.entityName = "GSIMACCOUNT";
         this.savingsId = accountId;
         this.entityId = null;
         this.href = "/savingsaccounts/" + accountId + "?command=activate";

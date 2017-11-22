@@ -89,6 +89,7 @@ import org.apache.fineract.portfolio.charge.exception.SavingsAccountChargeNotFou
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.group.domain.Group;
+import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
@@ -144,6 +145,10 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
     @ManyToOne(optional = true)
     @JoinColumn(name = "group_id", nullable = true)
     protected Group group;
+    
+    @ManyToOne
+    @JoinColumn(name = "gsim_id", nullable = true)
+    private GroupSavingsIndividualMonitoring gsim;
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
@@ -1574,8 +1579,16 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
         }
         return id;
     }
+    
+    public GroupSavingsIndividualMonitoring getGsim() {
+		return gsim;
+	}
 
-    public Long hasSavingsOfficerId() {
+	public void setGsim(GroupSavingsIndividualMonitoring gsim) {
+		this.gsim = gsim;
+	}
+
+	public Long hasSavingsOfficerId() {
         Long id = null;
         if (this.savingsOfficer != null) {
             id = this.savingsOfficer.getId();
@@ -3050,6 +3063,7 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
         return lastransactionDate;
     }
 
+
     public BigDecimal getSavingsHoldAmount() {
         return this.savingsOnHoldAmount == null ? BigDecimal.ZERO : this.savingsOnHoldAmount;
     }
@@ -3065,5 +3079,13 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
     private boolean isOverdraft() {
     		return allowOverdraft;
     }
+
+	public Integer getAccountType() {
+		return accountType;
+	}
+
+	public void setAccountType(Integer accountType) {
+		this.accountType = accountType;
+	}
 
 }

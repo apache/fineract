@@ -113,6 +113,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final AppUserRepositoryWrapper appuserRepository;
     private final StandingInstructionRepository standingInstructionRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final GSIMRepositoy gsimRepository;
 
     @Autowired
     public SavingsAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -135,7 +136,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService, 
             final AppUserRepositoryWrapper appuserRepository, 
             final StandingInstructionRepository standingInstructionRepository, 
-            final BusinessEventNotifierService businessEventNotifierService) {
+            final BusinessEventNotifierService businessEventNotifierService,
+            final GSIMRepositoy gsimRepository) {
         this.context = context;
         this.savingAccountRepositoryWrapper = savingAccountRepositoryWrapper;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
@@ -161,6 +163,40 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.appuserRepository = appuserRepository;
         this.standingInstructionRepository = standingInstructionRepository;
         this.businessEventNotifierService = businessEventNotifierService;
+        this.gsimRepository=gsimRepository;
+    }
+    
+    
+    @Transactional
+    @Override
+    public CommandProcessingResult gsimActivate(final Long gsimId, final JsonCommand command) {
+    	
+    	 Long parentSavingId=gsimId;
+     	GroupSavingsIndividualMonitoring parentSavings=gsimRepository.findOne(parentSavingId);
+     	List<SavingsAccount> childSavings=this.savingAccountRepositoryWrapper.findByGsimId(gsimId);
+     	
+     	CommandProcessingResult result=null;
+     	int count=0;
+     	for(SavingsAccount account:childSavings)
+     	{
+     		
+     		result=activate(account.getId(), command);
+     		
+     		if(result!=null)
+     		{
+     			count++;
+     			if(count==parentSavings.getChildAccountsCount())
+     			{
+     				parentSavings.setSavingsStatus(SavingsAccountStatusType.ACTIVE.getValue());
+     				gsimRepository.save(parentSavings);
+     			}
+     		}
+     		
+     		
+     	}
+     	
+     	return result;
+    	
     }
 
     @Transactional
@@ -239,6 +275,12 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.context.authenticatedUser();
 
         this.savingsAccountTransactionDataValidator.validate(command);
+        boolean isGsim=false;
+        
+       if( this.savingAccountRepositoryWrapper.findOneWithNotFoundDetection(savingsId).getGsim()!=null)
+       {
+    	   isGsim=true;
+       }
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
         checkClientOrGroupActive(account);
@@ -254,6 +296,14 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         boolean isRegularTransaction = true;
         final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(account, fmt, transactionDate,
                 transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction);
+        	if(isGsim && (deposit.getId()!=null))
+        	{
+        		GroupSavingsIndividualMonitoring gsim=gsimRepository.findOne(account.getGsim().getId());
+        		BigDecimal currentBalance=gsim.getParentDeposit().add(transactionAmount);
+        		gsim.setParentDeposit(currentBalance);
+        		gsimRepository.save(gsim);
+        		
+        	}
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(deposit.getId()) //
@@ -276,6 +326,13 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     public CommandProcessingResult withdrawal(final Long savingsId, final JsonCommand command) {
 
         this.savingsAccountTransactionDataValidator.validate(command);
+        
+        boolean isGsim=false;
+        
+        if( this.savingAccountRepositoryWrapper.findOneWithNotFoundDetection(savingsId).getGsim()!=null)
+        {
+     	   isGsim=true;
+        }
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
@@ -297,6 +354,15 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 isRegularTransaction, isApplyWithdrawFee, isInterestTransfer, isWithdrawBalance);
         final SavingsAccountTransaction withdrawal = this.savingsAccountDomainService.handleWithdrawal(account, fmt, transactionDate,
                 transactionAmount, paymentDetail, transactionBooleanValues);
+        
+    	if(isGsim && (withdrawal.getId()!=null))
+    	{
+    		GroupSavingsIndividualMonitoring gsim=gsimRepository.findOne(account.getGsim().getId());
+    		BigDecimal currentBalance=gsim.getParentDeposit().subtract(transactionAmount);
+    		gsim.setParentDeposit(currentBalance);
+    		gsimRepository.save(gsim);
+    		
+    	}
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(withdrawal.getId()) //
@@ -356,6 +422,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withSavingsId(savingsId) //
                 .build();
     }
+    
     @Override
     public CommandProcessingResult postInterest(final JsonCommand command) {
         

@@ -43,4 +43,5 @@ public interface GuarantorReadPlatformService {
 
     GuarantorData retrieveGuarantor(Long loanId, Long guarantorId);
 
+
 }

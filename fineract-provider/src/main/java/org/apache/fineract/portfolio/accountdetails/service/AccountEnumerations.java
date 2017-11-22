@@ -47,6 +47,9 @@ public class AccountEnumerations {
             case JLG:
                 optionData = new EnumOptionData(AccountType.JLG.getValue().longValue(), AccountType.JLG.getCode(), "JLG");
             break;
+            case GLIM:
+                optionData = new EnumOptionData(AccountType.GLIM.getValue().longValue(), AccountType.GLIM.getCode(), "GLIM");
+            break;
         }
 
         return optionData;

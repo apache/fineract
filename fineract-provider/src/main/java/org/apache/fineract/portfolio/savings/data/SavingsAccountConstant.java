@@ -32,7 +32,7 @@ public class SavingsAccountConstant extends SavingsApiConstants {
 	 * parameters to match those of request parameters.
 	 */
 	protected static final Set<String> SAVINGS_ACCOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-			localeParamName, dateFormatParamName, monthDayFormatParamName, staffIdParamName, accountNoParamName,
+			localeParamName, dateFormatParamName, monthDayFormatParamName, staffIdParamName,isGSIM,isParentAccount, accountNoParamName,
 			externalIdParamName, clientIdParamName, groupIdParamName, productIdParamName, fieldOfficerIdParamName,
 			submittedOnDateParamName, nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName,
 			interestPostingPeriodTypeParamName, interestCalculationTypeParamName,

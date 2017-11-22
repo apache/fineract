@@ -80,6 +80,8 @@ public class    SavingsApiConstants {
 
     // savings product and account parameters
     public static final String idParamName = "id";
+    public static final String isGSIM="isGSIM";
+    public static final String isParentAccount="isParentAccount";
     public static final String accountNoParamName = "accountNo";
     public static final String externalIdParamName = "externalId";
     public static final String statusParamName = "status";
