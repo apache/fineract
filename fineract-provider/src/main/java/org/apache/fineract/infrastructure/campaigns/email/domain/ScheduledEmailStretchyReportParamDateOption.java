@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.campaigns.email.domain;
 public enum ScheduledEmailStretchyReportParamDateOption {
     INVALID(0, "scheduledEmailStretchyReportParamDateOption.invalid", "invalid"),
     TODAY(1, "scheduledEmailStretchyReportParamDateOption.today", "today"),
-    // YESTERDAY(2, "scheduledEmailStretchyReportParamDateOption.yesterday", "yesterday"),
+    YESTERDAY(2, "scheduledEmailStretchyReportParamDateOption.yesterday", "yesterday"),
     TOMORROW(3, "scheduledEmailStretchyReportParamDateOption.tomorrow", "tomorrow");
 
     private String code;
@@ -51,9 +51,9 @@ public enum ScheduledEmailStretchyReportParamDateOption {
                 scheduledEmailStretchyReportParamDateOption = TODAY;
                 break;
                 
-            // case "yesterday":
-                // scheduledEmailStretchyReportParamDateOption = YESTERDAY;
-                // break;
+            case "yesterday":
+                scheduledEmailStretchyReportParamDateOption = YESTERDAY;
+                break;
                 
             case "tomorrow":
                 scheduledEmailStretchyReportParamDateOption = TOMORROW;
@@ -75,9 +75,9 @@ public enum ScheduledEmailStretchyReportParamDateOption {
                 scheduledEmailStretchyReportParamDateOption = TODAY;
                 break;
                 
-            // case 2:
-                // scheduledEmailStretchyReportParamDateOption = YESTERDAY;
-                // break;
+            case 2:
+                scheduledEmailStretchyReportParamDateOption = YESTERDAY;
+                break;
                 
             case 3:
                 scheduledEmailStretchyReportParamDateOption = TOMORROW;
@@ -112,6 +112,6 @@ public enum ScheduledEmailStretchyReportParamDateOption {
      * @return list of valid ScheduledEmailAttachmentFileFormat values
      **/
     public static Object[] validValues() {
-        return new Object[] { TODAY.value, TOMORROW.value };
+        return new Object[] { TODAY.value, YESTERDAY.value, TOMORROW.value };
     }
 }

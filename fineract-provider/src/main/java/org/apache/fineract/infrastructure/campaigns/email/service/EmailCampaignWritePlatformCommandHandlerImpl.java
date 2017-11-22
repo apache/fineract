@@ -448,6 +448,16 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         final String emailParams = this.fromJsonHelper.extractStringNamed("paramValue", query.parsedJson());
         final String textMessageTemplate = this.fromJsonHelper.extractStringNamed("emailMessage", query.parsedJson());
 
+		final Long campaignId  = this.fromJsonHelper.extractLongNamed("campaignId",query.parsedJson());
+
+         EmailCampaign emailCampaign = null;
+         HashMap<String, String> reportStretchyParams = null ;
+
+        if(campaignId != null){
+            emailCampaign = this.emailCampaignRepository.findOne(campaignId);
+            reportStretchyParams = this.validateStretchyReportParamMap(emailCampaign.getStretchyReportParamMap());
+        }
+ 
         try {
             HashMap<String, String> campaignParams = new ObjectMapper().readValue(emailParams,
                     new TypeReference<HashMap<String, String>>() {});
@@ -458,13 +468,27 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
             List<HashMap<String, Object>> runReportObject = this.getRunReportByServiceImpl(campaignParams.get("reportName"),
                     queryParamForRunReport);
 
+			// preview attachment report params
+			
+			
             if (runReportObject != null) {
                 for (HashMap<String, Object> entry : runReportObject) {
                     // add string object to campaignParam object
                     String textMessage = this.compileEmailTemplate(textMessageTemplate, "EmailCampaign", entry);
                     if (!textMessage.isEmpty()) {
                         final Integer totalMessage = runReportObject.size();
-                        campaignMessage = new PreviewCampaignMessage(textMessage, totalMessage);
+                        String reportStretchyParam = null;
+                        Object var = "id";
+                        Integer clientId = (Integer) entry.get(var);
+                        final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId.longValue());
+                        if(reportStretchyParams != null){
+                            HashMap<String, String> reportParams = this.replaceStretchyParamsWithActualClientParams(reportStretchyParams,client);
+                            this.replaceStretchyParamsWithActualLoansOrSavingsParam(reportStretchyParams,client); // add loans or savings id to report params only one object
+                            if(reportParams!=null){
+                                reportStretchyParam = reportParams.toString();
+                            }
+                        }
+                        campaignMessage = new PreviewCampaignMessage(textMessage,totalMessage,reportStretchyParam);
                         break;
                     }
                 }
@@ -781,6 +805,43 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
         return actualParams;
     }
 
+	private void replaceStretchyParamsWithActualLoansOrSavingsParam(final HashMap<String, String> stretchyParams, final Client client){
+
+        if (stretchyParams.containsKey("selectLoan") || stretchyParams.containsKey("loanId")) {
+            final List<Loan> loans = this.loanRepository.findLoanByClientId(client.getId());
+
+            for (final Loan loan : loans) {
+                if (loan.isOpen()) { // only send attachment for active loan
+
+                    if (stretchyParams.containsKey("selectLoan")) {
+
+                        stretchyParams.put("SelectLoan", loan.getId().toString());
+                        break;
+
+                    } else if (stretchyParams.containsKey("loanId")) {
+
+                        stretchyParams.put("loanId", loan.getId().toString());
+                        break;
+                    }
+
+                }
+            }
+
+        }else if(stretchyParams.containsKey("savingId")){
+            final List<SavingsAccount> savingsAccounts = this.savingsAccountRepository.findSavingAccountByClientId(client.getId());
+
+            for (final SavingsAccount savingsAccount : savingsAccounts) {
+
+                if (savingsAccount.isActive()) {
+
+                    stretchyParams.put("savingId", savingsAccount.getId().toString());
+                    break;
+                }
+            }
+        }
+
+    }
+ 
     private HashMap<String, String> validateStretchyReportParamMap(final String stretchyParams) {
 
         HashMap<String, String> stretchyReportParamHashMap = new HashMap<>();
