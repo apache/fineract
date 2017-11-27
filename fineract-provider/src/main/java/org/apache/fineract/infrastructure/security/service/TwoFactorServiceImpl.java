@@ -107,7 +107,7 @@ public class TwoFactorServiceImpl implements TwoFactorService {
             final OTPRequest request = generateNewToken(smsDelivery, extendedAccessToken);
             final String smsText = configurationService.getFormattedSmsTextFor(user, request);
             SmsMessage smsMessage = SmsMessage.pendingSms(null, null, null, user.getStaff(), smsText,
-                    user.getStaff().mobileNo(), null);
+                    user.getStaff().mobileNo(), null, false);
             this.smsMessageRepository.save(smsMessage);
             smsMessageScheduledJobService.sendTriggeredMessage(Collections.singleton(smsMessage),
                     configurationService.getSMSProviderId());
