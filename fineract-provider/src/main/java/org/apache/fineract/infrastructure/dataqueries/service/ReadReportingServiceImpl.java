@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.dataqueries.service;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -28,6 +29,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -486,11 +488,11 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-    public GenericResultsetData retrieveGenericResultSetForSmsCampaign(String name, String type, Map<String, String> queryParams) {
+    public GenericResultsetData retrieveGenericResultSetForSmsEmailCampaign(String name, String type, Map<String, String> queryParams) {
         final long startTime = System.currentTimeMillis();
         logger.info("STARTING REPORT: " + name + "   Type: " + type);
 
-        final String sql = sqlToRunForSmsCampaign(name, type, queryParams);
+        final String sql = sqlToRunForSmsEmailCampaign(name, type, queryParams);
 
         final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
 
@@ -500,7 +502,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
     
     @Override
-    public String sqlToRunForSmsCampaign(final String name, final String type, final Map<String, String> queryParams) {
+    public String sqlToRunForSmsEmailCampaign(final String name, final String type, final Map<String, String> queryParams) {
         String sql = getSql(name, type);
 
         final Set<String> keys = queryParams.keySet();
@@ -515,4 +517,86 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         return sql;
     }
+
+    @Override
+    public ByteArrayOutputStream generatePentahoReportAsOutputStream(final String reportName, final String outputTypeParam, final Map<String, String> queryParams,
+            final Locale locale, final AppUser runReportAsUser, final StringBuilder errorLog) {
+        //This complete implementation should be moved to Pentaho Report Service
+        /*
+        String outputType = "HTML";
+        if (StringUtils.isNotBlank(outputTypeParam)) {
+            outputType = outputTypeParam;
+        }
+
+        if (!(outputType.equalsIgnoreCase("HTML") || outputType.equalsIgnoreCase("PDF") || outputType.equalsIgnoreCase("XLS") || outputType
+                .equalsIgnoreCase("CSV"))) { throw new PlatformDataIntegrityException("error.msg.invalid.outputType",
+                "No matching Output Type: " + outputType); }
+
+        if (this.noPentaho) { throw new PlatformDataIntegrityException("error.msg.no.pentaho", "Pentaho is not enabled",
+                "Pentaho is not enabled"); }
+
+        final String reportPath = FileSystemContentRepository.FINERACT_BASE_DIR + File.separator + "pentahoReports" + File.separator
+                + reportName + ".prpt";
+        logger.info("Report path: " + reportPath);
+
+        // load report definition
+        final ResourceManager manager = new ResourceManager();
+        manager.registerDefaults();
+        Resource res;
+
+        try {
+            res = manager.createDirectly(reportPath, MasterReport.class);
+            final MasterReport masterReport = (MasterReport) res.getResource();
+            final DefaultReportEnvironment reportEnvironment = (DefaultReportEnvironment) masterReport.getReportEnvironment();
+            
+            if (locale != null) {
+                reportEnvironment.setLocale(locale);
+            }
+            addParametersToReport(masterReport, queryParams, runReportAsUser, errorLog);
+
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            if ("PDF".equalsIgnoreCase(outputType)) {
+                PdfReportUtil.createPDF(masterReport, baos);
+                return baos;
+            }
+
+            if ("XLS".equalsIgnoreCase(outputType)) {
+                ExcelReportUtil.createXLS(masterReport, baos);
+                return baos;
+            }
+
+            if ("CSV".equalsIgnoreCase(outputType)) {
+                CSVReportUtil.createCSV(masterReport, baos, "UTF-8");
+                return baos;
+            }
+
+            if ("HTML".equalsIgnoreCase(outputType)) {
+                HtmlReportUtil.createStreamHTML(masterReport, baos);
+                return baos;
+            }
+            
+        } catch (final ResourceException e) {
+            errorLog.append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw a Pentaho ResourceException "
+                    + "exception: " + e.getMessage() + " ---------- ");
+            throw new PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage());
+        } catch (final ReportProcessingException e) {
+            errorLog.append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw a Pentaho ReportProcessingException "
+                    + "exception: " + e.getMessage() + " ---------- ");
+            throw new PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage());
+        } catch (final IOException e) {
+            errorLog.append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw an IOException "
+                    + "exception: " + e.getMessage() + " ---------- ");
+            throw new PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage());
+        }
+
+        errorLog.append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw a PlatformDataIntegrityException "
+                + "exception: No matching Output Type: " + outputType + " ---------- ");
+        throw new PlatformDataIntegrityException("error.msg.invalid.outputType", "No matching Output Type: " + outputType);
+        
+    */
+        return null ;
+    }
 }
+
+

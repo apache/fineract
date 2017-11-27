@@ -37,7 +37,6 @@ import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterExc
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
-import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
@@ -45,6 +44,7 @@ import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
+import org.apache.fineract.portfolio.loanproduct.exception.EqualAmortizationUnsupportedFeatureException;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +93,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.linkAccountIdParameterName, LoanApiConstants.disbursementDataParameterName,
             LoanApiConstants.emiAmountParameterName, LoanApiConstants.maxOutstandingBalanceParameterName,
             LoanProductConstants.graceOnArrearsAgeingParameterName, LoanApiConstants.createStandingInstructionAtDisbursementParameterName,
-            LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose, LoanApiConstants.datatables));
+            LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose, LoanApiConstants.datatables, LoanApiConstants.isEqualAmortizationParam));
 
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
@@ -119,7 +119,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final String loanTypeParameterName = "loanType";
         final String loanTypeStr = this.fromApiJsonHelper.extractStringNamed(loanTypeParameterName, element);
         baseDataValidator.reset().parameter(loanTypeParameterName).value(loanTypeStr).notNull();
-
+        
         if (!StringUtils.isBlank(loanTypeStr)) {
             final AccountType loanType = AccountType.fromName(loanTypeStr);
             baseDataValidator.reset().parameter(loanTypeParameterName).value(loanType.getValue()).inMinMaxRange(1, 3);
@@ -159,6 +159,15 @@ public final class LoanApplicationCommandFromApiJsonHelper {
 
             }
 
+        }
+        
+        boolean isEqualAmortization = false;
+        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.isEqualAmortizationParam, element)) {
+            isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isEqualAmortizationParam, element);
+            baseDataValidator.reset().parameter(LoanApiConstants.isEqualAmortizationParam).value(isEqualAmortization).ignoreIfNull()
+                    .validateForBooleanValue();
+            if (isEqualAmortization && loanProduct.isInterestRecalculationEnabled()) { throw new EqualAmortizationUnsupportedFeatureException(
+                    "interest.recalculation", "interest recalculation"); }
         }
 
         final Long productId = this.fromApiJsonHelper.extractLongNamed("productId", element);
@@ -235,6 +244,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                 .inMinMaxRange(0, 1);
 
         if (loanProduct.isLinkedToFloatingInterestRate()) {
+            if (isEqualAmortization) { throw new EqualAmortizationUnsupportedFeatureException("floating.interest.rate",
+                    "floating interest rate"); }
             if (this.fromApiJsonHelper.parameterExists("interestRatePerPeriod", element)) {
                 baseDataValidator
                         .reset()
@@ -461,6 +472,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                 unsupportedParameterList.add(LoanApiConstants.emiAmountParameterName);
                 throw new UnsupportedParameterException(unsupportedParameterList);
             }
+            if (isEqualAmortization) { throw new EqualAmortizationUnsupportedFeatureException("fixed.emi", "fixed emi"); }
             final BigDecimal emiAnount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.emiAmountParameterName,
                     element);
             baseDataValidator.reset().parameter(LoanApiConstants.emiAmountParameterName).value(emiAnount).ignoreIfNull().positiveAmount();
@@ -531,6 +543,15 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             final String accountNo = this.fromApiJsonHelper.extractStringNamed(accountNoParameterName, element);
             baseDataValidator.reset().parameter(accountNoParameterName).value(accountNo).notBlank().notExceedingLengthOf(20);
         }
+        
+        boolean isEqualAmortization = existingLoanApplication.getLoanProductRelatedDetail().isEqualAmortization();
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.isEqualAmortizationParam, element)) {
+            isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.isEqualAmortizationParam, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.isEqualAmortizationParam).value(isEqualAmortization).ignoreIfNull()
+                    .validateForBooleanValue();
+            if (isEqualAmortization && loanProduct.isInterestRecalculationEnabled()) { throw new EqualAmortizationUnsupportedFeatureException(
+                    "interest.recalculation", "interest recalculation"); }
+        }     
 
         final String externalIdParameterName = "externalId";
         if (this.fromApiJsonHelper.parameterExists(externalIdParameterName, element)) {
@@ -632,6 +653,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         }
 
         if (loanProduct.isLinkedToFloatingInterestRate()) {
+            if (isEqualAmortization) { throw new EqualAmortizationUnsupportedFeatureException("floating.interest.rate",
+                    "floating interest rate"); }
             if (this.fromApiJsonHelper.parameterExists("interestRatePerPeriod", element)) {
                 baseDataValidator
                         .reset()
@@ -907,6 +930,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                 unsupportedParameterList.add(LoanApiConstants.emiAmountParameterName);
                 throw new UnsupportedParameterException(unsupportedParameterList);
             }
+            if (isEqualAmortization) { throw new EqualAmortizationUnsupportedFeatureException("fixed.emi", "fixed emi"); }
             final BigDecimal emiAnount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.emiAmountParameterName,
                     element);
             baseDataValidator.reset().parameter(LoanApiConstants.emiAmountParameterName).value(emiAnount).ignoreIfNull().positiveAmount();
@@ -1076,11 +1100,18 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.disbursementDataParameterName, element) && expectedDisbursement != null
                 && totalPrincipal != null) {
+        	
             BigDecimal tatalDisbursement = BigDecimal.ZERO;
             final JsonArray variationArray = this.fromApiJsonHelper.extractJsonArrayNamed(LoanApiConstants.disbursementDataParameterName,
                     element);
             List<LocalDate> expectedDisbursementDates = new ArrayList<>();
             if (variationArray != null && variationArray.size() > 0) {
+                if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.isEqualAmortizationParam, element)) {
+                    boolean isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isEqualAmortizationParam,
+                            element);
+                    if (isEqualAmortization) { throw new EqualAmortizationUnsupportedFeatureException("tranche.disbursal",
+                            "tranche disbursal"); }
+                }
                 int i = 0;
                 do {
                     final JsonObject jsonObject = variationArray.get(i).getAsJsonObject();

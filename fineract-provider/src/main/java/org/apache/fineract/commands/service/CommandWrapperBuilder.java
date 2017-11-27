@@ -2929,7 +2929,7 @@ public class CommandWrapperBuilder {
         this.href = "/smscampaigns/"+resourceId;
         return this;
     }
-    
+
     public CommandWrapperBuilder holdAmount(final Long accountId) {
         this.actionName = "HOLDAMOUNT";
         this.entityName = "SAVINGSACCOUNT";
@@ -3039,6 +3039,97 @@ public class CommandWrapperBuilder {
         this.entityId = adHocId;
         this.href = "/adhocquery/" + adHocId;
         this.json = "{}";
+        return this ;
+    }
+    public CommandWrapperBuilder createEmail() {
+        this.actionName = "CREATE";
+        this.entityName = "EMAIL";
+        this.entityId = null;
+        this.href = "/emailcampaigns/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateEmail(final Long resourceId) {
+        this.actionName = "UPDATE";
+        this.entityName = "EMAIL";
+        this.entityId = resourceId;
+        this.href = "/emailcampaigns/"+resourceId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteEmail(final Long resourceId) {
+        this.actionName = "DELETE";
+        this.entityName = "EMAIL";
+        this.entityId = resourceId;
+        this.href = "/emailcampaigns/"+resourceId;
+        return this;
+    }
+
+    public CommandWrapperBuilder createEmailCampaign() {
+        this.actionName = "CREATE";
+        this.entityName = "EMAIL_CAMPAIGN";
+        this.entityId = null;
+        this.href = "/emailcampaigns/campaign";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateEmailCampaign(final Long resourceId) {
+        this.actionName = "UPDATE";
+        this.entityName = "EMAIL_CAMPAIGN";
+        this.entityId = resourceId;
+        this.href = "/emailcampaigns/"+resourceId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteEmailCampaign(final Long resourceId) {
+        this.actionName = "DELETE";
+        this.entityName = "EMAIL_CAMPAIGN";
+        this.entityId = resourceId;
+        this.href = "/emailcampaigns/"+resourceId;
+        return this;
+    }
+
+    public CommandWrapperBuilder activateEmailCampaign(final Long resourceId) {
+        this.actionName = "ACTIVATE";
+        this.entityName = "EMAIL_CAMPAIGN";
+        this.entityId = resourceId;
+        this.href = "/emailcampaigns/"+resourceId + "?command=activate";
+        return this;
+    }
+
+    public CommandWrapperBuilder closeEmailCampaign(final Long resourceId) {
+        this.actionName = "CLOSE";
+        this.entityName = "EMAIL_CAMPAIGN";
+        this.entityId = resourceId;
+        this.href = "/emailcampaigns/"+resourceId + "?command=close";
+        return this;
+    }
+    public CommandWrapperBuilder reactivateEmailCampaign(final Long resourceId) {
+        this.actionName = "REACTIVATE";
+        this.entityName = "EMAIL_CAMPAIGN";
+        this.entityId = resourceId;
+        this.href = "/emailcampaigns/"+resourceId + "?command=reactivate";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateEmailConfiguration() {
+        this.actionName = "UPDATE";
+        this.entityName = "EMAIL_CONFIGURATION";
+        this.href = "/emailcampaigns/configuration/";
+        return this;
+    }
+
+    public CommandWrapperBuilder invalidateTwoFactorAccessToken() {
+        this.actionName = "INVALIDATE";
+        this.entityName = "TWOFACTOR_ACCESSTOKEN";
+        this.href = "/twofactor/invalidate";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateTwoFactorConfiguration() {
+        this.actionName = "UPDATE";
+        this.entityName = "TWOFACTOR_CONFIGURATION";
+        this.href = "/twofactor/configure";
         return this;
     }
 }

@@ -137,7 +137,7 @@ public class SmsCampaignApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List SMS Campaigns", notes = "Example Requests:\n" + "\n" + "smscampaigns")
     @ApiResponse(code = 200, message = "", response = SmsCampaignData.class)
-    public String retrieveAllCampaigns(@QueryParam("sqlSearch") final String sqlSearch,
+    public String retrieveAllEmails(@QueryParam("sqlSearch") final String sqlSearch,
             @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
             @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder, @Context final UriInfo uriInfo) {
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(SmsCampaignConstants.RESOURCE_NAME);

@@ -40,8 +40,8 @@ import com.google.gson.reflect.TypeToken;
 
 @Component
 public class CreditBureauLoanProductCommandFromApiJsonDeserializer {
-	private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("loan_product_id",
-			"is_creditcheck_mandatory", "skip_creditcheck_in_failure", "stale_period", "is_active", "locale"));
+	private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("loanProductId",
+			"isCreditcheckMandatory", "skipCreditcheckInFailure", "stalePeriod", "is_active", "locale","creditbureauLoanProductMappingId"));
 
 	private final FromJsonHelper fromApiJsonHelper;
 
@@ -67,47 +67,47 @@ public class CreditBureauLoanProductCommandFromApiJsonDeserializer {
 
 		baseDataValidator.reset().value(cb_id).notBlank().integerGreaterThanZero();
 
-		final long loan_product_id = this.fromApiJsonHelper.extractLongNamed("loan_product_id", element);
-		baseDataValidator.reset().parameter("loan_product_id").value(loan_product_id).notBlank()
+		final long loanProductId = this.fromApiJsonHelper.extractLongNamed("loanProductId", element);
+		baseDataValidator.reset().parameter("loanProductId").value(loanProductId).notBlank()
 				.integerGreaterThanZero();
-		System.out.println("loan product id " + loan_product_id);
+		
 			
-		if(this.fromApiJsonHelper.extractBooleanNamed("is_creditcheck_mandatory",element)!= null)
+		if(this.fromApiJsonHelper.extractBooleanNamed("isCreditcheckMandatory",element)!= null)
 		{
-			final boolean is_creditcheck_mandatory = this.fromApiJsonHelper.extractBooleanNamed("is_creditcheck_mandatory",
+			final boolean isCreditcheckMandatory = this.fromApiJsonHelper.extractBooleanNamed("isCreditcheckMandatory",
 					element);
-			baseDataValidator.reset().parameter("is_creditcheck_mandatory").value(is_creditcheck_mandatory).notBlank()
-					.trueOrFalseRequired(is_creditcheck_mandatory);	
+			baseDataValidator.reset().parameter("isCreditcheckMandatory").value(isCreditcheckMandatory).notBlank()
+					.trueOrFalseRequired(isCreditcheckMandatory);	
 		}
 		else
 		{
-			baseDataValidator.reset().parameter("is_creditcheck_mandatory").value(this.fromApiJsonHelper.extractBooleanNamed("is_creditcheck_mandatory",
+			baseDataValidator.reset().parameter("isCreditcheckMandatory").value(this.fromApiJsonHelper.extractBooleanNamed("isCreditcheckMandatory",
 					element)).notBlank()
-			.trueOrFalseRequired(this.fromApiJsonHelper.extractBooleanNamed("is_creditcheck_mandatory",
+			.trueOrFalseRequired(this.fromApiJsonHelper.extractBooleanNamed("isCreditcheckMandatory",
 					element));	
 		}
 		
 		
-		if( this.fromApiJsonHelper.extractBooleanNamed("skip_creditcheck_in_failure", element)!=null)
+		if( this.fromApiJsonHelper.extractBooleanNamed("skipCreditcheckInFailure", element)!=null)
 		{
-			final boolean skip_creditcheck_in_failure = this.fromApiJsonHelper.extractBooleanNamed("skip_creditcheck_in_failure", element);
-			baseDataValidator.reset().parameter("skip_creditcheck_in_failure").value(skip_creditcheck_in_failure).notBlank().trueOrFalseRequired(skip_creditcheck_in_failure);
+			final boolean skipCreditcheckInFailure = this.fromApiJsonHelper.extractBooleanNamed("skipCreditcheckInFailure", element);
+			baseDataValidator.reset().parameter("skipCreditcheckInFailure").value(skipCreditcheckInFailure).notBlank().trueOrFalseRequired(skipCreditcheckInFailure);
 				
 		}
 		else
 		{
-			baseDataValidator.reset().parameter("skip_creditcheck_in_failure").value(this.fromApiJsonHelper.extractBooleanNamed("skip_creditcheck_in_failure", element)).notBlank().trueOrFalseRequired(this.fromApiJsonHelper.extractBooleanNamed("skip_creditcheck_in_failure", element));	
+			baseDataValidator.reset().parameter("skipCreditcheckInFailure").value(this.fromApiJsonHelper.extractBooleanNamed("skipCreditcheckInFailure", element)).notBlank().trueOrFalseRequired(this.fromApiJsonHelper.extractBooleanNamed("skipCreditcheckInFailure", element));	
 		}
 		
 
-		if(this.fromApiJsonHelper.extractLongNamed("stale_period", element)!=null)
+		if(this.fromApiJsonHelper.extractLongNamed("stalePeriod", element)!=null)
 		{
-			final long stale_period = this.fromApiJsonHelper.extractLongNamed("stale_period", element);
-			baseDataValidator.reset().parameter("stale_period").value(stale_period).notBlank().integerGreaterThanZero();	
+			final long stalePeriod = this.fromApiJsonHelper.extractLongNamed("stalePeriod", element);
+			baseDataValidator.reset().parameter("stalePeriod").value(stalePeriod).notBlank().integerGreaterThanZero();	
 		}
 		else
 		{
-			baseDataValidator.reset().parameter("stale_period").value(this.fromApiJsonHelper.extractLongNamed("stale_period", element)).notBlank().integerGreaterThanZero();		
+			baseDataValidator.reset().parameter("stalePeriod").value(this.fromApiJsonHelper.extractLongNamed("stalePeriod", element)).notBlank().integerGreaterThanZero();		
 		}
 
 		
@@ -126,6 +126,42 @@ public class CreditBureauLoanProductCommandFromApiJsonDeserializer {
 
 		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
+	}
+	
+	
+	
+	public void validateForUpdate(final String json)
+	{
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+
+		final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+		}.getType();
+		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
+
+		final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+				.resource("CREDITBUREAU_LOANPRODUCT_MAPPING");
+
+		final JsonElement element = this.fromApiJsonHelper.parse(json);
+		
+		
+		final String creditbureauLoanProductMappingIdParameter = "creditbureauLoanProductMappingId";
+		if (this.fromApiJsonHelper.parameterExists(creditbureauLoanProductMappingIdParameter, element)) {
+			final Long creditbureauLoanProductMappingId = this.fromApiJsonHelper.extractLongNamed("creditbureauLoanProductMappingId", element);
+			baseDataValidator.reset().parameter("creditbureauLoanProductMappingId").value(creditbureauLoanProductMappingId).notNull().notBlank().longGreaterThanZero();
+		}
+		
+		final String is_activeParameter = "is_active";
+		if (this.fromApiJsonHelper.parameterExists(is_activeParameter, element)) {
+			final boolean is_active = this.fromApiJsonHelper.extractBooleanNamed("is_active", element);
+			baseDataValidator.reset().parameter("is_active").value(is_active).notNull().notBlank().trueOrFalseRequired(is_active);
+		}
+		
+		
+		throwExceptionIfValidationWarningsExist(dataValidationErrors);
+			
 	}
 
 	private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {

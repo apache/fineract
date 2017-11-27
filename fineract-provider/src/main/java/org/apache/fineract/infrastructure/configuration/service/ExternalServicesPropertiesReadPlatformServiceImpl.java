@@ -28,6 +28,7 @@ import org.apache.fineract.infrastructure.configuration.data.S3CredentialsData;
 import org.apache.fineract.infrastructure.configuration.data.SMTPCredentialsData;
 import org.apache.fineract.infrastructure.configuration.exception.ExternalServiceConfigurationNotFoundException;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.gcm.domain.NotificationConfigurationData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -176,6 +177,10 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
                 serviceNameToUse = ExternalServicesConstants.SMS_SERVICE_NAME;
             break;
 
+            case "NOTIFICATION":
+                serviceNameToUse = ExternalServicesConstants.NOTIFICATION_SERVICE_NAME;
+            break;
+
             default:
                 throw new ExternalServiceConfigurationNotFoundException(serviceName);
         }
@@ -185,5 +190,35 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 
     }
+    
+    private static final class NotificationDataExtractor implements ResultSetExtractor<NotificationConfigurationData> {
+
+        @Override
+        public NotificationConfigurationData extractData(final ResultSet rs) throws SQLException, DataAccessException {
+            String serverKey = null;
+            String gcmEndPoint = null;
+            String fcmEndPoint = null;
+            while (rs.next()) {
+                if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.NOTIFICATION_SERVER_KEY )) {
+                	serverKey = rs.getString("value");
+                } else if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.NOTIFICATION_GCM_END_POINT )) {
+                	gcmEndPoint = rs.getString("value");
+                } else if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.NOTIFICATION_FCM_END_POINT )) {
+                	fcmEndPoint = rs.getString("value");
+                }
+            }
+            return new NotificationConfigurationData(null, serverKey, gcmEndPoint, fcmEndPoint);
+        }
+    }
+
+
+	@Override
+	public NotificationConfigurationData getNotificationConfiguration() {
+		final ResultSetExtractor<NotificationConfigurationData> resultSetExtractor = new NotificationDataExtractor();
+        final String sql = "SELECT esp.name, esp.value FROM c_external_service_properties esp inner join c_external_service es on esp.external_service_id = es.id where es.name = '"
+                + ExternalServicesConstants.NOTIFICATION_SERVICE_NAME + "'";
+        final NotificationConfigurationData notificationConfigurationData = this.jdbcTemplate.query(sql, resultSetExtractor, new Object[] {});
+        return notificationConfigurationData;
+	}
 
 }

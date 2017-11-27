@@ -31,8 +31,10 @@ import javax.ws.rs.core.MediaType;
 import io.swagger.annotations.*;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.security.constants.TwoFactorConstants;
 import org.apache.fineract.infrastructure.security.data.AuthenticatedOauthUserData;
 import org.apache.fineract.infrastructure.security.service.SpringSecurityPlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.service.TwoFactorUtils;
 import org.apache.fineract.useradministration.data.RoleData;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.Role;
@@ -58,14 +60,17 @@ public class UserDetailsApiResource {
     private final ResourceServerTokenServices tokenServices;
     private final ToApiJsonSerializer<AuthenticatedOauthUserData> apiJsonSerializerService;
     private final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext;
+    private final TwoFactorUtils twoFactorUtils;
 
     @Autowired
     public UserDetailsApiResource(@Qualifier("tokenServices") final ResourceServerTokenServices tokenServices,
             final ToApiJsonSerializer<AuthenticatedOauthUserData> apiJsonSerializerService,
-            final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext) {
+            final SpringSecurityPlatformSecurityContext springSecurityPlatformSecurityContext,
+            final TwoFactorUtils twoFactorUtils) {
         this.tokenServices = tokenServices;
         this.apiJsonSerializerService = apiJsonSerializerService;
         this.springSecurityPlatformSecurityContext = springSecurityPlatformSecurityContext;
+        this.twoFactorUtils = twoFactorUtils;
     }
 
     @GET
@@ -100,12 +105,16 @@ public class UserDetailsApiResource {
 
             final EnumOptionData organisationalRole = principal.organisationalRoleData();
 
+            final boolean requireTwoFactorAuth = twoFactorUtils.isTwoFactorAuthEnabled()
+                    && !principal.hasSpecificPermissionTo(TwoFactorConstants.BYPASS_TWO_FACTOR_PERMISSION);
             if (this.springSecurityPlatformSecurityContext.doesPasswordHasToBeRenewed(principal)) {
-                authenticatedUserData = new AuthenticatedOauthUserData(principal.getUsername(), principal.getId(), accessToken);
+                authenticatedUserData = new AuthenticatedOauthUserData(principal.getUsername(),
+                        principal.getId(), accessToken, requireTwoFactorAuth);
             } else {
 
-                authenticatedUserData = new AuthenticatedOauthUserData(principal.getUsername(), officeId, officeName, staffId, staffDisplayName,
-                        organisationalRole, roles, permissions, principal.getId(), accessToken);
+                authenticatedUserData = new AuthenticatedOauthUserData(principal.getUsername(),
+                        officeId, officeName, staffId, staffDisplayName, organisationalRole, roles,
+                        permissions, principal.getId(), accessToken, requireTwoFactorAuth);
             }
             return this.apiJsonSerializerService.serialize(authenticatedUserData);
         }

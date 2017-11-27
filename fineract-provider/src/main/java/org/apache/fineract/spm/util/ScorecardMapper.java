@@ -29,6 +29,7 @@ import org.apache.fineract.spm.domain.Question;
 import org.apache.fineract.spm.domain.Response;
 import org.apache.fineract.spm.domain.Scorecard;
 import org.apache.fineract.spm.domain.Survey;
+import org.apache.fineract.spm.exception.SurveyResponseNotAvailableException;
 import org.apache.fineract.useradministration.domain.AppUser;
 
 public class ScorecardMapper {
@@ -43,7 +44,7 @@ public class ScorecardMapper {
 
         final List<ScorecardValue> scorecardValues = scorecardData.getScorecardValues();
 
-        if (scorecardValues != null) {
+        if (scorecardValues != null && !scorecardValues.isEmpty()) {
            for (ScorecardValue scorecardValue : scorecardValues) {
                final Scorecard scorecard = new Scorecard();
                scorecards.add(scorecard);
@@ -54,6 +55,8 @@ public class ScorecardMapper {
                scorecard.setCreatedOn(DateUtils.getLocalDateOfTenant().toDate());
                scorecard.setValue(scorecardValue.getValue());
            }
+        }else{
+            throw new SurveyResponseNotAvailableException();
         }
         return scorecards;
     }

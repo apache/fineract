@@ -67,7 +67,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
         final LoanScheduleParams loanScheduleRecalculationDTO = null;
         return generate(mc, loanApplicationTerms, loanCharges, holidayDetailDTO, loanScheduleRecalculationDTO);
     }
-
+    
     private LoanScheduleModel generate(final MathContext mc, final LoanApplicationTerms loanApplicationTerms,
             final Set<LoanCharge> loanCharges, final HolidayDetailDTO holidayDetailDTO, final LoanScheduleParams loanScheduleParams) {
 
@@ -114,10 +114,12 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
         // Determine the total interest owed over the full loan for FLAT
         // interest method .
-        if (!scheduleParams.isPartialUpdate()) {
+        if (!scheduleParams.isPartialUpdate() && !loanApplicationTerms.isEqualAmortization()) {
             Money totalInterestChargedForFullLoanTerm = loanApplicationTerms.calculateTotalInterestCharged(
-                    this.paymentPeriodsInOneYearCalculator, mc);
+                    this.paymentPeriodsInOneYearCalculator, mc);            
+            
             loanApplicationTerms.updateTotalInterestDue(totalInterestChargedForFullLoanTerm);
+            
         }
         
         boolean isFirstRepayment = true;
@@ -177,6 +179,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
             isFirstRepayment = false;
         }
+        
         while (!scheduleParams.getOutstandingBalance().isZero() || !scheduleParams.getDisburseDetailMap().isEmpty()) {
             LocalDate previousRepaymentDate = scheduleParams.getActualRepaymentDate();
             scheduleParams.setActualRepaymentDate(this.scheduledDateGenerator.generateNextRepaymentDate(

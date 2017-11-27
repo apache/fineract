@@ -153,10 +153,10 @@ public class LoanProductRelatedDetailTestHelper {
         final Integer daysInYearType = DaysInYearType.ACTUAL.getValue();
         final boolean isInterestRecalculationEnabled = false;
         final boolean considerPartialPeriodInterest = false;
-
+        final boolean isEqualAmortization = false;
         return new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType,
                 defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, considerPartialPeriodInterest, repayEvery,
                 repaymentFrequencyType, defaultNumberOfRepayments, graceOnPrincipalPayment, recurringMoratoriumOnPrincipalPeriods, graceOnInterestPayment, graceOnInterestCharged,
-                amortizationMethod, inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled);
+                amortizationMethod, inArrearsTolerance, graceOnArrearsAgeing, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, isEqualAmortization);
     }
 }

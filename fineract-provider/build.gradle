@@ -195,17 +195,33 @@ if (project.hasProperty('env') && project.getProperty('env') == 'dev') {
 
 /* Enable Oauth2 authentication based on environment, default to HTTP basic auth */
 if (project.hasProperty('security') && project.getProperty('security') == 'oauth') {
-	copy {
-	    from './properties/oauth/'
-	    into 'src/main/resources/'
-	    include '*.properties'
-	}
+    if(project.hasProperty('twofactor') && project.getProperty('twofactor') == 'enabled') {
+        copy {
+            from './properties/oauth/twofactor/'
+            into 'src/main/resources/'
+            include '*.properties'
+        }
+    } else {
+        copy {
+            from './properties/oauth/'
+            into 'src/main/resources/'
+            include '*.properties'
+        }
+    }
 }  else {
-	copy {
-	    from './properties/basicauth/'
-	    into 'src/main/resources/'
-	    include '*.properties'
-	}
+    if(project.hasProperty('twofactor') && project.getProperty('twofactor') == 'enabled') {
+        copy {
+            from './properties/basicauth/twofactor/'
+            into 'src/main/resources/'
+            include '*.properties'
+        }
+    } else {
+        copy {
+            from './properties/basicauth/'
+            into 'src/main/resources/'
+            include '*.properties'
+        }
+    }
 }
 
 task dist(type:Zip){

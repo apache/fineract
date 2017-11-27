@@ -32,8 +32,10 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.spm.data.SurveyData;
 import org.apache.fineract.spm.domain.Survey;
@@ -67,10 +69,15 @@ public class SpmApiResource {
     @Transactional
     @ApiOperation(value = "List all Surveys", notes = "")
     @ApiResponses({@ApiResponse(code = 200, message = "", response = SurveyData.class, responseContainer = "list")})
-    public List<SurveyData> fetchActiveSurveys() {
+    public List<SurveyData> fetchAllSurveys(@QueryParam("isActive") final Boolean isActive) {
         this.securityContext.authenticatedUser();
         final List<SurveyData> result = new ArrayList<>();
-        final List<Survey> surveys = this.spmService.fetchValidSurveys();
+        List<Survey> surveys = null;
+        if(isActive != null && isActive){
+            surveys = this.spmService.fetchValidSurveys();
+        }else{
+            surveys = this.spmService.fetchAllSurveys();
+        }
         if (surveys != null) {
             for (final Survey survey : surveys) {
                 result.add(SurveyMapper.map(survey));
@@ -119,16 +126,23 @@ public class SpmApiResource {
         return getResponse(survey.getId());
     }
 
-    @DELETE
+    @POST
     @Path("/{id}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
     @ApiOperation(value = "Deactivate Survey", notes = "")
     @ApiResponses({@ApiResponse(code = 200, message = "OK")})
-    public void deactivateSurvey(@PathParam("id") @ApiParam(value = "Enter id") final Long id) {
+    public void activateOrDeactivateSurvey(@PathParam("id") final Long id, @QueryParam("command") final String command) {
         this.securityContext.authenticatedUser();
-        this.spmService.deactivateSurvey(id);
+        if(command != null && command.equalsIgnoreCase("activate")){
+            this.spmService.activateSurvey(id);;
+        }else if(command != null && command.equalsIgnoreCase("deactivate")){
+            this.spmService.deactivateSurvey(id);
+        }else{
+            throw new UnrecognizedQueryParamException("command", command);
+        }
+        
     }
     
     private String getResponse(Long id) {
