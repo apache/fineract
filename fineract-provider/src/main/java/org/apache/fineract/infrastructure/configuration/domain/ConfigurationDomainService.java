@@ -85,5 +85,12 @@ public interface ConfigurationDomainService {
     Long getDailyTPTLimit();
 
     void removeGlobalConfigurationPropertyDataFromCache(String propertyName);
-    
+
+    boolean isSMSOTPDeliveryEnabled();
+
+    boolean isEmailOTPDeliveryEnabled();
+
+    Integer retrieveOTPCharacterLength();
+
+    Integer retrieveOTPLiveTime();
 }

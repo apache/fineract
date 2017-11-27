@@ -42,19 +42,26 @@
 				method="POST" requires-channel="https" />
 			<intercept-url pattern="/api/*/self/registration/user" access="permitAll"
 				method="POST" requires-channel="https" />
-			<intercept-url pattern="/api/**" access="isFullyAuthenticated()"
+			<intercept-url pattern="/api/*/twofactor" access="isFullyAuthenticated()"
+						   method="GET" requires-channel="https" />
+			<intercept-url pattern="/api/*/twofactor" access="isFullyAuthenticated()"
+						   method="POST" requires-channel="https" />
+			<intercept-url pattern="/api/*/twofactor/validate" access="isFullyAuthenticated()"
+						   method="POST" requires-channel="https" />
+			<intercept-url pattern="/api/**" access="isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')"
 				method="GET" requires-channel="https" />
-			<intercept-url pattern="/api/**" access="isFullyAuthenticated()"
+			<intercept-url pattern="/api/**" access="isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')"
 				method="POST" requires-channel="https" />
-			<intercept-url pattern="/api/**" access="isFullyAuthenticated()"
+			<intercept-url pattern="/api/**" access="isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')"
 				method="PUT" requires-channel="https" />
-			<intercept-url pattern="/api/**" access="isFullyAuthenticated()"
+			<intercept-url pattern="/api/**" access="isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')"
 				method="DELETE" requires-channel="https" />
-			<intercept-url pattern="/api/**" access="isFullyAuthenticated()"
+			<intercept-url pattern="/api/**" access="isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')"
 				method="HEAD" requires-channel="https" />
 	
 			<custom-filter after="SECURITY_CONTEXT_FILTER"
 				ref="basicAuthenticationProcessingFilter" />
+			<custom-filter ref="twoFactorAuthFilter" after="BASIC_AUTH_FILTER" />
 		</http>
 	
 		<beans:bean id="basicAuthenticationEntryPoint"
@@ -83,27 +90,34 @@
 			erase-credentials="false">
 			<authentication-provider ref="customAuthenticationProvider" />
 		</authentication-manager>
-	</beans:beans> 
+	</beans:beans>
 	<beans:beans profile="oauth">
 		<http create-session="stateless" use-expressions="true" pattern="/api/v1/**"
 			entry-point-ref="oauthAuthenticationEntryPoint"
 			access-decision-manager-ref="accessDecisionManager">
 			<anonymous enabled="false" />
 			<intercept-url pattern="/api//v1/**" method="OPTIONS"
-				access="permitAll" requires-channel="https" />
-			<intercept-url pattern="/api/v1/**" access="isFullyAuthenticated()"
+					access="permitAll" requires-channel="https" />
+			<intercept-url pattern="/api/*/twofactor" access="isFullyAuthenticated()"
+						   method="GET" requires-channel="https" />
+			<intercept-url pattern="/api/*/twofactor" access="isFullyAuthenticated()"
+						   method="POST" requires-channel="https" />
+			<intercept-url pattern="/api/*/twofactor/validate" access="isFullyAuthenticated()"
+						   method="POST" requires-channel="https" />
+			<intercept-url pattern="/api/v1/**" access="isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')"
 				method="GET" requires-channel="https" />
-			<intercept-url pattern="/api/v1/**" access="isFullyAuthenticated()"
+			<intercept-url pattern="/api/v1/**" access="isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')"
 				method="POST" requires-channel="https" />
-			<intercept-url pattern="/api/v1/**" access="isFullyAuthenticated()"
+			<intercept-url pattern="/api/v1/**" access="isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')"
 				method="PUT" requires-channel="https" />
-			<intercept-url pattern="/api/v1/**" access="isFullyAuthenticated()"
+			<intercept-url pattern="/api/v1/**" access="isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')"
 				method="DELETE" requires-channel="https" />
-			<intercept-url pattern="/api/v1/**" access="isFullyAuthenticated()"
+			<intercept-url pattern="/api/v1/**" access="isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')"
 				method="HEAD" requires-channel="https" />
 			<custom-filter ref="tenantIdentifierProcessingFilter"
 				position="FIRST" />
 			<custom-filter before="PRE_AUTH_FILTER" ref="resourceServerFilter" />
+			<custom-filter ref="twoFactorAuthFilter" after="BASIC_AUTH_FILTER" />
 			<access-denied-handler ref="oauthAccessDeniedHandler" />
 		</http>
 	

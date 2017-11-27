@@ -54,6 +54,9 @@ public class AuthenticatedOauthUserData {
     @SuppressWarnings("unused")
     private final boolean shouldRenewPassword;
 
+    @SuppressWarnings("unused")
+    private final boolean isTwoFactorAuthenticationRequired;
+
     public AuthenticatedOauthUserData(final String username, final Collection<String> permissions) {
         this.username = username;
         this.userId = null;
@@ -67,11 +70,13 @@ public class AuthenticatedOauthUserData {
         this.roles = null;
         this.permissions = permissions;
         this.shouldRenewPassword = false;
+        this.isTwoFactorAuthenticationRequired = false;
     }
 
     public AuthenticatedOauthUserData(final String username, final Long officeId, final String officeName, final Long staffId,
             final String staffDisplayName, final EnumOptionData organisationalRole, final Collection<RoleData> roles,
-            final Collection<String> permissions, final Long userId, final String accessToken) {
+            final Collection<String> permissions, final Long userId, final String accessToken,
+            final boolean isTwoFactorAuthenticationRequired) {
         this.username = username;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -84,9 +89,11 @@ public class AuthenticatedOauthUserData {
         this.roles = roles;
         this.permissions = permissions;
         this.shouldRenewPassword = false;
+        this.isTwoFactorAuthenticationRequired = isTwoFactorAuthenticationRequired;
     }
 
-    public AuthenticatedOauthUserData(final String username, final Long userId, final String accessToken) {
+    public AuthenticatedOauthUserData(final String username, final Long userId, final String accessToken,
+            final boolean isTwoFactorAuthenticationRequired) {
         this.username = username;
         this.officeId = null;
         this.officeName = null;
@@ -99,5 +106,6 @@ public class AuthenticatedOauthUserData {
         this.roles = null;
         this.permissions = null;
         this.shouldRenewPassword = true;
+        this.isTwoFactorAuthenticationRequired = isTwoFactorAuthenticationRequired;
     }
 }

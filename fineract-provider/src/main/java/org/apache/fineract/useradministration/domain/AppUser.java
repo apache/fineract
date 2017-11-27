@@ -491,6 +491,23 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         return hasNotPermission;
     }
 
+    /**
+     * Checks whether the user has a given permission explicitly.
+     *
+     * @param permissionCode the permission code to check for.
+     * @return whether the user has the specified permission
+     */
+    public boolean hasSpecificPermissionTo(final String permissionCode) {
+        boolean hasPermission = false;
+        for (final Role role : this.roles) {
+            if(role.hasPermissionTo(permissionCode)) {
+                hasPermission = true;
+                break;
+            }
+        }
+        return hasPermission;
+    }
+
     public void validateHasReadPermission(final String resourceType) {
 
         final String authorizationMessage = "User has no authority to view " + resourceType.toLowerCase() + "s";

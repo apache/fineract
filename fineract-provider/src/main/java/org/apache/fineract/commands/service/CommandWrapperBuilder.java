@@ -3118,4 +3118,18 @@ public class CommandWrapperBuilder {
         this.href = "/emailcampaigns/configuration/";
         return this;
     }
+
+    public CommandWrapperBuilder invalidateTwoFactorAccessToken() {
+        this.actionName = "INVALIDATE";
+        this.entityName = "TWOFACTOR_ACCESSTOKEN";
+        this.href = "/twofactor/invalidate";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateTwoFactorConfiguration() {
+        this.actionName = "UPDATE";
+        this.entityName = "TWOFACTOR_CONFIGURATION";
+        this.href = "/twofactor/configure";
+        return this;
+    }
 }
