@@ -28,6 +28,11 @@ public interface DocumentWritePlatformService {
 
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'CREATE_DOCUMENT')")
     Long createDocument(DocumentCommand documentCommand, InputStream inputStream);
+    
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'CREATE_DOCUMENT')")
+    Long createInternalDocument(String entityType, Long entityId,
+            Long fileSize, InputStream inputStream, String mimeType,
+            String name, String description, String fileName);
 
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'UPDATE_DOCUMENT')")
     CommandProcessingResult updateDocument(DocumentCommand documentCommand, InputStream inputStream);

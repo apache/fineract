@@ -40,6 +40,28 @@ public class OfficeData implements Serializable {
     @SuppressWarnings("unused")
     private final Collection<OfficeData> allowedParents;
 
+    //import fields
+    private transient Integer rowIndex;
+    private String locale;
+    private String dateFormat;
+
+    public static OfficeData importInstance(final String name, final Long parentId, final LocalDate openingDate,final String externalId) {
+    		return new OfficeData(null, name, null, externalId, openingDate, null, parentId, null, null);
+    }
+    
+    public void setImportFields(final Integer rowIndex, final String locale, final String dateFormat) {
+    		this.rowIndex = rowIndex;
+    		this.locale = locale;
+    		this.dateFormat = dateFormat;
+    }
+    
+    public Integer getRowIndex() {
+        return rowIndex;
+    }
+
+    public Long getId() {
+        return id;
+    }
     public static OfficeData dropdown(final Long id, final String name, final String nameDecorated) {
         return new OfficeData(id, name, nameDecorated, null, null, null, null, null, null);
     }
