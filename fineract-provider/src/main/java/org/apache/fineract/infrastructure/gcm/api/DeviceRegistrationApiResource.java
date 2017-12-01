@@ -46,7 +46,7 @@ import org.springframework.stereotype.Component;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-@Path("/device/registration")
+@Path("/self/device/registration")
 @Component
 @Scope("singleton")
 public class DeviceRegistrationApiResource {
@@ -77,7 +77,7 @@ public class DeviceRegistrationApiResource {
         Long clientId = json.get(DeviceRegistrationApiConstants.clientIdParamName).getAsLong();
         String registrationId = json.get(DeviceRegistrationApiConstants.registrationIdParamName).getAsString();
         DeviceRegistration deviceRegistration = this.deviceRegistrationWritePlatformService.registerDevice(clientId, registrationId);
-        String response = gson.toJson(deviceRegistration);
+        String response = gson.toJson(deviceRegistration.getId());
         return response;
     }
 
