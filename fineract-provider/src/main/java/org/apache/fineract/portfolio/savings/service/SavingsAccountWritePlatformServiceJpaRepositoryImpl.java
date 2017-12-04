@@ -254,6 +254,12 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         boolean isRegularTransaction = true;
         final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(account, fmt, transactionDate,
                 transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction);
+				
+		final String noteText = command.stringValueOfParameterNamed("note");
+        if (StringUtils.isNotBlank(noteText)) {
+            final Note note = Note.savingNote(account, noteText);
+            this.noteRepository.save(note);
+        }
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(deposit.getId()) //
@@ -297,6 +303,12 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 isRegularTransaction, isApplyWithdrawFee, isInterestTransfer, isWithdrawBalance);
         final SavingsAccountTransaction withdrawal = this.savingsAccountDomainService.handleWithdrawal(account, fmt, transactionDate,
                 transactionAmount, paymentDetail, transactionBooleanValues);
+				
+		final String noteText = command.stringValueOfParameterNamed("note");
+        if (StringUtils.isNotBlank(noteText)) {
+            final Note note = Note.savingNote(account, noteText);
+            this.noteRepository.save(note);
+        }
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(withdrawal.getId()) //
