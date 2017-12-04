@@ -234,7 +234,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         final String name = searchCriteria.getName();
         if (name != null) {
-        	paramList.add(ApiParameterHelper.sqlEncodeString("%" + name + "%"));
+        	paramList.add("%" + name + "%");
             extraCriteria.append(" and g.display_name like ? ");
         }
 
