@@ -782,6 +782,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
             sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
             sqlBuilder.append("tr.created_date as submittedOnDate,");
+            sqlBuilder.append(" au.username as submittedByUsername, ");
+            sqlBuilder.append(" nt.note as transactionNote, ") ;
             sqlBuilder.append("tr.running_balance_derived as runningBalance, tr.is_reversed as reversed,");
             sqlBuilder.append("fromtran.id as fromTransferId, fromtran.is_reversed as fromTransferReversed,");
             sqlBuilder.append("fromtran.transaction_date as fromTransferDate, fromtran.amount as fromTransferAmount,");
@@ -805,7 +807,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("left join m_account_transfer_transaction totran on totran.to_savings_transaction_id = tr.id ");
             sqlBuilder.append("left join m_payment_detail pd on tr.payment_detail_id = pd.id ");
             sqlBuilder.append("left join m_payment_type pt on pd.payment_type_id = pt.id ");
-
+            sqlBuilder.append(" left join m_appuser au on au.id=tr.appuser_id ");
+            sqlBuilder.append(" left join m_note nt ON nt.savings_account_transaction_id=tr.id ") ;
             this.schemaSql = sqlBuilder.toString();
         }
 
@@ -877,9 +880,10 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 transfer = AccountTransferData.transferBasicDetails(toTransferId, currency, toTransferAmount, toTransferDate,
                         toTransferDescription, toTransferReversed);
             }
-
+            final String submittedByUsername = rs.getString("submittedByUsername");
+            final String note = rs.getString("transactionNote") ;
             return SavingsAccountTransactionData.create(id, transactionType, paymentDetailData, savingsId, accountNo, date, currency,
-                    amount, outstandingChargeAmount, runningBalance, reversed, transfer, submittedOnDate, postInterestAsOn);
+                    amount, outstandingChargeAmount, runningBalance, reversed, transfer, submittedOnDate, postInterestAsOn, submittedByUsername, note);
         }
     }
 
