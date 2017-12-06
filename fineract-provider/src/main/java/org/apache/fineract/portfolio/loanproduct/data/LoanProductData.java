@@ -1196,4 +1196,28 @@ public class LoanProductData {
     public BigDecimal getInterestRateDifferential() {
         return this.interestRateDifferential;
     }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public LocalDate getCloseDate() {
+        return closeDate;
+    }
+
+    public Integer getMinNumberOfRepayments() {
+        return minNumberOfRepayments;
+    }
+
+    public Integer getMaxNumberOfRepayments() {
+        return maxNumberOfRepayments;
+    }
+
+    public BigDecimal getMinInterestRatePerPeriod() {
+        return minInterestRatePerPeriod;
+    }
+
+    public BigDecimal getMaxInterestRatePerPeriod() {
+        return maxInterestRatePerPeriod;
+    }
 }

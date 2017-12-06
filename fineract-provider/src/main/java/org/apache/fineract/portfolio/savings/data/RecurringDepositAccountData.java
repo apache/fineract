@@ -23,6 +23,7 @@ import java.util.Collection;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -74,6 +75,82 @@ public class RecurringDepositAccountData extends DepositAccountData {
     // for account close
     private final Collection<EnumOptionData> onAccountClosureOptions;
     private final Collection<PaymentTypeData> paymentTypeOptions;
+
+    //import fields
+    private transient Integer rowIndex;
+    private String dateFormat;
+    private String locale;
+    private LocalDate submittedOnDate;
+    private Long depositPeriodFrequencyId;
+
+    public static RecurringDepositAccountData importInstance(Long clientId,Long productId,Long fieldOfficerId,
+            LocalDate submittedOnDate,
+            EnumOptionData interestCompoundingPeriodTypeEnum,EnumOptionData interestPostingPeriodTypeEnum,
+            EnumOptionData interestCalculationTypeEnum,EnumOptionData interestCalculationDaysInYearTypeEnum,
+            Integer lockinPeriodFrequency,EnumOptionData lockinPeriodFrequencyTypeEnum,BigDecimal depositAmount,
+            Integer depositPeriod,Long depositPeriodFrequencyId,LocalDate expectedFirstDepositOnDate,
+            Integer recurringFrequency,EnumOptionData recurringFrequencyTypeEnum,boolean isCalendarInherited,
+            boolean isMandatoryDeposit,boolean allowWithdrawal,boolean adjustAdvanceTowardsFuturePayments,
+            String externalId,Collection<SavingsAccountChargeData> charges,Integer rowIndex,String locale, String dateFormat){
+
+        return new RecurringDepositAccountData(clientId, productId, fieldOfficerId, submittedOnDate,
+                interestCompoundingPeriodTypeEnum,interestPostingPeriodTypeEnum,interestCalculationTypeEnum,
+                interestCalculationDaysInYearTypeEnum, lockinPeriodFrequency, lockinPeriodFrequencyTypeEnum,
+                depositAmount, depositPeriod, depositPeriodFrequencyId, expectedFirstDepositOnDate,
+                recurringFrequency, recurringFrequencyTypeEnum, isCalendarInherited, isMandatoryDeposit,
+                allowWithdrawal, adjustAdvanceTowardsFuturePayments, externalId,charges, rowIndex,locale,dateFormat);
+    }
+    private RecurringDepositAccountData(Long clientId,Long productId,Long fieldofficerId,LocalDate submittedOnDate,
+            EnumOptionData interestCompoundingPeriodType,EnumOptionData interestPostingPeriodType,
+            EnumOptionData interestCalculationType,EnumOptionData interestCalculationDaysInYearType,
+            Integer lockinPeriodFrequency,EnumOptionData lockinPeriodFrequencyType,BigDecimal depositAmount,
+            Integer depositPeriod,Long depositPeriodFrequencyId,LocalDate expectedFirstDepositOnDate,
+            Integer recurringFrequency,EnumOptionData recurringFrequencyType,boolean isCalendarInherited,
+            boolean isMandatoryDeposit,boolean allowWithdrawal,boolean adjustAdvanceTowardsFuturePayments,
+            String externalId,Collection<SavingsAccountChargeData> charges,Integer rowIndex,String locale, String dateFormat) {
+        super(clientId,productId,fieldofficerId,interestCompoundingPeriodType,interestPostingPeriodType,interestCalculationType,
+                interestCalculationDaysInYearType,lockinPeriodFrequency,lockinPeriodFrequencyType, externalId,charges);
+
+        this.preClosurePenalApplicable = false;
+        this.preClosurePenalInterest = null;
+        this.preClosurePenalInterestOnType = null;
+        this.minDepositTerm = null;
+        this.maxDepositTerm = null;
+        this.minDepositTermType = null;
+        this.maxDepositTermType = null;
+        this.inMultiplesOfDepositTerm = null;
+        this.inMultiplesOfDepositTermType = null;
+        this.depositAmount = null;
+        this.maturityAmount = null;
+        this.maturityDate = null;
+        this.depositPeriod = depositPeriod;
+        this.depositPeriodFrequency = null;
+        this.mandatoryRecommendedDepositAmount = depositAmount;
+        this.totalOverdueAmount = null;
+        this.noOfOverdueInstallments = null;
+        this.isMandatoryDeposit = isMandatoryDeposit;
+        this.allowWithdrawal = allowWithdrawal;
+        this.adjustAdvanceTowardsFuturePayments = adjustAdvanceTowardsFuturePayments;
+        this.expectedFirstDepositOnDate = expectedFirstDepositOnDate;
+        this.isCalendarInherited = isCalendarInherited;
+        this.recurringFrequency = recurringFrequency;
+        this.recurringFrequencyType = recurringFrequencyType;
+        this.onAccountClosure = null;
+        this.preClosurePenalInterestOnTypeOptions = null;
+        this.periodFrequencyTypeOptions = null;
+        this.savingsAccounts = null;
+        this.onAccountClosureOptions = null;
+        this.paymentTypeOptions = null;
+        this.rowIndex = rowIndex;
+        this.dateFormat= dateFormat;
+        this.locale=locale;
+        this.submittedOnDate=submittedOnDate;
+        this.depositPeriodFrequencyId=depositPeriodFrequencyId;
+    }
+
+    public Integer getRowIndex() {
+        return rowIndex;
+    }
 
     public static RecurringDepositAccountData instance(final DepositAccountData depositAccountData,
             final boolean preClosurePenalApplicable, final BigDecimal preClosurePenalInterest,

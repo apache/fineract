@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.group.data;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
@@ -73,6 +74,104 @@ public class GroupGeneralData {
     private final GroupTimelineData timeline;
 
     private List<DatatableData> datatables = null;
+
+    //import fields
+    private transient Integer rowIndex;
+    private String dateFormat;
+    private String locale;
+    private LocalDate submittedOnDate;
+
+    public static GroupGeneralData importInstance(String groupName,List<ClientData> clientMembers,LocalDate activationDate,
+            LocalDate submittedOnDate ,Boolean active,String externalId,Long officeId,Long staffId,
+            Long centerId, Integer rowIndex,String locale,String dateFormat){
+
+        return new GroupGeneralData(groupName, clientMembers, activationDate, submittedOnDate,active, externalId,
+                officeId, staffId, centerId, rowIndex,locale,dateFormat);
+    }
+
+    private GroupGeneralData(String name,List<ClientData> clientMembers,LocalDate activationDate,
+            LocalDate submittedOnDate ,Boolean active,String externalId,Long officeId,Long staffId,
+            Long centerId, Integer rowIndex,String locale,String dateFormat ){
+        this.dateFormat= dateFormat;
+        this.locale= locale;
+        this.name = name;
+        this.clientMembers = clientMembers;
+        this.officeId = officeId;
+        this.staffId = staffId;
+        this.centerId = centerId;
+        this.externalId = externalId;
+        this.active = active;
+        this.activationDate = activationDate;
+        this.submittedOnDate=submittedOnDate;
+        this.rowIndex = rowIndex;
+        this.id=null;
+        this.accountNo = null;
+        this.status = null;
+        this.officeName = null;
+        this.centerName =null;
+        this.staffName = null;
+        this.hierarchy = null;
+        this.groupLevel = null;
+        this.activeClientMembers = null;
+        this.groupRoles = null;
+        this.calendarsData = null;
+        this.collectionMeetingCalendar = null;
+        this.centerOptions = null;
+        this.officeOptions = null;
+        this.staffOptions = null;
+        this.clientOptions = null;
+        this.availableRoles = null;
+        this.selectedRole = null;
+        this.closureReasons = null;
+        this.timeline = null;
+    }
+
+    public GroupGeneralData(Long id) {
+        this.id = id;
+        this.accountNo = null;
+        this.name = null;
+        this.externalId = null;
+        this.status = null;
+        this.active = null;
+        this.activationDate = null;
+        this.officeId = null;
+        this.officeName = null;
+        this.centerId = null;
+        this.centerName = null;
+        this.staffId = null;
+        this.staffName = null;
+        this.hierarchy = null;
+        this.groupLevel = null;
+        this.clientMembers = null;
+        this.activeClientMembers = null;
+        this.groupRoles = null;
+        this.calendarsData = null;
+        this.collectionMeetingCalendar = null;
+        this.centerOptions = null;
+        this.officeOptions = null;
+        this.staffOptions = null;
+        this.clientOptions = null;
+        this.availableRoles = null;
+        this.selectedRole = null;
+        this.closureReasons = null;
+        this.timeline = null;
+    }
+
+    public Integer getRowIndex() {
+        return rowIndex;
+    }
+
+    public Long getCenterId() {
+        return centerId;
+    }
+
+    public LocalDate getActivationDate() {
+        return activationDate;
+    }
+
+    public String getOfficeName() {
+        return officeName;
+    }
 
     public static GroupGeneralData lookup(final Long groupId, final String accountNo, final String groupName) {
         final Collection<ClientData> clientMembers = null;

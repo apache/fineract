@@ -78,6 +78,31 @@ public class SavingsAccountChargeData {
 
     private final Collection<ChargeData> chargeOptions;
 
+    public SavingsAccountChargeData(Long chargeId,  BigDecimal amount,LocalDate dueDate) {
+        this.chargeId = chargeId;
+        this.amount = amount;
+        this.dueDate = dueDate;
+        this.id=null;
+        this.accountId = null;
+        this.name = null;
+        this.chargeTimeType = null;
+        this.feeOnMonthDay = null;
+        this.feeInterval = null;
+        this.chargeCalculationType = null;
+        this.percentage = null;
+        this.amountPercentageAppliedTo = null;
+        this.currency = null;
+        this.amountPaid = null;
+        this.amountWaived = null;
+        this.amountWrittenOff = null;
+        this.amountOutstanding = null;
+        this.amountOrPercentage = null;
+        this.penalty = false;
+        this.isActive = null;
+        this.inactivationDate = null;
+        this.chargeOptions = null;
+    }
+
     public static SavingsAccountChargeData template(final Collection<ChargeData> chargeOptions) {
         final Long id = null;
         final Long chargeId = null;

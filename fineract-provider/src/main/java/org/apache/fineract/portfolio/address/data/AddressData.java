@@ -76,6 +76,38 @@ public class AddressData {
 	private final Collection<CodeValueData> stateProvinceIdOptions;
 	private final Collection<CodeValueData> addressTypeIdOptions;
 
+	public AddressData(Long addressTypeId,String street, String addressLine1, String addressLine2, String addressLine3,
+			String city,String postalCode, Boolean isActive,Long stateProvinceId,Long countryId) {
+
+		this.addressTypeId = addressTypeId;
+		this.isActive = isActive;
+		this.street = street;
+		this.addressLine1 = addressLine1;
+		this.addressLine2 = addressLine2;
+		this.addressLine3 = addressLine3;
+		this.countryId = countryId;
+		this.postalCode = postalCode;
+		this.stateProvinceId = stateProvinceId;
+		this.city = city;
+		this.townVillage = null;
+		this.client_id = null;
+		this.addressType = null;
+		this.addressId = null;
+		this.countyDistrict = null;
+		this.countryName = null;
+		this.stateName = null;
+		this.latitude = null;
+		this.longitude = null;
+		this.createdBy = null;
+		this.createdOn = null;
+		this.updatedBy = null;
+		this.updatedOn = null;
+		this.countryIdOptions = null;
+		this.stateProvinceIdOptions = null;
+		this.addressTypeIdOptions = null;
+	}
+
+
 	private AddressData(final String addressType, final Long client_id, final Long addressId, final Long addressTypeId,
 			final Boolean is_active, final String street, final String addressLine1, final String addressLine2,
 			final String addressLine3, final String townVillage, final String city, final String countyDistrict,

@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.integrationtests.common.savings;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -27,11 +31,16 @@ import java.util.Locale;
 
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Assert;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 
 @SuppressWarnings({ "rawtypes" })
 public class SavingsAccountHelper {
@@ -641,5 +650,29 @@ public class SavingsAccountHelper {
         datatableMap.put("data", dataMap);
         datatablesListMap.add(datatableMap);
         return datatablesListMap;
+    }
+
+    public Workbook getSavingsWorkbook(String dateFormat) throws IOException {
+        requestSpec.header(HttpHeaders.CONTENT_TYPE,"application/vnd.ms-excel");
+        byte[] byteArray=Utils.performGetBinaryResponse(requestSpec,responseSpec,SAVINGS_ACCOUNT_URL+"/downloadtemplate"+"?"+
+                Utils.TENANT_IDENTIFIER+"&dateFormat="+dateFormat);
+        InputStream inputStream= new ByteArrayInputStream(byteArray);
+        Workbook workbook=new HSSFWorkbook(inputStream);
+        return workbook;
+    }
+
+    public String importSavingsTemplate(File file) {
+        String locale="en";
+        String dateFormat="dd MMMM yyyy";
+        String legalFormType= null;
+        requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
+        return Utils.performServerTemplatePost(requestSpec,responseSpec,SAVINGS_ACCOUNT_URL+"/uploadtemplate"+"?"+Utils.TENANT_IDENTIFIER,
+                legalFormType,file,locale,dateFormat);
+    }
+
+    public String getOutputTemplateLocation(final String importDocumentId){
+        requestSpec.header(HttpHeaders.CONTENT_TYPE,MediaType.TEXT_PLAIN);
+        return Utils.performServerOutputTemplateLocationGet(requestSpec,responseSpec,"/fineract-provider/api/v1/imports/getOutputTemplateLocation"+"?"
+                +Utils.TENANT_IDENTIFIER,importDocumentId);
     }
 }

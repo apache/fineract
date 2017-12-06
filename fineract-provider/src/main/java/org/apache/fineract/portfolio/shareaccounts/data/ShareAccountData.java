@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
+import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.accountdetails.data.ShareAccountSummaryData;
@@ -31,6 +32,7 @@ import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.products.data.ProductData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductData;
+import org.joda.time.LocalDate;
 
 @SuppressWarnings("unused")
 public class ShareAccountData implements AccountData {
@@ -80,6 +82,75 @@ public class ShareAccountData implements AccountData {
     private Collection<ShareAccountChargeData> charges;
 
     private Collection<ShareAccountDividendData> dividends ;
+
+    //import fields
+    private Integer requestedShares;
+    private LocalDate submittedDate;
+    private Integer minimumActivePeriodFrequencyType;
+    private Integer lockinPeriodFrequency;
+    private Integer lockinPeriodFrequencyType;
+    private LocalDate applicationDate;
+    private String locale;
+    private transient Integer rowIndex;
+    private  String dateFormat;
+
+    public static ShareAccountData importInstance(Long clientId,Long productId,Integer requestedShares,String externalId,
+            LocalDate submittedOnDate , Integer minimumActivePeriodDays,Integer minimumActivePeriodFrequencyType,
+            Integer lockinPeriodFrequency,Integer lockinPeriodFrequencyType,LocalDate applicationDate,
+            Boolean allowDividendCalculationForInactiveClients, Collection<ShareAccountChargeData> charges,
+            Long defaultSavingsAccountId,Integer rowIndex,String locale, String dateFormat){
+        return new ShareAccountData(clientId,productId,requestedShares,externalId,submittedOnDate,minimumActivePeriodDays,
+                minimumActivePeriodFrequencyType,lockinPeriodFrequency,lockinPeriodFrequencyType,applicationDate,allowDividendCalculationForInactiveClients,charges,
+                defaultSavingsAccountId,rowIndex,locale,dateFormat);
+    }
+    private ShareAccountData(Long clientId,Long productId,Integer requestedShares,String externalId,
+            LocalDate submittedDate , Integer minimumActivePeriod,Integer minimumActivePeriodFrequencyType,
+            Integer lockinPeriodFrequency,Integer lockinPeriodFrequencyType,LocalDate applicationDate,
+            Boolean allowDividendCalculationForInactiveClients, Collection<ShareAccountChargeData> charges,
+            Long savingsAccountId,Integer rowIndex,String locale, String dateFormat) {
+
+        this.clientId = clientId;
+        this.productId = productId;
+        this.requestedShares=requestedShares;
+        this.externalId = externalId;
+        this.submittedDate=submittedDate;
+        this.minimumActivePeriod = minimumActivePeriod;
+        this.minimumActivePeriodFrequencyType=minimumActivePeriodFrequencyType;
+        this.lockinPeriodFrequency=lockinPeriodFrequency;
+        this.lockinPeriodFrequencyType=lockinPeriodFrequencyType;
+        this.applicationDate=applicationDate;
+        this.allowDividendCalculationForInactiveClients = allowDividendCalculationForInactiveClients;
+        this.dateFormat= dateFormat;
+        this.locale=locale;
+        this.charges = charges;
+        this.savingsAccountId = savingsAccountId;
+        this.rowIndex=rowIndex;
+        this.clientName = null;
+        this.savingsAccountNumber = null;
+        this.defaultShares = null;
+        this.id = null;
+        this.accountNo = null;
+        this.productName = null;
+        this.status = null;
+        this.timeline = null;
+        this.currency = null;
+        this.summary = null;
+        this.purchasedShares = null;
+        this.currentMarketPrice = null;
+        this.lockinPeriod = null;
+        this.lockPeriodTypeEnum = null;
+        this.minimumActivePeriodTypeEnum = null;
+        this.dividends = null;
+        this.productOptions = null;
+        this.chargeOptions = null;
+        this.lockinPeriodFrequencyTypeOptions = null;
+        this.minimumActivePeriodFrequencyTypeOptions = null;
+        this.clientSavingsAccounts = null;
+    }
+
+    public Integer getRowIndex() {
+        return rowIndex;
+    }
     
     // Data for template
     private Collection<ProductData> productOptions;
