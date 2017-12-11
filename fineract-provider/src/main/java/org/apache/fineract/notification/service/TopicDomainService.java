@@ -18,12 +18,28 @@
  */
 package org.apache.fineract.notification.service;
 
-import java.util.List;
+import java.util.Map;
 
-public interface NotificationWritePlatformService {
-    Long notify(Long userId, String objectType, Long objectId, String action,
-                Long actorId, String notificationContent, boolean isSystemGenerated);
+import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.useradministration.domain.AppUser;
+import org.apache.fineract.useradministration.domain.Role;
 
-    Long notify(List<Long> userIds, String objectType, Long objectId, String action,
-                Long actorId, String notificationContent, boolean isSystemGenerated);
+public interface TopicDomainService {
+	
+	public void createTopic( Office newOffice );
+	
+	public void createTopic( Role newRole );
+	
+	public void updateTopic( Office updatedOffice, Map<String, Object> changes );
+	
+	public void updateTopic( String previousRolename, Role updatedRole, Map<String, Object> changes );
+	
+	public void deleteTopic( Role role );
+	
+	public void subscribeUserToTopic( AppUser newUser );
+	
+	public void updateUserSubscription( AppUser userToUpdate, Map<String, Object> changes );
+	
+	public void unsubcribeUserFromTopic( AppUser user );
+	
 }

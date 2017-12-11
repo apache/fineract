@@ -29,7 +29,7 @@ public class NotificationData implements Serializable {
     private String action;
     private Long actorId;
     private String content;
-	private boolean isRead;
+    private boolean isRead;
     private boolean isSystemGenerated;
     private String tenantIdentifier;
     private String createdAt;
@@ -47,7 +47,7 @@ public class NotificationData implements Serializable {
         this.action = action;
         this.actorId = actorId;
         this.content = content;
-		this.isRead = isRead;
+        this.isRead = isRead;
         this.isSystemGenerated = isSystemGenerated;
         this.tenantIdentifier = tenantIdentifier;
         this.officeId = officeId;

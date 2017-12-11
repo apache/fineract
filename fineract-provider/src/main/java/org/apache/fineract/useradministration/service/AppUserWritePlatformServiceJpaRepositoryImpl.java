@@ -20,12 +20,12 @@ package org.apache.fineract.useradministration.service;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.EntityExistsException;
 import javax.persistence.PersistenceException;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -39,10 +39,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.core.service.PlatformEmailSendException;
 import org.apache.fineract.infrastructure.security.service.PlatformPasswordEncoder;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.notification.domain.Topic;
-import org.apache.fineract.notification.domain.TopicRepository;
-import org.apache.fineract.notification.domain.TopicSubscriber;
-import org.apache.fineract.notification.domain.TopicSubscriberRepository;
+import org.apache.fineract.notification.service.TopicDomainService;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -91,16 +88,14 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     private final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository;
     private final StaffRepositoryWrapper staffRepositoryWrapper;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
-    private final TopicRepository topicRepository;
-    private final TopicSubscriberRepository topicSubscriberRepository;
+    private final TopicDomainService topicDomainService;
 
     @Autowired
     public AppUserWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AppUserRepository appUserRepository,
             final UserDomainService userDomainService, final OfficeRepositoryWrapper officeRepositoryWrapper, final RoleRepository roleRepository,
             final PlatformPasswordEncoder platformPasswordEncoder, final UserDataValidator fromApiJsonDeserializer,
             final AppUserPreviousPasswordRepository appUserPreviewPasswordRepository, final StaffRepositoryWrapper staffRepositoryWrapper,
-            final ClientRepositoryWrapper clientRepositoryWrapper, final TopicRepository topicRepository,
-            final TopicSubscriberRepository topicSubscriberRepository) {
+            final ClientRepositoryWrapper clientRepositoryWrapper, final TopicDomainService topicDomainService) {
         this.context = context;
         this.appUserRepository = appUserRepository;
         this.userDomainService = userDomainService;
@@ -111,8 +106,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         this.appUserPreviewPasswordRepository = appUserPreviewPasswordRepository;
         this.staffRepositoryWrapper = staffRepositoryWrapper;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
-        this.topicRepository = topicRepository;
-        this.topicSubscriberRepository = topicSubscriberRepository;
+        this.topicDomainService = topicDomainService;
     }
 
     @Transactional
@@ -159,19 +153,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
             final Boolean sendPasswordToEmail = command.booleanObjectValueOfParameterNamed("sendPasswordToEmail");
             this.userDomainService.create(appUser, sendPasswordToEmail);
-            List<Topic> possibleTopics = topicRepository.findByEntityId(appUser.getOffice().getId());
             
-            if (!possibleTopics.isEmpty()) {
-            	Set<Role> userRoles = appUser.getRoles();
-            	for (Role curRole : userRoles) {
-            		for (Topic curTopic : possibleTopics) {
-            			if(curRole.getName().compareToIgnoreCase(curTopic.getMemberType()) == 0) {
-            				TopicSubscriber topicSubscriber = new TopicSubscriber(curTopic, appUser, new Date());
-            				topicSubscriberRepository.save(topicSubscriber);
-            			}
-            		}
-            	}
-            }
+            this.topicDomainService.subscribeUserToTopic(appUser);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -223,7 +206,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             	isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER); 
             }
             
-            if(isSelfServiceUser && command.hasParameter(AppUserConstants.CLIENTS)){
+            if(isSelfServiceUser
+            		&& command.hasParameter(AppUserConstants.CLIENTS)){
             	JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
             	Collection<Long> clientIds = new HashSet<>();
             	for(JsonElement clientElement : clientsArray){
@@ -234,33 +218,11 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
             final Map<String, Object> changes = userToUpdate.update(command, this.platformPasswordEncoder, clients);
 
+            this.topicDomainService.updateUserSubscription(userToUpdate, changes);
             if (changes.containsKey("officeId")) {
-                final Long oldOfficeId = userToUpdate.getOffice().getId();
-                final Long newOfficeId = (Long) changes.get("officeId");
-                final Office office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(newOfficeId);
+                final Long officeId = (Long) changes.get("officeId");
+                final Office office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
                 userToUpdate.changeOffice(office);
-
-                List<Topic> oldTopics = topicRepository.findByEntityId(oldOfficeId);
-                List<Topic> newTopics = topicRepository.findByEntityId(newOfficeId);
-                
-                List<TopicSubscriber> oldSubscriptions = topicSubscriberRepository.findBySubscriber(userToUpdate);
-                for (TopicSubscriber subscriber : oldSubscriptions) {
-                	for (Topic topic : oldTopics) {
-                		if (subscriber.getTopic().getId() == topic.getId()) {
-                			topicSubscriberRepository.delete(subscriber);
-                		}
-                	}
-                }
-                
-                Set<Role> userRoles = userToUpdate.getRoles();
-            	for (Role curRole : userRoles) {
-            		for (Topic curTopic : newTopics) {
-            			if (curRole.getName().compareToIgnoreCase(curTopic.getMemberType()) == 0) {
-            				TopicSubscriber newSubscription = new TopicSubscriber(curTopic, userToUpdate, new Date());
-            				topicSubscriberRepository.save(newSubscription);
-            			}
-            		}
-            	}
             }
 
             if (changes.containsKey("staffId")) {
@@ -274,34 +236,9 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
             if (changes.containsKey("roles")) {
                 final String[] roleIds = (String[]) changes.get("roles");
-                final Set<Role> oldRoles = userToUpdate.getRoles() ;
-                final Set<Role> tempOldRoles = new HashSet<>(oldRoles);
-                final Set<Role> updatedRoles = assembleSetOfRoles(roleIds);
-                final Set<Role> tempUpdatedRoles = new HashSet<>(updatedRoles);
-                
-                tempOldRoles.removeAll(updatedRoles);
-                List<TopicSubscriber> oldSubscriptions = topicSubscriberRepository.findBySubscriber(userToUpdate);
-                for (TopicSubscriber subscriber : oldSubscriptions) {
-                	Topic topic = subscriber.getTopic();
-                	for (Role role : tempOldRoles) {
-                		if (role.getName().compareToIgnoreCase(topic.getMemberType()) == 0) {
-                			topicSubscriberRepository.delete(subscriber);
-                		}
-                	}
-                }
-                
-                tempUpdatedRoles.removeAll(oldRoles);
-                List<Topic> newTopics = topicRepository.findByEntityId(userToUpdate.getOffice().getId());
-                for (Topic topic : newTopics) {
-                	for (Role role : tempUpdatedRoles) {
-                		if (role.getName().compareToIgnoreCase(topic.getMemberType()) == 0) {
-                			TopicSubscriber topicSubscriber = new TopicSubscriber(topic, userToUpdate, new Date());
-            				topicSubscriberRepository.save(topicSubscriber);
-                		}
-                	}
-                }
-                
-                userToUpdate.updateRoles(updatedRoles);
+                final Set<Role> allRoles = assembleSetOfRoles(roleIds);
+
+                userToUpdate.updateRoles(allRoles);
             }
 
             if (!changes.isEmpty()) {
@@ -393,10 +330,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         if (user == null || user.isDeleted()) { throw new UserNotFoundException(userId); }
 
         user.delete();
-        List<TopicSubscriber> subscriptions = topicSubscriberRepository.findBySubscriber(user);
-        for (TopicSubscriber subscription : subscriptions) {
-        	topicSubscriberRepository.delete(subscription);
-        }
+        this.topicDomainService.unsubcribeUserFromTopic(user);
         this.appUserRepository.save(user);
 
         return new CommandProcessingResultBuilder().withEntityId(userId).withOfficeId(user.getOffice().getId()).build();
