@@ -24,7 +24,8 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.notification.data.NotificationData;
 import org.apache.fineract.notification.data.TopicSubscriberData;
-import org.apache.fineract.notification.eventandlistener.NotificationEvent;
+import org.apache.fineract.notification.eventandlistener.NotificationEventService;
+import org.apache.fineract.notification.eventandlistener.SpringEventPublisher;
 import org.apache.fineract.organisation.office.domain.OfficeRepository;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants;
@@ -47,6 +48,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.jms.Queue;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -56,25 +58,27 @@ import java.util.Map;
 public class NotificationDomainServiceImpl implements NotificationDomainService {
 
 	private final BusinessEventNotifierService businessEventNotifierService;
-	private final NotificationEvent notificationEvent;
-	private final PlatformSecurityContext context;
+	final PlatformSecurityContext context;
 	private final RoleRepository roleRepository;
 	private final OfficeRepository officeRepository;
 	private final TopicSubscriberReadPlatformService topicSubscriberReadPlatformService;
+	private final NotificationEventService notificationEvent;
+	private final SpringEventPublisher springEventPublisher;
 	
 	@Autowired
 	public NotificationDomainServiceImpl(final BusinessEventNotifierService businessEventNotifierService,
-			final NotificationEvent notificationEvent,
 			final PlatformSecurityContext context, final RoleRepository roleRepository,
 			final TopicSubscriberReadPlatformService topicSubscriberReadPlatformService,
-			final OfficeRepository officeRepository) {
+			final OfficeRepository officeRepository, final NotificationEventService notificationEvent,
+			final SpringEventPublisher springEventPublisher) {
 		
 		this.businessEventNotifierService = businessEventNotifierService;
-		this.notificationEvent = notificationEvent;
 		this.context = context;
 		this.roleRepository = roleRepository;
 		this.topicSubscriberReadPlatformService = topicSubscriberReadPlatformService;
 		this.officeRepository = officeRepository;
+		this.notificationEvent = notificationEvent;
+		this.springEventPublisher = springEventPublisher;
 	}
 	
 	@PostConstruct
@@ -570,7 +574,11 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 				officeId,
 				userIds
 		);
-		notificationEvent.broadcastNotification(queue, notificationData);
+		try {
+			this.notificationEvent.broadcastNotification(queue, notificationData);
+		} catch(Exception e) {
+			this.springEventPublisher.broadcastNotification(notificationData);
+		}
 	}
 	
 	private List<Long> retrieveSubscribers(Long officeId, String permission) {

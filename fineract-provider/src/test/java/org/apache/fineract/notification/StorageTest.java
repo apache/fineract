@@ -22,7 +22,6 @@ package org.apache.fineract.notification;
 import org.apache.fineract.notification.domain.Notification;
 import org.apache.fineract.notification.domain.NotificationMapper;
 import org.apache.fineract.notification.service.NotificationGeneratorReadRepositoryWrapper;
-
 import org.apache.fineract.notification.service.NotificationGeneratorWritePlatformService;
 import org.apache.fineract.notification.service.NotificationMapperWritePlatformService;
 import org.apache.fineract.notification.service.NotificationWritePlatformServiceImpl;
@@ -128,5 +127,4 @@ public class StorageTest {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return formatter.format(date);
     }
-
 }

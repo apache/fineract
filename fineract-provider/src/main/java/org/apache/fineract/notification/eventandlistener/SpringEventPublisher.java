@@ -16,35 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.notification.cache;
+package org.apache.fineract.notification.eventandlistener;
 
+import org.apache.fineract.notification.data.NotificationData;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
 
-public class CacheNotificationResponseHeader {
-
-    private boolean hasNotifications;
-    private Long lastFetch;
-
-    public CacheNotificationResponseHeader() {
-    }
-
-    public CacheNotificationResponseHeader(boolean hasNotifications, Long lastFetch) {
-        this.hasNotifications = hasNotifications;
-        this.lastFetch = lastFetch;
-    }
-
-    public boolean hasNotifications() {
-        return hasNotifications;
-    }
-
-    public void setHasNotifications(boolean hasNotifications) {
-        this.hasNotifications = hasNotifications;
-    }
-
-    public Long getLastFetch() {
-        return lastFetch;
-    }
-
-    public void setLastFetch(Long lastFetch) {
-        this.lastFetch = lastFetch;
+@Service
+public class SpringEventPublisher {
+	@Autowired
+	private ApplicationEventPublisher applicationEventPublisher;
+	
+	public void broadcastNotification(final NotificationData notificationData) {
+        SpringEvent event = new SpringEvent(this, notificationData);
+        applicationEventPublisher.publishEvent(event);
     }
 }

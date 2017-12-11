@@ -52,5 +52,4 @@ public class NotificationApiTest {
         System.out.println("Response : " + response.toString());
         Assert.assertNotNull(response);
     }
-
 }

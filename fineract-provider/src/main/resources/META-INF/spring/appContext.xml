@@ -101,5 +101,4 @@
 	</bean>
 
 	<import resource="spmContext.xml"/>
-	<import resource="notificationContext.xml"/>
 </beans>

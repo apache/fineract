@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.organisation.office.service;
 
-import java.util.List;
 import java.util.Map;
 
 import javax.persistence.PersistenceException;
@@ -30,8 +29,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.notification.domain.Topic;
-import org.apache.fineract.notification.domain.TopicRepository;
+import org.apache.fineract.notification.service.TopicDomainService;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -43,8 +41,6 @@ import org.apache.fineract.organisation.office.domain.OfficeTransactionRepositor
 import org.apache.fineract.organisation.office.serialization.OfficeCommandFromApiJsonDeserializer;
 import org.apache.fineract.organisation.office.serialization.OfficeTransactionCommandFromApiJsonDeserializer;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.apache.fineract.useradministration.domain.Role;
-import org.apache.fineract.useradministration.domain.RoleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,23 +61,21 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     private final OfficeRepositoryWrapper officeRepositoryWrapper;
     private final OfficeTransactionRepository officeTransactionRepository;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
-    private final RoleRepository roleRepository;
-    private final TopicRepository topicRepository;
+    private final TopicDomainService topicDomainService;
 
     @Autowired
     public OfficeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final OfficeTransactionCommandFromApiJsonDeserializer moneyTransferCommandFromApiJsonDeserializer,
             final OfficeRepositoryWrapper officeRepositoryWrapper, final OfficeTransactionRepository officeMonetaryTransferRepository,
-            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository, RoleRepository roleRepository, TopicRepository topicRepository) {
+            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository, final TopicDomainService topicDomainService) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.moneyTransferCommandFromApiJsonDeserializer = moneyTransferCommandFromApiJsonDeserializer;
         this.officeRepositoryWrapper = officeRepositoryWrapper;
         this.officeTransactionRepository = officeMonetaryTransferRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
-        this.roleRepository = roleRepository;
-        this.topicRepository = topicRepository;
+        this.topicDomainService = topicDomainService;
     }
 
     @Transactional
@@ -111,22 +105,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 
             this.officeRepositoryWrapper.save(office);
             
-            Long entityId = office.getId();
-            String entityType = "";
-            if (office.getParent() == null) {
-            	entityType = "OFFICE";
-            } else {
-            	entityType = "BRANCH";
-            }
-            
-            List<Role> allRoles = roleRepository.findAll();
-            for(Role curRole : allRoles) {
-            	String memberType = curRole.getName().toUpperCase();
-            	String title = curRole.getName() + " of " + office.getName();
-            	Topic newTopic = new Topic(title, true, entityId, entityType, memberType);
-            	topicRepository.save(newTopic);
-            }
-            
+            this.topicDomainService.createTopic(office);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -168,31 +147,12 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
             if (changes.containsKey("parentId")) {
                 final Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, parentId);
                 office.update(parent);
-                String entityType = "";
-                if (office.getParent() == null) {
-                	entityType = "OFFICE";
-                } else {
-                	entityType = "BRANCH";
-                }
-                List<Topic> entityTopics = topicRepository.findByEntityId(office.getId());
-                for (Topic topic : entityTopics) {
-                	topic.setEntityType(entityType);
-                	topicRepository.save(topic);
-                }
-            }
-            
-            if (changes.containsKey("name")) {
-            	List<Topic> entityTopics = topicRepository.findByEntityId(office.getId());
-            	for (Topic topic: entityTopics) {
-            		Role role = roleRepository.getRoleByName(topic.getMemberType());
-	                String title = role.getName() + " of " + office.getName();
-	                topic.setTitle(title);
-	                topicRepository.save(topic);
-            	}
             }
 
             if (!changes.isEmpty()) {
                 this.officeRepositoryWrapper.saveAndFlush(office);
+                
+                this.topicDomainService.updateTopic(office, changes);
             }
 
             return new CommandProcessingResultBuilder() //
