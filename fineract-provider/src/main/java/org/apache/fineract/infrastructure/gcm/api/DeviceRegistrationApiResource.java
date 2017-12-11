@@ -135,7 +135,7 @@ public class DeviceRegistrationApiResource {
         String registrationId = json.get(DeviceRegistrationApiConstants.registrationIdParamName).getAsString();
         DeviceRegistration deviceRegistration = this.deviceRegistrationWritePlatformService.updateDeviceRegistration(id, clientId,
                 registrationId);
-        String response = gson.toJson(deviceRegistration);
+        String response = gson.toJson(deviceRegistration.getId());
         return response;
     }
 
