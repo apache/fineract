@@ -41,4 +41,12 @@ public class FundData implements Serializable {
         this.name = name;
         this.externalId = externalId;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public Long getId() {
+        return id;
+    }
 }

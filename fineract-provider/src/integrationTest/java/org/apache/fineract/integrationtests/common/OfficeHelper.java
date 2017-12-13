@@ -18,12 +18,22 @@
  */
 package org.apache.fineract.integrationtests.common;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Workbook;
+
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 
 public class OfficeHelper {
 
@@ -76,5 +86,28 @@ public class OfficeHelper {
 		map.put("openingDate", openingDate);
 		System.out.println("map : " + map);
 		return new Gson().toJson(map);
+	}
+
+	public String importOfficeTemplate(File file){
+		String locale="en";
+		String dateFormat="dd MMMM yyyy";
+		requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
+		return Utils.performServerTemplatePost(requestSpec,responseSpec,OFFICE_URL+"/uploadtemplate"+"?"+Utils.TENANT_IDENTIFIER,
+				null,file,locale,dateFormat);
+
+	}
+
+	public String getOutputTemplateLocation(final String importDocumentId){
+		requestSpec.header(HttpHeaders.CONTENT_TYPE,MediaType.TEXT_PLAIN);
+		return Utils.performServerOutputTemplateLocationGet(requestSpec,responseSpec,"/fineract-provider/api/v1/imports/getOutputTemplateLocation"+"?"
+				+Utils.TENANT_IDENTIFIER,importDocumentId);
+	}
+	public Workbook getOfficeWorkBook(final String dateFormat) throws IOException {
+		requestSpec.header(HttpHeaders.CONTENT_TYPE,"application/vnd.ms-excel");
+		byte[] byteArray=Utils.performGetBinaryResponse(requestSpec,responseSpec,OFFICE_URL+"/downloadtemplate"+"?"+
+				Utils.TENANT_IDENTIFIER+"&dateFormat="+dateFormat);
+		InputStream inputStream= new ByteArrayInputStream(byteArray);
+		Workbook workbook=new HSSFWorkbook(inputStream);
+		return workbook;
 	}
 }

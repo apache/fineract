@@ -19,8 +19,10 @@
 package org.apache.fineract.accounting.journalentry.data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
+import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.joda.time.LocalDate;
@@ -77,6 +79,91 @@ public class JournalEntryData {
 
     @SuppressWarnings("unused")
     private final TransactionDetailData transactionDetails;
+
+    //import fields
+    private transient Integer rowIndex;
+    private String dateFormat;
+    private String locale;
+    private List<CreditDebit> credits;
+    private List<CreditDebit> debits;
+    private Long paymentTypeId;
+    private String currencyCode;
+    private String accountNumber;
+    private String checkNumber;
+    private String routingCode;
+    private String receiptNumber;
+    private String bankNumber;
+
+    public static JournalEntryData importInstance(Long officeId,LocalDate transactionDate,String currencyCode, Long paymentTypeId,
+            Integer rowIndex,List<CreditDebit> credits, List<CreditDebit>debits,
+            String accountNumber,String checkNumber,String routingCode,String receiptNumber,String bankNumber,
+            String comments,String locale,String dateFormat){
+        return new JournalEntryData(officeId, transactionDate, currencyCode,
+                paymentTypeId, rowIndex, credits, debits,accountNumber,checkNumber,routingCode,
+                receiptNumber,bankNumber,comments,locale,dateFormat);
+    }
+    private JournalEntryData(Long officeId,LocalDate transactionDate,String currencyCode, Long paymentTypeId,
+            Integer rowIndex,List<CreditDebit> credits, List<CreditDebit>debits,
+            String accountNumber,String checkNumber,String routingCode,String receiptNumber,
+            String bankNumber,String comments,String locale,String dateFormat) {
+
+        this.officeId = officeId;
+        this.dateFormat= dateFormat;
+        this.locale= locale;
+        this.transactionDate = transactionDate;
+        this.currencyCode=currencyCode;
+        this.rowIndex = rowIndex;
+        this.credits = credits;
+        this.debits = debits;
+        this.paymentTypeId = paymentTypeId;
+        this.accountNumber=accountNumber;
+        this.checkNumber=checkNumber;
+        this.routingCode=routingCode;
+        this.receiptNumber=receiptNumber;
+        this.bankNumber=bankNumber;
+        this.comments=comments;
+        this.id = null;
+        this.officeName = null;
+        this.glAccountName = null;
+        this.glAccountId = null;
+        this.glAccountCode = null;
+        this.glAccountType = null;
+        this.entryType = null;
+        this.amount = null;
+        this.currency = null;
+        this.transactionId = null;
+        this.manualEntry = null;
+        this.entityType = null;
+        this.entityId = null;
+        this.createdByUserId = null;
+        this.createdDate = null;
+        this.createdByUserName = null;
+        this.reversed = null;
+        this.referenceNumber = null;
+        this.officeRunningBalance = null;
+        this.organizationRunningBalance = null;
+        this.runningBalanceComputed = null;
+        this.transactionDetails = null;
+    }
+
+    public Integer getRowIndex() {
+        return rowIndex;
+    }
+
+    public LocalDate getTransactionDate() {
+        return transactionDate;
+    }
+
+    public void addDebits(CreditDebit debit) {
+
+        this.debits.add(debit);
+    }
+
+
+
+    public void addCredits(CreditDebit credit) {
+        this.credits.add(credit);
+    }
 
     public JournalEntryData(final Long id, final Long officeId, final String officeName, final String glAccountName,
             final Long glAccountId, final String glAccountCode, final EnumOptionData glAccountClassification,

@@ -160,7 +160,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         final Object[] queryParameters = new Object[] { clientId, depositAccountType.getValue(), currencyCode };
         return this.jdbcTemplate.query(sqlBuilder.toString(), this.savingAccountMapper, queryParameters);
     }
-    
+
     @Override
     public Page<SavingsAccountData> retrieveAll(final SearchParameters searchParameters) {
 
@@ -178,35 +178,39 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         final Object[] objectArray = new Object[2];
         objectArray[0] = hierarchySearchString;
         int arrayPos = 1;
+        if(searchParameters!=null) {
+            String sqlQueryCriteria = searchParameters.getSqlSearch();
+            if (StringUtils.isNotBlank(sqlQueryCriteria)) {
+                sqlQueryCriteria = sqlQueryCriteria.replaceAll("accountNo", "sa.account_no");
+                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), sqlQueryCriteria);
+                sqlBuilder.append(" and (").append(sqlQueryCriteria).append(")");
+            }
 
-        String sqlQueryCriteria = searchParameters.getSqlSearch();
-        if (StringUtils.isNotBlank(sqlQueryCriteria)) {
-            sqlQueryCriteria = sqlQueryCriteria.replaceAll("accountNo", "sa.account_no");
-            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), sqlQueryCriteria);
-            sqlBuilder.append(" and (").append(sqlQueryCriteria).append(")");
-        }
+            if (StringUtils.isNotBlank(searchParameters.getExternalId())) {
+                sqlBuilder.append(" and sa.external_id = ?");
+                objectArray[arrayPos] = searchParameters.getExternalId();
+                arrayPos = arrayPos + 1;
+            }
+            if(searchParameters.getOfficeId()!=null){
+                sqlBuilder.append("and c.office_id =?");
+                objectArray[arrayPos]=searchParameters.getOfficeId();
+                arrayPos = arrayPos + 1;
+            }
+            if (searchParameters.isOrderByRequested()) {
+                sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
 
-        if (StringUtils.isNotBlank(searchParameters.getExternalId())) {
-            sqlBuilder.append(" and sa.external_id = ?");
-            objectArray[arrayPos] = searchParameters.getExternalId();
-            arrayPos = arrayPos + 1;
-        }
+                if (searchParameters.isSortOrderProvided()) {
+                    sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+                }
+            }
 
-        if (searchParameters.isOrderByRequested()) {
-            sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
-
-            if (searchParameters.isSortOrderProvided()) {
-                sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+            if (searchParameters.isLimited()) {
+                sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+                if (searchParameters.isOffset()) {
+                    sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+                }
             }
         }
-
-        if (searchParameters.isLimited()) {
-            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
-            if (searchParameters.isOffset()) {
-                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
-            }
-        }
-
         final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), finalObjectArray,

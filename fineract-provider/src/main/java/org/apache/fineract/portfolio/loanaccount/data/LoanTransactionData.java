@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.data;
 import java.math.BigDecimal;
 import java.util.Collection;
 
+import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
@@ -65,6 +66,116 @@ public class LoanTransactionData {
     final Collection<PaymentTypeData> paymentTypeOptions;
     
     private  Collection<CodeValueData> writeOffReasonOptions = null;
+
+    //import fields
+    private transient Integer rowIndex;
+    private String dateFormat;
+    private String locale;
+    private BigDecimal transactionAmount;
+    private LocalDate transactionDate;
+    private Long paymentTypeId;
+    private String accountNumber;
+    private Integer checkNumber;
+    private Integer routingCode;
+    private Integer receiptNumber;
+    private Integer bankNumber;
+    private transient Integer accountId;
+    private transient String transactionType;
+
+    public static LoanTransactionData importInstance(BigDecimal repaymentAmount,LocalDate lastRepaymentDate,
+            Long repaymentTypeId,Integer rowIndex,String locale,String dateFormat){
+        return new LoanTransactionData(repaymentAmount, lastRepaymentDate, repaymentTypeId, rowIndex,locale,dateFormat);
+    }
+    private LoanTransactionData(BigDecimal transactionAmount,LocalDate transactionDate,
+            Long paymentTypeId,Integer rowIndex,String locale,String dateFormat) {
+        this.transactionAmount=transactionAmount;
+        this.transactionDate=transactionDate;
+        this.paymentTypeId=paymentTypeId;
+        this.rowIndex = rowIndex;
+        this.dateFormat= dateFormat;
+        this.locale= locale;
+        this.amount = null;
+        this.date = null;
+        this.type = null;
+        this.id =null;
+        this.officeId = null;
+        this.officeName = null;
+        this.currency = null;
+        this.paymentDetailData = null;
+        this.principalPortion = null;
+        this.interestPortion = null;
+        this.feeChargesPortion = null;
+        this.penaltyChargesPortion = null;
+        this.overpaymentPortion = null;
+        this.unrecognizedIncomePortion = null;
+        this.externalId = null;
+        this.transfer = null;
+        this.fixedEmiAmount = null;
+        this.outstandingLoanBalance = null;
+        this.submittedOnDate = null;
+        this.manuallyReversed = false;
+        this.possibleNextRepaymentDate = null;
+        this.paymentTypeOptions = null;
+        this.writeOffReasonOptions = null;
+    }
+    public static LoanTransactionData importInstance(BigDecimal repaymentAmount,LocalDate repaymentDate,
+            Long repaymentTypeId, String accountNumber,Integer checkNumber,Integer routingCode,
+            Integer receiptNumber, Integer bankNumber,Integer loanAccountId,String transactionType,
+            Integer rowIndex,String locale, String dateFormat){
+        return new LoanTransactionData(repaymentAmount, repaymentDate, repaymentTypeId, accountNumber,
+                checkNumber, routingCode, receiptNumber, bankNumber, loanAccountId, "",
+                rowIndex,locale,dateFormat);
+    }
+
+    private LoanTransactionData(BigDecimal transactionAmount,LocalDate transactionDate, Long paymentTypeId,
+            String accountNumber,Integer checkNumber,Integer routingCode,Integer receiptNumber,
+            Integer bankNumber,Integer accountId,String transactionType,Integer rowIndex,String locale,
+            String dateFormat) {
+        this.transactionAmount = transactionAmount;
+        this.transactionDate = transactionDate;
+        this.paymentTypeId = paymentTypeId;
+        this.accountNumber=accountNumber;
+        this.checkNumber=checkNumber;
+        this.routingCode=routingCode;
+        this.receiptNumber=receiptNumber;
+        this.bankNumber=bankNumber;
+        this.accountId=accountId;
+        this.transactionType=transactionType;
+        this.rowIndex=rowIndex;
+        this.dateFormat=dateFormat;
+        this.locale= locale;
+        this.id = null;
+        this.officeId = null;
+        this.officeName = null;
+        this.type = null;
+        this.date = null;
+        this.currency = null;
+        this.paymentDetailData = null;
+        this.amount = null;
+        this.principalPortion = null;
+        this.interestPortion = null;
+        this.feeChargesPortion = null;
+        this.penaltyChargesPortion = null;
+        this.overpaymentPortion = null;
+        this.unrecognizedIncomePortion = null;
+        this.externalId = null;
+        this.transfer = null;
+        this.fixedEmiAmount = null;
+        this.outstandingLoanBalance = null;
+        this.submittedOnDate = null;
+        this.manuallyReversed = false;
+        this.possibleNextRepaymentDate = null;
+        this.paymentTypeOptions = null;
+        this.writeOffReasonOptions = null;
+    }
+
+    public Integer getAccountId() {
+        return accountId;
+    }
+
+    public Integer getRowIndex() {
+        return rowIndex;
+    }
 
     public static LoanTransactionData templateOnTop(final LoanTransactionData loanTransactionData,
             final Collection<PaymentTypeData> paymentTypeOptions) {

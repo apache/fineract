@@ -445,6 +445,60 @@ public class SavingsProductData {
 	public void setDepositAccountType(String depositAccountType) {
 		this.depositAccountType = depositAccountType;
 	}
-    
-    
+
+    public BigDecimal getNominalAnnualInterestRate() {
+        return nominalAnnualInterestRate;
+    }
+
+    public CurrencyData getCurrency() {
+        return currency;
+    }
+
+    public Integer getLockinPeriodFrequency() {
+        return lockinPeriodFrequency;
+    }
+
+    public EnumOptionData getLockinPeriodFrequencyType() {
+        return lockinPeriodFrequencyType;
+    }
+
+    public BigDecimal getOverdraftLimit() {
+        return overdraftLimit;
+    }
+
+    public BigDecimal getMinRequiredOpeningBalance() {
+        return minRequiredOpeningBalance;
+    }
+
+    public EnumOptionData getInterestCompoundingPeriodType() {
+        return interestCompoundingPeriodType;
+    }
+
+    public EnumOptionData getInterestPostingPeriodType() {
+        return interestPostingPeriodType;
+    }
+
+    public EnumOptionData getInterestCalculationType() {
+        return interestCalculationType;
+    }
+
+    public EnumOptionData getInterestCalculationDaysInYearType() {
+        return interestCalculationDaysInYearType;
+    }
+
+    public boolean isAllowOverdraft() {
+        return allowOverdraft;
+    }
+
+    public BigDecimal getMinRequiredBalance() {
+        return minRequiredBalance;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public boolean isWithdrawalFeeForTransfers() {
+        return withdrawalFeeForTransfers;
+    }
 }
