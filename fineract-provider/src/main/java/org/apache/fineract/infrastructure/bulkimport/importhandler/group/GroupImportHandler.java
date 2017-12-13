@@ -131,7 +131,7 @@ public class GroupImportHandler implements ImportHandler {
             if (clientName==null)
                 break;
             Long clientId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME), clientName);
-            ClientData clientData = new ClientData(clientId);
+            ClientData clientData = ClientData.emptyInstance(clientId);
             if (!containsClientId(clientMembers,clientId)) {
                 clientMembers.add(clientData);
             }

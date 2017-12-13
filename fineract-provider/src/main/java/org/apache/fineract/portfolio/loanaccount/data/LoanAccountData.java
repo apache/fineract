@@ -248,6 +248,26 @@ public class LoanAccountData {
                 rowIndex, externalId, null, charges, linkAccountId,locale,dateFormat);
     }
 
+
+    public static LoanAccountData importInstanceGroup(EnumOptionData loanTypeEnumOption,Long groupIdforGroupLoan,Long productId,
+            Long loanOfficerId,LocalDate submittedOnDate,
+            Long fundId,BigDecimal principal, Integer numberOfRepayments,Integer repaidEvery,
+            EnumOptionData repaidEveryFrequencyEnums, Integer loanTermFrequency,EnumOptionData loanTermFrequencyTypeEnum,
+            BigDecimal nominalInterestRate, EnumOptionData amortizationEnumOption,EnumOptionData interestMethodEnum,
+            EnumOptionData interestCalculationPeriodEnum,BigDecimal arrearsTolerance,
+            Long transactionProcessingStrategyId,
+            Integer graceOnPrincipalPayment,Integer graceOnInterestPayment,Integer graceOnInterestCharged,
+            LocalDate interestChargedFromDate,LocalDate repaymentsStartingFromDate,
+            Integer rowIndex ,String externalId,String linkAccountId,String locale,String dateFormat){
+
+        return new LoanAccountData(loanTypeEnumOption, groupIdforGroupLoan, productId, loanOfficerId, submittedOnDate, fundId,
+                principal, numberOfRepayments,
+                repaidEvery, repaidEveryFrequencyEnums, loanTermFrequency, loanTermFrequencyTypeEnum, nominalInterestRate, null,
+                amortizationEnumOption, interestMethodEnum, interestCalculationPeriodEnum, arrearsTolerance,
+                transactionProcessingStrategyId, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
+                interestChargedFromDate, repaymentsStartingFromDate, rowIndex, externalId, null, null, linkAccountId,locale,dateFormat);
+    }
+    
     private LoanAccountData(EnumOptionData loanType,Long clientId,Long productId,Long loanOfficerId,LocalDate submittedOnDate,
             Long fundId,BigDecimal principal, Integer numberOfRepayments,Integer repaymentEvery,
             EnumOptionData repaymentFrequencyType, Integer loanTermFrequency,EnumOptionData loanTermFrequencyType,
@@ -394,171 +414,7 @@ public class LoanAccountData {
         this.isVariableInstallmentsAllowed = null;
         this.minimumGap = null;
         this.maximumGap = null;
-    }
-
-    public static LoanAccountData importInstanceGroup(EnumOptionData loanTypeEnumOption,Long groupIdforGroupLoan,Long productId,
-            Long loanOfficerId,LocalDate submittedOnDate,
-            Long fundId,BigDecimal principal, Integer numberOfRepayments,Integer repaidEvery,
-            EnumOptionData repaidEveryFrequencyEnums, Integer loanTermFrequency,EnumOptionData loanTermFrequencyTypeEnum,
-            BigDecimal nominalInterestRate, EnumOptionData amortizationEnumOption,EnumOptionData interestMethodEnum,
-            EnumOptionData interestCalculationPeriodEnum,BigDecimal arrearsTolerance,
-            Long transactionProcessingStrategyId,
-            Integer graceOnPrincipalPayment,Integer graceOnInterestPayment,Integer graceOnInterestCharged,
-            LocalDate interestChargedFromDate,LocalDate repaymentsStartingFromDate,
-            Integer rowIndex ,String externalId,String linkAccountId,String locale,String dateFormat){
-
-        return new LoanAccountData(loanTypeEnumOption, groupIdforGroupLoan, productId, loanOfficerId, submittedOnDate, fundId,
-                principal, numberOfRepayments,
-                repaidEvery, repaidEveryFrequencyEnums, loanTermFrequency, loanTermFrequencyTypeEnum, nominalInterestRate,
-                amortizationEnumOption, interestMethodEnum, interestCalculationPeriodEnum, arrearsTolerance,
-                transactionProcessingStrategyId, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
-                interestChargedFromDate, repaymentsStartingFromDate, rowIndex, externalId, linkAccountId,locale,dateFormat);
-    }
-    private LoanAccountData(EnumOptionData loanType,Long clientId,Long productId,Long loanOfficerId,LocalDate submittedOnDate,
-            Long fundId,BigDecimal principal, Integer numberOfRepayments,Integer repaymentEvery,
-            EnumOptionData repaymentFrequencyType, Integer loanTermFrequency,EnumOptionData loanTermFrequencyType,
-            BigDecimal interestRatePerPeriod, EnumOptionData amortizationType,EnumOptionData interestType,
-            EnumOptionData interestCalculationPeriodType,BigDecimal inArrearsTolerance,
-            Long transactionProcessingStrategyId,
-            Integer graceOnPrincipalPayment,Integer graceOnInterestPayment,Integer graceOnInterestCharged,
-            LocalDate interestChargedFromDate,LocalDate repaymentsStartingFromDate,
-            Integer rowIndex ,String externalId,String linkAccountId,String locale,String dateFormat) {
-        this.dateFormat=dateFormat;
-        this.locale= locale;
-        this.rowIndex=rowIndex;
-        this.submittedOnDate=submittedOnDate;
-        this.productId=productId;
-        this.loanTermFrequency=loanTermFrequency;
-        this.loanTermFrequencyType=loanTermFrequencyType;
-        this.repaymentsStartingFromDate=repaymentsStartingFromDate;
-        this.linkAccountId=linkAccountId;
-        this.externalId = externalId;
-        this.clientId = clientId;
-        this.fundId = fundId;
-        this.loanOfficerId = loanOfficerId;
-        this.numberOfRepayments = numberOfRepayments;
-        this.loanType = loanType;
-        this.principal = principal;
-        this.repaymentEvery = repaymentEvery;
-        this.repaymentFrequencyType = repaymentFrequencyType;
-        this.interestRatePerPeriod = interestRatePerPeriod;
-        this.amortizationType = amortizationType;
-        this.interestType = interestType;
-        this.interestCalculationPeriodType = interestCalculationPeriodType;
-        this.inArrearsTolerance = inArrearsTolerance;
-        this.transactionProcessingStrategyId = transactionProcessingStrategyId;
-        this.graceOnInterestPayment = graceOnInterestPayment;
-        this.graceOnInterestCharged = graceOnInterestCharged;
-        this.graceOnPrincipalPayment = graceOnPrincipalPayment;
-        this.interestChargedFromDate = interestChargedFromDate;
-        this.groupId=null;
-        this.charges = null;
-        this.id = null;
-        this.accountNo = null;
-
-        this.status = null;
-        this.subStatus = null;
-
-        this.clientAccountNo = null;
-        this.clientName = null;
-        this.clientOfficeId = null;
-        this.group = null;
-        this.loanProductId = null;
-        this.loanProductName = null;
-        this.loanProductDescription = null;
-        this.isLoanProductLinkedToFloatingRate = false;
-
-        this.fundName = null;
-        this.loanPurposeId = null;
-        this.loanPurposeName = null;
-
-        this.loanOfficerName = null;
-
-        this.currency = null;
-
-        this.approvedPrincipal = null;
-        this.proposedPrincipal = null;
-        this.termFrequency = null;
-        this.termPeriodFrequencyType = null;
-
-
-        this.repaymentFrequencyNthDayType = null;
-        this.repaymentFrequencyDayOfWeekType = null;
-
-        this.interestRateFrequencyType = null;
-        this.annualInterestRate = null;
-        this.isFloatingInterestRate = false;
-        this.interestRateDifferential = null;
-
-        this.allowPartialPeriodInterestCalcualtion = null;
-
-        this.transactionProcessingStrategyName = null;
-
-        this.recurringMoratoriumOnPrincipalPeriods = null;
-
-        this.graceOnArrearsAgeing = null;
-
-        this.expectedFirstRepaymentOnDate = null;
-        this.syncDisbursementWithMeeting = null;
-        this.timeline = null;
-        this.summary = null;
-        this.repaymentSchedule = null;
-        this.transactions = null;
-
-        this.collateral = null;
-        this.guarantors = null;
-        this.meeting = null;
-        this.notes = null;
-        this.disbursementDetails = null;
-        this.originalSchedule = null;
-        this.productOptions = null;
-        this.loanOfficerOptions = null;
-        this.loanPurposeOptions = null;
-        this.fundOptions = null;
-        this.termFrequencyTypeOptions = null;
-        this.repaymentFrequencyTypeOptions = null;
-        this.repaymentFrequencyNthDayTypeOptions = null;
-        this.repaymentFrequencyDaysOfWeekTypeOptions = null;
-        this.interestRateFrequencyTypeOptions = null;
-        this.amortizationTypeOptions = null;
-        this.interestTypeOptions = null;
-        this.interestCalculationPeriodTypeOptions = null;
-        this.transactionProcessingStrategyOptions = null;
-        this.chargeOptions = null;
-        this.loanCollateralOptions = null;
-        this.calendarOptions = null;
-        this.feeChargesAtDisbursementCharged = null;
-        this.totalOverpaid = null;
-        this.loanCounter = null;
-        this.loanProductCounter = null;
-        this.linkedAccount = null;
-        this.accountLinkingOptions = null;
-        this.multiDisburseLoan = null;
-        this.canDefineInstallmentAmount = null;
-        this.fixedEmiAmount = null;
-        this.maxOutstandingLoanBalance = null;
-        this.canDisburse = null;
-        this.emiAmountVariations = null;
-        this.clientActiveLoanOptions = null;
-        this.canUseForTopup = null;
-        this.isTopup = false;
-        this.closureLoanId = null;
-        this.closureLoanAccountNo = null;
-        this.topupAmount = null;
-        this.memberVariations = null;
-        this.inArrears = null;
-        this.isNPA = null;
-        this.overdueCharges = null;
-        this.daysInMonthType = null;
-        this.daysInYearType = null;
-        this.isInterestRecalculationEnabled = false;
-        this.interestRecalculationData = null;
-        this.createStandingInstructionAtDisbursement = null;
-        this.paidInAdvance = null;
-        this.interestRatesPeriods = null;
-        this.isVariableInstallmentsAllowed = null;
-        this.minimumGap = null;
-        this.maximumGap = null;
+        this.isEqualAmortization = null;
     }
 
 

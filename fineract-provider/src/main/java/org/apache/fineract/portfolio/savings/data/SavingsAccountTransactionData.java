@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.savings.data;
 import java.math.BigDecimal;
 import java.util.Collection;
 
-import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -111,6 +110,8 @@ public class SavingsAccountTransactionData {
         this.receiptNumber = receiptNumber;
         this.bankNumber = bankNumber;
         this.paymentTypeOptions = null;
+        this.submittedByUsername = null;
+        this.note = null;
     }
 
     public Integer getRowIndex() {
