@@ -24,13 +24,11 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
-import java.util.Random;
-import java.util.TimeZone;
+import java.util.*;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
@@ -41,7 +39,6 @@ import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
-
 /**
  * Util for RestAssured tests. This class here in src/integrationTest is
  * copy/pasted to src/test; please keep them in sync.
@@ -145,6 +142,16 @@ public class Utils {
     public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
         return randomStringGenerator(prefix, lenOfRandomSuffix);
     }
+    public static Long randomNumberGenerator(final int expectedLength){
+       final String source="1234567890";
+       final int lengthofSource=source.length();
+       final Random random=new Random();
+       StringBuilder stringBuilder=new StringBuilder(expectedLength);
+        for (int i = 0; i < expectedLength; i++) {
+            stringBuilder.append(source.charAt(random.nextInt(lengthofSource)));
+        }
+        return Long.parseLong(stringBuilder.toString());
+    }
 
     public static String convertDateToURLFormat(final Calendar dateToBeConvert) {
         DateFormat dateFormat = new SimpleDateFormat("dd MMMMMM yyyy");
@@ -165,4 +172,27 @@ public class Utils {
         return TimeZone.getTimeZone(TENANT_TIME_ZONE);
     }
 
+    public static String performServerTemplatePost(final RequestSpecification requestSpec,final ResponseSpecification responseSpec,
+                                                   final String postURL,final String legalFormType,final File file,final String locale,final String dateFormat) {
+
+        final String importDocumentId=given().spec(requestSpec)
+                .queryParam("legalFormType",legalFormType)
+                .multiPart("file",file)
+                .formParam("locale",locale)
+                .formParam("dateFormat",dateFormat)
+                .expect().spec(responseSpec).
+                log().ifError().when().post(postURL)
+                .andReturn().asString();
+        return importDocumentId;
+    }
+
+    public static String performServerOutputTemplateLocationGet(final RequestSpecification requestSpec,final ResponseSpecification responseSpec,
+                                                                final String getURL,final String importDocumentId){
+        final String templateLocation=given().spec(requestSpec).
+                queryParam("importDocumentId",importDocumentId)
+                .expect().spec(responseSpec)
+                .log().ifError().when().get(getURL)
+                .andReturn().asString();
+        return templateLocation.substring(1,templateLocation.length()-1);
+    }
 }

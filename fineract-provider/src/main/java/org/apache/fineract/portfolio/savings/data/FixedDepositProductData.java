@@ -404,4 +404,52 @@ public class FixedDepositProductData extends DepositProductData {
         this.periodFrequencyTypeOptions = periodFrequencyTypeOptions;
     }
 
+    public Integer getMinDepositTerm() {
+        return minDepositTerm;
+    }
+
+    public EnumOptionData getMinDepositTermType() {
+        return minDepositTermType;
+    }
+
+    public EnumOptionData getMaxDepositTermType() {
+        return maxDepositTermType;
+    }
+
+    public Integer getMaxDepositTerm() {
+        return maxDepositTerm;
+    }
+
+    public Integer getInMultiplesOfDepositTerm() {
+        return inMultiplesOfDepositTerm;
+    }
+
+    public EnumOptionData getInMultiplesOfDepositTermType() {
+        return inMultiplesOfDepositTermType;
+    }
+
+    public BigDecimal getMinDepositAmount() {
+        return minDepositAmount;
+    }
+
+    public BigDecimal getDepositAmount() {
+        return depositAmount;
+    }
+
+    public BigDecimal getMaxDepositAmount() {
+        return maxDepositAmount;
+    }
+
+    public EnumOptionData getPreClosurePenalInterestOnType() {
+        return preClosurePenalInterestOnType;
+    }
+
+    public BigDecimal getPreClosurePenalInterest() {
+        return preClosurePenalInterest;
+    }
+
+    public boolean isPreClosurePenalApplicable() {
+        return preClosurePenalApplicable;
+    }
+
 }

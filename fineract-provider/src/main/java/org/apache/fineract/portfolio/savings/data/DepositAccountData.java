@@ -87,6 +87,59 @@ public class DepositAccountData {
 
     protected final DepositAccountInterestRateChartData chartTemplate;
 
+    //import fields
+    private Long productId;
+
+    public DepositAccountData(Long clientId,Long productId,Long fieldOfficerId,
+            EnumOptionData interestCompoundingPeriodType, EnumOptionData interestPostingPeriodType,
+            EnumOptionData interestCalculationType,EnumOptionData interestCalculationDaysInYearType,Integer lockinPeriodFrequency,
+            EnumOptionData lockinPeriodFrequencyType,String externalId,Collection<SavingsAccountChargeData> charges) {
+        this.id = null;
+        this.accountNo = null;
+        this.externalId = externalId;
+        this.groupId = null;
+        this.groupName = null;
+        this.clientId = clientId;
+        this.clientName = null;
+        this.depositProductId = null;
+        this.depositProductName = null;
+        this.fieldOfficerId = fieldOfficerId;
+        this.fieldOfficerName = null;
+        this.status = null;
+        this.timeline = null;
+        this.currency = null;
+        this.nominalAnnualInterestRate = null;
+        this.interestCompoundingPeriodType = interestCompoundingPeriodType;
+        this.interestPostingPeriodType = interestPostingPeriodType;
+        this.interestCalculationType = interestCalculationType;
+        this.interestCalculationDaysInYearType = interestCalculationDaysInYearType;
+        this.minRequiredOpeningBalance = null;
+        this.lockinPeriodFrequency = lockinPeriodFrequency;
+        this.lockinPeriodFrequencyType = lockinPeriodFrequencyType;
+        this.withdrawalFeeForTransfers = false;
+        this.depositType = null;
+        this.minBalanceForInterestCalculation = null;
+        this.withHoldTax = false;
+        this.taxGroup = null;
+        this.summary = null;
+        this.transactions = null;
+        this.charges = charges;
+        this.accountChart = null;
+        this.productOptions = null;
+        this.fieldOfficerOptions = null;
+        this.interestCompoundingPeriodTypeOptions = null;
+        this.interestPostingPeriodTypeOptions = null;
+        this.interestCalculationTypeOptions = null;
+        this.interestCalculationDaysInYearTypeOptions = null;
+        this.lockinPeriodFrequencyTypeOptions = null;
+        this.withdrawalFeeTypeOptions = null;
+        this.chargeOptions = null;
+        this.withdrawalFee = null;
+        this.annualFee = null;
+        this.chartTemplate = null;
+        this.productId=productId;
+    }
+
     public static DepositAccountData instance(final Long id, final String accountNo, final String externalId, final Long groupId,
             final String groupName, final Long clientId, final String clientName, final Long productId, final String productName,
             final Long fieldOfficerId, final String fieldOfficerName, final SavingsAccountStatusEnumData status,

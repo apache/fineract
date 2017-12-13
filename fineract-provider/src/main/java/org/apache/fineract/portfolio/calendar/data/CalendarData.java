@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.calendar.data;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarRemindBy;
@@ -41,7 +42,7 @@ public class CalendarData {
     private final Long calendarInstanceId;
     private final Long entityId;
     private final EnumOptionData entityType;
-    private final String title;
+    private String title;
     private final String description;
     private final String location;
     private final LocalDate startDate;
@@ -78,7 +79,123 @@ public class CalendarData {
     final List<EnumOptionData> frequencyOptions;
     final List<EnumOptionData> repeatsOnDayOptions;
     final List<EnumOptionData> frequencyNthDayTypeOptions;
- 
+
+    //import fields
+    private transient Integer rowIndex;
+    private  String dateFormat;
+    private  String locale;
+    private  String centerId;
+    private String typeId;
+
+    public static CalendarData importInstanceNoRepeatsOnDay(LocalDate startDate, boolean repeating,
+            EnumOptionData frequency, Integer interval,Integer rowIndex,String locale,String dateFormat){
+       return  new CalendarData(startDate, repeating, frequency, interval, rowIndex,locale,dateFormat);
+
+    }
+    public static CalendarData importInstanceWithRepeatsOnDay(LocalDate startDate, boolean repeating,
+            EnumOptionData frequency,Integer interval,EnumOptionData repeatsOnDay,Integer rowIndex,
+            String locale,String dateFormat){
+        return new CalendarData(startDate, repeating, frequency, interval, repeatsOnDay, rowIndex,locale,dateFormat);
+    }
+    private CalendarData(LocalDate startDate, boolean repeating,EnumOptionData frequency,Integer interval,
+            Integer rowIndex,String locale,String dateFormat) {
+        this.startDate = startDate;
+        this.repeating = repeating;
+        this.frequency = frequency;
+        this.interval = interval;
+        this.rowIndex=rowIndex;
+        this.dateFormat= dateFormat;
+        this.locale= locale;
+        this.description = "";
+        this.typeId = "1";
+        this.id = null;
+        this.calendarInstanceId = null;
+        this.entityId = null;
+        this.entityType = null;
+        this.title = null;
+        this.location = null;
+        this.endDate = null;
+        this.meetingTime = null;
+        this.type = null;
+        this.recurrence = null;
+        this.repeatsOnDay = null;
+        this.repeatsOnNthDayOfMonth = null;
+        this.remindBy = null;
+        this.firstReminder = null;
+        this.secondReminder = null;
+        this.recurringDates = null;
+        this.nextTenRecurringDates = null;
+        this.humanReadable = null;
+        this.recentEligibleMeetingDate =null;
+        this.createdDate = null;
+        this.lastUpdatedDate = null;
+        this.createdByUserId = null;
+        this.createdByUsername = null;
+        this.lastUpdatedByUserId = null;
+        this.lastUpdatedByUsername = null;
+        this.repeatsOnDayOfMonth = null;
+        this.entityTypeOptions = null;
+        this.calendarTypeOptions = null;
+        this.remindByOptions = null;
+        this.frequencyOptions = null;
+        this.repeatsOnDayOptions = null;
+        this.frequencyNthDayTypeOptions = null;
+        this.duration=null;
+    }
+
+    private CalendarData(LocalDate startDate, boolean repeating,EnumOptionData frequency,Integer interval,
+            EnumOptionData repeatsOnDay,Integer rowIndex,String locale,String dateFormat) {
+        this.startDate = startDate;
+        this.repeating = repeating;
+        this.frequency = frequency;
+        this.interval = interval;
+        this.repeatsOnDay = repeatsOnDay;
+        this.rowIndex=rowIndex;
+        this.dateFormat= dateFormat;
+        this.locale= locale;
+        this.description = "";
+        this.typeId = "1";
+        this.id = null;
+        this.calendarInstanceId = null;
+        this.entityId = null;
+        this.entityType = null;
+        this.title = null;
+        this.location = null;
+        this.endDate = null;
+        this.meetingTime = null;
+        this.type = null;
+        this.recurrence = null;
+        this.repeatsOnNthDayOfMonth = null;
+        this.remindBy = null;
+        this.firstReminder = null;
+        this.secondReminder = null;
+        this.recurringDates = null;
+        this.nextTenRecurringDates = null;
+        this.humanReadable = null;
+        this.recentEligibleMeetingDate =null;
+        this.createdDate = null;
+        this.lastUpdatedDate = null;
+        this.createdByUserId = null;
+        this.createdByUsername = null;
+        this.lastUpdatedByUserId = null;
+        this.lastUpdatedByUsername = null;
+        this.repeatsOnDayOfMonth = null;
+        this.entityTypeOptions = null;
+        this.calendarTypeOptions = null;
+        this.remindByOptions = null;
+        this.frequencyOptions = null;
+        this.repeatsOnDayOptions = null;
+        this.frequencyNthDayTypeOptions = null;
+        this.duration=null;
+    }
+    public void setCenterId(String centerId) {
+        this.centerId = centerId;
+    }
+
+    public void setTitle(String title){
+        this.title=title;
+    }
+
     public static CalendarData instance(final Long id, final Long calendarInstanceId, final Long entityId, final EnumOptionData entityType,
             final String title, final String description, final String location, final LocalDate startDate, final LocalDate endDate,
             final Integer duration, final EnumOptionData type, final boolean repeating, final String recurrence,

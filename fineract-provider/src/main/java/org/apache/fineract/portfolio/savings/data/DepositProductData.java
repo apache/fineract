@@ -411,4 +411,49 @@ public class DepositProductData {
     public String getName() {
         return this.name;
     }
+
+    public EnumOptionData getLockinPeriodFrequencyType() {
+        return lockinPeriodFrequencyType;
+    }
+
+    public Integer getLockinPeriodFrequency() {
+        return lockinPeriodFrequency;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public BigDecimal getNominalAnnualInterestRate() {
+        return nominalAnnualInterestRate;
+    }
+
+    public EnumOptionData getInterestPostingPeriodType() {
+        return interestPostingPeriodType;
+    }
+
+    public EnumOptionData getInterestCalculationType() {
+        return interestCalculationType;
+    }
+
+    public EnumOptionData getInterestCalculationDaysInYearType() {
+        return interestCalculationDaysInYearType;
+    }
+
+    public BigDecimal getMinBalanceForInterestCalculation() {
+        return minBalanceForInterestCalculation;
+    }
+
+    public String getShortName() {
+        return shortName;
+    }
+
+    public CurrencyData getCurrency() {
+        return currency;
+    }
+
+    public EnumOptionData getInterestCompoundingPeriodType() {
+        return interestCompoundingPeriodType;
+    }
 }
+

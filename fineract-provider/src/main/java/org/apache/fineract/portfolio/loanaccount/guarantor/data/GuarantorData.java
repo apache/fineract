@@ -18,9 +18,11 @@
  */
 package org.apache.fineract.portfolio.loanaccount.guarantor.data;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -66,6 +68,68 @@ public class GuarantorData {
     private final List<EnumOptionData> guarantorTypeOptions;
     private final Collection<CodeValueData> allowedClientRelationshipTypes;
     private final Collection<PortfolioAccountData> accountLinkingOptions;
+
+    //import fields
+    private Integer guarantorTypeId;
+    private Integer clientRelationshipTypeId;
+    private Integer savingsId;
+    private BigDecimal amount;
+    private transient Long accountId;
+    private transient Integer rowIndex;
+    private String dateFormat;
+    private String locale;
+
+    public static GuarantorData importInstance(Integer guarantorTypeId,Integer clientRelationshipTypeId,Long entityId,String firstName,
+            String lastName,String addressLine1,String addressLine2,String city,LocalDate dob, String zip,
+            Integer savingsId, BigDecimal amount,Integer rowIndex,Long accountId,String locale,String dateFormat){
+        return new GuarantorData(guarantorTypeId,clientRelationshipTypeId,entityId,firstName, lastName,
+                addressLine1, addressLine2,city,dob,zip,savingsId,amount, rowIndex, accountId,locale,dateFormat);
+    }
+    private GuarantorData(Integer guarantorTypeId,Integer clientRelationshipTypeId,Long entityId,String firstname,
+            String lastname,String addressLine1,String addressLine2,String city,LocalDate dob, String zip,
+            Integer savingsId, BigDecimal amount,Integer rowIndex,Long accountId,String locale,String dateFormat) {
+        this.rowIndex=rowIndex;
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.entityId = entityId;
+        this.addressLine1 = addressLine1;
+        this.addressLine2 = addressLine2;
+        this.city = city;
+        this.zip = zip;
+        this.dob = dob;
+        this.guarantorTypeId = guarantorTypeId;
+        this.clientRelationshipTypeId = clientRelationshipTypeId;
+        this.savingsId = savingsId;
+        this.amount = amount;
+        this.accountId = accountId;
+        this.dateFormat=dateFormat;
+        this.locale= locale;
+        this.clientRelationshipType = null;
+        this.guarantorType = null;
+        this.id = null;
+        this.loanId = null;
+        this.externalId = null;
+        this.officeName = null;
+        this.joinedDate = null;
+        this.state = null;
+        this.country = null;
+        this.mobileNumber = null;
+        this.housePhoneNumber = null;
+        this.comment = null;
+        this.guarantorFundingDetails = null;
+        this.status = false;
+        this.guarantorTypeOptions = null;
+        this.allowedClientRelationshipTypes = null;
+        this.accountLinkingOptions = null;
+    }
+
+    public Long getAccountId() {
+        return accountId;
+    }
+
+    public Integer getRowIndex() {
+        return rowIndex;
+    }
 
     public static GuarantorData template(final List<EnumOptionData> guarantorTypeOptions,
             final Collection<CodeValueData> allowedClientRelationshipTypes, Collection<PortfolioAccountData> accountLinkingOptions) {

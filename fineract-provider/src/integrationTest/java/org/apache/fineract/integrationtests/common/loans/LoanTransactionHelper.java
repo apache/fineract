@@ -21,17 +21,27 @@ package org.apache.fineract.integrationtests.common.loans;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class LoanTransactionHelper {
@@ -41,6 +51,7 @@ public class LoanTransactionHelper {
 
     private static final String CREATE_LOAN_PRODUCT_URL = "/fineract-provider/api/v1/loanproducts?" + Utils.TENANT_IDENTIFIER;
     private static final String APPLY_LOAN_URL = "/fineract-provider/api/v1/loans?" + Utils.TENANT_IDENTIFIER;
+    private static final String LOAN_ACCOUNT_URL="/fineract-provider/api/v1/loans";
     private static final String APPROVE_LOAN_COMMAND = "approve";
     private static final String UNDO_APPROVAL_LOAN_COMMAND = "undoApproval";
     private static final String DISBURSE_LOAN_COMMAND = "disburse";
@@ -693,5 +704,30 @@ public class LoanTransactionHelper {
         datatableMap.put("data", dataMap);
         datatablesListMap.add(datatableMap);
         return datatablesListMap;
+    }
+
+    public Workbook getLoanWorkbook(String dateFormat) throws IOException {
+        requestSpec.header(HttpHeaders.CONTENT_TYPE,"application/vnd.ms-excel");
+        byte[] byteArray=Utils.performGetBinaryResponse(requestSpec,responseSpec,LOAN_ACCOUNT_URL+"/downloadtemplate"+"?"+
+                Utils.TENANT_IDENTIFIER+"&dateFormat="+dateFormat);
+        InputStream inputStream= new ByteArrayInputStream(byteArray);
+        Workbook workbook=new HSSFWorkbook(inputStream);
+        return workbook;
+    }
+
+    public String importLoanTemplate(File file) {
+
+        String locale="en";
+        String dateFormat="dd MMMM yyyy";
+        String legalFormType= null;
+        requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
+        return Utils.performServerTemplatePost(requestSpec,responseSpec,LOAN_ACCOUNT_URL+"/uploadtemplate"+"?"+Utils.TENANT_IDENTIFIER,
+                legalFormType,file,locale,dateFormat);
+    }
+
+    public String getOutputTemplateLocation(final String importDocumentId){
+        requestSpec.header(HttpHeaders.CONTENT_TYPE,MediaType.TEXT_PLAIN);
+        return Utils.performServerOutputTemplateLocationGet(requestSpec,responseSpec,"/fineract-provider/api/v1/imports/getOutputTemplateLocation"+"?"
+                +Utils.TENANT_IDENTIFIER,importDocumentId);
     }
 }

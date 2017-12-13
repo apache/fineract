@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.accounting.glaccount.domain;
 
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,6 +60,27 @@ public enum GLAccountType {
                 maxValue = type.value;
             }
             i = i + 1;
+        }
+    }
+    public static EnumOptionData fromString(String accountType){
+        Long accountTypeId=null;
+        if (accountType!=null && accountType.equalsIgnoreCase(ASSET.toString())){
+            accountTypeId=1L;
+            return new EnumOptionData(accountTypeId,null,null);
+        }else if(accountType!=null && accountType.equalsIgnoreCase(LIABILITY.toString())) {
+            accountTypeId = 2L;
+            return new EnumOptionData(accountTypeId, null, null);
+        }else if(accountType!=null && accountType.equalsIgnoreCase(EQUITY.toString())){
+            accountTypeId=3L;
+            return new EnumOptionData(accountTypeId,null,null);
+        }else if(accountType!=null && accountType.equalsIgnoreCase(INCOME.toString())) {
+            accountTypeId = 4L;
+            return new EnumOptionData(accountTypeId, null, null);
+        }else if(accountType!=null && accountType.equalsIgnoreCase(EXPENSE.toString())){
+            accountTypeId=5L;
+            return new EnumOptionData(accountTypeId,null,null);
+        }else {
+            return null;
         }
     }
 

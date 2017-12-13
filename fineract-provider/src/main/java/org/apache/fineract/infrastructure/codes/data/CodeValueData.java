@@ -37,6 +37,15 @@ public class CodeValueData implements Serializable {
     private final boolean active;
     private final boolean mandatory;
 
+    public CodeValueData( final Long id){
+        this.id = id;
+        this.name = null;
+        this.position = null;
+        this.description = null;
+        this.active = false;
+        this.mandatory = false;
+    }
+
     public static CodeValueData instance(final Long id, final String name, final Integer position, 
             final boolean isActive, final boolean mandatory) {
         String description = null;

@@ -20,15 +20,25 @@ package org.apache.fineract.integrationtests.common;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Workbook;
+
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 
 public class ClientHelper {
 
@@ -591,4 +601,27 @@ public class ClientHelper {
         return Utils.performServerGet(requestSpec, responseSpec, CHARGES_URL, "reversed");
     }
 
+    public Workbook getClientEntityWorkbook(GlobalEntityType clientsEntity, String dateFormat) throws IOException {
+        requestSpec.header(HttpHeaders.CONTENT_TYPE,"application/vnd.ms-excel");
+        byte [] byteArray=Utils.performGetBinaryResponse(requestSpec,responseSpec,CLIENT_URL+"/downloadtemplate"+"?"+
+                Utils.TENANT_IDENTIFIER+"&legalFormType="+clientsEntity+"&dateFormat="+dateFormat);
+        InputStream inputStream= new ByteArrayInputStream(byteArray);
+        Workbook workbook=new HSSFWorkbook(inputStream);
+        return workbook;
+    }
+
+    public String getOutputTemplateLocation(final String importDocumentId){
+        requestSpec.header(HttpHeaders.CONTENT_TYPE,MediaType.TEXT_PLAIN);
+        return Utils.performServerOutputTemplateLocationGet(requestSpec,responseSpec,"/fineract-provider/api/v1/imports/getOutputTemplateLocation"+"?"
+                +Utils.TENANT_IDENTIFIER,importDocumentId);
+    }
+
+    public String importClientEntityTemplate(File file){
+        String locale="en";
+        String dateFormat="dd MMMM yyyy";
+        String legalFormType=GlobalEntityType.CLIENTS_ENTTTY.toString();
+        requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
+        return Utils.performServerTemplatePost(requestSpec,responseSpec,CLIENT_URL+"/uploadtemplate"+"?"+Utils.TENANT_IDENTIFIER,
+                legalFormType,file,locale,dateFormat);
+    }
 }
