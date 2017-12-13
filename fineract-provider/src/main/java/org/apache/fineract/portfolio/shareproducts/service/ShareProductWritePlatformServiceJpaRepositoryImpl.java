@@ -215,11 +215,11 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
         throw new PlatformDataIntegrityException("error.msg.shareproduct.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
-
+    
     private Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> constructEntityMap(final BusinessEventNotificationConstants.BUSINESS_ENTITY entityEvent, Object entity) {
-        Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> map = new HashMap<>(1);
-        map.put(entityEvent, entity);
-        return map;
+    	Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> map = new HashMap<>(1);
+    	map.put(entityEvent, entity);
+    	return map;
     }
 
 }

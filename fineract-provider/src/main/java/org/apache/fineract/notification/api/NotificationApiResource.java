@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.notification.api;
 
-
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
@@ -86,4 +85,5 @@ public class NotificationApiResource {
         this.context.authenticatedUser();
         this.notificationReadPlatformService.updateNotificationReadStatus();
     }
+
 }

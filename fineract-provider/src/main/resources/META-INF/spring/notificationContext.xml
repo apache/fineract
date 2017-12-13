@@ -41,4 +41,5 @@
         <property name="destinationName" value="NotificationQueue"/>
         <property name="messageListener" ref="notificationEventListener" />
     </bean>
+
 </beans>

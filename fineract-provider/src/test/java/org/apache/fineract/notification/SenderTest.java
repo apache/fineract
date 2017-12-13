@@ -1,5 +1,3 @@
-package org.apache.fineract.notification;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -18,6 +16,7 @@ package org.apache.fineract.notification;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.notification;
 
 import com.mockrunner.mock.jms.MockQueue;
 import org.apache.fineract.notification.data.NotificationData;
@@ -60,6 +59,7 @@ public class SenderTest {
                 action,
                 actorId,
                 notificationContent,
+                false,
                 false,
                 null,
                 null,
