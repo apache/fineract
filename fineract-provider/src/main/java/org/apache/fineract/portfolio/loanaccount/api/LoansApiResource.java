@@ -629,12 +629,7 @@ public class LoansApiResource {
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
-        long end = System.currentTimeMillis() ;
-        System.out.println("LoansApiResource.retrieveLoan() Time took: "+(end-start));
-        start = System.currentTimeMillis() ;
         String toReturn = this.toApiJsonSerializer.serialize(settings, loanAccount, this.LOAN_DATA_PARAMETERS);
-        end = System.currentTimeMillis() ;
-        System.out.println("LoansApiResource.retrieveLoan() Time took to Serialize: "+(end-start));
         return toReturn ;
     }
 

@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests.bulkimport.populator.loan;
 
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
@@ -48,13 +49,9 @@ public class LoanWorkbookPopulatorTest {
     @Before
     public void setup(){
         Utils.initializeRESTAssured();
-        this.requestSpec=new RequestSpecBuilder().build();
-        this.requestSpec
-                .header("Authorization",
-                        "Basic "
-                                + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200)
-                .build();
+        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
     @Test
     public void testLoanWorkbookPopulate() throws IOException {

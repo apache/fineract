@@ -272,7 +272,6 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     if (staffId == null){
       staff =
           (List) this.staffReadPlatformService.retrieveAllStaff(null, null, Boolean.FALSE, null);
-    //System.out.println("Staff List size : "+staff.size());
     }else {
       staff = new ArrayList<>();
       staff.add(this.staffReadPlatformService.retrieveStaff(staffId));

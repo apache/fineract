@@ -77,8 +77,6 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 		this.context.authenticatedUser();
 		this.fromApiJsonDeserializer.validateForCreate(command.json(), true);
 
-		System.out.println("request " + command.json());
-
 		if (command.longValueOfParameterNamed("stateProvinceId") != null) {
 			stateId = command.longValueOfParameterNamed("stateProvinceId");
 			stateIdobj = this.codeValueRepository.getOne(stateId);

@@ -152,7 +152,6 @@ public class CreditBureauConfigurationAPI {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String getConfiguration(@PathParam("organisationCreditBureauId") final Long organisationCreditBureauId, @Context final UriInfo uriInfo) {
-		// System.out.println("config triggered");
 
 		this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 

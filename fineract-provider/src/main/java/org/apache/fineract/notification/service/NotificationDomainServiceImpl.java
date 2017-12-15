@@ -595,7 +595,6 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 		List<Role> allRoles = roleRepository.findAll();
 		for (Role curRole : allRoles) {
 			if (curRole.hasPermissionTo(permission) || curRole.hasPermissionTo("ALL_FUNCTIONS")) {
-				System.out.println(curRole + " Role has permission");
 				String memberType = curRole.getName();
 				topicSubscribers = topicSubscriberReadPlatformService.getSubscribers(entityId, entityType, memberType);
 			}

@@ -20,9 +20,9 @@ package org.apache.fineract.integrationtests.bulkimport.importhandler.loan;
 
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
-import org.apache.fineract.infrastructure.bulkimport.constants.ClientEntityConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.LoanConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.integrationtests.common.*;
@@ -52,13 +52,9 @@ public class LoanImportHandlerTest {
     @Before
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().build();
-        this.requestSpec
-                .header("Authorization",
-                        "Basic "
-                                + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200)
-                .build();
+        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test
@@ -148,9 +144,7 @@ public class LoanImportHandlerTest {
         firstLoanRow.createCell(LoanConstants.LAST_REPAYMENT_DATE_COL).setCellValue(date);
         firstLoanRow.createCell(LoanConstants.REPAYMENT_TYPE_COL).setCellValue(extrasSheet.getRow(1).getCell(3).getStringCellValue());
 
-        String currentdirectory = new File("").getAbsolutePath();
-        File directory=new File(currentdirectory+"\\src\\integrationTest\\" +
-                "resources\\bulkimport\\importhandler\\loan");
+        File directory=new File(System.getProperty("user.home")+"\\Fineract\\bulkimport\\integration_tests\\importhandler\\loan") ;
         if (!directory.exists())
             directory.mkdirs();
         File file= new File(directory+"\\Loan.xls");
