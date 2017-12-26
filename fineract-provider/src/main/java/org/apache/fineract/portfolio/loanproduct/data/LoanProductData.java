@@ -1195,7 +1195,7 @@ public class LoanProductData {
 		return syncExpectedWithDisbursementDate;
 	}
     
-        public boolean canUseForTopup() {
+    public boolean canUseForTopup() {
             return this.canUseForTopup;
         }
         

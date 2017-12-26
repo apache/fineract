@@ -104,10 +104,10 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
     @Autowired
     public CenterReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
-            final StaffReadPlatformService staffReadPlatformService, final CodeValueReadPlatformService codeValueReadPlatformService,
-            final PaginationParametersDataValidator paginationParametersDataValidator, final ConfigurationDomainService configurationDomainService,
-            final CalendarReadPlatformService calendarReadPlatformService, final ColumnValidator columnValidator) {
+                                         final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
+                                         final StaffReadPlatformService staffReadPlatformService, final CodeValueReadPlatformService codeValueReadPlatformService,
+                                         final PaginationParametersDataValidator paginationParametersDataValidator, final ConfigurationDomainService configurationDomainService,
+                                         final CalendarReadPlatformService calendarReadPlatformService, final ColumnValidator columnValidator) {
         this.context = context;
         this.clientReadPlatformService = clientReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -394,8 +394,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy(),
-            		searchParameters.getSortOrder());
-            
+                    searchParameters.getSortOrder());
+
         }
 
         if (searchParameters.isLimited()) {
@@ -407,7 +407,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
-        		paramList.toArray(), this.centerMapper);
+                paramList.toArray(), this.centerMapper);
     }
 
     @Override
@@ -426,16 +426,16 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         List<Object> paramList = new ArrayList<>(
                 Arrays.asList(hierarchySearchString));
         if (searchParameters!=null) {
-        final String extraCriteria = getCenterExtraCriteria(this.centerMapper.schema(), paramList, searchParameters);
-        this.columnValidator.validateSqlInjection(sqlBuilder.toString(), extraCriteria);
-        if (StringUtils.isNotBlank(extraCriteria)) {
-            sqlBuilder.append(" and (").append(extraCriteria).append(")");
-        }
+            final String extraCriteria = getCenterExtraCriteria(this.centerMapper.schema(), paramList, searchParameters);
+            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), extraCriteria);
+            if (StringUtils.isNotBlank(extraCriteria)) {
+                sqlBuilder.append(" and (").append(extraCriteria).append(")");
+            }
 
             if (searchParameters.isOrderByRequested()) {
                 sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy(),
-                		searchParameters.getSortOrder());
+                        searchParameters.getSortOrder());
             }
 
             if (searchParameters.isLimited()) {
@@ -601,8 +601,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
                         flag = false;
                         if (staffCenterData.getStaffId().equals(centerData.staffId())) {
                             staffCenterData.getMeetingFallCenters().add(centerData);
-                 
-                            
+
+
                             flag = true;
                             break;
                         }

@@ -97,66 +97,66 @@ import java.util.List;
 @Service
 public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkbookPopulatorService {
 
-  private final PlatformSecurityContext context;
-  private final OfficeReadPlatformService officeReadPlatformService;
-  private final StaffReadPlatformService staffReadPlatformService;
-  private final ClientReadPlatformService clientReadPlatformService;
-  private final CenterReadPlatformService centerReadPlatformService;
-  private final GroupReadPlatformService groupReadPlatformService;
-  private final FundReadPlatformService fundReadPlatformService;
-  private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
-  private final LoanProductReadPlatformService loanProductReadPlatformService;
-  private final CurrencyReadPlatformService currencyReadPlatformService;
-  private final LoanReadPlatformService loanReadPlatformService;
-  private final GLAccountReadPlatformService glAccountReadPlatformService;
-  private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
-  private final CodeValueReadPlatformService codeValueReadPlatformService;
-  private final SavingsProductReadPlatformService savingsProductReadPlatformService;
-  private final ProductReadPlatformService productReadPlatformService;
-  private final ChargeReadPlatformService chargeReadPlatformService;
-  private final DepositProductReadPlatformService depositProductReadPlatformService;
-  private final RoleReadPlatformService roleReadPlatformService;
-  
-  @Autowired
-  public BulkImportWorkbookPopulatorServiceImpl(final PlatformSecurityContext context,
-      final OfficeReadPlatformService officeReadPlatformService,
-      final StaffReadPlatformService staffReadPlatformService,
-      final ClientReadPlatformService clientReadPlatformService,
-      final CenterReadPlatformService centerReadPlatformService,
-      final GroupReadPlatformService groupReadPlatformService,
-      final FundReadPlatformService fundReadPlatformService,
-      final PaymentTypeReadPlatformService paymentTypeReadPlatformService,
-      final LoanProductReadPlatformService loanProductReadPlatformService,
-      final CurrencyReadPlatformService currencyReadPlatformService,
-      final LoanReadPlatformService loanReadPlatformService,
-      final GLAccountReadPlatformService glAccountReadPlatformService,
-      final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
-		final CodeValueReadPlatformService codeValueReadPlatformService,
-		final SavingsProductReadPlatformService savingsProductReadPlatformService,
-		  final ProductReadPlatformService productReadPlatformService,
-		  final ChargeReadPlatformService chargeReadPlatformService,
-		  final DepositProductReadPlatformService depositProductReadPlatformService,
-		  final RoleReadPlatformService roleReadPlatformService) {
-    this.officeReadPlatformService = officeReadPlatformService;
-    this.staffReadPlatformService = staffReadPlatformService;
-    this.context = context;
-    this.clientReadPlatformService=clientReadPlatformService;
-    this.centerReadPlatformService=centerReadPlatformService;
-    this.groupReadPlatformService=groupReadPlatformService;
-    this.fundReadPlatformService=fundReadPlatformService;
-    this.paymentTypeReadPlatformService=paymentTypeReadPlatformService;
-    this.loanProductReadPlatformService=loanProductReadPlatformService;
-    this.currencyReadPlatformService=currencyReadPlatformService;
-    this.loanReadPlatformService=loanReadPlatformService;
-    this.glAccountReadPlatformService=glAccountReadPlatformService;
-    this.savingsAccountReadPlatformService=savingsAccountReadPlatformService;
-    this.codeValueReadPlatformService=codeValueReadPlatformService;
-    this.savingsProductReadPlatformService=savingsProductReadPlatformService;
-    this.productReadPlatformService=productReadPlatformService;
-    this.chargeReadPlatformService=chargeReadPlatformService;
-    this.depositProductReadPlatformService=depositProductReadPlatformService;
-    this.roleReadPlatformService=roleReadPlatformService;
-  }
+	private final PlatformSecurityContext context;
+	private final OfficeReadPlatformService officeReadPlatformService;
+	private final StaffReadPlatformService staffReadPlatformService;
+	private final ClientReadPlatformService clientReadPlatformService;
+	private final CenterReadPlatformService centerReadPlatformService;
+	private final GroupReadPlatformService groupReadPlatformService;
+	private final FundReadPlatformService fundReadPlatformService;
+	private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+	private final LoanProductReadPlatformService loanProductReadPlatformService;
+	private final CurrencyReadPlatformService currencyReadPlatformService;
+	private final LoanReadPlatformService loanReadPlatformService;
+	private final GLAccountReadPlatformService glAccountReadPlatformService;
+	private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
+	private final CodeValueReadPlatformService codeValueReadPlatformService;
+	private final SavingsProductReadPlatformService savingsProductReadPlatformService;
+	private final ProductReadPlatformService productReadPlatformService;
+	private final ChargeReadPlatformService chargeReadPlatformService;
+	private final DepositProductReadPlatformService depositProductReadPlatformService;
+	private final RoleReadPlatformService roleReadPlatformService;
+
+	@Autowired
+	public BulkImportWorkbookPopulatorServiceImpl(final PlatformSecurityContext context,
+												  final OfficeReadPlatformService officeReadPlatformService,
+												  final StaffReadPlatformService staffReadPlatformService,
+												  final ClientReadPlatformService clientReadPlatformService,
+												  final CenterReadPlatformService centerReadPlatformService,
+												  final GroupReadPlatformService groupReadPlatformService,
+												  final FundReadPlatformService fundReadPlatformService,
+												  final PaymentTypeReadPlatformService paymentTypeReadPlatformService,
+												  final LoanProductReadPlatformService loanProductReadPlatformService,
+												  final CurrencyReadPlatformService currencyReadPlatformService,
+												  final LoanReadPlatformService loanReadPlatformService,
+												  final GLAccountReadPlatformService glAccountReadPlatformService,
+												  final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
+												  final CodeValueReadPlatformService codeValueReadPlatformService,
+												  final SavingsProductReadPlatformService savingsProductReadPlatformService,
+												  final ProductReadPlatformService productReadPlatformService,
+												  final ChargeReadPlatformService chargeReadPlatformService,
+												  final DepositProductReadPlatformService depositProductReadPlatformService,
+												  final RoleReadPlatformService roleReadPlatformService) {
+		this.officeReadPlatformService = officeReadPlatformService;
+		this.staffReadPlatformService = staffReadPlatformService;
+		this.context = context;
+		this.clientReadPlatformService=clientReadPlatformService;
+		this.centerReadPlatformService=centerReadPlatformService;
+		this.groupReadPlatformService=groupReadPlatformService;
+		this.fundReadPlatformService=fundReadPlatformService;
+		this.paymentTypeReadPlatformService=paymentTypeReadPlatformService;
+		this.loanProductReadPlatformService=loanProductReadPlatformService;
+		this.currencyReadPlatformService=currencyReadPlatformService;
+		this.loanReadPlatformService=loanReadPlatformService;
+		this.glAccountReadPlatformService=glAccountReadPlatformService;
+		this.savingsAccountReadPlatformService=savingsAccountReadPlatformService;
+		this.codeValueReadPlatformService=codeValueReadPlatformService;
+		this.savingsProductReadPlatformService=savingsProductReadPlatformService;
+		this.productReadPlatformService=productReadPlatformService;
+		this.chargeReadPlatformService=chargeReadPlatformService;
+		this.depositProductReadPlatformService=depositProductReadPlatformService;
+		this.roleReadPlatformService=roleReadPlatformService;
+	}
 
 	@Override
 	public Response getTemplate(String entityType, Long officeId, Long staffId,final String dateFormat) {
@@ -214,94 +214,94 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
 
 
 	private WorkbookPopulator populateClientWorkbook(final String entityType ,final Long officeId, final Long staffId) {
-    this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.OFFICE_ENTITY_TYPE);
-    this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.STAFF_ENTITY_TYPE);
-    List<OfficeData> offices = fetchOffices(officeId);
-    List<StaffData> staff = fetchStaff(staffId);
-    List<CodeValueData> clientTypeCodeValues =fetchCodeValuesByCodeName("ClientType");
-	List<CodeValueData> clientClassification=fetchCodeValuesByCodeName("ClientClassification");
-	List<CodeValueData> addressTypesCodeValues=fetchCodeValuesByCodeName("ADDRESS_TYPE");
-	List<CodeValueData> stateProvinceCodeValues=fetchCodeValuesByCodeName("STATE");
-	List<CodeValueData> countryCodeValues=fetchCodeValuesByCodeName("COUNTRY");
-	if(entityType.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_PERSON.toString())) {
-		List<CodeValueData> genderCodeValues = fetchCodeValuesByCodeName("Gender");
-		return new ClientPersonWorkbookPopulator(new OfficeSheetPopulator(offices),
-				new PersonnelSheetPopulator(staff, offices), clientTypeCodeValues, genderCodeValues, clientClassification
-				, addressTypesCodeValues, stateProvinceCodeValues, countryCodeValues);
-	}else if(entityType.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_ENTTTY.toString())){
-		List<CodeValueData> constitutionCodeValues=fetchCodeValuesByCodeName("Constitution");
-		List<CodeValueData> mainBusinessline=fetchCodeValuesByCodeName("Main Business Line");
-		return new ClientEntityWorkbookPopulator(new OfficeSheetPopulator(offices),
-				new PersonnelSheetPopulator(staff, offices), clientTypeCodeValues, constitutionCodeValues,mainBusinessline,
-				clientClassification, addressTypesCodeValues, stateProvinceCodeValues, countryCodeValues);
+		this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.OFFICE_ENTITY_TYPE);
+		this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.STAFF_ENTITY_TYPE);
+		List<OfficeData> offices = fetchOffices(officeId);
+		List<StaffData> staff = fetchStaff(staffId);
+		List<CodeValueData> clientTypeCodeValues =fetchCodeValuesByCodeName("ClientType");
+		List<CodeValueData> clientClassification=fetchCodeValuesByCodeName("ClientClassification");
+		List<CodeValueData> addressTypesCodeValues=fetchCodeValuesByCodeName("ADDRESS_TYPE");
+		List<CodeValueData> stateProvinceCodeValues=fetchCodeValuesByCodeName("STATE");
+		List<CodeValueData> countryCodeValues=fetchCodeValuesByCodeName("COUNTRY");
+		if(entityType.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_PERSON.toString())) {
+			List<CodeValueData> genderCodeValues = fetchCodeValuesByCodeName("Gender");
+			return new ClientPersonWorkbookPopulator(new OfficeSheetPopulator(offices),
+					new PersonnelSheetPopulator(staff, offices), clientTypeCodeValues, genderCodeValues, clientClassification
+					, addressTypesCodeValues, stateProvinceCodeValues, countryCodeValues);
+		}else if(entityType.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_ENTTTY.toString())){
+			List<CodeValueData> constitutionCodeValues=fetchCodeValuesByCodeName("Constitution");
+			List<CodeValueData> mainBusinessline=fetchCodeValuesByCodeName("Main Business Line");
+			return new ClientEntityWorkbookPopulator(new OfficeSheetPopulator(offices),
+					new PersonnelSheetPopulator(staff, offices), clientTypeCodeValues, constitutionCodeValues,mainBusinessline,
+					clientClassification, addressTypesCodeValues, stateProvinceCodeValues, countryCodeValues);
+		}
+		return null;
 	}
-	  return null;
-  }
 
-  private Response buildResponse(final Workbook workbook, final String entity) {
-    String filename = entity + DateUtils.getLocalDateOfTenant().toString() + ".xls";
-    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try {
-      workbook.write(baos);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+	private Response buildResponse(final Workbook workbook, final String entity) {
+		String filename = entity + DateUtils.getLocalDateOfTenant().toString() + ".xls";
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			workbook.write(baos);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
-    final ResponseBuilder response = Response.ok(baos.toByteArray());
-    response.header("Content-Disposition", "attachment; filename=\"" + filename + "\"");
-    response.header("Content-Type", "application/vnd.ms-excel");
-    return response.build();
-  }
-
-  @SuppressWarnings("unchecked")
-  private List<OfficeData> fetchOffices(final Long officeId) {
-    List<OfficeData> offices = null;
-    if (officeId == null) {
-      Boolean includeAllOffices = Boolean.TRUE;
-      offices = (List) this.officeReadPlatformService.retrieveAllOffices(includeAllOffices, null);
-    } else {
-      offices = new ArrayList<>();
-      offices.add(this.officeReadPlatformService.retrieveOffice(officeId));
-    }
-    return offices;
-  }
-
-  @SuppressWarnings("unchecked")
-  private List<StaffData> fetchStaff(final Long staffId) {
-    List<StaffData> staff = null;
-    if (staffId == null){
-      staff =
-          (List) this.staffReadPlatformService.retrieveAllStaff(null, null, Boolean.FALSE, null);
-    }else {
-      staff = new ArrayList<>();
-      staff.add(this.staffReadPlatformService.retrieveStaff(staffId));
-    }
-    return staff;
-  }
-  private List<CodeValueData> fetchCodeValuesByCodeName(String codeName){
-  	List<CodeValueData> codeValues=null;
-  	if (codeName!=null){
-  		codeValues=(List)codeValueReadPlatformService.retrieveCodeValuesByCode(codeName);
-	}else {
-	 	throw new NullPointerException();
+		final ResponseBuilder response = Response.ok(baos.toByteArray());
+		response.header("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+		response.header("Content-Type", "application/vnd.ms-excel");
+		return response.build();
 	}
-	return codeValues;
-  }
-  private List<SavingsProductData>fetchSavingsProducts(){
-  	List<SavingsProductData> savingsProducts=(List)savingsProductReadPlatformService.retrieveAll();
-	return savingsProducts;
-  }
 
-private WorkbookPopulator populateCenterWorkbook(Long officeId,Long staffId){
-	 this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.OFFICE_ENTITY_TYPE);
-	 this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.STAFF_ENTITY_TYPE);
-	this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.GROUP_ENTITY_TYPE);
-	 List<OfficeData> offices = fetchOffices(officeId);
-	List<StaffData> staff = fetchStaff(staffId);
-	List<GroupGeneralData> groups = fetchGroups(officeId);
-	return new CentersWorkbookPopulator(new OfficeSheetPopulator(offices),
-	        new PersonnelSheetPopulator(staff, offices),new GroupSheetPopulator(groups,offices));
-}
+	@SuppressWarnings("unchecked")
+	private List<OfficeData> fetchOffices(final Long officeId) {
+		List<OfficeData> offices = null;
+		if (officeId == null) {
+			Boolean includeAllOffices = Boolean.TRUE;
+			offices = (List) this.officeReadPlatformService.retrieveAllOffices(includeAllOffices, null);
+		} else {
+			offices = new ArrayList<>();
+			offices.add(this.officeReadPlatformService.retrieveOffice(officeId));
+		}
+		return offices;
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<StaffData> fetchStaff(final Long staffId) {
+		List<StaffData> staff = null;
+		if (staffId == null){
+			staff =
+					(List) this.staffReadPlatformService.retrieveAllStaff(null, null, Boolean.FALSE, null);
+		}else {
+			staff = new ArrayList<>();
+			staff.add(this.staffReadPlatformService.retrieveStaff(staffId));
+		}
+		return staff;
+	}
+	private List<CodeValueData> fetchCodeValuesByCodeName(String codeName){
+		List<CodeValueData> codeValues=null;
+		if (codeName!=null){
+			codeValues=(List)codeValueReadPlatformService.retrieveCodeValuesByCode(codeName);
+		}else {
+			throw new NullPointerException();
+		}
+		return codeValues;
+	}
+	private List<SavingsProductData>fetchSavingsProducts(){
+		List<SavingsProductData> savingsProducts=(List)savingsProductReadPlatformService.retrieveAll();
+		return savingsProducts;
+	}
+
+	private WorkbookPopulator populateCenterWorkbook(Long officeId,Long staffId){
+		this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.OFFICE_ENTITY_TYPE);
+		this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.STAFF_ENTITY_TYPE);
+		this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.GROUP_ENTITY_TYPE);
+		List<OfficeData> offices = fetchOffices(officeId);
+		List<StaffData> staff = fetchStaff(staffId);
+		List<GroupGeneralData> groups = fetchGroups(officeId);
+		return new CentersWorkbookPopulator(new OfficeSheetPopulator(offices),
+				new PersonnelSheetPopulator(staff, offices),new GroupSheetPopulator(groups,offices));
+	}
 
 	private WorkbookPopulator populateGroupsWorkbook(Long officeId, Long staffId) {
 		this.context.authenticatedUser().validateHasReadPermission(TemplatePopulateImportConstants.OFFICE_ENTITY_TYPE);
@@ -324,7 +324,7 @@ private WorkbookPopulator populateCenterWorkbook(Long officeId,Long staffId){
 			SearchParameters searchParameters = SearchParameters.from(null, officeId, null, null, null);
 			centers = (List<CenterData>)centerReadPlatformService.retrieveAll(searchParameters,null);
 		}
-		
+
 		return centers;
 	}
 	private List<ClientData> fetchClients(Long officeId) {
@@ -453,7 +453,7 @@ private WorkbookPopulator populateCenterWorkbook(Long officeId,Long staffId){
 	private List<GLAccountData> fetchGLAccounts() {
 		List<GLAccountData> glaccounts = (List<GLAccountData>) this.glAccountReadPlatformService.
 				retrieveAllGLAccounts(null, null, null,
-					null, null, null);
+						null, null, null);
 		return glaccounts;
 	}
 
@@ -567,7 +567,7 @@ private WorkbookPopulator populateCenterWorkbook(Long officeId,Long staffId){
 		List<CurrencyData> currencies = fetchCurrencies();
 		List<SavingsAccountData> savingsAccounts=fetchSavingsAccounts(officeId);
 		return new SavingsTransactionsWorkbookPopulator(new OfficeSheetPopulator(offices), new ClientSheetPopulator(clients, offices),
-				 new ExtrasSheetPopulator(funds, paymentTypes, currencies),savingsAccounts);
+				new ExtrasSheetPopulator(funds, paymentTypes, currencies),savingsAccounts);
 	}
 
 

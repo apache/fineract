@@ -45,7 +45,7 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
 	private Map<Long,String> clientIdToClientExternalId;
 
 	public LoanRepaymentWorkbookPopulator(List<LoanAccountData> loans, OfficeSheetPopulator officeSheetPopulator,
-			ClientSheetPopulator clientSheetPopulator, ExtrasSheetPopulator extrasSheetPopulator) {
+										  ClientSheetPopulator clientSheetPopulator, ExtrasSheetPopulator extrasSheetPopulator) {
 		this.allloans = loans;
 		this.officeSheetPopulator = officeSheetPopulator;
 		this.clientSheetPopulator = clientSheetPopulator;
@@ -70,27 +70,27 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
 		List<ClientData>allclients=clientSheetPopulator.getClients();
 		for (ClientData client: allclients) {
 			if (client.getExternalId()!=null)
-			clientIdToClientExternalId.put(client.getId(),client.getExternalId());
+				clientIdToClientExternalId.put(client.getId(),client.getExternalId());
 		}
 	}
 
 	private void setDefaults(Sheet worksheet) {
-			for (Integer rowNo = 1; rowNo < 3000; rowNo++) {
-				Row row = worksheet.getRow(rowNo);
-				if (row == null)
-					row = worksheet.createRow(rowNo);
-				writeFormula(LoanRepaymentConstants.CLIENT_EXTERNAL_ID, row,
-						"IF(ISERROR(VLOOKUP($B"+(rowNo+1)+",$P$2:$Q$"+(allloans.size()+1)+",2,FALSE))," +
-								"\"\",(VLOOKUP($B"+(rowNo+1)+",$P$2:$Q$"+(allloans.size()+1)+",2,FALSE)))");
-				writeFormula(LoanRepaymentConstants.PRODUCT_COL, row,
-						"IF(ISERROR(VLOOKUP($D" + (rowNo + 1) + ",$R$2:$T$" + (allloans.size() + 1)
-								+ ",2,FALSE)),\"\",VLOOKUP($D" + (rowNo + 1) + ",$R$2:$T$" + (allloans.size() + 1)
-								+ ",2,FALSE))");
-				writeFormula(LoanRepaymentConstants.PRINCIPAL_COL, row,
-						"IF(ISERROR(VLOOKUP($D" + (rowNo + 1) + ",$R$2:$T$" + (allloans.size() + 1)
-								+ ",3,FALSE)),\"\",VLOOKUP($D" + (rowNo + 1) + ",$R$2:$T$" + (allloans.size() + 1)
-								+ ",3,FALSE))");
-			}
+		for (Integer rowNo = 1; rowNo < 3000; rowNo++) {
+			Row row = worksheet.getRow(rowNo);
+			if (row == null)
+				row = worksheet.createRow(rowNo);
+			writeFormula(LoanRepaymentConstants.CLIENT_EXTERNAL_ID, row,
+					"IF(ISERROR(VLOOKUP($B"+(rowNo+1)+",$P$2:$Q$"+(allloans.size()+1)+",2,FALSE))," +
+							"\"\",(VLOOKUP($B"+(rowNo+1)+",$P$2:$Q$"+(allloans.size()+1)+",2,FALSE)))");
+			writeFormula(LoanRepaymentConstants.PRODUCT_COL, row,
+					"IF(ISERROR(VLOOKUP($D" + (rowNo + 1) + ",$R$2:$T$" + (allloans.size() + 1)
+							+ ",2,FALSE)),\"\",VLOOKUP($D" + (rowNo + 1) + ",$R$2:$T$" + (allloans.size() + 1)
+							+ ",2,FALSE))");
+			writeFormula(LoanRepaymentConstants.PRINCIPAL_COL, row,
+					"IF(ISERROR(VLOOKUP($D" + (rowNo + 1) + ",$R$2:$T$" + (allloans.size() + 1)
+							+ ",3,FALSE)),\"\",VLOOKUP($D" + (rowNo + 1) + ",$R$2:$T$" + (allloans.size() + 1)
+							+ ",3,FALSE))");
+		}
 	}
 
 	private void setRules(Sheet worksheet,String dateFormat) {
@@ -182,7 +182,7 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
 			}
 		}
 
-			// Account Number Named after Clients
+		// Account Number Named after Clients
 		for (int j = 0; j < clientsWithActiveLoans.size(); j++) {
 			Name name = loanRepaymentWorkbook.createName();
 			name.setNameName("Account_" + clientsWithActiveLoans.get(j).replaceAll(" ", "_") + "_"
