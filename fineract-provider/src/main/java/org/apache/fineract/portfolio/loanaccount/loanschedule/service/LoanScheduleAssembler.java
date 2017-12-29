@@ -227,7 +227,7 @@ public class LoanScheduleAssembler {
 
         BigDecimal annualNominalInterestRate = BigDecimal.ZERO;
         if (interestRatePerPeriod != null) {
-            annualNominalInterestRate = this.aprCalculator.calculateFrom(interestRatePeriodFrequencyType, interestRatePerPeriod);
+       annualNominalInterestRate = this.aprCalculator.calculateFrom(interestRatePeriodFrequencyType, interestRatePerPeriod, numberOfRepayments, repaymentEvery, repaymentPeriodFrequencyType);
         }
 
         // disbursement details

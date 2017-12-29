@@ -239,6 +239,10 @@ public class LoanEnumerations {
                 optionData = new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(), codePrefix
                         + PeriodFrequencyType.YEARS.getCode(), "Per year");
             break;
+            case WHOLE_TERM:
+                 optionData = new EnumOptionData(PeriodFrequencyType.WHOLE_TERM.getValue().longValue(), codePrefix
+                         + PeriodFrequencyType.WHOLE_TERM.getCode(), "Whole term");
+            break;
             default:
                 optionData = new EnumOptionData(PeriodFrequencyType.INVALID.getValue().longValue(), PeriodFrequencyType.INVALID.getCode(),
                         "Invalid");

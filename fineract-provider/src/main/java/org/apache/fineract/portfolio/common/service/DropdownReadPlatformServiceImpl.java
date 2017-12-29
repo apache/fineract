@@ -40,7 +40,7 @@ public class DropdownReadPlatformServiceImpl implements DropdownReadPlatformServ
     public List<EnumOptionData> retrievePeriodFrequencyTypeOptions() {
         final List<EnumOptionData> loanTermFrequencyOptions = Arrays.asList(termFrequencyType(PeriodFrequencyType.DAYS, "frequency"),
                 termFrequencyType(PeriodFrequencyType.WEEKS, "frequency"), termFrequencyType(PeriodFrequencyType.MONTHS, "frequency"),
-                termFrequencyType(PeriodFrequencyType.YEARS, "frequency"));
+                 termFrequencyType(PeriodFrequencyType.YEARS, "frequency"), termFrequencyType(PeriodFrequencyType.WHOLE_TERM, "frequency"));
         return loanTermFrequencyOptions;
     }
 
