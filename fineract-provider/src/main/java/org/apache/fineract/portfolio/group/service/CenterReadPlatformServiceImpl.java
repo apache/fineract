@@ -393,6 +393,9 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
+            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy(),
+            		searchParameters.getSortOrder());
+            
         }
 
         if (searchParameters.isLimited()) {
@@ -431,6 +434,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
             if (searchParameters.isOrderByRequested()) {
                 sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
+                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy(),
+                		searchParameters.getSortOrder());
             }
 
             if (searchParameters.isLimited()) {

@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 
 public class SQLInjectionValidator {
 
-	private final static String[] DDL_COMMANDS = { "create", "drop", "alter", "truncate", "comment" };
+	private final static String[] DDL_COMMANDS = { "create", "drop", "alter", "truncate", "comment", "sleep" };
 
 	private final static String[] DML_COMMANDS = { "select", "insert", "update", "delete", "merge", "upsert", "call" };
 

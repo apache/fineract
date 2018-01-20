@@ -18,8 +18,18 @@
  */
 package org.apache.fineract.notification.service;
 
-import org.apache.fineract.infrastructure.core.service.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+
+import org.apache.fineract.infrastructure.core.service.Page;
+import org.apache.fineract.infrastructure.core.service.PaginationHelper;
+import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
+import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.notification.cache.CacheNotificationResponseHeader;
 import org.apache.fineract.notification.data.NotificationData;
 import org.apache.fineract.notification.data.NotificationMapperData;
@@ -28,16 +38,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-
 @Service
 public class NotificationReadPlatformServiceImpl implements NotificationReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
+    private final ColumnValidator columnValidator;
     private final PaginationHelper<NotificationData> paginationHelper = new PaginationHelper<>();
     private final NotificationDataRow notificationDataRow = new NotificationDataRow();
     private final NotificationMapperRow notificationMapperRow = new NotificationMapperRow();
@@ -45,9 +51,12 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
             tenantNotificationResponseHeaderCache = new HashMap<>();
 
     @Autowired
-    public NotificationReadPlatformServiceImpl(final RoutingDataSource dataSource, final PlatformSecurityContext context) {
+    public NotificationReadPlatformServiceImpl(final RoutingDataSource dataSource,
+    		final PlatformSecurityContext context,
+    		final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.context = context;
+        this.columnValidator = columnValidator;
     }
 
     @Override
@@ -139,9 +148,10 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
 
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
-
+            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
             if (searchParameters.isSortOrderProvided()) {
                 sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
             }
         }
 

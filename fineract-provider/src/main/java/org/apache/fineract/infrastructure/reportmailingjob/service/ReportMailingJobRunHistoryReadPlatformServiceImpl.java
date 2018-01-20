@@ -29,6 +29,7 @@ import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobRunHistoryData;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -39,12 +40,15 @@ import org.springframework.stereotype.Service;
 public class ReportMailingJobRunHistoryReadPlatformServiceImpl implements ReportMailingJobRunHistoryReadPlatformService {
     private final JdbcTemplate jdbcTemplate;
     private final ReportMailingJobRunHistoryMapper reportMailingJobRunHistoryMapper;
+    private final ColumnValidator columnValidator;
     private final PaginationHelper<ReportMailingJobRunHistoryData> paginationHelper = new PaginationHelper<>();
     
     @Autowired
-    public ReportMailingJobRunHistoryReadPlatformServiceImpl(final RoutingDataSource dataSource) {
+    public ReportMailingJobRunHistoryReadPlatformServiceImpl(final RoutingDataSource dataSource,
+    		final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.reportMailingJobRunHistoryMapper = new ReportMailingJobRunHistoryMapper();
+        this.columnValidator = columnValidator;
     }
     
     @Override
@@ -63,9 +67,10 @@ public class ReportMailingJobRunHistoryReadPlatformServiceImpl implements Report
         
         if (searchParameters.isOrderByRequested()) {
             sqlStringBuilder.append(" order by ").append(searchParameters.getOrderBy());
-
+            this.columnValidator.validateSqlInjection(sqlStringBuilder.toString(), searchParameters.getOrderBy());
             if (searchParameters.isSortOrderProvided()) {
                 sqlStringBuilder.append(" ").append(searchParameters.getSortOrder());
+                this.columnValidator.validateSqlInjection(sqlStringBuilder.toString(), searchParameters.getSortOrder());
             }
         }
 

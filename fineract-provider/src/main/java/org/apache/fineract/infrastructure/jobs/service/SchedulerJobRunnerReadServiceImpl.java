@@ -31,6 +31,7 @@ import org.apache.fineract.infrastructure.jobs.data.JobDetailData;
 import org.apache.fineract.infrastructure.jobs.data.JobDetailHistoryData;
 import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
 import org.apache.fineract.infrastructure.jobs.exception.OperationNotAllowedException;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -41,12 +42,15 @@ import org.springframework.stereotype.Service;
 public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerReadService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final ColumnValidator columnValidator;
 
     private final PaginationHelper<JobDetailHistoryData> paginationHelper = new PaginationHelper<>();
 
     @Autowired
-    public SchedulerJobRunnerReadServiceImpl(final RoutingDataSource dataSource) {
+    public SchedulerJobRunnerReadServiceImpl(final RoutingDataSource dataSource,
+    		final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.columnValidator = columnValidator;
     }
 
     @Override
@@ -79,9 +83,10 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
         sqlBuilder.append(" where job.id=?");
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
-
+            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
             if (searchParameters.isSortOrderProvided()) {
                 sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
             }
         }
 

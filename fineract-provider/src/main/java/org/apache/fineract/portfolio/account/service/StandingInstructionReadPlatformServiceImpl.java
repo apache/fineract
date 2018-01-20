@@ -40,6 +40,7 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
@@ -71,6 +72,7 @@ import org.springframework.util.CollectionUtils;
 public class StandingInstructionReadPlatformServiceImpl implements StandingInstructionReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final ColumnValidator columnValidator;
     private final ClientReadPlatformService clientReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService;
@@ -86,13 +88,15 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
     public StandingInstructionReadPlatformServiceImpl(final RoutingDataSource dataSource,
             final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
             final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService,
-            final DropdownReadPlatformService dropdownReadPlatformService) {
+            final DropdownReadPlatformService dropdownReadPlatformService,
+            final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.clientReadPlatformService = clientReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
         this.portfolioAccountReadPlatformService = portfolioAccountReadPlatformService;
         this.dropdownReadPlatformService = dropdownReadPlatformService;
         this.standingInstructionMapper = new StandingInstructionMapper();
+        this.columnValidator = columnValidator;
     }
 
     @Override
@@ -309,9 +313,10 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
         final SearchParameters searchParameters = standingInstructionDTO.searchParameters();
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
-
+            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
             if (searchParameters.isSortOrderProvided()) {
                 sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
             }
         }
 
