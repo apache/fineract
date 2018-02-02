@@ -28,6 +28,7 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.organisation.office.data.OfficeData;
@@ -48,13 +49,17 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final CurrencyReadPlatformService currencyReadPlatformService;
+    private final ColumnValidator columnValidator;
     private final static String nameDecoratedBaseOnHierarchy = "concat(substring('........................................', 1, ((LENGTH(o.hierarchy) - LENGTH(REPLACE(o.hierarchy, '.', '')) - 1) * 4)), o.name)";
 
     @Autowired
     public OfficeReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final CurrencyReadPlatformService currencyReadPlatformService, final RoutingDataSource dataSource) {
+            final CurrencyReadPlatformService currencyReadPlatformService,
+            final RoutingDataSource dataSource,
+            final ColumnValidator columnValidator) {
         this.context = context;
         this.currencyReadPlatformService = currencyReadPlatformService;
+        this.columnValidator = columnValidator;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
@@ -159,9 +164,10 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
         if(searchParameters!=null) {
             if (searchParameters.isOrderByRequested()) {
                 sqlBuilder.append("order by ").append(searchParameters.getOrderBy());
-
+                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
                 if (searchParameters.isSortOrderProvided()) {
                     sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+                    this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
                 }
             } else {
                 sqlBuilder.append("order by o.hierarchy");

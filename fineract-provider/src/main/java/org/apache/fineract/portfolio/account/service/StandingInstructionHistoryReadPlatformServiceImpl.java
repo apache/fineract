@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
@@ -50,6 +51,7 @@ import org.springframework.stereotype.Service;
 public class StandingInstructionHistoryReadPlatformServiceImpl implements StandingInstructionHistoryReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final ColumnValidator columnValidator;
 
     // mapper
     private final StandingInstructionHistoryMapper standingInstructionHistoryMapper;
@@ -58,9 +60,11 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
     private final PaginationHelper<StandingInstructionHistoryData> paginationHelper = new PaginationHelper<>();
 
     @Autowired
-    public StandingInstructionHistoryReadPlatformServiceImpl(final RoutingDataSource dataSource) {
+    public StandingInstructionHistoryReadPlatformServiceImpl(final RoutingDataSource dataSource,
+    		final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.standingInstructionHistoryMapper = new StandingInstructionHistoryMapper();
+        this.columnValidator = columnValidator;
     }
 
     @Override
@@ -139,9 +143,10 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
         final SearchParameters searchParameters = standingInstructionDTO.searchParameters();
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
-
+            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
             if (searchParameters.isSortOrderProvided()) {
                 sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
             }
         }
 

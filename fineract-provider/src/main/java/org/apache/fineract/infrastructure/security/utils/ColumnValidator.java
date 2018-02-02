@@ -90,21 +90,23 @@ public class ColumnValidator {
 		return columns;
 	}
 
-	public void validateSqlInjection(String schema, String condition) {
-		SQLInjectionValidator.validateSQLInput(condition);
-		List<String> operator = new ArrayList<>(Arrays.asList("=", ">", "<",
-				"> =", "< =", "! =", "!=", ">=", "<="));
-		condition = condition.trim().replace("( ", "(").replace(" )", ")")
-				.toLowerCase();
-		for (String op : operator) {
-			condition = replaceAll(condition, op).replaceAll(" +", " ");
+	public void validateSqlInjection(String schema, String... conditions) {
+		for(String condition: conditions) {
+			SQLInjectionValidator.validateSQLInput(condition);
+			List<String> operator = new ArrayList<>(Arrays.asList("=", ">", "<",
+					"> =", "< =", "! =", "!=", ">=", "<="));
+			condition = condition.trim().replace("( ", "(").replace(" )", ")")
+					.toLowerCase();
+			for (String op : operator) {
+				condition = replaceAll(condition, op).replaceAll(" +", " ");
+			}
+			Set<String> operands = getOperand(condition);
+			schema = schema.trim().replaceAll(" +", " ").toLowerCase();
+			Map<String, Set<String>> tableColumnAliasMap = getTableColumnAliasMap(operands);
+			Map<String, Set<String>> tableColumnMap = getTableColumnMap(schema,
+					tableColumnAliasMap);
+			validateColumn(tableColumnMap);
 		}
-		Set<String> operands = getOperand(condition);
-		schema = schema.trim().replaceAll(" +", " ").toLowerCase();
-		Map<String, Set<String>> tableColumnAliasMap = getTableColumnAliasMap(operands);
-		Map<String, Set<String>> tableColumnMap = getTableColumnMap(schema,
-				tableColumnAliasMap);
-		validateColumn(tableColumnMap);
 	}
 
 	private static Map<String, Set<String>> getTableColumnMap(String schema,

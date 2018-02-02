@@ -31,10 +31,11 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountDividendData;
 import org.apache.fineract.portfolio.shareaccounts.service.SharesEnumerations;
-import org.apache.fineract.portfolio.shareproducts.data.ShareProductDividendPayOutData;
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductData;
+import org.apache.fineract.portfolio.shareproducts.data.ShareProductDividendPayOutData;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -45,11 +46,14 @@ import org.springframework.stereotype.Service;
 public class ShareProductDividendReadPlatformServiceImpl implements ShareProductDividendReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final ColumnValidator columnValidator;
     private final PaginationHelper<ShareProductDividendPayOutData> paginationHelper = new PaginationHelper<>();
 
     @Autowired
-    public ShareProductDividendReadPlatformServiceImpl(final RoutingDataSource dataSource) {
+    public ShareProductDividendReadPlatformServiceImpl(final RoutingDataSource dataSource,
+    		final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.columnValidator = columnValidator;
     }
 
     @Override
@@ -68,9 +72,11 @@ public class ShareProductDividendReadPlatformServiceImpl implements ShareProduct
         }
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
-
+            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
+            
             if (searchParameters.isSortOrderProvided()) {
                 sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
             }
         }
 
