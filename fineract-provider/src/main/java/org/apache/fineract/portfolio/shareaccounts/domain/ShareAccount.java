@@ -439,7 +439,7 @@ public class ShareAccount extends AbstractPersistableCustom<Long> {
         this.totalSharesPending = null;
         this.totalSharesApproved = null;
         for (ShareAccountTransaction transaction : this.shareAccountTransactions) {
-            if(transaction.isPurchasTransaction()) {
+            if(transaction.isPendingForApprovalTransaction()) {
                 transaction.reject();
             }
         }
