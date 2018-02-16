@@ -216,9 +216,6 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                     if(toSaveMessages.size()>0){
                         this.smsMessageRepository.save(toSaveMessages);
                         this.smsMessageRepository.flush();
-                        //this.smsMessageRepository.save(entry.getValue());
-                        //request.append(SmsMessageApiQueueResourceData.toJsonString(apiQueueResourceDatas));
-                        //logger.info("Sending triggered SMS with request - " + request.toString());
                         this.triggeredExecutorService.execute(new SmsTask(ThreadLocalContextUtil.getTenant(), apiQueueResourceDatas));
                     }
                     if(!toSendNotificationMessages.isEmpty()){
