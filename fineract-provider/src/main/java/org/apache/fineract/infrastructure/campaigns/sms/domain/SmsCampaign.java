@@ -147,12 +147,10 @@ public class SmsCampaign extends AbstractPersistableCustom<Long> {
         this.recurrence = recurrence;
         LocalDateTime recurrenceStartDate = new LocalDateTime();
         this.isVisible = true;
-        if (this.triggerType.intValue() == SmsCampaignTriggerType.SCHEDULE.getValue()) {
-            if (localDateTime != null) {
-                this.recurrenceStartDate = localDateTime.toDate();
-            } else {
-                this.recurrenceStartDate = recurrenceStartDate.toDate();
-            }
+        if (localDateTime != null) {
+            this.recurrenceStartDate = localDateTime.toDate();
+        } else {
+            this.recurrenceStartDate = recurrenceStartDate.toDate();
         }
         this.isNotification = isNotification;
     }
@@ -507,27 +505,11 @@ public class SmsCampaign extends AbstractPersistableCustom<Long> {
     }
 
     public LocalDate getRecurrenceStartDate() {
-        if (this.triggerType.intValue() == SmsCampaignTriggerType.SCHEDULE.getValue()) {
-            return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.recurrenceStartDate), null);
-        } else {
-            if (this.recurrenceStartDate == null) {
-                return null;
-            } else {
-                return new LocalDate(this.recurrenceStartDate);
-            }
-        }
+        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.recurrenceStartDate), null);
     }
 
     public LocalDateTime getRecurrenceStartDateTime() {
-        if (this.triggerType.intValue() == SmsCampaignTriggerType.SCHEDULE.getValue()) {
-            return (LocalDateTime) ObjectUtils.defaultIfNull(new LocalDateTime(this.recurrenceStartDate), null);
-        } else {
-            if (this.recurrenceStartDate == null) {
-                return null;
-            } else {
-                return new LocalDateTime(this.recurrenceStartDate);
-            }
-        }
+        return (LocalDateTime) ObjectUtils.defaultIfNull(new LocalDateTime(this.recurrenceStartDate), null);
     }
 
     public void setLastTriggerDate(Date lastTriggerDate) {
