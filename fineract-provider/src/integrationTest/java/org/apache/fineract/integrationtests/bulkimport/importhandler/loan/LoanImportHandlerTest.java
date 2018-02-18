@@ -157,10 +157,17 @@ public class LoanImportHandlerTest {
         Assert.assertNotNull(importDocumentId);
 
         //Wait for the creation of output excel
-        Thread.sleep(3000);
+        Thread.sleep(10000);
 
         //check status column of output excel
         String location=loanTransactionHelper.getOutputTemplateLocation(importDocumentId);
+        Long start= System.currentTimeMillis();
+
+        while (!new File(location).exists()) {
+            Thread.sleep(1000);
+            if (System.currentTimeMillis() - start > 30000)
+                break;
+        }
         FileInputStream fileInputStream = new FileInputStream(location);
         Workbook Outputworkbook=new HSSFWorkbook(fileInputStream);
         Sheet outputLoanSheet = Outputworkbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME);
