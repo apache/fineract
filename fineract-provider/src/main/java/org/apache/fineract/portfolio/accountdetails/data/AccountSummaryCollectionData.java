@@ -27,25 +27,33 @@ import java.util.Collection;
 public class AccountSummaryCollectionData {
 
     private final Collection<LoanAccountSummaryData> loanAccounts;
+    private final Collection<LoanAccountSummaryData> groupLoanIndividualMonitoringAccounts;
     private final Collection<SavingsAccountSummaryData> savingsAccounts;
     private final Collection<ShareAccountSummaryData> shareAccounts ;
     
     private final Collection<LoanAccountSummaryData> memberLoanAccounts;
     private final Collection<SavingsAccountSummaryData> memberSavingsAccounts;
-
-    public AccountSummaryCollectionData(final Collection<LoanAccountSummaryData> loanAccounts,
+    
+	   /* METHOD SIGNATURE CHANGE NOTICE: Method's signature 
+	    was changed for GLIM & GSIM implementation*/
+    
+    public AccountSummaryCollectionData(final Collection<LoanAccountSummaryData> loanAccounts,final Collection<LoanAccountSummaryData> groupLoanIndividualMonitoringAccounts,
             final Collection<SavingsAccountSummaryData> savingsAccounts, final Collection<ShareAccountSummaryData> shareAccounts) {
         this.loanAccounts = defaultLoanAccountsIfEmpty(loanAccounts);
+        this.groupLoanIndividualMonitoringAccounts=groupLoanIndividualMonitoringAccounts;
         this.savingsAccounts = defaultSavingsAccountsIfEmpty(savingsAccounts);
         this.shareAccounts = defaultShareAccountsIfEmpty(shareAccounts) ;
         this.memberLoanAccounts = null;
         this.memberSavingsAccounts = null;
     }
     
-    public AccountSummaryCollectionData(final Collection<LoanAccountSummaryData> loanAccounts,
+   /* Note to Self: GSIM not passed in*/
+    
+    public AccountSummaryCollectionData(final Collection<LoanAccountSummaryData> loanAccounts,final Collection<LoanAccountSummaryData> groupLoanIndividualMonitoringAccounts,
             final Collection<SavingsAccountSummaryData> savingsAccounts, final Collection<LoanAccountSummaryData> memberLoanAccounts,
             final Collection<SavingsAccountSummaryData> memberSavingsAccounts) {
         this.loanAccounts = defaultLoanAccountsIfEmpty(loanAccounts);
+        this.groupLoanIndividualMonitoringAccounts=groupLoanIndividualMonitoringAccounts;
         this.savingsAccounts = defaultSavingsAccountsIfEmpty(savingsAccounts);
         this.shareAccounts = null ;
         this.memberLoanAccounts = defaultLoanAccountsIfEmpty(memberLoanAccounts);

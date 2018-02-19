@@ -19,7 +19,12 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.PersistenceException;
 
@@ -46,7 +51,11 @@ import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.infrastructure.entityaccess.FineractEntityAccessConstants;
-import org.apache.fineract.infrastructure.entityaccess.domain.*;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelation;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepository;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMapping;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMappingRepository;
 import org.apache.fineract.infrastructure.entityaccess.exception.NotOfficeSpecificProductException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -54,8 +63,13 @@ import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
 import org.apache.fineract.portfolio.account.domain.AccountAssociations;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationsRepository;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
-import org.apache.fineract.portfolio.calendar.domain.*;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
+import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
+import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
+import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
+import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
+import org.apache.fineract.portfolio.calendar.domain.CalendarRepository;
+import org.apache.fineract.portfolio.calendar.domain.CalendarType;
 import org.apache.fineract.portfolio.calendar.exception.CalendarNotFoundException;
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
 import org.apache.fineract.portfolio.charge.domain.Charge;
@@ -72,11 +86,26 @@ import org.apache.fineract.portfolio.common.service.BusinessEventNotifierService
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
+import org.apache.fineract.portfolio.group.exception.GroupMemberNotFoundInGSIMException;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
-import org.apache.fineract.portfolio.loanaccount.domain.*;
+import org.apache.fineract.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
+import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTopupDetails;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified;
@@ -88,14 +117,20 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanSchedu
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationCommandFromApiJsonHelper;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationTransitionApiJsonValidator;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
-import org.apache.fineract.portfolio.loanproduct.domain.*;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
+import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.apache.fineract.portfolio.loanproduct.serialization.LoanProductDataValidator;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.savings.data.GroupSavingsIndividualMonitoringAccountData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
+import org.apache.fineract.portfolio.savings.service.GSIMReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -107,6 +142,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 @Service
 public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements LoanApplicationWritePlatformService {
@@ -147,6 +183,11 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final FineractEntityToEntityMappingRepository repository;
     private final FineractEntityRelationRepository fineractEntityRelationRepository;
+    private final GLIMAccountInfoWritePlatformService glimAccountInfoWritePlatformService;
+    private final GLIMAccountInfoRepository glimRepository;
+    private final LoanRepository loanRepository;
+    private final GSIMReadPlatformService gsimReadPlatformService;
+    
 
     @Autowired
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
@@ -169,7 +210,11 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final LoanScheduleAssembler loanScheduleAssembler, final LoanUtilService loanUtilService, 
             final CalendarReadPlatformService calendarReadPlatformService, final GlobalConfigurationRepositoryWrapper globalConfigurationRepository,
             final FineractEntityToEntityMappingRepository repository, final FineractEntityRelationRepository fineractEntityRelationRepository,
-            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService) {
+            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
+            final GLIMAccountInfoWritePlatformService glimAccountInfoWritePlatformService,
+            final GLIMAccountInfoRepository glimRepository,final LoanRepository loanRepository,
+            final GSIMReadPlatformService gsimReadPlatformService
+            ) {
         this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
@@ -204,6 +249,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.globalConfigurationRepository = globalConfigurationRepository;
         this.repository = repository;
         this.fineractEntityRelationRepository = fineractEntityRelationRepository;
+        this.glimAccountInfoWritePlatformService=glimAccountInfoWritePlatformService;
+        this.glimRepository=glimRepository;
+        this.loanRepository=loanRepository;
+        this.gsimReadPlatformService=gsimReadPlatformService;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -327,11 +376,107 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 createAndPersistCalendarInstanceForInterestRecalculation(newLoanApplication);
             }
 
+            
+            // loan account number generation
+            String accountNumber="";
+            GroupLoanIndividualMonitoringAccount glimAccount;
+            BigDecimal applicationId=BigDecimal.ZERO;
+            Boolean isLastChildApplication=false;
+   
+            
             if (newLoanApplication.isAccountNumberRequiresAutoGeneration()) {
-                final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository
-                        .findByAccountType(EntityAccountType.LOAN);
-                newLoanApplication.updateAccountNo(this.accountNumberGenerator.generate(newLoanApplication, accountNumberFormat));
-                this.loanRepositoryWrapper.save(newLoanApplication);
+            	
+            	 final AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.LOAN);
+            	// if application is of GLIM type
+            	if(newLoanApplication.getLoanType()==4)
+            	{    
+            		Group group= this.groupRepository.findOneWithNotFoundDetection(groupId);
+            		
+            		//GLIM specific parameters
+            		if(command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("applicationId")!=null)
+            		{
+            			applicationId=command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("applicationId");
+            		}
+            		
+            		if(command.booleanObjectValueOfParameterNamed("lastApplication")!=null)
+            		{
+            			isLastChildApplication=command.booleanPrimitiveValueOfParameterNamed("lastApplication");
+            		}
+            		
+            		if(command.booleanObjectValueOfParameterNamed("isParentAccount")!=null)
+            		{	
+            				
+            			//empty table check
+                			if(glimRepository.count()!=0)
+                			{
+                				//**************Parent-Not an empty table********************	
+                				accountNumber=this.accountNumberGenerator.generate(newLoanApplication, accountNumberFormat);
+                    			newLoanApplication.updateAccountNo(accountNumber+"-1");
+                    			glimAccountInfoWritePlatformService.addGLIMAccountInfo(accountNumber,group, command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"),Long.valueOf(1),true,
+                    					LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),applicationId);
+                    			newLoanApplication.setGlim(glimRepository.findOneByAccountNumber(accountNumber));
+                    			 this.loanRepositoryWrapper.save(newLoanApplication);
+                    	
+                			}
+                			else
+                			{
+                				//************** Parent-empty table********************
+                				
+                				accountNumber=this.accountNumberGenerator.generate(newLoanApplication, accountNumberFormat);
+                    			newLoanApplication.updateAccountNo(accountNumber+"-1");
+                				glimAccountInfoWritePlatformService.addGLIMAccountInfo(accountNumber,group, command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"),Long.valueOf(1),true,
+                						LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),applicationId);
+                				newLoanApplication.setGlim(glimRepository.findOneByAccountNumber(accountNumber));
+                    			 this.loanRepositoryWrapper.save(newLoanApplication);
+          
+                			}
+          
+            		}
+            		else
+            		{
+            		
+            			
+            			if(glimRepository.count()!=0)
+            			{
+            				// Child-Not an empty table
+            				
+            				glimAccount=glimRepository.findOneByIsAcceptingChildAndApplicationId(true,applicationId);
+            				accountNumber=glimAccount.getAccountNumber()+"-"+(glimAccount.getChildAccountsCount()+1);
+                			newLoanApplication.updateAccountNo(accountNumber);
+                			this.glimAccountInfoWritePlatformService.incrementChildAccountCount(glimAccount);
+                			newLoanApplication.setGlim(glimAccount);
+               			 	this.loanRepositoryWrapper.save(newLoanApplication);
+                			
+            			}
+            			else
+            			{
+            				//**************Child-empty table********************
+            				// if the glim info is empty set the current account as parent
+            				accountNumber=this.accountNumberGenerator.generate(newLoanApplication, accountNumberFormat);
+                			newLoanApplication.updateAccountNo(accountNumber+"-1");
+                			glimAccountInfoWritePlatformService.addGLIMAccountInfo(accountNumber,group, command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"),Long.valueOf(1),true,
+                					LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),applicationId);
+                			newLoanApplication.setGlim(glimRepository.findOneByAccountNumber(accountNumber));
+                			 this.loanRepositoryWrapper.save(newLoanApplication);
+                	
+            			}
+            			
+            			// reset in cases of last child application of glim
+            			
+            			if(isLastChildApplication)
+            			{
+            				this.glimAccountInfoWritePlatformService.resetIsAcceptingChild(glimRepository.findOneByIsAcceptingChildAndApplicationId(true,applicationId));
+            			}
+            
+            			
+            		}
+            	}
+            	else   // for applications other than GLIM
+            	{
+            		  newLoanApplication.updateAccountNo(this.accountNumberGenerator.generate(newLoanApplication, accountNumberFormat));
+            		  this.loanRepositoryWrapper.save(newLoanApplication);
+            	}
+          
             }
 
             final String submittedOnNote = command.stringValueOfParameterNamed("submittedOnNote");
@@ -372,16 +517,62 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     this.calendarInstanceRepository.save(calendarInstance);
                 }
             }
-
-            // Save linked account information
+            	
+            
+         // Save linked account information
+            SavingsAccount savingsAccount;
+            AccountAssociations accountAssociations;
             final Long savingsAccountId = command.longValueOfParameterNamed("linkAccountId");
             if (savingsAccountId != null) {
-                final SavingsAccount savingsAccount = this.savingsAccountAssembler.assembleFrom(savingsAccountId);
-                this.fromApiJsonDeserializer.validatelinkedSavingsAccount(savingsAccount, newLoanApplication);
-                boolean isActive = true;
-                final AccountAssociations accountAssociations = AccountAssociations.associateSavingsAccount(newLoanApplication,
-                        savingsAccount, AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue(), isActive);
-                this.accountAssociationsRepository.save(accountAssociations);
+            if(newLoanApplication.getLoanType()==4)
+        	{			
+            	
+            	List<GroupSavingsIndividualMonitoringAccountData>  childSavings= (List<GroupSavingsIndividualMonitoringAccountData>)gsimReadPlatformService.findGSIMAccountsByGSIMId(savingsAccountId);
+            	//List<SavingsAccountSummaryData> childSavings=gsimAccount.getChildGSIMAccounts();
+            	List<BigDecimal> gsimClientMembers=new ArrayList<BigDecimal>();
+            	Map<BigDecimal,BigDecimal> clientAccountMappings=new HashMap<>();
+            	for(GroupSavingsIndividualMonitoringAccountData childSaving:childSavings)
+            	{
+            		gsimClientMembers.add(childSaving.getClientId());
+            		clientAccountMappings.put(childSaving.getClientId(), childSaving.getChildAccountId());
+            		
+            		
+            	}
+            
+            	
+            	if(gsimClientMembers.contains(BigDecimal.valueOf(newLoanApplication.getClientId())))
+        		{
+            		savingsAccount = this.savingsAccountAssembler.assembleFrom((clientAccountMappings.get(BigDecimal.valueOf(newLoanApplication.getClientId()))).longValue());
+            		
+       			 	this.fromApiJsonDeserializer.validatelinkedSavingsAccount(savingsAccount, newLoanApplication);
+                    boolean isActive = true;
+                   accountAssociations = AccountAssociations.associateSavingsAccount(newLoanApplication,
+                            savingsAccount, AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue(), isActive);
+                    this.accountAssociationsRepository.save(accountAssociations);
+                    
+        			
+        		}else
+        		{
+        			throw new GroupMemberNotFoundInGSIMException(newLoanApplication.getClientId());	
+        		}
+            	
+           
+            	
+            	
+        	}
+            else
+            {
+                
+            	 savingsAccount = this.savingsAccountAssembler.assembleFrom(savingsAccountId);
+                    this.fromApiJsonDeserializer.validatelinkedSavingsAccount(savingsAccount, newLoanApplication);
+                    boolean isActive = true;
+                  accountAssociations = AccountAssociations.associateSavingsAccount(newLoanApplication,
+                            savingsAccount, AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue(), isActive);
+                    this.accountAssociationsRepository.save(accountAssociations);
+                
+            }
+            
+            
             }
 
             if(command.parameterExists(LoanApiConstants.datatables)){
@@ -1059,7 +1250,61 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         fromApiJsonDeserializer.validateLoanMultiDisbursementdate(element, baseDataValidator, expectedDisbursementDate, principal);
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
+    
+    
+    @Transactional
+    @Override
+    public CommandProcessingResult approveGLIMLoanAppication(final Long loanId, final JsonCommand command)
+    {		
 
+    	final Long parentLoanId=loanId;
+    	GroupLoanIndividualMonitoringAccount parentLoan=glimRepository.findOne(parentLoanId);    	
+    	JsonArray approvalFormData=command.arrayOfParameterNamed("approvalFormData");
+    	
+    	JsonObject jsonObject=null;
+    	JsonCommand childCommand=null;
+    	Long[] childLoanId=new Long[approvalFormData.size()];
+    	BigDecimal parentPrincipalAmount=command.bigDecimalValueOfParameterNamed("glimPrincipal");
+      	
+    	for (int i = 0; i < approvalFormData.size(); i++) {
+    		
+			jsonObject=approvalFormData.get(i).getAsJsonObject();
+			
+			childLoanId[i]=jsonObject.get("loanId").getAsLong();
+    	}
+  
+    			
+    	CommandProcessingResult result=null;
+    	int count=0,j=0;;
+    	for(JsonElement approvals:approvalFormData)
+    	{
+    			
+    		childCommand=JsonCommand.fromExistingCommand(command,approvals);
+   
+    	
+    		result=approveApplication(childLoanId[j++],childCommand);
+    		
+    		if(result.getLoanId()!=null)
+    		{
+    			count++;
+    		// if all the child loans are approved, mark the parent loan as approved
+    			if(count==parentLoan.getChildAccountsCount())
+    			{
+    				parentLoan.setPrincipalAmount(parentPrincipalAmount);
+    				parentLoan.setLoanStatus(LoanStatus.APPROVED.getValue());
+    				glimRepository.save(parentLoan);
+    			}
+    			
+    			
+    		}
+    		
+    		
+    	}
+    	
+    	return result;
+    }
+    
+    
     @Transactional
     @Override
     public CommandProcessingResult approveApplication(final Long loanId, final JsonCommand command) {
@@ -1068,9 +1313,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         LocalDate expectedDisbursementDate = null;
 
         this.loanApplicationTransitionApiJsonValidator.validateApproval(command.json());
-
+     					
         final Loan loan = retrieveLoanBy(loanId);
-
+        
         final JsonArray disbursementDataArray = command.arrayOfParameterNamed(LoanApiConstants.disbursementDataParameterName);
 
         expectedDisbursementDate = command.localDateValueOfParameterNamed(LoanApiConstants.disbursementDateParameterName);
@@ -1105,6 +1350,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         final Map<String, Object> changes = loan.loanApplicationApproval(currentUser, command, disbursementDataArray,
                 defaultLoanLifecycleStateMachine());
+        
+      
 
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
                 StatusEnum.APPROVE.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
@@ -1167,6 +1414,42 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 .with(changes) //
                 .build();
     }
+    
+    
+    @Transactional
+    @Override
+    public CommandProcessingResult undoGLIMLoanApplicationApproval(final Long loanId, final JsonCommand command)
+    {		
+    	
+    	//GroupLoanIndividualMonitoringAccount glimAccount=glimRepository.findOne(loanId);
+    	final Long parentLoanId=loanId;
+    	GroupLoanIndividualMonitoringAccount parentLoan=glimRepository.findOne(parentLoanId);
+    	List<Loan> childLoans=this.loanRepository.findByGlimId(loanId);
+    	
+    	CommandProcessingResult result=null;
+    	int count=0;
+    	for(Loan loan:childLoans)
+    	{
+    		result=undoApplicationApproval(loan.getId(),command);	
+    		
+    		if(result.getLoanId()!=null)
+    		{
+    			count++;
+    		// if all the child loans are approved, mark the parent loan as approved
+    			if(count==parentLoan.getChildAccountsCount())
+    			{
+    				parentLoan.setLoanStatus(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue());
+    				glimRepository.save(parentLoan);
+    			}
+    			
+    			
+    		}
+    		
+    		
+    	}
+    	
+    	return result;
+    }
 
     @Transactional
     @Override
@@ -1212,6 +1495,41 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 .withLoanId(loanId) //
                 .with(changes) //
                 .build();
+    }
+    
+    @Transactional
+    @Override
+    public CommandProcessingResult rejectGLIMApplicationApproval(final Long glimId, final JsonCommand command)
+    {		
+    	
+    	//GroupLoanIndividualMonitoringAccount glimAccount=glimRepository.findOne(loanId);
+    	final Long parentLoanId=glimId;
+    	GroupLoanIndividualMonitoringAccount parentLoan=glimRepository.findOne(parentLoanId);
+    	List<Loan> childLoans=this.loanRepository.findByGlimId(glimId);
+    	
+    	CommandProcessingResult result=null;
+    	int count=0;
+    	for(Loan loan:childLoans)
+    	{
+    		result=rejectApplication(loan.getId(),command);	
+    		
+    		if(result.getLoanId()!=null)
+    		{
+    			count++;
+    		// if all the child loans are Rejected, mark the parent loan as rejected
+    			if(count==parentLoan.getChildAccountsCount())
+    			{
+    				parentLoan.setLoanStatus(LoanStatus.REJECTED.getValue());
+    				glimRepository.save(parentLoan);
+    			}
+    			
+    			
+    		}
+    		
+    		
+    	}
+    	
+    	return result;
     }
 
     @Transactional

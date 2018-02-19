@@ -35,8 +35,7 @@ import org.springframework.stereotype.Component;
 public class SelfSavingsDataValidator {
 
 	private static final Set<String> allowedAssociationParameters = new HashSet<>(
-			Arrays.asList(SavingsApiConstants.transactions,
-					SavingsApiConstants.charges));
+			Arrays.asList(SavingsApiConstants.transactions, SavingsApiConstants.charges));
 
 	public void validateRetrieveSavings(final UriInfo uriInfo) {
 		List<String> unsupportedParams = new ArrayList<>();
@@ -44,8 +43,7 @@ public class SelfSavingsDataValidator {
 		validateTemplate(uriInfo, unsupportedParams);
 
 		Set<String> associationParameters = ApiParameterHelper
-				.extractAssociationsForResponseIfProvided(uriInfo
-						.getQueryParameters());
+				.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
 		if (!associationParameters.isEmpty()) {
 			associationParameters.removeAll(allowedAssociationParameters);
 			if (!associationParameters.isEmpty()) {
@@ -74,10 +72,8 @@ public class SelfSavingsDataValidator {
 		}
 	}
 
-	private void validateTemplate(final UriInfo uriInfo,
-			List<String> unsupportedParams) {
-		final boolean templateRequest = ApiParameterHelper.template(uriInfo
-				.getQueryParameters());
+	private void validateTemplate(final UriInfo uriInfo, List<String> unsupportedParams) {
+		final boolean templateRequest = ApiParameterHelper.template(uriInfo.getQueryParameters());
 		if (templateRequest) {
 			unsupportedParams.add("template");
 		}

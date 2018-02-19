@@ -80,8 +80,12 @@ import org.apache.fineract.portfolio.group.data.GroupRoleData;
 import org.apache.fineract.portfolio.group.service.CenterReadPlatformService;
 import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
 import org.apache.fineract.portfolio.group.service.GroupRolesReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.data.GLIMContainer;
+import org.apache.fineract.portfolio.loanaccount.service.GLIMAccountInfoReadPlatformService;
 import org.apache.fineract.portfolio.meeting.data.MeetingData;
 import org.apache.fineract.portfolio.meeting.service.MeetingReadPlatformService;
+import org.apache.fineract.portfolio.savings.data.GSIMContainer;
+import org.apache.fineract.portfolio.savings.service.GSIMReadPlatformService;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -102,6 +106,8 @@ public class GroupsApiResource {
     private final ToApiJsonSerializer<Object> toApiJsonSerializer;
     private final ToApiJsonSerializer<GroupGeneralData> groupGeneralApiJsonSerializer;
     private final ToApiJsonSerializer<AccountSummaryCollectionData> groupSummaryToApiJsonSerializer;
+    private final ToApiJsonSerializer<GLIMContainer> glimContainerToApiJsonSerializer;
+    private final ToApiJsonSerializer<GSIMContainer> gsimContainerToApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final CollectionSheetReadPlatformService collectionSheetReadPlatformService;
@@ -113,6 +119,8 @@ public class GroupsApiResource {
     private final EntityDatatableChecksReadService entityDatatableChecksReadService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
+    private final GLIMAccountInfoReadPlatformService glimAccountInfoReadPlatformService;
+    private final GSIMReadPlatformService gsimReadPlatformService;
 
 
     @Autowired
@@ -121,6 +129,8 @@ public class GroupsApiResource {
             final ToApiJsonSerializer<Object> toApiJsonSerializer,
             final ToApiJsonSerializer<GroupGeneralData> groupTopOfHierarchyApiJsonSerializer,
             final ToApiJsonSerializer<AccountSummaryCollectionData> groupSummaryToApiJsonSerializer,
+            final ToApiJsonSerializer<GLIMContainer> glimContainerToApiJsonSerializer,
+            final ToApiJsonSerializer<GSIMContainer> gsimContainerToApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final CollectionSheetReadPlatformService collectionSheetReadPlatformService, final FromJsonHelper fromJsonHelper,
@@ -129,15 +139,18 @@ public class GroupsApiResource {
             final CalendarReadPlatformService calendarReadPlatformService, final MeetingReadPlatformService meetingReadPlatformService,
             final EntityDatatableChecksReadService entityDatatableChecksReadService,
             final BulkImportWorkbookService bulkImportWorkbookService,
-            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService) {
-
-        this.context = context;
+            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService,
+            final GLIMAccountInfoReadPlatformService glimAccountInfoReadPlatformService,
+            final GSIMReadPlatformService gsimReadPlatformService) {
+    	this.context = context;
         this.groupReadPlatformService = groupReadPlatformService;
         this.centerReadPlatformService = centerReadPlatformService;
         this.clientReadPlatformService = clientReadPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.groupGeneralApiJsonSerializer = groupTopOfHierarchyApiJsonSerializer;
         this.groupSummaryToApiJsonSerializer = groupSummaryToApiJsonSerializer;
+        this.glimContainerToApiJsonSerializer=glimContainerToApiJsonSerializer;
+        this.gsimContainerToApiJsonSerializer=gsimContainerToApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.collectionSheetReadPlatformService = collectionSheetReadPlatformService;
@@ -149,6 +162,9 @@ public class GroupsApiResource {
         this.entityDatatableChecksReadService = entityDatatableChecksReadService;
         this.bulkImportWorkbookPopulatorService=bulkImportWorkbookPopulatorService;
         this.bulkImportWorkbookService=bulkImportWorkbookService;
+        this.glimAccountInfoReadPlatformService=glimAccountInfoReadPlatformService;
+        this.gsimReadPlatformService=gsimReadPlatformService;
+
     }
 
     @GET
@@ -449,12 +465,13 @@ public class GroupsApiResource {
 
         final AccountSummaryCollectionData groupAccount = this.accountDetailsReadPlatformService.retrieveGroupAccountDetails(groupId);
 
-        final Set<String> GROUP_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("loanAccounts", "savingsAccounts",
+        final Set<String> GROUP_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("loanAccounts", "groupLoanIndividualMonitoringAccounts","savingsAccounts",
                 "memberLoanAccounts", "memberSavingsAccounts"));
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.groupSummaryToApiJsonSerializer.serialize(settings, groupAccount, GROUP_ACCOUNTS_DATA_PARAMETERS);
     }
+
 
     @GET
     @Path("downloadtemplate")
@@ -475,4 +492,66 @@ public class GroupsApiResource {
                 uploadedInputStream,fileDetail,locale,dateFormat);
         return this.toApiJsonSerializer.serialize(importDocumentId);
     }
+    
+    @GET
+    @Path("{groupId}/glimaccounts")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveglimAccounts(@PathParam("groupId") final Long groupId, @QueryParam("parentLoanAccountNo")final String parentLoanAccountNo,  @Context final UriInfo uriInfo)
+    {
+    	
+    		this.context.authenticatedUser().validateHasReadPermission("GROUP");
+    		List<GLIMContainer> glimContainer;
+    		if(parentLoanAccountNo==null)
+    		{
+    			glimContainer=(List)glimAccountInfoReadPlatformService.findGlimAccount(groupId);	
+    		}
+    		else
+    		{
+    			glimContainer=(List)glimAccountInfoReadPlatformService.findGlimAccountbyGroupAndAccount(groupId,parentLoanAccountNo);	
+    		}
+    		
+
+    		
+    		 final Set<String> GLIM_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("groupId", "accountNumber","childGLIMAccounts",
+    	                "memberLoanAccounts", "parentPrincipalAmount"));
+
+    	        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    	        return this.glimContainerToApiJsonSerializer.serialize(settings, glimContainer, GLIM_ACCOUNTS_DATA_PARAMETERS);
+    		
+    	}
+    	
+    	@GET
+        @Path("{groupId}/gsimaccounts")
+        @Consumes({ MediaType.APPLICATION_JSON })
+        @Produces({ MediaType.APPLICATION_JSON })
+        public String retrieveGsimAccounts(@PathParam("groupId") final Long groupId, @QueryParam("parentGSIMAccountNo")final String parentGSIMAccountNo,
+        		 @QueryParam("parentGSIMId")final Long parentGSIMId,@Context final UriInfo uriInfo) 
+    	{
+    		List<GSIMContainer> gsimContainer;
+    	      this.context.authenticatedUser().validateHasReadPermission("GROUP");
+    		
+    		if(parentGSIMAccountNo==null && parentGSIMId!=null)
+    		{
+    			gsimContainer= (List<GSIMContainer>)this.gsimReadPlatformService.findGsimAccountContainerbyGsimAccountId(parentGSIMId);
+    		}
+    		else if(parentGSIMAccountNo !=null && parentGSIMId==null )
+    		{
+    			gsimContainer= (List)this.gsimReadPlatformService.findGsimAccountContainerbyGsimAccountNumber(parentGSIMAccountNo);		
+    		}
+    		else
+    		{
+    			gsimContainer= (List)this.gsimReadPlatformService.findGSIMAccountContainerByGroupId(groupId);	
+    			
+    		}
+    			
+
+    		 final Set<String> GSIM_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("gsimId","groupId", "accountNumber","childGSIMAccounts",
+ 	                "parentBalance", "savingsStatus"));
+
+    	        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    	        return this.gsimContainerToApiJsonSerializer.serialize(settings, gsimContainer, GSIM_ACCOUNTS_DATA_PARAMETERS);
+        		
+        	}
+
 }
