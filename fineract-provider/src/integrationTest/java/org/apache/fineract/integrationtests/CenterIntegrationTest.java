@@ -132,19 +132,19 @@ public class CenterIntegrationTest {
         String newName = "TestCenterUpdateNew" + new Timestamp(new java.util.Date().getTime());
         String newExternalId = Utils.randomStringGenerator("newID_", 7, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
         int newStaffId = StaffHelper.createStaff(requestSpec, responseSpec);
-        int[] associateGroupMembers = generateGroupMembers(2, officeId);
+        int[] groupMembersForLink = generateGroupMembers(2, officeId);
 
-        int[] associateResponse = CenterHelper.associateGroups(resourceId, associateGroupMembers, requestSpec, responseSpec);
+        int[] associateResponse = CenterHelper.associateGroups(resourceId, groupMembersForLink, requestSpec, responseSpec);
         Arrays.sort(associateResponse);
-        Arrays.sort(associateGroupMembers);
-        Assert.assertArrayEquals(associateResponse, associateGroupMembers);
+        Arrays.sort(groupMembersForLink);
+        Assert.assertArrayEquals(associateResponse, groupMembersForLink);
 
         int[] newGroupMembers = new int[5];
         for (int i = 0; i < 5; i++) {
             if (i < 3) {
                 newGroupMembers[i] = groupMembers[i];
             } else {
-                newGroupMembers[i] = associateGroupMembers[i % 3];
+                newGroupMembers[i] = groupMembersForLink[i % 3];
             }
         }
 
@@ -164,6 +164,12 @@ public class CenterIntegrationTest {
         Assert.assertEquals(newExternalId, center.getExternalId());
         Assert.assertEquals((Integer)newStaffId, center.getStaffId());
         Assert.assertArrayEquals(newGroupMembers, center.getGroupMembers());
+        
+        //Reversing group association to test disassociateGroups command
+        int[] disAssociateResponse = CenterHelper.disassociateGroups(resourceId, groupMembersForLink, requestSpec, responseSpec);
+        Arrays.sort(disAssociateResponse);
+        Arrays.sort(groupMembersForLink);
+        Assert.assertArrayEquals(disAssociateResponse, groupMembersForLink);
     }
 
     @Test
