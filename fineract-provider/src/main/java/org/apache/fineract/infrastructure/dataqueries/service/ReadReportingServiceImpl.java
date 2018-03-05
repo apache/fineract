@@ -49,6 +49,7 @@ import org.apache.fineract.infrastructure.dataqueries.exception.ReportNotFoundEx
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.apache.fineract.infrastructure.report.provider.ReportingProcessServiceProvider;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,16 +74,19 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     private final PlatformSecurityContext context;
     private final GenericDataService genericDataService;
     private final ReportingProcessServiceProvider reportingProcessServiceProvider;
+    private final ColumnValidator columnValidator;
 
     @Autowired
     public ReadReportingServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final GenericDataService genericDataService, final ReportingProcessServiceProvider reportingProcessServiceProvider) {
+            final GenericDataService genericDataService, final ReportingProcessServiceProvider reportingProcessServiceProvider,
+            final ColumnValidator columnValidator) {
 
         this.context = context;
         this.dataSource = dataSource;
         this.jdbcTemplate = new JdbcTemplate(this.dataSource);
         this.genericDataService = genericDataService;
         this.reportingProcessServiceProvider = reportingProcessServiceProvider;
+        this.columnValidator = columnValidator;
     }
 
     @Override
@@ -221,7 +225,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     public String getReportType(final String reportName) {
 
         final String sql = "SELECT ifnull(report_type,'') as report_type FROM `stretchy_report` where report_name = '" + reportName + "'";
-
+        this.columnValidator.validateSqlInjection(sql, reportName);
+        
         final String sqlWrapped = this.genericDataService.wrapSQL(sql);
 
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sqlWrapped);
