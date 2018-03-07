@@ -523,7 +523,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
         sb.append(" inner join m_calendar mc  on mc.id = mci.calendar_id and mc.calendar_type_enum = ?");
         sb.append(" inner join m_mandatory_savings_schedule ms on ms.savings_account_id = dat.savings_account_id and ms.duedate > ?");
         sb.append(" where dat.deposit_period is null");
-        sb.append(" group by ms.savings_account_id");
+        sb.append(" group by ms.savings_account_id, rd.mandatory_recommended_deposit_amount, mc.recurrence");
 
         return this.jdbcTemplate.queryForList(sb.toString(), SavingsAccountStatusType.ACTIVE.getValue(),
                 CalendarEntityType.SAVINGS.getValue(), CalendarType.COLLECTION.getValue(),

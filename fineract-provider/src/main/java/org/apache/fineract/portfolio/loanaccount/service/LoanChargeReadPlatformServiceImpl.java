@@ -398,7 +398,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
     private Collection<LoanInstallmentChargeData> retrieveInstallmentLoanChargesForAccrual(Long loanChargeId) {
         final LoanInstallmentChargeAccrualMapper rm = new LoanInstallmentChargeAccrualMapper();
-        String sql = "select " + rm.schema() + " where lic.loan_charge_id= ?  group by lsi.installment";
+        String sql = "select " + rm.schema() + " where lic.loan_charge_id= ?  group by lsi.installment, lsi.duedate, lic.amount_outstanding_derived, lic.amount, lic.is_paid_derived, lic.amount_waived_derived, lic.waived";
         Collection<LoanInstallmentChargeData> chargeDatas = this.jdbcTemplate.query(sql, rm,
                 new Object[] { LoanTransactionType.ACCRUAL.getValue(), loanChargeId });
         final Map<Integer, LoanInstallmentChargeData> installmentChargeDatas = new HashMap<>();
