@@ -18,23 +18,6 @@
  */
 package org.apache.fineract.portfolio.client.api;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Set;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
-
 import io.swagger.annotations.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
@@ -52,14 +35,20 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.client.data.ClientChargeData;
-import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.data.ClientTransactionData;
-import org.apache.fineract.portfolio.client.domain.ClientCharge;
 import org.apache.fineract.portfolio.client.service.ClientChargeReadPlatformService;
 import org.apache.fineract.portfolio.client.service.ClientTransactionReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Set;
 
 @Path("/clients/{clientId}/charges")
 @Component
@@ -94,11 +83,11 @@ public class ClientChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Client Charges", notes = "The list capability of client charges supports pagination." + "Example Requests:\n" + "clients/1/charges\n" + "\nclients/1/charges?offset=0&limit=5" )
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "", response = ClientCharge.class) })
-    public String retrieveAllClientCharges(@PathParam("clientId") final Long clientId,
-            @DefaultValue(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL) @QueryParam(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS) final String chargeStatus,
-            @QueryParam("pendingPayment") final Boolean pendingPayment, @Context final UriInfo uriInfo,
-            @QueryParam("limit") final Integer limit, @QueryParam("offset") final Integer offset) {
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientChargesApiResourceSwagger.GetClientsClientIdChargesResponse.class) })
+    public String retrieveAllClientCharges(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
+            @DefaultValue(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL) @QueryParam(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS) @ApiParam(value = "chargeStatus") final String chargeStatus,
+            @QueryParam("pendingPayment") @ApiParam(value = "pendingPayment") final Boolean pendingPayment, @Context final UriInfo uriInfo,
+            @QueryParam("limit") @ApiParam(value = "limit") final Integer limit, @QueryParam("offset") @ApiParam(value = "offset") final Integer offset) {
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (!(is(chargeStatus, ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL)
@@ -141,8 +130,8 @@ public class ClientChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Client Charge", notes = "Example Requests:\n" + "clients/1/charges/1\n" + "\n" + "\n" + "clients/1/charges/1?fields=name,id" )
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "", response = ClientChargeData.class) })
-    public String retrieveClientCharge(@PathParam("clientId") final Long clientId, @PathParam("chargeId") final Long chargeId,
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = ClientChargesApiResourceSwagger.GetClientsClientIdChargesResponse.GetClientsChargesPageItems.class) })
+    public String retrieveClientCharge(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId, @PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId,
             @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_CHARGES_RESOURCE_NAME);
@@ -170,9 +159,9 @@ public class ClientChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Add Client Charge", notes = " This API associates a Client charge with an implicit Client account\n" + "Mandatory Fields : \n" + "chargeId and dueDate  \n" + "Optional Fields : \n" + "amount" )
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", dataType = "body", dataTypeClass = ClientData.class )})
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "", response = CommandProcessingResult.class) })
-    public String applyClientCharge(@PathParam("clientId") final Long clientId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientChargesApiResourceSwagger.PostClientsClientIdChargesRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = ClientChargesApiResourceSwagger.PostClientsClientIdChargesResponse.class) })
+    public String applyClientCharge(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createClientCharge(clientId).withJson(apiRequestBodyAsJson)
                 .build();
@@ -186,9 +175,11 @@ public class ClientChargesApiResource {
     @Path("{chargeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @ApiOperation(value = "Pay a Client Charge", notes = "Mandatory Fields\n" + "transactionDate and amount " + "" + "\"Pay either a part of or the entire due amount for a charge.(command=paycharge)\n" + "\n" + "Waive a Client Charge\n" + "\n" + "\n" + "This API provides the facility of waiving off the remaining amount on a client charge (command=waive)\n" )
-    public String payOrWaiveClientCharge(@PathParam("clientId") final Long clientId, @PathParam("chargeId") final Long chargeId,
-            @QueryParam("command") final String commandParam, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Pay a Client Charge | Waive a Client Charge", notes = "Pay a Client Charge:\n\n" + "Mandatory Fields:" + "transactionDate and amount " + "" + "\"Pay either a part of or the entire due amount for a charge.(command=paycharge)\n" + "\n" + "Waive a Client Charge:\n" + "\n" + "\n" + "This API provides the facility of waiving off the remaining amount on a client charge (command=waive)\n\n" + "Showing request/response for 'Pay a Client Charge'" )
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientChargesApiResourceSwagger.PostClientsClientIdChargesChargeIdRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientChargesApiResourceSwagger.PostClientsClientIdChargesChargeIdResponse.class)})
+    public String payOrWaiveClientCharge(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId, @PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId,
+            @QueryParam("command") @ApiParam(value = "command") final String commandParam, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         String json = "";
         if (is(commandParam, ClientApiConstants.CLIENT_CHARGE_COMMAND_WAIVE_CHARGE)) {
@@ -224,8 +215,8 @@ public class ClientChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Client Charge", notes = "Deletes a Client Charge on which no transactions have taken place (either payments or waivers). ")
-    @ApiResponses({@ApiResponse(code = 200, message = "", response = CommandProcessingResult.class)})
-    public String deleteClientCharge(@PathParam("clientId") final Long clientId, @PathParam("chargeId") final Long chargeId) {
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientChargesApiResourceSwagger.DeleteClientsClientIdChargesChargeIdResponse.class)})
+    public String deleteClientCharge(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId, @PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteClientCharge(clientId, chargeId).build();
 

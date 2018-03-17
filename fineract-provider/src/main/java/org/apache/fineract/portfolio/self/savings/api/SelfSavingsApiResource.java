@@ -18,17 +18,7 @@
  */
 package org.apache.fineract.portfolio.self.savings.api;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
-
+import io.swagger.annotations.*;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.savings.api.SavingsAccountChargesApiResource;
 import org.apache.fineract.portfolio.savings.api.SavingsAccountTransactionsApiResource;
@@ -41,9 +31,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
+
 @Path("/self/savingsaccounts")
 @Component
 @Scope("singleton")
+@Api(value = "Self Savings Account", description = "")
 public class SelfSavingsApiResource {
 
 	private final PlatformSecurityContext context;
@@ -73,9 +69,11 @@ public class SelfSavingsApiResource {
 	@Path("{accountId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
+	@ApiOperation(value = "Retrieve a savings account", httpMethod = "GET", notes = "Retrieves a savings account\n\n" + "Example Requests :\n" + "\n" + "self/savingsaccounts/1\n" + "\n" + "\n" + "self/savingsaccounts/1?associations=transactions")
+	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfSavingsApiResourceSwagger.GetSelfSavingsAccountsResponse.class)})
 	public String retrieveSavings(
-			@PathParam("accountId") final Long accountId,
-			@DefaultValue("all") @QueryParam("chargeStatus") final String chargeStatus,
+			@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId,
+			@DefaultValue("all") @QueryParam("chargeStatus") @ApiParam(value = "chargeStatus") final String chargeStatus,
 			@Context final UriInfo uriInfo) {
 
 		this.dataValidator.validateRetrieveSavings(uriInfo);
@@ -91,9 +89,11 @@ public class SelfSavingsApiResource {
 	@Path("{accountId}/transactions/{transactionId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
+	@ApiOperation(value = "Retrieve Savings Account Transaction", httpMethod = "GET", notes = "Retrieves Savings Account Transaction\n\n" + "Example Requests:\n" + "\n" + "self/savingsaccounts/1/transactions/1")
+	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfSavingsApiResourceSwagger.GetSelfSavingsAccountsAccountIdTransactionsTransactionIdResponse.class)})
 	public String retrieveSavingsTransaction(
-			@PathParam("accountId") final Long accountId,
-			@PathParam("transactionId") final Long transactionId,
+			@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId,
+			@PathParam("transactionId") @ApiParam(value = "transactionId") final Long transactionId,
 			@Context final UriInfo uriInfo) {
 
 		this.dataValidator.validateRetrieveSavingsTransaction(uriInfo);
@@ -108,9 +108,11 @@ public class SelfSavingsApiResource {
 	@Path("{accountId}/charges")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
+	@ApiOperation(value = "List Savings Charges", httpMethod = "GET", notes = "Lists Savings Charges\n\n" + "Example Requests:\n" + "\n" + "self/savingsaccounts/1/charges\n" + "\n" + "self/savingsaccounts/1/charges?chargeStatus=inactive\n" + "\n" + "self/savingsaccounts/1/charges?fields=name,amountOrPercentage")
+	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfSavingsApiResourceSwagger.GetSelfSavingsAccountsAccountIdChargesResponse.class, responseContainer = "List")})
 	public String retrieveAllSavingsAccountCharges(
-			@PathParam("accountId") final Long accountId,
-			@DefaultValue("all") @QueryParam("chargeStatus") final String chargeStatus,
+			@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId,
+			@DefaultValue("all") @QueryParam("chargeStatus") @ApiParam(value = "chargeStatus") final String chargeStatus,
 			@Context final UriInfo uriInfo) {
 
 		validateAppuserSavingsAccountMapping(accountId);
@@ -124,9 +126,11 @@ public class SelfSavingsApiResource {
 	@Path("{accountId}/charges/{savingsAccountChargeId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
+	@ApiOperation(value = "Retrieve a Savings account Charge", httpMethod = "GET", notes = "Retrieves a Savings account Charge\n\n" + "Example Requests:\n" + "\n" + "self/savingsaccounts/1/charges/5\n" + "\n" + "\n" + "self/savingsaccounts/1/charges/5?fields=name,amountOrPercentage")
+	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfSavingsApiResourceSwagger.GetSelfSavingsAccountsAccountIdChargesSavingsAccountChargeIdResponse.class)})
 	public String retrieveSavingsAccountCharge(
-			@PathParam("accountId") final Long accountId,
-			@PathParam("savingsAccountChargeId") final Long savingsAccountChargeId,
+			@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId,
+			@PathParam("savingsAccountChargeId") @ApiParam(value = "savingsAccountChargeId") final Long savingsAccountChargeId,
 			@Context final UriInfo uriInfo) {
 
 		validateAppuserSavingsAccountMapping(accountId);
