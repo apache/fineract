@@ -34,13 +34,14 @@ Instructions to build war file
 
 Instructions to execute Integration tests
 ============
-1. Login to mysql DB using `mysql -u root -pmysql`
-2. Create the mifosplatform-tenants database using `CREATE DATABASE mifosplatform-tenants`.
-3. Create the default tenant database using `CREATE DATABASE mifostenant-default`.
+1. Login to mysql DB using `mysql -u root -p mysql`
+> Note that if this is the first time to access MySQL DB, then you may need to reset your password. 
+2. Create the mifosplatform-tenants database using `CREATE DATABASE mifosplatform_tenants`.
+3. Create the default tenant database using `CREATE DATABASE mifostenant_default`.
 4. Download gradle-wrapper.jar version 2.10 and place it in the fineract-provider/gradle/wrapper folder. See 'Instructions to download gradle wrapper' above.
 5. Run the following commands:
-	1. `./gradlew migrateTenantListDB -PdbName=mifosplatform-tenants`
-	2. `./gradlew migrateTenantDB -PdbName=mifostenant-default`
+	1. `./gradlew migrateTenantListDB -PdbName=mifosplatform_tenants`
+	2. `./gradlew migrateTenantDB -PdbName=mifostenant_default`
 6. Run `./gradlew clean integrationTest`
 
 Version
