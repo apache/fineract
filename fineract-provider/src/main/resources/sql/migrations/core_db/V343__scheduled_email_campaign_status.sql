@@ -17,4 +17,4 @@
 +-- under the License.
 +--
 +
-+ALTER TABLE `scheduled_email_campaign` ADD `previous_run_status` VARCHAR(10) NULL;
+ALTER TABLE `scheduled_email_campaign` ADD `previous_run_status` VARCHAR(10) NULL;
