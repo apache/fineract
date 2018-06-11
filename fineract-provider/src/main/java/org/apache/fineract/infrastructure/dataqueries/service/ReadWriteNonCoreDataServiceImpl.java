@@ -1187,8 +1187,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             sql = sql + "select * from `" + dataTableName + "` where id = " + id;
         }
 
-        this.columnValidator.validateSqlInjection(sql, order);
-        if (order != null) {
+        if (StringUtils.isNotBlank(order)) {
+            this.columnValidator.validateSqlInjection(sql, order);
             sql = sql + " order by " + order;
         }
 
