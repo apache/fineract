@@ -58,7 +58,7 @@ public class GroupImportHandler implements ImportHandler {
 
     @Autowired
     public GroupImportHandler(final PortfolioCommandSourceWritePlatformService
-            commandsSourceWritePlatformService) {
+                                      commandsSourceWritePlatformService) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
 
@@ -77,11 +77,11 @@ public class GroupImportHandler implements ImportHandler {
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(groupsSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
-                row = groupsSheet.getRow(rowIndex);
-                if(ImportHandlerUtils.isNotImported(row, GroupConstants.STATUS_COL)) {
-                    groups.add(readGroup(row,locale,dateFormat));
-                    meetings.add(readMeeting(row,locale,dateFormat));
-                }
+            row = groupsSheet.getRow(rowIndex);
+            if(ImportHandlerUtils.isNotImported(row, GroupConstants.STATUS_COL)) {
+                groups.add(readGroup(row,locale,dateFormat));
+                meetings.add(readMeeting(row,locale,dateFormat));
+            }
         }
     }
 
@@ -111,7 +111,7 @@ public class GroupImportHandler implements ImportHandler {
         String centerName = ImportHandlerUtils.readAsString(GroupConstants.CENTER_NAME_COL, row);
         Long centerId=null;
         if(centerName!=null)
-        centerId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CENTER_SHEET_NAME), centerName);
+            centerId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CENTER_SHEET_NAME), centerName);
         String externalId = ImportHandlerUtils.readAsString(GroupConstants.EXTERNAL_ID_COL, row);
         Boolean active = ImportHandlerUtils.readAsBoolean(GroupConstants.ACTIVE_COL, row);
         LocalDate submittedOnDate=ImportHandlerUtils.readAsDate(GroupConstants.SUBMITTED_ON_DATE_COL,row);
@@ -136,19 +136,19 @@ public class GroupImportHandler implements ImportHandler {
                 clientMembers.add(clientData);
             }
         }
-            statuses.add(status);
-            return GroupGeneralData.importInstance(groupName, clientMembers, activationDate, submittedOnDate,active, externalId,
-                    officeId, staffId, centerId, row.getRowNum(),locale,dateFormat);
-        }
+        statuses.add(status);
+        return GroupGeneralData.importInstance(groupName, clientMembers, activationDate, submittedOnDate,active, externalId,
+                officeId, staffId, centerId, row.getRowNum(),locale,dateFormat);
+    }
 
-   private boolean containsClientId(List<ClientData> clientMembers,Long clientId){
-       for (ClientData client: clientMembers) {
-           if (client.getId()==clientId){
-               return true;
-           }
-       }
-       return false;
-   }
+    private boolean containsClientId(List<ClientData> clientMembers,Long clientId){
+        for (ClientData client: clientMembers) {
+            if (client.getId()==clientId){
+                return true;
+            }
+        }
+        return false;
+    }
 
     public Count importEntity(String dateFormat) {
         Sheet groupSheet = workbook.getSheet(TemplatePopulateImportConstants.GROUP_SHEET_NAME);

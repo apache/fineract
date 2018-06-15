@@ -54,9 +54,9 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
     @Autowired
     public OfficeReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final CurrencyReadPlatformService currencyReadPlatformService,
-            final RoutingDataSource dataSource,
-            final ColumnValidator columnValidator) {
+                                         final CurrencyReadPlatformService currencyReadPlatformService,
+                                         final RoutingDataSource dataSource,
+                                         final ColumnValidator columnValidator) {
         this.context = context;
         this.currencyReadPlatformService = currencyReadPlatformService;
         this.columnValidator = columnValidator;

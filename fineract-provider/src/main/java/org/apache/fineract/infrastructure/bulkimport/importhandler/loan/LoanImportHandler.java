@@ -58,7 +58,7 @@ public class LoanImportHandler implements ImportHandler {
 
     @Autowired
     public LoanImportHandler(final PortfolioCommandSourceWritePlatformService
-            commandsSourceWritePlatformService) {
+                                     commandsSourceWritePlatformService) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
     @Override
@@ -78,13 +78,13 @@ public class LoanImportHandler implements ImportHandler {
         Integer noOfEntries = ImportHandlerUtils.getNumberOfRows(loanSheet, TemplatePopulateImportConstants.FIRST_COLUMN_INDEX);
         for (int rowIndex = 1; rowIndex <= noOfEntries; rowIndex++) {
             Row row;
-                row = loanSheet.getRow(rowIndex);
-                if ( ImportHandlerUtils.isNotImported(row, LoanConstants.STATUS_COL)) {
-                    loans.add(readLoan(row,locale,dateFormat));
-                    approvalDates.add(readLoanApproval(row,locale,dateFormat));
-                    disbursalDates.add(readDisbursalData(row,locale,dateFormat));
-                    loanRepayments.add(readLoanRepayment(row,locale,dateFormat));
-                }
+            row = loanSheet.getRow(rowIndex);
+            if ( ImportHandlerUtils.isNotImported(row, LoanConstants.STATUS_COL)) {
+                loans.add(readLoan(row,locale,dateFormat));
+                approvalDates.add(readLoanApproval(row,locale,dateFormat));
+                disbursalDates.add(readDisbursalData(row,locale,dateFormat));
+                loanRepayments.add(readLoanRepayment(row,locale,dateFormat));
+            }
         }
 
     }
@@ -106,7 +106,7 @@ public class LoanImportHandler implements ImportHandler {
         LocalDate disbursedDate = ImportHandlerUtils.readAsDate(LoanConstants.DISBURSED_DATE_COL, row);
         String linkAccountId=null;
         if ( ImportHandlerUtils.readAsLong(LoanConstants.LINK_ACCOUNT_ID, row)!=null)
-         linkAccountId =  ImportHandlerUtils.readAsLong(LoanConstants.LINK_ACCOUNT_ID, row).toString();
+            linkAccountId =  ImportHandlerUtils.readAsLong(LoanConstants.LINK_ACCOUNT_ID, row).toString();
 
         if (disbursedDate!=null) {
             return DisbursementData.importInstance(disbursedDate,linkAccountId,row.getRowNum(),locale,dateFormat);
@@ -256,13 +256,13 @@ public class LoanImportHandler implements ImportHandler {
 
         if (charge2!=null) {
             if ( ImportHandlerUtils.readAsDouble(LoanConstants.CHARGE_AMOUNT_2, row)!=null){
-            charges.add(new LoanChargeData( ImportHandlerUtils.readAsLong(LoanConstants.CHARGE_ID_2, row),
-                    ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_2, row),
-                    BigDecimal.valueOf( ImportHandlerUtils.readAsDouble(LoanConstants.CHARGE_AMOUNT_2, row))));
+                charges.add(new LoanChargeData( ImportHandlerUtils.readAsLong(LoanConstants.CHARGE_ID_2, row),
+                        ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_2, row),
+                        BigDecimal.valueOf( ImportHandlerUtils.readAsDouble(LoanConstants.CHARGE_AMOUNT_2, row))));
             }else {
                 charges.add(new LoanChargeData( ImportHandlerUtils.readAsLong(LoanConstants.CHARGE_ID_2, row),
                         ImportHandlerUtils.readAsDate(LoanConstants.CHARGE_DUE_DATE_2, row),
-                       null));
+                        null));
             }
         }
         statuses.add(status);

@@ -203,6 +203,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 if (searchParameters.isSortOrderProvided()) {
                     sqlBuilder.append(' ').append(searchParameters.getSortOrder());
                     this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
+
                 }
             }
 
