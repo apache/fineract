@@ -20,10 +20,17 @@ package org.apache.fineract.scheduledjobs.service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.fineract.accounting.glaccount.domain.TrialBalance;
+import org.apache.fineract.accounting.glaccount.domain.TrialBalanceRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.joda.time.LocalDate;
+import org.joda.time.DateTime;
 
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -43,6 +50,7 @@ import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPla
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountDividendReadPlatformService;
 import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountSchedularService;
+import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -52,6 +60,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service(value = "scheduledJobRunnerService")
 public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService {
@@ -67,6 +76,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     private final DepositAccountWritePlatformService depositAccountWritePlatformService;
     private final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService;
     private final ShareAccountSchedularService shareAccountSchedularService;
+    private final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper;
 
     @Autowired
     public ScheduledJobRunnerServiceImpl(final RoutingDataSourceServiceFactory dataSourceServiceFactory,
@@ -75,7 +85,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             final DepositAccountReadPlatformService depositAccountReadPlatformService,
             final DepositAccountWritePlatformService depositAccountWritePlatformService,
             final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService,
-            final ShareAccountSchedularService shareAccountSchedularService) {
+            final ShareAccountSchedularService shareAccountSchedularService, final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper) {
         this.dataSourceServiceFactory = dataSourceServiceFactory;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
@@ -83,6 +93,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         this.depositAccountWritePlatformService = depositAccountWritePlatformService;
         this.shareAccountDividendReadPlatformService = shareAccountDividendReadPlatformService;
         this.shareAccountSchedularService = shareAccountSchedularService;
+        this.trialBalanceRepositoryWrapper=trialBalanceRepositoryWrapper;
     }
 
     @Transactional
@@ -407,6 +418,69 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         }
 
         if (errorMsg.length() > 0) { throw new JobExecutionException(errorMsg.toString()); }
+    }
+
+    @CronTarget(jobName = JobName.UPDATE_TRAIL_BALANCE_DETAILS)
+    public void updateTrialBalanceDetails() throws JobExecutionException {
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
+        final StringBuilder tbGapSqlBuilder = new StringBuilder(500);
+        tbGapSqlBuilder.append("select distinct(je.transaction_date) ")
+                .append("from acc_gl_journal_entry je ")
+                .append("where je.transaction_date > (select IFNULL(MAX(created_date),'2010-01-01') from m_trial_balance)");
+
+        final List<Date> tbGaps = jdbcTemplate.queryForList(tbGapSqlBuilder.toString(), Date.class);
+
+        for(Date tbGap : tbGaps) {
+            LocalDate convDate = new DateTime(tbGap).toLocalDate();
+            int days = Days.daysBetween(convDate, DateUtils.getLocalDateOfTenant()).getDays();
+            if(days < 1)
+                continue;
+            final String formattedDate = new SimpleDateFormat("yyyy-MM-dd").format(tbGap);
+            final StringBuilder sqlBuilder = new StringBuilder(600);
+            sqlBuilder.append("Insert Into m_trial_balance(office_id, account_id, Amount, entry_date, created_date,closing_balance) ")
+                    .append("Select je.office_id, je.account_id, sum(if(je.type_enum=1, (-1) * je.amount, je.amount)) ")
+                    .append("as Amount, Date(je.entry_date) as 'Entry_Date', je.transaction_date as 'Created_Date',sum(je.amount) as closing_balance ")
+                    .append("from acc_gl_journal_entry je WHERE je.transaction_date = ? ")
+                    .append("group by je.account_id, je.office_id, je.transaction_date, Date(je.entry_date)");
+
+            final int result = jdbcTemplate.update(sqlBuilder.toString(), new Object[] {
+                    formattedDate
+            });
+            logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Results affected by update: " + result);
+        }
+
+        // Updating closing balance
+        String distinctOfficeQuery = "select distinct(office_id) from m_trial_balance where closing_balance is null group by office_id";
+        final List<Long> officeIds = jdbcTemplate.queryForList(distinctOfficeQuery, new Object[] {}, Long.class);
+
+
+        for(Long officeId : officeIds) {
+            String distinctAccountQuery = "select distinct(account_id) from m_trial_balance where office_id=? and closing_balance is null group by account_id";
+            final List<Long> accountIds = jdbcTemplate.queryForList(distinctAccountQuery, new Object[] {officeId}, Long.class);
+            for(Long accountId : accountIds) {
+                final String closingBalanceQuery = "select closing_balance from m_trial_balance where office_id=? and account_id=? and closing_balance " +
+                        "is not null order by created_date desc, entry_date desc limit 1";
+                List<BigDecimal> closingBalanceData = jdbcTemplate.queryForList(closingBalanceQuery, new Object[] {officeId, accountId}, BigDecimal.class);
+                List<TrialBalance> tbRows = this.trialBalanceRepositoryWrapper.findNewByOfficeAndAccount(officeId, accountId);
+                BigDecimal closingBalance = null;
+                if(!CollectionUtils.isEmpty(closingBalanceData))
+                    closingBalance = closingBalanceData.get(0);
+                if(CollectionUtils.isEmpty(closingBalanceData)) {
+                    closingBalance = BigDecimal.ZERO;
+                    for(TrialBalance row : tbRows) {
+                        closingBalance = closingBalance.add(row.getAmount());
+                        row.setClosingBalance(closingBalance);
+                    }
+                } else {
+                    for(TrialBalance tbRow : tbRows) {
+                        closingBalance = closingBalance.add(tbRow.getAmount());
+                        tbRow.setClosingBalance(closingBalance);
+                    }
+                }
+                this.trialBalanceRepositoryWrapper.save(tbRows);
+            }
+        }
+
     }
 
 }
