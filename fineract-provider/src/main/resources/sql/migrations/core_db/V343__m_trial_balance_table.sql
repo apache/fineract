@@ -23,12 +23,13 @@ CREATE TABLE `m_trial_balance` (
 	`entry_date` DATE NOT NULL,
 	`created_date` DATE NULL,
 	`closing_balance` DECIMAL(19,6) NOT NULL
-)
-COLLATE='latin1_swedish_ci'
-ENGINE=InnoDB;
+);
+
 
 INSERT INTO `job` (`name`, `display_name`, `cron_expression`, `create_time`, `task_priority`, `group_name`, `previous_run_start_time`, `next_run_time`, `job_key`, `initializing_errorlog`, `is_active`, `currently_running`, `updates_allowed`, `scheduler_group`, `is_misfired`) VALUES ('Update Trial Balance Details', 'Update Trial Balance Details', '0 1 0 1/1 * ? *', now(), 5, NULL, NULL, NULL, NULL, NULL, 1, 0, 1, 0, 0);
 
 ALTER TABLE acc_gl_journal_entry ADD transaction_date date;
 
-UPDATE `acc_gl_journal_entry` SET transaction_date=DATE(created_date)
+ALTER TABLE acc_gl_journal_entry ADD INDEX transaction_date_index (transaction_date);
+
+UPDATE `acc_gl_journal_entry` SET transaction_date=DATE(created_date);
