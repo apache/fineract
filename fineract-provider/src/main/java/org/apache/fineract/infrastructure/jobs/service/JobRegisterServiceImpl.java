@@ -231,6 +231,8 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
                         if (jobDetail.isActiveSchedular()) {
                             if (jobDetail.getNodeId().toString()==System.getProperty("node.id")) {
                                 executeJob(jobDetail, SchedulerServiceConstants.TRIGGER_TYPE_CRON);
+                            }else{
+                                jobDetail.setIsDirtyJob(true);
                             }
                         }
                         final String schedulerName = getSchedulerName(jobDetail);

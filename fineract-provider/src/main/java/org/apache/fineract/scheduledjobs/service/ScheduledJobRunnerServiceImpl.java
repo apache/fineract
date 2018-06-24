@@ -53,6 +53,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 @Service(value = "scheduledJobRunnerService")
 public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService {
 
@@ -67,6 +68,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     private final DepositAccountWritePlatformService depositAccountWritePlatformService;
     private final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService;
     private final ShareAccountSchedularService shareAccountSchedularService;
+    private final ScheduledJobDetailRepository scheduledJobDetailsRepository;
+    private final JobRegisterService jobRegisterService;
 
     @Autowired
     public ScheduledJobRunnerServiceImpl(final RoutingDataSourceServiceFactory dataSourceServiceFactory,
@@ -75,7 +78,9 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             final DepositAccountReadPlatformService depositAccountReadPlatformService,
             final DepositAccountWritePlatformService depositAccountWritePlatformService,
             final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService,
-            final ShareAccountSchedularService shareAccountSchedularService) {
+            final ShareAccountSchedularService shareAccountSchedularService, 
+			final ScheduledJobDetailRepository scheduledJobDetailsRepository,
+			final JobRegisterService jobRegisterService) {
         this.dataSourceServiceFactory = dataSourceServiceFactory;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
@@ -83,6 +88,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         this.depositAccountWritePlatformService = depositAccountWritePlatformService;
         this.shareAccountDividendReadPlatformService = shareAccountDividendReadPlatformService;
         this.shareAccountSchedularService = shareAccountSchedularService;
+        this.scheduledJobDetailsRepository=scheduledJobDetailsRepository;
+		this.jobRegisterService=jobRegisterService;
     }
 
     @Transactional
@@ -407,6 +414,18 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         }
 
         if (errorMsg.length() > 0) { throw new JobExecutionException(errorMsg.toString()); }
+    }
+
+    
+    //get all dirty jobs
+    // execute each job.
+    @Override
+    @CronTarget(jobName = JobName.EXECUTE_DIRTY_JOBS)
+    public void executeDirtyJobs() throws JobExecutionException {
+        List<ScheduledJobDetail> jobDetails=this.scheduledJobDetailsRepository.findAllDirtyJobs(true);
+        for (ScheduledJobDetail scheduledJobDetail:jobDetails){
+            jobRegisterService.executeJob(scheduledJobDetail.getId());
+        }
     }
 
 }

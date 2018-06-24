@@ -26,6 +26,8 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface ScheduledJobDetailRepository extends JpaRepository<ScheduledJobDetail, Long>, JpaSpecificationExecutor<ScheduledJobDetail> {
 
     @Query("select jobDetail from ScheduledJobDetail jobDetail where jobDetail.jobKey = :jobKey")
@@ -37,5 +39,8 @@ public interface ScheduledJobDetailRepository extends JpaRepository<ScheduledJob
     @Lock(value = LockModeType.PESSIMISTIC_WRITE)
     @Query("select jobDetail from ScheduledJobDetail jobDetail where jobDetail.jobKey = :jobKey")
     ScheduledJobDetail findByJobKeyWithLock(@Param("jobKey") String jobKey);
+
+    @Query("select jobDetail from ScheduledJobDetail jobDetail where jobDetail.isDirtyJob = :isDirtyJob")
+    List<ScheduledJobDetail> findAllDirtyJobs(@Param("isDirtyJob") boolean isDirtyJob);
 
 }

@@ -88,6 +88,9 @@ public class ScheduledJobDetail extends AbstractPersistableCustom<Long> {
     @Column(name = "node_id")
     private Integer nodeId;
 
+    @Column(name="is_dirty_job")
+    private boolean isDirtyJob;
+
     protected ScheduledJobDetail() {
 
     }
@@ -117,6 +120,10 @@ public class ScheduledJobDetail extends AbstractPersistableCustom<Long> {
     }
 
     public Integer getNodeId(){return this.nodeId;}
+
+    public boolean isDirtyJob(){return  this.isDirtyJob;}
+
+    public void setIsDirtyJob(final boolean isDirtyJob){ this.isDirtyJob=isDirtyJob;}
 
     public boolean isActiveSchedular() {
         return this.activeSchedular;
