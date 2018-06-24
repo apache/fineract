@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.infrastructure.jobs.service;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,6 +31,7 @@ import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformInternalServerException;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -117,6 +122,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             ThreadLocalContextUtil.setTenant(tenant);
             final List<ScheduledJobDetail> scheduledJobDetails = this.schedularWritePlatformService.retrieveAllJobs();
             for (final ScheduledJobDetail jobDetails : scheduledJobDetails) {
+                readAndSetSchedulerNode();
                 scheduleJob(jobDetails);
                 jobDetails.updateTriggerMisfired(false);
                 this.schedularWritePlatformService.saveOrUpdate(jobDetails);
@@ -126,6 +132,30 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
                 schedulerDetail.updateSuspendedState(false);
                 this.schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
             }
+        }
+    }
+
+    private void readAndSetSchedulerNode() {
+        Properties prop = new Properties();
+        String homeDirectory = System.getProperty("user.home");
+        FileInputStream fis = null;
+        String nodeKey = "node.id";
+        String defaultValue = "1";
+        try {
+            File file = new File(homeDirectory + "/fineract.properties");
+            fis = new FileInputStream(file);
+            prop.load(fis);
+            String nodeValue = prop.getProperty(nodeKey);
+            if (!StringUtils.isBlank(nodeValue)) {
+                System.setProperty(nodeKey, nodeValue);
+            } else {
+                System.setProperty(nodeKey, defaultValue);
+            }
+            fis.close();
+        } catch (FileNotFoundException e) {
+            System.setProperty(nodeKey, defaultValue);
+        } catch (IOException e) {
+            System.setProperty(nodeKey, defaultValue);
         }
     }
 
@@ -199,7 +229,9 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
                 for (final ScheduledJobDetail jobDetail : scheduledJobDetails) {
                     if (jobDetail.isTriggerMisfired()) {
                         if (jobDetail.isActiveSchedular()) {
-                            executeJob(jobDetail, SchedulerServiceConstants.TRIGGER_TYPE_CRON);
+                            if (jobDetail.getNodeId().toString()==System.getProperty("node.id")) {
+                                executeJob(jobDetail, SchedulerServiceConstants.TRIGGER_TYPE_CRON);
+                            }
                         }
                         final String schedulerName = getSchedulerName(jobDetail);
                         final Scheduler scheduler = this.schedulers.get(schedulerName);

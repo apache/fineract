@@ -85,6 +85,9 @@ public class ScheduledJobDetail extends AbstractPersistableCustom<Long> {
     @Column(name = "is_misfired")
     private boolean triggerMisfired;
 
+    @Column(name = "node_id")
+    private Integer nodeId;
+
     protected ScheduledJobDetail() {
 
     }
@@ -112,6 +115,8 @@ public class ScheduledJobDetail extends AbstractPersistableCustom<Long> {
     public Short getSchedulerGroup() {
         return this.schedulerGroup;
     }
+
+    public Integer getNodeId(){return this.nodeId;}
 
     public boolean isActiveSchedular() {
         return this.activeSchedular;
