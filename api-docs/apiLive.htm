@@ -3667,10 +3667,26 @@
 							</tr>
 							<tr>
 								<td><a href="#selfsavings">Savings</a></td>
+								<td>self/savingsaccounts/template?clientId={clientId}&productId={productId}</td>
+								<td></td>
+								<td><a href="#selfsavings_template">Retrieve Savings Application Template</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/savingsaccounts</td>
+								<td><a href="#selfsavingssubmission">Submit new Savings Application</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
 								<td>self/savingsaccounts/{accountId}</td>
 								<td></td>
 								<td><a href="#selfsavings">Retrieve a Savings Account</a></td>
-								<td></td>
+								<td><a href="#selfsavings_update">Update Savings Account</a></td>
 								<td></td>
 							</tr>
 							<tr>
@@ -46695,6 +46711,100 @@ GET https://DomainName/api/v1/self/loans/{loanId}/charges/{chargeId}
 				</div>
 			</div>
 
+			
+	<a id="selfsavingssubmission" name="selfsavingssubmission" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Submit new savings application</h2>
+	        <br/>
+	        <table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields</div></td></tr>
+	            <tr class=alt><td>clientId, productId, submittedOnDate</td></tr>
+	        </table>
+	        <br/>
+	        <table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Optional Fields</div></td></tr>
+	            <tr class=alt><td>accountNo, externalId, fieldOfficerId</td></tr>
+	        </table>
+	        <br/>
+	        <table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Inherited from Product (if not provided)</div></td></tr>
+	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, allowOverdraft, overdraftLimit, withHoldTax</td>
+	       		</tr>
+	        </table>
+            <br/>
+	    </div>
+	    <div class="method-example">
+	    	<p>Minimal request: accountNo auto generated, remaining details inherited from savings product.</p>
+	        <code class="method-declaration">POST https://Domain Name/api/v1/self/savingsaccounts</code>
+	        <code class="method-request">POST self/savingsaccount
+Content-Type: application/json
+Request Body:
+{  
+	"productId":3,
+	"clientId":"14",
+	"locale":"en",
+	"dateFormat":"dd MMMM yyyy",
+	"submittedOnDate":"09 July 2018"
+}
+			</code>
+			 <code class="method-response">
+{  
+	"officeId":1,
+	"clientId":14,
+	"savingsId":10,
+	"resourceId":10
+}
+	        </code>
+			
+			<p>Full request:Below details override details from savings product (except currency).</p>
+			<code class="method-request">POST self/savingsaccount
+Content-Type: application/json
+Request Body:
+{  
+	"productId":1,
+	"nominalAnnualInterestRate":9.5,
+	"minRequiredOpeningBalance":1000,
+	"lockinPeriodFrequency":1,
+	"withdrawalFeeForTransfers":true,
+	"allowOverdraft":true,
+	"overdraftLimit":"10000",
+	"nominalAnnualInterestRateOverdraft":"5",
+	"minOverdraftForInterestCalculation":"1000",
+	"enforceMinRequiredBalance":false,
+	"withHoldTax":false,
+	"interestCompoundingPeriodType":1,
+	"interestPostingPeriodType":4,
+	"interestCalculationType":1,
+	"interestCalculationDaysInYearType":365,
+	"lockinPeriodFrequencyType":1,
+	"fieldOfficerId":1,
+	"externalId":"126",
+	"submittedOnDate":"11 July 2018",
+	"locale":"en",
+	"dateFormat":"dd MMMM yyyy",
+	"monthDayFormat":"dd MMM",
+	"charges":[  
+		{  
+		"chargeId":3,
+		"amount":2
+		}
+	],
+	"clientId":"14"
+}
+			</code>
+	        <code class="method-response">
+{  
+	"officeId":1,
+	"clientId":14,
+	"savingsId":9,
+	"resourceId":9
+}
+	        </code>
+	    </div>
+	</div>
+
+	
 	<a id="selfsavings" name="selfsavings" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
@@ -46783,6 +46893,364 @@ GET https://DomainName/api/v1/self/loans/{loanId}/charges/{chargeId}
   }
 }
 	        </code>
+	    </div>
+	</div>
+	
+	<a id="selfsavings_update" name="selfsavings_update" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Modify a savings application</h2>
+	        <p>Savings application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">PUT https://Domain Name/api/v1/self/savingsaccounts/{accountsId}</code>
+	        <code class="method-request">PUT self/savingsaccounts/1
+Content-Type: application/json
+No Request Body:
+{
+	"productId":1,
+	"clientId":14
+}
+	        </code>
+	        <code class="method-response">
+{
+    "officeId": 1,
+    "clientId": 14,
+    "savingsId": 11,
+    "resourceId": 11,
+    "changes": {
+        "productId": 1
+    }
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="selfsavings_template" name="selfsavings_template" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve Savings Account Template:</h2>
+	        <h4>Arguments</h4>
+	        <dl class="argument-list">
+	            <dt>clientId</dt>
+	            <dd>Integer <span>mandatory</span></dd>
+	            <dt>productId</dt>
+	            <dd>Integer <span>optional</span></dd>
+	            <dd>If entered, productId, productName and selectedProduct fields are returned.</dd>
+	        </dl>
+	        <p>Example Requests: </p>
+	        <div class=apiClick>self/savingsaccounts/template?clientId=14</div>
+	        <br><br>
+	        <div class=apiClick>self/savingsaccounts/template?clientId=14&productId=2</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/self/savingsaccounts/template?clientId={clientId}</code>
+			<code class="method-response">
+{
+    "clientId": 14,
+    "clientName": "Bheem",
+    "withdrawalFeeForTransfers": false,
+    "allowOverdraft": false,
+    "enforceMinRequiredBalance": false,
+    "withHoldTax": false,
+    "isDormancyTrackingActive": false,
+    "productOptions": [
+        {
+            "id": 1,
+            "name": "Voluntary savings",
+            "withdrawalFeeForTransfers": false,
+            "allowOverdraft": false,
+            "enforceMinRequiredBalance": false,
+            "withHoldTax": false
+        },
+        {
+            "id": 2,
+            "name": "Savings",
+            "withdrawalFeeForTransfers": false,
+            "allowOverdraft": false,
+            "enforceMinRequiredBalance": false,
+            "withHoldTax": false
+        },
+        {
+            "id": 3,
+            "name": "Savings Product",
+            "withdrawalFeeForTransfers": false,
+            "allowOverdraft": false,
+            "enforceMinRequiredBalance": false,
+            "withHoldTax": false
+        }
+    ],
+    "chargeOptions": [
+        {
+            "id": 3,
+            "name": "Saving Accounts Processing Fee",
+            "active": true,
+            "penalty": false,
+            "currency": {
+                "code": "USD",
+                "name": "US Dollar",
+                "decimalPlaces": 2,
+                "displaySymbol": "$",
+                "nameCode": "currency.USD",
+                "displayLabel": "US Dollar ($)"
+            },
+            "amount": 2,
+            "chargeTimeType": {
+                "id": 3,
+                "code": "chargeTimeType.savingsActivation",
+                "value": "Savings Activation"
+            },
+            "chargeAppliesTo": {
+                "id": 2,
+                "code": "chargeAppliesTo.savings",
+                "value": "Savings"
+            },
+            "chargeCalculationType": {
+                "id": 1,
+                "code": "chargeCalculationType.flat",
+                "value": "Flat"
+            },
+            "chargePaymentMode": {
+                "id": 0,
+                "code": "chargepaymentmode.regular",
+                "value": "Regular"
+            }
+        }
+    ]
+}
+			</code>
+	    </div>
+
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/self/savingsaccounts/template?clientId={clientId}&productId={productId}</code>
+			<code class="method-response">
+{
+    "clientId": 14,
+    "clientName": "Bheem",
+    "savingsProductId": 2,
+    "savingsProductName": "Savings",
+    "timeline": {},
+    "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "inMultiplesOf": 1,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+    },
+    "nominalAnnualInterestRate": 5,
+    "interestCompoundingPeriodType": {
+        "id": 1,
+        "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+        "value": "Daily"
+    },
+    "interestPostingPeriodType": {
+        "id": 4,
+        "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+        "value": "Monthly"
+    },
+    "interestCalculationType": {
+        "id": 1,
+        "code": "savingsInterestCalculationType.dailybalance",
+        "value": "Daily Balance"
+    },
+    "interestCalculationDaysInYearType": {
+        "id": 365,
+        "code": "savingsInterestCalculationDaysInYearType.days365",
+        "value": "365 Days"
+    },
+    "minRequiredOpeningBalance": 1000,
+    "withdrawalFeeForTransfers": false,
+    "allowOverdraft": false,
+    "enforceMinRequiredBalance": false,
+    "withHoldTax": false,
+    "isDormancyTrackingActive": false,
+    "charges": [],
+    "productOptions": [
+        {
+            "id": 1,
+            "name": "Voluntary savings",
+            "withdrawalFeeForTransfers": false,
+            "allowOverdraft": false,
+            "enforceMinRequiredBalance": false,
+            "withHoldTax": false
+        },
+        {
+            "id": 2,
+            "name": "Savings",
+            "withdrawalFeeForTransfers": false,
+            "allowOverdraft": false,
+            "enforceMinRequiredBalance": false,
+            "withHoldTax": false
+        },
+        {
+            "id": 3,
+            "name": "Savings Product",
+            "withdrawalFeeForTransfers": false,
+            "allowOverdraft": false,
+            "enforceMinRequiredBalance": false,
+            "withHoldTax": false
+        }
+    ],
+    "fieldOfficerOptions": [
+        {
+            "id": 1,
+            "firstname": "Aliya",
+            "lastname": "A",
+            "displayName": "A, Aliya",
+            "officeId": 1,
+            "officeName": "Head Office",
+            "isLoanOfficer": true,
+            "isActive": true
+        }
+    ],
+    "interestCompoundingPeriodTypeOptions": [
+        {
+            "id": 1,
+            "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+            "value": "Daily"
+        },
+        {
+            "id": 4,
+            "code": "savings.interest.period.savingsCompoundingInterestPeriodType.monthly",
+            "value": "Monthly"
+        },
+        {
+            "id": 5,
+            "code": "savings.interest.period.savingsCompoundingInterestPeriodType.quarterly",
+            "value": "Quarterly"
+        },
+        {
+            "id": 6,
+            "code": "savings.interest.period.savingsCompoundingInterestPeriodType.biannual",
+            "value": "Semi-Annual"
+        },
+        {
+            "id": 7,
+            "code": "savings.interest.period.savingsCompoundingInterestPeriodType.annual",
+            "value": "Annually"
+        }
+    ],
+    "interestPostingPeriodTypeOptions": [
+        {
+            "id": 4,
+            "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+            "value": "Monthly"
+        },
+        {
+            "id": 5,
+            "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.quarterly",
+            "value": "Quarterly"
+        },
+        {
+            "id": 6,
+            "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.biannual",
+            "value": "BiAnnual"
+        },
+        {
+            "id": 7,
+            "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.annual",
+            "value": "Annually"
+        }
+    ],
+    "interestCalculationTypeOptions": [
+        {
+            "id": 1,
+            "code": "savingsInterestCalculationType.dailybalance",
+            "value": "Daily Balance"
+        },
+        {
+            "id": 2,
+            "code": "savingsInterestCalculationType.averagedailybalance",
+            "value": "Average Daily Balance"
+        }
+    ],
+    "interestCalculationDaysInYearTypeOptions": [
+        {
+            "id": 360,
+            "code": "savingsInterestCalculationDaysInYearType.days360",
+            "value": "360 Days"
+        },
+        {
+            "id": 365,
+            "code": "savingsInterestCalculationDaysInYearType.days365",
+            "value": "365 Days"
+        }
+    ],
+    "lockinPeriodFrequencyTypeOptions": [
+        {
+            "id": 0,
+            "code": "savings.lockin.savingsPeriodFrequencyType.days",
+            "value": "Days"
+        },
+        {
+            "id": 1,
+            "code": "savings.lockin.savingsPeriodFrequencyType.weeks",
+            "value": "Weeks"
+        },
+        {
+            "id": 2,
+            "code": "savings.lockin.savingsPeriodFrequencyType.months",
+            "value": "Months"
+        },
+        {
+            "id": 3,
+            "code": "savings.lockin.savingsPeriodFrequencyType.years",
+            "value": "Years"
+        }
+    ],
+    "withdrawalFeeTypeOptions": [
+        {
+            "id": 1,
+            "code": "savingsWithdrawalFeesType.flat",
+            "value": "Flat"
+        },
+        {
+            "id": 2,
+            "code": "savingsWithdrawalFeesType.percent.of.amount",
+            "value": "% of Amount"
+        }
+    ],
+    "chargeOptions": [
+        {
+            "id": 3,
+            "name": "Saving Accounts Processing Fee",
+            "active": true,
+            "penalty": false,
+            "currency": {
+                "code": "USD",
+                "name": "US Dollar",
+                "decimalPlaces": 2,
+                "displaySymbol": "$",
+                "nameCode": "currency.USD",
+                "displayLabel": "US Dollar ($)"
+            },
+            "amount": 2,
+            "chargeTimeType": {
+                "id": 3,
+                "code": "chargeTimeType.savingsActivation",
+                "value": "Savings Activation"
+            },
+            "chargeAppliesTo": {
+                "id": 2,
+                "code": "chargeAppliesTo.savings",
+                "value": "Savings"
+            },
+            "chargeCalculationType": {
+                "id": 1,
+                "code": "chargeCalculationType.flat",
+                "value": "Flat"
+            },
+            "chargePaymentMode": {
+                "id": 0,
+                "code": "chargepaymentmode.regular",
+                "value": "Regular"
+            }
+        }
+    ]
+}
+			</code>
 	    </div>
 	</div>
 
