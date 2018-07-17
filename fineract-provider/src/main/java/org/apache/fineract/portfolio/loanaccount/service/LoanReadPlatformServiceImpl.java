@@ -1651,29 +1651,34 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     private static final class LoanSchedulePeriodicAccrualMapper implements RowMapper<LoanScheduleAccrualData> {
-
-        public String schema() {
-            final StringBuilder sqlBuilder = new StringBuilder(400);
-            sqlBuilder
-                    .append("loan.id as loanId ,if(loan.client_id is null,mg.office_id,mc.office_id) as officeId,")
-                    .append("loan.accrued_till as accruedTill, loan.repayment_period_frequency_enum as frequencyEnum, ")
-                    .append("loan.interest_calculated_from_date as interestCalculatedFrom, ")
-                    .append("loan.repay_every as repayEvery,")
-                    .append("ls.installment as installmentNumber, ")
-                    .append("ls.duedate as duedate,ls.fromdate as fromdate ,ls.id as scheduleId,loan.product_id as productId,")
-                    .append("ls.interest_amount as interest, ls.interest_waived_derived as interestWaived,")
-                    .append("ls.penalty_charges_amount as penalty, ")
-                    .append("ls.fee_charges_amount as charges, ")
-                    .append("ls.accrual_interest_derived as accinterest,ls.accrual_fee_charges_derived as accfeecharege,ls.accrual_penalty_charges_derived as accpenalty,")
-                    .append(" loan.currency_code as currencyCode,loan.currency_digits as currencyDigits,loan.currency_multiplesof as inMultiplesOf,")
-                    .append("curr.display_symbol as currencyDisplaySymbol,curr.name as currencyName,curr.internationalized_name_code as currencyNameCode")
-                    .append(" from m_loan_repayment_schedule ls ").append(" left join m_loan loan on loan.id=ls.loan_id ")
-                    .append(" left join m_product_loan mpl on mpl.id = loan.product_id")
-                    .append(" left join m_client mc on mc.id = loan.client_id ").append(" left join m_group mg on mg.id = loan.group_id")
-                    .append(" left join m_currency curr on curr.code = loan.currency_code")
-                    .append(" left join m_loan_recalculation_details as recaldet on loan.id = recaldet.loan_id ");
-            return sqlBuilder.toString();
-        }
+        
+            public String schema() {
+                final StringBuilder sqlBuilder = new StringBuilder(400);
+                sqlBuilder
+                        .append("loan.id as loanId , mc.office_id as officeId, loan.loan_status_id as loanStatusId, ")
+                        .append("loan.accrued_till as accruedTill, loan.repayment_period_frequency_enum as frequencyEnum, ")
+                        .append("loan.interest_calculated_from_date as interestCalculatedFrom, ")
+                        .append("loan.repay_every as repayEvery,loan.is_npa as npa,")
+                        .append("ls.installment as installmentNumber, ")
+                        .append("ls.duedate as duedate,ls.fromdate as fromdate ,ls.id as scheduleId,loan.product_id as productId,")
+                        .append("ls.interest_amount as interest, ls.interest_waived_derived as interestWaived,")
+                        .append("ls.penalty_charges_amount as penalty, ")
+                        .append("ls.fee_charges_amount as charges, ")
+                        .append("ls.accrual_interest_derived as accinterest,ls.accrual_fee_charges_derived as accfeecharege,ls.accrual_penalty_charges_derived as accpenalty,")
+                        .append("loan.currency_code as currencyCode,loan.currency_digits as currencyDigits,loan.currency_multiplesof as inMultiplesOf,")
+                        .append("curr.display_symbol as currencyDisplaySymbol,curr.name as currencyName,curr.internationalized_name_code as currencyNameCode ")
+                        .append("from m_loan_repayment_schedule ls INNER JOIN (SELECT l.id, l.client_id, l.product_id, l.accrued_till, l.repayment_period_frequency_enum,")
+                        .append("l.interest_calculated_from_date, l.repay_every, l.is_npa, l.currency_code, l.currency_digits, l.currency_multiplesof, l.loan_status_id ")
+                        .append("from m_loan l inner join m_client mc on mc.id = l.client_id inner join m_office o on mc.office_id = o.id  where ")
+                        .append("l.loan_status_id= ? and l.is_npa=0 and l.maturedon_date >= CURDATE() and l.accrued_till <=? and o.hierarchy like ? ")
+                        .append("and l.id >= ? limit ? ")
+                        .append(") loan on loan.id=ls.loan_id ")
+                        .append("inner join m_product_loan mpl on mpl.id = loan.product_id ")
+                        .append("inner join m_client mc on mc.id = loan.client_id ")
+                        .append("inner join m_currency curr on curr.code = loan.currency_code ")
+                        .append("inner join m_office o on mc.office_id = o.id ");
+                return sqlBuilder.toString();
+            }
 
         @Override
         public LoanScheduleAccrualData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
@@ -2198,6 +2203,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
     }
 
+    
 	@Override
 	public Long retrieveLoanIdByAccountNumber(String loanAccountNumber) {
 		try {
@@ -2208,5 +2214,26 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			return null;
 		}
 	}
+
+
+    @Override
+    public List<LoanScheduleAccrualData> retrivePeriodicAccrualData(LocalDate tillDate, int offsetCounter,
+                                                                    int maxPageSize, long maxLoanIdInList,
+                                                                    String officeHierarchy) {
+        LoanSchedulePeriodicAccrualMapper mapper = new LoanSchedulePeriodicAccrualMapper();
+        final StringBuilder sqlBuilder = new StringBuilder(400);
+        sqlBuilder.append("select SQL_CALC_FOUND_ROWS OUTPUT.* from (");
+        sqlBuilder
+                .append("select  ")
+                .append(mapper.schema())
+                .append(" where loan.accrued_till < ls.duedate and mpl.accounting_type=? ")
+                .append(" and ls.completed_derived = 0 and ls.fromdate < ? ")
+                .append(" order by loan.id, ls.duedate");
+        sqlBuilder.append(" ) OUTPUT");
+        return this.jdbcTemplate.query(sqlBuilder.toString(), mapper, new Object[] { LoanStatus.ACTIVE.getValue(), formatter.print(tillDate),
+                officeHierarchy,maxLoanIdInList, maxPageSize, AccountingRuleType.ACCRUAL_PERIODIC.getValue(),formatter.print(tillDate)});
+    }
+
+
 
 }
