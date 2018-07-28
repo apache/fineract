@@ -233,6 +233,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
        
     }
 
+
+
     @Override
     public LoanScheduleData retrieveRepaymentSchedule(final Long loanId,
             final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData, Collection<DisbursementData> disbursementData,
@@ -2208,5 +2210,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			return null;
 		}
 	}
+    
+    @Override
+    public Integer retrieveNumberOfActiveLoans() {
+        final String sql="select count(*) from m_loan";
+        return this.jdbcTemplate.queryForObject(sql,Integer.class);
+    }
+    
 
 }

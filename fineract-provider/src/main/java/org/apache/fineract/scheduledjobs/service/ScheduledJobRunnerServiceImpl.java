@@ -26,6 +26,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import java.util.*;
+import java.util.concurrent.*;
+
 import org.apache.fineract.accounting.glaccount.domain.TrialBalance;
 import org.apache.fineract.accounting.glaccount.domain.TrialBalanceRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
@@ -40,6 +43,11 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.organisation.office.domain.OfficeRepository;
+import org.apache.fineract.portfolio.loanaccount.service.LoanApplicationWriteService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.UpdateLoanSummaryPoster;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositAccountUtils;
 import org.apache.fineract.portfolio.savings.data.DepositAccountData;
@@ -57,6 +65,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,6 +86,11 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     private final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService;
     private final ShareAccountSchedularService shareAccountSchedularService;
     private final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper;
+    private final LoanReadPlatformService loanReadPlatformService;
+    private final ApplicationContext applicationContext;
+    private final LoanApplicationWriteService loanApplicationWriteService;
+    private final OfficeRepository officeRepository;
+
 
     @Autowired
     public ScheduledJobRunnerServiceImpl(final RoutingDataSourceServiceFactory dataSourceServiceFactory,
@@ -85,7 +99,12 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             final DepositAccountReadPlatformService depositAccountReadPlatformService,
             final DepositAccountWritePlatformService depositAccountWritePlatformService,
             final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService,
-            final ShareAccountSchedularService shareAccountSchedularService, final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper) {
+            final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper,
+            final ShareAccountSchedularService shareAccountSchedularService,
+            final LoanReadPlatformService loanReadPlatformService,
+            final ApplicationContext applicationContext,
+            final LoanApplicationWriteService loanApplicationWriteService,
+            final OfficeRepository officeRepository) {
         this.dataSourceServiceFactory = dataSourceServiceFactory;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
@@ -94,6 +113,10 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         this.shareAccountDividendReadPlatformService = shareAccountDividendReadPlatformService;
         this.shareAccountSchedularService = shareAccountSchedularService;
         this.trialBalanceRepositoryWrapper=trialBalanceRepositoryWrapper;
+        this.loanReadPlatformService=loanReadPlatformService;
+        this.applicationContext=applicationContext;
+        this.loanApplicationWriteService=loanApplicationWriteService;
+        this.officeRepository=officeRepository;
     }
 
     @Transactional
@@ -430,10 +453,10 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         final List<Date> tbGaps = jdbcTemplate.queryForList(tbGapSqlBuilder.toString(), Date.class);
 
-        for(Date tbGap : tbGaps) {
+        for (Date tbGap : tbGaps) {
             LocalDate convDate = new DateTime(tbGap).toLocalDate();
             int days = Days.daysBetween(convDate, DateUtils.getLocalDateOfTenant()).getDays();
-            if(days < 1)
+            if (days < 1)
                 continue;
             final String formattedDate = new SimpleDateFormat("yyyy-MM-dd").format(tbGap);
             final StringBuilder sqlBuilder = new StringBuilder(600);
@@ -443,42 +466,105 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                     .append("from acc_gl_journal_entry je WHERE je.transaction_date = ? ")
                     .append("group by je.account_id, je.office_id, je.transaction_date, Date(je.entry_date)");
 
-            final int result = jdbcTemplate.update(sqlBuilder.toString(), new Object[] {
+            final int result = jdbcTemplate.update(sqlBuilder.toString(), new Object[]{
                     formattedDate
             });
             logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Results affected by update: " + result);
         }
 
         // Updating closing balance
-        String distinctOfficeQuery = "select distinct(office_id) from m_trial_balance where closing_balance is null group by office_id";
-        final List<Long> officeIds = jdbcTemplate.queryForList(distinctOfficeQuery, new Object[] {}, Long.class);
+        String distinctOfficeQuery = "SELECT DISTINCT(office_id) FROM m_trial_balance WHERE closing_balance IS NULL GROUP BY office_id";
+        final List<Long> officeIds = jdbcTemplate.queryForList(distinctOfficeQuery, new Object[]{}, Long.class);
 
 
-        for(Long officeId : officeIds) {
-            String distinctAccountQuery = "select distinct(account_id) from m_trial_balance where office_id=? and closing_balance is null group by account_id";
-            final List<Long> accountIds = jdbcTemplate.queryForList(distinctAccountQuery, new Object[] {officeId}, Long.class);
-            for(Long accountId : accountIds) {
-                final String closingBalanceQuery = "select closing_balance from m_trial_balance where office_id=? and account_id=? and closing_balance " +
-                        "is not null order by created_date desc, entry_date desc limit 1";
-                List<BigDecimal> closingBalanceData = jdbcTemplate.queryForList(closingBalanceQuery, new Object[] {officeId, accountId}, BigDecimal.class);
+        for (Long officeId : officeIds) {
+            String distinctAccountQuery = "SELECT DISTINCT(account_id) FROM m_trial_balance WHERE office_id=? AND closing_balance IS NULL GROUP BY account_id";
+            final List<Long> accountIds = jdbcTemplate.queryForList(distinctAccountQuery, new Object[]{officeId}, Long.class);
+            for (Long accountId : accountIds) {
+                final String closingBalanceQuery = "SELECT closing_balance FROM m_trial_balance WHERE office_id=? AND account_id=? AND closing_balance " +
+                        "IS NOT NULL ORDER BY created_date DESC, entry_date DESC LIMIT 1";
+                List<BigDecimal> closingBalanceData = jdbcTemplate.queryForList(closingBalanceQuery, new Object[]{officeId, accountId}, BigDecimal.class);
                 List<TrialBalance> tbRows = this.trialBalanceRepositoryWrapper.findNewByOfficeAndAccount(officeId, accountId);
                 BigDecimal closingBalance = null;
-                if(!CollectionUtils.isEmpty(closingBalanceData))
+                if (!CollectionUtils.isEmpty(closingBalanceData))
                     closingBalance = closingBalanceData.get(0);
-                if(CollectionUtils.isEmpty(closingBalanceData)) {
+                if (CollectionUtils.isEmpty(closingBalanceData)) {
                     closingBalance = BigDecimal.ZERO;
-                    for(TrialBalance row : tbRows) {
+                    for (TrialBalance row : tbRows) {
                         closingBalance = closingBalance.add(row.getAmount());
                         row.setClosingBalance(closingBalance);
                     }
                 } else {
-                    for(TrialBalance tbRow : tbRows) {
+                    for (TrialBalance tbRow : tbRows) {
                         closingBalance = closingBalance.add(tbRow.getAmount());
                         tbRow.setClosingBalance(closingBalance);
                     }
                 }
                 this.trialBalanceRepositoryWrapper.save(tbRows);
             }
+        }
+    }
+    
+    @Transactional
+    @Override
+    @CronTarget(jobName = JobName.UPDATE_LOAN_SUMMARY)
+    public void updateLoanSummaryDetails(@SuppressWarnings("unused") final Map<String, String> jobParameters) throws JobExecutionException {
+
+        final int threadPoolSize=Integer.parseInt(jobParameters.get("thread-pool-size"));
+        final String officeId = jobParameters.get("officeId");
+        final ExecutorService executorService = Executors.newFixedThreadPool(threadPoolSize);
+        final Office office = this.officeRepository.findOne(Long.parseLong(officeId));
+
+        List<Callable<Object>> posters = new ArrayList<Callable<Object>>();
+
+        //Get the  total count of loans
+        Integer numberofLoans=loanReadPlatformService.retrieveNumberOfActiveLoans();
+
+        Integer batchSize = (int) Math.ceil(numberofLoans/ threadPoolSize);
+        Integer maxLoanId=0;
+
+        do{
+            UpdateLoanSummaryPoster poster = (UpdateLoanSummaryPoster) this.applicationContext.getBean("updateLoanSummaryPoster");
+            poster.setLoanApplicationWriteService(loanApplicationWriteService);
+            poster.setTenant(ThreadLocalContextUtil.getTenant());
+            poster.setBatchSize(batchSize);
+            maxLoanId+=batchSize;
+            poster.setMaxLoanId(maxLoanId);
+            poster.setOfficeHierachy(office.getHierarchy()+ "%");
+            posters.add(Executors.callable(poster));
+            numberofLoans-=batchSize;
+        }while(numberofLoans>=0);
+
+        try {
+            List<Future<Object>> responses = executorService.invokeAll(posters);
+            checkCompletion(responses);
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();
+        }
+    }
+
+    //checks the execution of task by each thread in the executor service
+    private void checkCompletion(List<Future<Object>> responses) {
+        try {
+            for(Future f : responses) {
+                f.get();
+            }
+            boolean allThreadsExecuted = false;
+            int noOfThreadsExecuted = 0;
+            for (Future<Object> future : responses) {
+                if (future.isDone()) {
+                    noOfThreadsExecuted++;
+                }
+            }
+            allThreadsExecuted = noOfThreadsExecuted == responses.size();
+            if(!allThreadsExecuted)
+                logger.error("All threads could not execute.");
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();
+            logger.error("Interrupted while posting IRD entries", e1);
+        }  catch (ExecutionException e2) {
+            e2.printStackTrace();
+            logger.error("Execution exception while posting IRD entries", e2);
         }
 
     }
