@@ -472,6 +472,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Results affected by update: " + result);
         }
 
+
         // Updating closing balance
         String distinctOfficeQuery = "SELECT DISTINCT(office_id) FROM m_trial_balance WHERE closing_balance IS NULL GROUP BY office_id";
         final List<Long> officeIds = jdbcTemplate.queryForList(distinctOfficeQuery, new Object[]{}, Long.class);
@@ -504,8 +505,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             }
         }
     }
-    
-    @Transactional
+
     @Override
     @CronTarget(jobName = JobName.UPDATE_LOAN_SUMMARY)
     public void updateLoanSummaryDetails(@SuppressWarnings("unused") final Map<String, String> jobParameters) throws JobExecutionException {
@@ -522,14 +522,17 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         Integer batchSize = (int) Math.ceil(numberofLoans/ threadPoolSize);
         Integer maxLoanId=0;
+        Integer offset=0;
 
         do{
             UpdateLoanSummaryPoster poster = (UpdateLoanSummaryPoster) this.applicationContext.getBean("updateLoanSummaryPoster");
             poster.setLoanApplicationWriteService(loanApplicationWriteService);
             poster.setTenant(ThreadLocalContextUtil.getTenant());
             poster.setBatchSize(batchSize);
-            maxLoanId+=batchSize;
+            maxLoanId+=batchSize+1;
             poster.setMaxLoanId(maxLoanId);
+            poster.setOffSet(offset);
+            offset+=batchSize;
             poster.setOfficeHierachy(office.getHierarchy()+ "%");
             posters.add(Executors.callable(poster));
             numberofLoans-=batchSize;
