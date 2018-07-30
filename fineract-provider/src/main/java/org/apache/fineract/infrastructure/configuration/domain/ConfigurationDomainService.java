@@ -92,4 +92,6 @@ public interface ConfigurationDomainService {
     Integer retrieveOTPCharacterLength();
 
     Integer retrieveOTPLiveTime();
+
+    boolean isSubRatesEnabled();
 }

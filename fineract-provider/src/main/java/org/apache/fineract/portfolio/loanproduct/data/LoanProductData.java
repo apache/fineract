@@ -47,6 +47,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductConfigurableAttributes;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
+import org.apache.fineract.portfolio.rate.data.RateData;
 import org.joda.time.LocalDate;
 import org.springframework.util.CollectionUtils;
 
@@ -133,6 +134,10 @@ public class LoanProductData implements Serializable {
     private Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings;
     private Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
 
+    // rates
+    private final boolean isRatesEnabled;
+    private final Collection<RateData> rates;
+
     // template related
     private final Collection<FundData> fundOptions;
     @SuppressWarnings("unused")
@@ -146,6 +151,7 @@ public class LoanProductData implements Serializable {
     private final List<EnumOptionData> interestCalculationPeriodTypeOptions;
     private final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions;
     private final Collection<ChargeData> chargeOptions;
+    private final Collection<RateData> rateOptions;
     @SuppressWarnings("unused")
     private final Collection<ChargeData> penaltyOptions;
     @SuppressWarnings("unused")
@@ -261,6 +267,9 @@ public class LoanProductData implements Serializable {
         final boolean syncExpectedWithDisbursementDate = false;
         final boolean canUseForTopup = false;
         final boolean isEqualAmortization = false;
+        final Collection<RateData> rateOptions = null;
+        final Collection<RateData> rates = null;
+        final boolean isRatesEnabled= false;
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                 minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType,
@@ -275,7 +284,7 @@ public class LoanProductData implements Serializable {
                 loanProductConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRateId, floatingRateName,
                 interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate, maxDifferentialLendingRate,
                 isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
-                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization);
+                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled);
 
     }
 
@@ -353,6 +362,9 @@ public class LoanProductData implements Serializable {
         final boolean syncExpectedWithDisbursementDate = false;
         final boolean canUseForTopup = false;
         final boolean isEqualAmortization = false;
+        final Collection<RateData> rateOptions = null;
+        final Collection<RateData> rates = null;
+        final boolean isRatesEnabled = false;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -368,7 +380,7 @@ public class LoanProductData implements Serializable {
                 loanProductConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRateId, floatingRateName,
                 interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate, maxDifferentialLendingRate,
                 isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
-                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization);
+                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled);
 
     }
 
@@ -453,6 +465,9 @@ public class LoanProductData implements Serializable {
         final boolean syncExpectedWithDisbursementDate = false;
         final boolean canUseForTopup = false;
         final boolean isEqualAmortization = false;
+        final Collection<RateData> rateOptions = null;
+        final Collection<RateData> rates = null;
+        final boolean isRatesEnabled = false;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -468,7 +483,7 @@ public class LoanProductData implements Serializable {
                 installmentAmountInMultiplesOf, loanProductConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRateId,
                 floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
-                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization);
+                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled);
 
     }
 
@@ -547,6 +562,9 @@ public class LoanProductData implements Serializable {
         final boolean syncExpectedWithDisbursementDate = false;
         final boolean canUseForTopup = false;
         final boolean isEqualAmortization = false;
+        final Collection<RateData> rateOptions = null;
+        final Collection<RateData> rates = null;
+        final boolean isRatesEnabled = false;
 
         return new LoanProductData(id, name, shortName, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                 numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
@@ -562,7 +580,7 @@ public class LoanProductData implements Serializable {
                 installmentAmountInMultiplesOf, loanProductConfigurableAttributes, isLinkedToFloatingInterestRates, floatingRateId,
                 floatingRateName, interestRateDifferential, minDifferentialLendingRate, defaultDifferentialLendingRate,
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
-                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization);
+                syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled);
 
     }
 
@@ -601,7 +619,8 @@ public class LoanProductData implements Serializable {
                            BigDecimal minDifferentialLendingRate, BigDecimal defaultDifferentialLendingRate, BigDecimal maxDifferentialLendingRate,
                            boolean isFloatingInterestRateCalculationAllowed, final boolean isVariableInstallmentsAllowed,
                            final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments,
-                           final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization) {
+                           final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization, Collection<RateData> rateOptions, Collection<RateData> rates,
+                           final boolean isRatesEnabled) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
@@ -653,6 +672,9 @@ public class LoanProductData implements Serializable {
         this.status = status;
         this.externalId = externalId;
         this.minimumDaysBetweenDisbursalAndFirstRepayment = minimumDaysBetweenDisbursalAndFirstRepayment;
+        this.rateOptions = rateOptions;
+        this.rates = rates;
+        this.isRatesEnabled = isRatesEnabled;
 
         this.chargeOptions = null;
         this.penaltyOptions = null;
@@ -715,7 +737,7 @@ public class LoanProductData implements Serializable {
                            final List<EnumOptionData> interestTypeOptions, final List<EnumOptionData> interestCalculationPeriodTypeOptions,
                            final List<EnumOptionData> repaymentFrequencyTypeOptions, final List<EnumOptionData> interestRateFrequencyTypeOptions,
                            final Collection<FundData> fundOptions, final Collection<TransactionProcessingStrategyData> transactionStrategyOptions,
-                           final Map<String, List<GLAccountData>> accountingMappingOptions, final List<EnumOptionData> accountingRuleOptions,
+                           final Collection<RateData> rateOptions, final Map<String, List<GLAccountData>> accountingMappingOptions, final List<EnumOptionData> accountingRuleOptions,
                            final List<EnumOptionData> valueConditionTypeOptions, final List<EnumOptionData> daysInMonthTypeOptions,
                            final List<EnumOptionData> daysInYearTypeOptions, final List<EnumOptionData> interestRecalculationCompoundingTypeOptions,
                            final List<EnumOptionData> rescheduleStrategyTypeOptions, final List<EnumOptionData> interestRecalculationFrequencyTypeOptions,
@@ -780,6 +802,7 @@ public class LoanProductData implements Serializable {
         this.currency = productData.currency;
         this.fundOptions = fundOptions;
         this.transactionProcessingStrategyOptions = transactionStrategyOptions;
+        this.rateOptions = rateOptions;
         this.floatingRateOptions = floatingRateOptions;
         if (this.transactionProcessingStrategyOptions != null && this.transactionProcessingStrategyOptions.size() == 1) {
             final List<TransactionProcessingStrategyData> listOfOptions = new ArrayList<>(this.transactionProcessingStrategyOptions);
@@ -843,6 +866,8 @@ public class LoanProductData implements Serializable {
         this.syncExpectedWithDisbursementDate = productData.syncExpectedWithDisbursementDate;
         this.canUseForTopup = productData.canUseForTopup;
         this.isEqualAmortization = productData.isEqualAmortization;
+        this.rates = productData.rates;
+        this.isRatesEnabled = isRatesEnabled;
     }
 
     private Collection<ChargeData> nullIfEmpty(final Collection<ChargeData> charges) {
@@ -1198,9 +1223,9 @@ public class LoanProductData implements Serializable {
         return syncExpectedWithDisbursementDate;
     }
 
-    public boolean canUseForTopup() {
-        return this.canUseForTopup;
-    }
+        public boolean canUseForTopup() {
+            return this.canUseForTopup;
+        }
 
     public BigDecimal getInterestRateDifferential() {
         return this.interestRateDifferential;

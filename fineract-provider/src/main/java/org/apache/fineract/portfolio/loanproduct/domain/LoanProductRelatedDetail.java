@@ -666,4 +666,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         this.isEqualAmortization = isEqualAmortization;
     }
 
+    public void setNominalInterestRatePerPeriod(BigDecimal nominalInterestRatePerPeriod) {
+        this.nominalInterestRatePerPeriod = nominalInterestRatePerPeriod;
+    }
 }

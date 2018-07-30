@@ -3147,4 +3147,21 @@ public class CommandWrapperBuilder {
         this.href = "/self/pocket?command="+PocketApiConstants.delinkAccountsFromPocketCommandParam;
         return this;
     }
+
+    public CommandWrapperBuilder createRate() {
+        this.actionName = "CREATE";
+        this.entityName = "RATE";
+        this.entityId = null;
+        this.href = "/rates/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateRate(final Long rateId) {
+        this.actionName = "UPDATE";
+        this.entityName = "RATE";
+        this.entityId = rateId;
+        this.href = "/rates/" + rateId;
+        return this;
+    }
+
 }
