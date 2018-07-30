@@ -27,6 +27,7 @@ import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToG
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -52,6 +53,8 @@ import org.apache.fineract.portfolio.loanproduct.service.LoanDropdownReadPlatfor
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
+import org.apache.fineract.portfolio.rate.data.RateData;
+import org.apache.fineract.portfolio.rate.service.RateReadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -80,7 +83,8 @@ public class LoanProductsApiResource {
             "interestCalculationPeriodTypeOptions", "transactionProcessingStrategyOptions", "chargeOptions", "accountingOptions",
             "accountingRuleOptions", "accountingMappingOptions", "floatingRateOptions", "isLinkedToFloatingInterestRates",
             "floatingRatesId", "interestRateDifferential", "minDifferentialLendingRate", "defaultDifferentialLendingRate",
-            "maxDifferentialLendingRate", "isFloatingInterestRateCalculationAllowed", LoanProductConstants.canUseForTopup, LoanProductConstants.isEqualAmortizationParam));
+            "maxDifferentialLendingRate", "isFloatingInterestRateCalculationAllowed", LoanProductConstants.canUseForTopup, LoanProductConstants.isEqualAmortizationParam,
+            LoanProductConstants.ratesParamName));
 
     private final Set<String> PRODUCT_MIX_DATA_PARAMETERS = new HashSet<>(Arrays.asList("productId", "productName", "restrictedProducts",
             "allowedProducts", "productOptions"));
@@ -103,6 +107,9 @@ public class LoanProductsApiResource {
     private final DropdownReadPlatformService commonDropdownReadPlatformService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
     private final FloatingRatesReadPlatformService floatingRateReadPlatformService;
+    private final RateReadService rateReadService;
+    private final ConfigurationDomainService configurationDomainService;
+
 
     @Autowired
     public LoanProductsApiResource(final PlatformSecurityContext context, final LoanProductReadPlatformService readPlatformService,
@@ -117,7 +124,8 @@ public class LoanProductsApiResource {
             final ProductMixReadPlatformService productMixReadPlatformService,
             final DropdownReadPlatformService commonDropdownReadPlatformService,
             PaymentTypeReadPlatformService paymentTypeReadPlatformService,
-            final FloatingRatesReadPlatformService floatingRateReadPlatformService) {
+            final FloatingRatesReadPlatformService floatingRateReadPlatformService, final RateReadService rateReadService,
+            final ConfigurationDomainService configurationDomainService) {
         this.context = context;
         this.loanProductReadPlatformService = readPlatformService;
         this.chargeReadPlatformService = chargeReadPlatformService;
@@ -134,6 +142,8 @@ public class LoanProductsApiResource {
         this.commonDropdownReadPlatformService = commonDropdownReadPlatformService;
         this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
         this.floatingRateReadPlatformService = floatingRateReadPlatformService;
+        this.rateReadService = rateReadService;
+        this.configurationDomainService = configurationDomainService;
     }
 
     @POST
@@ -266,6 +276,12 @@ public class LoanProductsApiResource {
             penaltyOptions = null;
         }
 
+        boolean isRatesEnabled = this.configurationDomainService.isSubRatesEnabled();
+        Collection<RateData> rateOptions = this.rateReadService.retrieveLoanApplicableRates();
+        if(rateOptions.isEmpty()){
+            rateOptions = null;
+        }
+
         final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
         final List<EnumOptionData> amortizationTypeOptions = this.dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
         final List<EnumOptionData> interestTypeOptions = this.dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
@@ -309,11 +325,11 @@ public class LoanProductsApiResource {
 
         return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions,
                 amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions,
-                interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions, accountOptions,
+                interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions, rateOptions, accountOptions,
                 accountingRuleTypeOptions, loanCycleValueConditionTypeOptions, daysInMonthTypeOptions, daysInYearTypeOptions,
                 interestRecalculationCompoundingTypeOptions, rescheduleStrategyTypeOptions, interestRecalculationFrequencyTypeOptions,
-                preCloseInterestCalculationStrategyOptions, floatingRateOptions, interestRecalculationNthDayTypeOptions, 
-                interestRecalculationDayOfWeekTypeOptions);
+                preCloseInterestCalculationStrategyOptions, floatingRateOptions, interestRecalculationNthDayTypeOptions,
+                interestRecalculationDayOfWeekTypeOptions, isRatesEnabled);
     }
 
 }

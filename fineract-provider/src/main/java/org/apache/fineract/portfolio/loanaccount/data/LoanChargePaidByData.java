@@ -27,6 +27,17 @@ public class LoanChargePaidByData {
     private final Integer installmentNumber;
     private final Long chargeId;
     private final Long transactionId;
+    private final String name;
+
+    public LoanChargePaidByData(final Long id, final BigDecimal amount, final Integer installmentNumber, final Long chargeId,
+        final Long transactionId, String name) {
+        this.id = id;
+        this.amount = amount;
+        this.installmentNumber = installmentNumber;
+        this.chargeId = chargeId;
+        this.transactionId = transactionId;
+        this.name=name;
+    }
 
     public LoanChargePaidByData(final Long id, final BigDecimal amount, final Integer installmentNumber, final Long chargeId,
             final Long transactionId) {
@@ -35,6 +46,7 @@ public class LoanChargePaidByData {
         this.installmentNumber = installmentNumber;
         this.chargeId = chargeId;
         this.transactionId = transactionId;
+        this.name=null;
     }
 
     public Long getId() {
@@ -57,4 +69,7 @@ public class LoanChargePaidByData {
         return this.transactionId;
     }
 
+    public String getName() {
+        return name;
+    }
 }

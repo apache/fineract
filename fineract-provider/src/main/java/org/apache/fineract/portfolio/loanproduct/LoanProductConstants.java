@@ -131,8 +131,11 @@ public interface LoanProductConstants {
     public static final String allowPartialPeriodInterestCalcualtionParamName = "allowPartialPeriodInterestCalcualtion";
 
     public static final String canUseForTopup = "canUseForTopup";
-    
+
+    //Rate Module
+    public static final String ratesParamName = "rates";
+
     public static final String isEqualAmortizationParam = "isEqualAmortization";
-    
+
 
 }

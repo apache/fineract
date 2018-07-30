@@ -52,6 +52,7 @@ import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookP
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
@@ -112,6 +113,8 @@ import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatform
 import org.apache.fineract.portfolio.note.data.NoteData;
 import org.apache.fineract.portfolio.note.domain.NoteType;
 import org.apache.fineract.portfolio.note.service.NoteReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.rate.data.RateData;
+import org.apache.fineract.portfolio.rate.service.RateReadService;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,7 +145,7 @@ public class LoansApiResource {
             "syncDisbursementWithMeeting", "loanCounter", "loanProductCounter", "notes", "accountLinkingOptions", "linkedAccount",
             "interestRateDifferential", "isFloatingInterestRate", "interestRatesPeriods", LoanApiConstants.canUseForTopup,
             LoanApiConstants.isTopup, LoanApiConstants.loanIdToClose, LoanApiConstants.topupAmount, LoanApiConstants.clientActiveLoanOptions,
-            LoanApiConstants.datatables));
+            LoanApiConstants.datatables, LoanProductConstants.ratesParamName));
 
     private final Set<String> LOAN_APPROVAL_DATA_PARAMETERS = new HashSet<>(Arrays.asList("approvalDate", "approvalAmount"));
     private final String resourceNameForPermissions = "LOAN";
@@ -174,30 +177,32 @@ public class LoansApiResource {
     private final EntityDatatableChecksReadService entityDatatableChecksReadService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
-
+    private final RateReadService rateReadService;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public LoansApiResource(final PlatformSecurityContext context, final LoanReadPlatformService loanReadPlatformService,
-            final LoanProductReadPlatformService loanProductReadPlatformService,
-            final LoanDropdownReadPlatformService dropdownReadPlatformService, final FundReadPlatformService fundReadPlatformService,
-            final ChargeReadPlatformService chargeReadPlatformService, final LoanChargeReadPlatformService loanChargeReadPlatformService,
-            final CollateralReadPlatformService loanCollateralReadPlatformService,
-            final LoanScheduleCalculationPlatformService calculationPlatformService,
-            final GuarantorReadPlatformService guarantorReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService, final GroupReadPlatformService groupReadPlatformService,
-            final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer,
-            final DefaultToApiJsonSerializer<LoanApprovalData> loanApprovalDataToApiJsonSerializer,
-            final DefaultToApiJsonSerializer<LoanScheduleData> loanScheduleToApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper, final FromJsonHelper fromJsonHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final CalendarReadPlatformService calendarReadPlatformService, final NoteReadPlatformServiceImpl noteReadPlatformService,
-            final PortfolioAccountReadPlatformService portfolioAccountReadPlatformServiceImpl,
-            final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
-            final LoanScheduleHistoryReadPlatformService loanScheduleHistoryReadPlatformService,
-            final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
-            final EntityDatatableChecksReadService entityDatatableChecksReadService,
-            final BulkImportWorkbookService bulkImportWorkbookService,
-            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService) {
+        final LoanProductReadPlatformService loanProductReadPlatformService,
+        final LoanDropdownReadPlatformService dropdownReadPlatformService, final FundReadPlatformService fundReadPlatformService,
+        final ChargeReadPlatformService chargeReadPlatformService, final LoanChargeReadPlatformService loanChargeReadPlatformService,
+        final CollateralReadPlatformService loanCollateralReadPlatformService,
+        final LoanScheduleCalculationPlatformService calculationPlatformService,
+        final GuarantorReadPlatformService guarantorReadPlatformService,
+        final CodeValueReadPlatformService codeValueReadPlatformService, final GroupReadPlatformService groupReadPlatformService,
+        final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer,
+        final DefaultToApiJsonSerializer<LoanApprovalData> loanApprovalDataToApiJsonSerializer,
+        final DefaultToApiJsonSerializer<LoanScheduleData> loanScheduleToApiJsonSerializer,
+        final ApiRequestParameterHelper apiRequestParameterHelper, final FromJsonHelper fromJsonHelper,
+        final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+        final CalendarReadPlatformService calendarReadPlatformService, final NoteReadPlatformServiceImpl noteReadPlatformService,
+        final PortfolioAccountReadPlatformService portfolioAccountReadPlatformServiceImpl,
+        final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
+        final LoanScheduleHistoryReadPlatformService loanScheduleHistoryReadPlatformService,
+        final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
+        final EntityDatatableChecksReadService entityDatatableChecksReadService,
+        final BulkImportWorkbookService bulkImportWorkbookService,
+        final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService, final RateReadService rateReadService, 
+        final ConfigurationDomainService configurationDomainService) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
@@ -223,8 +228,10 @@ public class LoansApiResource {
         this.loanScheduleHistoryReadPlatformService = loanScheduleHistoryReadPlatformService;
         this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
         this.entityDatatableChecksReadService = entityDatatableChecksReadService;
+        this.rateReadService = rateReadService;
         this.bulkImportWorkbookService=bulkImportWorkbookService;
         this.bulkImportWorkbookPopulatorService=bulkImportWorkbookPopulatorService;
+        this.configurationDomainService = configurationDomainService;
     }
 
     /*
@@ -280,6 +287,7 @@ public class LoansApiResource {
         LoanAccountData newLoanAccount = null;
         Long officeId = null;
         Collection<PortfolioAccountData> accountLinkingOptions = null;
+        boolean isRatesEnabled = this.configurationDomainService.isSubRatesEnabled();
 
         if (productId != null) {
             newLoanAccount = this.loanReadPlatformService.retrieveLoanProductDetailsTemplate(productId, clientId, groupId);
@@ -357,7 +365,7 @@ public class LoansApiResource {
             // add product options, allowed loan officers and calendar options
             // (calendar options will be null in individual loan)
             newLoanAccount = LoanAccountData.associationsAndTemplate(newLoanAccount, productOptions, allowedLoanOfficers, calendarOptions,
-                    accountLinkingOptions);
+                    accountLinkingOptions, isRatesEnabled);
         }
         final List<DatatableData> datatableTemplates = this.entityDatatableChecksReadService
                 .retrieveTemplates(StatusEnum.CREATE.getCode().longValue(), EntityTables.LOAN.getName(), productId);
@@ -619,13 +627,20 @@ public class LoansApiResource {
 
         paidInAdvanceTemplate = this.loanReadPlatformService.retrieveTotalPaidInAdvance(loanId);
 
+        //Get rates from Loan
+        boolean isRatesEnabled = this.configurationDomainService.isSubRatesEnabled();
+        List<RateData> rates = null;
+        if (isRatesEnabled){
+          rates = this.rateReadService.retrieveLoanRates(loanId);
+        }
+
         final LoanAccountData loanAccount = LoanAccountData.associationsAndTemplate(loanBasicDetails, repaymentSchedule, loanRepayments,
                 charges, collateral, guarantors, meeting, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 repaymentFrequencyNthDayTypeOptions, repaymentFrequencyDayOfWeekTypeOptions, repaymentStrategyOptions, 
                 interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, 
                 fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers, loanPurposeOptions, loanCollateralOptions, 
                 calendarOptions, notes, accountLinkingOptions, linkedAccount, disbursementData, emiAmountVariations,
-                overdueCharges, paidInAdvanceTemplate, interestRatesPeriods, clientActiveLoanOptions);
+                overdueCharges, paidInAdvanceTemplate, interestRatesPeriods, clientActiveLoanOptions, rates, isRatesEnabled);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);

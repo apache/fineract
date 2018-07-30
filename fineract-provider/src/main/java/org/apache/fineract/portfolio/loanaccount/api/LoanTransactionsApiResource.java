@@ -32,6 +32,7 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
+import org.apache.fineract.portfolio.loanaccount.service.LoanChargePaidByReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
@@ -66,19 +67,21 @@ public class LoanTransactionsApiResource {
     private final DefaultToApiJsonSerializer<LoanTransactionData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    private final LoanChargePaidByReadPlatformService loanChargePaidByReadPlatformService;
 
     @Autowired
     public LoanTransactionsApiResource(final PlatformSecurityContext context, final LoanReadPlatformService loanReadPlatformService,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final DefaultToApiJsonSerializer<LoanTransactionData> toApiJsonSerializer,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            PaymentTypeReadPlatformService paymentTypeReadPlatformService) {
+            PaymentTypeReadPlatformService paymentTypeReadPlatformService, LoanChargePaidByReadPlatformService loanChargePaidByReadPlatformService) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
+        this.loanChargePaidByReadPlatformService = loanChargePaidByReadPlatformService;
     }
 
     private boolean is(final String commandParam, final String commandValue) {
@@ -154,6 +157,7 @@ public class LoanTransactionsApiResource {
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         LoanTransactionData transactionData = this.loanReadPlatformService.retrieveLoanTransaction(loanId, transactionId);
+        transactionData.setLoanChargePaidByList(this.loanChargePaidByReadPlatformService.getLoanChargesPaidByTransactionId(transactionId));
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
             final Collection<PaymentTypeData> paymentTypeOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();

@@ -165,4 +165,12 @@ public class LoanProductMinMaxConstraints {
 		this.maxNominalInterestRatePerPeriod = null;
 	}
 
+
+    public void setMinNominalInterestRatePerPeriod(BigDecimal minNominalInterestRatePerPeriod) {
+        this.minNominalInterestRatePerPeriod = minNominalInterestRatePerPeriod;
+    }
+
+    public void setMaxNominalInterestRatePerPeriod(BigDecimal maxNominalInterestRatePerPeriod) {
+        this.maxNominalInterestRatePerPeriod = maxNominalInterestRatePerPeriod;
+    }
 }
