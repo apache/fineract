@@ -133,6 +133,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanTransactionProcessin
 import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.apache.fineract.portfolio.rate.domain.Rate;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -388,20 +389,24 @@ public class Loan extends AbstractPersistableCustom<Long> {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loan", optional = true, orphanRemoval = true, fetch=FetchType.EAGER)
     private LoanTopupDetails loanTopupDetails;
 
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "m_loan_rate", joinColumns = @JoinColumn(name = "loan_id"), inverseJoinColumns = @JoinColumn(name = "rate_id"))
+    private List<Rate> rates;
+
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy,
             final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges,
             final Set<LoanCollateral> collateral, final BigDecimal fixedEmiAmount, final List<LoanDisbursementDetails> disbursementDetails,
             final BigDecimal maxOutstandingLoanBalance, final Boolean createStandingInstructionAtDisbursement,
-            final Boolean isFloatingInterestRate, final BigDecimal interestRateDifferential) {
+            final Boolean isFloatingInterestRate, final BigDecimal interestRateDifferential, final List<Rate> rates) {
         final LoanStatus status = null;
         final Group group = null;
         final Boolean syncDisbursementWithMeeting = null;
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting, fixedEmiAmount,
                 disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate,
-                interestRateDifferential);
+                interestRateDifferential, rates);
     }
 
     public static Loan newGroupLoanApplication(final String accountNo, final Group group, final Integer loanType,
@@ -411,13 +416,13 @@ public class Loan extends AbstractPersistableCustom<Long> {
             final Set<LoanCollateral> collateral, final Boolean syncDisbursementWithMeeting, final BigDecimal fixedEmiAmount,
             final List<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance,
             final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,
-            final BigDecimal interestRateDifferential) {
+            final BigDecimal interestRateDifferential, final List<Rate> rates) {
         final LoanStatus status = null;
         final Client client = null;
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting, fixedEmiAmount,
                 disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate,
-                interestRateDifferential);
+                interestRateDifferential, rates);
     }
 
     public static Loan newIndividualLoanApplicationFromGroup(final String accountNo, final Client client, final Group group,
@@ -427,12 +432,12 @@ public class Loan extends AbstractPersistableCustom<Long> {
             final Set<LoanCollateral> collateral, final Boolean syncDisbursementWithMeeting, final BigDecimal fixedEmiAmount,
             final List<LoanDisbursementDetails> disbursementDetails, final BigDecimal maxOutstandingLoanBalance,
             final Boolean createStandingInstructionAtDisbursement, final Boolean isFloatingInterestRate,
-            final BigDecimal interestRateDifferential) {
+            final BigDecimal interestRateDifferential, final List<Rate> rates) {
         final LoanStatus status = null;
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting, fixedEmiAmount,
                 disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement, isFloatingInterestRate,
-                interestRateDifferential);
+                interestRateDifferential,rates);
     }
 
     protected Loan() {
@@ -445,7 +450,7 @@ public class Loan extends AbstractPersistableCustom<Long> {
             final Set<LoanCharge> loanCharges, final Set<LoanCollateral> collateral, final Boolean syncDisbursementWithMeeting,
             final BigDecimal fixedEmiAmount, final List<LoanDisbursementDetails> disbursementDetails,
             final BigDecimal maxOutstandingLoanBalance, final Boolean createStandingInstructionAtDisbursement,
-            final Boolean isFloatingInterestRate, final BigDecimal interestRateDifferential) {
+            final Boolean isFloatingInterestRate, final BigDecimal interestRateDifferential, final List<Rate> rates) {
 
         this.loanRepaymentScheduleDetail = loanRepaymentScheduleDetail;
         this.loanRepaymentScheduleDetail.validateRepaymentPeriodWithGraceSettings();
@@ -502,6 +507,9 @@ public class Loan extends AbstractPersistableCustom<Long> {
          */
 
         this.proposedPrincipal = this.loanRepaymentScheduleDetail.getPrincipal().getAmount();
+
+        //rates added here
+        this.rates = rates;
 
     }
 
@@ -1164,6 +1172,14 @@ public class Loan extends AbstractPersistableCustom<Long> {
         }
         this.collateral.clear();
         this.collateral.addAll(associateWithThisLoan(loanCollateral));
+    }
+
+    public void updateLoanRates(final List<Rate> loanRates) {
+        if (this.rates == null) {
+            this.rates = new ArrayList<>();
+        }
+        this.rates.clear();
+        this.rates.addAll(loanRates);
     }
 
     public void updateLoanSchedule(final LoanScheduleModel modifiedLoanSchedule, AppUser currentUser) {
@@ -6533,4 +6549,12 @@ public class Loan extends AbstractPersistableCustom<Long> {
     }
 
     public boolean isIndividualLoan(){return AccountType.fromInt(this.loanType).isIndividualAccount();}
+
+    public void setRates(List<Rate> rates) {
+        this.rates = rates;
+    }
+
+    public List<Rate> getRates() {
+        return rates;
+    }
 }
