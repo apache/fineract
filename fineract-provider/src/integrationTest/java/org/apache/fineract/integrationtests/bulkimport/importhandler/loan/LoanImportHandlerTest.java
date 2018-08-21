@@ -80,27 +80,28 @@ public class LoanImportHandlerTest {
         Integer outcome_staff_creation =staffHelper.createStaff(requestSpec,responseSpec);
         Assert.assertNotNull("Could not create staff",outcome_staff_creation);
 
+       // LoanTransactionHelper ltHelper=new LoanTransactionHelper(requestSpec,responseSpec);
+       // LoanProductTestBuilder loanProductTestBuilder=new LoanProductTestBuilder();
+       // String jsonLoanProduct=loanProductTestBuilder.build(null);
+       // Integer outcome_lp_creaion=ltHelper.getLoanProductId(jsonLoanProduct);
+       // Assert.assertNotNull("Could not create Loan Product" ,outcome_lp_creaion);
+
+       // FundsResourceHandler fundsResourceHandler=new FundsResourceHandler();
+       // String jsonFund="{\n" +
+       //         "\t\"name\": \""+Utils.randomNameGenerator("Fund_Name",9)+"\"\n" +
+       //         "}";
+       // Integer outcome_fund_creation=fundsResourceHandler.createFund(jsonFund,requestSpec,responseSpec);
+       // Assert.assertNotNull("Could not create Fund" ,outcome_fund_creation);
+
+       // PaymentTypeHelper paymentTypeHelper=new PaymentTypeHelper();
+       // String name = PaymentTypeHelper.randomNameGenerator("P_T", 5);
+       // String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
+       // Boolean isCashPayment = true;
+       // Integer position = 1;
+       // Integer outcome_payment_creation= paymentTypeHelper.createPaymentType(requestSpec, responseSpec,name,description,isCashPayment,position);
+       // Assert.assertNotNull("Could not create payment type" ,outcome_payment_creation);
+
         LoanTransactionHelper loanTransactionHelper=new LoanTransactionHelper(requestSpec,responseSpec);
-        LoanProductTestBuilder loanProductTestBuilder=new LoanProductTestBuilder();
-        String jsonLoanProduct=loanProductTestBuilder.build(null);
-        Integer outcome_lp_creaion=loanTransactionHelper.getLoanProductId(jsonLoanProduct);
-        Assert.assertNotNull("Could not create Loan Product" ,outcome_lp_creaion);
-
-        FundsResourceHandler fundsResourceHandler=new FundsResourceHandler();
-        String jsonFund="{\n" +
-                "\t\"name\": \""+Utils.randomNameGenerator("Fund_Name",9)+"\"\n" +
-                "}";
-        Integer outcome_fund_creation=fundsResourceHandler.createFund(jsonFund,requestSpec,responseSpec);
-        Assert.assertNotNull("Could not create Fund" ,outcome_fund_creation);
-
-        PaymentTypeHelper paymentTypeHelper=new PaymentTypeHelper();
-        String name = PaymentTypeHelper.randomNameGenerator("P_T", 5);
-        String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
-        Boolean isCashPayment = true;
-        Integer position = 1;
-        Integer outcome_payment_creation= paymentTypeHelper.createPaymentType(requestSpec, responseSpec,name,description,isCashPayment,position);
-        Assert.assertNotNull("Could not create payment type" ,outcome_payment_creation);
-
         Workbook workbook=loanTransactionHelper.getLoanWorkbook("dd MMMM yyyy");
 
         //insert dummy data into loan Sheet
@@ -127,7 +128,7 @@ public class LoanImportHandlerTest {
         firstLoanRow.createCell(LoanConstants.NO_OF_REPAYMENTS_COL).setCellValue(loanProductSheet.getRow(1).getCell(6).getNumericCellValue());
         firstLoanRow.createCell(LoanConstants.REPAID_EVERY_COL).setCellValue(loanProductSheet.getRow(1).getCell(9).getNumericCellValue());
         firstLoanRow.createCell(LoanConstants.REPAID_EVERY_FREQUENCY_COL).setCellValue(loanProductSheet.getRow(1).getCell(10).getStringCellValue());
-        firstLoanRow.createCell(LoanConstants.LOAN_TERM_COL).setCellValue(loanProductSheet.getRow(1).getCell(8).getNumericCellValue());
+        firstLoanRow.createCell(LoanConstants.LOAN_TERM_COL).setCellValue(60);
         firstLoanRow.createCell(LoanConstants.LOAN_TERM_FREQUENCY_COL).setCellValue(loanProductSheet.getRow(1).getCell(10).getStringCellValue());
         firstLoanRow.createCell(LoanConstants.NOMINAL_INTEREST_RATE_COL).setCellValue(loanProductSheet.getRow(1).getCell(11).getNumericCellValue());
         firstLoanRow.createCell(LoanConstants.NOMINAL_INTEREST_RATE_FREQUENCY_COL).setCellValue(loanProductSheet.getRow(1).getCell(14).getStringCellValue());
@@ -144,10 +145,12 @@ public class LoanImportHandlerTest {
         firstLoanRow.createCell(LoanConstants.LAST_REPAYMENT_DATE_COL).setCellValue(date);
         firstLoanRow.createCell(LoanConstants.REPAYMENT_TYPE_COL).setCellValue(extrasSheet.getRow(1).getCell(3).getStringCellValue());
 
-        File directory=new File(System.getProperty("user.home")+"\\Fineract\\bulkimport\\integration_tests\\importhandler\\loan") ;
+        String currentdirectory = new File("").getAbsolutePath();
+        File directory=new File(currentdirectory+File.separator+"src"+File.separator+"integrationTest"+File.separator+
+                "resources"+File.separator+"bulkimport"+File.separator+"importhandler"+File.separator+"loan") ;
         if (!directory.exists())
             directory.mkdirs();
-        File file= new File(directory+"\\Loan.xls");
+        File file= new File(directory+File.separator+"Loan.xls");
         OutputStream outputStream=new FileOutputStream(file);
         workbook.write(outputStream);
         outputStream.close();
@@ -157,7 +160,7 @@ public class LoanImportHandlerTest {
         Assert.assertNotNull(importDocumentId);
 
         //Wait for the creation of output excel
-        Thread.sleep(3000);
+        Thread.sleep(10000);
 
         //check status column of output excel
         String location=loanTransactionHelper.getOutputTemplateLocation(importDocumentId);

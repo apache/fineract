@@ -74,11 +74,11 @@ public class OfficeImportHandlerTest {
         firstOfficeRow.createCell(OfficeConstants.OPENED_ON_COL).setCellValue(date);
 
         String currentdirectory = new File("").getAbsolutePath();
-        File directory=new File(currentdirectory+"\\src\\integrationTest\\" +
-                "resources\\bulkimport\\importhandler\\office");
+        File directory=new File(currentdirectory+File.separator+"src"+File.separator+"integrationTest"+File.separator+
+                "resources"+File.separator+"bulkimport"+File.separator+"importhandler"+File.separator+"office");
         if (!directory.exists())
             directory.mkdirs();
-        File file= new File(directory+"\\Office.xls");
+        File file= new File(directory+File.separator+"Office.xls");
         OutputStream outputStream=new FileOutputStream(file);
         workbook.write(outputStream);
         outputStream.close();
