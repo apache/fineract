@@ -877,14 +877,14 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     public CommandProcessingResult disassociateGroupsToCenter(final Long centerId, final JsonCommand command) {
         this.fromApiJsonDeserializer.validateForDisassociateGroups(command.json());
 
-        final Group centerForUpdate = this.groupRepository.findOneWithNotFoundDetection(centerId);
+        final Group centerForUpdate = this.groupRepository.findOneAndLoadAssociatedMembers(centerId);
         final Set<Group> groupMembers = assembleSetOfChildGroups(centerForUpdate.officeId(), command);
 
         final Map<String, Object> actualChanges = new HashMap<>();
 
         final List<String> changes = centerForUpdate.disassociateGroups(groupMembers);
         if (!changes.isEmpty()) {
-            actualChanges.put(GroupingTypesApiConstants.clientMembersParamName, changes);
+            actualChanges.put(GroupingTypesApiConstants.groupMembersParamName, changes);
         }
 
         this.groupRepository.saveAndFlush(centerForUpdate);

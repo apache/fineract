@@ -66,4 +66,13 @@ public class GroupRepositoryWrapper {
     public void flush() {
         this.repository.flush();
     }
+    
+    public Group findOneAndLoadAssociatedMembers(final Long id) {
+        final Group entity = this.repository.findOne(id);
+        if (entity == null) { throw new GroupNotFoundException(id); }
+        else{
+        	entity.getGroupMembers().size();
+        }
+        return entity;
+    }
 }

@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,10 +45,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -108,9 +107,9 @@ public final class Group extends AbstractPersistableCustom<Long> {
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id")
-    private final List<Group> groupMembers = new LinkedList<>();
-
-    @ManyToMany
+    private Set<Group> groupMembers = new HashSet<>();
+    
+	@ManyToMany
     @JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "client_id"))
     private Set<Client> clientMembers = new HashSet<>();
 
@@ -577,7 +576,7 @@ public final class Group extends AbstractPersistableCustom<Long> {
     }
 
     public List<String> disassociateGroups(Set<Group> groupMembersSet) {
-
+    	
         final List<String> differences = new ArrayList<>();
         for (final Group group : groupMembersSet) {
             if (hasGroupAsMember(group)) {
@@ -744,4 +743,13 @@ public final class Group extends AbstractPersistableCustom<Long> {
         this.accountNumber = accountIdentifier;
         this.accountNumberRequiresAutoGeneration = false;
     }
+
+	public Set<Group> getGroupMembers() {
+		return groupMembers;
+	}
+
+	public void setGroupMembers(Set<Group> groupMembers) {
+		this.groupMembers = groupMembers;
+	}
+
 }
