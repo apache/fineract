@@ -108,7 +108,7 @@ public final class Group extends AbstractPersistableCustom<Long> {
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id")
-    private List<Group> groupMembers = new LinkedList<>();
+    private final List<Group> groupMembers = new LinkedList<>();
 
     @ManyToMany
     @JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "client_id"))
@@ -744,10 +744,4 @@ public final class Group extends AbstractPersistableCustom<Long> {
         this.accountNumber = accountIdentifier;
         this.accountNumberRequiresAutoGeneration = false;
     }
-
-	public void setGroupMembers(List<Group> groupMembers) {
-		this.groupMembers = groupMembers;
-	}
-    
-    
 }
