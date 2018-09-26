@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -41,15 +42,16 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -540,7 +542,22 @@ public final class Group extends AbstractPersistableCustom<Long> {
     }
 
     public boolean hasGroupAsMember(final Group group) {
-        return this.groupMembers.contains(group);
+    	if (CollectionUtils.isEmpty(this.groupMembers))
+    	{
+    		return false;
+    	}
+    	List<Long> groupIds = this.groupMembers.stream().map(Group::getId)
+        		.collect(Collectors.toList());
+    	System.out.println("########### " + groupIds + "; group id = " + group.getId());
+        return groupIds.contains(group.getId());
+    }
+
+    public boolean hasGroupAsParent(final Group group) {
+    	if (group.getParent() != null)
+    	{
+    		return this.getId().equals(group.getParent().getId());
+    	}
+    	return false;
     }
 
     public boolean hasStaff() {
@@ -580,10 +597,8 @@ public final class Group extends AbstractPersistableCustom<Long> {
 
         final List<String> differences = new ArrayList<>();
         for (final Group group : groupMembersSet) {
-            if (hasGroupAsMember(group)) {
-                this.groupMembers.remove(group);
+            if (hasGroupAsParent(group)) {
                 differences.add(group.getId().toString());
-    			group.resetHierarchy();
             } else {
                 throw new GroupNotExistsInCenterException(group.getId(), getId());
             }

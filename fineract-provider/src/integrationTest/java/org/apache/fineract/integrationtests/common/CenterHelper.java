@@ -113,11 +113,21 @@ public class CenterHelper {
 
     public static int[] associateGroups(final int id, final int[] groupMembers, final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
-        final String ASSOCIATE_GROUP_CENTER_URL = CENTERS_URL + "/" + id + "?command=associateGroups&" + Utils.TENANT_IDENTIFIER;
+        return linkGroupsToCenterCommand(id, groupMembers, requestSpec, responseSpec, "associateGroups");
+    }
+
+    public static int[] disassociateGroups(final int id, final int[] groupMembers, final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec) {
+        return linkGroupsToCenterCommand(id, groupMembers, requestSpec, responseSpec, "disassociateGroups");
+    }
+
+    private static int[] linkGroupsToCenterCommand(final int id, final int[] groupMembers, final RequestSpecification requestSpec,
+            final ResponseSpecification responseSpec, String command) {
+        final String CENTER_GROUP_LINK_URL = CENTERS_URL + "/" + id + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
         HashMap groupMemberHashMap = new HashMap();
         groupMemberHashMap.put("groupMembers", groupMembers);
-        System.out.println("---------------------------------ASSOCIATING GROUPS AT " + id + "--------------------------------------------");
-        HashMap hash = Utils.performServerPost(requestSpec, responseSpec, ASSOCIATE_GROUP_CENTER_URL,
+        System.out.println("---------------------------------" + command + " GROUPS AT " + id + "--------------------------------------------");
+        HashMap hash = Utils.performServerPost(requestSpec, responseSpec, CENTER_GROUP_LINK_URL,
                 new Gson().toJson(groupMemberHashMap), "changes");
         System.out.println(hash);
         ArrayList<String> arr = (ArrayList<String>) hash.get("groupMembers");

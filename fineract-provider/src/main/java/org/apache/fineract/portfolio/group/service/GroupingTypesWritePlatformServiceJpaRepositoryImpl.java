@@ -884,7 +884,13 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         final List<String> changes = centerForUpdate.disassociateGroups(groupMembers);
         if (!changes.isEmpty()) {
-            actualChanges.put(GroupingTypesApiConstants.clientMembersParamName, changes);
+        	changes.stream().forEach(groupId -> {
+        		Group group = this.groupRepository.findOneWithNotFoundDetection(Long.parseLong(groupId));
+        		group.setParent(null);
+        		group.resetHierarchy();
+        		this.groupRepository.saveAndFlush(group);
+        	});
+            actualChanges.put(GroupingTypesApiConstants.groupMembersParamName, changes);
         }
 
         this.groupRepository.saveAndFlush(centerForUpdate);
