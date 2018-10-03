@@ -115,10 +115,10 @@ public class ClientEntityImportHandlerTest {
         firstClientRow.createCell(ClientEntityConstants.SUBMITTED_ON_COL).setCellValue(submittedDate);
         firstClientRow.createCell(ClientEntityConstants.ADDRESS_ENABLED).setCellValue("False");
 
-        File directory=new File(System.getProperty("user.home")+"\\Fineract\\bulkimport\\integration_tests\\importhandler\\client") ;
+        File directory=new File(System.getProperty("user.home")+File.separator+"Fineract"+File.separator+"bulkimport"+File.separator+"integration_tests"+File.separator+"importhandler"+File.separator+"client") ;
         if (!directory.exists())
             directory.mkdirs();
-        File file= new File(directory+"\\ClientEntity.xls");
+        File file= new File(directory+File.separator+"ClientEntity.xls");
         OutputStream outputStream=new FileOutputStream(file);
         workbook.write(outputStream);
         outputStream.close();

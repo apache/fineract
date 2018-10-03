@@ -102,11 +102,9 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationCo
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanEventApiJsonValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanUpdateCommandFromApiJsonDeserializer;
 import org.apache.fineract.portfolio.loanproduct.data.LoanOverdueDTO;
-import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
-import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
@@ -151,7 +149,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final HolidayRepositoryWrapper holidayRepository;
     private final ConfigurationDomainService configurationDomainService;
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
-    private final LoanProductReadPlatformService loanProductReadPlatformService;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
     private final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
@@ -186,7 +183,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final CalendarInstanceRepository calendarInstanceRepository,
             final PaymentDetailWritePlatformService paymentDetailWritePlatformService, final HolidayRepositoryWrapper holidayRepository,
             final ConfigurationDomainService configurationDomainService, final WorkingDaysRepositoryWrapper workingDaysRepository,
-            final LoanProductReadPlatformService loanProductReadPlatformService,
             final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
             final AccountTransfersReadPlatformService accountTransfersReadPlatformService,
             final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
@@ -222,7 +218,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.holidayRepository = holidayRepository;
         this.configurationDomainService = configurationDomainService;
         this.workingDaysRepository = workingDaysRepository;
-        this.loanProductReadPlatformService = loanProductReadPlatformService;
         this.accountTransfersWritePlatformService = accountTransfersWritePlatformService;
         this.accountTransfersReadPlatformService = accountTransfersReadPlatformService;
         this.accountAssociationsReadPlatformService = accountAssociationsReadPlatformService;
@@ -276,8 +271,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
                 StatusEnum.DISBURSE.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
 
-        // check for product mix validations
-        checkForProductMixRestrictions(loan);
         
         LocalDate recalculateFrom = null;
         if(!loan.isMultiDisburmentLoan()){
@@ -2267,32 +2260,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.holidayRepository.save(holidays);
     }
 
-    private void checkForProductMixRestrictions(final Loan loan) {
-
-        final List<Long> activeLoansLoanProductIds;
-        final Long productId = loan.loanProduct().getId();
-
-        if (loan.isGroupLoan()) {
-            activeLoansLoanProductIds = this.loanRepositoryWrapper.findActiveLoansLoanProductIdsByGroup(loan.getGroupId(),
-                    LoanStatus.ACTIVE.getValue());
-        } else {
-            activeLoansLoanProductIds = this.loanRepositoryWrapper.findActiveLoansLoanProductIdsByClient(loan.getClientId(),
-                    LoanStatus.ACTIVE.getValue());
-        }
-        checkForProductMixRestrictions(activeLoansLoanProductIds, productId, loan.loanProduct().productName());
-    }
-
-    private void checkForProductMixRestrictions(final List<Long> activeLoansLoanProductIds, final Long productId, final String productName) {
-
-        if (!CollectionUtils.isEmpty(activeLoansLoanProductIds)) {
-            final Collection<LoanProductData> restrictedPrdouctsList = this.loanProductReadPlatformService
-                    .retrieveRestrictedProductsForMix(productId);
-            for (final LoanProductData restrictedProduct : restrictedPrdouctsList) {
-                if (activeLoansLoanProductIds.contains(restrictedProduct.getId())) { throw new LoanDisbursalException(productName,
-                        restrictedProduct.getName()); }
-            }
-        }
-    }
 
     private void checkClientOrGroupActive(final Loan loan) {
         final Client client = loan.client();

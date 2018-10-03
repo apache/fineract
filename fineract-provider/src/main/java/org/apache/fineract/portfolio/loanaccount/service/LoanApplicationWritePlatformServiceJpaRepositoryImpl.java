@@ -88,7 +88,9 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanSchedu
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationCommandFromApiJsonHelper;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanApplicationTransitionApiJsonValidator;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
+import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.domain.*;
+import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.apache.fineract.portfolio.loanproduct.serialization.LoanProductDataValidator;
@@ -104,6 +106,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -147,6 +150,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final FineractEntityToEntityMappingRepository repository;
     private final FineractEntityRelationRepository fineractEntityRelationRepository;
+    private final LoanProductReadPlatformService loanProductReadPlatformService;
 
     @Autowired
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
@@ -169,7 +173,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final LoanScheduleAssembler loanScheduleAssembler, final LoanUtilService loanUtilService, 
             final CalendarReadPlatformService calendarReadPlatformService, final GlobalConfigurationRepositoryWrapper globalConfigurationRepository,
             final FineractEntityToEntityMappingRepository repository, final FineractEntityRelationRepository fineractEntityRelationRepository,
-            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService) {
+            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService, final LoanProductReadPlatformService loanProductReadPlatformService) {
         this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
@@ -204,6 +208,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.globalConfigurationRepository = globalConfigurationRepository;
         this.repository = repository;
         this.fineractEntityRelationRepository = fineractEntityRelationRepository;
+        this.loanProductReadPlatformService = loanProductReadPlatformService;
+
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -255,6 +261,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
 
             final Loan newLoanApplication = this.loanAssembler.assembleFrom(command, currentUser);
+
+	     checkForProductMixRestrictions(newLoanApplication);
 
             validateSubmittedOnDate(newLoanApplication);
 
@@ -412,6 +420,33 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleDataIntegrityIssues(command, throwable, dve);
          	return CommandProcessingResult.empty();
+        }
+    }
+
+
+public void checkForProductMixRestrictions(final Loan loan) {
+
+        final List<Long> activeLoansLoanProductIds;
+        final Long productId = loan.loanProduct().getId();
+
+        if (loan.isGroupLoan()) {
+            activeLoansLoanProductIds = this.loanRepositoryWrapper.findActiveLoansLoanProductIdsByGroup(loan.getGroupId(),
+                    LoanStatus.ACTIVE.getValue());
+        } else {
+            activeLoansLoanProductIds = this.loanRepositoryWrapper.findActiveLoansLoanProductIdsByClient(loan.getClientId(),
+                    LoanStatus.ACTIVE.getValue());
+        }
+        checkForProductMixRestrictions(activeLoansLoanProductIds, productId, loan.loanProduct().productName());
+    }
+
+    private void checkForProductMixRestrictions(final List<Long> activeLoansLoanProductIds, final Long productId, final String productName) {
+
+        if (!CollectionUtils.isEmpty(activeLoansLoanProductIds)) {
+            final Collection<LoanProductData> restrictedPrdouctsList = this.loanProductReadPlatformService
+                    .retrieveRestrictedProductsForMix(productId);
+            for (final LoanProductData restrictedProduct : restrictedPrdouctsList) {
+                if (activeLoansLoanProductIds.contains(restrictedProduct.getId())) { throw new GeneralPlatformDomainRuleException("error.msg.loan.applied.or.to.be.disbursed.can.not.co-exist.with.the.loan.already.active.to.this.client", "This loan could not be applied/disbursed as the loan and `" + restrictedProduct + "` are not allowed to co-exist"); }
+            }
         }
     }
 
