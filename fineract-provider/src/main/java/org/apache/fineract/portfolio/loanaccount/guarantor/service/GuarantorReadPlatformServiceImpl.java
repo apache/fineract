@@ -74,7 +74,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
     public List<GuarantorData> retrieveGuarantorsForLoan(final Long loanId) {
         final GuarantorMapper rm = new GuarantorMapper();
         String sql = "select " + rm.schema();
-        sql += " where loan_id = ?  group by g.id,gfd.id";
+        sql += " where loan_id = ?  group by g.id,gfd.id, gt.id";
         final List<GuarantorData> guarantorDatas = this.jdbcTemplate.query(sql, rm,
                 new Object[] { AccountAssociationType.GUARANTOR_ACCOUNT_ASSOCIATION.getValue(),
                         loanId });
@@ -91,7 +91,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
     public GuarantorData retrieveGuarantor(final Long loanId, final Long guarantorId) {
         final GuarantorMapper rm = new GuarantorMapper();
         String sql = "select " + rm.schema();
-        sql += " where g.loan_id = ? and g.id = ? group by g.id,gfd.id";
+        sql += " where g.loan_id = ? and g.id = ? group by g.id, gfd.id, gt.id";
         final GuarantorData guarantorData = this.jdbcTemplate.queryForObject(sql, rm,
                 new Object[] { AccountAssociationType.GUARANTOR_ACCOUNT_ASSOCIATION.getValue(),
                         loanId, guarantorId });

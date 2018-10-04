@@ -282,7 +282,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
                       " left outer join m_loan l on staff.id = l.loan_officer_id and l.loan_status_id < ? " +
                       " left outer join m_savings_account s on c.staff_id = s.field_officer_id and s.status_enum < ? "+ 
                       " where  staff.id  = ? "+
-                      " group by staff.id";
+                      " group by staff.id, client, grp, loan, sav";
         
        
 		List<Map<String, Object>> result = this.jdbcTemplate.queryForList(

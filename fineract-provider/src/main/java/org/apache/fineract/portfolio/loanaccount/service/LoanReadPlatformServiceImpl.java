@@ -1530,7 +1530,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     @Override
     public Collection<DisbursementData> retrieveLoanDisbursementDetails(final Long loanId) {
         final LoanDisbursementDetailMapper rm = new LoanDisbursementDetailMapper();
-        final String sql = "select " + rm.schema() + " where dd.loan_id=? group by dd.id order by dd.expected_disburse_date";
+        final String sql = "select " + rm.schema() + " where dd.loan_id=? group by dd.id, lc.amount_waived_derived order by dd.expected_disburse_date";
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
     }
 
@@ -1562,7 +1562,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     @Override
     public DisbursementData retrieveLoanDisbursementDetail(Long loanId, Long disbursementId) {
         final LoanDisbursementDetailMapper rm = new LoanDisbursementDetailMapper();
-        final String sql = "select " + rm.schema() + " where dd.loan_id=? and dd.id=?";
+        final String sql = "select " + rm.schema() + " where dd.loan_id=? and dd.id=? group by dd.id, lc.amount_waived_derived";
         return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId, disbursementId });
     }
 

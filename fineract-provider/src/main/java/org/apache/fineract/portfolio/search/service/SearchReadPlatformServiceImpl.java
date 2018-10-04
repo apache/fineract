@@ -262,7 +262,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                 }
             }
 
-            sql.append(" group by mo.id) a ");
+            sql.append(" group by mo.id, mp.name) a ");
 
             // update isWhereClauseAdded to false to add filters for derived
             // table
