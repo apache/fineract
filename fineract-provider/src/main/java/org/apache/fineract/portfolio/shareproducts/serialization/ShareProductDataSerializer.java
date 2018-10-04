@@ -118,10 +118,11 @@ public class ShareProductDataSerializer {
         final String shortName = this.fromApiJsonHelper.extractStringNamed(ShareProductApiConstants.shortname_paramname, element);
         baseDataValidator.reset().parameter(ShareProductApiConstants.shortname_paramname).value(shortName).notBlank()
                 .notExceedingLengthOf(4);
-        String description = null;
-        if (this.fromApiJsonHelper.parameterExists(ShareProductApiConstants.description_paramname, element)) {
-            description = this.fromApiJsonHelper.extractStringNamed(ShareProductApiConstants.description_paramname, element);
-        }
+        
+		final String description = this.fromApiJsonHelper
+				.extractStringNamed(ShareProductApiConstants.description_paramname, element);
+		baseDataValidator.reset().parameter(ShareProductApiConstants.description_paramname).value(description)
+				.notBlank().notExceedingLengthOf(500);
 
         String externalId = this.fromApiJsonHelper.extractStringNamed(ShareProductApiConstants.externalid_paramname, element);
         // baseDataValidator.reset().parameter(ShareProductApiConstants.externalid_paramname).value(externalId).notBlank();
