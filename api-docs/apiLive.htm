@@ -3872,6 +3872,14 @@
 								<td>self/clients/{clientId}/obligeedetails</td>
 								<td></td>
 								<td><a href="#self_obligee_list">Obligee list</a></td>
+								</td>
+								</td>
+							</tr>
+							<tr>
+								<td><a href="#self_service_user_reports">Run Report</a></td>
+								<td>self/runreports/{reportName}</td>
+								<td></td>
+								<td><a href="#self_service_user_reports">Run a Report</a></td>
 								<td></td>
 								<td></td>
 							</tr>
@@ -49299,6 +49307,7 @@ No Request Body:
 }					</code>
 				</div>
 			</div>
+			
 <a id="self_loanproducts" name="self_loanproducts" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -50554,6 +50563,134 @@ GET https://DomainName/api/v1/self/loanproducts/{productId}?clientId={clientId}
 	    </div>
 </div>
 
+	<a id="self_service_user_reports" name="self_service_user_reports" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Running a Report</h4>
+					<p>This resource allows you to run and receive output from pre-defined Apache Fineract reports. </p>
+                                        <p>
+                                                The default output is a JSON formatted "Generic Resultset". The Generic Resultset contains
+						Column Heading as well as Data information. However, you can
+						export to CSV format by simply adding "&exportCSV=true" to the end
+						of your URL.</p>
+					<p>If Pentaho reports have been pre-defined, they can also be
+						run through this resource. Pentaho reports can return HTML, PDF or
+						CSV formats.</p>
+					<p>The Apache Fineract reference application uses a
+						JQuery plugin called stretchyreporting which, itself, uses this
+						reports resource to provide a pretty flexible reporting User
+						Interface (UI).</p>
+					<h5>Arguments</h5>
+					<dl class="argument-list">
+						<dt>R_'parameter names' ...</dt>
+						<dd>
+							optional, <span>No defaults</span>
+						</dd>
+						<dd>The number and names of the parameters depend on the
+							specific report and how it has been configured. R_officeId is an
+							example parameter name.</dd>
+						<dd>Note: the prefix R_ stands for Reporting</dd>
+						<dt>genericResultSet</dt>
+						<dd>
+							<span>optional, defaults to true</span>
+						</dd>
+						<dd>If 'true' an optimised JSON format is returned suitable for tabular display of data.
+						<dd>If 'false' a simple JSON format is returned.
+						<dt>parameterType</dt>
+						<dd>
+							optional, <span>The only valid value is 'true'. If any
+								other value is provided the argument will be ignored</span>
+						</dd>
+						<dd>Determines whether the request looks in the list of
+							reports or the list of parameters for its data. Doesn't apply to
+							Pentaho reports.</dd>
+						<dt>exportCSV</dt>
+						<dd>
+							optional, <span>The only valid value is 'true'. If any
+								other value is provided the argument will be ignored</span>
+						</dd>
+						<dd>Output will be delivered as a CSV file instead of JSON.
+							Doesn't apply to Pentaho reports.</dd>
+						<dt>output-type</dt>
+						<dd>
+							optional, <span>Defaults to HTML.</span>
+						</dd>
+						<dd>Valid Values are HTML, XLS, XSLX, CSV and PDF for html, Excel, Excel 2007+,
+							CSV and PDF formats respectively.</dd>
+						<dd>Only applies to Pentaho reports.</dd>
+						<dt>locale</dt>
+						<dd>
+							optional
+						</dd>
+						<dd>Any valid locale Ex: en_US, en_IN, fr_FR etc</dd>
+						<dd>Only applies to Pentaho reports.</dd>
+					</dl>
+					<p>Example Requests:</p>
+					<div class=apiClick>self/runreports/Client%20Details?R_officeId=1</div>
+					<br>
+					<br>
+					<div class=apiClick>self/runreports/Client%20Details?R_officeId=1&exportCSV=true</div>
+					<br>
+					<br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/runreports/{reportName}
+					</code>
+					<code class="method-response">
+{
+    "columnHeaders": [
+        {
+            "columnName": "Office/Branch",
+            "columnType": "VARCHAR",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "Client Account No.",
+            "columnType": "VARCHAR",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "Name",
+            "columnType": "VARCHAR",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "Joined",
+            "columnType": "DATE",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "External Id",
+            "columnType": "VARCHAR",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        }
+    ],
+    "data": [
+        {
+            "row": [
+                "Head Office",
+                "000000001",
+                "John Doe",
+                "2017-03-04",
+                "786YYH7"
+            ]
+        }
+    ]
+}
+					</code>
+				</div>
+			</div>
 			<!-- end of Customer Self Service APIs-->
         </div>
 		<!-- main-content-wrapper -->

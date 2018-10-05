@@ -90,15 +90,16 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-    public StreamingOutput retrieveReportCSV(final String name, final String type, final Map<String, String> queryParams) {
+	public StreamingOutput retrieveReportCSV(final String name, final String type,
+			final Map<String, String> queryParams, final boolean isSelfServiceUserReport) {
 
-        return new StreamingOutput() {
+		return new StreamingOutput() {
 
             @Override
             public void write(final OutputStream out) {
                 try {
 
-                    final GenericResultsetData result = retrieveGenericResultset(name, type, queryParams);
+                    final GenericResultsetData result = retrieveGenericResultset(name, type, queryParams, isSelfServiceUserReport);
                     final StringBuffer sb = generateCsvFileBuffer(result);
 
                     final InputStream in = new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
@@ -171,12 +172,13 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-    public GenericResultsetData retrieveGenericResultset(final String name, final String type, final Map<String, String> queryParams) {
+	public GenericResultsetData retrieveGenericResultset(final String name, final String type,
+			final Map<String, String> queryParams, final boolean isSelfServiceUserReport) {
 
         final long startTime = System.currentTimeMillis();
         logger.info("STARTING REPORT: " + name + "   Type: " + type);
 
-        final String sql = getSQLtoRun(name, type, queryParams);
+        final String sql = getSQLtoRun(name, type, queryParams, isSelfServiceUserReport);
 
         final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
 
@@ -185,7 +187,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         return result;
     }
 
-    private String getSQLtoRun(final String name, final String type, final Map<String, String> queryParams) {
+	private String getSQLtoRun(final String name, final String type, final Map<String, String> queryParams,
+			final boolean isSelfServiceUserReport) {
 
         String sql = getSql(name, type);
 
@@ -203,18 +206,22 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         // (typically used to return report lists containing only reports
         // permitted to be run by the user
         sql = this.genericDataService.replace(sql, "${currentUserId}", currentUser.getId().toString());
+        
+		sql = this.genericDataService.replace(sql, "${isSelfServiceUser}",
+				Integer.toString(isSelfServiceUserReport ? 1 : 0));
 
-        sql = this.genericDataService.wrapSQL(sql);
+		sql = this.genericDataService.wrapSQL(sql);
 
-        return sql;
+		return sql;
 
-    }
+	}
 
     private String getSql(final String name, final String type) {
 
-        final String inputSql = "select " + type + "_sql as the_sql from stretchy_" + type + " where " + type + "_name = '" + name + "'";
+        final String inputSql = "select " + type + "_sql as the_sql from stretchy_" + type + " where " + type + "_name = '" + name + "'" ;
         final String inputSqlWrapped = this.genericDataService.wrapSQL(inputSql);
 
+        // the return statement contains the exact sql required
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(inputSqlWrapped);
 
         if (rs.next() && rs.getString("the_sql") != null) { return rs.getString("the_sql"); }
@@ -222,21 +229,22 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-    public String getReportType(final String reportName) {
+    public String getReportType(final String reportName, final boolean isSelfServiceUserReport) {
 
-        final String sql = "SELECT ifnull(report_type,'') as report_type FROM `stretchy_report` where report_name = '" + reportName + "'";
+        final String sql = "SELECT ifnull(report_type,'') as report_type FROM `stretchy_report` where report_name = '" + reportName + "' and self_service_user_report = ?";
         this.columnValidator.validateSqlInjection(sql, reportName);
         
         final String sqlWrapped = this.genericDataService.wrapSQL(sql);
 
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sqlWrapped);
+        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sqlWrapped, new Object [] {isSelfServiceUserReport});
 
         if (rs.next()) { return rs.getString("report_type"); }
         throw new ReportNotFoundException(sql);
     }
 
     @Override
-    public String retrieveReportPDF(final String reportName, final String type, final Map<String, String> queryParams) {
+	public String retrieveReportPDF(final String reportName, final String type, final Map<String, String> queryParams,
+			final boolean isSelfServiceUserReport) {
 
         final String fileLocation = FileSystemContentRepository.FINERACT_BASE_DIR + File.separator + "";
         if (!new File(fileLocation).isDirectory()) {
@@ -246,7 +254,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final String genaratePdf = fileLocation + File.separator + reportName + ".pdf";
 
         try {
-            final GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams);
+            final GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams, isSelfServiceUserReport);
 
             final List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
             final List<ResultsetRowData> data = result.getData();
