@@ -218,4 +218,15 @@ public class SelfClientsApiResource {
 		}
 	}
 
+	@GET
+	@Path("{clientId}/obligeedetails")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveObligeeDetails(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+
+		validateAppuserClientsMapping(clientId);
+
+		return this.clientApiResource.retrieveObligeeDetails(clientId, uriInfo);
+	}
+
 }

@@ -186,6 +186,7 @@ public class ClientApiConstants {
     public static final String staffOptionsParamName = "staffOptions";
 
     public static final String datatables = "datatables";
+    public static final String obligeeData = "ObligeeDetails";
 
 
     /**

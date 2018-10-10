@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -39,8 +40,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataParam;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -59,11 +58,16 @@ import org.apache.fineract.portfolio.accountdetails.data.AccountSummaryCollectio
 import org.apache.fineract.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.guarantor.data.ObligeeData;
+import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorReadPlatformService;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataParam;
 
 @Path("/clients")
 @Component
@@ -80,6 +84,7 @@ public class ClientsApiResource {
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
+    private final GuarantorReadPlatformService guarantorReadPlatformService;
 
     @Autowired
     public ClientsApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
@@ -90,7 +95,7 @@ public class ClientsApiResource {
             final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
             final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
             final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService,
-            final BulkImportWorkbookService bulkImportWorkbookService) {
+            final BulkImportWorkbookService bulkImportWorkbookService, final GuarantorReadPlatformService guarantorReadPlatformService) {
         this.context = context;
         this.clientReadPlatformService = readPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
@@ -101,6 +106,7 @@ public class ClientsApiResource {
         this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
         this.bulkImportWorkbookPopulatorService=bulkImportWorkbookPopulatorService;
         this.bulkImportWorkbookService=bulkImportWorkbookService;
+        this.guarantorReadPlatformService = guarantorReadPlatformService;
     }
 
     @GET
@@ -341,4 +347,18 @@ public class ClientsApiResource {
         final Long importDocumentId = bulkImportWorkbookService.importWorkbook(legalFormType, uploadedInputStream,fileDetail,locale,dateFormat);
         return this.toApiJsonSerializer.serialize(importDocumentId);
     }
+
+	@GET
+	@Path("{clientId}/obligeedetails")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveObligeeDetails(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+
+		this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
+
+		final List<ObligeeData> ObligeeList = this.guarantorReadPlatformService.retrieveObligeeDetails(clientId);
+
+		return this.toApiJsonSerializer.serialize(ObligeeList);
+	}
+
 }

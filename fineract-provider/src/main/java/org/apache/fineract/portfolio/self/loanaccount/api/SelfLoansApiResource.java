@@ -42,6 +42,7 @@ import org.apache.fineract.portfolio.loanaccount.api.LoansApiResource;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTemplateTypeRequiredException;
 import org.apache.fineract.portfolio.loanaccount.exception.NotSupportedLoanTemplateTypeException;
+import org.apache.fineract.portfolio.loanaccount.guarantor.api.GuarantorsApiResource;
 import org.apache.fineract.portfolio.self.client.service.AppuserClientMapperReadService;
 import org.apache.fineract.portfolio.self.loanaccount.data.SelfLoansDataValidator;
 import org.apache.fineract.portfolio.self.loanaccount.service.AppuserLoansMapperReadService;
@@ -62,6 +63,7 @@ public class SelfLoansApiResource {
 	private final AppuserLoansMapperReadService appuserLoansMapperReadService;
 	private final AppuserClientMapperReadService appUserClientMapperReadService;
 	private final SelfLoansDataValidator dataValidator;
+	private final GuarantorsApiResource guarantorsApiResource;
 
 	@Autowired
 	public SelfLoansApiResource(final PlatformSecurityContext context,
@@ -70,7 +72,7 @@ public class SelfLoansApiResource {
 			final LoanChargesApiResource loanChargesApiResource,
 			final AppuserLoansMapperReadService appuserLoansMapperReadService,
 			final AppuserClientMapperReadService appUserClientMapperReadService,
-			final SelfLoansDataValidator dataValidator) {
+			final SelfLoansDataValidator dataValidator, final GuarantorsApiResource guarantorsApiResource) {
 		this.context = context;
 		this.loansApiResource = loansApiResource;
 		this.loanTransactionsApiResource = loanTransactionsApiResource;
@@ -78,6 +80,7 @@ public class SelfLoansApiResource {
 		this.appuserLoansMapperReadService = appuserLoansMapperReadService;
 		this.appUserClientMapperReadService = appUserClientMapperReadService;
 		this.dataValidator = dataValidator;
+		this.guarantorsApiResource = guarantorsApiResource;
 	}
 
 	@GET
@@ -232,5 +235,15 @@ public class SelfLoansApiResource {
     private boolean is(final String commandParam, final String commandValue) {
         return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
+    
+	@GET
+	@Path("{loanId}/guarantors")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveGuarantorDetails(@PathParam("loanId") final Long loanId, @Context final UriInfo uriInfo) {
+
+		validateAppuserLoanMapping(loanId);
+		return this.guarantorsApiResource.retrieveGuarantorDetails(uriInfo, loanId);
+	}
 
 }

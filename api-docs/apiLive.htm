@@ -3769,6 +3769,22 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr>
+								<td><a href="#self_guarantors_list">Guarantor and Obligee details</a></td>
+								<td>self/loans/{loanId}/guarantors</td>
+								<td></td>
+								<td><a href="#self_guarantors_list">Guarantors list</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/clients/{clientId}/obligeedetails</td>
+								<td></td>
+								<td><a href="#self_obligee_list">Obligee list</a></td>
+								<td></td>
+								<td></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -48394,6 +48410,238 @@ Request Body:
 	    </div>
 </div>
 
+<a id="self_guarantors_list" name="self_guarantors_list"
+				class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+			<h4>List Guarantors</h4>
+			<p>Example Requests:</p>
+			<div class=apiClick>self/loans/33/guarantors</div>
+				<br>
+			</div>
+			<div class="method-example">
+				<code class="method-declaration">
+GET https://DomainName/api/v1/self/loans/{loanId}/guarantors
+				</code>
+			<code class="method-response">
+[  
+   {  
+      "id":6,
+      "loanId":33,
+      "guarantorType":{  
+         "id":1,
+         "code":"guarantor.existing.customer",
+         "value":"CUSTOMER"
+      },
+      "firstname":"Abhishek v",
+      "lastname":"M",
+      "entityId":12,
+      "officeName":"Head Office",
+      "joinedDate":[  
+         2014,
+         7,
+         5
+      ],
+      "guarantorFundingDetails":[  
+         {  
+            "id":7,
+            "status":{  
+               "id":100,
+               "code":"guarantorFundStatusType.active",
+               "value":"ACTIVE"
+            },
+            "savingsAccount":{  
+               "id":28,
+               "accountNo":"000000028"
+            },
+            "amount":2000,
+            "amountReleased":0,
+            "amountRemaining":2000,
+            "amountTransfered":0,
+            "guarantorTransactions":[  
+               {  
+                  "id":6,
+                  "onHoldTransactionData":{  
+                     "id":6,
+                     "amount":2000,
+                     "transactionType":{  
+                        "id":1,
+                        "code":"deposutAccountOnHoldTransactionType.hold",
+                        "value":"hold"
+                     },
+                     "transactionDate":[  
+                        2018,
+                        10,
+                        10
+                     ],
+                     "reversed":false,
+                     "savingsId":0,
+                     "loanId":0
+                  },
+                  "reversed":false
+               }
+            ]
+         }
+      ],
+      "status":true
+   },
+   {  
+      "id":7,
+      "loanId":33,
+      "clientRelationshipType":{  
+         "id":6,
+         "name":"Parent",
+         "active":false,
+         "mandatory":false
+      },
+      "guarantorType":{  
+         "id":1,
+         "code":"guarantor.existing.customer",
+         "value":"CUSTOMER"
+      },
+      "firstname":"Bheem",
+      "lastname":"Test",
+      "entityId":14,
+      "officeName":"Head Office",
+      "joinedDate":[  
+         2013,
+         7,
+         3
+      ],
+      "guarantorFundingDetails":[  
+         {  
+            "id":8,
+            "status":{  
+               "id":100,
+               "code":"guarantorFundStatusType.active",
+               "value":"ACTIVE"
+            },
+            "savingsAccount":{  
+               "id":37,
+               "accountNo":"000000037"
+            },
+            "amount":1000,
+            "amountReleased":0,
+            "amountRemaining":1000,
+            "amountTransfered":0,
+            "guarantorTransactions":[  
+               {  
+                  "id":7,
+                  "onHoldTransactionData":{  
+                     "id":7,
+                     "amount":1000,
+                     "transactionType":{  
+                        "id":1,
+                        "code":"deposutAccountOnHoldTransactionType.hold",
+                        "value":"hold"
+                     },
+                     "transactionDate":[  
+                        2018,
+                        10,
+                        10
+                     ],
+                     "reversed":false,
+                     "savingsId":0,
+                     "loanId":0
+                  },
+                  "reversed":false
+               }
+            ]
+         }
+      ],
+      "status":true
+   }
+]
+			</code>
+		</div>
+	</div>
+	<a id="self_obligee_list" name="self_obligee_list"
+				class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+			<h4>Obligee List</h4>
+			<p>Obligee list provides list of clients and other details, to whom the user has agreed to be a guarantor.</p>
+			
+			<table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Field Descriptions</div></td></tr>
+
+				<tr class=alt><td>clientId</td></tr>
+				<tr><td class=fielddesc>The client id of the self service user.</td></tr>
+
+				<tr class=alt><td>firstName, lastName, displayName</td></tr>
+				<tr><td class=fielddesc>The first name, last name and display name of the obligee</td></tr>
+				
+				<tr class=alt><td>accountNumber, loanAmount</td></tr>
+				<tr><td class=fielddesc>The loan account number and principal amount of the obligee </td></tr>
+				
+				<tr class=alt><td>guaranteeAmount, amountReleased, amountTransferred</td></tr>
+				<tr><td class=fielddesc>Guranteed amount, released and transferred amount of the client</td></tr>
+			</table>
+					
+			<p>Example Requests:</p>
+			<div class=apiClick>self/clients/14/obligeedetails</div>
+				<br>
+			</div>
+			<div class="method-example">
+				<code class="method-declaration">
+GET https://DomainName/api/v1/self/clients/{clientId}/obligeedetails
+				</code>
+			<code class="method-response">		
+			[  
+   {  
+      "firstName":"App",
+      "lastName":"Test",
+      "displayName":"App Test",
+      "accountNumber":"000000005",
+      "loanAmount":50000,
+      "guaranteeAmount":10000,
+      "amountReleased":0,
+      "amountTransferred":0
+   },
+   {  
+      "firstName":"App",
+      "lastName":"Test",
+      "displayName":"App Test",
+      "accountNumber":"000000005",
+      "loanAmount":50000,
+      "guaranteeAmount":5000,
+      "amountReleased":0,
+      "amountTransferred":0
+   },
+   {  
+      "firstName":"App",
+      "lastName":"Test",
+      "displayName":"App Test",
+      "accountNumber":"000000006",
+      "loanAmount":50000,
+      "guaranteeAmount":10000,
+      "amountReleased":0,
+      "amountTransferred":0
+   },
+   {  
+      "firstName":"Abhishek v",
+      "lastName":"M",
+      "displayName":"Abhishek v M",
+      "accountNumber":"000000032",
+      "loanAmount":10000,
+      "guaranteeAmount":1000,
+      "amountReleased":1000,
+      "amountTransferred":0
+   },
+   {  
+      "firstName":"Abhishek v",
+      "lastName":"M",
+      "displayName":"Abhishek v M",
+      "accountNumber":"000000033",
+      "loanAmount":10000,
+      "guaranteeAmount":1000,
+      "amountReleased":0,
+      "amountTransferred":0
+   }
+]
+			</code>
+		</div>
+	</div>
 			<!-- end of Customer Self Service APIs-->
         </div>
 		<!-- main-content-wrapper -->
