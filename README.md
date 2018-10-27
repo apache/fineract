@@ -21,9 +21,9 @@ Instructions to run Apache RAT (Release Audit Tool)
 ============
 1. Extract the archive file to your local directory.
 2. Download gradle-wrapper.jar version 2.10 and place it in the fineract-provider/gradle/wrapper folder. See 'Instructions to download gradle wrapper' above.
-3. Run `./gradlew rat`. Report will be generated under build/reports/rat/rat-report.txt
+3. Run `./gradlew rat`. A report will be generated under build/reports/rat/rat-report.txt
 
-Instructions to build war file
+Instructions to build a war file
 ============
 1. Extract the archive file to your local directory.
 2. Download gradle-wrapper.jar version 2.10 and place it in the fineract-provider/gradle/wrapper folder. See 'Instructions to download gradle wrapper' above.
@@ -37,14 +37,14 @@ Instructions to execute Integration tests
 3. Create the default tenant database using `CREATE DATABASE mifostenant-default`.
 4. Download gradle-wrapper.jar version 2.10 and place it in the fineract-provider/gradle/wrapper folder. See 'Instructions to download gradle wrapper' above.
 5. Run the following commands:
-	1. `./gradlew migrateTenantListDB -PdbName=mifosplatform-tenants`
-	2. `./gradlew migrateTenantDB -PdbName=mifostenant-default`
+    1. `./gradlew migrateTenantListDB -PdbName=mifosplatform-tenants`
+    2. `./gradlew migrateTenantDB -PdbName=mifostenant-default`
 6. Run `./gradlew clean integrationTest`
 
 Version
 ============
 
-The latest stable release can be viewed on the develop branch: [Latest Release on Develop](https://github.com/apache/incubator-fineract/tree/develop "Latest Release"), [View change log](https://github.com/apache/incubator-fineract/blob/develop/CHANGELOG.md "Latest release change log")
+The latest stable release can be viewed on the develop branch: [Latest Release on Develop](https://github.com/apache/incubator-fineract/tree/develop "Latest Release"), [View change log](https://github.com/apache/incubator-fineract/blob/develop/CHANGELOG.md "Latest release changelog")
 
 License
 ============
