@@ -24,7 +24,9 @@ import java.util.Date;
 
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 
+@SuppressWarnings("unused")
 public class AddressData {
+	
 	private final Long client_id;
 
 	private final String addressType;

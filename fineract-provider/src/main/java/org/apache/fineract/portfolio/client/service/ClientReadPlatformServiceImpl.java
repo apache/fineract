@@ -169,8 +169,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         return ClientData.template(defaultOfficeId, new LocalDate(), offices, staffOptions, null, genderOptions, savingsProductDatas,
                 clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions,
-                clientLegalFormOptions,familyMemberOptions,address,isAddressEnabled, datatableTemplates);
-    }
+				clientLegalFormOptions, familyMemberOptions, new ArrayList<AddressData>(Arrays.asList(address)),
+				isAddressEnabled, datatableTemplates);
+	}
 
     @Override
    // @Transactional(readOnly=true)
@@ -427,7 +428,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public ClientData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final String accountNo = rs.getString("accountNo");
 
@@ -612,7 +613,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public ClientData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final String accountNo = rs.getString("accountNo");
 
@@ -714,7 +715,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public GroupGeneralData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public GroupGeneralData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final Long groupId = JdbcSupport.getLong(rs, "groupId");
             final String groupName = rs.getString("groupName");
@@ -744,7 +745,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public ClientData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("id");
             final String displayName = rs.getString("displayName");
@@ -778,7 +779,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public ClientData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("id");
             final String accountNo = rs.getString("accountNo");
