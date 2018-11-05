@@ -3602,6 +3602,30 @@
 								<td></td>
 							</tr>
 							<tr>
+								<td></td>
+								<td>self/clients/{clientId}/images</td>
+								<td><a href="#self_client_images_upload">Upload client image (Data URI)</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/clients/{clientId}/images</td>
+								<td><a href="#self_client_images_upload_multi_part">Upload client image (Multi-part Form data)</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/clients/{clientId}/images</td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td><a href="#self_client_image_delete">Delete client image</a></td>
+							</tr>
+							<tr>
 								<td><a href="#selfloantemplate">Loans</a></td>
 								<td>self/loans/template?templateType=individual</td>
 								<td></td>
@@ -49110,6 +49134,98 @@ GET https://DomainName/api/v1/self/clients/{clientId}/obligeedetails
 			</code>
 		</div>
 	</div>
+
+	<a id="self_client_images_upload" name="self_client_images_upload" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Upload client image (Data URI)</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/self/clients/{clientId}/images
+					</code>
+					<code class="method-request">
+POST self/clients/14/images
+Content-Type: text/plain
+Request Body:
+data:image/png;base64,iVBORw0KGgoAA
+AANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD///+l2Z/dAAAAM0l
+EQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4Ug9C9zwz3gVLMDA/A6
+P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 14,
+  "changes": {},
+  "resourceIdentifier": "14"
+}
+					</code>
+				</div>
+			</div>
+			
+				<a id="self_client_images_upload_multi_part" name="self_client_images_upload_multi_part" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Upload client image (Multi-part Form data)</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>file
+							</td>
+						</tr>
+					</table>
+					<p>
+						The form should contain a required named body part with the
+						name "file". <br/> <br/>
+						If you are using a HTML form, a snippet like
+						<small> &lt;input type="file" name="file"&gt;&lt;/input&gt; </small>
+						can be used for uploading the image file
+					</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/self/clients/{clientId}/images
+					</code>
+					<code class="method-request">
+POST self/clients/14/images
+Content-Type: multipart/form-data
+Request Body: <i>Not shown</i>
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 14,
+  "changes": {},
+  "resourceIdentifier": "14"
+}
+					</code>
+				</div>
+			</div>
+		<a id="self_client_image_delete" name="self_client_image_delete" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete an client's Image</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/self/clients/{clientId}/images
+					</code>
+					<code class="method-request">
+DELETE self/clients/14/images
+Content-Type: application/json
+No Request Body:
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 14,
+  "changes": {},
+  "resourceIdentifier": "14"
+}
+					</code>
+				</div>
+			</div>
+	
 			<!-- end of Customer Self Service APIs-->
         </div>
 		<!-- main-content-wrapper -->
