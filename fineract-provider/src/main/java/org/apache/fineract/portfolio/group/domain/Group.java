@@ -46,10 +46,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerator;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -334,7 +334,9 @@ public final class Group extends AbstractPersistableCustom<Long> {
             actualChanges.put(GroupingTypesApiConstants.localeParamName, localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
-            this.activationDate = newValue.toDate();
+			if (newValue != null) {
+				this.activationDate = newValue.toDate();
+			}
         }
         
         if (command.isChangeInStringParameterNamed(GroupingTypesApiConstants.accountNoParamName, this.accountNumber)) {
