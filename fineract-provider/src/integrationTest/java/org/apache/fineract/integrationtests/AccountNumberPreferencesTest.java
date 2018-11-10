@@ -373,8 +373,9 @@ public class AccountNumberPreferencesTest {
         }
     }
 
-    private void validateAccountNumberLengthAndStartsWithPrefix(final String accountNumber, final String prefix) {
+    private void validateAccountNumberLengthAndStartsWithPrefix(final String accountNumber, String prefix) {
         if (prefix != null) {
+        		prefix = prefix.substring(0, Math.min(prefix.length(), 10));
             Assert.assertEquals(accountNumber.length(), prefix.length() + 9);
             Assert.assertTrue(accountNumber.startsWith(prefix));
         } else {

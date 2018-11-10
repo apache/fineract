@@ -183,6 +183,7 @@ public class DepositTermDetail {
             final Integer inMultiplesOfInDays = this.convertToSafeDays(this.inMultiplesOfDepositTerm(),
                     SavingsPeriodFrequencyType.fromInt(this.inMultiplesOfDepositTermType()));
             final Integer minDepositInDays = this.convertToSafeDays(minDepositTerm, SavingsPeriodFrequencyType.fromInt(minDepositTermType));
+            if(inMultiplesOfInDays!=0)
             isValidInMultiplesOfPeriod = ((depositPeriodInDays - minDepositInDays) % inMultiplesOfInDays == 0);
         }
 

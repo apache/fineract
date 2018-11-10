@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
@@ -62,6 +63,7 @@ public class AccountTransfersReadPlatformServiceImpl implements
 	private final ClientReadPlatformService clientReadPlatformService;
 	private final OfficeReadPlatformService officeReadPlatformService;
 	private final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService;
+	private final ColumnValidator columnValidator;
 
 	// mapper
 	private final AccountTransfersMapper accountTransfersMapper;
@@ -76,11 +78,13 @@ public class AccountTransfersReadPlatformServiceImpl implements
 			final RoutingDataSource dataSource,
 			final ClientReadPlatformService clientReadPlatformService,
 			final OfficeReadPlatformService officeReadPlatformService,
-			final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService) {
+			final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService,
+			final ColumnValidator columnValidator) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.clientReadPlatformService = clientReadPlatformService;
 		this.officeReadPlatformService = officeReadPlatformService;
 		this.portfolioAccountReadPlatformService = portfolioAccountReadPlatformService;
+		this.columnValidator = columnValidator;
 
 		this.accountTransfersMapper = new AccountTransfersMapper();
 	}
@@ -259,9 +263,10 @@ public class AccountTransfersReadPlatformServiceImpl implements
 		if (searchParameters.isOrderByRequested()) {
 			sqlBuilder.append(" order by ").append(
 					searchParameters.getOrderBy());
-
+			this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
 			if (searchParameters.isSortOrderProvided()) {
 				sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+				this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
 			}
 		}
 
@@ -514,10 +519,11 @@ public class AccountTransfersReadPlatformServiceImpl implements
 			if (searchParameters.isOrderByRequested()) {
 				sqlBuilder.append(" order by ").append(
 						searchParameters.getOrderBy());
-
+				this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
 				if (searchParameters.isSortOrderProvided()) {
 					sqlBuilder.append(' ').append(
 							searchParameters.getSortOrder());
+					this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
 				}
 			}
 

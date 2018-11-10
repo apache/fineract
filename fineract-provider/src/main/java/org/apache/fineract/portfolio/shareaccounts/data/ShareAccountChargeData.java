@@ -65,6 +65,27 @@ public class ShareAccountChargeData {
 
     private final Collection<ChargeData> chargeOptions;
 
+    public ShareAccountChargeData(Long chargeId, BigDecimal amount) {
+        this.chargeId = chargeId;
+        this.amount = amount;
+        this.id = null;
+        this.accountId = null;
+        this.name = null;
+        this.chargeTimeType = null;
+        this.chargeCalculationType = null;
+        this.percentage = null;
+        this.amountPercentageAppliedTo = null;
+        this.currency = null;
+        this.amountPaid = null;
+        this.amountWaived = null;
+        this.amountWrittenOff = null;
+        this.amountOutstanding = null;
+        this.amountOrPercentage = null;
+        this.isActive = null;
+        this.chargeOptions = null;
+    }
+
+
     public ShareAccountChargeData(final Long id, final Long chargeId, final Long accountId, final String name,
             final CurrencyData currency, final BigDecimal amount, final BigDecimal amountPaid, final BigDecimal amountWaived,
             final BigDecimal amountWrittenOff, final BigDecimal amountOutstanding, final EnumOptionData chargeTimeType,

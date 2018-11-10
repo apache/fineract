@@ -415,7 +415,6 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
 		
 		this.context.authenticatedUser();
 		
-		System.out.println("clientFamilyMemberId "+clientFamilyMemberId);
 		apiJsonDeserializer.validateForDelete(clientFamilyMemberId);
 		
 		ClientFamilyMembers clientFamilyMember=null;

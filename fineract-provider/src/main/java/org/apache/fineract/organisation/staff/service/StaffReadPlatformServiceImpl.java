@@ -241,14 +241,16 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         }
         // Passing status parameter to get ACTIVE (By Default), INACTIVE or ALL
         // (Both active and Inactive) employees
-        if (status.equalsIgnoreCase("active")) {
-            extraCriteria.append(" and s.is_active = 1 ");
-        } else if (status.equalsIgnoreCase("inActive")) {
-            extraCriteria.append(" and s.is_active = 0 ");
-        } else if (status.equalsIgnoreCase("all")) {} else {
-            throw new UnrecognizedQueryParamException("status", status, new Object[] { "all", "active", "inactive" });
+        if (status!=null) {
+            if (status.equalsIgnoreCase("active")) {
+                extraCriteria.append(" and s.is_active = 1 ");
+            } else if (status.equalsIgnoreCase("inActive")) {
+                extraCriteria.append(" and s.is_active = 0 ");
+            } else if (status.equalsIgnoreCase("all")) {
+            } else {
+                throw new UnrecognizedQueryParamException("status", status, new Object[]{"all", "active", "inactive"});
+            }
         }
-        
         //adding the Authorization criteria so that a user cannot see an employee who does not belong to his office or 	a sub office for his office.
         
         extraCriteria.append(" and o.hierarchy like ? ");
@@ -280,7 +282,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
                       " left outer join m_loan l on staff.id = l.loan_officer_id and l.loan_status_id < ? " +
                       " left outer join m_savings_account s on c.staff_id = s.field_officer_id and s.status_enum < ? "+ 
                       " where  staff.id  = ? "+
-                      " group by staff.id";
+                      " group by staff.id, client, grp, loan, sav";
         
        
 		List<Map<String, Object>> result = this.jdbcTemplate.queryForList(

@@ -1,5 +1,3 @@
-package org.apache.fineract.notification;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -18,6 +16,8 @@ package org.apache.fineract.notification;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package org.apache.fineract.notification;
 
 import org.apache.fineract.notification.domain.Notification;
 import org.apache.fineract.notification.domain.NotificationMapper;

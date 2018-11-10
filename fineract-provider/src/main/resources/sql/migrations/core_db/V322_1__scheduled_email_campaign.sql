@@ -16,36 +16,35 @@
 -- specific language governing permissions and limitations
 -- under the License.
 --
-create table if not exists scheduled_email_campaign (
-id bigint(20) NOT NULL AUTO_INCREMENT,
-campaign_name varchar(100) NOT NULL,
-campaign_type int NOT NULL,
-businessRule_id int NOT NULL,
-param_value text,
-status_enum int NOT NULL,
-closedon_date date,
-closedon_userid bigint(20),
-submittedon_date date,
-submittedon_userid bigint(20),
-approvedon_date date,
-approvedon_userid bigint(20),
-recurrence varchar(100),
-next_trigger_date datetime,
-last_trigger_date datetime,
-recurrence_start_date datetime,
-email_subject varchar(100) not null,
-email_message text not null,
-email_attachment_file_format varchar(10) not null,
-stretchy_report_id int not null,
-stretchy_report_param_map text null,
-previous_run_status varchar(10) null,
-previous_run_error_log text null,
-previous_run_error_message text null,
-is_visible tinyint(1) null,
-foreign key (submittedon_userid) references m_appuser(id),
-foreign key (stretchy_report_id) references stretchy_report(id),
-  PRIMARY KEY (id)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `scheduled_email_campaign` (
+	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+	`campaign_name` VARCHAR(100) NOT NULL,
+	`campaign_type` INT(11) NOT NULL,
+	`businessRule_id` INT(11) NOT NULL,
+	`param_value` TEXT NULL,
+	`status_enum` INT(11) NOT NULL,
+	`email_subject` VARCHAR(100) NOT NULL, 
+	`email_message` TEXT NOT NULL,
+	`email_attachment_file_format` VARCHAR(10) NOT NULL,
+	`stretchy_report_id` INT(11) NOT NULL,
+	`stretchy_report_param_map` TEXT NULL DEFAULT NULL,
+	`closedon_date` DATE NULL DEFAULT NULL,
+	`closedon_userid` BIGINT(20) NULL DEFAULT NULL,
+	`submittedon_date` DATE NULL DEFAULT NULL,
+	`submittedon_userid` BIGINT(20) NULL DEFAULT NULL,
+	`approvedon_date` DATE NULL DEFAULT NULL,
+	`approvedon_userid` BIGINT(20) NULL DEFAULT NULL,
+	`recurrence` VARCHAR(100) NULL DEFAULT NULL,
+	`next_trigger_date` DATETIME NULL DEFAULT NULL,
+	`last_trigger_date` DATETIME NULL DEFAULT NULL,
+	`recurrence_start_date` DATETIME NULL DEFAULT NULL,
+	`is_visible` TINYINT(1) NULL DEFAULT '1',
+	`previous_run_error_log` TEXT NULL DEFAULT NULL,
+	`previous_run_error_message` TEXT NULL DEFAULT NULL,
+	PRIMARY KEY (`id`),
+	CONSTRAINT `scheduled_email_campaign_ibfk_1` FOREIGN KEY (`stretchy_report_id`) REFERENCES `stretchy_report` (`id`)	
+);
 
 CREATE TABLE IF NOT EXISTS scheduled_email_messages_outbound (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -67,8 +66,8 @@ CREATE TABLE IF NOT EXISTS scheduled_email_messages_outbound (
   CONSTRAINT `SEFKGROUP000000001` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`),
   CONSTRAINT `SEFKCLIENT00000001` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
   CONSTRAINT `SEFKSTAFF000000001` FOREIGN KEY (`staff_id`) REFERENCES `m_staff` (`id`),
-  CONSTRAINT `fk_schedule_email_campign` FOREIGN KEY (`email_campaign_id`) REFERENCES `scheduled_email_campaign` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  CONSTRAINT `fk_schedule_email_campign1` FOREIGN KEY (`email_campaign_id`) REFERENCES `scheduled_email_campaign` (`id`)
+);
 
 create table if not exists scheduled_email_configuration (
 id int primary key auto_increment,

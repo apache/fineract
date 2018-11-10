@@ -148,7 +148,7 @@ public class XBRLResultServiceImpl implements XBRLResultService {
                 + " and acc_gl_journal_entry.entry_date > " + startDate +
                 // "and (acc_gl_journal_entry.office_id=${branch} or ${branch}=1) "
                 // +
-                " group by name " + "order by glcode) credits " + "on debits.glcode=credits.glcode;";
+                " group by name, glcode " + "order by glcode) credits " + "on debits.glcode=credits.glcode;";
         return sql;
     }
 

@@ -3602,6 +3602,30 @@
 								<td></td>
 							</tr>
 							<tr>
+								<td></td>
+								<td>self/clients/{clientId}/images</td>
+								<td><a href="#self_client_images_upload">Upload client image (Data URI)</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/clients/{clientId}/images</td>
+								<td><a href="#self_client_images_upload_multi_part">Upload client image (Multi-part Form data)</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/clients/{clientId}/images</td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td><a href="#self_client_image_delete">Delete client image</a></td>
+							</tr>
+							<tr>
 								<td><a href="#selfloantemplate">Loans</a></td>
 								<td>self/loans/template?templateType=individual</td>
 								<td></td>
@@ -3667,10 +3691,26 @@
 							</tr>
 							<tr>
 								<td><a href="#selfsavings">Savings</a></td>
+								<td>self/savingsaccounts/template?clientId={clientId}&productId={productId}</td>
+								<td></td>
+								<td><a href="#selfsavings_template">Retrieve Savings Application Template</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/savingsaccounts</td>
+								<td><a href="#selfsavingssubmission">Submit new Savings Application</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
 								<td>self/savingsaccounts/{accountId}</td>
 								<td></td>
 								<td><a href="#selfsavings">Retrieve a Savings Account</a></td>
-								<td></td>
+								<td><a href="#selfsavings_update">Update Savings Account</a></td>
 								<td></td>
 							</tr>
 							<tr>
@@ -3697,6 +3737,30 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr>
+								<td><a href="#selfshareaccount_template">Share Accounts</a></td>
+								<td>self/shareaccounts/template?clientId=?productId=?</td>
+								<td></td>
+								<td><a href="#selfshareaccount_template">Share Accounts Template</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							
+							<tr>
+								<td></td>
+								<td>self/shareaccounts</td>
+								<td><a href="#selfshareaccount_create">Submit New Share Application</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/shareaccounts/{accountId}</td>
+								<td></td>
+								<td><a href="#selfshareaccount_retrieve">Retrieve a Share Application/Account</a></td>
+								<td></td>
+							</tr>				
 							<tr>
 								<td><a href="#selftransfertemplate">Own Account Transfers</a></td>
 								<td>self/accounttransfers/template</td>
@@ -3742,6 +3806,22 @@
 								<td>self/accounttransfers?type="tpt"</td>
 								<td><a href="#selftpttransfer">Third Party Account Transfer</a></td>
 								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#self_guarantors_list">Guarantor and Obligee details</a></td>
+								<td>self/loans/{loanId}/guarantors</td>
+								<td></td>
+								<td><a href="#self_guarantors_list">Guarantors list</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/clients/{clientId}/obligeedetails</td>
+								<td></td>
+								<td><a href="#self_obligee_list">Obligee list</a></td>
 								<td></td>
 								<td></td>
 							</tr>
@@ -46695,6 +46775,100 @@ GET https://DomainName/api/v1/self/loans/{loanId}/charges/{chargeId}
 				</div>
 			</div>
 
+			
+	<a id="selfsavingssubmission" name="selfsavingssubmission" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Submit new savings application</h2>
+	        <br/>
+	        <table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields</div></td></tr>
+	            <tr class=alt><td>clientId, productId, submittedOnDate</td></tr>
+	        </table>
+	        <br/>
+	        <table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Optional Fields</div></td></tr>
+	            <tr class=alt><td>accountNo, externalId, fieldOfficerId</td></tr>
+	        </table>
+	        <br/>
+	        <table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Inherited from Product (if not provided)</div></td></tr>
+	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, allowOverdraft, overdraftLimit, withHoldTax</td>
+	       		</tr>
+	        </table>
+            <br/>
+	    </div>
+	    <div class="method-example">
+	    	<p>Minimal request: accountNo auto generated, remaining details inherited from savings product.</p>
+	        <code class="method-declaration">POST https://Domain Name/api/v1/self/savingsaccounts</code>
+	        <code class="method-request">POST self/savingsaccount
+Content-Type: application/json
+Request Body:
+{  
+	"productId":3,
+	"clientId":"14",
+	"locale":"en",
+	"dateFormat":"dd MMMM yyyy",
+	"submittedOnDate":"09 July 2018"
+}
+			</code>
+			 <code class="method-response">
+{  
+	"officeId":1,
+	"clientId":14,
+	"savingsId":10,
+	"resourceId":10
+}
+	        </code>
+			
+			<p>Full request:Below details override details from savings product (except currency).</p>
+			<code class="method-request">POST self/savingsaccount
+Content-Type: application/json
+Request Body:
+{  
+	"productId":1,
+	"nominalAnnualInterestRate":9.5,
+	"minRequiredOpeningBalance":1000,
+	"lockinPeriodFrequency":1,
+	"withdrawalFeeForTransfers":true,
+	"allowOverdraft":true,
+	"overdraftLimit":"10000",
+	"nominalAnnualInterestRateOverdraft":"5",
+	"minOverdraftForInterestCalculation":"1000",
+	"enforceMinRequiredBalance":false,
+	"withHoldTax":false,
+	"interestCompoundingPeriodType":1,
+	"interestPostingPeriodType":4,
+	"interestCalculationType":1,
+	"interestCalculationDaysInYearType":365,
+	"lockinPeriodFrequencyType":1,
+	"fieldOfficerId":1,
+	"externalId":"126",
+	"submittedOnDate":"11 July 2018",
+	"locale":"en",
+	"dateFormat":"dd MMMM yyyy",
+	"monthDayFormat":"dd MMM",
+	"charges":[  
+		{  
+		"chargeId":3,
+		"amount":2
+		}
+	],
+	"clientId":"14"
+}
+			</code>
+	        <code class="method-response">
+{  
+	"officeId":1,
+	"clientId":14,
+	"savingsId":9,
+	"resourceId":9
+}
+	        </code>
+	    </div>
+	</div>
+
+	
 	<a id="selfsavings" name="selfsavings" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
@@ -46783,6 +46957,364 @@ GET https://DomainName/api/v1/self/loans/{loanId}/charges/{chargeId}
   }
 }
 	        </code>
+	    </div>
+	</div>
+	
+	<a id="selfsavings_update" name="selfsavings_update" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Modify a savings application</h2>
+	        <p>Savings application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">PUT https://Domain Name/api/v1/self/savingsaccounts/{accountsId}</code>
+	        <code class="method-request">PUT self/savingsaccounts/1
+Content-Type: application/json
+No Request Body:
+{
+	"productId":1,
+	"clientId":14
+}
+	        </code>
+	        <code class="method-response">
+{
+    "officeId": 1,
+    "clientId": 14,
+    "savingsId": 11,
+    "resourceId": 11,
+    "changes": {
+        "productId": 1
+    }
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="selfsavings_template" name="selfsavings_template" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve Savings Account Template:</h2>
+	        <h4>Arguments</h4>
+	        <dl class="argument-list">
+	            <dt>clientId</dt>
+	            <dd>Integer <span>mandatory</span></dd>
+	            <dt>productId</dt>
+	            <dd>Integer <span>optional</span></dd>
+	            <dd>If entered, productId, productName and selectedProduct fields are returned.</dd>
+	        </dl>
+	        <p>Example Requests: </p>
+	        <div class=apiClick>self/savingsaccounts/template?clientId=14</div>
+	        <br><br>
+	        <div class=apiClick>self/savingsaccounts/template?clientId=14&productId=2</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/self/savingsaccounts/template?clientId={clientId}</code>
+			<code class="method-response">
+{
+    "clientId": 14,
+    "clientName": "Bheem",
+    "withdrawalFeeForTransfers": false,
+    "allowOverdraft": false,
+    "enforceMinRequiredBalance": false,
+    "withHoldTax": false,
+    "isDormancyTrackingActive": false,
+    "productOptions": [
+        {
+            "id": 1,
+            "name": "Voluntary savings",
+            "withdrawalFeeForTransfers": false,
+            "allowOverdraft": false,
+            "enforceMinRequiredBalance": false,
+            "withHoldTax": false
+        },
+        {
+            "id": 2,
+            "name": "Savings",
+            "withdrawalFeeForTransfers": false,
+            "allowOverdraft": false,
+            "enforceMinRequiredBalance": false,
+            "withHoldTax": false
+        },
+        {
+            "id": 3,
+            "name": "Savings Product",
+            "withdrawalFeeForTransfers": false,
+            "allowOverdraft": false,
+            "enforceMinRequiredBalance": false,
+            "withHoldTax": false
+        }
+    ],
+    "chargeOptions": [
+        {
+            "id": 3,
+            "name": "Saving Accounts Processing Fee",
+            "active": true,
+            "penalty": false,
+            "currency": {
+                "code": "USD",
+                "name": "US Dollar",
+                "decimalPlaces": 2,
+                "displaySymbol": "$",
+                "nameCode": "currency.USD",
+                "displayLabel": "US Dollar ($)"
+            },
+            "amount": 2,
+            "chargeTimeType": {
+                "id": 3,
+                "code": "chargeTimeType.savingsActivation",
+                "value": "Savings Activation"
+            },
+            "chargeAppliesTo": {
+                "id": 2,
+                "code": "chargeAppliesTo.savings",
+                "value": "Savings"
+            },
+            "chargeCalculationType": {
+                "id": 1,
+                "code": "chargeCalculationType.flat",
+                "value": "Flat"
+            },
+            "chargePaymentMode": {
+                "id": 0,
+                "code": "chargepaymentmode.regular",
+                "value": "Regular"
+            }
+        }
+    ]
+}
+			</code>
+	    </div>
+
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/self/savingsaccounts/template?clientId={clientId}&productId={productId}</code>
+			<code class="method-response">
+{
+    "clientId": 14,
+    "clientName": "Bheem",
+    "savingsProductId": 2,
+    "savingsProductName": "Savings",
+    "timeline": {},
+    "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "inMultiplesOf": 1,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+    },
+    "nominalAnnualInterestRate": 5,
+    "interestCompoundingPeriodType": {
+        "id": 1,
+        "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+        "value": "Daily"
+    },
+    "interestPostingPeriodType": {
+        "id": 4,
+        "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+        "value": "Monthly"
+    },
+    "interestCalculationType": {
+        "id": 1,
+        "code": "savingsInterestCalculationType.dailybalance",
+        "value": "Daily Balance"
+    },
+    "interestCalculationDaysInYearType": {
+        "id": 365,
+        "code": "savingsInterestCalculationDaysInYearType.days365",
+        "value": "365 Days"
+    },
+    "minRequiredOpeningBalance": 1000,
+    "withdrawalFeeForTransfers": false,
+    "allowOverdraft": false,
+    "enforceMinRequiredBalance": false,
+    "withHoldTax": false,
+    "isDormancyTrackingActive": false,
+    "charges": [],
+    "productOptions": [
+        {
+            "id": 1,
+            "name": "Voluntary savings",
+            "withdrawalFeeForTransfers": false,
+            "allowOverdraft": false,
+            "enforceMinRequiredBalance": false,
+            "withHoldTax": false
+        },
+        {
+            "id": 2,
+            "name": "Savings",
+            "withdrawalFeeForTransfers": false,
+            "allowOverdraft": false,
+            "enforceMinRequiredBalance": false,
+            "withHoldTax": false
+        },
+        {
+            "id": 3,
+            "name": "Savings Product",
+            "withdrawalFeeForTransfers": false,
+            "allowOverdraft": false,
+            "enforceMinRequiredBalance": false,
+            "withHoldTax": false
+        }
+    ],
+    "fieldOfficerOptions": [
+        {
+            "id": 1,
+            "firstname": "Aliya",
+            "lastname": "A",
+            "displayName": "A, Aliya",
+            "officeId": 1,
+            "officeName": "Head Office",
+            "isLoanOfficer": true,
+            "isActive": true
+        }
+    ],
+    "interestCompoundingPeriodTypeOptions": [
+        {
+            "id": 1,
+            "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+            "value": "Daily"
+        },
+        {
+            "id": 4,
+            "code": "savings.interest.period.savingsCompoundingInterestPeriodType.monthly",
+            "value": "Monthly"
+        },
+        {
+            "id": 5,
+            "code": "savings.interest.period.savingsCompoundingInterestPeriodType.quarterly",
+            "value": "Quarterly"
+        },
+        {
+            "id": 6,
+            "code": "savings.interest.period.savingsCompoundingInterestPeriodType.biannual",
+            "value": "Semi-Annual"
+        },
+        {
+            "id": 7,
+            "code": "savings.interest.period.savingsCompoundingInterestPeriodType.annual",
+            "value": "Annually"
+        }
+    ],
+    "interestPostingPeriodTypeOptions": [
+        {
+            "id": 4,
+            "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+            "value": "Monthly"
+        },
+        {
+            "id": 5,
+            "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.quarterly",
+            "value": "Quarterly"
+        },
+        {
+            "id": 6,
+            "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.biannual",
+            "value": "BiAnnual"
+        },
+        {
+            "id": 7,
+            "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.annual",
+            "value": "Annually"
+        }
+    ],
+    "interestCalculationTypeOptions": [
+        {
+            "id": 1,
+            "code": "savingsInterestCalculationType.dailybalance",
+            "value": "Daily Balance"
+        },
+        {
+            "id": 2,
+            "code": "savingsInterestCalculationType.averagedailybalance",
+            "value": "Average Daily Balance"
+        }
+    ],
+    "interestCalculationDaysInYearTypeOptions": [
+        {
+            "id": 360,
+            "code": "savingsInterestCalculationDaysInYearType.days360",
+            "value": "360 Days"
+        },
+        {
+            "id": 365,
+            "code": "savingsInterestCalculationDaysInYearType.days365",
+            "value": "365 Days"
+        }
+    ],
+    "lockinPeriodFrequencyTypeOptions": [
+        {
+            "id": 0,
+            "code": "savings.lockin.savingsPeriodFrequencyType.days",
+            "value": "Days"
+        },
+        {
+            "id": 1,
+            "code": "savings.lockin.savingsPeriodFrequencyType.weeks",
+            "value": "Weeks"
+        },
+        {
+            "id": 2,
+            "code": "savings.lockin.savingsPeriodFrequencyType.months",
+            "value": "Months"
+        },
+        {
+            "id": 3,
+            "code": "savings.lockin.savingsPeriodFrequencyType.years",
+            "value": "Years"
+        }
+    ],
+    "withdrawalFeeTypeOptions": [
+        {
+            "id": 1,
+            "code": "savingsWithdrawalFeesType.flat",
+            "value": "Flat"
+        },
+        {
+            "id": 2,
+            "code": "savingsWithdrawalFeesType.percent.of.amount",
+            "value": "% of Amount"
+        }
+    ],
+    "chargeOptions": [
+        {
+            "id": 3,
+            "name": "Saving Accounts Processing Fee",
+            "active": true,
+            "penalty": false,
+            "currency": {
+                "code": "USD",
+                "name": "US Dollar",
+                "decimalPlaces": 2,
+                "displaySymbol": "$",
+                "nameCode": "currency.USD",
+                "displayLabel": "US Dollar ($)"
+            },
+            "amount": 2,
+            "chargeTimeType": {
+                "id": 3,
+                "code": "chargeTimeType.savingsActivation",
+                "value": "Savings Activation"
+            },
+            "chargeAppliesTo": {
+                "id": 2,
+                "code": "chargeAppliesTo.savings",
+                "value": "Savings"
+            },
+            "chargeCalculationType": {
+                "id": 1,
+                "code": "chargeCalculationType.flat",
+                "value": "Flat"
+            },
+            "chargePaymentMode": {
+                "id": 0,
+                "code": "chargepaymentmode.regular",
+                "value": "Regular"
+            }
+        }
+    ]
+}
+			</code>
 	    </div>
 	</div>
 
@@ -47487,6 +48019,1213 @@ No Request Body:
 	        </code>
 	    </div>
 	</div>
+	
+	<a id="selfshareaccount_template" name="selfshareaccount_template" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve Share Account Template:</h2>
+	            <p>This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+	                <ul>
+	                <li class=normalli>Field Defaults</li>
+	                <li class=normalli>Allowed Value Lists</li>
+	                </ul>
+	            </p>
+	        <h4>Arguments</h4>
+	        <dl class="argument-list">
+	            <dt>clientId</dt>
+	            <dd>Integer <span>mandatory</span></dd>
+	            <dt>productId</dt>
+	            <dd>Integer <span>optional</span></dd>
+	            <dd>If entered, productId, productName and selectedProduct fields are returned.</dd>
+	        </dl>
+	        <p>Example Requests: </p>
+	        <div class=apiClick>self/shareaccounts/template?clientId=14</div>
+	        <br><br>
+	        <div class=apiClick>self/shareaccounts/template?clientId=14&productId=3</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/self/shareaccounts/template?clientId={clientId}</code>
+			<code class="method-response">
+{
+    "clientId": 14,
+    "productOptions": [
+        {
+            "id": 3,
+            "name": "SP",
+            "shortName": "SP",
+            "totalShares": 1000
+        },
+        {
+            "id": 4,
+            "name": "Product1",
+            "shortName": "test",
+            "totalShares": 1000
+        }
+    ],
+    "chargeOptions": [
+        {
+            "id": 2,
+            "name": "Activation fee",
+            "active": true,
+            "penalty": false,
+            "currency": {
+                "code": "USD",
+                "name": "US Dollar",
+                "decimalPlaces": 2,
+                "displaySymbol": "$",
+                "nameCode": "currency.USD",
+                "displayLabel": "US Dollar ($)"
+            },
+            "amount": 2,
+            "chargeTimeType": {
+                "id": 14,
+                "code": "chargeTimeType.sharespurchase",
+                "value": "Share Purchase"
+            },
+            "chargeAppliesTo": {
+                "id": 4,
+                "code": "chargeAppliesTo.shares",
+                "value": "Shares"
+            },
+            "chargeCalculationType": {
+                "id": 1,
+                "code": "chargeCalculationType.flat",
+                "value": "Flat"
+            },
+            "chargePaymentMode": {
+                "id": 0,
+                "code": "chargepaymentmode.regular",
+                "value": "Regular"
+            }
+        }
+    ]
+}
+			</code>
+	    </div>
+
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/self/shareaccounts/template?clientId={clientId}&productId={productId}</code>
+			<code class="method-response">
+{
+    "clientId": 14,
+    "productOptions": [
+        {
+            "id": 3,
+            "name": "SP",
+            "shortName": "SP",
+            "description": "SP1",
+            "currency": {
+                "code": "USD",
+                "name": "US Dollar",
+                "decimalPlaces": 2,
+                "inMultiplesOf": 1,
+                "displaySymbol": "$",
+                "nameCode": "currency.USD",
+                "displayLabel": "US Dollar ($)"
+            },
+            "totalShares": 1000,
+            "totalSharesIssued": 900,
+            "unitPrice": 1,
+            "shareCapital": 900,
+            "minimumShares": 8,
+            "nominalShares": 500,
+            "maximumShares": 500,
+            "marketPrice": [],
+            "charges": [],
+            "allowDividendCalculationForInactiveClients": false,
+            "lockinPeriod": 50,
+            "lockPeriodTypeEnum": {
+                "id": 0,
+                "code": "shares.lockin.sharePeriodFrequencyType.days",
+                "value": "Days"
+            },
+            "minimumActivePeriod": 10,
+            "minimumActivePeriodForDividendsTypeEnum": {
+                "id": 0,
+                "code": "shares.minimumactive.sharePeriodFrequencyType.days",
+                "value": "Days"
+            },
+            "accountingRule": {
+                "id": 2,
+                "code": "accountingRuleType.cash",
+                "value": "CASH BASED"
+            },
+            "accountingMappings": {
+                "shareReferenceId": {
+                    "id": 32,
+                    "name": "Cash In Hand",
+                    "glCode": "20301"
+                },
+                "incomeFromFeeAccountId": {
+                    "id": 40,
+                    "name": "Other Operating Income",
+                    "glCode": "30105"
+                },
+                "shareEquityId": {
+                    "id": 56,
+                    "name": "Share Equity",
+                    "glCode": "00098"
+                },
+                "shareSuspenseId": {
+                    "id": 2,
+                    "name": "Overpayment Liability",
+                    "glCode": "10200"
+                }
+            },
+            "currencyOptions": [
+                {
+                    "code": "USD",
+                    "name": "US Dollar",
+                    "decimalPlaces": 2,
+                    "displaySymbol": "$",
+                    "nameCode": "currency.USD",
+                    "displayLabel": "US Dollar ($)"
+                }
+            ],
+            "chargeOptions": [
+                {
+                    "id": 2,
+                    "name": "Activation fee",
+                    "active": true,
+                    "penalty": false,
+                    "currency": {
+                        "code": "USD",
+                        "name": "US Dollar",
+                        "decimalPlaces": 2,
+                        "displaySymbol": "$",
+                        "nameCode": "currency.USD",
+                        "displayLabel": "US Dollar ($)"
+                    },
+                    "amount": 2,
+                    "chargeTimeType": {
+                        "id": 14,
+                        "code": "chargeTimeType.sharespurchase",
+                        "value": "Share Purchase"
+                    },
+                    "chargeAppliesTo": {
+                        "id": 4,
+                        "code": "chargeAppliesTo.shares",
+                        "value": "Shares"
+                    },
+                    "chargeCalculationType": {
+                        "id": 1,
+                        "code": "chargeCalculationType.flat",
+                        "value": "Flat"
+                    },
+                    "chargePaymentMode": {
+                        "id": 0,
+                        "code": "chargepaymentmode.regular",
+                        "value": "Regular"
+                    }
+                }
+            ],
+            "minimumActivePeriodFrequencyTypeOptions": [
+                {
+                    "id": 0,
+                    "code": "shares.lockin.sharePeriodFrequencyType.days",
+                    "value": "Days"
+                }
+            ],
+            "lockinPeriodFrequencyTypeOptions": [
+                {
+                    "id": 0,
+                    "code": "shares.lockin.sharePeriodFrequencyType.days",
+                    "value": "Days"
+                },
+                {
+                    "id": 1,
+                    "code": "shares.lockin.sharePeriodFrequencyType.weeks",
+                    "value": "Weeks"
+                },
+                {
+                    "id": 2,
+                    "code": "shares.lockin.sharePeriodFrequencyType.months",
+                    "value": "Months"
+                },
+                {
+                    "id": 3,
+                    "code": "shares.lockin.sharePeriodFrequencyType.years",
+                    "value": "Years"
+                }
+            ],
+            "accountingMappingOptions": {
+                "liabilityAccountOptions": [
+                    {
+                        "id": 30,
+                        "name": "Recurring Deposits",
+                        "parentId": 1,
+                        "glCode": "10104",
+                        "disabled": false,
+                        "manualEntriesAllowed": true,
+                        "type": {
+                            "id": 2,
+                            "code": "accountType.liability",
+                            "value": "LIABILITY"
+                        },
+                        "usage": {
+                            "id": 1,
+                            "code": "accountUsage.detail",
+                            "value": "DETAIL"
+                        },
+                        "nameDecorated": "....Recurring Deposits",
+                        "tagId": {
+                            "id": 0,
+                            "active": false,
+                            "mandatory": false
+                        }
+                    },
+                    {
+                        "id": 2,
+                        "name": "Overpayment Liability",
+                        "glCode": "10200",
+                        "disabled": false,
+                        "manualEntriesAllowed": true,
+                        "type": {
+                            "id": 2,
+                            "code": "accountType.liability",
+                            "value": "LIABILITY"
+                        },
+                        "usage": {
+                            "id": 1,
+                            "code": "accountUsage.detail",
+                            "value": "DETAIL"
+                        },
+                        "nameDecorated": "Overpayment Liability",
+                        "tagId": {
+                            "id": 0,
+                            "active": false,
+                            "mandatory": false
+                        }
+                    },
+                    {
+                        "id": 55,
+                        "name": "Liability Transfer (Temp)",
+                        "glCode": "220004-Temp",
+                        "disabled": false,
+                        "manualEntriesAllowed": true,
+                        "type": {
+                            "id": 2,
+                            "code": "accountType.liability",
+                            "value": "LIABILITY"
+                        },
+                        "usage": {
+                            "id": 1,
+                            "code": "accountUsage.detail",
+                            "value": "DETAIL"
+                        },
+                        "description": "Temporary Liability account to track Account Transfers",
+                        "nameDecorated": "Liability Transfer (Temp)",
+                        "tagId": {
+                            "id": 0,
+                            "active": false,
+                            "mandatory": false
+                        }
+                    }
+                ],
+                "assetAccountOptions": [
+                    {
+                        "id": 31,
+                        "name": "Furniture and Fixtures",
+                        "parentId": 8,
+                        "glCode": "20101",
+                        "disabled": false,
+                        "manualEntriesAllowed": true,
+                        "type": {
+                            "id": 1,
+                            "code": "accountType.asset",
+                            "value": "ASSET"
+                        },
+                        "usage": {
+                            "id": 1,
+                            "code": "accountUsage.detail",
+                            "value": "DETAIL"
+                        },
+                        "nameDecorated": "....Furniture and Fixtures",
+                        "tagId": {
+                            "id": 0,
+                            "active": false,
+                            "mandatory": false
+                        }
+                    },
+                    {
+                        "id": 32,
+                        "name": "Cash In Hand",
+                        "parentId": 10,
+                        "glCode": "20301",
+                        "disabled": false,
+                        "manualEntriesAllowed": true,
+                        "type": {
+                            "id": 1,
+                            "code": "accountType.asset",
+                            "value": "ASSET"
+                        },
+                        "usage": {
+                            "id": 1,
+                            "code": "accountUsage.detail",
+                            "value": "DETAIL"
+                        },
+                        "nameDecorated": "....Cash In Hand",
+                        "tagId": {
+                            "id": 0,
+                            "active": false,
+                            "mandatory": false
+                        }
+                    },
+                    {
+                        "id": 33,
+                        "name": "Petty Cash",
+                        "parentId": 10,
+                        "glCode": "20302",
+                        "disabled": false,
+                        "manualEntriesAllowed": true,
+                        "type": {
+                            "id": 1,
+                            "code": "accountType.asset",
+                            "value": "ASSET"
+                        },
+                        "usage": {
+                            "id": 1,
+                            "code": "accountUsage.detail",
+                            "value": "DETAIL"
+                        },
+                        "nameDecorated": "....Petty Cash",
+                        "tagId": {
+                            "id": 0,
+                            "active": false,
+                            "mandatory": false
+                        }
+                    },
+                    {
+                        "id": 34,
+                        "name": "Loans to Customers",
+                        "parentId": 12,
+                        "glCode": "20501",
+                        "disabled": false,
+                        "manualEntriesAllowed": true,
+                        "type": {
+                            "id": 1,
+                            "code": "accountType.asset",
+                            "value": "ASSET"
+                        },
+                        "usage": {
+                            "id": 1,
+                            "code": "accountUsage.detail",
+                            "value": "DETAIL"
+                        },
+                        "nameDecorated": "....Loans to Customers",
+                        "tagId": {
+                            "id": 0,
+                            "active": false,
+                            "mandatory": false
+                        }
+                    },
+                    {
+                        "id": 35,
+                        "name": "Current Account Overdrafts",
+                        "parentId": 12,
+                        "glCode": "20502",
+                        "disabled": false,
+                        "manualEntriesAllowed": true,
+                        "type": {
+                            "id": 1,
+                            "code": "accountType.asset",
+                            "value": "ASSET"
+                        },
+                        "usage": {
+                            "id": 1,
+                            "code": "accountUsage.detail",
+                            "value": "DETAIL"
+                        },
+                        "nameDecorated": "....Current Account Overdrafts",
+                        "tagId": {
+                            "id": 0,
+                            "active": false,
+                            "mandatory": false
+                        }
+                    },
+                    {
+                        "id": 17,
+                        "name": "Suspense Account",
+                        "glCode": "9999",
+                        "disabled": false,
+                        "manualEntriesAllowed": true,
+                        "type": {
+                            "id": 1,
+                            "code": "accountType.asset",
+                            "value": "ASSET"
+                        },
+                        "usage": {
+                            "id": 1,
+                            "code": "accountUsage.detail",
+                            "value": "DETAIL"
+                        },
+                        "nameDecorated": "Suspense Account",
+                        "tagId": {
+                            "id": 0,
+                            "active": false,
+                            "mandatory": false
+                        }
+                    }
+                ],
+                "incomeAccountOptions": [
+                    {
+                        "id": 54,
+                        "name": "Loan Recovery (Temp)",
+                        "glCode": "220002-Temp",
+                        "disabled": false,
+                        "manualEntriesAllowed": true,
+                        "type": {
+                            "id": 4,
+                            "code": "accountType.income",
+                            "value": "INCOME"
+                        },
+                        "usage": {
+                            "id": 1,
+                            "code": "accountUsage.detail",
+                            "value": "DETAIL"
+                        },
+                        "description": "Temporary account to track income from Loan recovery",
+                        "nameDecorated": "Loan Recovery (Temp)",
+                        "tagId": {
+                            "id": 0,
+                            "active": false,
+                            "mandatory": false
+                        }
+                    },
+                    {
+                        "id": 36,
+                        "name": "Fees and Charges",
+                        "parentId": 18,
+                        "glCode": "30101",
+                        "disabled": false,
+                        "manualEntriesAllowed": true,
+                        "type": {
+                            "id": 4,
+                            "code": "accountType.income",
+                            "value": "INCOME"
+                        },
+                        "usage": {
+                            "id": 1,
+                            "code": "accountUsage.detail",
+                            "value": "DETAIL"
+                        },
+                        "nameDecorated": "....Fees and Charges",
+                        "tagId": {
+                            "id": 0,
+                            "active": false,
+                            "mandatory": false
+                        }
+                    },
+                    {
+                        "id": 37,
+                        "name": "Penalties",
+                        "parentId": 18,
+                        "glCode": "30102",
+                        "disabled": false,
+                        "manualEntriesAllowed": true,
+                        "type": {
+                            "id": 4,
+                            "code": "accountType.income",
+                            "value": "INCOME"
+                        },
+                        "usage": {
+                            "id": 1,
+                            "code": "accountUsage.detail",
+                            "value": "DETAIL"
+                        },
+                        "nameDecorated": "....Penalties",
+                        "tagId": {
+                            "id": 0,
+                            "active": false,
+                            "mandatory": false
+                        }
+                    },
+                    {
+                        "id": 38,
+                        "name": "Interest Received from Borrowers",
+                        "parentId": 18,
+                        "glCode": "30103",
+                        "disabled": false,
+                        "manualEntriesAllowed": true,
+                        "type": {
+                            "id": 4,
+                            "code": "accountType.income",
+                            "value": "INCOME"
+                        },
+                        "usage": {
+                            "id": 1,
+                            "code": "accountUsage.detail",
+                            "value": "DETAIL"
+                        },
+                        "nameDecorated": "....Interest Received from Borrowers",
+                        "tagId": {
+                            "id": 0,
+                            "active": false,
+                            "mandatory": false
+                        }
+                    },
+                    {
+                        "id": 39,
+                        "name": "Insurance Charges",
+                        "parentId": 18,
+                        "glCode": "30104",
+                        "disabled": false,
+                        "manualEntriesAllowed": true,
+                        "type": {
+                            "id": 4,
+                            "code": "accountType.income",
+                            "value": "INCOME"
+                        },
+                        "usage": {
+                            "id": 1,
+                            "code": "accountUsage.detail",
+                            "value": "DETAIL"
+                        },
+                        "nameDecorated": "....Insurance Charges",
+                        "tagId": {
+                            "id": 0,
+                            "active": false,
+                            "mandatory": false
+                        }
+                    },
+                    {
+                        "id": 40,
+                        "name": "Other Operating Income",
+                        "parentId": 18,
+                        "glCode": "30105",
+                        "disabled": false,
+                        "manualEntriesAllowed": true,
+                        "type": {
+                            "id": 4,
+                            "code": "accountType.income",
+                            "value": "INCOME"
+                        },
+                        "usage": {
+                            "id": 1,
+                            "code": "accountUsage.detail",
+                            "value": "DETAIL"
+                        },
+                        "nameDecorated": "....Other Operating Income",
+                        "tagId": {
+                            "id": 0,
+                            "active": false,
+                            "mandatory": false
+                        }
+                    }
+                ],
+                "equityAccountOptions": [
+                    {
+                        "id": 56,
+                        "name": "Share Equity",
+                        "parentId": 25,
+                        "glCode": "00098",
+                        "disabled": false,
+                        "manualEntriesAllowed": true,
+                        "type": {
+                            "id": 3,
+                            "code": "accountType.equity",
+                            "value": "EQUITY"
+                        },
+                        "usage": {
+                            "id": 1,
+                            "code": "accountUsage.detail",
+                            "value": "DETAIL"
+                        },
+                        "nameDecorated": "....Share Equity",
+                        "tagId": {
+                            "id": 0,
+                            "active": false,
+                            "mandatory": false
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "chargeOptions": [
+        {
+            "id": 2,
+            "name": "Activation fee",
+            "active": true,
+            "penalty": false,
+            "currency": {
+                "code": "USD",
+                "name": "US Dollar",
+                "decimalPlaces": 2,
+                "displaySymbol": "$",
+                "nameCode": "currency.USD",
+                "displayLabel": "US Dollar ($)"
+            },
+            "amount": 2,
+            "chargeTimeType": {
+                "id": 14,
+                "code": "chargeTimeType.sharespurchase",
+                "value": "Share Purchase"
+            },
+            "chargeAppliesTo": {
+                "id": 4,
+                "code": "chargeAppliesTo.shares",
+                "value": "Shares"
+            },
+            "chargeCalculationType": {
+                "id": 1,
+                "code": "chargeCalculationType.flat",
+                "value": "Flat"
+            },
+            "chargePaymentMode": {
+                "id": 0,
+                "code": "chargepaymentmode.regular",
+                "value": "Regular"
+            }
+        }
+    ]
+}
+			</code>
+	    </div>
+</div>
+
+<a id="selfshareaccount_create" name="selfshareaccount_create" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Submit new share application</h2>
+	        <br/>
+	        <table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Mandatory Fields</div></td></tr>
+	            <tr class=alt><td>clientId, productId, submittedDate, savingsAccountId, requestedShares, applicationDate</td></tr>
+	        </table>
+	        <br/>
+	        <table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Optional Fields</div></td></tr>
+	            <tr class=alt><td>accountNo, externalId</td></tr>
+	        </table>
+	        <br/>
+	        <table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Inherited from Product (if not provided)</div></td></tr>
+	            <tr class=alt><td> minimumActivePeriod, minimumActivePeriodFrequencyType, lockinPeriodFrequency, lockinPeriodFrequencyType</td>
+	       		</tr>
+	        </table>
+	    </div>
+	    <div class="method-example">
+	    	<p>Minimal request: accountNo auto generated, remaining details inherited from Share product.</p>
+	        <code class="method-declaration">POST https://Domain Name/api/v1/self/shareaccounts</code>
+	        <code class="method-request">POST Share Account
+Content-Type: application/json
+Request Body:
+{  
+   "productId":3,
+   "unitPrice":1,
+   "requestedShares":500,
+   "submittedDate":"31 July 2018",
+   "savingsAccountId":2,
+   "applicationDate":"31 July 2018",
+   "locale":"en",
+   "dateFormat":"dd MMMM yyyy",
+   "charges":[  
+      {  
+         "chargeId":2,
+         "amount":2
+      }
+   ],
+   "clientId":"14"
+}
+			</code>
+	        <code class="method-response">
+{
+    "resourceId": 12
+}
+	        </code>
+	    </div>
+</div>
+
+<a id="selfshareaccount_retrieve" name="selfshareaccount_retrieve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve a share application/account:</h2>
+
+	        <p>Example Requests : </p>
+	        <div class=apiClick>self/shareaccounts/12</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://DomainName/api/v1/self/shareaccounts/{accountId}</code>
+	        <code class="method-response">
+{
+    "id": 12,
+    "accountNo": "000000012",
+    "savingsAccountNumber": "000000002",
+    "clientId": 14,
+    "clientName": "Bheem",
+    "productId": 3,
+    "productName": "SP",
+    "status": {
+        "id": 100,
+        "code": "shareAccountStatusType.submitted.and.pending.approval",
+        "value": "Submitted and pending approval",
+        "submittedAndPendingApproval": true,
+        "approved": false,
+        "rejected": false,
+        "active": false,
+        "closed": false
+    },
+    "timeline": {
+        "submittedOnDate": [
+            2018,
+            7,
+            31
+        ],
+        "submittedByUsername": "self",
+        "submittedByFirstname": "self",
+        "submittedByLastname": "self"
+    },
+    "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "inMultiplesOf": 1,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+    },
+    "summary": {
+        "id": 12,
+        "accountNo": "000000012",
+        "totalApprovedShares": 0,
+        "totalPendingForApprovalShares": 500,
+        "productId": 3,
+        "productName": "SP",
+        "status": {
+            "id": 100,
+            "code": "shareAccountStatusType.submitted.and.pending.approval",
+            "value": "Submitted and pending approval",
+            "submittedAndPendingApproval": true,
+            "approved": false,
+            "rejected": false,
+            "active": false,
+            "closed": false
+        },
+        "currency": {
+            "code": "USD",
+            "name": "US Dollar",
+            "decimalPlaces": 2,
+            "inMultiplesOf": 1,
+            "displaySymbol": "$",
+            "nameCode": "currency.USD",
+            "displayLabel": "US Dollar ($)"
+        },
+        "timeline": {
+            "submittedOnDate": [
+                2018,
+                7,
+                31
+            ],
+            "submittedByUsername": "self",
+            "submittedByFirstname": "self",
+            "submittedByLastname": "self"
+        }
+    },
+    "purchasedShares": [
+        {
+            "id": 13,
+            "accountId": 12,
+            "purchasedDate": [
+                2018,
+                7,
+                31
+            ],
+            "numberOfShares": 500,
+            "purchasedPrice": 1,
+            "status": {
+                "id": 100,
+                "code": "purchasedSharesStatusType.applied",
+                "value": "Pending Approval"
+            },
+            "type": {
+                "id": 500,
+                "code": "purchasedSharesType.purchased",
+                "value": "Purchase"
+            },
+            "amount": 502,
+            "chargeAmount": 2,
+            "amountPaid": 500
+        }
+    ],
+    "savingsAccountId": 2,
+    "currentMarketPrice": 1,
+    "lockPeriodTypeEnum": {
+        "id": 4,
+        "code": "sharePeriodFrequencyType.invalid",
+        "value": "Invalid"
+    },
+    "minimumActivePeriodTypeEnum": {
+        "id": 4,
+        "code": "sharePeriodFrequencyType.invalid",
+        "value": "Invalid"
+    },
+    "allowDividendCalculationForInactiveClients": false,
+    "charges": [
+        {
+            "id": 9,
+            "chargeId": 2,
+            "accountId": 12,
+            "name": "Activation fee",
+            "chargeTimeType": {
+                "id": 14,
+                "code": "chargeTimeType.sharespurchase",
+                "value": "Share Purchase"
+            },
+            "chargeCalculationType": {
+                "id": 1,
+                "code": "chargeCalculationType.flat",
+                "value": "Flat"
+            },
+            "percentage": 0,
+            "amountPercentageAppliedTo": 0,
+            "currency": {
+                "code": "USD",
+                "name": "US Dollar",
+                "decimalPlaces": 2,
+                "displaySymbol": "$",
+                "nameCode": "currency.USD",
+                "displayLabel": "US Dollar ($)"
+            },
+            "amount": 2,
+            "amountPaid": 0,
+            "amountWaived": 0,
+            "amountWrittenOff": 0,
+            "amountOutstanding": 2,
+            "amountOrPercentage": 2,
+            "isActive": true
+        }
+    ],
+    "dividends": []
+}
+	        </code>
+	    </div>
+</div>
+
+<a id="self_guarantors_list" name="self_guarantors_list"
+				class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+			<h4>List Guarantors</h4>
+			<p>Example Requests:</p>
+			<div class=apiClick>self/loans/33/guarantors</div>
+				<br>
+			</div>
+			<div class="method-example">
+				<code class="method-declaration">
+GET https://DomainName/api/v1/self/loans/{loanId}/guarantors
+				</code>
+			<code class="method-response">
+[  
+   {  
+      "id":6,
+      "loanId":33,
+      "guarantorType":{  
+         "id":1,
+         "code":"guarantor.existing.customer",
+         "value":"CUSTOMER"
+      },
+      "firstname":"Abhishek v",
+      "lastname":"M",
+      "entityId":12,
+      "officeName":"Head Office",
+      "joinedDate":[  
+         2014,
+         7,
+         5
+      ],
+      "guarantorFundingDetails":[  
+         {  
+            "id":7,
+            "status":{  
+               "id":100,
+               "code":"guarantorFundStatusType.active",
+               "value":"ACTIVE"
+            },
+            "savingsAccount":{  
+               "id":28,
+               "accountNo":"000000028"
+            },
+            "amount":2000,
+            "amountReleased":0,
+            "amountRemaining":2000,
+            "amountTransfered":0,
+            "guarantorTransactions":[  
+               {  
+                  "id":6,
+                  "onHoldTransactionData":{  
+                     "id":6,
+                     "amount":2000,
+                     "transactionType":{  
+                        "id":1,
+                        "code":"deposutAccountOnHoldTransactionType.hold",
+                        "value":"hold"
+                     },
+                     "transactionDate":[  
+                        2018,
+                        10,
+                        10
+                     ],
+                     "reversed":false,
+                     "savingsId":0,
+                     "loanId":0
+                  },
+                  "reversed":false
+               }
+            ]
+         }
+      ],
+      "status":true
+   },
+   {  
+      "id":7,
+      "loanId":33,
+      "clientRelationshipType":{  
+         "id":6,
+         "name":"Parent",
+         "active":false,
+         "mandatory":false
+      },
+      "guarantorType":{  
+         "id":1,
+         "code":"guarantor.existing.customer",
+         "value":"CUSTOMER"
+      },
+      "firstname":"Bheem",
+      "lastname":"Test",
+      "entityId":14,
+      "officeName":"Head Office",
+      "joinedDate":[  
+         2013,
+         7,
+         3
+      ],
+      "guarantorFundingDetails":[  
+         {  
+            "id":8,
+            "status":{  
+               "id":100,
+               "code":"guarantorFundStatusType.active",
+               "value":"ACTIVE"
+            },
+            "savingsAccount":{  
+               "id":37,
+               "accountNo":"000000037"
+            },
+            "amount":1000,
+            "amountReleased":0,
+            "amountRemaining":1000,
+            "amountTransfered":0,
+            "guarantorTransactions":[  
+               {  
+                  "id":7,
+                  "onHoldTransactionData":{  
+                     "id":7,
+                     "amount":1000,
+                     "transactionType":{  
+                        "id":1,
+                        "code":"deposutAccountOnHoldTransactionType.hold",
+                        "value":"hold"
+                     },
+                     "transactionDate":[  
+                        2018,
+                        10,
+                        10
+                     ],
+                     "reversed":false,
+                     "savingsId":0,
+                     "loanId":0
+                  },
+                  "reversed":false
+               }
+            ]
+         }
+      ],
+      "status":true
+   }
+]
+			</code>
+		</div>
+	</div>
+	<a id="self_obligee_list" name="self_obligee_list"
+				class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+			<h4>Obligee List</h4>
+			<p>Obligee list provides list of clients and other details, to whom the user has agreed to be a guarantor.</p>
+			
+			<table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Field Descriptions</div></td></tr>
+
+				<tr class=alt><td>clientId</td></tr>
+				<tr><td class=fielddesc>The client id of the self service user.</td></tr>
+
+				<tr class=alt><td>firstName, lastName, displayName</td></tr>
+				<tr><td class=fielddesc>The first name, last name and display name of the obligee</td></tr>
+				
+				<tr class=alt><td>accountNumber, loanAmount</td></tr>
+				<tr><td class=fielddesc>The loan account number and principal amount of the obligee </td></tr>
+				
+				<tr class=alt><td>guaranteeAmount, amountReleased, amountTransferred</td></tr>
+				<tr><td class=fielddesc>Guranteed amount, released and transferred amount of the client</td></tr>
+			</table>
+					
+			<p>Example Requests:</p>
+			<div class=apiClick>self/clients/14/obligeedetails</div>
+				<br>
+			</div>
+			<div class="method-example">
+				<code class="method-declaration">
+GET https://DomainName/api/v1/self/clients/{clientId}/obligeedetails
+				</code>
+			<code class="method-response">		
+			[  
+   {  
+      "firstName":"App",
+      "lastName":"Test",
+      "displayName":"App Test",
+      "accountNumber":"000000005",
+      "loanAmount":50000,
+      "guaranteeAmount":10000,
+      "amountReleased":0,
+      "amountTransferred":0
+   },
+   {  
+      "firstName":"App",
+      "lastName":"Test",
+      "displayName":"App Test",
+      "accountNumber":"000000005",
+      "loanAmount":50000,
+      "guaranteeAmount":5000,
+      "amountReleased":0,
+      "amountTransferred":0
+   },
+   {  
+      "firstName":"App",
+      "lastName":"Test",
+      "displayName":"App Test",
+      "accountNumber":"000000006",
+      "loanAmount":50000,
+      "guaranteeAmount":10000,
+      "amountReleased":0,
+      "amountTransferred":0
+   },
+   {  
+      "firstName":"Abhishek v",
+      "lastName":"M",
+      "displayName":"Abhishek v M",
+      "accountNumber":"000000032",
+      "loanAmount":10000,
+      "guaranteeAmount":1000,
+      "amountReleased":1000,
+      "amountTransferred":0
+   },
+   {  
+      "firstName":"Abhishek v",
+      "lastName":"M",
+      "displayName":"Abhishek v M",
+      "accountNumber":"000000033",
+      "loanAmount":10000,
+      "guaranteeAmount":1000,
+      "amountReleased":0,
+      "amountTransferred":0
+   }
+]
+			</code>
+		</div>
+	</div>
+
+	<a id="self_client_images_upload" name="self_client_images_upload" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Upload client image (Data URI)</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/self/clients/{clientId}/images
+					</code>
+					<code class="method-request">
+POST self/clients/14/images
+Content-Type: text/plain
+Request Body:
+data:image/png;base64,iVBORw0KGgoAA
+AANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD///+l2Z/dAAAAM0l
+EQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4Ug9C9zwz3gVLMDA/A6
+P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 14,
+  "changes": {},
+  "resourceIdentifier": "14"
+}
+					</code>
+				</div>
+			</div>
+			
+				<a id="self_client_images_upload_multi_part" name="self_client_images_upload_multi_part" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Upload client image (Multi-part Form data)</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>file
+							</td>
+						</tr>
+					</table>
+					<p>
+						The form should contain a required named body part with the
+						name "file". <br/> <br/>
+						If you are using a HTML form, a snippet like
+						<small> &lt;input type="file" name="file"&gt;&lt;/input&gt; </small>
+						can be used for uploading the image file
+					</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/self/clients/{clientId}/images
+					</code>
+					<code class="method-request">
+POST self/clients/14/images
+Content-Type: multipart/form-data
+Request Body: <i>Not shown</i>
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 14,
+  "changes": {},
+  "resourceIdentifier": "14"
+}
+					</code>
+				</div>
+			</div>
+		<a id="self_client_image_delete" name="self_client_image_delete" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete an client's Image</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/self/clients/{clientId}/images
+					</code>
+					<code class="method-request">
+DELETE self/clients/14/images
+Content-Type: application/json
+No Request Body:
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 14,
+  "changes": {},
+  "resourceIdentifier": "14"
+}
+					</code>
+				</div>
+			</div>
+	
 			<!-- end of Customer Self Service APIs-->
         </div>
 		<!-- main-content-wrapper -->

@@ -85,7 +85,7 @@ dependencies {
                 [group: 'net.sf.ehcache', name: 'ehcache', version: '2.7.2'],
                 [group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.8.12'],
                 [group: 'com.jayway.jsonpath', name: 'json-path', version: '0.9.1'],
-
+                [group: 'org.apache.tika', name: 'tika-core', version :'1.9'],
                 // Although fineract (at the time of writing) doesn't have any compile time dep. on this,
                 // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
                 [group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.3.5'],

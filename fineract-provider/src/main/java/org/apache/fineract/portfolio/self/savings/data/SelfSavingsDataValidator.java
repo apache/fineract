@@ -20,19 +20,36 @@ package org.apache.fineract.portfolio.self.savings.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.google.gson.JsonElement;
 
 @Component
 public class SelfSavingsDataValidator {
+	
+	private final FromJsonHelper fromApiJsonHelper;
+
+	@Autowired
+	public SelfSavingsDataValidator(final FromJsonHelper fromApiJsonHelper) {
+		this.fromApiJsonHelper = fromApiJsonHelper;
+	}
 
 	private static final Set<String> allowedAssociationParameters = new HashSet<>(
 			Arrays.asList(SavingsApiConstants.transactions,
@@ -81,6 +98,33 @@ public class SelfSavingsDataValidator {
 		if (templateRequest) {
 			unsupportedParams.add("template");
 		}
+	}
+	
+	public HashMap<String, Object> validateSavingsApplication(final String json) {
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+
+		final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+				.resource(SelfSavingsAccountConstants.savingsAccountResource);
+
+		final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+		final Long clientId = this.fromApiJsonHelper.extractLongNamed(SelfSavingsAccountConstants.clientIdParameterName,
+				element);
+		baseDataValidator.reset().parameter(SelfSavingsAccountConstants.clientIdParameterName).value(clientId).notNull()
+				.longGreaterThanZero();
+
+		if (!dataValidationErrors.isEmpty()) {
+			throw new PlatformApiDataValidationException(dataValidationErrors);
+		}
+
+		HashMap<String, Object> parameterMap = new HashMap<>();
+		parameterMap.put(SelfSavingsAccountConstants.clientIdParameterName, clientId);
+
+		return parameterMap;
+
 	}
 
 }

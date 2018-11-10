@@ -29,6 +29,7 @@ public class ClientApiConstants {
     public static final String CLIENT_RESOURCE_NAME = "client";
     public static final String CLIENT_CHARGES_RESOURCE_NAME = "CLIENTCHARGE";
 
+
     // Client Charge Action Names
     public static final String CLIENT_CHARGE_ACTION_CREATE = "CREATE";
     public static final String CLIENT_CHARGE_ACTION_DELETE = "DELETE";
@@ -185,7 +186,9 @@ public class ClientApiConstants {
     public static final String staffOptionsParamName = "staffOptions";
 
     public static final String datatables = "datatables";
+    public static final String obligeeData = "ObligeeDetails";
 
+    public static final String clientEntityName = "clients";
 
     /**
      * These parameters will match the class level parameters of

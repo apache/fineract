@@ -218,12 +218,14 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         this.columnValidator.validateSqlInjection(sqlBuilder.toString(), extraCriteria);
         if (parameters.isOrderByRequested()) {
             sqlBuilder.append(' ').append(parameters.orderBySql());
+            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), parameters.orderBySql());
         } else {
             sqlBuilder.append(' ').append(' ').append(" order by aud.id DESC");
         }
 
         if (parameters.isLimited()) {
             sqlBuilder.append(' ').append(parameters.limitSql());
+            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), parameters.limitSql());
         }
 
         logger.info("sql: " + sqlBuilder.toString());

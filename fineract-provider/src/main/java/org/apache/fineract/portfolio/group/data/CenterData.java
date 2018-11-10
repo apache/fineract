@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
@@ -66,6 +67,59 @@ public class CenterData {
     private final BigDecimal installmentDue;
 
     private List<DatatableData> datatables = null;
+
+    //import fields
+    private transient Integer rowIndex;
+    private String dateFormat;
+    private String locale;
+    private LocalDate submittedOnDate;
+
+    public static CenterData importInstance(String name,List<GroupGeneralData> groupMembers,LocalDate activationDate,
+            boolean active ,LocalDate submittedOnDate,String externalId, Long officeId,
+            Long staffId,Integer rowIndex,String dateFormat,String locale){
+
+        return new CenterData(name,groupMembers,activationDate, active,submittedOnDate, externalId, officeId, staffId, rowIndex,dateFormat,locale);
+    }
+
+    private CenterData(String name,List<GroupGeneralData> groupMembers,LocalDate activationDate,
+            boolean active ,LocalDate submittedOnDate,String externalId, Long officeId,
+            Long staffId,Integer rowIndex,String dateFormat,String locale) {
+        this.name = name;
+        this.groupMembers=groupMembers;
+        this.externalId = externalId;
+        this.officeId = officeId;
+        this.staffId = staffId;
+        this.active = active;
+        this.activationDate = activationDate;
+        this.submittedOnDate=submittedOnDate;
+        this.rowIndex = rowIndex;
+        this.dateFormat= dateFormat;
+        this.locale=locale;
+        this.status=null;
+        this.id=null;
+        this.accountNo = null;
+        this.staffName = null;
+        this.hierarchy = null;
+        this.timeline = null;
+        this.groupMembersOptions = null;
+        this.collectionMeetingCalendar = null;
+        this.closureReasons =null;
+        this.officeOptions = null;
+        this.staffOptions = null;
+        this.totalCollected =null;
+        this.totalOverdue = null;
+        this.totaldue = null;
+        this.installmentDue = null;
+        this.officeName=null;
+    }
+
+    public Integer getRowIndex() {
+        return rowIndex;
+    }
+
+    public String getOfficeName() {
+        return officeName;
+    }
 
     public static CenterData template(final Long officeId, final String accountNo, final LocalDate activationDate,
             final Collection<OfficeData> officeOptions, final Collection<StaffData> staffOptions,

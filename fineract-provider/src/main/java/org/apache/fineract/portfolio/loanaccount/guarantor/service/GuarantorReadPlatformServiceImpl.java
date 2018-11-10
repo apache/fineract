@@ -39,10 +39,12 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.guarantor.data.GuarantorData;
 import org.apache.fineract.portfolio.loanaccount.guarantor.data.GuarantorFundingData;
 import org.apache.fineract.portfolio.loanaccount.guarantor.data.GuarantorTransactionData;
+import org.apache.fineract.portfolio.loanaccount.guarantor.data.ObligeeData;
 import org.apache.fineract.portfolio.savings.data.DepositAccountOnHoldTransactionData;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -74,7 +76,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
     public List<GuarantorData> retrieveGuarantorsForLoan(final Long loanId) {
         final GuarantorMapper rm = new GuarantorMapper();
         String sql = "select " + rm.schema();
-        sql += " where loan_id = ?  group by g.id,gfd.id";
+        sql += " where loan_id = ?  group by g.id,gfd.id, gt.id";
         final List<GuarantorData> guarantorDatas = this.jdbcTemplate.query(sql, rm,
                 new Object[] { AccountAssociationType.GUARANTOR_ACCOUNT_ASSOCIATION.getValue(),
                         loanId });
@@ -91,7 +93,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
     public GuarantorData retrieveGuarantor(final Long loanId, final Long guarantorId) {
         final GuarantorMapper rm = new GuarantorMapper();
         String sql = "select " + rm.schema();
-        sql += " where g.loan_id = ? and g.id = ? group by g.id,gfd.id";
+        sql += " where g.loan_id = ? and g.id = ? group by g.id, gfd.id, gt.id";
         final GuarantorData guarantorData = this.jdbcTemplate.queryForObject(sql, rm,
                 new Object[] { AccountAssociationType.GUARANTOR_ACCOUNT_ASSOCIATION.getValue(),
                         loanId, guarantorId });
@@ -254,7 +256,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
         }
 
         @Override
-        public GuarantorTransactionData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public GuarantorTransactionData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
             GuarantorTransactionData guarantorTransactionData = null;
             final Long id = rs.getLong("gtId");
             final Long transactionId = rs.getLong("ohtId");
@@ -287,5 +289,57 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
         }
         return guarantorData;
     }
+
+	@Override
+	public List<ObligeeData> retrieveObligeeDetails(final Long clientId) {
+		final ObligeeMapper rm = new ObligeeMapper();
+		String sql = rm.schema();
+		try {
+			return this.jdbcTemplate.query(sql, rm, new Object[] { clientId });
+		} catch (final EmptyResultDataAccessException e) {
+			return null;
+		}
+
+	}
+
+	private static final class ObligeeMapper implements RowMapper<ObligeeData> {
+
+		private final String sql;
+
+		public ObligeeMapper() {
+			StringBuilder sb = new StringBuilder(
+					"SELECT cl.firstname, cl.lastname,cl.display_name as displayName, loan.account_no as loanAccountNumber, loan.principal_amount as loanAmount, gfd.amount as guaranteedAmount, ");
+			sb.append(
+					"gfd.amount_released_derived as amountReleased, gfd.amount_transfered_derived as amountTransferred FROM m_guarantor mg");
+			sb.append(" JOIN m_guarantor_funding_details gfd on mg.id = gfd.guarantor_id ");
+			sb.append(
+					" JOIN m_client mc ON mg.entity_id = mc.id AND mc.id = ? JOIN m_loan loan ON mg.loan_id = loan.id ");
+			sb.append(" JOIN m_client cl ON loan.client_id = cl.id ");
+			sql = sb.toString();
+		}
+
+		public String schema() {
+			return this.sql;
+		}
+
+		@Override
+		public ObligeeData mapRow(final ResultSet rs, final int rowNum)
+				throws SQLException {
+			final String firstName = rs.getString("firstname");
+			final String lastName = rs.getString("lastname");
+			final String displayName = rs.getString("displayName");
+			final String loanAccountNumber = rs.getString("loanAccountNumber");
+
+			final BigDecimal loanAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "loanAmount");
+			final BigDecimal guaranteeAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "guaranteedAmount");
+			final BigDecimal amountReleased = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountReleased");
+			final BigDecimal amountTransferred = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountTransferred");
+
+			return ObligeeData.instance(firstName, lastName, displayName, loanAccountNumber, loanAmount,
+					guaranteeAmount, amountReleased, amountTransferred);
+
+		}
+
+	}
 
 }

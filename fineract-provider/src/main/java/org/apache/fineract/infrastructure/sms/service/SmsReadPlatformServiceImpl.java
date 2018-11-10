@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.infrastructure.sms.data.SmsData;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageEnumerations;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageStatusType;
@@ -49,11 +50,14 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
     private final JdbcTemplate jdbcTemplate;
     private final SmsMapper smsRowMapper;
     private final PaginationHelper<SmsData> paginationHelper = new PaginationHelper<>();
+    private final ColumnValidator columnValidator;
 
     @Autowired
-    public SmsReadPlatformServiceImpl(final RoutingDataSource dataSource) {
+    public SmsReadPlatformServiceImpl(final RoutingDataSource dataSource,
+    		final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.smsRowMapper = new SmsMapper();
+        this.columnValidator = columnValidator;
     }
 
     private static final class SmsMapper implements RowMapper<SmsData> {
@@ -224,9 +228,10 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
-
+            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
             if (searchParameters.isSortOrderProvided()) {
                 sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
             }
         } else {
             sqlBuilder.append(" order by smo.submittedon_date, smo.id");

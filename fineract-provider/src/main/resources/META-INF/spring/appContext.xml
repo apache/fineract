@@ -104,6 +104,5 @@
 
 	<import resource="swagger.xml"/>
 
-	<import resource="notificationContext.xml"/>
 
 </beans>

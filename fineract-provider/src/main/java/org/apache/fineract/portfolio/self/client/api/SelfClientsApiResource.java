@@ -19,6 +19,23 @@
 package org.apache.fineract.portfolio.self.client.api;
 
 import io.swagger.annotations.*;
+import java.io.InputStream;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+
 import org.apache.fineract.infrastructure.documentmanagement.api.ImagesApiResource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
@@ -33,11 +50,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataBodyPart;
+import com.sun.jersey.multipart.FormDataParam;
 
 @Path("/self/clients")
 @Component
@@ -228,6 +243,54 @@ public class SelfClientsApiResource {
 		if (!mappedClientId) {
 			throw new ClientNotFoundException(clientId);
 		}
+	}
+	
+	@POST
+	@Path("{clientId}/images")
+	@Consumes({ MediaType.MULTIPART_FORM_DATA })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String addNewClientImage(@PathParam("clientId") final Long clientId,
+			@HeaderParam("Content-Length") final Long fileSize, @FormDataParam("file") final InputStream inputStream,
+			@FormDataParam("file") final FormDataContentDisposition fileDetails,
+			@FormDataParam("file") final FormDataBodyPart bodyPart) {
+
+		validateAppuserClientsMapping(clientId);
+		return this.imagesApiResource.addNewClientImage(ClientApiConstants.clientEntityName, clientId, fileSize,
+				inputStream, fileDetails, bodyPart);
+
+	}
+	
+	@POST
+	@Path("{clientId}/images")
+	@Consumes({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String addNewClientImage(@PathParam("entity") final String entityName,
+			@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
+		validateAppuserClientsMapping(clientId);
+		return this.imagesApiResource.addNewClientImage(ClientApiConstants.clientEntityName, clientId, jsonRequestBody);
+
+	}
+
+	@DELETE
+	@Path("{clientId}/images")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String deleteClientImage(@PathParam("clientId") final Long clientId) {
+		
+		validateAppuserClientsMapping(clientId);
+		return this.imagesApiResource.deleteClientImage(ClientApiConstants.clientEntityName, clientId);
+
+	}
+
+	@GET
+	@Path("{clientId}/obligeedetails")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveObligeeDetails(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+
+		validateAppuserClientsMapping(clientId);
+
+		return this.clientApiResource.retrieveObligeeDetails(clientId, uriInfo);
 	}
 
 }

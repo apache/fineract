@@ -20,6 +20,7 @@ package org.apache.fineract.organisation.staff.data;
 
 import java.util.Collection;
 
+import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.joda.time.LocalDate;
 
@@ -39,6 +40,41 @@ public class StaffData {
     private final Boolean isLoanOfficer;
     private final Boolean isActive;
     private final LocalDate joiningDate;
+
+    //import fields
+    private transient Integer rowIndex;
+    private String dateFormat;
+    private String locale;
+
+    public static StaffData importInstance(String externalId, String firstName, String lastName, String mobileNo, Long officeId, Boolean isLoanOfficer,
+            Boolean isActive, LocalDate joinedOnDate, Integer rowIndex,String locale, String dateFormat){
+        return  new StaffData(externalId,firstName,lastName,mobileNo,officeId,isLoanOfficer,isActive,
+                joinedOnDate,rowIndex,locale,dateFormat);
+
+    }
+    private StaffData(String externalId, String firstname, String lastname, String mobileNo, Long officeId, Boolean isLoanOfficer,
+            Boolean isActive, LocalDate joiningDate, Integer rowIndex,String locale, String dateFormat) {
+
+        this.externalId = externalId;
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.mobileNo = mobileNo;
+        this.officeId = officeId;
+        this.isLoanOfficer = isLoanOfficer;
+        this.isActive = isActive;
+        this.joiningDate = joiningDate;
+        this.rowIndex = rowIndex;
+        this.dateFormat= dateFormat;
+        this.locale= locale;
+        this.allowedOffices = null;
+        this.id = null;
+        this.officeName = null;
+        this.displayName = null;
+    }
+
+    public Integer getRowIndex() {
+        return rowIndex;
+    }
 
     @SuppressWarnings("unused")
     private final Collection<OfficeData> allowedOffices;

@@ -35,6 +35,7 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 import org.apache.fineract.useradministration.domain.AppUser;
 
@@ -69,6 +70,10 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
     private SavingsAccount savingsAccount;
 
     @ManyToOne
+    @JoinColumn(name = "savings_account_transaction_id", nullable = true)
+    private SavingsAccountTransaction savingsTransaction;
+    
+    @ManyToOne
     @JoinColumn(name = "share_account_id", nullable = true)
     private ShareAccount shareAccount;
     
@@ -95,6 +100,19 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         return new Note(account, note);
     }
 
+    public static Note savingsTransactionNote(final SavingsAccount savingsAccount, final SavingsAccountTransaction savingsTransaction,
+            final String note) {
+        return new Note(savingsAccount, savingsTransaction, note);
+    }
+    
+    private Note(final SavingsAccount savingsAccount, final SavingsAccountTransaction savingsTransaction, final String note) {
+        this.savingsAccount = savingsAccount;
+        this.savingsTransaction = savingsTransaction;
+        this.client = savingsAccount.getClient();
+        this.note = note;
+        this.noteTypeId = NoteType.SAVINGS_TRANSACTION.getValue();
+    }
+    
     public static Note shareNote(final ShareAccount account, final String note) {
         return new Note(account, note);
     }

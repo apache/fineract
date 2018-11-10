@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.notification.service.TopicDomainService;
 import org.apache.fineract.useradministration.command.PermissionsCommand;
 import org.apache.fineract.useradministration.domain.Permission;
 import org.apache.fineract.useradministration.domain.PermissionRepository;
@@ -57,16 +58,18 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     private final PermissionRepository permissionRepository;
     private final RoleDataValidator roleCommandFromApiJsonDeserializer;
     private final PermissionsCommandFromApiJsonDeserializer permissionsFromApiJsonDeserializer;
+    private final TopicDomainService topicDomainService;
 
     @Autowired
     public RoleWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final RoleRepository roleRepository,
             final PermissionRepository permissionRepository, final RoleDataValidator roleCommandFromApiJsonDeserializer,
-            final PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+            final PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer, final TopicDomainService topicDomainService) {
         this.context = context;
         this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
         this.roleCommandFromApiJsonDeserializer = roleCommandFromApiJsonDeserializer;
         this.permissionsFromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.topicDomainService = topicDomainService;
     }
 
     @Transactional
@@ -80,6 +83,8 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
             final Role entity = Role.fromJson(command);
             this.roleRepository.save(entity);
+            
+            this.topicDomainService.createTopic(entity);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(entity.getId()).build();
         } catch (final DataIntegrityViolationException dve) {
@@ -130,9 +135,13 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             final Role role = this.roleRepository.findOne(roleId);
             if (role == null) { throw new RoleNotFoundException(roleId); }
 
+            String previousRoleName = role.getName();
             final Map<String, Object> changes = role.update(command);
             if (!changes.isEmpty()) {
                 this.roleRepository.saveAndFlush(role);
+                if (changes.containsKey("name")) {
+                	this.topicDomainService.updateTopic( previousRoleName, role, changes);
+                }
             }
 
             return new CommandProcessingResultBuilder() //
@@ -221,6 +230,8 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
              */
             final Integer count = this.roleRepository.getCountOfRolesAssociatedWithUsers(roleId);
             if (count > 0) { throw new RoleAssociatedException("error.msg.role.associated.with.users.deleted", roleId); }
+            
+            this.topicDomainService.deleteTopic(role);
             
             this.roleRepository.delete(role);
             return new CommandProcessingResultBuilder().withEntityId(roleId).build();

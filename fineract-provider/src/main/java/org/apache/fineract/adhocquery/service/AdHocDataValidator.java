@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.fineract.adhocquery.domain.ReportRunFrequency;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
@@ -44,7 +45,9 @@ public final class AdHocDataValidator {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("name","query","tableName","tableFields","email","isActive"));
+    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList(
+        "name","query","tableName","tableFields","email","isActive", "reportRunFrequency", "reportRunEvery"
+    ));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -77,7 +80,19 @@ public final class AdHocDataValidator {
         baseDataValidator.reset().parameter("tableFields").value(tableFields).notBlank().notExceedingLengthOf(1000);
 
         final String email = this.fromApiJsonHelper.extractStringNamed("email", element);
-        baseDataValidator.reset().parameter("email").value(email).notBlank().notExceedingLengthOf(500);
+        baseDataValidator.reset().parameter("email").value(email).ignoreIfNull().notExceedingLengthOf(500);
+
+        final Long reportRunFrequencyCode = this.fromApiJsonHelper.extractLongNamed("reportRunFrequency", element);
+        if (reportRunFrequencyCode != null) {
+            baseDataValidator.reset().parameter("reportRunFrequency").value(reportRunFrequencyCode)
+                .inMinMaxRange((int) ReportRunFrequency.DAILY.getValue(), (int) ReportRunFrequency.CUSTOM.getValue());
+        }
+
+        final Long reportRunEvery = this.fromApiJsonHelper.extractLongNamed("reportRunEvery", element);
+        if (reportRunEvery != null) {
+            baseDataValidator.reset().parameter("reportRunEvery").value(reportRunFrequencyCode).integerGreaterThanZero();
+        }
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -111,7 +126,16 @@ public final class AdHocDataValidator {
         }
         if (this.fromApiJsonHelper.parameterExists("email", element)) {
             final String email = this.fromApiJsonHelper.extractStringNamed("email", element);
-            baseDataValidator.reset().parameter("email").value(email).notBlank().notExceedingLengthOf(500);
+            baseDataValidator.reset().parameter("email").value(email).ignoreIfNull().notExceedingLengthOf(500);
+        }
+        if (this.fromApiJsonHelper.parameterExists("reportRunFrequency", element)) {
+            final Long reportRunFrequencyCode = this.fromApiJsonHelper.extractLongNamed("reportRunFrequency", element);
+            baseDataValidator.reset().parameter("reportRunFrequency").value(reportRunFrequencyCode)
+                .inMinMaxRange((int) ReportRunFrequency.DAILY.getValue(), (int) ReportRunFrequency.CUSTOM.getValue());
+        }
+        if (this.fromApiJsonHelper.parameterExists("reportRunEvery", element)) {
+            final Long reportRunEvery = this.fromApiJsonHelper.extractLongNamed("reportRunEvery", element);
+            baseDataValidator.reset().parameter("reportRunEvery").value(reportRunEvery).integerGreaterThanZero();
         }
         /*if (this.fromApiJsonHelper.parameterExists("isActive", element)) {
             final Integer isActive = this.fromApiJsonHelper.extractIntegerNamed("isActive", element, Locale.getDefault());

@@ -60,7 +60,7 @@ public class SavingsProductHelper {
     private String nameOfSavingsProduct = Utils.randomNameGenerator("SAVINGS_PRODUCT_", 6);
     private String shortName = Utils.randomNameGenerator("", 4);
     private String description = Utils.randomNameGenerator("", 20);
-    private String interestCompoundingPeriodType = "2";
+    private String interestCompoundingPeriodType = "4";
     private String interestPostingPeriodType = "4";
     private String interestCalculationType = INTEREST_CALCULATION_USING_DAILY_BALANCE;
     private String nominalAnnualInterestRate = "10.0";

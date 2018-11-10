@@ -133,8 +133,13 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
                 conditionSql = " n.loan_transaction_id = ? ";
             break;
             case SAVING_ACCOUNT:
-                conditionSql = " n.saving_account_id = ? ";
+                paramList.add(NoteType.SAVING_ACCOUNT.getValue());
+                paramList.add(NoteType.SAVINGS_TRANSACTION.getValue());
+                conditionSql = " n.saving_account_id = ? and ( n.note_type_enum = ? or n.note_type_enum = ? ) ";
             break;
+            case SAVINGS_TRANSACTION:
+                conditionSql = " n.savings_account_transaction_id = ? " ;
+                break ;
             case GROUP:
                 conditionSql = " n.group_id = ? ";
             break;

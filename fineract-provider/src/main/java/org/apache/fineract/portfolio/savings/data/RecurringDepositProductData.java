@@ -422,4 +422,63 @@ public class RecurringDepositProductData extends DepositProductData {
         this.periodFrequencyTypeOptions = periodFrequencyTypeOptions;
     }
 
+    public EnumOptionData getMinDepositTermType() {
+        return minDepositTermType;
+    }
+
+    public boolean isPreClosurePenalApplicable() {
+        return preClosurePenalApplicable;
+    }
+
+    public BigDecimal getPreClosurePenalInterest() {
+        return preClosurePenalInterest;
+    }
+
+    public EnumOptionData getPreClosurePenalInterestOnType() {
+        return preClosurePenalInterestOnType;
+    }
+
+    public Integer getMinDepositTerm() {
+        return minDepositTerm;
+    }
+
+    public Integer getMaxDepositTerm() {
+        return maxDepositTerm;
+    }
+
+    public EnumOptionData getMaxDepositTermType() {
+        return maxDepositTermType;
+    }
+
+    public BigDecimal getMinDepositAmount() {
+        return minDepositAmount;
+    }
+
+    public BigDecimal getDepositAmount() {
+        return depositAmount;
+    }
+
+    public BigDecimal getMaxDepositAmount() {
+        return maxDepositAmount;
+    }
+
+    public Integer getInMultiplesOfDepositTerm() {
+        return inMultiplesOfDepositTerm;
+    }
+
+    public EnumOptionData getInMultiplesOfDepositTermType() {
+        return inMultiplesOfDepositTermType;
+    }
+
+    public boolean isMandatoryDeposit() {
+        return isMandatoryDeposit;
+    }
+
+    public boolean isAllowWithdrawal() {
+        return allowWithdrawal;
+    }
+
+    public boolean isAdjustAdvanceTowardsFuturePayments() {
+        return adjustAdvanceTowardsFuturePayments;
+    }
 }

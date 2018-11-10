@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.portfolio.savings.data.DepositAccountOnHoldTransactionData;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,13 +42,16 @@ import org.springframework.stereotype.Service;
 public class DepositAccountOnHoldTransactionReadPlatformServiceImpl implements DepositAccountOnHoldTransactionReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final ColumnValidator columnValidator;
     private final PaginationHelper<DepositAccountOnHoldTransactionData> paginationHelper = new PaginationHelper<>();
     private final DepositAccountOnHoldTransactionsMapper mapper;
 
     @Autowired
-    public DepositAccountOnHoldTransactionReadPlatformServiceImpl(final RoutingDataSource dataSource) {
+    public DepositAccountOnHoldTransactionReadPlatformServiceImpl(final RoutingDataSource dataSource,
+    		final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         mapper = new DepositAccountOnHoldTransactionsMapper();
+        this.columnValidator = columnValidator;
     }
 
     @Override
@@ -66,9 +70,11 @@ public class DepositAccountOnHoldTransactionReadPlatformServiceImpl implements D
 
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
+            this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
 
             if (searchParameters.isSortOrderProvided()) {
                 sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
             }
         }
 

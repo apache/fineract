@@ -194,21 +194,35 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
     public void sendTriggeredMessages(Map<SmsCampaign, Collection<SmsMessage>> smsDataMap) {
         try {
             if (!smsDataMap.isEmpty()) {
+                List<SmsMessage> toSaveMessages = new ArrayList<>() ;
+                List<SmsMessage> toSendNotificationMessages = new ArrayList<>() ;
                 for (Entry<SmsCampaign, Collection<SmsMessage>> entry : smsDataMap.entrySet()) {
                     Iterator<SmsMessage> smsMessageIterator = entry.getValue().iterator();
                     Collection<SmsMessageApiQueueResourceData> apiQueueResourceDatas = new ArrayList<>();
                     StringBuilder request = new StringBuilder();
                     while (smsMessageIterator.hasNext()) {
                         SmsMessage smsMessage = smsMessageIterator.next();
-                        SmsMessageApiQueueResourceData apiQueueResourceData = SmsMessageApiQueueResourceData.instance(smsMessage.getId(),
-                                null, null, null, smsMessage.getMobileNo(), smsMessage.getMessage(), entry.getKey().getProviderId());
-                        apiQueueResourceDatas.add(apiQueueResourceData);
-                        smsMessage.setStatusType(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue());
+                        if(smsMessage.isNotification()){
+                            smsMessage.setStatusType(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue());
+                            toSendNotificationMessages.add(smsMessage);
+                        }else {
+                            SmsMessageApiQueueResourceData apiQueueResourceData = SmsMessageApiQueueResourceData.instance(smsMessage.getId(),
+                                    null, null, null, smsMessage.getMobileNo(), smsMessage.getMessage(), entry.getKey().getProviderId());
+                            apiQueueResourceDatas.add(apiQueueResourceData);
+                            smsMessage.setStatusType(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue());
+                            toSaveMessages.add(smsMessage) ;
+                        }
                     }
-                    this.smsMessageRepository.save(entry.getValue()) ;
-                    request.append(SmsMessageApiQueueResourceData.toJsonString(apiQueueResourceDatas));
-                    logger.info("Sending triggered SMS with request - " + request.toString());
-                    this.triggeredExecutorService.execute(new SmsTask(ThreadLocalContextUtil.getTenant(), apiQueueResourceDatas));
+                    if(toSaveMessages.size()>0){
+                        this.smsMessageRepository.save(toSaveMessages);
+                        this.smsMessageRepository.flush();
+                        this.triggeredExecutorService.execute(new SmsTask(ThreadLocalContextUtil.getTenant(), apiQueueResourceDatas));
+                    }
+                    if(!toSendNotificationMessages.isEmpty()){
+                        this.notificationSenderService.sendNotification(toSendNotificationMessages);
+                    }
+
+
                 }
             }
         } catch (Exception e) {

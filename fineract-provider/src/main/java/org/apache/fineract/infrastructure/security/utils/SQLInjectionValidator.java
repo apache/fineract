@@ -24,13 +24,13 @@ import java.util.regex.Pattern;
 
 public class SQLInjectionValidator {
 
-	private final static String[] DDL_COMMANDS = { "create", "drop", "alter", "truncate", "comment" };
+	private final static String[] DDL_COMMANDS = { "create", "drop", "alter", "truncate", "comment", "sleep" };
 
 	private final static String[] DML_COMMANDS = { "select", "insert", "update", "delete", "merge", "upsert", "call" };
 
 	private final static String[] COMMENTS = { "--", "({", "/*", "#" };
 
-	private final static String SQL_PATTERN = "[a-zA-Z_=,\\-'!><.?\"`% ()0-9]*";
+	private final static String SQL_PATTERN = "[a-zA-Z_=,\\-'!><.?\"`% ()0-9*\n\r]*";
 
 	public final static void validateSQLInput(final String sqlSearch) {
 		String lowerCaseSQL = sqlSearch.toLowerCase();
@@ -115,9 +115,9 @@ public class SQLInjectionValidator {
 		}
 	}
 	public final static void validateAdhocQuery(final String sqlSearch) {
-		String lowerCaseSQL = sqlSearch.toLowerCase();
+		String lowerCaseSQL = sqlSearch.toLowerCase().trim();
 		for (String ddl : DDL_COMMANDS) {
-			if (lowerCaseSQL.contains(ddl)) {
+			if (lowerCaseSQL.startsWith(ddl)) {
 				throw new SQLInjectionException();
 			}
 		}

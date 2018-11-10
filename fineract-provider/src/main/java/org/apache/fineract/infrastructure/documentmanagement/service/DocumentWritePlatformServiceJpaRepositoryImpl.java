@@ -89,6 +89,22 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
     @Transactional
     @Override
+    public Long createInternalDocument(final String entityType, final Long entityId,
+            final Long fileSize, final InputStream inputStream, final String mimeType,
+            final String name, final String description, final String fileName) {
+
+
+        final DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, name, fileName,
+                fileSize, mimeType, description, null);
+
+        final Long documentId = createDocument(documentCommand, inputStream);
+
+        return documentId;
+
+    }
+
+    @Transactional
+    @Override
     public CommandProcessingResult updateDocument(final DocumentCommand documentCommand, final InputStream inputStream) {
         try {
             this.context.authenticatedUser();
@@ -161,7 +177,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
     /*** Entities for document Management **/
     public static enum DOCUMENT_MANAGEMENT_ENTITY {
-        CLIENTS, CLIENT_IDENTIFIERS, STAFF, LOANS, SAVINGS, GROUPS;
+        CLIENTS, CLIENT_IDENTIFIERS, STAFF, LOANS, SAVINGS, GROUPS,IMPORT;
 
         @Override
         public String toString() {
