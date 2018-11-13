@@ -21,12 +21,10 @@ package org.apache.fineract.portfolio.client.data;
 import java.util.Collection;
 import java.util.List;
 
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
@@ -41,6 +39,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing client data.
  */
+@SuppressWarnings("unused")
 final public class ClientData implements Comparable<ClientData> {
 
     private final Long id;
@@ -50,7 +49,6 @@ final public class ClientData implements Comparable<ClientData> {
     private final EnumOptionData status;
     private final CodeValueData subStatus;
 
-    @SuppressWarnings("unused")
     private final Boolean active;
     private final LocalDate activationDate;
 
@@ -103,11 +101,12 @@ final public class ClientData implements Comparable<ClientData> {
     
     private final ClientNonPersonData clientNonPersonDetails;
     
-    private final AddressData address;
+    private final Collection<AddressData> address;
 
 	private final Boolean isAddressEnabled;
 
-    private final List<DatatableData> datatables;
+    
+	private final List<DatatableData> datatables;
 
     //import fields
     private transient Integer rowIndex;
@@ -122,7 +121,7 @@ final public class ClientData implements Comparable<ClientData> {
     public static ClientData importClientEntityInstance(Long legalFormId,Integer rowIndex,String fullname,Long officeId, Long clientTypeId,
             Long clientClassificationId,Long staffId,Boolean active,LocalDate activationDate,LocalDate submittedOnDate,
             String externalId,LocalDate dateOfBirth,String mobileNo,ClientNonPersonData clientNonPersonDetails,
-            AddressData address,String locale,String dateFormat){
+            Collection<AddressData> address,String locale,String dateFormat){
         return  new ClientData(legalFormId,rowIndex,fullname, null, null, null, submittedOnDate,activationDate,active, externalId,
         		officeId, staffId,mobileNo,dateOfBirth,clientTypeId, null,clientClassificationId,null,
         		address,clientNonPersonDetails, locale,dateFormat);
@@ -131,7 +130,7 @@ final public class ClientData implements Comparable<ClientData> {
     public static ClientData importClientPersonInstance(Long legalFormId,Integer rowIndex,String firstName,String lastName,String middleName,
             LocalDate submittedOn,LocalDate activationDate,Boolean active,String externalId,Long officeId,
             Long staffId,String mobileNo, LocalDate dob,Long clientTypeId,Long genderId,
-            Long clientClassificationId, Boolean isStaff, AddressData address,String locale,String dateFormat){
+            Long clientClassificationId, Boolean isStaff, Collection<AddressData> address,String locale,String dateFormat){
 
         return new ClientData(legalFormId,rowIndex, null, firstName,lastName,middleName,submittedOn,activationDate,active,externalId,
                 officeId,staffId,mobileNo,dob,clientTypeId,genderId,clientClassificationId,isStaff,address, null, locale,dateFormat);
@@ -144,7 +143,7 @@ final public class ClientData implements Comparable<ClientData> {
     private ClientData(Long legalFormId,Integer rowIndex, String fullname, String firstname,String lastname,String middlename,
             LocalDate submittedOn,LocalDate activationDate,Boolean active,String externalId,Long officeId,
             Long staffId,String mobileNo, LocalDate dob,Long clientTypeId,Long genderId,
-            Long clientClassificationId,Boolean isStaff, AddressData address, ClientNonPersonData clientNonPersonDetails,
+            Long clientClassificationId,Boolean isStaff, Collection<AddressData> address, ClientNonPersonData clientNonPersonDetails,
             String locale,String dateFormat ) {
         this.rowIndex=rowIndex;
         this.dateFormat=dateFormat;
@@ -225,7 +224,7 @@ final public class ClientData implements Comparable<ClientData> {
             final Collection<StaffData> staffOptions, final Collection<CodeValueData> narrations,
             final Collection<CodeValueData> genderOptions, final Collection<SavingsProductData> savingProductOptions,
             final Collection<CodeValueData> clientTypeOptions, final Collection<CodeValueData> clientClassificationOptions, final Collection<CodeValueData> clientNonPersonConstitutionOptions,
-            final Collection<CodeValueData> clientNonPersonMainBusinessLineOptions, final List<EnumOptionData> clientLegalFormOptions,final ClientFamilyMembersData familyMemberOptions, final AddressData address,
+            final Collection<CodeValueData> clientNonPersonMainBusinessLineOptions, final List<EnumOptionData> clientLegalFormOptions,final ClientFamilyMembersData familyMemberOptions, final Collection<AddressData> address,
             final Boolean isAddressEnabled, final List<DatatableData> datatables) {
         final String accountNo = null;
         final EnumOptionData status = null;
@@ -456,7 +455,7 @@ final public class ClientData implements Comparable<ClientData> {
             final CodeValueData clientClassification, final Collection<CodeValueData> clientTypeOptions,
             final Collection<CodeValueData> clientClassificationOptions, final Collection<CodeValueData> clientNonPersonConstitutionOptions,
             final Collection<CodeValueData> clientNonPersonMainBusinessLineOptions, final ClientNonPersonData clientNonPerson,
-            final List<EnumOptionData> clientLegalFormOptions,final ClientFamilyMembersData familyMemberOptions, final EnumOptionData legalForm, final AddressData address,
+            final List<EnumOptionData> clientLegalFormOptions,final ClientFamilyMembersData familyMemberOptions, final EnumOptionData legalForm, final Collection<AddressData> address,
             final Boolean isAddressEnabled, final List<DatatableData> datatables, final Boolean isStaff) {
         this.accountNo = accountNo;
         this.status = status;
