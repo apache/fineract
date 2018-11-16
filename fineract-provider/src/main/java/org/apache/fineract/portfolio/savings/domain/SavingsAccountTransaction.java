@@ -111,7 +111,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     @Column(name = "created_date", nullable = false)
     private Date createdDate;
 
-    @ManyToOne
+	@ManyToOne
     @JoinColumn(name = "appuser_id", nullable = true)
     private AppUser appUser;
     
@@ -790,5 +790,9 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     
 	public boolean isAmountOnHoldNotReleased() {
 		return (isAmountOnHold() && getReleaseIdOfHoldAmountTransaction() == null);
-	}	    
+	}
+	
+	public Date getCreatedDate() {
+		return createdDate;
+	}
 }

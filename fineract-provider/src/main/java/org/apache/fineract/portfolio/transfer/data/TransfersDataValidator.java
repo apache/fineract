@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
+import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -54,7 +55,7 @@ public final class TransfersDataValidator {
 	private static final Set<String> PROPOSE_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<>(
 			Arrays.asList(TransferApiConstants.localeParamName, TransferApiConstants.dateFormatParamName,
 					TransferApiConstants.destinationOfficeIdParamName, TransferApiConstants.transferActiveLoans,
-					TransferApiConstants.note));
+					TransferApiConstants.note, TransferApiConstants.transferDate));
 
 	private static final Set<String> ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<>(
 			Arrays.asList(TransferApiConstants.newStaffIdParamName, TransferApiConstants.destinationGroupIdParamName,
@@ -132,7 +133,7 @@ public final class TransfersDataValidator {
                 .extractLongNamed(TransferApiConstants.destinationOfficeIdParamName, element);
         baseDataValidator.reset().parameter(TransferApiConstants.destinationOfficeIdParamName).value(destinationOfficeId).notNull()
                 .integerGreaterThanZero();
-
+        
         validateNote(baseDataValidator, element);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

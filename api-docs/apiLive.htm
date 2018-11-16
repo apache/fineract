@@ -5761,7 +5761,7 @@ Request Body:
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Propose a Client Transfer</h4>
-	        <p>Allows you to propose the transfer of a <i>Client</i> to a different <i>Office</i>.</p>
+	        <p>Allows you to propose the transfer of a <i>Client</i> to a different <i>Office</i> on a specific date, if loan or savings transaction not present from proposed transfer date to current date.</p>
 	    </div>
 		<div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=proposeTransfer</code>
@@ -5769,6 +5769,7 @@ Request Body:
 Content-Type: application/json
 Request Body:
 {
+  "transferDate":"28 August 2018",
   "destinationOfficeId":"2",
   "note":"Client Relocating to Bangalore"
 }
