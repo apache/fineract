@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.loanaccount.data;
 import java.math.BigDecimal;
 import java.util.Collection;
 
-import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
@@ -32,6 +31,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing a loan transaction.
  */
+@SuppressWarnings("unused")
 public class LoanTransactionData {
 
     private final Long id;
@@ -56,16 +56,14 @@ public class LoanTransactionData {
     private final AccountTransferData transfer;
     private final BigDecimal fixedEmiAmount;
     private final BigDecimal outstandingLoanBalance;
-    @SuppressWarnings("unused")
     private final LocalDate submittedOnDate;
     private final boolean manuallyReversed;
-    @SuppressWarnings("unused")
 	private final LocalDate possibleNextRepaymentDate;
 
     // templates
     final Collection<PaymentTypeData> paymentTypeOptions;
     
-    private  Collection<CodeValueData> writeOffReasonOptions = null;
+	private  Collection<CodeValueData> writeOffReasonOptions = null;
 
     //import fields
     private transient Integer rowIndex;
@@ -79,7 +77,7 @@ public class LoanTransactionData {
     private Integer routingCode;
     private Integer receiptNumber;
     private Integer bankNumber;
-    private transient Integer accountId;
+    private transient Long accountId;
     private transient String transactionType;
 
     public static LoanTransactionData importInstance(BigDecimal repaymentAmount,LocalDate lastRepaymentDate,
@@ -120,7 +118,7 @@ public class LoanTransactionData {
     }
     public static LoanTransactionData importInstance(BigDecimal repaymentAmount,LocalDate repaymentDate,
             Long repaymentTypeId, String accountNumber,Integer checkNumber,Integer routingCode,
-            Integer receiptNumber, Integer bankNumber,Integer loanAccountId,String transactionType,
+            Integer receiptNumber, Integer bankNumber,Long loanAccountId,String transactionType,
             Integer rowIndex,String locale, String dateFormat){
         return new LoanTransactionData(repaymentAmount, repaymentDate, repaymentTypeId, accountNumber,
                 checkNumber, routingCode, receiptNumber, bankNumber, loanAccountId, "",
@@ -129,7 +127,7 @@ public class LoanTransactionData {
 
     private LoanTransactionData(BigDecimal transactionAmount,LocalDate transactionDate, Long paymentTypeId,
             String accountNumber,Integer checkNumber,Integer routingCode,Integer receiptNumber,
-            Integer bankNumber,Integer accountId,String transactionType,Integer rowIndex,String locale,
+            Integer bankNumber,Long accountId,String transactionType,Integer rowIndex,String locale,
             String dateFormat) {
         this.transactionAmount = transactionAmount;
         this.transactionDate = transactionDate;
@@ -169,7 +167,7 @@ public class LoanTransactionData {
         this.writeOffReasonOptions = null;
     }
 
-    public Integer getAccountId() {
+    public Long getAccountId() {
         return accountId;
     }
 
