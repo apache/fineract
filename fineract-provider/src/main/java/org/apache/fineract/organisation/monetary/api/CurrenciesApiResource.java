@@ -31,6 +31,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.*;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -48,6 +49,7 @@ import org.springframework.stereotype.Component;
 @Path("/currencies")
 @Component
 @Scope("singleton")
+@Api(value = "Currency", description = "Application related configuration around viewing/updating the currencies permitted for use within the MFI.")
 public class CurrenciesApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
@@ -75,6 +77,8 @@ public class CurrenciesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Retrieve Currency Configuration", notes = "Returns the list of currencies permitted for use AND the list of currencies not selected (but available for selection).\n" + "\n" + "Example Requests:\n" + "\n" + "currencies\n" + "\n" + "\n" + "currencies?fields=selectedCurrencyOptions")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = CurrenciesApiResourceSwagger.GetCurrenciesResponse.class)})
     public String retrieveCurrencies(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
@@ -88,7 +92,10 @@ public class CurrenciesApiResource {
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateCurrencies(final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Update Currency Configuration", notes = "Updates the list of currencies permitted for use.")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CurrenciesApiResourceSwagger.PutCurrenciesRequest.class )})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = CurrenciesApiResourceSwagger.PutCurrenciesResponse.class)})
+    public String updateCurrencies(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateCurrencies() //

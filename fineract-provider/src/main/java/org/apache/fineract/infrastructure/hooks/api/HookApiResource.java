@@ -35,6 +35,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.*;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -54,6 +55,7 @@ import org.springframework.stereotype.Component;
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
 @Scope("singleton")
+@Api(value = "Hooks", description = "Hooks are a mechanism to trigger custom code on the occurence of events.")
 public class HookApiResource {
 
 	private final PlatformSecurityContext context;
@@ -77,6 +79,8 @@ public class HookApiResource {
 	}
 
 	@GET
+	@ApiOperation(value = "Retrieve Hooks", notes = "Returns the list of hooks.\n" + "\n" + "Example Requests:\n" + "\n" + "hooks", responseContainer = "List", response = HookApiResourceSwagger.GetHookResponse.class)
+	@ApiResponses({@ApiResponse(code = 200, message = "", response = HookApiResourceSwagger.GetHookResponse.class, responseContainer = "list")})
 	public String retrieveHooks(@Context final UriInfo uriInfo) {
 
 		this.context.authenticatedUser().validateHasReadPermission(
@@ -93,7 +97,9 @@ public class HookApiResource {
 
 	@GET
 	@Path("{hookId}")
-	public String retrieveHook(@PathParam("hookId") final Long hookId,
+	@ApiOperation(value = "Retrieve a Hook", notes = "Returns the details of a Hook.\n" + "\n" + "Example Requests:\n" + "\n" + "hooks/1")
+	@ApiResponses({@ApiResponse(code = 200, message = "", response = HookApiResourceSwagger.GetHookResponse.class)})
+	public String retrieveHook(@PathParam("hookId") @ApiParam(value = "hookId") final Long hookId,
 			@Context final UriInfo uriInfo) {
 
 		this.context.authenticatedUser().validateHasReadPermission(
@@ -116,6 +122,8 @@ public class HookApiResource {
 
 	@GET
 	@Path("template")
+	@ApiOperation(value = "Retrieve Hooks Template", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "hooks/template")
+	@ApiResponses({@ApiResponse(code = 200, message = "", response = HookApiResourceSwagger.GetHookTemplateResponse.class)})
 	public String template(@Context final UriInfo uriInfo) {
 
 		this.context.authenticatedUser().validateHasReadPermission(
@@ -131,7 +139,10 @@ public class HookApiResource {
 	}
 
 	@POST
-	public String createHook(final String apiRequestBodyAsJson) {
+	@ApiOperation(value = "Create a Hook", notes = "The following parameters can be passed for the creation of a hook :-\n" + "\n" + "name - string - Required. The name of the template that is being called. (See /hooks/template for the list of valid hook names.)\n" + "\n" + "isActive - boolean - Determines whether the hook is actually triggered.\n" + "\n" + "events - array - Determines what events the hook is triggered for.\n" + "\n" + "config - hash - Required. Key/value pairs to provide settings for this hook. These settings vary between the templates.\n" + "\n" + "templateId - Optional. The UGD template ID associated with the same entity (client or loan).")
+	@ApiImplicitParams({@ApiImplicitParam(paramType = "body", dataType = "body", required = true, type = "body", dataTypeClass = HookApiResourceSwagger.PostHookRequest.class)})
+	@ApiResponses({@ApiResponse(code = 200, message = "", response = HookApiResourceSwagger.PostHookResponse.class)})
+	public String createHook(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
 		final CommandWrapper commandRequest = new CommandWrapperBuilder()
 				.createHook().withJson(apiRequestBodyAsJson).build();
@@ -144,8 +155,11 @@ public class HookApiResource {
 
 	@PUT
 	@Path("{hookId}")
-	public String updateHook(@PathParam("hookId") final Long hookId,
-			final String apiRequestBodyAsJson) {
+	@ApiOperation(value = "Update a Hook", notes = "Updates the details of a hook.")
+	@ApiImplicitParams({@ApiImplicitParam(paramType = "body", dataType = "body", required = true, type = "body", dataTypeClass = HookApiResourceSwagger.PutHookRequest.class)})
+	@ApiResponses({@ApiResponse(code = 200, message = "", response = HookApiResourceSwagger.PutHookResponse.class)})
+	public String updateHook(@PathParam("hookId") @ApiParam(value = "hookId") final Long hookId,
+			@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
 		final CommandWrapper commandRequest = new CommandWrapperBuilder()
 				.updateHook(hookId).withJson(apiRequestBodyAsJson).build();
@@ -158,7 +172,9 @@ public class HookApiResource {
 
 	@DELETE
 	@Path("{hookId}")
-	public String deleteHook(@PathParam("hookId") final Long hookId) {
+	@ApiOperation(value = "Delete a Hook", notes = "Deletes a hook.")
+	@ApiResponses({@ApiResponse(code = 200, message = "", response = HookApiResourceSwagger.DeleteHookResponse.class)})
+	public String deleteHook(@PathParam("hookId") @ApiParam(value = "hookId") final Long hookId) {
 
 		final CommandWrapper commandRequest = new CommandWrapperBuilder()
 				.deleteHook(hookId).build();

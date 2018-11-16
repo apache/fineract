@@ -18,23 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
-
+import io.swagger.annotations.*;
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.common.AccountingRuleType;
@@ -60,12 +44,7 @@ import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartDat
 import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartReadPlatformService;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
-import org.apache.fineract.portfolio.savings.DepositAccountType;
-import org.apache.fineract.portfolio.savings.DepositsApiConstants;
-import org.apache.fineract.portfolio.savings.SavingsCompoundingInterestPeriodType;
-import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYearType;
-import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
-import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.apache.fineract.portfolio.savings.*;
 import org.apache.fineract.portfolio.savings.data.FixedDepositProductData;
 import org.apache.fineract.portfolio.savings.service.DepositProductReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.DepositsDropdownReadPlatformService;
@@ -78,9 +57,19 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 @Path("/fixeddepositproducts")
 @Component
 @Scope("singleton")
+@Api(value = "Fixed Deposit Product", description = "This is one of the advanced term deposit product offered by MFI's. The Fixed Deposit Products (aka FD) product offerings are modeled using this API.\n" + "\n" + "The FD products are deposit accounts which are held for a fixed term – like 1 year, 2 years etc.\n" + "\n" + "When creating fixed deposit accounts, the details from the fixed deposit product are used to auto fill details of the fixed deposit account application process.")
 public class FixedDepositProductsApiResource {
 
     private final DepositProductReadPlatformService depositProductReadPlatformService;
@@ -135,7 +124,10 @@ public class FixedDepositProductsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String create(final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Create a Fixed Deposit Product", httpMethod = "POST", notes = "Creates a Fixed Deposit Product\n\n" + "Mandatory Fields: name, shortName, description, currencyCode, digitsAfterDecimal,inMultiplesOf, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minDepositTerm, minDepositTermTypeId, accountingRule\n\n" + "Optional Fields: lockinPeriodFrequency, lockinPeriodFrequencyType, maxDepositTerm, maxDepositTermTypeId, inMultiplesOfDepositTerm, inMultiplesOfDepositTermTypeId, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges, charts, , withHoldTax, taxGroupId\n\n" + "\n" + "Mandatory Fields for Cash based accounting (accountingRule = 2): savingsReferenceAccountId, savingsControlAccountId, interestOnSavingsAccountId, incomeFromFeeAccountId, transfersInSuspenseAccountId, incomeFromPenaltyAccountId")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FixedDepositProductsApiResourceSwagger.PostFixedDepositProductsRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FixedDepositProductsApiResourceSwagger.PostFixedDepositProductsResponse.class)})
+    public String create(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createFixedDepositProduct().withJson(apiRequestBodyAsJson)
                 .build();
@@ -149,7 +141,10 @@ public class FixedDepositProductsApiResource {
     @Path("{productId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String update(@PathParam("productId") final Long productId, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Update a Fixed Deposit Product", httpMethod = "PUT", notes = "Updates a Fixed Deposit Product")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FixedDepositProductsApiResourceSwagger.PutFixedDepositProductsProductIdRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FixedDepositProductsApiResourceSwagger.PutFixedDepositProductsProductIdResponse.class)})
+    public String update(@PathParam("productId") @ApiParam(value = "productId") final Long productId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateFixedDepositProduct(productId)
                 .withJson(apiRequestBodyAsJson).build();
@@ -163,6 +158,8 @@ public class FixedDepositProductsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "List Fixed Deposit Products", httpMethod = "GET", notes = "Lists Fixed Deposit Products\n\n" + "Example Requests:\n" + "\n" +"fixeddepositproducts\n" + "\n" + "\n" + "fixeddepositproducts?fields=name")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FixedDepositProductsApiResourceSwagger.GetFixedDepositProductsResponse.class, responseContainer = "List")})
     public String retrieveAll(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(DepositsApiConstants.FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME);
@@ -179,7 +176,9 @@ public class FixedDepositProductsApiResource {
     @Path("{productId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveOne(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "Retrieve a Fixed Deposit Product", httpMethod = "GET", notes = "Retrieves a Fixed Deposit Product\n\n" + "Example Requests:\n" + "\n" + "fixeddepositproducts/1\n" + "\n" + "\n" + "fixeddepositproducts/1?template=true\n" + "\n" + "\n" + "fixeddepositproducts/1?fields=name,description")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FixedDepositProductsApiResourceSwagger.GetFixedDepositProductsProductIdResponse.class)})
+    public String retrieveOne(@PathParam("productId") @ApiParam(value = "productId") final Long productId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(DepositsApiConstants.FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME);
 
@@ -319,7 +318,9 @@ public class FixedDepositProductsApiResource {
     @Path("{productId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String delete(@PathParam("productId") final Long productId) {
+    @ApiOperation(value = "Delete a Fixed Deposit Product", httpMethod = "DELETE", notes = "Deletes a Fixed Deposit Product")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FixedDepositProductsApiResourceSwagger.DeleteFixedDepositProductsProductIdResponse.class)})
+    public String delete(@PathParam("productId") @ApiParam(value = "productId") final Long productId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteFixedDepositProduct(productId).build();
 

@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.loanaccount.api;
 
+import com.google.gson.JsonElement;
+import io.swagger.annotations.*;
+
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestType;
 
 import java.io.InputStream;
@@ -88,14 +91,7 @@ import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.fund.service.FundReadPlatformService;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
-import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
-import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
-import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
+import org.apache.fineract.portfolio.loanaccount.data.*;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTemplateTypeRequiredException;
 import org.apache.fineract.portfolio.loanaccount.exception.NotSupportedLoanTemplateTypeException;
@@ -123,11 +119,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.google.gson.JsonElement;
 
 @Path("/loans")
 @Component
 @Scope("singleton")
+@Api(value = "Loans", description = "The API concept of loans models the loan application process and the loan contract/monitoring process.")
 public class LoansApiResource {
 
     private final Set<String> LOAN_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "accountNo", "status", "externalId", "clientId",
@@ -242,8 +238,8 @@ public class LoansApiResource {
     @Path("{loanId}/template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveApprovalTemplate(@PathParam("loanId") final Long loanId, @QueryParam("templateType") final String templateType,
-            @Context final UriInfo uriInfo) {
+    public String retrieveApprovalTemplate(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId, @QueryParam("templateType") @ApiParam(value = "templateType") final String templateType,
+                                           @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
@@ -265,10 +261,12 @@ public class LoansApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String template(@QueryParam("clientId") final Long clientId, @QueryParam("groupId") final Long groupId,
-            @QueryParam("productId") final Long productId, @QueryParam("templateType") final String templateType,
-            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
-            @DefaultValue("false") @QueryParam("activeOnly") final boolean onlyActive, @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "Retrieve Loan Details Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Requests:\n" + "\n" + "loans/template?templateType=individual&clientId=1\n" + "\n" + "\n" + "loans/template?templateType=individual&clientId=1&productId=1")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.GetLoansTemplateResponse.class)})
+    public String template(@QueryParam("clientId") @ApiParam(value = "clientId") final Long clientId, @QueryParam("groupId") @ApiParam(value = "groupId") final Long groupId,
+            @QueryParam("productId")@ApiParam(value = "productId") final Long productId, @QueryParam("templateType") @ApiParam(value = "templateType") final String templateType,
+            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @ApiParam(value = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
+            @DefaultValue("false") @QueryParam("activeOnly") @ApiParam(value = "activeOnly") final boolean onlyActive, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
@@ -389,8 +387,10 @@ public class LoansApiResource {
     @Path("{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveLoan(@PathParam("loanId") final Long loanId,
-            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
+    @ApiOperation(value = "Retrieve a Loan", httpMethod = "GET", notes = "Note: template=true parameter doesn't apply to this resource." + "Example Requests:\n" + "\n" + "loans/1\n" + "\n" + "\n" + "loans/1?fields=id,principal,annualInterestRate\n" + "\n" + "\n" + "loans/1?associations=all\n" + "\n" + "loans/1?associations=all&exclude=guarantors\n" + "\n" + "\n" + "loans/1?fields=id,principal,annualInterestRate&associations=repaymentSchedule,transactions")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.GetLoansLoanIdResponse.class)})
+    public String retrieveLoan(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId,
+            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @ApiParam(value = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @Context final UriInfo uriInfo) {
         long start = System.currentTimeMillis() ;
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
@@ -636,13 +636,15 @@ public class LoansApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "List Loans", httpMethod = "GET", notes = "The list capability of loans can support pagination and sorting.\n" + "Example Requests:\n" + "\n" + "loans\n" + "\n" + "loans?fields=accountNo\n" + "\n" + "loans?offset=10&limit=50\n" + "\n" + "loans?orderBy=accountNo&sortOrder=DESC")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.GetLoansResponse.class)})
     public String retrieveAll(@Context final UriInfo uriInfo,
-            @QueryParam("sqlSearch") final String sqlSearch,
-            @QueryParam("externalId") final String externalId,
+            @QueryParam("sqlSearch") @ApiParam(value = "sqlSearch") final String sqlSearch,
+            @QueryParam("externalId") @ApiParam(value = "externalId") final String externalId,
             // @QueryParam("underHierarchy") final String hierarchy,
-            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder,
-            @QueryParam("accountNo") final String accountNo) {
+            @QueryParam("offset") @ApiParam(value = "offset") final Integer offset, @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
+            @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy, @QueryParam("sortOrder") @ApiParam(value = "sortOrder")final String sortOrder,
+            @QueryParam("accountNo") @ApiParam(value = "accountNo") final String accountNo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
@@ -658,8 +660,11 @@ public class LoansApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String calculateLoanScheduleOrSubmitLoanApplication(@QueryParam("command") final String commandParam,
-            @Context final UriInfo uriInfo, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Calculate loan repayment schedule | Submit a new Loan Application", httpMethod = "POST", notes = "It calculates the loan repayment Schedule\n" + "Submits a new loan application\n" + "Mandatory Fields: clientId, productId, principal, loanTermFrequency, loanTermFrequencyType, loanType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, interestRatePerPeriod, amortizationType, interestType, interestCalculationPeriodType, transactionProcessingStrategyId, expectedDisbursementDate, submittedOnDate, loanType\n" + "Optional Fields: graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, linkAccountId, allowPartialPeriodInterestCalcualtion, fixedEmiAmount, maxOutstandingLoanBalance, disbursementData, graceOnArrearsAgeing, createStandingInstructionAtDisbursement (requires linkedAccountId if set to true)\n" + "Additional Mandatory Fields if interest recalculation is enabled for product and Rest frequency not same as repayment period: recalculationRestFrequencyDate\n" + "Additional Mandatory Fields if interest recalculation with interest/fee compounding is enabled for product and compounding frequency not same as repayment period: recalculationCompoundingFrequencyDate\n" + "Additional Mandatory Field if Entity-Datatable Check is enabled for the entity of type loan: datatables")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoansApiResourceSwagger.PostLoansRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.PostLoansResponse.class)})
+    public String calculateLoanScheduleOrSubmitLoanApplication(@QueryParam("command") @ApiParam(value = "command") final String commandParam,
+            @Context final UriInfo uriInfo, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         if (is(commandParam, "calculateLoanSchedule")) {
 
@@ -683,7 +688,10 @@ public class LoansApiResource {
     @Path("{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String modifyLoanApplication(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Modify a loan application", httpMethod = "PUT", notes = "Loan application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method.")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoansApiResourceSwagger.PutLoansLoanIdRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.PutLoansLoanIdResponse.class)})
+    public String modifyLoanApplication(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateLoanApplication(loanId).withJson(apiRequestBodyAsJson)
                 .build();
@@ -697,7 +705,9 @@ public class LoansApiResource {
     @Path("{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteLoanApplication(@PathParam("loanId") final Long loanId) {
+    @ApiOperation(value = "Delete a Loan Application", httpMethod = "DELETE", notes = "Note: Only loans in \"Submitted and awaiting approval\" status can be deleted.")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.DeleteLoansLoanIdResponse.class)})
+    public String deleteLoanApplication(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteLoanApplication(loanId).build();
 
@@ -710,8 +720,11 @@ public class LoansApiResource {
     @Path("{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String stateTransitions(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam,
-            final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Approve Loan Application | Recover Loan Guarantee | Undo Loan Application Approval | Assign a Loan Officer | Unassign a Loan Officer | Reject Loan Application | Applicant Withdraws from Loan Application | Disburse Loan Disburse Loan To Savings Account | Undo Loan Disbursal", httpMethod = "POST", notes = "Approve Loan Application:\n" + "Mandatory Fields: approvedOnDate\n" + "Optional Fields: approvedLoanAmount and expectedDisbursementDate\n" + "Approves the loan application\n\n" + "Recover Loan Guarantee:\n" + "Recovers the loan guarantee\n\n" + "Undo Loan Application Approval:\n" + "Undoes the Loan Application Approval\n\n" + "Assign a Loan Officer:\n" + "Allows you to assign Loan Officer for existing Loan.\n\n" + "Unassign a Loan Officer:\n" + "Allows you to unassign the Loan Officer.\n\n" + "Reject Loan Application:\n" + "Mandatory Fields: rejectedOnDate\n" + "Allows you to reject the loan application\n\n" + "Applicant Withdraws from Loan Application:\n" + "Mandatory Fields: withdrawnOnDate\n" + "Allows the applicant to withdraw the loan application\n\n" + "Disburse Loan:\n" + "Mandatory Fields: actualDisbursementDate\n" + "Optional Fields: transactionAmount and fixedEmiAmount\n" + "Disburses the Loan\n\n" + "Disburse Loan To Savings Account:\n" + "Mandatory Fields: actualDisbursementDate\n" + "Optional Fields: transactionAmount and fixedEmiAmount\n" + "Disburses the loan to Saving Account\n\n" + "Undo Loan Disbursal:\n" + "Undoes the Loan Disbursal\n" + "Showing request and response for Assign a Loan Officer")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoansApiResourceSwagger.PostLoansLoanIdRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.PostLoansLoanIdResponse.class)})
+    public String stateTransitions(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId, @QueryParam("command") @ApiParam(value = "command") final String commandParam,
+           @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 

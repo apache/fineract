@@ -27,6 +27,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.*;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
@@ -43,6 +44,7 @@ import org.springframework.stereotype.Component;
 @Path("/" + ReportMailingJobConstants.REPORT_MAILING_JOB_RUN_HISTORY_RESOURCE_NAME)
 @Component
 @Scope("singleton")
+@Api(value = "List Report Mailing Job History", description = "")
 public class ReportMailingJobRunHistoryApiResource {
     
     private final PlatformSecurityContext platformSecurityContext;
@@ -64,10 +66,14 @@ public class ReportMailingJobRunHistoryApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllByReportMailingJobId(@Context final UriInfo uriInfo, 
-            @QueryParam("reportMailingJobId") final Long reportMailingJobId, @QueryParam("offset") final Integer offset,
-            @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
-            @QueryParam("sortOrder") final String sortOrder) {
+    @ApiOperation(value = "List Report Mailing Job History", notes = "The list capability of report mailing job history can support pagination and sorting.\n" + "\n" + "Example Requests:\n" + "\n" + "reportmailingjobrunhistory/1")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = ReportMailingJobRunHistoryData.class)})
+    public String retrieveAllByReportMailingJobId(@Context final UriInfo uriInfo,
+                                                  @QueryParam("reportMailingJobId") @ApiParam(value = "reportMailingJobId") final Long reportMailingJobId,
+                                                  @QueryParam("offset") @ApiParam(value = "offset") final Integer offset,
+                                                  @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
+                                                  @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy,
+                                                  @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder) {
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(ReportMailingJobConstants.REPORT_MAILING_JOB_ENTITY_NAME);
         final SearchParameters searchParameters = SearchParameters.fromReportMailingJobRunHistory(offset, limit, orderBy, sortOrder);
         

@@ -33,6 +33,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -61,6 +62,7 @@ import com.google.gson.JsonElement;
 @Path("/smscampaigns")
 @Component
 @Scope("singleton")
+@Api(value = "SMS Campaigns")
 public class SmsCampaignApiResource {
 
     private final PlatformSecurityContext platformSecurityContext;
@@ -96,6 +98,8 @@ public class SmsCampaignApiResource {
 
     @GET
     @Path("template")
+    @ApiOperation(value = "Retrieve a SMS Campaign", notes = "Example Requests:\n" + "\n" + "smscampaigns/1\n" + "\n" + "\n" + "smscampaigns/1?template=true\n" + "\n" + "\n" + "smscampaigns/template")
+    @ApiResponse(code = 200, message = "", response = SmsCampaignData.class)
     public String template(@Context final UriInfo uriInfo) {
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(SmsCampaignConstants.RESOURCE_NAME);
         final SmsCampaignData smsCampaignData = this.smsCampaignReadPlatformService.retrieveTemplate(CampaignType.SMS.name());
@@ -106,7 +110,10 @@ public class SmsCampaignApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createCampaign(final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Create a SMS Campaign", notes = "Mandatory Fields\n" + "campaignName, campaignType, triggerType, providerId, runReportId, message\n" + "\n" + "Mandatory Fields for Cash based on selected report id\n" + "paramValue in json format")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass =CommandWrapper.class)})
+    @ApiResponse(code = 200, message = "", response = CommandProcessingResult.class)
+    public String createCampaign(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         this.platformSecurityContext.authenticatedUser();
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createSmsCampaign().withJson(apiRequestBodyAsJson).build();
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -116,6 +123,8 @@ public class SmsCampaignApiResource {
     @GET
     @Path("{resourceId}")
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Retrieve a SMS Campaign", notes = "Example Requests:\n" + "\n" + "smscampaigns/1\n")
+    @ApiResponse(code = 200, message = "", response = SmsCampaignData.class)
     public String retrieveCampaign(@PathParam("resourceId") final Long resourceId, @Context final UriInfo uriInfo) {
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(SmsCampaignConstants.RESOURCE_NAME);
         SmsCampaignData smsCampaignData = this.smsCampaignReadPlatformService.retrieveOne(resourceId);
@@ -126,6 +135,8 @@ public class SmsCampaignApiResource {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "List SMS Campaigns", notes = "Example Requests:\n" + "\n" + "smscampaigns")
+    @ApiResponse(code = 200, message = "", response = SmsCampaignData.class)
     public String retrieveAllEmails(@QueryParam("sqlSearch") final String sqlSearch,
             @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
             @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder, @Context final UriInfo uriInfo) {
@@ -140,7 +151,10 @@ public class SmsCampaignApiResource {
     @Path("{campaignId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateCampaign(@PathParam("campaignId") final Long campaignId, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Update a Campaign")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CommandWrapper.class)})
+    @ApiResponse(code = 200, message = "", response = CommandProcessingResult.class)
+    public String updateCampaign(@PathParam("campaignId") final Long campaignId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSmsCampaign(campaignId).withJson(apiRequestBodyAsJson)
                 .build();
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -151,8 +165,10 @@ public class SmsCampaignApiResource {
     @Path("{campaignId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "SMS Campaign", notes = "Activates | Deactivates | Reactivates")
+    @ApiResponse(code = 200, message = "", response = CommandProcessingResult.class)
     public String handleCommands(@PathParam("campaignId") final Long campaignId, @QueryParam("command") final String commandParam,
-            final String apiRequestBodyAsJson) {
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
         CommandProcessingResult result = null;
         CommandWrapper commandRequest = null;
@@ -187,6 +203,8 @@ public class SmsCampaignApiResource {
 
     @DELETE
     @Path("{campaignId}")
+    @ApiOperation(value = "Delete a SMS Campaign", notes = "Note: Only closed SMS Campaigns can be deleted")
+    @ApiResponse(code = 200, message = "", response = CommandProcessingResult.class)
     public String delete(@PathParam("campaignId") final Long campaignId) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteSmsCampaign(campaignId).build();
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

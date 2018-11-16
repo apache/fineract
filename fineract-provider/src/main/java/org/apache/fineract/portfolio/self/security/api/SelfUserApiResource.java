@@ -19,15 +19,8 @@
 
 package org.apache.fineract.portfolio.self.security.api;
 
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-
+import com.google.gson.reflect.TypeToken;
+import io.swagger.annotations.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -37,10 +30,17 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.reflect.TypeToken;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @Path("/self/user")
 @Component
+@Api(value = "Self User", description = "")
 public class SelfUserApiResource {
 
         private final UsersApiResource usersApiResource;
@@ -59,7 +59,10 @@ public class SelfUserApiResource {
         }
 
         @PUT
-        public String update(final String apiRequestBodyAsJson) {
+        @ApiOperation(value = "Update User", httpMethod = "PUT", notes = "This API can be used by Self Service user to update their own user information. Currently, \"password\" and \"repeatPassword\" are the only parameters accepted.")
+        @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SelfUserApiResourceSwagger.PutSelfUserRequest.class)})
+        @ApiResponses({@ApiResponse(code = 200,message = "OK", response = SelfUserApiResourceSwagger.PutSelfUserResponse.class)})
+        public String update(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
                 if (StringUtils.isBlank(apiRequestBodyAsJson)) { throw new InvalidJsonException(); }
 
                 final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();

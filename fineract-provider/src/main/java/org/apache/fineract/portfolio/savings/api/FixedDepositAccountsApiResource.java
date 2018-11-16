@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.savings.api;
 
+import com.google.gson.JsonElement;
+import io.swagger.annotations.*;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -77,11 +79,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.google.gson.JsonElement;
 
 @Path("/fixeddepositaccounts")
 @Component
 @Scope("singleton")
+@Api(value = "Fixed Deposit Account", description = "Fixed Deposit accounts are instances of a praticular fixed deposit product created. An application process around the creation of accounts is also supported.")
 public class FixedDepositAccountsApiResource {
 
     private final DepositAccountReadPlatformService depositAccountReadPlatformService;
@@ -124,10 +126,12 @@ public class FixedDepositAccountsApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String template(@QueryParam("clientId") final Long clientId, @QueryParam("groupId") final Long groupId,
-            @QueryParam("productId") final Long productId,
-            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
-            @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "Retrieve Fixed Deposit Account Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for fixed deposit applications. The template data returned consists of any or all of:\n\n" + "\n\n" + "Field Defaults\n\n" + "Allowed Value Lists" + "Example Requests:\n\n" + "\n\n" + "fixeddepositaccounts/template?clientId=1")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FixedDepositAccountsApiResourceSwagger.GetFixedDepositAccountsTemplateResponse.class)})
+    public String template(@QueryParam("clientId") @ApiParam(value = "clientId") final Long clientId, @QueryParam("groupId") @ApiParam(value = "groupId") final Long groupId,
+                           @QueryParam("productId")@ApiParam(value = "productId") final Long productId,
+                           @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @ApiParam(value = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
+                           @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME);
 
@@ -141,9 +145,11 @@ public class FixedDepositAccountsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("paged") final Boolean paged,
-            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
+    @ApiOperation(value = "List Fixed deposit applications/accounts", httpMethod = "GET", notes = "Lists Fixed Deposit Accounts\n\n" + "Example Requests:\n\n" + "\n\n" + "fixeddepositaccounts\n\n" + "\n\n" + "fixeddepositaccounts?fields=name")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FixedDepositAccountsApiResourceSwagger.GetFixedDepositAccountsResponse.class, responseContainer = "List")})
+    public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("paged") @ApiParam(value = "paged") final Boolean paged,
+            @QueryParam("offset") @ApiParam(value = "offset") final Integer offset, @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
+            @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy, @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder) {
 
         this.context.authenticatedUser().validateHasReadPermission(DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME);
         final PaginationParameters paginationParameters = PaginationParameters.instance(paged, offset, limit, orderBy, sortOrder);
@@ -165,7 +171,10 @@ public class FixedDepositAccountsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String submitApplication(final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Submit new fixed deposit application", httpMethod = "POST", notes = "Submits a new fixed deposit application"+"Mandatory Fields: clientId or groupId, productId, submittedOnDate, depositAmount, depositPeriod, depositPeriodFrequencyId\n\n" + "Optional Fields: accountNo, externalId, fieldOfficerId,linkAccountId(if provided initial deposit amount will be collected from this account),transferInterestToSavings(By enabling this flag all interest postings will be transferred to linked saving account )")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FixedDepositAccountsApiResourceSwagger.PostFixedDepositAccountsRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FixedDepositAccountsApiResourceSwagger.PostFixedDepositAccountsResponse.class)})
+    public String submitApplication(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createFixedDepositAccount().withJson(apiRequestBodyAsJson)
                 .build();
@@ -179,9 +188,11 @@ public class FixedDepositAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveOne(@PathParam("accountId") final Long accountId,
-            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
-            @DefaultValue("all") @QueryParam("chargeStatus") final String chargeStatus, @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "Retrieve a fixed deposit application/account", httpMethod = "GET", notes = "Retrieves a fixed deposit application/account\n\n" + "Example Requests :\n\n" + "\n\n" + "fixeddepositaccounts/1" + "\n\n" + "fixeddepositaccounts/1?associations=all" )
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FixedDepositAccountsApiResourceSwagger.GetFixedDepositAccountsAccountIdResponse.class)})
+    public String retrieveOne(@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId,
+            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @ApiParam(value = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
+            @DefaultValue("all") @QueryParam("chargeStatus")@ApiParam(value = "chargeStatus") final String chargeStatus, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME);
 
@@ -268,7 +279,10 @@ public class FixedDepositAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String update(@PathParam("accountId") final Long accountId, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Modify a fixed deposit application", httpMethod = "PUT", notes = "Fixed deposit application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FixedDepositAccountsApiResourceSwagger.PutFixedDepositAccountsAccountIdRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FixedDepositAccountsApiResourceSwagger.PutFixedDepositAccountsAccountIdResponse.class)})
+    public String update(@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateFixedDepositAccount(accountId)
                 .withJson(apiRequestBodyAsJson).build();
@@ -282,8 +296,11 @@ public class FixedDepositAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String handleCommands(@PathParam("accountId") final Long accountId, @QueryParam("command") final String commandParam,
-            @Context final UriInfo uriInfo, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Approve fixed deposit application | Undo approval fixed deposit application | Reject fixed deposit application | Withdraw fixed deposit application | Activate a fixed deposit account | Close a fixed deposit account | Premature Close a fixed deposit account | Calculate Premature amount on Fixed deposit account | Calculate Interest on Fixed Deposit Account | Post Interest on Fixed Deposit Account", httpMethod = "POST", notes = "Approve fixed deposit application:\n\n" + "Approves fixed deposit application so long as its in 'Submitted and pending approval' state.\n\n" + "Undo approval fixed deposit application:\n\n" + "Will move 'approved' fixed deposit application back to 'Submitted and pending approval' state.\n\n" + "Reject fixed deposit application:\n\n" + "Rejects fixed deposit application so long as its in 'Submitted and pending approval' state.\n\n" + "Withdraw fixed deposit application:\n\n" + "Used when an applicant withdraws from the fixed deposit application. It must be in 'Submitted and pending approval' state.\n\n" + "Close a fixed deposit account:\n\n" + "Results in a Matured fixed deposit account being converted into a 'closed' fixed deposit account.\n\n" + "Premature Close a fixed deposit account:\n\n" + "Results in an Active fixed deposit account being converted into a 'Premature Closed' fixed deposit account with options to withdraw prematured amount. (premature amount is calculated using interest rate chart applicable along with penal interest if any.)\n\n" + "Calculate Premature amount on Fixed deposit account:\n\n" + "Calculate premature amount on fixed deposit account till premature close date. Premature amount is calculated based on interest chart and penal interest applicable.\n\n" + "Calculate Interest on Fixed Deposit Account:\n\n" + "Calculates interest earned on a fixed deposit account based on todays date. It does not attempt to post or credit the interest on the account. That is responsibility of the Post Interest API that will likely be called by overnight process.\n\n" + "Post Interest on Fixed Deposit Account:\n\n" + "Calculates and Posts interest earned on a fixed deposit account based on today's date and whether an interest posting or crediting event is due.\n\n" + "Showing request/response for Calculate Interest on Fixed Deposit Account")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FixedDepositAccountsApiResourceSwagger.PostFixedDepositAccountsAccountIdRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FixedDepositAccountsApiResourceSwagger.PostFixedDepositAccountsAccountIdResponse.class)})
+    public String handleCommands(@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId, @QueryParam("command") @ApiParam(value = "command") final String commandParam,
+            @Context final UriInfo uriInfo, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         String jsonApiRequest = apiRequestBodyAsJson;
         if (StringUtils.isBlank(jsonApiRequest)) {
@@ -345,7 +362,9 @@ public class FixedDepositAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String delete(@PathParam("accountId") final Long accountId) {
+    @ApiOperation(value = "Delete a fixed deposit application", httpMethod = "DELETE", notes = "At present we support hard delete of fixed deposit application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the fixed deposit account.")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FixedDepositAccountsApiResourceSwagger.DeleteFixedDepositAccountsAccountIdResponse.class)})
+    public String delete(@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteFixedDepositAccount(accountId).build();
 
@@ -358,7 +377,7 @@ public class FixedDepositAccountsApiResource {
     @Path("{accountId}/template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String accountClosureTemplate(@PathParam("accountId") final Long accountId, @QueryParam("command") final String commandParam,
+    public String accountClosureTemplate(@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId, @QueryParam("command") @ApiParam(value = "command") final String commandParam,
             @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESOURCE_NAME);
