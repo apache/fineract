@@ -9,6 +9,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +24,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -59,7 +61,11 @@ import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
@@ -100,8 +106,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final AddressReadPlatformService addressReadPlatformService,final ClientFamilyMembersReadPlatformService clientFamilyMembersReadPlatformService,
             final ConfigurationReadPlatformService configurationReadPlatformService,
             final EntityDatatableChecksReadService entityDatatableChecksReadService,
-            final ColumnValidator columnValidator) {
-        this.context = context;
+			final ColumnValidator columnValidator) {
+		this.context = context;
         this.officeReadPlatformService = officeReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.staffReadPlatformService = staffReadPlatformService;
@@ -112,7 +118,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         this.configurationReadPlatformService=configurationReadPlatformService;
         this.entityDatatableChecksReadService = entityDatatableChecksReadService;
         this.columnValidator = columnValidator;
-    }
+	}
 
     @Override
     public ClientData retrieveTemplate(final Long officeId, final boolean staffInSelectedOfficeOnly) {
@@ -816,5 +822,50 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         return ClientData.template(null, null, null, null, narrations, null, null, clientTypeOptions, clientClassificationOptions, 
         		clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions, clientLegalFormOptions,null,null,null, null);
     }
+    
+	@Override
+	public Date retrieveClientTransferProposalDateByLoan(Long clientId) {
+		try {
+			String sql = "SELECT t.transaction_date  FROM m_client c LEFT JOIN m_loan loan ON c.id = loan.client_id AND c.id = ? AND loan.loan_status_id = ? LEFT JOIN m_loan_transaction t ON loan.id = t.loan_id AND t.transaction_type_enum = ? ORDER BY t.id DESC LIMIT 1";
+			return this.jdbcTemplate.queryForObject(sql, Date.class, clientId,
+					LoanStatus.TRANSFER_IN_PROGRESS.getValue(), LoanTransactionType.INITIATE_TRANSFER.getValue());
+		} catch (final EmptyResultDataAccessException e) {
+			return null;
+
+		}
+	}
+
+	@Override
+	public Date retrieveClientTransferProposalDateBySavings(Long clientId) {
+		try {
+			String sql = "SELECT t.transaction_date FROM m_client c LEFT JOIN m_savings_account savings  ON c.id = savings.client_id AND c.id = ? AND savings.status_enum = ? LEFT JOIN m_savings_account_transaction t ON savings.id = t.savings_account_id AND t.transaction_type_enum = ? ORDER BY t.id DESC LIMIT 1";
+			return this.jdbcTemplate.queryForObject(sql, Date.class, clientId,
+					SavingsAccountStatusType.TRANSFER_IN_PROGRESS.getValue(),
+					SavingsAccountTransactionType.INITIATE_TRANSFER.getValue());
+		} catch (final EmptyResultDataAccessException e) {
+			return null;
+
+		}
+	}
+
+	@Override
+	public Date retrieveClientTransferProposalDate(Long clientId) {
+		validateClient(clientId);
+		Date transferDateForLoan = retrieveClientTransferProposalDateByLoan(clientId);
+		if (transferDateForLoan == null) {
+			transferDateForLoan = retrieveClientTransferProposalDateBySavings(clientId);
+		}
+		return transferDateForLoan;
+	}
+	
+	@Override
+	public void validateClient(Long clientId) {
+		try {
+			final String sql = "SELECT cl.id FROM m_client cl WHERE cl.id =? ";
+			this.jdbcTemplate.queryForObject(sql, Long.class, clientId);
+		} catch (final EmptyResultDataAccessException e) {
+			throw new ClientNotFoundException(clientId);
+		}
+	}
 
 }

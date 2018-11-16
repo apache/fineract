@@ -20,13 +20,12 @@ package org.apache.fineract.portfolio.transfer.service;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
@@ -42,7 +41,6 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.apache.fineract.portfolio.client.exception.ClientHasBeenClosedException;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.exception.ClientNotInGroupException;
@@ -60,6 +58,7 @@ import org.apache.fineract.portfolio.transfer.exception.ClientNotAwaitingTransfe
 import org.apache.fineract.portfolio.transfer.exception.ClientNotAwaitingTransferApprovalOrOnHoldException;
 import org.apache.fineract.portfolio.transfer.exception.TransferNotSupportedException;
 import org.apache.fineract.portfolio.transfer.exception.TransferNotSupportedException.TRANSFER_NOT_SUPPORTED_REASON;
+import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -295,8 +294,13 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         final Long destinationOfficeId = jsonCommand.longValueOfParameterNamed(TransferApiConstants.destinationOfficeIdParamName);
         final Office office = this.officeRepository.findOneWithNotFoundDetection(destinationOfficeId);
         final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
-        handleClientTransferLifecycleEvent(client, office, TransferEventType.PROPOSAL, jsonCommand);
-        this.clientRepositoryWrapper.save(client);
+		if (client.getOffice().getId().equals(destinationOfficeId)) {
+			throw new GeneralPlatformDomainRuleException(TransferApiConstants.transferClientToSameOfficeException,
+					TransferApiConstants.transferClientToSameOfficeExceptionMessage, office.getName());
+
+		}
+		handleClientTransferLifecycleEvent(client, office, TransferEventType.PROPOSAL, jsonCommand);
+		this.clientRepositoryWrapper.save(client);
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
                 .withEntityId(clientId) //
@@ -369,6 +373,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         Group destinationGroup = null;
         final Long staffId = jsonCommand.longValueOfParameterNamed(TransferApiConstants.newStaffIdParamName);
         final Long destinationGroupId = jsonCommand.longValueOfParameterNamed(TransferApiConstants.destinationGroupIdParamName);
+        final LocalDate transferDate = jsonCommand.localDateValueOfParameterNamed(TransferApiConstants.transferDate);
         if (staffId != null) {
             staff = this.staffRepositoryWrapper.findByOfficeHierarchyWithNotFoundDetection(staffId, destinationOffice.getHierarchy());
         }
@@ -387,17 +392,17 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                 if (loan.isDisbursed() && !loan.isClosed()) {
                     switch (transferEventType) {
                         case ACCEPTANCE:
-                            this.loanWritePlatformService.acceptLoanTransfer(loan, DateUtils.getLocalDateOfTenant(),
+                            this.loanWritePlatformService.acceptLoanTransfer(loan, loan.getLastUserTransactionDate(),
                                     destinationOffice, staff);
                         break;
                         case PROPOSAL:
-                            this.loanWritePlatformService.initiateLoanTransfer(loan, DateUtils.getLocalDateOfTenant());
+                            this.loanWritePlatformService.initiateLoanTransfer(loan, transferDate);
                         break;
                         case REJECTION:
                             this.loanWritePlatformService.rejectLoanTransfer(loan);
                         break;
                         case WITHDRAWAL:
-                            this.loanWritePlatformService.withdrawLoanTransfer(loan, DateUtils.getLocalDateOfTenant());
+                            this.loanWritePlatformService.withdrawLoanTransfer(loan, loan.getLastUserTransactionDate());
                     }
                 }
             }
@@ -411,18 +416,18 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                     switch (transferEventType) {
                         case ACCEPTANCE:
                             this.savingsAccountWritePlatformService.acceptSavingsTransfer(savingsAccount,
-                                    DateUtils.getLocalDateOfTenant(), destinationOffice, staff);
+                            		savingsAccount.retrieveLastTransactionDate(), destinationOffice, staff);
                         break;
                         case PROPOSAL:
                             this.savingsAccountWritePlatformService.initiateSavingsTransfer(savingsAccount,
-                                    DateUtils.getLocalDateOfTenant());
+                            		transferDate);
                         break;
                         case REJECTION:
                             this.savingsAccountWritePlatformService.rejectSavingsTransfer(savingsAccount);
                         break;
                         case WITHDRAWAL:
                             this.savingsAccountWritePlatformService.withdrawSavingsTransfer(savingsAccount,
-                                    DateUtils.getLocalDateOfTenant());
+                            		savingsAccount.retrieveLastTransactionDate());
                     }
                 }
             }

@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.client.api;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -62,6 +63,7 @@ import org.apache.fineract.portfolio.loanaccount.guarantor.data.ObligeeData;
 import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorReadPlatformService;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
+import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -95,10 +97,11 @@ public class ClientsApiResource {
             final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
             final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
             final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService,
-            final BulkImportWorkbookService bulkImportWorkbookService, final GuarantorReadPlatformService guarantorReadPlatformService) {
-        this.context = context;
-        this.clientReadPlatformService = readPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
+			final BulkImportWorkbookService bulkImportWorkbookService,
+			final GuarantorReadPlatformService guarantorReadPlatformService) {
+		this.context = context;
+		this.clientReadPlatformService = readPlatformService;
+		this.toApiJsonSerializer = toApiJsonSerializer;
         this.clientAccountSummaryToApiJsonSerializer = clientAccountSummaryToApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
@@ -361,4 +364,16 @@ public class ClientsApiResource {
 		return this.toApiJsonSerializer.serialize(ObligeeList);
 	}
 
+	@Path("{clientId}/transferproposaldate")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveTransferTemplate(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+
+		this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
+		final Date transferDate = this.clientReadPlatformService.retrieveClientTransferProposalDate(clientId);
+		if (transferDate != null) {
+			return this.toApiJsonSerializer.serialize(new LocalDate(transferDate));
+		}
+		return this.toApiJsonSerializer.serialize(transferDate);
+	}
 }
