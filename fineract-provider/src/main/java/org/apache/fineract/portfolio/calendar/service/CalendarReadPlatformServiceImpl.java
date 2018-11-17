@@ -151,6 +151,8 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         }
         return result;
     }
+    
+
 
     @Override
     public CalendarData retrieveCollctionCalendarByEntity(final Long entityId, final Integer entityTypeId) {
