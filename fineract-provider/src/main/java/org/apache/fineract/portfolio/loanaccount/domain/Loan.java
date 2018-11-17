@@ -167,6 +167,10 @@ public class Loan extends AbstractPersistableCustom {
     @JoinColumn(name = "group_id", nullable = true)
     private Group group;
 
+    @ManyToOne
+    @JoinColumn(name = "glim_id", nullable = true)
+    private GroupLoanIndividualMonitoringAccount glim;
+
     @Column(name = "loan_type_enum", nullable = false)
     private Integer loanType;
 
@@ -627,6 +631,7 @@ public class Loan extends AbstractPersistableCustom {
         changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(),
                 allNonContraTransactionsPostDisbursement, getCurrency(), getRepaymentScheduleInstallments(), charges());
         for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
+
             mapEntry.getValue().updateLoan(this);
         }
         this.loanTransactions.addAll(changedTransactionDetail.getNewTransactionMappings().values());
@@ -675,6 +680,7 @@ public class Loan extends AbstractPersistableCustom {
 
         final LoanTransaction applyLoanChargeTransaction = LoanTransaction.accrueLoanCharge(this, getOffice(), chargeAmount,
                 transactionDate, feeCharges, penaltyCharges, DateUtils.getLocalDateTimeOfTenant(), currentUser);
+
         Integer installmentNumber = null;
         final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(applyLoanChargeTransaction, loanCharge, loanCharge.getAmount(
                 getCurrency()).getAmount(), installmentNumber);
@@ -701,6 +707,7 @@ public class Loan extends AbstractPersistableCustom {
         List<LoanRepaymentScheduleInstallment> installments = getRepaymentScheduleInstallments() ;
         for (final LoanRepaymentScheduleInstallment installment : installments) {
             if (installmentNumber == null && charge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())) {
+
                 chargePaymentInstallments.add(installment);
                 break;
             } else if (installmentNumber != null && installment.getInstallmentNumber().equals(installmentNumber)) {
@@ -712,6 +719,7 @@ public class Loan extends AbstractPersistableCustom {
         final Set<LoanCharge> loanCharges = new HashSet<>(1);
         loanCharges.add(charge);
         loanRepaymentScheduleTransactionProcessor.handleTransaction(chargesPayment, getCurrency(), chargePaymentInstallments, loanCharges);
+
         updateLoanSummaryDerivedFields();
         doPostLoanTransactionChecks(chargesPayment.getTransactionDate(), loanLifecycleStateMachine);
     }
@@ -720,6 +728,7 @@ public class Loan extends AbstractPersistableCustom {
         if (isClosed()) {
             final String defaultUserMessage = "This charge cannot be added as the loan is already closed.";
             throw new LoanChargeCannotBeAddedException("loanCharge", "loan.is.closed", defaultUserMessage, getId(), loanCharge.name());
+
         }
     }
 
@@ -727,6 +736,7 @@ public class Loan extends AbstractPersistableCustom {
         if (loanCharge.isWaived()) {
             final String defaultUserMessage = "This loan charge cannot be removed as the charge as already been waived.";
             throw new LoanChargeCannotBeAddedException("loanCharge", "loanCharge.is.waived", defaultUserMessage, getId(), loanCharge.name());
+
         }
     }
 
@@ -805,6 +815,7 @@ public class Loan extends AbstractPersistableCustom {
                             final Money penaltychargesPortion = Money.zero(currency);
 
                             transaction.updateComponentsAndTotal(principalPortion, interestPortion, chargeAmount, penaltychargesPortion);
+
                         } else {
                             transactionToRemove = transaction;
                         }
@@ -1071,6 +1082,14 @@ public class Loan extends AbstractPersistableCustom {
     public Client client() {
         return this.client;
     }
+
+    public GroupLoanIndividualMonitoringAccount getGlim() {
+        return glim;
+   }
+
+   public void setGlim(GroupLoanIndividualMonitoringAccount glim) {
+        this.glim = glim;
+   }
 
     public LoanProduct loanProduct() {
         return this.loanProduct;
@@ -4203,6 +4222,14 @@ public class Loan extends AbstractPersistableCustom {
         return groupId;
     }
 
+    public Long getGlimId() {
+        Long glimId = null;
+        if (this.glim != null) {
+             glimId = this.glim.getId();
+        }
+        return glimId;
+   }
+
     public Long getOfficeId() {
         Long officeId = null;
         if (this.client != null) {
@@ -6558,4 +6585,13 @@ public class Loan extends AbstractPersistableCustom {
     public List<Rate> getRates() {
         return rates;
     }
+
+    public Integer getLoanType() {
+        return loanType;
+   }
+
+   public void setLoanType(Integer loanType) {
+        this.loanType = loanType;
+   }
+
 }

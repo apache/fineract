@@ -140,9 +140,13 @@ public class SavingsAccount extends AbstractPersistableCustom {
     @JoinColumn(name = "client_id", nullable = true)
     protected Client client;
 
-    @ManyToOne(optional = true)
+    @ManyToOne(optional = true, fetch=FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = true)
     protected Group group;
+
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name = "gsim_id", nullable = true)
+    private GroupSavingsIndividualMonitoring gsim;
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
@@ -1612,7 +1616,15 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return id;
     }
 
-    public Long hasSavingsOfficerId() {
+    public GroupSavingsIndividualMonitoring getGsim() {
+          return gsim;
+     }
+
+     public void setGsim(GroupSavingsIndividualMonitoring gsim) {
+          this.gsim = gsim;
+     }
+
+     public Long hasSavingsOfficerId() {
         Long id = null;
         if (this.savingsOfficer != null) {
             id = this.savingsOfficer.getId();
@@ -2691,10 +2703,6 @@ public class SavingsAccount extends AbstractPersistableCustom {
         return getActivationLocalDate() == null ? getSubmittedOnLocalDate() : getActivationLocalDate();
     }
 
-    public AccountType getAccountType() {
-        return AccountType.fromInt(accountType);
-    }
-
     public DepositAccountType depositAccountType() {
         return DepositAccountType.fromInt(depositType);
     }
@@ -3137,8 +3145,19 @@ public class SavingsAccount extends AbstractPersistableCustom {
         this.savingsOnHoldAmount = getSavingsHoldAmount().subtract(amount);
     }
 
+    public AccountType getAccountType() {
+        return AccountType.fromInt(accountType);
+    }
+
+    public Integer getAccountTypes() {
+          return accountType;
+     }
+
+    public void setAccountType(Integer accountType) {
+          this.accountType = accountType;
+     }
+
     private boolean isOverdraft() {
             return allowOverdraft;
     }
-
 }

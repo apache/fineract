@@ -41,87 +41,82 @@ import org.springframework.stereotype.Component;
 @Component
 public class SelfSavingsDataValidator {
 
-    private final FromJsonHelper fromApiJsonHelper;
+     private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
-    public SelfSavingsDataValidator(final FromJsonHelper fromApiJsonHelper) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-    }
+     @Autowired
+     public SelfSavingsDataValidator(final FromJsonHelper fromApiJsonHelper) {
+          this.fromApiJsonHelper = fromApiJsonHelper;
+     }
 
-    private static final Set<String> allowedAssociationParameters = new HashSet<>(
-            Arrays.asList(SavingsApiConstants.transactions,
-                    SavingsApiConstants.charges));
+     private static final Set<String> allowedAssociationParameters = new HashSet<>(
+               Arrays.asList(SavingsApiConstants.transactions, SavingsApiConstants.charges));
 
-    public void validateRetrieveSavings(final UriInfo uriInfo) {
-        List<String> unsupportedParams = new ArrayList<>();
+     public void validateRetrieveSavings(final UriInfo uriInfo) {
+          List<String> unsupportedParams = new ArrayList<>();
 
-        validateTemplate(uriInfo, unsupportedParams);
+          validateTemplate(uriInfo, unsupportedParams);
 
-        Set<String> associationParameters = ApiParameterHelper
-                .extractAssociationsForResponseIfProvided(uriInfo
-                        .getQueryParameters());
-        if (!associationParameters.isEmpty()) {
-            associationParameters.removeAll(allowedAssociationParameters);
-            if (!associationParameters.isEmpty()) {
-                unsupportedParams.addAll(associationParameters);
-            }
-        }
+          Set<String> associationParameters = ApiParameterHelper
+                    .extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
+          if (!associationParameters.isEmpty()) {
+               associationParameters.removeAll(allowedAssociationParameters);
+               if (!associationParameters.isEmpty()) {
+                    unsupportedParams.addAll(associationParameters);
+               }
+          }
 
-        if (uriInfo.getQueryParameters().getFirst("exclude") != null) {
-            unsupportedParams.add("exclude");
-        }
+          if (uriInfo.getQueryParameters().getFirst("exclude") != null) {
+               unsupportedParams.add("exclude");
+          }
 
-        throwExceptionIfReqd(unsupportedParams);
-    }
+          throwExceptionIfReqd(unsupportedParams);
+     }
 
-    public void validateRetrieveSavingsTransaction(final UriInfo uriInfo) {
-        List<String> unsupportedParams = new ArrayList<>();
+     public void validateRetrieveSavingsTransaction(final UriInfo uriInfo) {
+          List<String> unsupportedParams = new ArrayList<>();
 
-        validateTemplate(uriInfo, unsupportedParams);
+          validateTemplate(uriInfo, unsupportedParams);
 
-        throwExceptionIfReqd(unsupportedParams);
-    }
+          throwExceptionIfReqd(unsupportedParams);
+     }
 
-    private void throwExceptionIfReqd(final List<String> unsupportedParams) {
-        if (unsupportedParams.size() > 0) {
-            throw new UnsupportedParameterException(unsupportedParams);
-        }
-    }
+     private void throwExceptionIfReqd(final List<String> unsupportedParams) {
+          if (unsupportedParams.size() > 0) {
+               throw new UnsupportedParameterException(unsupportedParams);
+          }
+     }
 
-    private void validateTemplate(final UriInfo uriInfo,
-            List<String> unsupportedParams) {
-        final boolean templateRequest = ApiParameterHelper.template(uriInfo
-                .getQueryParameters());
-        if (templateRequest) {
-            unsupportedParams.add("template");
-        }
-    }
+     private void validateTemplate(final UriInfo uriInfo, List<String> unsupportedParams) {
+          final boolean templateRequest = ApiParameterHelper.template(uriInfo.getQueryParameters());
+          if (templateRequest) {
+               unsupportedParams.add("template");
+          }
+     }
 
-    public HashMap<String, Object> validateSavingsApplication(final String json) {
-        if (StringUtils.isBlank(json)) {
-            throw new InvalidJsonException();
-        }
+     public HashMap<String, Object> validateSavingsApplication(final String json) {
+          if (StringUtils.isBlank(json)) {
+               throw new InvalidJsonException();
+          }
 
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(SelfSavingsAccountConstants.savingsAccountResource);
+          final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+          final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                    .resource(SelfSavingsAccountConstants.savingsAccountResource);
 
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
+          final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final Long clientId = this.fromApiJsonHelper.extractLongNamed(SelfSavingsAccountConstants.clientIdParameterName,
-                element);
-        baseDataValidator.reset().parameter(SelfSavingsAccountConstants.clientIdParameterName).value(clientId).notNull()
-                .longGreaterThanZero();
+          final Long clientId = this.fromApiJsonHelper.extractLongNamed(SelfSavingsAccountConstants.clientIdParameterName,
+                    element);
+          baseDataValidator.reset().parameter(SelfSavingsAccountConstants.clientIdParameterName).value(clientId).notNull()
+                    .longGreaterThanZero();
 
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
+          if (!dataValidationErrors.isEmpty()) {
+               throw new PlatformApiDataValidationException(dataValidationErrors);
+          }
 
-        HashMap<String, Object> parameterMap = new HashMap<>();
-        parameterMap.put(SelfSavingsAccountConstants.clientIdParameterName, clientId);
+          HashMap<String, Object> parameterMap = new HashMap<>();
+          parameterMap.put(SelfSavingsAccountConstants.clientIdParameterName, clientId);
 
-        return parameterMap;
+          return parameterMap;
 
-    }
-
+     }
 }

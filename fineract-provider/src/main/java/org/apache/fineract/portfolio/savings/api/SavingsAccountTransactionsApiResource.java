@@ -137,6 +137,11 @@ public class SavingsAccountTransactionsApiResource {
             if (is(commandParam, "deposit")) {
                 final CommandWrapper commandRequest = builder.savingsAccountDeposit(savingsId).build();
                 result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            }
+            else if(is(commandParam, "gsimDeposit"))
+            {
+                 final CommandWrapper commandRequest = builder.gsimSavingsAccountDeposit(savingsId).build();
+                 result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             } else if (is(commandParam, "withdrawal")) {
                 final CommandWrapper commandRequest = builder.savingsAccountWithdrawal(savingsId).build();
                 result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

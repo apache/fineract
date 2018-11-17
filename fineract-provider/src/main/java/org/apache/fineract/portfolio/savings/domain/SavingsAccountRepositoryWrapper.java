@@ -102,6 +102,10 @@ public class SavingsAccountRepositoryWrapper {
         return this.repository.findByGroupId(groupId) ;
     }
 
+    public List<SavingsAccount> findByGsimId(@Param("gsimId") Long gsimId) {
+        return this.repository.findSavingAccountByGsimId(gsimId);
+    }
+
     //Root Entity is enough
     public SavingsAccount findNonClosedAccountByAccountNumber(@Param("accountNumber") String accountNumber) {
         return this.repository.findNonClosedAccountByAccountNumber(accountNumber) ;

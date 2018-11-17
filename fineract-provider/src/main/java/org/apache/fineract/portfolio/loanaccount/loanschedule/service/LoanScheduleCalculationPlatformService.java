@@ -29,4 +29,5 @@ public interface LoanScheduleCalculationPlatformService {
     void updateFutureSchedule(LoanScheduleData loanScheduleData, Long loanId);
 
     LoanScheduleData generateLoanScheduleForVariableInstallmentRequest(Long loanId, String json);
+
 }

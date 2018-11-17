@@ -35,6 +35,8 @@ public class CommandProcessingResultBuilder {
     private String resourceIdentifier;
     private Long entityId;
     private Long subEntityId;
+    private Long gsimId;
+    private Long glimId;
     private String transactionId;
     private Map<String, Object> changes;
     private Long productId;
@@ -42,7 +44,7 @@ public class CommandProcessingResultBuilder {
 
     public CommandProcessingResult build() {
         return CommandProcessingResult.fromDetails(this.commandId, this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId,
-                this.resourceIdentifier, this.entityId, this.transactionId, this.changes, this.productId, this.rollbackTransaction,
+                this.resourceIdentifier, this.entityId, this.gsimId, this.glimId, this.transactionId, this.changes, this.productId,  this.rollbackTransaction,
                 this.subEntityId);
     }
 
@@ -103,6 +105,16 @@ public class CommandProcessingResultBuilder {
 
     public CommandProcessingResultBuilder withProductId(final Long productId) {
         this.productId = productId;
+        return this;
+    }
+
+    public CommandProcessingResultBuilder withGsimId(final Long gsimId) {
+        this.gsimId = gsimId;
+        return this;
+    }
+
+    public CommandProcessingResultBuilder withGlimId(final Long glimId) {
+        this.glimId = glimId;
         return this;
     }
 
