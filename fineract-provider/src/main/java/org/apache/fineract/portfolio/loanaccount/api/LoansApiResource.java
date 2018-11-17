@@ -105,6 +105,7 @@ import org.apache.fineract.portfolio.fund.service.FundReadPlatformService;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
+import org.apache.fineract.portfolio.loanaccount.data.GlimRepaymentTemplate;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
@@ -121,6 +122,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleD
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleHistoryReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.GLIMAccountInfoReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
@@ -265,6 +267,8 @@ public class LoansApiResource {
             LoanApiConstants.datatables, LoanProductConstants.ratesParamName));
 
     private final Set<String> LOAN_APPROVAL_DATA_PARAMETERS = new HashSet<>(Arrays.asList("approvalDate", "approvalAmount"));
+    final Set<String> GLIM_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("glimId","groupId", "clientId","parentLoanAccountNo","parentPrincipalAmount",
+            "childLoanAccountNo", "childPrincipalAmount","clientName"));
     private final String resourceNameForPermissions = "LOAN";
 
     private final PlatformSecurityContext context;
@@ -296,6 +300,8 @@ public class LoansApiResource {
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
     private final RateReadService rateReadService;
     private final ConfigurationDomainService configurationDomainService;
+    private final DefaultToApiJsonSerializer<GlimRepaymentTemplate> glimTemplateToApiJsonSerializer;
+    private final GLIMAccountInfoReadPlatformService glimAccountInfoReadPlatformService;
 
     @Autowired
     public LoansApiResource(final PlatformSecurityContext context, final LoanReadPlatformService loanReadPlatformService,
@@ -319,7 +325,8 @@ public class LoansApiResource {
             final EntityDatatableChecksReadService entityDatatableChecksReadService,
             final BulkImportWorkbookService bulkImportWorkbookService,
             final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService, final RateReadService rateReadService,
-            final ConfigurationDomainService configurationDomainService) {
+            final ConfigurationDomainService configurationDomainService, final DefaultToApiJsonSerializer<GlimRepaymentTemplate> glimTemplateToApiJsonSerializer,
+            final GLIMAccountInfoReadPlatformService glimAccountInfoReadPlatformService) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
@@ -349,6 +356,8 @@ public class LoansApiResource {
         this.bulkImportWorkbookService=bulkImportWorkbookService;
         this.bulkImportWorkbookPopulatorService=bulkImportWorkbookPopulatorService;
         this.configurationDomainService = configurationDomainService;
+        this.glimTemplateToApiJsonSerializer=glimTemplateToApiJsonSerializer;
+        this.glimAccountInfoReadPlatformService=glimAccountInfoReadPlatformService;
     }
 
     /*
@@ -916,6 +925,57 @@ public class LoansApiResource {
     public Response getLoansTemplate(@QueryParam("officeId") final Long officeId,
             @QueryParam("staffId") final Long staffId,@QueryParam("dateFormat") final String dateFormat) {
         return bulkImportWorkbookPopulatorService.getTemplate(GlobalEntityType.LOANS.toString(), officeId, staffId,dateFormat);
+    }
+
+    @GET
+    @Path("glimAccount/{glimId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String getGlimRepaymentTemplate(@PathParam("glimId") final Long glimId,@Context final UriInfo uriInfo)
+    {
+          this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+          Collection<GlimRepaymentTemplate> glimRepaymentTemplate=this.glimAccountInfoReadPlatformService.findglimRepaymentTemplate(glimId);
+          final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+         return this.glimTemplateToApiJsonSerializer.serialize(settings, glimRepaymentTemplate, this.GLIM_ACCOUNTS_DATA_PARAMETERS);
+    }
+
+    @POST
+    @Path("glimAccount/{glimId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Approve GLIM Application | Undo GLIM Application Approval | Reject GLIM Application | Disburse Loan Disburse Loan To Savings Account | Undo Loan Disbursal", httpMethod = "POST", notes = "Approve GLIM Application:\n" + "Mandatory Fields: approvedOnDate\n" + "Optional Fields: approvedLoanAmount and expectedDisbursementDate\n" + "Approves the GLIM application\n\n" + "Undo GLIM Application Approval:\n" + "Undoes the GLIM Application Approval\n\n" + "Reject GLIM Application:\n" + "Mandatory Fields: rejectedOnDate\n" + "Allows you to reject the GLIM application\n\n" + "Disburse Loan:\n" + "Mandatory Fields: actualDisbursementDate\n" + "Optional Fields: transactionAmount and fixedEmiAmount\n" + "Disburses the Loan\n\n" + "Disburse Loan To Savings Account:\n" + "Mandatory Fields: actualDisbursementDate\n" + "Optional Fields: transactionAmount and fixedEmiAmount\n" + "Disburses the loan to Saving Account\n\n" + "Undo Loan Disbursal:\n" + "Undoes the Loan Disbursal\n")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoansApiResourceSwagger.PostLoansLoanIdRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.PostLoansLoanIdResponse.class)})
+    public String glimStateTransitions(@PathParam("glimId") final Long glimId, @QueryParam("command") final String commandParam,
+          final String apiRequestBodyAsJson) {
+
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+
+        CommandProcessingResult result = null;
+
+        if (is(commandParam, "reject")) {
+            final CommandWrapper commandRequest = builder.rejectGLIMApplication(glimId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "approve")) {
+            final CommandWrapper commandRequest = builder.approveGLIMLoanApplication(glimId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "disburse")) {
+            final CommandWrapper commandRequest = builder.disburseGlimLoanApplication(glimId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "glimrepayment")) {
+            final CommandWrapper commandRequest = builder.repaymentGlimLoanApplication(glimId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "undodisbursal")) {
+            final CommandWrapper commandRequest = builder.undoGLIMLoanDisbursal(glimId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "undoapproval")) {
+            final CommandWrapper commandRequest = builder.undoGLIMLoanApproval(glimId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        }
+
+        if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
+
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @GET

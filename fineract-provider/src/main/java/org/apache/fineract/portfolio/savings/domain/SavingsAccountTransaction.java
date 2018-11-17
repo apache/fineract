@@ -117,6 +117,10 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
     @Column(name = "is_manual", length = 1, nullable = true)
     private boolean isManualTransaction;
 
+    @Column(name = "is_loan_disbursement", length = 1, nullable = true)
+    private boolean isLoanDisbursement;
+
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
     @JoinColumn(name = "savings_transaction_id", referencedColumnName = "id", nullable = false)
     private List<SavingsAccountTransactionTaxDetails> taxDetails = new ArrayList<>();
@@ -405,6 +409,10 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom {
 
     public boolean occursOn(final LocalDate occursOnDate) {
         return getTransactionLocalDate().isEqual(occursOnDate);
+    }
+
+    public void setLoanDisbursement(boolean isLoanDisbursement) {
+        this.isLoanDisbursement = isLoanDisbursement;
     }
 
     public void zeroBalanceFields() {

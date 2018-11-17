@@ -59,6 +59,7 @@ public class LoanRepositoryWrapper {
         return loan;
     }
 
+
     //Root Entities are enough
     public Collection<Loan> findActiveLoansByLoanIdAndGroupId(Long clientId, Long groupId) {
         final Collection<Integer> loanStatuses = new ArrayList<>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),

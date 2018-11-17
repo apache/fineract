@@ -134,6 +134,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         return user;
     }
 
+
     @Transactional
     @Override
     public SavingsAccountTransaction handleDeposit(final SavingsAccount account, final DateTimeFormatter fmt,
@@ -176,7 +177,6 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
             account.calculateInterestUsing(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
                     financialYearBeginningMonth, postInterestOnDate);
         }
-
         saveTransactionToGenerateTransactionId(deposit);
 
         this.savingsAccountRepository.saveAndFlush(account);

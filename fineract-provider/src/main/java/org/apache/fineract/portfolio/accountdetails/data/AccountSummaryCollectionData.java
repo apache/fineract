@@ -27,6 +27,7 @@ import java.util.Collection;
 public class AccountSummaryCollectionData {
 
     private final Collection<LoanAccountSummaryData> loanAccounts;
+    private final Collection<LoanAccountSummaryData> groupLoanIndividualMonitoringAccounts;
     private final Collection<SavingsAccountSummaryData> savingsAccounts;
     private final Collection<ShareAccountSummaryData> shareAccounts ;
     private final Collection<GuarantorAccountSummaryData> guarantorAccounts;
@@ -35,10 +36,15 @@ public class AccountSummaryCollectionData {
     private final Collection<SavingsAccountSummaryData> memberSavingsAccounts;
     private final Collection<GuarantorAccountSummaryData> memberGuarantorAccounts;
 
-    public AccountSummaryCollectionData(final Collection<LoanAccountSummaryData> loanAccounts,
-            final Collection<SavingsAccountSummaryData> savingsAccounts, final Collection<ShareAccountSummaryData> shareAccounts,
-            final Collection<GuarantorAccountSummaryData> guarantorAccounts) {
+
+       /* METHOD SIGNATURE CHANGE NOTICE: Method's signature
+        was changed for GLIM & GSIM implementation*/
+    public AccountSummaryCollectionData(final Collection<LoanAccountSummaryData> loanAccounts,final Collection<LoanAccountSummaryData> groupLoanIndividualMonitoringAccounts,
+            final Collection<SavingsAccountSummaryData> savingsAccounts, final Collection<ShareAccountSummaryData> shareAccounts,final Collection<GuarantorAccountSummaryData> guarantorAccounts)
+    {
+
         this.loanAccounts = defaultLoanAccountsIfEmpty(loanAccounts);
+        this.groupLoanIndividualMonitoringAccounts=groupLoanIndividualMonitoringAccounts;
         this.savingsAccounts = defaultSavingsAccountsIfEmpty(savingsAccounts);
         this.shareAccounts = defaultShareAccountsIfEmpty(shareAccounts) ;
         this.guarantorAccounts = guarantorAccounts;
@@ -47,10 +53,13 @@ public class AccountSummaryCollectionData {
         this.memberGuarantorAccounts = null;
     }
 
-    public AccountSummaryCollectionData(final Collection<LoanAccountSummaryData> loanAccounts,
+    public AccountSummaryCollectionData(final Collection<LoanAccountSummaryData> loanAccounts,final Collection<LoanAccountSummaryData> groupLoanIndividualMonitoringAccounts,
             final Collection<SavingsAccountSummaryData> savingsAccounts, final Collection<GuarantorAccountSummaryData> guarantorAccounts, final Collection<LoanAccountSummaryData> memberLoanAccounts,
             final Collection<SavingsAccountSummaryData> memberSavingsAccounts, final Collection<GuarantorAccountSummaryData> memberGuarantorAccounts) {
+   /* Note to Self: GSIM not passed in*/
+
         this.loanAccounts = defaultLoanAccountsIfEmpty(loanAccounts);
+        this.groupLoanIndividualMonitoringAccounts=groupLoanIndividualMonitoringAccounts;
         this.savingsAccounts = defaultSavingsAccountsIfEmpty(savingsAccounts);
         this.guarantorAccounts = guarantorAccounts;
         this.shareAccounts = null ;

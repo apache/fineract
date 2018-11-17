@@ -68,6 +68,7 @@ public class ClientSavingsIntegrationTest {
     public static final String WITHDRAW_AMOUNT_ADJUSTED = "500";
     public static final String MINIMUM_OPENING_BALANCE = "1000.0";
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
+    public static final String DATE_FORMAT = "dd MMMM yyyy";
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -2294,4 +2295,5 @@ public class ClientSavingsIntegrationTest {
         assertEquals("Verifying opening Balance is -300", balance, summary.get("accountBalance"));
 
     }
+
 }
