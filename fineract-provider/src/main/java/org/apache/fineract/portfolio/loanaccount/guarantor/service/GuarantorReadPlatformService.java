@@ -46,4 +46,5 @@ public interface GuarantorReadPlatformService {
 
 	List<ObligeeData> retrieveObligeeDetails(Long clientId);
 
+
 }

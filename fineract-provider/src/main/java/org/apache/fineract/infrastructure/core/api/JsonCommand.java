@@ -98,6 +98,13 @@ public final class JsonCommand {
                 command.resourceId, command.subresourceId, command.groupId, command.clientId, command.loanId, command.savingsId,
                 command.transactionId, command.url, command.productId,command.creditBureauId,command.organisationCreditBureauId);
     }
+    
+    public static JsonCommand fromExistingCommand(JsonCommand command, final JsonElement parsedCommand,final Long clientId) {
+        final String jsonCommand = command.fromApiJsonHelper.toJson(parsedCommand);
+        return new JsonCommand(command.commandId, jsonCommand, parsedCommand, command.fromApiJsonHelper, command.entityName,
+                command.resourceId, command.subresourceId, command.groupId, clientId, command.loanId, command.savingsId,
+                command.transactionId, command.url, command.productId,command.creditBureauId,command.organisationCreditBureauId);
+    }
 
     public JsonCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,

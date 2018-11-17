@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -132,6 +133,12 @@ public interface LoanReadPlatformService {
     LoanTransactionData retrieveLoanForeclosureTemplate(final Long loanId, final LocalDate transactionDate);
 
 	LoanAccountData retrieveLoanByLoanAccount(String loanAccountNumber);
+<<<<<<< HEAD
 	
 	Long retrieveLoanIdByAccountNumber(String loanAccountNumber);
+=======
+
+	List<LoanAccountData> retrieveGLIMChildLoansByGLIMParentAccount(String parentloanAccountNumber);
+
+>>>>>>> 5ecaff5dc... gsim and glim functionalities added
 }

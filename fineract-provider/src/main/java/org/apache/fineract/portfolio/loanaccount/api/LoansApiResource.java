@@ -24,7 +24,14 @@ import io.swagger.annotations.*;
 import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestType;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -41,8 +48,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataParam;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -91,7 +96,19 @@ import org.apache.fineract.portfolio.fund.data.FundData;
 import org.apache.fineract.portfolio.fund.service.FundReadPlatformService;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
+<<<<<<< HEAD
 import org.apache.fineract.portfolio.loanaccount.data.*;
+=======
+import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
+import org.apache.fineract.portfolio.loanaccount.data.GlimRepaymentTemplate;
+import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
+import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
+import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
+>>>>>>> 5ecaff5dc... gsim and glim functionalities added
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTemplateTypeRequiredException;
 import org.apache.fineract.portfolio.loanaccount.exception.NotSupportedLoanTemplateTypeException;
@@ -101,6 +118,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleD
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleHistoryReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.GLIMAccountInfoReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
@@ -119,6 +137,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+<<<<<<< HEAD
+=======
+import com.google.gson.JsonElement;
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataParam;
+>>>>>>> 5ecaff5dc... gsim and glim functionalities added
 
 @Path("/loans")
 @Component
@@ -145,6 +169,8 @@ public class LoansApiResource {
             LoanApiConstants.datatables));
 
     private final Set<String> LOAN_APPROVAL_DATA_PARAMETERS = new HashSet<>(Arrays.asList("approvalDate", "approvalAmount"));
+    final Set<String> GLIM_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("glimId","groupId", "clientId","parentLoanAccountNo","parentPrincipalAmount",
+    		"childLoanAccountNo", "childPrincipalAmount","clientName"));
     private final String resourceNameForPermissions = "LOAN";
 
     private final PlatformSecurityContext context;
@@ -174,7 +200,8 @@ public class LoansApiResource {
     private final EntityDatatableChecksReadService entityDatatableChecksReadService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
-
+    private final DefaultToApiJsonSerializer<GlimRepaymentTemplate> glimTemplateToApiJsonSerializer;
+    private final GLIMAccountInfoReadPlatformService glimAccountInfoReadPlatformService;
 
     @Autowired
     public LoansApiResource(final PlatformSecurityContext context, final LoanReadPlatformService loanReadPlatformService,
@@ -197,7 +224,9 @@ public class LoansApiResource {
             final AccountDetailsReadPlatformService accountDetailsReadPlatformService,
             final EntityDatatableChecksReadService entityDatatableChecksReadService,
             final BulkImportWorkbookService bulkImportWorkbookService,
-            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService) {
+            final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService,
+            final DefaultToApiJsonSerializer<GlimRepaymentTemplate> glimTemplateToApiJsonSerializer,
+            final GLIMAccountInfoReadPlatformService glimAccountInfoReadPlatformService) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
@@ -225,6 +254,9 @@ public class LoansApiResource {
         this.entityDatatableChecksReadService = entityDatatableChecksReadService;
         this.bulkImportWorkbookService=bulkImportWorkbookService;
         this.bulkImportWorkbookPopulatorService=bulkImportWorkbookPopulatorService;
+        this.glimTemplateToApiJsonSerializer=glimTemplateToApiJsonSerializer;
+        this.glimAccountInfoReadPlatformService=glimAccountInfoReadPlatformService;
+
     }
 
     /*
@@ -256,6 +288,8 @@ public class LoansApiResource {
         return this.loanApprovalDataToApiJsonSerializer.serialize(settings, loanApprovalTemplate, this.LOAN_APPROVAL_DATA_PARAMETERS);
 
     }
+    
+ 
 
     @GET
     @Path("template")
@@ -632,6 +666,9 @@ public class LoansApiResource {
         String toReturn = this.toApiJsonSerializer.serialize(settings, loanAccount, this.LOAN_DATA_PARAMETERS);
         return toReturn ;
     }
+    
+    
+  
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -715,59 +752,126 @@ public class LoansApiResource {
 
         return this.toApiJsonSerializer.serialize(result);
     }
-
-    @POST
-    @Path("{loanId}")
+    
+    
+    @GET
+    @Path("glimAccount/{glimId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    public String getGlimRepaymentTemplate(@PathParam("glimId") final Long glimId,@Context final UriInfo uriInfo)
+    {
+    	 this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+    	 Collection<GlimRepaymentTemplate> glimRepaymentTemplate=this.glimAccountInfoReadPlatformService.findglimRepaymentTemplate(glimId);
+    	 final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+         return this.glimTemplateToApiJsonSerializer.serialize(settings, glimRepaymentTemplate, this.GLIM_ACCOUNTS_DATA_PARAMETERS);
+    
+    }
+    
+    
+    @POST
+    @Path("glimAccount/{glimId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+<<<<<<< HEAD
     @ApiOperation(value = "Approve Loan Application | Recover Loan Guarantee | Undo Loan Application Approval | Assign a Loan Officer | Unassign a Loan Officer | Reject Loan Application | Applicant Withdraws from Loan Application | Disburse Loan Disburse Loan To Savings Account | Undo Loan Disbursal", httpMethod = "POST", notes = "Approve Loan Application:\n" + "Mandatory Fields: approvedOnDate\n" + "Optional Fields: approvedLoanAmount and expectedDisbursementDate\n" + "Approves the loan application\n\n" + "Recover Loan Guarantee:\n" + "Recovers the loan guarantee\n\n" + "Undo Loan Application Approval:\n" + "Undoes the Loan Application Approval\n\n" + "Assign a Loan Officer:\n" + "Allows you to assign Loan Officer for existing Loan.\n\n" + "Unassign a Loan Officer:\n" + "Allows you to unassign the Loan Officer.\n\n" + "Reject Loan Application:\n" + "Mandatory Fields: rejectedOnDate\n" + "Allows you to reject the loan application\n\n" + "Applicant Withdraws from Loan Application:\n" + "Mandatory Fields: withdrawnOnDate\n" + "Allows the applicant to withdraw the loan application\n\n" + "Disburse Loan:\n" + "Mandatory Fields: actualDisbursementDate\n" + "Optional Fields: transactionAmount and fixedEmiAmount\n" + "Disburses the Loan\n\n" + "Disburse Loan To Savings Account:\n" + "Mandatory Fields: actualDisbursementDate\n" + "Optional Fields: transactionAmount and fixedEmiAmount\n" + "Disburses the loan to Saving Account\n\n" + "Undo Loan Disbursal:\n" + "Undoes the Loan Disbursal\n" + "Showing request and response for Assign a Loan Officer")
     @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoansApiResourceSwagger.PostLoansLoanIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoansApiResourceSwagger.PostLoansLoanIdResponse.class)})
     public String stateTransitions(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId, @QueryParam("command") @ApiParam(value = "command") final String commandParam,
            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
+=======
+    public String glimStateTransitions(@PathParam("glimId") final Long glimId, @QueryParam("command") final String commandParam,
+          final String apiRequestBodyAsJson) {
+>>>>>>> 5ecaff5dc... gsim and glim functionalities added
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
         CommandProcessingResult result = null;
-
+        
         if (is(commandParam, "reject")) {
-            final CommandWrapper commandRequest = builder.rejectLoanApplication(loanId).build();
+            final CommandWrapper commandRequest = builder.rejectGLIMApplication(glimId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "withdrawnByApplicant")) {
-            final CommandWrapper commandRequest = builder.withdrawLoanApplication(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "approve")) {
-            final CommandWrapper commandRequest = builder.approveLoanApplication(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "disburse")) {
-            final CommandWrapper commandRequest = builder.disburseLoanApplication(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "disburseToSavings")) {
-            final CommandWrapper commandRequest = builder.disburseLoanToSavingsApplication(loanId).build();
+        }else if (is(commandParam, "approve")) {
+            final CommandWrapper commandRequest = builder.approveGLIMLoanApplication(glimId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
+        else if (is(commandParam, "disburse")) {
+            final CommandWrapper commandRequest = builder.disburseGlimLoanApplication(glimId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        }  else if (is(commandParam, "glimrepayment")) {
+            final CommandWrapper commandRequest = builder.repaymentGlimLoanApplication(glimId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } 
+        else if (is(commandParam, "glimrepayment")) {
+            final CommandWrapper commandRequest = builder.repaymentGlimLoanApplication(glimId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } 
+        else if (is(commandParam, "undodisbursal")) {
+            final CommandWrapper commandRequest = builder.undoGLIMLoanDisbursal(glimId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } 
+        else if (is(commandParam, "undoapproval")) {
+            final CommandWrapper commandRequest = builder.undoGLIMLoanApproval(glimId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } 
+        
+        
+        if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
 
-        if (is(commandParam, "undoapproval")) {
-            final CommandWrapper commandRequest = builder.undoLoanApplicationApproval(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "undodisbursal")) {
-            final CommandWrapper commandRequest = builder.undoLoanApplicationDisbursal(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        }else if (is(commandParam, "undolastdisbursal")) {
-            final CommandWrapper commandRequest = builder.undoLastDisbursalLoanApplication(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        }
+        return this.toApiJsonSerializer.serialize(result);
+    }
 
-        if (is(commandParam, "assignloanofficer")) {
-            final CommandWrapper commandRequest = builder.assignLoanOfficer(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "unassignloanofficer")) {
-            final CommandWrapper commandRequest = builder.unassignLoanOfficer(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "recoverGuarantees")) {
-            final CommandWrapper commandRequest = new CommandWrapperBuilder().recoverFromGuarantor(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        }
+    @POST
+    @Path("{loanId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String stateTransitions(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam,
+          final String apiRequestBodyAsJson) {
+
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+
+        CommandProcessingResult result = null;
+        	
+        		  if (is(commandParam, "reject")) {
+        	            final CommandWrapper commandRequest = builder.rejectLoanApplication(loanId).build();
+        	            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        	        } else if (is(commandParam, "withdrawnByApplicant")) {
+        	            final CommandWrapper commandRequest = builder.withdrawLoanApplication(loanId).build();
+        	            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        	        } else if (is(commandParam, "approve")) {
+        	            final CommandWrapper commandRequest = builder.approveLoanApplication(loanId).build();
+        	            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        	        } else if (is(commandParam, "disburse")) {
+        	            final CommandWrapper commandRequest = builder.disburseLoanApplication(loanId).build();
+        	            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        	        } else if (is(commandParam, "disburseToSavings")) {
+        	            final CommandWrapper commandRequest = builder.disburseLoanToSavingsApplication(loanId).build();
+        	            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        	        }
+
+        	        if (is(commandParam, "undoapproval")) {
+        	            final CommandWrapper commandRequest = builder.undoLoanApplicationApproval(loanId).build();
+        	            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        	        } else if (is(commandParam, "undodisbursal")) {
+        	            final CommandWrapper commandRequest = builder.undoLoanApplicationDisbursal(loanId).build();
+        	            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        	        }else if (is(commandParam, "undolastdisbursal")) {
+        	            final CommandWrapper commandRequest = builder.undoLastDisbursalLoanApplication(loanId).build();
+        	            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        	        }
+
+        	        if (is(commandParam, "assignloanofficer")) {
+        	            final CommandWrapper commandRequest = builder.assignLoanOfficer(loanId).build();
+        	            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        	        } else if (is(commandParam, "unassignloanofficer")) {
+        	            final CommandWrapper commandRequest = builder.unassignLoanOfficer(loanId).build();
+        	            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        	        } else if (is(commandParam, "recoverGuarantees")) {
+        	            final CommandWrapper commandRequest = new CommandWrapperBuilder().recoverFromGuarantor(loanId).build();
+        	            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        	        }
+        	      
+        	
+      
 
         if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
 
