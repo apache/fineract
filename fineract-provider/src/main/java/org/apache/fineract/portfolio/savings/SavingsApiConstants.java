@@ -80,11 +80,20 @@ public class    SavingsApiConstants {
 
     // savings product and account parameters
     public static final String idParamName = "id";
+    public static final String isGSIM="isGSIM";
+    public static final String isParentAccount="isParentAccount";
     public static final String accountNoParamName = "accountNo";
     public static final String externalIdParamName = "externalId";
     public static final String statusParamName = "status";
     public static final String subStatusParamName = "subStatus";
     public static final String clientIdParamName = "clientId";
+    public static final String isRetailAccountParamName = "isRetailAccount";
+    public static final String autogenerateTransactionIdParamName="autogenerateTransactionId";
+    public static final String transactionUpperLimitParamName="transactionUpperLimit";
+    public static final String transactionLowerLimitParamName="transactionLowerLimit";
+    public static final String retailEntriesParamName="retailEntries";
+    public static final String childAccountIdParamName="childAccountId";
+
     public static final String groupIdParamName = "groupId";
     public static final String productIdParamName = "productId";
     public static final String fieldOfficerIdParamName = "fieldOfficerId";
@@ -185,6 +194,8 @@ public class    SavingsApiConstants {
     public static final String daysToEscheatParamName = "daysToEscheat";
 
     public static final String datatables = "datatables";
+    public static final String gsimApplicationId = "applicationId";
+    public static final String gsimLastApplication = "lastApplication";
     
     public static final String ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE = "not.in.active.state";
 }

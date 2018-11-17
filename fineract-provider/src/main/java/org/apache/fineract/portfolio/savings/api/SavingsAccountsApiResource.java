@@ -160,6 +160,19 @@ public class SavingsAccountsApiResource {
 
         return this.toApiJsonSerializer.serialize(result);
     }
+    
+    @POST
+    @Path("/gsim")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String submitGSIMApplication(final String apiRequestBodyAsJson) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createGSIMAccount().withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
 
     @GET
     @Path("{accountId}")
@@ -255,6 +268,88 @@ public class SavingsAccountsApiResource {
 
         return this.toApiJsonSerializer.serialize(result);
     }
+    
+    @PUT
+    @Path("/gsim/{parentAccountId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String updateGsim(@PathParam("parentAccountId") final Long parentAccountId, final String apiRequestBodyAsJson,
+            @QueryParam("command") final String commandParam) {
+
+      /*  if (is(commandParam, "updateWithHoldTax")) {
+            final CommandWrapper commandRequest = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson).updateWithHoldTax(accountId)
+                    .build();
+            final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
+        }*/
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateGSIMAccount(parentAccountId).withJson(apiRequestBodyAsJson)
+                .build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
+    
+  
+    @POST
+    @Path("/gsimcommands/{parentAccountId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String handleGSIMCommands(@PathParam("parentAccountId") final Long parentAccountId, @QueryParam("command") final String commandParam,
+            final String apiRequestBodyAsJson) {
+
+        String jsonApiRequest = apiRequestBodyAsJson;
+        if (StringUtils.isBlank(jsonApiRequest)) {
+            jsonApiRequest = "{}";
+        }
+
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(jsonApiRequest);
+
+        CommandProcessingResult result = null;
+        if (is(commandParam, "reject")) {
+            final CommandWrapper commandRequest = builder.rejectGSIMAccountApplication(parentAccountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "withdrawnByApplicant")) {
+            final CommandWrapper commandRequest = builder.withdrawSavingsAccountApplication(parentAccountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "approve")) {
+        	System.out.println("parentAccountId "+parentAccountId);
+            final CommandWrapper commandRequest = builder.approveGSIMAccountApplication(parentAccountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "undoapproval")) {
+            final CommandWrapper commandRequest = builder.undoGSIMApplicationApproval(parentAccountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "activate")) {
+            final CommandWrapper commandRequest = builder.gsimAccountActivation(parentAccountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "calculateInterest")) {
+            final CommandWrapper commandRequest = builder.withNoJsonBody().savingsAccountInterestCalculation(parentAccountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "postInterest")) {
+            final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(parentAccountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "applyAnnualFees")) {
+            final CommandWrapper commandRequest = builder.savingsAccountApplyAnnualFees(parentAccountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "close")) {
+            final CommandWrapper commandRequest = builder.closeGSIMApplication(parentAccountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } 
+
+        if (result == null) {
+          
+            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "reject", "withdrawnByApplicant", "approve",
+                    "undoapproval", "activate", "calculateInterest", "postInterest", "close", "assignSavingsOfficer",
+                    "unassignSavingsOfficer", SavingsApiConstants.COMMAND_BLOCK_DEBIT, SavingsApiConstants.COMMAND_UNBLOCK_DEBIT,
+                    SavingsApiConstants.COMMAND_BLOCK_CREDIT, SavingsApiConstants.COMMAND_UNBLOCK_CREDIT,
+                    SavingsApiConstants.COMMAND_BLOCK_ACCOUNT, SavingsApiConstants.COMMAND_UNBLOCK_ACCOUNT });
+        }
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
+   
 
     @POST
     @Path("{accountId}")

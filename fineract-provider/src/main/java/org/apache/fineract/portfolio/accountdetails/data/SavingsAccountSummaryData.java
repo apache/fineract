@@ -70,4 +70,13 @@ public class SavingsAccountSummaryData {
         this.subStatus = subStatus;
         this.lastActiveTransactionDate = lastActiveTransactionDate;
     }
+
+	public String getAccountNo() {
+		return accountNo;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
 }

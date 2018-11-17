@@ -137,7 +137,8 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
 
         return this.loanScheduleAssembler.assembleLoanScheduleFrom(query.parsedJson());
     }
-
+    
+    
     @Override
     public void updateFutureSchedule(LoanScheduleData loanScheduleData, final Long loanId) {
 

@@ -60,6 +60,7 @@ import org.apache.fineract.portfolio.group.exception.ClientNotInGroupException;
 import org.apache.fineract.portfolio.group.exception.GroupExistsInCenterException;
 import org.apache.fineract.portfolio.group.exception.GroupNotExistsInCenterException;
 import org.apache.fineract.portfolio.group.exception.InvalidGroupStateTransitionException;
+import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 
@@ -145,6 +146,9 @@ public final class Group extends AbstractPersistableCustom<Long> {
 
     @OneToMany(mappedBy="group",cascade = CascadeType.REMOVE)
     private Set<GroupRole> groupRole;
+    
+    @OneToMany(mappedBy = "group")
+    private List<GroupLoanIndividualMonitoringAccount> glimLoan;
 
 
     // JPA default constructor for entity
