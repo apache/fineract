@@ -137,9 +137,6 @@ public class SavingsProductDataValidator {
         final String shortName = this.fromApiJsonHelper.extractStringNamed(shortNameParamName, element);
         baseDataValidator.reset().parameter(shortNameParamName).value(shortName).notBlank().notExceedingLengthOf(4);
 
-        final String description = this.fromApiJsonHelper.extractStringNamed(descriptionParamName, element);
-        baseDataValidator.reset().parameter(descriptionParamName).value(description).notBlank().notExceedingLengthOf(500);
-
         final String currencyCode = this.fromApiJsonHelper.extractStringNamed(currencyCodeParamName, element);
         baseDataValidator.reset().parameter(currencyCodeParamName).value(currencyCode).notBlank();
 
@@ -174,6 +171,11 @@ public class SavingsProductDataValidator {
                 interestCalculationDaysInYearTypeParamName, element);
         baseDataValidator.reset().parameter(interestCalculationDaysInYearTypeParamName).value(interestCalculationDaysInYearType).notNull()
                 .isOneOfTheseValues(SavingsInterestCalculationDaysInYearType.integerValues());
+
+        if (this.fromApiJsonHelper.parameterExists(descriptionParamName, element)) {
+            final String description = this.fromApiJsonHelper.extractStringNamed(descriptionParamName, element);
+            baseDataValidator.reset().parameter(descriptionParamName).value(description).ignoreIfNull().notExceedingLengthOf(500);
+        }
 
         if (this.fromApiJsonHelper.parameterExists(minRequiredOpeningBalanceParamName, element)) {
             final BigDecimal minOpeningBalance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(

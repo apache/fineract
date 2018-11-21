@@ -107,7 +107,7 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
     @Column(name = "short_name", nullable = false, unique = true)
     protected String shortName;
 
-    @Column(name = "description", length = 500, nullable = false)
+    @Column(name = "description", length = 500, nullable = true)
     protected String description;
 
     @Embedded
