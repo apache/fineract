@@ -78,11 +78,4 @@ public class SavingsAccountSummaryData {
 	public Long getId() {
 		return id;
 	}
-	
-	
-    
-    
-    
-    
-    
 }
