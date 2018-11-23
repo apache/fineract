@@ -148,16 +148,4 @@ public class GroupLoanIndividualMonitoringAccount extends AbstractPersistableCus
 	public void setApplicationId(BigDecimal applicationId) {
 		this.applicationId = applicationId;
 	}
-	
-	
-	
-	
-	
-
-
-
-
-	
-	
-
 }
