@@ -374,6 +374,12 @@ public final class GroupingTypesDataValidator {
             }
         }
 
+        if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.submittedOnDateParamName, element)) {
+            final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(
+                    GroupingTypesApiConstants.submittedOnDateParamName, element);
+            baseDataValidator.reset().parameter(GroupingTypesApiConstants.submittedOnDateParamName).value(submittedOnDate).notNull();
+        }
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
