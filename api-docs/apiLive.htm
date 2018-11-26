@@ -3618,12 +3618,62 @@
 								<td></td>
 							</tr>
 							<tr>
+								<td><a href="#self_loanproducts">Loan Product</a></td>
+								<td>self/loanproducts?clientId={clientId}</td>
+								<td></td>
+								<td><a href="#self_loanproducts_list">List Loan Products</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/loanproducts/{productId}?clientId={clientId}</td>
+								<td></td>
+								<td><a href="#self_loanproducts_retrieve">Retrieve a Loan
+										Product</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#self_savingsproducts">Savings Product</a></td>
+								<td>self/savingsproducts?clientId={clientId}</td>
+								<td></td>
+								<td><a href="#self_savingsproducts_list">List Savings products</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+
+							<tr>
+								<td></td>
+								<td>self/savingsproducts/{productId}?clientId={clientId}</td>
+								<td></td>
+								<td><a href="#self_savingsproducts_retrieve">Retrieve a savings product</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
 								<td></td>
 								<td>self/clients/{clientId}/images</td>
 								<td></td>
 								<td></td>
 								<td></td>
 								<td><a href="#self_client_image_delete">Delete client image</a></td>
+							</tr>
+							<tr>
+								<td><a href="#self_shareproducts_list">Share Product</a></td>
+								<td>self/shareproducts?clientId={clientId}</td>
+								<td></td>
+								<td><a href="#self_shareproducts_list">List Share products</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/shareproducts/{productId}?clientId={clientId}</td>
+								<td></td>
+								<td><a href="#self_shareproducts_retrieve">Retrieve a share product</a></td>
+								<td></td>
+								<td></td>
 							</tr>
 							<tr>
 								<td><a href="#selfloantemplate">Loans</a></td>
@@ -49222,11 +49272,1148 @@ No Request Body:
   "resourceId": 14,
   "changes": {},
   "resourceIdentifier": "14"
+}					</code>
+				</div>
+			</div>
+<a id="self_loanproducts" name="self_loanproducts" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Loan Products</h3>
+					
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="fineractHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>name</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Name associated with loan product on system.</td>
+						</tr>
+						<tr class=alt>
+							<td>shortName</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Short name associated with a loan product. <br>
+								An abbreviated version of the name, used in reports or menus where space is limited, such as Collection Sheets.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>description</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>For providing helpful description of product offering.</td>
+						</tr>
+						<tr class=alt>
+							<td>fundId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>For associating a loan product with a given fund by default.</td>
+						</tr>
+						<tr class=alt>
+							<td>includeInBorrowerCycle</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>It is a flag, Used to denote whether the loans should include in loan cycle counter or not.</td>
+						</tr>
+						<tr class=alt>
+							<td>useBorrowerCycle</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>It is a flag, Used to denote whether the loans should depend on <br>borrower loan cycle counter or not.</td>
+						</tr>
+						<tr class=alt>
+							<td>currencyCode</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>A three letter ISO code of currency.</td>
+						</tr>
+						<tr class=alt>
+							<td>digitsAfterDecimal</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Override the currency default value for digitsAfterDecimal.</td>
+						</tr>
+						<tr class=alt>
+							<td>inMultiplesOf</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Override the default value for rounding currency to multiples of value provided.</td>
+						</tr>
+						<tr class=alt>
+							<td>installmentAmountInMultiplesOf</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Override the default value for rounding instalment amount to multiples of value provided.</td>
+						</tr>
+
+						<tr class=alt>
+							<td>principal</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The loan amount to be disbursed to through loan.</td>
+						</tr>
+						<tr class=alt>
+							<td>numberOfRepayments</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Number of installments to repay.<br>
+								Used like: <b>numberOfRepayments</b> Every <i>repaymentEvery</i>
+								<i>repaymentFrequencyType</i><br> e.g. <b>10</b> (repayments) Every 12 Weeks
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>repaymentEvery</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Used like: numberOfRepayments Every
+								<b>repaymentEvery</b> repaymentFrequencyType<br> e.g. 10
+								(repayments) Every <b>12</b> Weeks
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>repaymentFrequencyType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Used like: <i>numberOfRepayments</i> Every
+								repaymentEvery <b>repaymentFrequencyType</b><br> e.g. 10
+								(repayments) Every 12 <b>Weeks</b> <br>
+								<span>Example Values:</span> 0=Days, 1=Weeks, 2=Months
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>interestRatePerPeriod</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Interest Rate.<br> Used like:
+								<b>interestRatePerPeriod</b> % interestRateFrequencyType - interestType<br>
+								e.g. <b>12.0000</b>% Per year - Declining Balance
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>interestRateFrequencyType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Used like: interestRatePerPeriod%
+								interestRateFrequencyType - interestType<br> e.g. 12.0000%
+								<b>Per year</b> - Declining Balance <br>
+							<span>Example Values:</span> 2=Per month, 3=Per year
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>amortizationType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc><span>Example Values:</span> 0=Equal
+								principle payments, 1=Equal installments</td>
+						</tr>
+						<tr class=alt>
+							<td>interestType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Used like: interestRatePerPeriod%
+								interestRateFrequencyType - interestType<br> e.g. 12.0000%
+								Per year - <b>Declining Balance</b> <br>
+							<span>Example Values:</span> 0=Declining Balance, 1=Flat
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>interestCalculationPeriodType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc><span>Example Values:</span> 0=Daily, 1=Same as repayment period</td>
+						</tr>
+						<tr class=alt>
+							<td>allowPartialPeriodInterestCalcualtion</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>This value will be supported along with interestCalculationPeriodType as Same as repayment period to calculate interest for partial periods.
+							<span>Example:</span> Interest charged from is 5th of April , Principal is 10000 and interest is 1% per month then the interest will be (10000 * 1%)* (25/30) , it calculates for the month first then calculates exact periods between start date and end date(can be a decimal)
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>inArrearsTolerance</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The amount that can be 'waived' at end
+								of all loan payments because it is too small to worry about.<br>
+								This is also the tolerance amount assessed when determining if a
+								loan is in arrears.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>principalVariationsForBorrowerCycle,interestRateVariationsForBorrowerCycle,<br>numberOfRepaymentVariationsForBorrowerCycle</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Variations for loan, based on borrower cycle number
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>minimumDaysBetweenDisbursalAndFirstRepayment</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The minimum number of days allowed between a Loan disbursal and its first repayment.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>principalThresholdForLastInstalment</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Field represents percentage of current instalment principal amount for comparing against principal outstanding to add another repayment instalment.  If the outstanding principal amount is less then calculated amount, remaining outstanding amount will be added to current instalment. Default value for multi disburse loan is 50% and non-multi disburse loan is 0%
+						</tr>
+						<tr class=alt>
+							<td>canDefineInstallmentAmount</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>if provided as true, then fixed instalment amount can be provided from loan account.
+							</td>
+						</tr>
+
+
+
+<tr class=alt>
+	<td>transactionProcessingStrategyId</td>
+</tr>
+<tr>
+	<td class=fielddesc>
+An enumeration that indicates the type of transaction processing strategy to be used. This relates to functionality that is also known as <b>Payment Application Logic</b>.
+
+<p>A number of out of the box approaches exist, some are custom to specific MFIs, some are more general and indicate the order in which payments are processed.</p>
+
+<p>Refer to the <a href="#paymentapplicationlogic">Payment Application Logic / Transaction Processing Strategy<a> section in the appendix for more detailed overview of each available <b>payment application logic</b> provided out of the box.</p>
+
+<i>List of current approaches</i>:<br/>
+<ul>
+	<li>1 = Mifos style (Similar to Old Mifos)</li>
+	<li>2 = Heavensfamily (Custom MFI approach)</li>
+	<li>3 = Creocore (Custom MFI approach)</li>
+	<li>4 = RBI (India)</li>
+	<li>5 = Principal Interest Penalties Fees Order</li>
+	<li>6 = Interest Principal Penalties Fees Order</li>
+    <li>7 = Early Payment Strategy</li>
+</ul>
+	</td>
+</tr>
+						<tr class=alt>
+							<td>graceOnPrincipalPayment</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer - represents the number of repayment periods that grace should apply to the principal component of a repayment period.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>graceOnInterestPayment</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer - represents the number of repayment periods that grace should apply to the interest component of a repayment period. Interest is still calculated but offset to later repayment periods.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>graceOnInterestCharged</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer - represents the number of repayment periods that should be interest-free.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>graceOnArrearsAgeing</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer -  Used in Arrears calculation to only take into account loans that are more than graceOnArrearsAgeing days overdue.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>overdueDaysForNPA</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer - represents the maximum number of days a Loan may
+							be overdue before being classified as a NPA (non performing asset)
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>accountMovesOutOfNPAOnlyOnArrearsCompletion</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Boolean - if provided as true,  Loan Account moves out of NPA state only when all arrears are cleared
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>accountingRule</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies if accounting is enabled for the particular
+								product and the type of the accounting rule to be used
+								<span>Example Values:</span>1=NONE, 2=CASH_BASED, 3=ACCRUAL_PERIODIC, 4=ACCRUAL_UPFRONT</td>
+						</tr>
+						<tr class=alt>
+							<td>isInterestRecalculationEnabled</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>It is a flag, Used to denote whether interest recalculation is enabled or disabled for the particular product</td>
+						</tr>
+						<tr class=alt>
+							<td>daysInYearType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies the number of days in a year. <br>
+							<span>Example Values:</span>1=ACTUAL(Actual number of days in year), 360=360 DAYS, 364=364 DAYS(52 WEEKS), 365=365 DAYS</td>
+						</tr>
+						<tr class=alt>
+							<td>daysInMonthType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies the number of days in a month. <br>
+							<span>Example Values:</span>1=ACTUAL(Actual number of days in month), 30=30 DAYS</td>
+						</tr>
+						<tr class=alt>
+							<td>interestRecalculationCompoundingMethod</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies which amount portion should be added to principal for interest recalculation. <br>
+							<span>Example Values:</span>0=NONE(Only on principal), 1=INTEREST(Principal+Interest), 2=FEE(Principal+Fee), 3=FEE And INTEREST (Principal+Fee+Interest)</td>
+						</tr>
+						<tr class=alt>
+							<td>rescheduleStrategyMethod</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies what action should perform on loan repayment schedule for advance payments. <br>
+							<span>Example Values:</span>1=Reschedule next repayments, 2=Reduce number of installments, 3=Reduce EMI amount</td>
+						</tr>
+						<tr class=alt>
+							<td>recalculationCompoundingFrequencyType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies effective date from which the compounding of interest or fee amounts will be considered in recalculation on late payment.<br>
+							<span>Example Values:</span>1=Same as repayment period, 2=Daily, 3=Weekly, 4=Monthly</td>
+						</tr>
+						<tr class=alt>
+							<td>recalculationCompoundingFrequencyInterval</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies compounding frequency interval for interest recalculation.<br>
+						</tr>
+						<tr class=alt>
+							<td>recalculationCompoundingFrequencyDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies compounding frequency start date for interest recalculation.<br>
+						</tr>
+
+						<tr class=alt>
+							<td>recalculationRestFrequencyType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies effective date from which the late or advanced payment amounts will be considered in recalculation.<br>
+							<span>Example Values:</span>1=Same as repayment period, 2=Daily, 3=Weekly, 4=Monthly</td>
+						</tr>
+						<tr class=alt>
+							<td>recalculationRestFrequencyInterval</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies rest frequency interval for interest recalculation.<br>
+						</tr>
+						<tr class=alt>
+							<td>recalculationRestFrequencyDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies rest frequency start date for interest recalculation.<br>
+						</tr>
+						<tr class=alt>
+							<td>preClosureInterestCalculationStrategy</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies applicable days for interest calculation on pre closure of a loan.<br>
+							<span>Example Values:</span>1=Calculate till pre closure date, 2=Calculate till rest frequency date</td>
+						</tr>
+						<tr class=alt>
+							<td>isArrearsBasedOnOriginalSchedule</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>If Specified as true, arrears will be identified based on original schedule.<br>
+						</tr>
+						<tr class=alt>
+							<td>allowAttributeOverrides</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Specifies if select attributes may be overridden for individual loan accounts.<br>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<a id="self_loanproducts_list" name="self_loanproducts_list"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Loan Products</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>self/loanproducts?clientId=1</div>
+					<br>
+					<br>
+					<div class=apiClick>self/loanproducts?fields=name,description&clientId=1</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/loanproducts?clientId={clientId}
+					</code>
+					<code class="method-response">
+[  
+   {  
+      "name":"Personal loan",
+      "description":"Loan",
+      "useBorrowerCycle":false,
+      "status":"loanProduct.active",
+      "allowVariableInstallments":false,
+      "minimumGap":0,
+      "maximumGap":0,
+      "daysInMonthType":{  
+         "code":"DaysInMonthType.actual",
+         "value":"Actual"
+      },
+      "daysInYearType":{  
+         "code":"DaysInYearType.actual",
+         "value":"Actual"
+      },
+      "isInterestRecalculationEnabled":false,
+      "canDefineInstallmentAmount":false,
+      "installmentAmountInMultiplesOf":1,
+      "principalVariationsForBorrowerCycle":[  
+
+      ],
+      "interestRateVariationsForBorrowerCycle":[  
+
+      ],
+      "numberOfRepaymentVariationsForBorrowerCycle":[  
+
+      ],
+      "multiDisburseLoan":false,
+      "maxTrancheCount":0,
+      "principalThresholdForLastInstallment":0,
+      "holdGuaranteeFunds":false,
+      "accountMovesOutOfNPAOnlyOnArrearsCompletion":false,
+      "allowAttributeOverrides":{  
+         "graceOnPrincipalAndInterestPayment":true,
+         "graceOnArrearsAgeing":true
+      },
+      "syncExpectedWithDisbursementDate":false
+   }
+]
+					</code>
+				</div>
+			</div>
+			
+			
+			<a id="self_loanproducts_retrieve" name="self_loanproducts_retrieve"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Loan Product</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>self/loanproducts/1?clientId=1</div>
+					<br>
+					<br>
+					<div class=apiClick>self/loanproducts/1?fields=name,description&clientId=1</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/self/loanproducts/{productId}?clientId={clientId}
+					</code>
+					<code class="method-response">
+{
+  "id": 11,
+  "name": "advanced accounting",
+  "shortName": "ad11",
+  "includeInBorrowerCycle": true,
+  "useBorrowerCycle": true,
+  "status": "loanProduct.active",
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "inMultiplesOf": 0,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "principal": 10000.000000,
+  "minPrincipal": 2000.000000,
+  "maxPrincipal": 15000.000000,
+  "numberOfRepayments": 7,
+  "repaymentEvery": 7,
+  "repaymentFrequencyType": {
+    "id": 0,
+    "code": "repaymentFrequency.periodFrequencyType.days",
+    "value": "Days"
+  },
+  "interestRatePerPeriod": 5.000000,
+  "interestRateFrequencyType": {
+    "id": 2,
+    "code": "interestRateFrequency.periodFrequencyType.months",
+    "value": "Per month"
+  },
+  "annualInterestRate": 60.000000,
+  "amortizationType": {
+    "id": 1,
+    "code": "amortizationType.equal.installments",
+    "value": "Equal installments"
+  },
+  "interestType": {
+    "id": 0,
+    "code": "interestType.declining.balance",
+    "value": "Declining Balance"
+  },
+  "interestCalculationPeriodType": {
+    "id": 1,
+    "code": "interestCalculationPeriodType.same.as.repayment.period",
+    "value": "Same as repayment period"
+  },
+  "transactionProcessingStrategyId": 1,
+  "transactionProcessingStrategyName": "Mifos style",
+  "charges": [],
+  "principalVariationsForBorrowerCycle": [
+    {
+      "id": 21,
+      "borrowerCycleNumber": 1,
+      "paramType": {
+        "id": 1,
+        "code": "LoanProductParamType.principal",
+        "value": "principal"
+      },
+      "valueConditionType": {
+        "id": 2,
+        "code": "LoanProductValueConditionType.equal",
+        "value": "equals"
+      },
+      "minValue": 2000.000000,
+      "maxValue": 20000.000000,
+      "defaultValue": 15000.000000
+    },
+    {
+      "id": 20,
+      "borrowerCycleNumber": 1,
+      "paramType": {
+        "id": 1,
+        "code": "LoanProductParamType.principal",
+        "value": "principal"
+      },
+      "valueConditionType": {
+        "id": 3,
+        "code": "LoanProductValueConditionType.greterthan",
+        "value": "greter than"
+      },
+      "minValue": 3000.000000,
+      "maxValue": 25000.000000,
+      "defaultValue": 20000.000000
+    }
+  ],
+  "interestRateVariationsForBorrowerCycle": [],
+  "numberOfRepaymentVariationsForBorrowerCycle": [],
+  "accountingRule": {
+    "id": 2,
+    "code": "accountingRuleType.cash",
+    "value": "CASH BASED"
+  },
+  "accountingMappings": {
+    "fundSourceAccount": {
+      "id": 1,
+      "name": "fund source",
+      "glCode": "01"
+    },
+    "loanPortfolioAccount": {
+      "id": 2,
+      "name": "Loan portfolio",
+      "glCode": "02"
+    },
+    "transfersInSuspenseAccount": {
+      "id": 3,
+      "name": "transfers",
+      "glCode": "03"
+    },
+    "interestOnLoanAccount": {
+      "id": 4,
+      "name": "income from interest",
+      "glCode": "04"
+    },
+    "incomeFromFeeAccount": {
+      "id": 8,
+      "name": "income from fees 2",
+      "glCode": "10"
+    },
+    "incomeFromPenaltyAccount": {
+      "id": 9,
+      "name": "income from penalities 2",
+      "glCode": "11"
+    },
+    "writeOffAccount": {
+      "id": 10,
+      "name": "loans written off 2",
+      "glCode": "12"
+    },
+    "overpaymentLiabilityAccount": {
+      "id": 11,
+      "name": "over payment",
+      "glCode": "13"
+    }
+  },
+  "paymentChannelToFundSourceMappings": [
+    {
+      "paymentType": {
+        "id": 10,
+        "name": "check"
+      },
+      "fundSourceAccount": {
+        "id": 1,
+        "name": "fund source",
+        "glCode": "01"
+      }
+    }
+  ],
+  "feeToIncomeAccountMappings": [
+    {
+      "charge": {
+        "id": 1,
+        "name": "flat install",
+        "active": false,
+        "penalty": false
+      },
+      "incomeAccount": {
+        "id": 8,
+        "name": "income from fees 2",
+        "glCode": "10"
+      }
+    },
+    {
+      "charge": {
+        "id": 2,
+        "name": "install per",
+        "active": false,
+        "penalty": false
+      },
+      "incomeAccount": {
+        "id": 4,
+        "name": "income from interest",
+        "glCode": "04"
+      }
+    },
+    {
+      "charge": {
+        "id": 5,
+        "name": "des charge",
+        "active": false,
+        "penalty": false
+      },
+      "incomeAccount": {
+        "id": 9,
+        "name": "income from penalities 2",
+        "glCode": "11"
+      }
+    },
+    "multiDisburseLoan":true,"maxTrancheCount":3,"outstandingLoanBalance":36000.000000,
+    "overdueDaysForNPA":2,
+	"principalThresholdForLastInstalment":50
+  ]
 }
 					</code>
 				</div>
 			</div>
+			
+<a id="self_savingsproducts" name="self_savingsproducts" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h3>Savings Product:</h3>
+	        <p>An MFIs savings product offerings are modeled using this API.</p>
+	        <table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="fineractHeading2">Field Descriptions</div></td></tr>
+
+				<tr class=alt><td>name</td></tr>
+	            <tr><td class=fielddesc>The name of the product offering.</td></tr>
+
+	            <tr class=alt><td>shortName</td></tr>
+	            <tr><td class=fielddesc>Shortname associated with a saving product. <br>
+	            	An abbreviated version of the name, used in reports or menus where space is limited.
+	            </td></tr>
+
+	            <tr class=alt><td>description</td></tr>
+	            <tr><td class=fielddesc>A description of the product offering.</td></tr>
+
+				<tr class=alt><td>currencyCode</td></tr>
+	            <tr><td class=fielddesc>Three letter ISO code representing currency.</td></tr>
+
+	            <tr class=alt><td>digitsAfterDecimal</td></tr>
+	            <tr><td class=fielddesc>Override the currency default value for digitsAfterDecimal.</td></tr>
+
+	            <tr class=alt><td>inMultiplesOf</td></tr>
+	            <tr><td class=fielddesc>Override the default value for rounding currency to multiples of provided value.</td></tr>
+
+				<tr class=alt><td>nominalAnnualInterestRate</td></tr>
+	            <tr><td class=fielddesc>The default interest rate set when creating savings accounts of this type of product. e.g. <b>5</b>% Per year - It number here is always expressed as the Nominal APR.</td></tr>
+
+				<tr class=alt><td>interestCompoundingPeriodType</td></tr>
+	            <tr><td class=fielddesc>The period at which interest rate is compounded. 1=Daily, 4=Monthly (at end of month)</td></tr>
+
+	            <tr class=alt><td>interestPostingPeriodType</td></tr>
+	            <tr><td class=fielddesc>The period at which interest rate is posted or credited to savings account. 4=Monthly (at end of month), 5=Quarterly (at end of quarter, 31st Mar, 30th Jun, 30th Sep, 31st Dec)</td></tr>
+
+	            <tr class=alt><td>interestCalculationType</td></tr>
+	            <tr><td class=fielddesc>The interest calculation method used: 1=Daily Balance or 2=Average Daily Balance</td></tr>
+
+				<tr class=alt><td>interestCalculationDaysInYearType</td></tr>
+	            <tr><td class=fielddesc>The setting for number of days in year to use: 360=360 Days, 365=365 Days</td></tr>
+
+				<tr class=alt><td>minRequiredOpeningBalance</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, sets the minimum deposit amount required to open a savings account e.g. <b>2,000</b></td></tr>
+
+	            <tr class=alt><td>lockinPeriodFrequency</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>lockinPeriodFrequencyType</i> to indicate the length of time that the savings account is 'locked in' and withdrawals are not allowed. e.g. <b>6</b> Months</td></tr>
+
+	            <tr class=alt><td>lockinPeriodFrequencyType</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>lockinPeriodFrequency</i> to indicate the length of time that the savings account is 'locked in' and withdrawals are not allowed. 0=Days, 1=Weeks, 2=Months, 3=Years
+	            e.g. 6 <b>Months</b></td></tr>
+
+	            <tr class=alt><td>withdrawalFeeForTransfers</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: Used along with <i>withdrawalFeeAmount</i> to indicate whether the withdrawal fee should be applied on the account for account transfers .</td></tr>
+
+				<tr class=alt><td>accountingRule</td></tr>
+	            <tr>
+					<td class=fielddesc>Specifies if accounting is enabled for the particular
+					product and the type of the accounting rule to be used
+					<span>Example Values:</span>1=NONE,2=CASH_BASED</td>
+				</tr>
+
+				<tr class=alt><td>allowOverdraft</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, depending on the value mark the savings account as overdraft account </td></tr>
+
+				<tr class=alt><td>overdraftLimit</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, sets the maximum allowed overdraft amount for a  savings account e.g. <b>5,000</b> else set the limit as zero</td></tr>
+
+				<tr class=alt><td>minBalanceForInterestCalculation</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, balance must be greater than provided value for calculation of interest  e.g. <b>5,000</b> </td></tr>
+
+	            <tr class=alt><td>enforceMinRequiredBalance</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If set to <span>true</span>, validates that the account balance does not
+	            fall below <span>minRequiredBalance</span> </td></tr>
+
+				<tr class=alt><td>minRequiredBalance</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, sets an indicator of the minimum required balance of the  savings account e.g. <b>5,000</b> else set the limit as zero. Note that <span>enforceMinRequiredBalance</span> determines if the minimum required balance is enforced</td></tr>
+
+				<tr class=alt><td>withHoldTax</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, sets an indicator for applying withhold tax on interest posting for savings account </td></tr>
+
+				<tr class=alt><td>taxGroupId</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If withhold tax set as true, with hold tax will be applied as per the tax group provided </td></tr>
+
+
+	        </table>
+	    </div>
+	</div>
 	
+	   <a id="self_savingsproducts_list" name="self_savingsproducts_list" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>List Savings Products</h4>
+            <p>Example Requests:</p>
+            <div class=apiClick>self/savingsproducts?clientId=1</div>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">GET https://domainname/api/v1/self/savingsproducts?clientid={clientid}</code>
+            <code class="method-response">
+[
+  {
+    "id": 1,
+    "name": "Savings product",
+    "shortName": "sa1",
+    "description": "savings",
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "nominalAnnualInterestRate": 5.000000,
+    "interestCompoundingPeriodType": {
+      "id": 1,
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+      "value": "Daily"
+    },
+    "interestPostingPeriodType": {
+      "id": 4,
+      "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+      "value": "Monthly"
+    },
+    "interestCalculationType": {
+      "id": 1,
+      "code": "savingsInterestCalculationType.dailybalance",
+      "value": "Daily Balance"
+    },
+    "interestCalculationDaysInYearType": {
+      "id": 365,
+      "code": "savingsInterestCalculationDaysInYearType.days365",
+      "value": "365 Days"
+    },
+    "withdrawalFeeForTransfers": false,
+    "accountingRule": {
+      "id": 2,
+      "code": "accountingRuleType.cash",
+      "value": "CASH BASED"
+    }
+  }
+]			</code>
+        </div>
+    </div>
+	
+	  <a id="self_savingsproducts_retrieve" name="self_savingsproducts_retrieve" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Retrieve a Savings Product</h4>
+            <p>Example Requests: </p>
+            <div class=apiClick>self/savingsproducts/1?clientId=1</div>
+            <br><br>
+            <div class=apiClick>self/savingsproducts/1?fields=name,description&clientId=1</div>
+        </div>
+        <div class="method-example">
+			<code class="method-declaration">GET https://DomainName/api/v1/self/savingsproducts/{productId}&clientId={clientId}</code>
+			<code class="method-response">
+{
+  "id": 1,
+  "name": "savings product",
+  "shortName": "sa1",
+  "description": "savings",
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "nominalAnnualInterestRate": 5.000000,
+  "interestCompoundingPeriodType": {
+    "id": 1,
+    "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+    "value": "Daily"
+  },
+  "interestPostingPeriodType": {
+    "id": 4,
+    "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+    "value": "Monthly"
+  },
+  "interestCalculationType": {
+    "id": 1,
+    "code": "savingsInterestCalculationType.dailybalance",
+    "value": "Daily Balance"
+  },
+  "interestCalculationDaysInYearType": {
+    "id": 365,
+    "code": "savingsInterestCalculationDaysInYearType.days365",
+    "value": "365 Days"
+  },
+  "withdrawalFeeForTransfers": false,
+  "accountingRule": {
+    "id": 2,
+    "code": "accountingRuleType.cash",
+    "value": "CASH BASED"
+  },
+  "accountingMappings": {
+    "savingsReferenceAccount": {
+      "id": 12,
+      "name": "savings ref",
+      "glCode": "20"
+    },
+    "incomeFromFeeAccount": {
+      "id": 16,
+      "name": "income from savings fee",
+      "glCode": "24"
+    },
+    "incomeFromPenaltyAccount": {
+      "id": 17,
+      "name": "income from sav penalites",
+      "glCode": "25"
+    },
+    "interestOnSavingsAccount": {
+      "id": 15,
+      "name": "interest on savings",
+      "glCode": "23"
+    },
+    "savingsControlAccount": {
+      "id": 13,
+      "name": "savings ref tool kit",
+      "glCode": "21"
+    },
+    "transfersInSuspenseAccount": {
+      "id": 14,
+      "name": "saving transfers",
+      "glCode": "22"
+    }
+  },
+  "paymentChannelToFundSourceMappings": [
+    {
+      "paymentType": {
+        "id": 10,
+        "name": "check"
+      },
+      "fundSourceAccount": {
+        "id": 12,
+        "name": "savings ref",
+        "glCode": "20"
+      }
+    }
+  ],
+  "feeToIncomeAccountMappings": [
+    {
+      "charge": {
+        "id": 11,
+        "name": "sav charge",
+        "active": false,
+        "penalty": false
+      },
+      "incomeAccount": {
+        "id": 16,
+        "name": "income from savings fee",
+        "glCode": "24"
+      }
+    }
+  ],
+  "penaltyToIncomeAccountMappings": [
+    {
+      "charge": {
+        "id": 12,
+        "name": "sav 2",
+        "active": false,
+        "penalty": true
+      },
+      "incomeAccount": {
+        "id": 17,
+        "name": "income from sav penalites",
+        "glCode": "25"
+      }
+    }
+  ],
+  "charges": []
+}
+			</code>
+        </div>
+    </div>
+	
+	<a id="self_shareproducts_list" name="self_shareproducts_list" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>List Share Products</h4>
+            <p>Example Requests:</p>
+            <div class=apiClick>self/products/share?clientId=1</div>
+        </div>
+        <div class="method-example">
+
+            <code class="method-declaration">GET https://DomainName/api/v1/self/products/share?clientId={clientId}</code>
+            <code class="method-response">
+
+{
+    "totalFilteredRecords": 2,
+    "pageItems": [
+        {
+            "id": 1,
+            "name": "Share P1",
+            "shortName": "shar",
+            "description": "Share",
+            "currency": {
+                "code": "USD",
+                "name": "US Dollar",
+                "decimalPlaces": 2,
+                "inMultiplesOf": 1,
+                "displaySymbol": "$",
+                "nameCode": "currency.USD",
+                "displayLabel": "US Dollar ($)"
+            },
+            "totalShares": 1000,
+            "totalSharesIssued": 450,
+            "unitPrice": 5,
+            "shareCapital": 2250,
+            "minimumShares": 2,
+            "nominalShares": 5,
+            "maximumShares": 8,
+            "allowDividendCalculationForInactiveClients": false,
+            "lockinPeriod": 1,
+            "lockPeriodTypeEnum": {
+                "id": 1,
+                "code": "shares.lockin.sharePeriodFrequencyType.weeks",
+                "value": "Weeks"
+            },
+            "minimumActivePeriod": 10,
+            "minimumActivePeriodForDividendsTypeEnum": {
+                "id": 0,
+                "code": "shares.minimumactive.sharePeriodFrequencyType.days",
+                "value": "Days"
+            },
+            "accountingRule": {
+                "id": 1,
+                "code": "accountingRuleType.none",
+                "value": "NONE"
+            }
+        },
+        {
+            "id": 2,
+            "name": "ShareP2",
+            "shortName": "comp",
+            "description": "Company shares",
+            "currency": {
+                "code": "USD",
+                "name": "US Dollar",
+                "decimalPlaces": 2,
+                "inMultiplesOf": 1,
+                "displaySymbol": "$",
+                "nameCode": "currency.USD",
+                "displayLabel": "US Dollar ($)"
+            },
+            "totalShares": 500,
+            "totalSharesIssued": 200,
+            "unitPrice": 2,
+            "shareCapital": 400,
+            "nominalShares": 5,
+            "allowDividendCalculationForInactiveClients": false,
+            "lockinPeriod": 1,
+            "lockPeriodTypeEnum": {
+                "id": 0,
+                "code": "shares.lockin.sharePeriodFrequencyType.days",
+                "value": "Days"
+            },
+            "minimumActivePeriod": 10,
+            "minimumActivePeriodForDividendsTypeEnum": {
+                "id": 0,
+                "code": "shares.minimumactive.sharePeriodFrequencyType.days",
+                "value": "Days"
+            },
+            "accountingRule": {
+                "id": 2,
+                "code": "accountingRuleType.cash",
+                "value": "CASH BASED"
+            }
+        }
+    ]
+}
+</code>
+       </div>
+</div>
+
+ <a id="self_shareproducts_retrieve" name="self_shareproducts_retrieve" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Retrieve a Share Product</h4>
+            <p>Example Requests: </p>
+            <div class=apiClick>self/products/share/2?clientId=1</div>
+            <br><br>
+            <div class=apiClick>self/products/share/2?clientId=1&template=true</div>
+        </div>
+        <div class="method-example">
+			<code class="method-declaration">GET https://DomainName/api/v1/self/products/share/{productId}?clientId={clientId}</code>
+			<code class="method-response">
+{
+    "id": 2,
+    "name": "ShareP2",
+    "shortName": "comp",
+    "description": "Company shares",
+    "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "inMultiplesOf": 1,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+    },
+    "totalShares": 500,
+    "totalSharesIssued": 200,
+    "unitPrice": 2,
+    "shareCapital": 400,
+    "nominalShares": 5,
+    "marketPrice": [
+        {
+            "id": 2,
+            "fromDate": "May 27, 2018",
+            "shareValue": 1
+        }
+    ],
+    "charges": [
+        {
+            "id": 1,
+            "name": "Activation",
+            "active": true,
+            "penalty": false,
+            "currency": {
+                "code": "USD",
+                "name": "US Dollar",
+                "decimalPlaces": 2,
+                "displaySymbol": "$",
+                "nameCode": "currency.USD",
+                "displayLabel": "US Dollar ($)"
+            },
+            "amount": 1,
+            "chargeTimeType": {
+                "id": 13,
+                "code": "chargeTimeType.activation",
+                "value": "Share Account Activate"
+            },
+            "chargeAppliesTo": {
+                "id": 4,
+                "code": "chargeAppliesTo.shares",
+                "value": "Shares"
+            },
+            "chargeCalculationType": {
+                "id": 1,
+                "code": "chargeCalculationType.flat",
+                "value": "Flat"
+            },
+            "chargePaymentMode": {
+                "id": 0,
+                "code": "chargepaymentmode.regular",
+                "value": "Regular"
+            }
+        }
+    ],
+    "allowDividendCalculationForInactiveClients": false,
+    "lockinPeriod": 1,
+    "lockPeriodTypeEnum": {
+        "id": 0,
+        "code": "shares.lockin.sharePeriodFrequencyType.days",
+        "value": "Days"
+    },
+    "minimumActivePeriod": 10,
+    "minimumActivePeriodForDividendsTypeEnum": {
+        "id": 0,
+        "code": "shares.minimumactive.sharePeriodFrequencyType.days",
+        "value": "Days"
+    },
+    "accountingRule": {
+        "id": 2,
+        "code": "accountingRuleType.cash",
+        "value": "CASH BASED"
+    },
+    "accountingMappings": {
+        "shareReferenceId": {
+            "id": 1,
+            "name": "GLAsset",
+            "glCode": "GL1"
+        },
+        "incomeFromFeeAccountId": {
+            "id": 4,
+            "name": "GLIncome",
+            "glCode": "GL4"
+        },
+        "shareEquityId": {
+            "id": 3,
+            "name": "GLEquity",
+            "glCode": "GL3"
+        },
+        "shareSuspenseId": {
+            "id": 2,
+            "name": "GL2Liabilities",
+            "glCode": "GL2"
+        }
+    }
+}
+			</code>
+        </div>
+</div>
 			<!-- end of Customer Self Service APIs-->
         </div>
 		<!-- main-content-wrapper -->
