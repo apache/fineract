@@ -3618,6 +3618,14 @@
 								<td></td>
 							</tr>
 							<tr>
+								<td></td>
+								<td>self/clients/{clientId}/images</td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td><a href="#self_client_image_delete">Delete client image</a></td>
+							</tr>
+							<tr>
 								<td><a href="#self_loanproducts">Loan Product</a></td>
 								<td>self/loanproducts?clientId={clientId}</td>
 								<td></td>
@@ -3650,14 +3658,6 @@
 								<td><a href="#self_savingsproducts_retrieve">Retrieve a savings product</a></td>
 								<td></td>
 								<td></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td>self/clients/{clientId}/images</td>
-								<td></td>
-								<td></td>
-								<td></td>
-								<td><a href="#self_client_image_delete">Delete client image</a></td>
 							</tr>
 							<tr>
 								<td><a href="#self_shareproducts_list">Share Product</a></td>
@@ -3872,6 +3872,30 @@
 								<td>self/clients/{clientId}/obligeedetails</td>
 								<td></td>
 								<td><a href="#self_obligee_list">Obligee list</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#active_surveys">Surveys</a></td>
+								<td>self/surveys?isActive=true</td>
+								<td></td>
+								<td><a href="#active_surveys">Retrieve Active Surveys</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/surveys/scorecards/{surveyId}</td>
+								<td><a href="#submit_survey">Take Survey</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/surveys/scorecards/clients/{clientId}</td>
+								<td></td>
+								<td><a href="#survey_score">Survey Scorecards</a></td>
 								<td></td>
 								<td></td>
 							</tr>
@@ -49700,8 +49724,7 @@ GET https://DomainName/api/v1/self/loanproducts?clientId={clientId}
 ]
 					</code>
 				</div>
-			</div>
-			
+			</div>			
 			
 			<a id="self_loanproducts_retrieve" name="self_loanproducts_retrieve"
 				class="old-syle-anchor">&nbsp;</a>
@@ -50414,6 +50437,123 @@ GET https://DomainName/api/v1/self/loanproducts/{productId}?clientId={clientId}
 			</code>
         </div>
 </div>
+	
+<a id="active_surveys" name="active_surveys" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve Active Surveys</h2>
+
+	        <p>Example Requests : </p>
+	        <div class=apiClick>self/surveys?isActive=true</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://domainname/api/v1/self/surveys?isActive=true</code>
+	        <code class="method-response">
+[  
+   {  
+      "id":1,
+      "componentDatas":[  
+
+      ],
+      "questionDatas":[  
+         {  
+            "id":1,
+            "responseDatas":[  
+               {  
+                  "id":2,
+                  "text":"Own",
+                  "value":1,
+                  "sequenceNo":1
+               },
+               {  
+                  "id":1,
+                  "text":"Rent",
+                  "value":0,
+                  "sequenceNo":2
+               }
+            ],
+            "componentKey":Test,
+            "key":"t1",
+            "text":"Type of house",
+            "description":Test,
+            "sequenceNo":1
+         }
+      ],
+      "key":"test",
+      "name":"test",
+      "description":"test",
+      "countryCode":"in",
+      "validFrom":1540233000000,
+      "validTo":4695906600000
+   }
+]
+	        </code>
+	    </div>
+</div>
+
+<a id="submit_survey" name="submit_survey" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Submit Survey</h2>
+
+	        <p>Example Requests : </p>
+	        <div class=apiClick>self/surveys/scorecards/1</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://domainname/api/v1/self/surveys/scorecards/{surveyId}</code>
+			<code class="method-request">
+{  
+   "userId":3,
+   "clientId":"1",
+   "surveyId":1,
+   "scorecardValues":[  
+      {  
+         "questionId":1,
+         "responseId":2,
+         "value":1,
+         "createdOn":1540291482379
+      }
+   ],
+   "surveyName":"",
+   "username":"",
+   "id":0
+}
+			</code>
+	    </div>
+</div>
+
+<a id="survey_score" name="survey_score" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve Survey records</h2>
+
+	        <p>Example Requests : </p>
+	        <div class=apiClick>self/surveys/scorecards/clients/1</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://domainname/api/v1/self/surveys/scorecards/clients/{clientId}</code>
+	        <code class="method-response">
+[  
+   {  
+      "id":8,
+      "userId":,
+      "username":"mifos",
+      "clientId":3,
+      "surveyId":1,
+      "surveyName":"test",
+      "scorecardValues":[  
+         {  
+            "questionId":1,
+            "responseId":2,
+            "value":1,
+            "createdOn":1540233000000
+         }
+      ]
+   }
+]	        </code>
+	    </div>
+</div>
+
 			<!-- end of Customer Self Service APIs-->
         </div>
 		<!-- main-content-wrapper -->
