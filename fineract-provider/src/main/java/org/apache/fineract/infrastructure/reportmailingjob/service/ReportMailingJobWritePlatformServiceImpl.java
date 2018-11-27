@@ -422,7 +422,8 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
             final MultivaluedMap<String, String> reportParams, final String reportName, final StringBuilder errorLog) {
         
         try {
-            final String reportType = this.readReportingService.getReportType(reportName);
+        	final boolean isSelfServiceUserReport = false;
+            final String reportType = this.readReportingService.getReportType(reportName, isSelfServiceUserReport);
             final ReportingProcessService reportingProcessService = this.reportingProcessServiceProvider.findReportingProcessService(reportType);
             
             if (reportingProcessService != null) {
