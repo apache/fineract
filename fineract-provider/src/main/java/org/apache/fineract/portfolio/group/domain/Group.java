@@ -345,6 +345,18 @@ public final class Group extends AbstractPersistableCustom<Long> {
             this.accountNumber = StringUtils.defaultIfEmpty(newValue, null);
         }
 
+        if (command.isChangeInLocalDateParameterNamed(GroupingTypesApiConstants.submittedOnDateParamName, getSubmittedOnDate())) {
+            final String valueAsInput = command.stringValueOfParameterNamed(GroupingTypesApiConstants.submittedOnDateParamName);
+            actualChanges.put(GroupingTypesApiConstants.submittedOnDateParamName, valueAsInput);
+            actualChanges.put(GroupingTypesApiConstants.dateFormatParamName, dateFormatAsInput);
+            actualChanges.put(GroupingTypesApiConstants.localeParamName, localeAsInput);
+
+            final LocalDate newValue = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.submittedOnDateParamName);
+            if (newValue != null) {
+                this.submittedOnDate = newValue.toDate();
+            }
+        }
+
         return actualChanges;
     }
 
