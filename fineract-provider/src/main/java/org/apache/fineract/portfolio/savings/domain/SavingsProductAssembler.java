@@ -89,7 +89,7 @@ public class SavingsProductAssembler {
 
         final String name = command.stringValueOfParameterNamed(nameParamName);
         final String shortName = command.stringValueOfParameterNamed(shortNameParamName);
-        final String description = command.stringValueOfParameterNamed(descriptionParamName);
+        final String description = command.stringValueOfParameterNamedAllowingNull(descriptionParamName);
 
         final String currencyCode = command.stringValueOfParameterNamed(currencyCodeParamName);
         final Integer digitsAfterDecimal = command.integerValueOfParameterNamed(digitsAfterDecimalParamName);
