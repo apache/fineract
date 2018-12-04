@@ -40,6 +40,7 @@ Instructions to execute Integration tests
 	1. `./gradlew migrateTenantListDB -PdbName=mifosplatform-tenants`
 	2. `./gradlew migrateTenantDB -PdbName=mifostenant-default`
 6. Run `./gradlew clean integrationTest`
+7. Run `./gradlew tomcatRunWar`
 
 Version
 ============
