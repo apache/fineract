@@ -116,15 +116,20 @@ public class CashBasedAccountingProcessorForShares implements AccountingProcesso
                     CASH_ACCOUNTS_FOR_SHARES.SHARES_EQUITY.getValue(), shareProductId, paymentTypeId, shareAccountId, transactionId,
                     transactionDate, amountForJE);
         } else if (transactionDTO.getTransactionStatus().isRejected()) {
-            BigDecimal amountForJE = amount;
             if (chargeAmount != null && chargeAmount.compareTo(BigDecimal.ZERO) == 1) {
-                amountForJE = amount.subtract(chargeAmount);
-                /*this.helper.revertCashBasedJournalEntryForSharesCharges(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.INCOME_FROM_FEES,
-                        shareProductId, shareAccountId, transactionId, transactionDate, chargeAmount, feePayments);*/
+                this.helper.revertCashBasedJournalEntryForSharesCharges(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.INCOME_FROM_FEES,
+                        shareProductId, shareAccountId, transactionId, transactionDate, chargeAmount, feePayments);
+                this.helper.createDebitJournalEntryForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_SUSPENSE.getValue(), shareProductId, paymentTypeId, shareAccountId,
+                        transactionId, transactionDate, amount.subtract(chargeAmount));
+                this.helper.createCreditJournalEntryForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_REFERENCE.getValue(), shareProductId, paymentTypeId, shareAccountId,
+                        transactionId, transactionDate, amount);
+                
+            }else{
+            	this.helper.createJournalEntriesForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_SUSPENSE.getValue(),
+                        CASH_ACCOUNTS_FOR_SHARES.SHARES_REFERENCE.getValue(), shareProductId, paymentTypeId, shareAccountId, transactionId,
+                        transactionDate, amount);
             }
-            this.helper.createJournalEntriesForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_SUSPENSE.getValue(),
-                    CASH_ACCOUNTS_FOR_SHARES.SHARES_REFERENCE.getValue(), shareProductId, paymentTypeId, shareAccountId, transactionId,
-                    transactionDate, amountForJE);
+            
         }
     }
 
