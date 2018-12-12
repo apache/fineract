@@ -33,8 +33,8 @@ import org.joda.time.LocalDate;
 @SuppressWarnings("unused")
 public class SavingsSummaryCustom 
 {
-	private final Long id;
-	private final String displayName;
+    private final Long id;
+    private final String displayName;
     private final String accountNo;
     private final String externalId;
     private final Long productId;
