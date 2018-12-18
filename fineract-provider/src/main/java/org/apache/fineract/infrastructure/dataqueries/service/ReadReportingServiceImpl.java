@@ -36,6 +36,7 @@ import java.util.Set;
 import javax.sql.DataSource;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -50,6 +51,7 @@ import org.apache.fineract.infrastructure.documentmanagement.contentrepository.F
 import org.apache.fineract.infrastructure.report.provider.ReportingProcessServiceProvider;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
+import org.apache.fineract.infrastructure.security.utils.SQLInjectionException;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +70,7 @@ import com.lowagie.text.pdf.PdfWriter;
 public class ReadReportingServiceImpl implements ReadReportingService {
 
     private final static Logger logger = LoggerFactory.getLogger(ReadReportingServiceImpl.class);
+    private final static String REPORT_NAME_REGEX_PATTERN = "^[a-zA-Z][a-zA-Z0-9\\-_\\s]{0,48}[a-zA-Z0-9]$";
 
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
@@ -218,20 +221,24 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     private String getSql(final String name, final String type) {
 
-        final String inputSql = "select " + type + "_sql as the_sql from stretchy_" + type + " where " + type + "_name = '" + name + "'" ;
+        final String inputSql = "select " + type + "_sql as the_sql from stretchy_" + type + " where " + type + "_name = '" + name + "'";
+        validateReportName(name);
+        this.columnValidator.validateSqlInjection(inputSql, name);
+        
         final String inputSqlWrapped = this.genericDataService.wrapSQL(inputSql);
 
         // the return statement contains the exact sql required
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(inputSqlWrapped);
 
         if (rs.next() && rs.getString("the_sql") != null) { return rs.getString("the_sql"); }
-        throw new ReportNotFoundException(inputSql);
+        throw new ReportNotFoundException(name);
     }
 
     @Override
     public String getReportType(final String reportName, final boolean isSelfServiceUserReport) {
 
         final String sql = "SELECT ifnull(report_type,'') as report_type FROM `stretchy_report` where report_name = '" + reportName + "' and self_service_user_report = ?";
+        validateReportName(reportName);
         this.columnValidator.validateSqlInjection(sql, reportName);
         
         final String sqlWrapped = this.genericDataService.wrapSQL(sql);
@@ -239,7 +246,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sqlWrapped, new Object [] {isSelfServiceUserReport});
 
         if (rs.next()) { return rs.getString("report_type"); }
-        throw new ReportNotFoundException(sql);
+        throw new ReportNotFoundException(reportName);
     }
 
     @Override
@@ -453,7 +460,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         }
 
         @Override
-        public ReportParameterJoinData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public ReportParameterJoinData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final Long reportId = rs.getLong("reportId");
             final String reportName = rs.getString("reportName");
@@ -491,7 +498,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         }
 
         @Override
-        public ReportParameterData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public ReportParameterData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("id");
             final String parameterName = rs.getString("parameterName");
@@ -610,6 +617,11 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     */
         return null ;
     }
+    
+	private void validateReportName(final String name) {
+
+		if (!StringUtils.isBlank(name) && !name.matches(REPORT_NAME_REGEX_PATTERN)) {
+			throw new SQLInjectionException();
+		}
+	}
 }
-
-

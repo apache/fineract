@@ -23,10 +23,11 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 /**
  * A {@link RuntimeException} thrown when report resources are not found.
  */
+@SuppressWarnings("serial")
 public class ReportNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public ReportNotFoundException(final String reportSql) {
-        super("error.msg.report.name.not.found", "Reporting meta-data entry not found.", "Input sql: " + reportSql);
+    public ReportNotFoundException(final String reportName) {
+        super("error.msg.report.name.not.found", "Reporting meta-data entry not found.", "Report Name: " + reportName);
     }
 
     public ReportNotFoundException(final Long id) {
