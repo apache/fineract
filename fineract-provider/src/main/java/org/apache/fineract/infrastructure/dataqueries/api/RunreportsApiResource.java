@@ -49,6 +49,7 @@ import org.apache.fineract.infrastructure.report.provider.ReportingProcessServic
 import org.apache.fineract.infrastructure.report.service.ReportingProcessService;
 import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -177,6 +178,7 @@ public class RunreportsApiResource {
             if (k.startsWith("R_")) {
                 pKey = "${" + k.substring(2) + "}";
                 pValue = queryParams.get(k).get(0);
+                SQLInjectionValidator.validateSQLInput(pValue);
                 reportParams.put(pKey, pValue);
             }
         }

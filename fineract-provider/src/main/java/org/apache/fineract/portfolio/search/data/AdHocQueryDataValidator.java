@@ -33,6 +33,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.security.utils.SQLInjectionValidator;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -214,9 +215,10 @@ public class AdHocQueryDataValidator {
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         List<String> loanStatus = null;
-        if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.loanStatusParamName, element)) {
-            loanStatus = Arrays.asList(this.fromApiJsonHelper.extractArrayNamed(AdHocQuerySearchConstants.loanStatusParamName, element));
-        }
+		if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.loanStatusParamName, element)) {
+			loanStatus = Arrays.asList(
+					this.fromApiJsonHelper.extractArrayNamed(AdHocQuerySearchConstants.loanStatusParamName, element));
+		}
 
         List<Long> loanProducts = null;
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.loanProductsParamName, element)) {
@@ -233,6 +235,7 @@ public class AdHocQueryDataValidator {
         String loanDateOption = null;
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.loanDateOptionParamName, element)) {
             loanDateOption = this.fromApiJsonHelper.extractStringNamed(AdHocQuerySearchConstants.loanDateOptionParamName, element);
+            SQLInjectionValidator.validateSQLInput(loanDateOption);
         }
 
         LocalDate loanFromDate = null;
@@ -255,6 +258,7 @@ public class AdHocQueryDataValidator {
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.outStandingAmountPercentageConditionParamName, element)) {
             outStandingAmountPercentageCondition = this.fromApiJsonHelper.extractStringNamed(
                     AdHocQuerySearchConstants.outStandingAmountPercentageConditionParamName, element);
+            SQLInjectionValidator.validateSQLInput(outStandingAmountPercentageCondition);
         }
 
         BigDecimal minOutStandingAmountPercentage = null;
@@ -285,6 +289,7 @@ public class AdHocQueryDataValidator {
         if (this.fromApiJsonHelper.parameterExists(AdHocQuerySearchConstants.outstandingAmountConditionParamName, element)) {
             outstandingAmountCondition = this.fromApiJsonHelper.extractStringNamed(
                     AdHocQuerySearchConstants.outstandingAmountConditionParamName, element);
+        	SQLInjectionValidator.validateSQLInput(outstandingAmountCondition);
         }
 
         BigDecimal minOutstandingAmount = null;
