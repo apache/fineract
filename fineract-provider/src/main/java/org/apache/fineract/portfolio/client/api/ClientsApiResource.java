@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.client.api;
 
-import io.swagger.annotations.*;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
@@ -71,6 +70,14 @@ import org.springframework.stereotype.Component;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @Path("/clients")
 @Component
@@ -389,16 +396,15 @@ public class ClientsApiResource {
 		return this.toApiJsonSerializer.serialize(ObligeeList);
 	}
 
+	@GET
 	@Path("{clientId}/transferproposaldate")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveTransferTemplate(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
-		this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
+	    this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
+
 		final Date transferDate = this.clientReadPlatformService.retrieveClientTransferProposalDate(clientId);
-		if (transferDate != null) {
-			return this.toApiJsonSerializer.serialize(new LocalDate(transferDate));
-		}
-		return this.toApiJsonSerializer.serialize(transferDate);
+		return this.toApiJsonSerializer.serialize((transferDate != null ? new LocalDate(transferDate) : null));
 	}
 }

@@ -61,11 +61,7 @@ import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
-import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
@@ -824,40 +820,16 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     }
     
 	@Override
-	public Date retrieveClientTransferProposalDateByLoan(Long clientId) {
-		try {
-			String sql = "SELECT t.transaction_date  FROM m_client c LEFT JOIN m_loan loan ON c.id = loan.client_id AND c.id = ? AND loan.loan_status_id = ? LEFT JOIN m_loan_transaction t ON loan.id = t.loan_id AND t.transaction_type_enum = ? ORDER BY t.id DESC LIMIT 1";
-			return this.jdbcTemplate.queryForObject(sql, Date.class, clientId,
-					LoanStatus.TRANSFER_IN_PROGRESS.getValue(), LoanTransactionType.INITIATE_TRANSFER.getValue());
-		} catch (final EmptyResultDataAccessException e) {
-			return null;
-
-		}
-	}
-
-	@Override
-	public Date retrieveClientTransferProposalDateBySavings(Long clientId) {
-		try {
-			String sql = "SELECT t.transaction_date FROM m_client c LEFT JOIN m_savings_account savings  ON c.id = savings.client_id AND c.id = ? AND savings.status_enum = ? LEFT JOIN m_savings_account_transaction t ON savings.id = t.savings_account_id AND t.transaction_type_enum = ? ORDER BY t.id DESC LIMIT 1";
-			return this.jdbcTemplate.queryForObject(sql, Date.class, clientId,
-					SavingsAccountStatusType.TRANSFER_IN_PROGRESS.getValue(),
-					SavingsAccountTransactionType.INITIATE_TRANSFER.getValue());
-		} catch (final EmptyResultDataAccessException e) {
-			return null;
-
-		}
-	}
-
-	@Override
 	public Date retrieveClientTransferProposalDate(Long clientId) {
 		validateClient(clientId);
-		Date transferDateForLoan = retrieveClientTransferProposalDateByLoan(clientId);
-		if (transferDateForLoan == null) {
-			transferDateForLoan = retrieveClientTransferProposalDateBySavings(clientId);
+		final String sql = "SELECT cl.proposed_transfer_date FROM m_client cl WHERE cl.id =? ";
+		try {
+			return this.jdbcTemplate.queryForObject(sql, Date.class, clientId);
+		} catch (final EmptyResultDataAccessException e) {
+			return null; 
 		}
-		return transferDateForLoan;
 	}
-	
+
 	@Override
 	public void validateClient(Long clientId) {
 		try {
