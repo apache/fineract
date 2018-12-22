@@ -160,6 +160,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             sqlBuilder.append(" and (").append(extraCriteria).append(")");
         }
 
+        sqlBuilder.append("AND g.parent_id is NULL");
         if (parameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy(),
@@ -197,6 +198,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
                 sqlBuilder.append(" and (").append(extraCriteria).append(")");
             }
         }
+        sqlBuilder.append("AND g.parent_id is NULL");
         if (parameters!=null) {
             if (parameters.isOrderByRequested()) {
                 sqlBuilder.append(parameters.orderBySql());
