@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.shareproducts.domain;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -48,6 +49,7 @@ import org.apache.fineract.portfolio.shareproducts.data.ShareProductMarketPriceD
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.DateTime;
 
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "m_share_product")
 public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
@@ -282,23 +284,26 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public boolean setMarketPrice(Set<ShareProductMarketPriceData> marketPrice) {
-        boolean update = false;
-        for (ShareProductMarketPriceData data : marketPrice) {
-            if (data.getId() == null) {
-                ShareProductMarketPrice entity = new ShareProductMarketPrice(data.getStartDate(), data.getShareValue());
-                entity.setShareProduct(this);
-                this.marketPrice.add(entity);
-                update = true;
-            } else {
-                for (ShareProductMarketPrice priceData : this.marketPrice) {
-                    if (priceData.getId() == data.getId()) {
-                        priceData.setStartDate(data.getStartDate());
-                        priceData.setShareValue(data.getShareValue());
-                        update = true;
-                    }
-                }
-            }
-        }
+		boolean update = true;
+		Set<ShareProductMarketPrice> marketPriceTemp = new HashSet<ShareProductMarketPrice>();
+		if (marketPrice != null && marketPrice.size() > 0) {
+        	 for (ShareProductMarketPriceData data : marketPrice) {
+                 if (data.getId() == null) {
+                     ShareProductMarketPrice entity = new ShareProductMarketPrice(data.getStartDate(), data.getShareValue());
+                     entity.setShareProduct(this);
+                     marketPriceTemp.add(entity);
+				} else {
+					for (ShareProductMarketPrice priceData : this.marketPrice) {
+						if (priceData.getId().equals(data.getId())) {
+							priceData.setStartDate(data.getStartDate());
+							priceData.setShareValue(data.getShareValue());
+							marketPriceTemp.add(priceData);
+						}
+					}
+				}
+			}
+		}
+		this.marketPrice = marketPriceTemp;
         return update;
     }
 
