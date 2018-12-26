@@ -248,7 +248,8 @@ public final class LoanEventApiJsonValidator {
         baseDataValidator.reset().parameter("amount").value(amount).notNull().positiveAmount();
 
         if (this.fromApiJsonHelper.parameterExists("dueDate", element)) {
-            this.fromApiJsonHelper.extractLocalDateNamed("dueDate", element);
+        	final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed("dueDate", element);
+            baseDataValidator.reset().parameter("dueDate").value(dueDate).notBlank();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

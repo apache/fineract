@@ -134,6 +134,11 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
 
     public static LoanCharge createNewFromJson(final Loan loan, final Charge chargeDefinition, final JsonCommand command) {
         final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
+        if (dueDate == null) {
+            final String defaultUserMessage = "Loan charge is missing due date.";
+            throw new LoanChargeWithoutMandatoryFieldException("loanCharge", "dueDate", defaultUserMessage, chargeDefinition.getId(),
+                    chargeDefinition.getName());
+        }
         return createNewFromJson(loan, chargeDefinition, command, dueDate);
     }
 
