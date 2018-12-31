@@ -1806,7 +1806,10 @@ public class LoanAccountData {
     }
 
     public BigDecimal getTotalOutstandingAmount() {
-        return this.summary.getTotalOutstanding();
+        if(this.summary!=null)
+            return this.summary.getTotalOutstanding();
+        else
+            return null;
     }
 
     public boolean isInterestRecalculationEnabled() {
@@ -1871,4 +1874,5 @@ public class LoanAccountData {
     public String getStatusStringValue(){
         return this.status.value();
     }
+
 }
