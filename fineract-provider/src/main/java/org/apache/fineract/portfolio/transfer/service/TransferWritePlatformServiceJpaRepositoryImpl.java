@@ -27,6 +27,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
@@ -40,6 +41,8 @@ import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientStatus;
+import org.apache.fineract.portfolio.client.domain.ClientTransferDetails;
+import org.apache.fineract.portfolio.client.domain.ClientTransferDetailsRepositoryWrapper;
 import org.apache.fineract.portfolio.client.exception.ClientHasBeenClosedException;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
@@ -81,6 +84,8 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     private final TransfersDataValidator transfersDataValidator;
     private final NoteWritePlatformService noteWritePlatformService;
     private final StaffRepositoryWrapper staffRepositoryWrapper;
+	private final ClientTransferDetailsRepositoryWrapper clientTransferDetailsRepositoryWrapper;
+	private final PlatformSecurityContext context;
 
     @Autowired
     public TransferWritePlatformServiceJpaRepositoryImpl(final ClientRepositoryWrapper clientRepositoryWrapper,
@@ -89,8 +94,10 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
             final LoanRepositoryWrapper loanRepositoryWrapper, final TransfersDataValidator transfersDataValidator,
             final NoteWritePlatformService noteWritePlatformService, final StaffRepositoryWrapper staffRepositoryWrapper,
             final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
-            final SavingsAccountWritePlatformService savingsAccountWritePlatformService) {
-        this.clientRepositoryWrapper = clientRepositoryWrapper;
+			final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
+			final ClientTransferDetailsRepositoryWrapper clientTransferDetailsRepositoryWrapper,
+			final PlatformSecurityContext context) {
+		this.clientRepositoryWrapper = clientRepositoryWrapper;
         this.officeRepository = officeRepository;
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.loanWritePlatformService = loanWritePlatformService;
@@ -101,7 +108,9 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         this.staffRepositoryWrapper = staffRepositoryWrapper;
         this.savingsAccountRepositoryWrapper = savingsAccountRepositoryWrapper;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
-    }
+		this.clientTransferDetailsRepositoryWrapper = clientTransferDetailsRepositoryWrapper;
+		this.context = context;
+	}
 
     @Override
     @Transactional
@@ -438,7 +447,8 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                 client.setStatus(ClientStatus.ACTIVE.getValue());
                 client.updateTransferToOffice(null);
                 client.updateOffice(destinationOffice);
-                client.updateOfficeJoiningDate(todaysDate);
+                client.updateOfficeJoiningDate(client.getProposedTransferDate());
+                client.updateProposedTransferDate(null);
                 if (client.getGroups().size() == 1) {
                     if (destinationGroup == null) {
                         throw new TransferNotSupportedException(TRANSFER_NOT_SUPPORTED_REASON.CLIENT_DESTINATION_GROUP_NOT_SPECIFIED,
@@ -458,18 +468,26 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
             case PROPOSAL:
                 client.setStatus(ClientStatus.TRANSFER_IN_PROGRESS.getValue());
                 client.updateTransferToOffice(destinationOffice);
+                client.updateProposedTransferDate(transferDate.toDate());
             break;
             case REJECTION:
                 client.setStatus(ClientStatus.TRANSFER_ON_HOLD.getValue());
                 client.updateTransferToOffice(null);
+                client.updateProposedTransferDate(null);
             break;
             case WITHDRAWAL:
                 client.setStatus(ClientStatus.ACTIVE.getValue());
                 client.updateTransferToOffice(null);
+                client.updateProposedTransferDate(null);
         }
 
-        this.noteWritePlatformService.createAndPersistClientNote(client, jsonCommand);
-    }
+		this.noteWritePlatformService.createAndPersistClientNote(client, jsonCommand);
+		Date proposedTransferDate = transferDate != null ? transferDate.toDate() : null;
+		this.clientTransferDetailsRepositoryWrapper
+				.save(ClientTransferDetails.instance(client.getId(), client.getOffice().getId(),
+						destinationOffice.getId(), proposedTransferDate, transferEventType.getValue(),
+						DateUtils.getLocalDateTimeOfTenant().toDate(), this.context.authenticatedUser().getId()));
+	}
 
     private List<Client> assembleListOfClients(final JsonCommand command) {
 
