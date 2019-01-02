@@ -49,9 +49,5 @@ public interface ClientReadPlatformService {
     
 	Date retrieveClientTransferProposalDate(Long clientId);
 
-	Date retrieveClientTransferProposalDateByLoan(Long clientId);
-
-	Date retrieveClientTransferProposalDateBySavings(Long clientId);
-
 	void validateClient(Long clientId);
 }

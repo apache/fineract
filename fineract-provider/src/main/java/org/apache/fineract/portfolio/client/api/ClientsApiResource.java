@@ -389,6 +389,7 @@ public class ClientsApiResource {
 		return this.toApiJsonSerializer.serialize(ObligeeList);
 	}
 
+	@GET
 	@Path("{clientId}/transferproposaldate")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
@@ -396,9 +397,6 @@ public class ClientsApiResource {
 
 		this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
 		final Date transferDate = this.clientReadPlatformService.retrieveClientTransferProposalDate(clientId);
-		if (transferDate != null) {
-			return this.toApiJsonSerializer.serialize(new LocalDate(transferDate));
-		}
-		return this.toApiJsonSerializer.serialize(transferDate);
+		return this.toApiJsonSerializer.serialize((transferDate != null ? new LocalDate(transferDate) : null));
 	}
 }

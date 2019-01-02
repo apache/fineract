@@ -231,6 +231,10 @@ public final class Client extends AbstractPersistableCustom<Long> {
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "reopened_by_userid", nullable = true)
     private AppUser reopenedBy;
+    
+    @Column(name = "proposed_transfer_date", nullable = true)
+ 	@Temporal(TemporalType.DATE)
+ 	private Date proposedTransferDate;
 
     public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff,
             final Long savingsProductId, final CodeValue gender, final CodeValue clientType, final CodeValue clientClassification,
@@ -1057,5 +1061,16 @@ public final class Client extends AbstractPersistableCustom<Long> {
 
     public String getMiddlename(){return this.middlename;}
 
-    public String getLastname(){return this.lastname;}
+	public String getLastname() {
+		return this.lastname;
+	}
+
+	public Date getProposedTransferDate() {
+		return proposedTransferDate;
+	}
+
+	public void updateProposedTransferDate(Date proposedTransferDate) {
+		this.proposedTransferDate = proposedTransferDate;
+	}
+
 }
