@@ -43,7 +43,7 @@
 	UNIQUE INDEX `glim_account_no_UNIQUE` (`account_number`),
 	INDEX `FK_group_id` (`group_id`),
 	CONSTRAINT `FK_group_id` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`)
-)
+);
  
  -- change m_loan table
  

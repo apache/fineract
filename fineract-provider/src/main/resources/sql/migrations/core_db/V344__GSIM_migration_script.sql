@@ -52,7 +52,7 @@ CREATE TABLE `gsim_accounts` (
 	UNIQUE INDEX `gsim_account_no_UNIQUE` (`account_number`),
 	INDEX `FK_gsim_group_id` (`group_id`),
 	CONSTRAINT `FK_gsim_group_id` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`)
-)
+);
   
  -- changes to savings
  ALTER TABLE `m_savings_account` ADD COLUMN `gsim_id` bigint(20) DEFAULT NULL AFTER `group_id`; 
