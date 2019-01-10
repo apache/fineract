@@ -223,7 +223,6 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         final String inputSql = "select " + type + "_sql as the_sql from stretchy_" + type + " where " + type + "_name = '" + name + "'";
         validateReportName(name);
-        this.columnValidator.validateSqlInjection(inputSql, name);
         
         final String inputSqlWrapped = this.genericDataService.wrapSQL(inputSql);
 
