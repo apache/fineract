@@ -561,7 +561,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     }
 
     private void updateInterestRateDerivedFields(final AprCalculator aprCalculator) {
-        this.annualNominalInterestRate = aprCalculator.calculateFrom(this.interestPeriodFrequencyType, this.nominalInterestRatePerPeriod);
+       this.annualNominalInterestRate = aprCalculator.calculateFrom(this.interestPeriodFrequencyType, this.nominalInterestRatePerPeriod, this.numberOfRepayments, this.repayEvery, this.repaymentPeriodFrequencyType);
+
     }
 
     public boolean hasCurrencyCodeOf(final String currencyCode) {

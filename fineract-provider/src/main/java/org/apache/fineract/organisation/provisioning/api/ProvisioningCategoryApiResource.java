@@ -32,6 +32,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.Api;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -49,6 +50,7 @@ import org.springframework.stereotype.Component;
 @Path("/provisioningcategory")
 @Component
 @Scope("singleton")
+@Api(value = "Provisioning Category", description = "")
 public class ProvisioningCategoryApiResource {
 
     private final PlatformSecurityContext platformSecurityContext;

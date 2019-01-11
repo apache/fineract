@@ -170,7 +170,7 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
 				.createIntegerConstraint(DataValidationConstraint.OperatorType.GREATER_OR_EQUAL, "=$M1*$N1", null);
 		DataValidationConstraint interestFrequencyConstraint = validationHelper
 				.createFormulaListConstraint("INDIRECT(CONCATENATE(\"INTEREST_FREQUENCY_\",$E1))");
-		DataValidationConstraint interestConstraint = validationHelper.createIntegerConstraint(
+		DataValidationConstraint interestConstraint = validationHelper.createDecimalConstraint(
 				DataValidationConstraint.OperatorType.BETWEEN, "=INDIRECT(CONCATENATE(\"MIN_INTEREST_\",$E1))",
 				"=INDIRECT(CONCATENATE(\"MAX_INTEREST_\",$E1))");
 		DataValidationConstraint amortizationConstraint = validationHelper

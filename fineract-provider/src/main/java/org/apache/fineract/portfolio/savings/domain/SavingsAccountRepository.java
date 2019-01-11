@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.savings.domain;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -49,4 +51,6 @@ public interface SavingsAccountRepository extends JpaRepository<SavingsAccount, 
 
     @Query("select sa from SavingsAccount sa where sa.accountNumber = :accountNumber and sa.status in (100, 200, 300, 303, 304) ")
     SavingsAccount findNonClosedAccountByAccountNumber(@Param("accountNumber") String accountNumber);
+    
+    Page<SavingsAccount> findByStatus(Integer status,Pageable pageable);
 }

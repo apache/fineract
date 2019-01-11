@@ -34,6 +34,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import io.swagger.annotations.Api;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
@@ -58,6 +59,7 @@ import com.sun.jersey.multipart.FormDataParam;
 @Path("{entity}/{entityId}/images")
 @Component
 @Scope("singleton")
+@Api(value = "DomainName//api//v1//{entity}//{entityId}//images", description = "")
 public class ImagesApiResource {
 
     private final PlatformSecurityContext context;

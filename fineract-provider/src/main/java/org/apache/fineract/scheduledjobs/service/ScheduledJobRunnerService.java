@@ -20,6 +20,8 @@ package org.apache.fineract.scheduledjobs.service;
 
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 
+import java.util.Map;
+
 public interface ScheduledJobRunnerService {
 
     void updateLoanSummaryDetails();
@@ -37,4 +39,6 @@ public interface ScheduledJobRunnerService {
     void generateRDSchedule();
 
     void postDividends() throws JobExecutionException;
+
+    void updateTrialBalanceDetails()  throws JobExecutionException;
 }

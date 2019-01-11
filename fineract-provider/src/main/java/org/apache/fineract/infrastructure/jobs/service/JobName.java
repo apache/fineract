@@ -49,7 +49,8 @@ public enum JobName {
 	GENERATE_ADHOCCLIENT_SCEHDULE("Generate AdhocClient Schedule"),
 	SEND_MESSAGES_TO_EMAIL_GATEWAY("Send messages to Email gateway"),
     UPDATE_EMAIL_OUTBOUND_WITH_CAMPAIGN_MESSAGE("Update Email Outbound with campaign message"),
-    EXECUTE_EMAIL("Execute Email");
+    EXECUTE_EMAIL("Execute Email"),
+    UPDATE_TRAIL_BALANCE_DETAILS("Update Trial Balance Details");
 
     private final String name;
 

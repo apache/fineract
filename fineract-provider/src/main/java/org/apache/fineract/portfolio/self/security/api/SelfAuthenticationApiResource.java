@@ -18,22 +18,24 @@
  */
 package org.apache.fineract.portfolio.self.security.api;
 
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-
+import io.swagger.annotations.*;
 import org.apache.fineract.infrastructure.security.api.AuthenticationApiResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+
 @Path("/self/authentication")
 @Component
 @Profile("basicauth")
 @Scope("singleton")
+@Api(value = "Self Authentication", description = "")
 public class SelfAuthenticationApiResource {
 
 	private final AuthenticationApiResource authenticationApiResource;
@@ -46,8 +48,10 @@ public class SelfAuthenticationApiResource {
 
 	@POST
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String authenticate(@QueryParam("username") final String username,
-			@QueryParam("password") final String password) {
+	@ApiOperation(value = "Verify authentication", httpMethod = "POST", notes = "Authenticates the credentials provided and returns the set roles and permissions allowed.\n\n" + "Please visit this link for more info - https://demo.openmf.org/api-docs/apiLive.htm#selfbasicauth")
+	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfAuthenticationApiResourceSwagger.PostSelfAuthenticationResponse.class)})
+	public String authenticate(@QueryParam("username") @ApiParam(value = "username") final String username,
+			@QueryParam("password") @ApiParam(value = "password") final String password) {
 		return this.authenticationApiResource.authenticate(username, password);
 	}
 

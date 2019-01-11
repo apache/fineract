@@ -115,14 +115,18 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
     }
 
     private boolean isJobExist(final Long jobId) {
-        boolean isJobPresent = false;
-        final String sql = "select count(*) from job job where job.id=" + jobId;
-        @SuppressWarnings("deprecation")
-        final int count = this.jdbcTemplate.queryForInt(sql);
-        if (count == 1) {
-            isJobPresent = true;
-        }
-        return isJobPresent;
+    	boolean isJobPresent = false;
+    	try{
+            final String sql = "select count(*) from job job where job.id= ?";
+            final int count = this.jdbcTemplate.queryForObject(sql, Integer.class, new Object[] { jobId });
+            if (count == 1) {
+                isJobPresent = true;
+            }
+            return isJobPresent;
+    	}catch(EmptyResultDataAccessException e){
+    		return isJobPresent;
+    	}
+        
     }
 
     private static final class JobDetailMapper implements RowMapper<JobDetailData> {

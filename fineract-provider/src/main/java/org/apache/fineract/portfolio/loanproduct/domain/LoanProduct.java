@@ -223,6 +223,9 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         Integer minimumGapBetweenInstallments = null;
         Integer maximumGapBetweenInstallments = null;
 
+
+        final Integer repaymentEvery = command.integerValueOfParameterNamed("repaymentEvery");
+        final Integer numberOfRepayments = command.integerValueOfParameterNamed("numberOfRepayments");
         final Boolean isLinkedToFloatingInterestRates = command.booleanObjectValueOfParameterNamed("isLinkedToFloatingInterestRates");
         if (isLinkedToFloatingInterestRates != null && isLinkedToFloatingInterestRates) {
             interestRateDifferential = command.bigDecimalValueOfParameterNamed("interestRateDifferential");
@@ -236,7 +239,8 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             interestRatePerPeriod = command.bigDecimalValueOfParameterNamed("interestRatePerPeriod");
             minInterestRatePerPeriod = command.bigDecimalValueOfParameterNamed("minInterestRatePerPeriod");
             maxInterestRatePerPeriod = command.bigDecimalValueOfParameterNamed("maxInterestRatePerPeriod");
-            annualInterestRate = aprCalculator.calculateFrom(interestFrequencyType, interestRatePerPeriod);
+            annualInterestRate = aprCalculator.calculateFrom(interestFrequencyType, interestRatePerPeriod, numberOfRepayments, repaymentEvery, repaymentFrequencyType);
+
         }
 
         final Boolean isVariableInstallmentsAllowed = command
@@ -246,8 +250,6 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             maximumGapBetweenInstallments = command.integerValueOfParameterNamed(LoanProductConstants.maximumGapBetweenInstallments);
         }
 
-        final Integer repaymentEvery = command.integerValueOfParameterNamed("repaymentEvery");
-        final Integer numberOfRepayments = command.integerValueOfParameterNamed("numberOfRepayments");
         final Integer minNumberOfRepayments = command.integerValueOfParameterNamed("minNumberOfRepayments");
         final Integer maxNumberOfRepayments = command.integerValueOfParameterNamed("maxNumberOfRepayments");
         final BigDecimal inArrearsTolerance = command.bigDecimalValueOfParameterNamed("inArrearsTolerance");

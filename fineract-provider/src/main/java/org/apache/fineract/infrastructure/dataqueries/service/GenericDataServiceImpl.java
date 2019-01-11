@@ -23,6 +23,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
@@ -34,6 +35,7 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
@@ -55,37 +57,40 @@ public class GenericDataServiceImpl implements GenericDataService {
 
     @Override
     public GenericResultsetData fillGenericResultSet(final String sql) {
+    	try{
+    		 final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
 
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+    	        final List<ResultsetColumnHeaderData> columnHeaders = new ArrayList<>();
+    	        final List<ResultsetRowData> resultsetDataRows = new ArrayList<>();
 
-        final List<ResultsetColumnHeaderData> columnHeaders = new ArrayList<>();
-        final List<ResultsetRowData> resultsetDataRows = new ArrayList<>();
+    	        final SqlRowSetMetaData rsmd = rs.getMetaData();
 
-        final SqlRowSetMetaData rsmd = rs.getMetaData();
+    	        for (int i = 0; i < rsmd.getColumnCount(); i++) {
 
-        for (int i = 0; i < rsmd.getColumnCount(); i++) {
+    	            final String columnName = rsmd.getColumnName(i + 1);
+    	            final String columnType = rsmd.getColumnTypeName(i + 1);
 
-            final String columnName = rsmd.getColumnName(i + 1);
-            final String columnType = rsmd.getColumnTypeName(i + 1);
+    	            final ResultsetColumnHeaderData columnHeader = ResultsetColumnHeaderData.basic(columnName, columnType);
+    	            columnHeaders.add(columnHeader);
+    	        }
 
-            final ResultsetColumnHeaderData columnHeader = ResultsetColumnHeaderData.basic(columnName, columnType);
-            columnHeaders.add(columnHeader);
-        }
+    	        while (rs.next()) {
+    	            final List<String> columnValues = new ArrayList<>();
+    	            for (int i = 0; i < rsmd.getColumnCount(); i++) {
+    	                final String columnName = rsmd.getColumnName(i + 1);
+    	                final String columnValue = rs.getString(columnName);
+    	                columnValues.add(columnValue);
+    	            }
 
-        while (rs.next()) {
-            final List<String> columnValues = new ArrayList<>();
-            for (int i = 0; i < rsmd.getColumnCount(); i++) {
-                final String columnName = rsmd.getColumnName(i + 1);
-                final String columnValue = rs.getString(columnName);
-                columnValues.add(columnValue);
-            }
+    	            final ResultsetRowData resultsetDataRow = ResultsetRowData.create(columnValues);
+    	            resultsetDataRows.add(resultsetDataRow);
+    	        }
 
-            final ResultsetRowData resultsetDataRow = ResultsetRowData.create(columnValues);
-            resultsetDataRows.add(resultsetDataRow);
-        }
-
-        return new GenericResultsetData(columnHeaders, resultsetDataRows);
-    }
+			return new GenericResultsetData(columnHeaders, resultsetDataRows);
+		} catch (DataAccessException e) {
+			throw new PlatformDataIntegrityException("error.msg.report.unknown.data.integrity.issue", e.getClass().getName());
+		}
+	}
 
     @Override
     public String replace(final String str, final String pattern, final String replace) {

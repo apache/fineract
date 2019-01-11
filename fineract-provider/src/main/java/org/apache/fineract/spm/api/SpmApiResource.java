@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.spm.api;
 
+import io.swagger.annotations.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +51,7 @@ import com.google.gson.Gson;
 @Path("/surveys")
 @Component
 @Scope("singleton")
+@Api(value = "SPM - Serveys", description = "")
 public class SpmApiResource {
 
     private final PlatformSecurityContext securityContext;
@@ -64,6 +67,8 @@ public class SpmApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
+    @ApiOperation(value = "List all Surveys", notes = "")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = SurveyData.class, responseContainer = "list")})
     public List<SurveyData> fetchAllSurveys(@QueryParam("isActive") final Boolean isActive) {
         this.securityContext.authenticatedUser();
         final List<SurveyData> result = new ArrayList<>();
@@ -86,7 +91,9 @@ public class SpmApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
-    public SurveyData findSurvey(@PathParam("id") final Long id) {
+    @ApiOperation(value = "Retrieve a Survey", notes = "")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = SurveyData.class)})
+    public SurveyData findSurvey(@PathParam("id") @ApiParam(value = "Enter id") final Long id) {
         this.securityContext.authenticatedUser();
         final Survey survey = this.spmService.findById(id);
         return SurveyMapper.map(survey);
@@ -96,7 +103,9 @@ public class SpmApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
-    public String createSurvey(final SurveyData surveyData) {
+    @ApiOperation(value = "Create a Survey", notes = "Adds a new survey to collect client related data.\n" + "\n" + "Mandatory Fields\n" + "\n" + "countryCode, key, name, questions, responses, sequenceNo, text, value")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK")})
+    public String createSurvey(@ApiParam(value = "Create survey") final SurveyData surveyData) {
         this.securityContext.authenticatedUser();
         final Survey survey = SurveyMapper.map(surveyData, new Survey());
         this.spmService.createSurvey(survey);
@@ -122,6 +131,8 @@ public class SpmApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
+    @ApiOperation(value = "Deactivate Survey", notes = "")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK")})
     public void activateOrDeactivateSurvey(@PathParam("id") final Long id, @QueryParam("command") final String command) {
         this.securityContext.authenticatedUser();
         if(command != null && command.equalsIgnoreCase("activate")){

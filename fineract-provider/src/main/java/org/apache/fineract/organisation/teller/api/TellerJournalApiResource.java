@@ -27,6 +27,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import io.swagger.annotations.Api;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.teller.data.TellerData;
@@ -40,6 +41,7 @@ import org.springframework.stereotype.Component;
 @Path("cashiersjournal")
 @Component
 @Scope("singleton")
+@Api(value = "cashiersjournal", description = "")
 public class TellerJournalApiResource {
 
     private final PlatformSecurityContext securityContext;

@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.group.api;
 
+import com.google.gson.JsonElement;
+import io.swagger.annotations.*;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
@@ -88,11 +90,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.google.gson.JsonElement;
 
 @Path("/groups")
 @Component
 @Scope("singleton")
+@Api(value = "Groups", description = "Groups are used to provide a distinctive banking distribution channel used in microfinances throughout the world. The Group is an administrative unit. It can contain as few as 5 people or as many as 40 depending on how its used.\n\n" + "\n\n" + "Different styles of group lending - Joint-Liability Group, Grameen Model (Center-Group), Self-Help Groups, Village/Communal Banks)")
 public class GroupsApiResource {
 
     private final PlatformSecurityContext context;
@@ -155,10 +157,12 @@ public class GroupsApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveTemplate(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId,
-            @QueryParam("center") final boolean isCenterGroup, @QueryParam("centerId") final Long centerId,
-            @QueryParam("command") final String commandParam,
-            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
+    @ApiOperation(value = "Retrieve Group Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n\n" + "\n\n" + "Field Defaults\n\n" + "Allowed Value Lists\n\n" + "Example Requests:\n\n" + "\n\n" + "groups/template\n\n" + "\n\n" + "groups/template?officeId=2\n\n" + "\n\n" + "groups/template?centerId=1\n\n" + "\n\n" + "groups/template?centerId=1&staffInSelectedOfficeOnly=true")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = GroupsApiResourceSwagger.GetGroupsTemplateResponse.class)})
+    public String retrieveTemplate(@Context final UriInfo uriInfo, @QueryParam("officeId") @ApiParam(value = "officeId") final Long officeId,
+            @QueryParam("center") @ApiParam(value = "center") final boolean isCenterGroup, @QueryParam("centerId") @ApiParam(value = "centerId") final Long centerId,
+            @QueryParam("command") @ApiParam(value = "command") final String commandParam,
+            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @ApiParam(value = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
 
@@ -191,13 +195,15 @@ public class GroupsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
-            @QueryParam("officeId") final Long officeId, @QueryParam("staffId") final Long staffId,
-            @QueryParam("externalId") final String externalId, @QueryParam("name") final String name,
-            @QueryParam("underHierarchy") final String hierarchy, @QueryParam("paged") final Boolean paged,
-            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder, 
-            @QueryParam("orphansOnly") final Boolean orphansOnly) {
+    @ApiOperation(value = "List Groups", httpMethod = "GET", notes = "The default implementation of listing Groups returns 200 entries with support for pagination and sorting. Using the parameter limit with value -1 returns all entries.\n\n" + "Example Requests:\n\n" + "\n\n" + "groups\n\n" + "\n\n" + "groups?fields=name,officeName,joinedDate\n\n" + "\n\n" + "groups?offset=10&limit=50\n\n" + "\n\n" + "groups?orderBy=name&sortOrder=DESC")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = GroupsApiResourceSwagger.GetGroupsResponse.class)})
+    public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") @ApiParam(value = "sqlSearch") final String sqlSearch,
+            @QueryParam("officeId") @ApiParam(value = "officeId") final Long officeId, @QueryParam("staffId") @ApiParam(value = "staffId") final Long staffId,
+            @QueryParam("externalId") @ApiParam(value = "externalId") final String externalId, @QueryParam("name") @ApiParam(value = "name") final String name,
+            @QueryParam("underHierarchy") @ApiParam(value = "underHierarchy") final String hierarchy, @QueryParam("paged") @ApiParam(value = "paged") final Boolean paged,
+            @QueryParam("offset")@ApiParam(value = "offset") final Integer offset, @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
+            @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy, @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder,
+            @QueryParam("orphansOnly") @ApiParam(value = "orphansOnly") final Boolean orphansOnly) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
         final PaginationParameters parameters = PaginationParameters.instance(paged, offset, limit, orderBy, sortOrder);
@@ -218,9 +224,11 @@ public class GroupsApiResource {
     @Path("{groupId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveOne(@Context final UriInfo uriInfo, @PathParam("groupId") final Long groupId,
-            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
-            @QueryParam("roleId") final Long roleId) {
+    @ApiOperation(value = "Retrieve a Group", httpMethod = "GET", notes = "Retrieve group information.\n\n" + "Example Requests:\n\n" + "\n\n" + "groups/1\n\n" + "\n\n" + "groups/1?associations=clientMembers")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = GroupsApiResourceSwagger.GetGroupsGroupIdResponse.class)})
+    public String retrieveOne(@Context final UriInfo uriInfo, @PathParam("groupId") @ApiParam(value = "groupId") final Long groupId,
+            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @ApiParam(value = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
+            @QueryParam("roleId") @ApiParam(value = "roleId") final Long roleId) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -315,7 +323,10 @@ public class GroupsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String create(final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Create a Group", httpMethod = "POST", notes = "Creates a Group\n\n" + "Mandatory Fields: name, officeId, active, activationDate (if active=true)\n\n" + "Optional Fields: externalId, staffId, clientMembers")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = GroupsApiResourceSwagger.PostGroupsRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = GroupsApiResourceSwagger.PostGroupsResponse.class)})
+    public String create(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createGroup() //
@@ -329,7 +340,10 @@ public class GroupsApiResource {
     @Path("{groupId}/command/unassign_staff")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String unassignLoanOfficer(@PathParam("groupId") final Long groupId, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Unassign a Staff", httpMethod = "POST", notes = "Allows you to unassign the Staff.\n\n" + "Mandatory Fields: staffId")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = GroupsApiResourceSwagger.PostGroupsGroupIdCommandUnassignStaffRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = GroupsApiResourceSwagger.PostGroupsGroupIdCommandUnassignStaffResponse.class )})
+    public String unassignLoanOfficer(@PathParam("groupId") @ApiParam(value = "groupId") final Long groupId,@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .unassignGroupStaff(groupId) //
@@ -344,7 +358,10 @@ public class GroupsApiResource {
     @Path("{groupId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String update(@PathParam("groupId") final Long groupId, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Update a Group", httpMethod = "PUT", notes = "Updates a Group")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = GroupsApiResourceSwagger.PutGroupsGroupIdRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = GroupsApiResourceSwagger.PutGroupsGroupIdResponse.class)})
+    public String update(@PathParam("groupId")@ApiParam(value = "groupId") final Long groupId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateGroup(groupId) //
@@ -358,7 +375,9 @@ public class GroupsApiResource {
     @Path("{groupId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String delete(@PathParam("groupId") final Long groupId) {
+    @ApiOperation(value = "Delete a Group", httpMethod = "DELETE", notes = "A group can be deleted if it is in pending state and has no associations - clients, loans or savings")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = GroupsApiResourceSwagger.DeleteGroupsGroupIdResponse.class)})
+    public String delete(@PathParam("groupId") @ApiParam(value = "groupId") final Long groupId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .deleteGroup(groupId) //
@@ -371,8 +390,11 @@ public class GroupsApiResource {
     @Path("{groupId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String activateOrGenerateCollectionSheet(@PathParam("groupId") final Long groupId,
-            @QueryParam("command") final String commandParam, @QueryParam("roleId") final Long roleId, final String apiRequestBodyAsJson,
+    @ApiOperation(value = "Activate a Group | Associate Clients | Disassociate Clients | Transfer Clients across groups | Generate Collection Sheet | Save Collection Sheet | Unassign a Staff | Assign a Staff | Close a Group | Unassign a Role | Update a Role", httpMethod = "POST", notes = "Activate a Group:\n\n" + "Groups can be created in a Pending state. This API exists to enable group activation.\n\n" + "\n\n" + "If the group happens to be already active this API will result in an error.\n\n" + "Mandatory Fields: activationDate\n\n" + "Associate Clients:\n\n" + "This API allows to associate existing clients to a group.\n\n" + "\n\n" + "The clients are listed from the office to which the group is associated.\n\n" + "\n\n" + "If client(s) is already associated with group then API will result in an error.\n\n" + "Mandatory Fields: clientMembers\n\n" + "Disassociate Clients:\n\n" + "This API allows to disassociate clients from a group.\n\n" + "\n\n" + "Disassociating a client with active joint liability group loans results in an error.\n\n" + "Mandatory Fields: clientMembers\n\n" + "Transfer Clients across groups:\n\n" + "This API allows to transfer clients from one group to another\n\n" + "Mandatory Fields: destinationGroupId and clients\n\n" + "Optional Fields: inheritDestinationGroupLoanOfficer (defaults to true) and transferActiveLoans (defaults to true)\n\n" + "Generate Collection Sheet:\n\n" + "This API retrieves repayment details of all jlg loans of all members of a group on a specified meeting date.\n\n" + "Mandatory Fields: calendarId and transactionDate\n\n" + "Save Collection Sheet:\n\n" + "This api allows the loan officer to perform bulk repayments of JLG loans for a group on its meeting date.\n\n" + "Mandatory Fields: calendarId, transactionDate, actualDisbursementDate\n\n" + "Optional Fields: clientsAttendance, bulkRepaymentTransaction, bulkDisbursementTransactions\n\n" + "Unassign a Staff:\n\n" + "Allows you to unassign the Staff.\n\n" + "Mandatory Fields: staffId\n\n" + "Assign a Staff:\n\n" + "Allows you to assign Staff to an existing Group.\n\n" + "\n\n" + "The selected Staff should be belong to the same office (or an office higher up in the hierarchy) as this group" + "Mandatory Fields: staffId\n\n" + "Optional Fields: inheritStaffForClientAccounts (Optional: Boolean if true all members of the group (i.e all clients with active loans and savings ) will inherit the staffId)\n\n" + "Close a Group:\n\n" + "This API exists to close a group. Groups can be closed if they don't have any non-closed clients/loans/savingsAccounts.\n\n" + "\n\n" + "If the group has any active clients/loans/savingsAccount, this API will result in an error." + "Assign a Role:\n\n" + "Allows you to assign a Role to an existing member of a group.\n\n" + "\n\n" + "We can define the different roles applicable to group members by adding code values to the pre-defined system code GROUPROLE. Example:Group leader etc.\n\n" + "Mandatory Fields: clientId, role\n\n" + "Unassign a Role:\n\n" + "Allows you to unassign Roles associated tp Group members.\n\n" + "Update a Role:\n\n" + "Allows you to update the member Role.\n\n" + "Mandatory Fields: role\n\n" + "Showing request/response for Transfer Clients across groups")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = GroupsApiResourceSwagger.PostGroupsGroupIdRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = GroupsApiResourceSwagger.PostGroupsGroupIdResponse.class)})
+    public String activateOrGenerateCollectionSheet(@PathParam("groupId") @ApiParam(value = "groupId") final Long groupId,
+            @QueryParam("command") @ApiParam(value = "command") final String commandParam, @QueryParam("roleId") @ApiParam(value = "roleId") final Long roleId, @ApiParam(hidden = true) final String apiRequestBodyAsJson,
             @Context final UriInfo uriInfo) {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
@@ -443,7 +465,9 @@ public class GroupsApiResource {
     @Path("{groupId}/accounts")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAccounts(@PathParam("groupId") final Long groupId, @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "Retrieve Group accounts overview", httpMethod = "GET", notes = "Retrieves details of all Loan and Savings accounts associated with this group.\n\n" + "\n\n" + "Example Requests:\n\n" + "\n\n" + "groups/1/accounts\n\n" + "\n\n" + "\n\n" + "groups/1/accounts?fields=loanAccounts,savingsAccounts,memberLoanAccounts,\n\n" + "memberSavingsAccounts")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = GroupsApiResourceSwagger.GetGroupsGroupIdAccountsResponse.class)})
+    public String retrieveAccounts(@PathParam("groupId") @ApiParam(value = "groupId") final Long groupId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission("GROUP");
 

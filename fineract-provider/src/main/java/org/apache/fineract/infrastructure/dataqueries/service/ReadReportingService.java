@@ -32,13 +32,13 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 public interface ReadReportingService {
 
-    StreamingOutput retrieveReportCSV(String name, String type, Map<String, String> extractedQueryParams);
+    StreamingOutput retrieveReportCSV(String name, String type, Map<String, String> extractedQueryParams, boolean isSelfServiceUserReport);
 
-    GenericResultsetData retrieveGenericResultset(String name, String type, Map<String, String> extractedQueryParams);
+    GenericResultsetData retrieveGenericResultset(String name, String type, Map<String, String> extractedQueryParams, boolean isSelfServiceUserReport);
 
-    String retrieveReportPDF(String name, String type, Map<String, String> extractedQueryParams);
+    String retrieveReportPDF(String name, String type, Map<String, String> extractedQueryParams, boolean isSelfServiceUserReport);
 
-    String getReportType(String reportName);
+    String getReportType(String reportName, boolean isSelfServiceUserReport);
 
     Collection<ReportData> retrieveReportList();
 

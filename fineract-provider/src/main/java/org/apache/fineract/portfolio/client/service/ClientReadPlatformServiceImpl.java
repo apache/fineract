@@ -9,6 +9,7 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,6 +24,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -59,7 +61,11 @@ import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.apache.fineract.portfolio.savings.service.SavingsProductReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
@@ -100,8 +106,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final AddressReadPlatformService addressReadPlatformService,final ClientFamilyMembersReadPlatformService clientFamilyMembersReadPlatformService,
             final ConfigurationReadPlatformService configurationReadPlatformService,
             final EntityDatatableChecksReadService entityDatatableChecksReadService,
-            final ColumnValidator columnValidator) {
-        this.context = context;
+			final ColumnValidator columnValidator) {
+		this.context = context;
         this.officeReadPlatformService = officeReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.staffReadPlatformService = staffReadPlatformService;
@@ -112,7 +118,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         this.configurationReadPlatformService=configurationReadPlatformService;
         this.entityDatatableChecksReadService = entityDatatableChecksReadService;
         this.columnValidator = columnValidator;
-    }
+	}
 
     @Override
     public ClientData retrieveTemplate(final Long officeId, final boolean staffInSelectedOfficeOnly) {
@@ -169,8 +175,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         return ClientData.template(defaultOfficeId, new LocalDate(), offices, staffOptions, null, genderOptions, savingsProductDatas,
                 clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions,
-                clientLegalFormOptions,familyMemberOptions,address,isAddressEnabled, datatableTemplates);
-    }
+				clientLegalFormOptions, familyMemberOptions, new ArrayList<AddressData>(Arrays.asList(address)),
+				isAddressEnabled, datatableTemplates);
+	}
 
     @Override
    // @Transactional(readOnly=true)
@@ -427,7 +434,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public ClientData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final String accountNo = rs.getString("accountNo");
 
@@ -612,7 +619,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public ClientData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final String accountNo = rs.getString("accountNo");
 
@@ -714,7 +721,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public GroupGeneralData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public GroupGeneralData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final Long groupId = JdbcSupport.getLong(rs, "groupId");
             final String groupName = rs.getString("groupName");
@@ -744,7 +751,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public ClientData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("id");
             final String displayName = rs.getString("displayName");
@@ -778,7 +785,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public ClientData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("id");
             final String accountNo = rs.getString("accountNo");
@@ -815,5 +822,26 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         return ClientData.template(null, null, null, null, narrations, null, null, clientTypeOptions, clientClassificationOptions, 
         		clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions, clientLegalFormOptions,null,null,null, null);
     }
+    
+	@Override
+	public Date retrieveClientTransferProposalDate(Long clientId) {
+		validateClient(clientId);
+		final String sql = "SELECT cl.proposed_transfer_date FROM m_client cl WHERE cl.id =? ";
+		try {
+			return this.jdbcTemplate.queryForObject(sql, Date.class, clientId);
+		} catch (final EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+	
+	@Override
+	public void validateClient(Long clientId) {
+		try {
+			final String sql = "SELECT cl.id FROM m_client cl WHERE cl.id =? ";
+			this.jdbcTemplate.queryForObject(sql, Long.class, clientId);
+		} catch (final EmptyResultDataAccessException e) {
+			throw new ClientNotFoundException(clientId);
+		}
+	}
 
 }

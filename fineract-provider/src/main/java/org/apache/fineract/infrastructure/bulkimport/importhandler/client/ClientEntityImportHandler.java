@@ -18,7 +18,11 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.importhandler.client;
 
-import com.google.gson.GsonBuilder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -29,17 +33,19 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.exception.*;
 import org.apache.fineract.portfolio.address.data.AddressData;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.data.ClientNonPersonData;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.gson.GsonBuilder;
 @Service
 public class ClientEntityImportHandler implements ImportHandler {
 
@@ -134,6 +140,7 @@ public class ClientEntityImportHandler implements ImportHandler {
             activationDate=submittedOn;
         }
         AddressData addressDataObj=null;
+        Collection<AddressData> addressList = null;
         if (ImportHandlerUtils.readAsBoolean(ClientEntityConstants.ADDRESS_ENABLED,row)) {
             String addressType = ImportHandlerUtils.readAsString(ClientEntityConstants.ADDRESS_TYPE_COL, row);
             Long addressTypeId = null;
@@ -167,10 +174,12 @@ public class ClientEntityImportHandler implements ImportHandler {
             }
             addressDataObj = new AddressData(addressTypeId, street, addressLine1, addressLine2, addressLine3,
                     city, postalCode, isActiveAddress, stateProvinceId, countryId);
+            addressList = new ArrayList<AddressData>(Arrays.asList(addressDataObj));
         }
         return ClientData.importClientEntityInstance(legalFormId,row.getRowNum(),name,officeId,clientTypeId,clientClassicationId,
-                staffId,active,activationDate,submittedOn, externalId,incorportionDate,mobileNo,clientNonPersonData,addressDataObj,locale,dateFormat);
-    }
+				staffId, active, activationDate, submittedOn, externalId, incorportionDate, mobileNo,
+				clientNonPersonData, addressList, locale, dateFormat);
+	}
 
     public Count importEntity(String dateFormat) {
         Sheet clientSheet=workbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);
