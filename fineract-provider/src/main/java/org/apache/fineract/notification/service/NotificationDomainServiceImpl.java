@@ -51,7 +51,9 @@ import javax.jms.Queue;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
 
 @Service
@@ -583,7 +585,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 	
 	private List<Long> retrieveSubscribers(Long officeId, String permission) {
 		
-		Collection<TopicSubscriberData> topicSubscribers = new ArrayList<>();
+		Set<TopicSubscriberData> topicSubscribers = new HashSet<>();
 		List<Long> subscriberIds = new ArrayList<>();
 		Long entityId = officeId;
 		String entityType= "";
@@ -596,7 +598,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 		for (Role curRole : allRoles) {
 			if (curRole.hasPermissionTo(permission) || curRole.hasPermissionTo("ALL_FUNCTIONS")) {
 				String memberType = curRole.getName();
-				topicSubscribers = topicSubscriberReadPlatformService.getSubscribers(entityId, entityType, memberType);
+				topicSubscribers.addAll(topicSubscriberReadPlatformService.getSubscribers(entityId, entityType, memberType));
 			}
 		}
 		
