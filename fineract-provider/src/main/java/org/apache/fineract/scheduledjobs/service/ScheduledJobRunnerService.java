@@ -41,4 +41,6 @@ public interface ScheduledJobRunnerService {
     void postDividends() throws JobExecutionException;
 
     void updateTrialBalanceDetails()  throws JobExecutionException;
+
+    void updateLoanSummaryDetails(@SuppressWarnings("unused") final Map<String, String> jobParameters) throws JobExecutionException;
 }

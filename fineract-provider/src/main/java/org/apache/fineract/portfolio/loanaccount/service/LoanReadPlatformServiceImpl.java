@@ -2209,4 +2209,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		}
 	}
 
+    @Override
+    public Integer retrieveNumberOfActiveLoans() {
+        final String sql="select count(*) from m_loan";
+        return this.jdbcTemplate.queryForObject(sql,Integer.class);
+    }
 }

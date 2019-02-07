@@ -21,14 +21,17 @@ package org.apache.fineract.scheduledjobs.service;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.*;
 
 import org.apache.fineract.accounting.glaccount.domain.TrialBalance;
 import org.apache.fineract.accounting.glaccount.domain.TrialBalanceRepositoryWrapper;
+import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.organisation.office.domain.OfficeRepository;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.apache.fineract.portfolio.loanaccount.service.LoanApplicationWriteService;
+import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.UpdateLoanSummaryPoster;
 import org.joda.time.LocalDate;
 import org.joda.time.DateTime;
 
@@ -57,6 +60,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,6 +81,10 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     private final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService;
     private final ShareAccountSchedularService shareAccountSchedularService;
     private final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper;
+    private final LoanReadPlatformService loanReadPlatformService;
+    private final ApplicationContext applicationContext;
+    private final LoanApplicationWriteService loanApplicationWriteService;
+    private final OfficeRepository officeRepository;
 
     @Autowired
     public ScheduledJobRunnerServiceImpl(final RoutingDataSourceServiceFactory dataSourceServiceFactory,
@@ -85,7 +93,11 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             final DepositAccountReadPlatformService depositAccountReadPlatformService,
             final DepositAccountWritePlatformService depositAccountWritePlatformService,
             final ShareAccountDividendReadPlatformService shareAccountDividendReadPlatformService,
-            final ShareAccountSchedularService shareAccountSchedularService, final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper) {
+            final ShareAccountSchedularService shareAccountSchedularService, final TrialBalanceRepositoryWrapper trialBalanceRepositoryWrapper,
+            final LoanReadPlatformService loanReadPlatformService,
+            final ApplicationContext applicationContext,
+            final LoanApplicationWriteService loanApplicationWriteService,
+            final OfficeRepository officeRepository) {
         this.dataSourceServiceFactory = dataSourceServiceFactory;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
@@ -94,6 +106,10 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         this.shareAccountDividendReadPlatformService = shareAccountDividendReadPlatformService;
         this.shareAccountSchedularService = shareAccountSchedularService;
         this.trialBalanceRepositoryWrapper=trialBalanceRepositoryWrapper;
+        this.loanReadPlatformService=loanReadPlatformService;
+        this.applicationContext=applicationContext;
+        this.loanApplicationWriteService=loanApplicationWriteService;
+        this.officeRepository=officeRepository;
     }
 
     @Transactional
@@ -482,5 +498,68 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         }
 
     }
+
+    @Transactional
+    @Override
+    @CronTarget(jobName = JobName.UPDATE_LOAN_SUMMARY)
+    public void updateLoanSummaryDetails(@SuppressWarnings("unused") final Map<String, String> jobParameters) throws JobExecutionException {
+
+        final int threadPoolSize=Integer.parseInt(jobParameters.get("thread-pool-size"));
+        final String officeId = jobParameters.get("officeId");
+        final ExecutorService executorService = Executors.newFixedThreadPool(threadPoolSize);
+        final Office office = this.officeRepository.findOne(Long.parseLong(officeId));
+
+        List<Callable<Object>> posters = new ArrayList<Callable<Object>>();
+
+        //Get the  total count of loans
+        Integer numberofLoans=loanReadPlatformService.retrieveNumberOfActiveLoans();
+
+        Integer batchSize = (int) Math.ceil(numberofLoans/ threadPoolSize);
+        Integer maxLoanId=0;
+
+        do{
+            UpdateLoanSummaryPoster poster = (UpdateLoanSummaryPoster) this.applicationContext.getBean("updateLoanSummaryPoster");
+            poster.setLoanApplicationWriteService(loanApplicationWriteService);
+            poster.setTenant(ThreadLocalContextUtil.getTenant());
+            poster.setBatchSize(batchSize);
+            maxLoanId+=batchSize+1;
+            poster.setMaxLoanId(maxLoanId);
+            poster.setOfficeHierachy(office.getHierarchy()+ "%");
+            posters.add(Executors.callable(poster));
+            numberofLoans-=batchSize;
+        }while(numberofLoans>=0);
+
+        try {
+            List<Future<Object>> responses = executorService.invokeAll(posters);
+            checkCompletion(responses);
+        } catch (InterruptedException e1) {
+            logger.error("Interrupted while updating loan summary details", e1);
+        }
+    }
+
+    //checks the execution of task by each thread in the executor service
+    private void checkCompletion(List<Future<Object>> responses) {
+        try {
+            for(Future f : responses) {
+                f.get();
+            }
+            boolean allThreadsExecuted = false;
+            int noOfThreadsExecuted = 0;
+            for (Future<Object> future : responses) {
+                if (future.isDone()) {
+                    noOfThreadsExecuted++;
+                }
+            }
+            allThreadsExecuted = noOfThreadsExecuted == responses.size();
+            if(!allThreadsExecuted)
+                logger.error("All threads could not execute.");
+        } catch (InterruptedException e1) {
+            logger.error("Interrupted while posting IRD entries", e1);
+        }  catch (ExecutionException e2) {
+            logger.error("Execution exception while posting IRD entries", e2);
+        }
+
+    }
+
 
 }
