@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
@@ -134,4 +135,7 @@ public interface LoanReadPlatformService {
 	LoanAccountData retrieveLoanByLoanAccount(String loanAccountNumber);
 	
 	Long retrieveLoanIdByAccountNumber(String loanAccountNumber);
+
+    List<LoanScheduleAccrualData> retrivePeriodicAccrualData(final LocalDate tillDate, int offsetCounter,
+                                                             int maxPageSize, long maxLoanIdInList, final String officeHierarchy);
 }
