@@ -158,9 +158,15 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(groupOffice, groupLevel, activationDate);
 
             Staff staff = null;
-            final Long staffId = command.longValueOfParameterNamed(GroupingTypesApiConstants.staffIdParamName);
-            if (staffId != null) {
-                staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, groupOffice.getHierarchy());
+            if ((GroupTypes.GROUP).equals(groupingType)) {
+                if (parentGroup != null) {
+                    staff = parentGroup.getStaff();
+                }
+            } else if ((GroupTypes.CENTER).equals(groupingType)) {
+                final Long staffId = command.longValueOfParameterNamed(GroupingTypesApiConstants.staffIdParamName);
+                if (staffId != null) {
+                    staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, groupOffice.getHierarchy());
+                }
             }
 
             final Set<Client> clientMembers = assembleSetOfClients(officeId, command);
@@ -388,11 +394,16 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final Map<String, Object> actualChanges = groupForUpdate.update(command);
 
             if (actualChanges.containsKey(GroupingTypesApiConstants.staffIdParamName)) {
-                final Long newValue = command.longValueOfParameterNamed(GroupingTypesApiConstants.staffIdParamName);
-
                 Staff newStaff = null;
-                if (newValue != null) {
-                    newStaff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(newValue, groupHierarchy);
+                if ((GroupTypes.GROUP).equals(groupingType)) {
+                    if (groupForUpdate.getParent() != null) {
+                        newStaff = groupForUpdate.getParent().getStaff();
+                    }
+                } else if ((GroupTypes.CENTER).equals(groupingType)) {
+                    final Long newValue = command.longValueOfParameterNamed(GroupingTypesApiConstants.staffIdParamName);
+                    if (newValue != null) {
+                        newStaff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(newValue, groupHierarchy);
+                    }
                 }
                 groupForUpdate.updateStaff(newStaff);
             }

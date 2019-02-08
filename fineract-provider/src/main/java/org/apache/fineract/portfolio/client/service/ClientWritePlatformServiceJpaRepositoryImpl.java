@@ -247,9 +247,15 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             }
 
             Staff staff = null;
-            final Long staffId = command.longValueOfParameterNamed(ClientApiConstants.staffIdParamName);
-            if (staffId != null) {
-                staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, clientOffice.getHierarchy());
+            if (clientParentGroup != null) {
+                if (clientParentGroup.getParent() != null) {
+                    staff = clientParentGroup.getParent().getStaff();
+                }
+            } else {
+                final Long staffId = command.longValueOfParameterNamed(ClientApiConstants.staffIdParamName);
+                if (staffId != null) {
+                    staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, clientOffice.getHierarchy());
+                }
             }
 
             CodeValue gender = null;
