@@ -60,7 +60,6 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
     public void sendDefinedEmail(EmailDetail emailDetails) {
         final Email email = new SimpleEmail();
         final SMTPCredentialsData smtpCredentialsData = this.externalServicesReadPlatformService.getSMTPCredentials();
-        final String authuserName = smtpCredentialsData.getUsername();
 
         final String authuser = smtpCredentialsData.getUsername();
         final String authpwd = smtpCredentialsData.getPassword();
@@ -74,7 +73,7 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
             if(smtpCredentialsData.isUseTLS()){
                 email.getMailSession().getProperties().put("mail.smtp.starttls.enable", "true");
             }
-            email.setFrom(authuser, authuserName);
+            email.setFrom(smtpCredentialsData.getFromEmail(), smtpCredentialsData.getFromName());
 
             email.setSubject(emailDetails.getSubject());
             email.setMsg(emailDetails.getBody());
