@@ -75,21 +75,30 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
             String host = null;
             String port = "25";
             boolean useTLS = false;
+            String fromEmail = null;
+            String fromName = null;
 
             while (rs.next()) {
-                if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.SMTP_USERNAME)) {
-                    username = rs.getString("value");
-                } else if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.SMTP_PASSWORD)) {
-                    password = rs.getString("value");
-                } else if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.SMTP_HOST)) {
-                    host = rs.getString("value");
-                } else if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.SMTP_PORT)) {
-                    port = rs.getString("value");
-                } else if (rs.getString("name").equalsIgnoreCase(ExternalServicesConstants.SMTP_USE_TLS)) {
-                    useTLS = Boolean.parseBoolean(rs.getString("value"));
+                String name = rs.getString("name");
+                String value = rs.getString("value");
+
+                if (ExternalServicesConstants.SMTP_USERNAME.equalsIgnoreCase(name)) {
+                    username = value;
+                } else if (ExternalServicesConstants.SMTP_PASSWORD.equalsIgnoreCase(name)) {
+                    password = value;
+                } else if (ExternalServicesConstants.SMTP_HOST.equalsIgnoreCase(name)) {
+                    host = value;
+                } else if (ExternalServicesConstants.SMTP_PORT.equalsIgnoreCase(name)) {
+                    port = value;
+                } else if (ExternalServicesConstants.SMTP_USE_TLS.equalsIgnoreCase(name)) {
+                    useTLS = Boolean.parseBoolean(value);
+                } else if (ExternalServicesConstants.SMTP_FROM_EMAIL.equalsIgnoreCase(name)) {
+                    fromEmail = value;
+                } else if (ExternalServicesConstants.SMTP_FROM_NAME.equalsIgnoreCase(name)) {
+                    fromName = value;
                 }
             }
-            return new SMTPCredentialsData(username, password, host, port, useTLS);
+            return new SMTPCredentialsData(username, password, host, port, useTLS, fromEmail, fromName);
         }
     }
 
