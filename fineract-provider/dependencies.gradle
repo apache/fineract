@@ -27,10 +27,6 @@ dependencies {
 
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat:${springBootVersion}")
 
-    providedCompile(
-//              [group: 'javax.servlet', name: 'servlet-api', version: '2.5'],
-            )
-
     compile(
                // [group: 'ch.vorburger.mariaDB4j', name: 'mariaDB4j', version: '2.1.3'],
 
@@ -39,7 +35,7 @@ dependencies {
                 [group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: springBootVersion],
 				//[group: 'org.eclipse.persistence', name: 'javax.persistence', version: '2.0.0'],
                 [group: 'org.springframework', name: 'spring-context-support', version: springVersion],
-				
+
 	       		[group: 'org.springframework.security.oauth', name: 'spring-security-oauth2', version: springOauthVersion],
 
                 [group: 'org.apache.openjpa', name:'openjpa-all', version: openJPAVersion],

@@ -77,11 +77,10 @@ repositories {
 	// mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
 }
 openjpa {
-    files = fileTree(sourceSets.main.output.classesDir).matching {
+    files = fileTree(sourceSets.main.output.classesDirs.filter {
 		include '**/AbstractPersistableCustom.class'
 		include '**/domain/*.class'
-
-    }
+    })
     enforcePropertyRestrictions = true
 }
 
@@ -335,8 +334,8 @@ tomcatRunWar {
 }
 
 /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
-sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
-sourceSets.test.output.resourcesDir = sourceSets.test.output.classesDir
+sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
+sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
 
 /* Exclude maria db and embedded tomcat related files for non dev builds */
 if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
@@ -375,7 +374,7 @@ task integrationTest(type:Test){
         tomcatRunWar.daemon = true
         tomcatRunWar.execute()
     }
-    testClassesDir = project.sourceSets.integrationTest.output.classesDir
+    testClassesDirs = project.sourceSets.integrationTest.output.classesDirs
     classpath = project.sourceSets.integrationTest.runtimeClasspath
 }
 
@@ -397,21 +396,27 @@ configurations.driver.each {File file ->
     loader.addURL(file.toURL())
 }
 
-task createDB<<{
+task createDB {
     description= "Creates the Database. Needs database name to be passed (like: -PdbName=someDBname)"
-    def sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
-    sql.execute( 'create database '+"`$dbName`" )
+    doLast {
+        sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
+        sql.execute( 'create database '+"`$dbName`" )
+    }
 }
 
-task dropDB<<{
+task dropDB {
     description= "Drops the specified database. The database name has to be passed (like: -PdbName=someDBname)"
-    def sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
-    sql.execute( 'DROP DATABASE '+"`$dbName`")
+    doLast {
+        sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
+        sql.execute( 'DROP DATABASE '+"`$dbName`")
+    }
 }
-task setBlankPassword<<{
-    def sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
-    sql.execute('USE `mifosplatform-tenants`')
-    sql.execute('UPDATE mifosplatform-tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
+task setBlankPassword {
+    doLast {
+        sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
+        sql.execute('USE `mifosplatform-tenants`')
+        sql.execute('UPDATE mifosplatform-tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
+    }
 }
 
 
