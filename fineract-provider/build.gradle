@@ -74,11 +74,10 @@ repositories {
 	// mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
 }
 openjpa {
-    files = fileTree(sourceSets.main.output.classesDir).matching {
+    files = fileTree(sourceSets.main.output.classesDirs.filter {
 		include '**/AbstractPersistableCustom.class'
 		include '**/domain/*.class'
-
-    }
+    })
     enforcePropertyRestrictions = true
 }
 
@@ -329,8 +328,8 @@ tomcatRunWar {
 }
 
 /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
-sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
-sourceSets.test.output.resourcesDir = sourceSets.test.output.classesDir
+sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
+sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
 
 /* Exclude maria db and embedded tomcat related files for non dev builds */
 if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
@@ -369,7 +368,7 @@ task integrationTest(type:Test){
         tomcatRunWar.daemon = true
         tomcatRunWar.execute()
     }
-    testClassesDir = project.sourceSets.integrationTest.output.classesDir
+    testClassesDirs = project.sourceSets.integrationTest.output.classesDirs
     classpath = project.sourceSets.integrationTest.runtimeClasspath
 }
 
@@ -398,21 +397,27 @@ configurations.driver.each {File file ->
     loader.addURL(file.toURL())
 }
 
-task createDB<<{
+task createDB {
     description= "Creates the Database. Needs database name to be passed (like: -PdbName=someDBname)"
-    sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
-    sql.execute( 'create database '+"`$dbName`" )
+    doLast {
+        sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
+        sql.execute( 'create database '+"`$dbName`" )
+    }
 }
 
-task dropDB<<{
+task dropDB {
     description= "Drops the specified database. The database name has to be passed (like: -PdbName=someDBname)"
-    sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
-    sql.execute( 'DROP DATABASE '+"`$dbName`")
+    doLast {
+        sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
+        sql.execute( 'DROP DATABASE '+"`$dbName`")
+    }
 }
-task setBlankPassword<<{
-    sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
-    sql.execute('USE `mifosplatform-tenants`')
-    sql.execute('UPDATE mifosplatform-tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
+task setBlankPassword {
+    doLast {
+        sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
+        sql.execute('USE `mifosplatform-tenants`')
+        sql.execute('UPDATE mifosplatform-tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
+    }
 }
 
 
@@ -436,7 +441,7 @@ buildscript {
         // see https://github.com/krummas/DrizzleJDBC/issues/46
         // see https://github.com/apache/fineract/pull/525
         // see https://github.com/apache/fineract/pull/550
-	classpath 'org.mariadb.jdbc:mariadb-java-client:2.4.1'
+	    classpath 'org.mariadb.jdbc:mariadb-java-client:2.4.1'
     }
 }
 
@@ -448,8 +453,14 @@ flyway {
     password = mysqlPassword
 }
 
-task migrateTenantDB<<{
+task migrateTenantDB {
     description="Migrates a Tenant DB. Optionally can pass dbName. Defaults to 'mifostenant-default' (Example: -PdbName=someTenantDBname)"
+    doLast {
+        def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/core_db'
+        def tenantDbName = 'mifostenant-default';
+        if (rootProject.hasProperty("dbName")) {
+            tenantDbName = rootProject.getProperty("dbName")
+        }
 
 	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/core_db'
 	def tenantDbName = 'mifostenant-default';
@@ -463,10 +474,17 @@ task migrateTenantDB<<{
     /**We use ${ as the prefix for strecthy reporting, do not want them to be interpreted by Flyway**/
     flyway.placeholderPrefix = "\$\${"
     flywayMigrate.execute()
+    }
 }
 
-task showTenantDBInfo<<{
+task showTenantDBInfo {
     description="Shows the migration info for a Tenant DB. Optionally can pass dbName. Defaults to 'mifostenant-default' (Example: -PdbName=someTenantDBname)"
+    doLast {
+        def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/core_db'
+        def tenantDbName = 'mifostenant-default';
+        if (rootProject.hasProperty("dbName")) {
+            tenantDbName = rootProject.getProperty("dbName")
+        }
 
 	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/core_db'
     def tenantDbName = 'mifostenant-default';
@@ -478,11 +496,18 @@ task showTenantDBInfo<<{
     flyway.driver = "org.mariadb.jdbc.Driver"
     flyway.locations= [filePath]
     flywayInfo.execute()
+    }
 }
 
 
-task migrateTenantListDB<<{
+task migrateTenantListDB {
     description="Migrates a Tenant List DB. Optionally can pass dbName. Defaults to 'mifosplatform-tenants' (Example: -PdbName=someDBname)"
+    doLast {
+        def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
+        def tenantsDbName = 'mifosplatform-tenants';
+        if (rootProject.hasProperty("dbName")) {
+            tenantsDbName = rootProject.getProperty("dbName")
+        }
 
 	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
  	def tenantsDbName = 'mifosplatform-tenants';
@@ -493,12 +518,18 @@ task migrateTenantListDB<<{
     flyway.url= "jdbc:mariadb://localhost:3306/$tenantsDbName"
     flyway.driver = "org.mariadb.jdbc.Driver"
     flyway.locations= [filePath]
-
     flywayMigrate.execute()
+    }
 }
 
-task showTenantListDBInfo<<{
+task showTenantListDBInfo {
     description="Shows the migration info for a List DB. Optionally can pass dbName. Defaults to 'mifosplatform-tenants' (Example: -PdbName=someDBname)"
+    doLast {
+        def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
+        def tenantsDbName = 'mifosplatform-tenants';
+        if (rootProject.hasProperty("dbName")) {
+            tenantsDbName = rootProject.getProperty("dbName")
+        }
 
 	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
     def tenantsDbName = 'mifosplatform-tenants';
@@ -510,21 +541,23 @@ task showTenantListDBInfo<<{
     flyway.driver = "org.mariadb.jdbc.Driver"
     flyway.locations= [filePath]
     flywayInfo.execute()
+    }
 }
 
-task repairTenantDB<<{
+task repairTenantDB {
     description="repair migrate"
+    doLast {
+        def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
+        def tenantsDbName = 'mifosplatform-tenants';
+        if (rootProject.hasProperty("dbName")) {
+            tenantsDbName = rootProject.getProperty("dbName")
+        }
 
-	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
-    def tenantsDbName = 'mifosplatform-tenants';
-    if (rootProject.hasProperty("dbName")) {
-        tenantsDbName = rootProject.getProperty("dbName")
+        flyway.url = "jdbc:mariadb://localhost:3306/$tenantsDbName"
+        flyway.driver = "org.mariadb.jdbc.Driver"
+        flyway.locations = [filePath]
+        flywayRepair.execute()
     }
-
-    flyway.url= "jdbc:mariadb://localhost:3306/$tenantsDbName"
-    flyway.driver = "org.mariadb.jdbc.Driver"
-    flyway.locations= [filePath]
-    flywayRepair.execute()
 }
 
 /*
