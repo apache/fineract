@@ -77,7 +77,7 @@ openjpa {
     files = fileTree(sourceSets.main.output.classesDir).matching {
 		include '**/AbstractPersistableCustom.class'
 		include '**/domain/*.class'
-		
+
     }
     enforcePropertyRestrictions = true
 }
@@ -86,7 +86,7 @@ rat {
   xmlOutput = false
   htmlOutput = false
   plainOutput = true
-  verbose = false 
+  verbose = false
 //  inputDir = './..'
   reportDir = new File(buildDir,'reports/rat')
  excludes = [
@@ -111,7 +111,7 @@ rat {
 	'**/NOTICE_RELEASE',
 	'**/NOTICE_SOURCE',
     // Swagger License
-    '**/fineract-provider/src/main/resources/swagger-ui/*.*',
+    '**/src/main/resources/swagger-ui/**',
     // gradle
     '**/.gradle/**',
     '**/gradlew',
@@ -122,8 +122,8 @@ rat {
     '**/native/**',
     '**/wrapper/**',
 	'**/build/**',
-	
-	//Api Docs 
+
+	//Api Docs
 	'**/api-docs/*.*',
 	'**/docs/system-architecture/.htaccess',
 	'**/docs/system-architecture/404.html',
@@ -131,14 +131,14 @@ rat {
 	'**/docs/system-architecture/**/*.xml',
 	'**/bootstrap-3.0.0/assets/application.js',
 	'**/system-architecture/js/plugins.js',
-	
+
 	//Apache License
 	'**/bootstrap-3.0.0/assets/less.js',
 	'**/css/bootstrap-3.0.0/**/*.*',
-	
+
 	//Public Domain See http://www.JSON.org/js.html
 	'**/bootstrap-3.0.0/assets/json2.js.htm',
-	
+
 	// MIT License
 	'**/modernizr-2.6.2.min.js',
 	'**/css/normalize.css',
@@ -153,7 +153,7 @@ rat {
 	'**/system-architecture/js/vendor/toc-0.1.2/jquery.toc.min.js',
 	'**/assets/respond.min.js',
 	'**/assets/html5shiv.js',
-	
+
 	//BSD License
 	'**/assets/uglify.js'
 	]
@@ -256,7 +256,7 @@ task dist(type:Zip){
         include '**/*'
         into('database/migrations')
     }
-    
+
     from war.outputs.files
     into(baseName + '-' + version)
 }
@@ -270,7 +270,7 @@ pmd {
 }
 findbugs {
     ignoreFailures = true
-    sourceSets = [sourceSets.main] 
+    sourceSets = [sourceSets.main]
 }
 
 war {
@@ -285,7 +285,7 @@ war {
 	}
 	rename ('LICENSE_RELEASE', 'LICENSE')
 	rename ('NOTICE_RELEASE', 'NOTICE')
-	
+
 	from('../DISCLAIMER') { // notice the parens
 		into "WEB-INF/" // no leading slash
 	}
@@ -294,7 +294,7 @@ war {
 
 license {
     header rootProject.file('../APACHE_LICENSETEXT.md')
-    excludes(["**/*.html", "**/*.mustache", "**/package-info.java", "**/keystore.jks"])
+    excludes(["**/*.html", "**/*.mustache", "**/package-info.java", "**/keystore.jks", "**/swagger-ui/**"])
     strictCheck true
 }
 
@@ -439,7 +439,7 @@ task migrateTenantDB<<{
     if (rootProject.hasProperty("dbName")) {
 		tenantDbName = rootProject.getProperty("dbName")
 	}
-	
+
     flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantDbName"
 	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
@@ -450,13 +450,13 @@ task migrateTenantDB<<{
 
 task showTenantDBInfo<<{
     description="Shows the migration info for a Tenant DB. Optionally can pass dbName. Defaults to 'mifostenant-default' (Example: -PdbName=someTenantDBname)"
-    
+
 	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/core_db'
     def tenantDbName = 'mifostenant-default';
     if (rootProject.hasProperty("dbName")) {
 		tenantDbName = rootProject.getProperty("dbName")
 	}
-	
+
     flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantDbName"
 	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
@@ -472,7 +472,7 @@ task migrateTenantListDB<<{
     if (rootProject.hasProperty("dbName")) {
 		tenantsDbName = rootProject.getProperty("dbName")
 	}
-	
+
     flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
 	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
@@ -482,13 +482,13 @@ task migrateTenantListDB<<{
 
 task showTenantListDBInfo<<{
     description="Shows the migration info for a List DB. Optionally can pass dbName. Defaults to 'mifosplatform-tenants' (Example: -PdbName=someDBname)"
-    
+
 	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
     def tenantsDbName = 'mifosplatform-tenants';
     if (rootProject.hasProperty("dbName")) {
 		tenantsDbName = rootProject.getProperty("dbName")
 	}
-    
+
     flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
 	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
@@ -497,13 +497,13 @@ task showTenantListDBInfo<<{
 
 task repairTenantDB<<{
     description="repair migrate"
-    
+
 	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
     def tenantsDbName = 'mifosplatform-tenants';
     if (rootProject.hasProperty("dbName")) {
         tenantsDbName = rootProject.getProperty("dbName")
     }
-    
+
     flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
 	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
     flyway.locations= [filePath]
