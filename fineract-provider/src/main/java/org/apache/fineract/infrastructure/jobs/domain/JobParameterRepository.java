@@ -16,22 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.infrastructure.jobs.domain;
 
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
-import org.apache.fineract.organisation.office.domain.Office;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import java.util.Map;
+import java.util.List;
 
+public interface JobParameterRepository extends JpaRepository<JobParameter, Long>, JpaSpecificationExecutor<JobParameter> {
 
-public interface LoanSchedularService {
-
-    void applyChargeForOverdueLoans() throws JobExecutionException;
-
-    void recalculateInterest() throws JobExecutionException;
-
-    void recalculateInterest(final Office office, final int threadPoolSize, final int batchSize);
-
-    void recalculateInterest(@SuppressWarnings("unused") final Map<String, String> jobParameters);
-
+    @Query("select jobParameter from JobParameter jobParameter where jobParameter.jobId=:jobId")
+    List<JobParameter> findJobParametersByJobId(@Param("jobId") Long jobId);
 }

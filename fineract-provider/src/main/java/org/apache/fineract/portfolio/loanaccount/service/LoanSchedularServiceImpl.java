@@ -18,13 +18,10 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.*;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
@@ -33,10 +30,14 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.organisation.office.domain.OfficeRepository;
+import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
@@ -48,13 +49,19 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
     private final ConfigurationDomainService configurationDomainService;
     private final LoanReadPlatformService loanReadPlatformService;
     private final LoanWritePlatformService loanWritePlatformService;
+	private final OfficeRepository officeRepository;
+	private final ApplicationContext applicationContext;
 
     @Autowired
     public LoanSchedularServiceImpl(final ConfigurationDomainService configurationDomainService,
-            final LoanReadPlatformService loanReadPlatformService, final LoanWritePlatformService loanWritePlatformService) {
+            final LoanReadPlatformService loanReadPlatformService, final LoanWritePlatformService loanWritePlatformService,
+			final OfficeRepository	officeRepository,
+			final ApplicationContext applicationContext) {
         this.configurationDomainService = configurationDomainService;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanWritePlatformService = loanWritePlatformService;
+		this.officeRepository=officeRepository;
+		this.applicationContext=applicationContext;
     }
 
     @Override
@@ -183,5 +190,134 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
 		}
 
 	}
+
+	@Override
+	@CronTarget(jobName = JobName.RECALCULATE_INTEREST_FOR_LOAN)
+	public void recalculateInterest(Map<String, String> jobParameters) {
+		//gets the officeId
+		final String officeId = jobParameters.get("officeId");
+		logger.info(officeId);
+		Long officeIdLong=Long.valueOf(officeId);
+		//gets the Office object
+		final Office office = this.officeRepository.findOne(officeIdLong);
+		if(office == null)
+			throw new OfficeNotFoundException(officeIdLong);
+		final int threadPoolSize=Integer.parseInt(jobParameters.get("thread-pool-size"));
+		final int batchSize=Integer.parseInt(jobParameters.get("batch-size"));
+
+		recalculateInterest(office,threadPoolSize,batchSize);
+	}
+
+	@Override
+	public void recalculateInterest(Office office, int threadPoolSize, int batchSize) {
+		final int pageSize = batchSize * threadPoolSize;
+
+		//initialise the executor service with fetched configurations
+		final ExecutorService executorService = Executors.newFixedThreadPool(threadPoolSize);
+
+		Long maxLoanIdInList = 0L;
+		final String officeHierarchy = office.getHierarchy() + "%";
+
+		//Get the loanIds from service
+		List<Long> loanIds = this.loanReadPlatformService
+				.fetchLoansForInterestRecalculation(pageSize, maxLoanIdInList, officeHierarchy);
+
+		// gets the loanIds data set iteratively and call addAccuruals for that paginated dataset
+		do {
+			int totalFilteredRecords = loanIds.size();
+			logger.info("Starting accrual - total filtered records - " + totalFilteredRecords);
+			recalculateInterest(loanIds, threadPoolSize, batchSize,
+					executorService);
+			maxLoanIdInList+=pageSize+1;
+			loanIds = this.loanReadPlatformService
+					.fetchLoansForInterestRecalculation(pageSize, maxLoanIdInList, officeHierarchy);
+		} while (!CollectionUtils.isEmpty(loanIds));
+
+		//shutdown the executor when done
+		executorService.shutdownNow();
+	}
+
+	private void recalculateInterest(List<Long> loanIds,
+									  int threadPoolSize, int batchSize, final ExecutorService executorService) {
+		StringBuilder sb = new StringBuilder();
+
+		List<Callable<Object>> posters = new ArrayList<Callable<Object>>();
+		int fromIndex = 0;
+		// get the size of current paginated dataset
+		int size = loanIds.size();
+		//calculate the batch size
+		batchSize = (int) Math.ceil(size / threadPoolSize);
+
+		if(batchSize == 0)
+			return;
+
+		int toIndex = (batchSize > size - 1)? size : batchSize ;
+		while(toIndex < size && loanIds.get(toIndex - 1).equals(loanIds.get(toIndex))) {
+			toIndex ++;
+		}
+		boolean lastBatch = false;
+		int loopCount = size/batchSize+1;
+
+		for (long i=0; i < loopCount; i++) {
+			List<Long> subList = safeSubList(loanIds, fromIndex, toIndex);
+			RecalculateInterestPoster poster = (RecalculateInterestPoster) this.applicationContext.getBean("recalculateInterestPoster");
+			poster.setLoanIds(subList);
+			poster.setLoanWritePlatformService(loanWritePlatformService);
+			posters.add(Executors.callable(poster));
+			if(lastBatch)
+				break;
+			if(toIndex + batchSize > size - 1)
+				lastBatch = true;
+			fromIndex = fromIndex + (toIndex - fromIndex);
+			toIndex = (toIndex + batchSize > size - 1)? size : toIndex + batchSize;
+			while(toIndex < size && loanIds.get(toIndex - 1).equals(loanIds.get(toIndex))) {
+				toIndex ++;
+			}
+		}
+
+		try {
+			List<Future<Object>> responses = executorService.invokeAll(posters);
+			checkCompletion(responses);
+		} catch (InterruptedException e1) {
+			logger.error("Interrupted while recalculateInterest", e1);
+		}
+	}
+	//break the lists into sub lists
+	public <T> List<T> safeSubList(List<T> list, int fromIndex, int toIndex) {
+		int size = list.size();
+		if (fromIndex >= size || toIndex <= 0 || fromIndex >= toIndex) {
+			return Collections.emptyList();
+		}
+
+		fromIndex = Math.max(0, fromIndex);
+		toIndex = Math.min(size, toIndex);
+
+		return list.subList(fromIndex, toIndex);
+	}
+	//checks the execution of task by each thread in the executor service
+	private void checkCompletion(List<Future<Object>> responses) {
+		try {
+			for(Future f : responses) {
+				f.get();
+			}
+			boolean allThreadsExecuted = false;
+			int noOfThreadsExecuted = 0;
+			for (Future<Object> future : responses) {
+				if (future.isDone()) {
+					noOfThreadsExecuted++;
+				}
+			}
+			allThreadsExecuted = noOfThreadsExecuted == responses.size();
+			if(!allThreadsExecuted)
+				logger.error("All threads could not execute.");
+		} catch (InterruptedException e1) {
+			logger.error("Interrupted while posting IR entries", e1);
+		}  catch (ExecutionException e2) {
+			logger.error("Execution exception while posting IR entries", e2);
+		}
+	}
+
+
+
 
 }
