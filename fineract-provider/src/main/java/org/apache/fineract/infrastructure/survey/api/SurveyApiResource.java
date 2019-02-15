@@ -30,6 +30,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import io.swagger.annotations.*;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -52,6 +53,7 @@ import org.springframework.stereotype.Component;
 @Path("/survey")
 @Component
 @Scope("singleton")
+@Api(value = "Survey", description = "")
 public class SurveyApiResource {
 
     private final DefaultToApiJsonSerializer<SurveyData> toApiJsonSerializer;
@@ -78,6 +80,8 @@ public class SurveyApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Retrieve surveys", notes = "Retrieve surveys. This allows to retrieve the list of survey tables registered .")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = SurveyApiResourceSwagger.GetSurveyResponse.class, responseContainer = "List")})
     public String retrieveSurveys() {
 
         this.context.authenticatedUser().validateHasReadPermission(SurveyApiConstants.SURVEY_RESOURCE_NAME);
@@ -90,7 +94,9 @@ public class SurveyApiResource {
     @Path("{surveyName}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveSurvey(@PathParam("surveyName") final String surveyName) {
+    @ApiOperation(value = "Retrieve survey", notes = "Lists a registered survey table details and the Apache Fineract Core application table they are registered to.")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = SurveyApiResourceSwagger.GetSurveyResponse.class)})
+    public String retrieveSurvey(@PathParam("surveyName") @ApiParam(value = "surveyName") final String surveyName) {
 
         this.context.authenticatedUser().validateHasReadPermission(SurveyApiConstants.SURVEY_RESOURCE_NAME);
 
@@ -104,7 +110,10 @@ public class SurveyApiResource {
     @Path("{surveyName}/{apptableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createDatatableEntry(@PathParam("surveyName") final String datatable, @PathParam("apptableId") final Long apptableId,
+    @ApiOperation(value = "Create an entry in the survey table", notes = "Insert and entry in a survey table (full fill the survey)." + "\n" + "\n" + "Refer Link for sample Body:  [ https://demo.openmf.org/api-docs/apiLive.htm#survey_create ] ")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdResponse.class)})
+    public String createDatatableEntry(@PathParam("surveyName") @ApiParam(value = "surveyName") final String datatable, @PathParam("apptableId") @ApiParam(value = "apptableId") final Long apptableId,
             final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //

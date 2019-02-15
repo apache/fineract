@@ -26,6 +26,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import io.swagger.annotations.Api;
 import org.apache.fineract.mix.data.XBRLData;
 import org.apache.fineract.mix.service.XBRLBuilder;
 import org.apache.fineract.mix.service.XBRLResultService;
@@ -36,6 +37,7 @@ import org.springframework.stereotype.Component;
 @Path("/mixreport")
 @Component
 @Scope("singleton")
+@Api(value = "Mix Report", description = "")
 public class MixReportApiResource {
 
     private final XBRLResultService xbrlResultService;

@@ -54,7 +54,8 @@ public class SelfRunReportApiResource {
     @Produces({ MediaType.APPLICATION_JSON, "text/csv", "application/vnd.ms-excel", "application/pdf", "text/html" })
     public Response runReport(@PathParam("reportName") final String reportName, @Context final UriInfo uriInfo) {
         this.context.authenticatedUser();
-        return this.runreportsApiResource.runReport(reportName, uriInfo);
+        final boolean isSelfServiceUserReport = true;
+        return this.runreportsApiResource.runReport(reportName, uriInfo, isSelfServiceUserReport);
     }
 
 }

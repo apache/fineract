@@ -115,42 +115,44 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 		long countryId;
 		ClientAddress clientAddressobj = new ClientAddress();
 		final JsonArray addressArray = command.arrayOfParameterNamed("address");
+		
+		if(addressArray != null){
+			for (int i = 0; i < addressArray.size(); i++) {
+				final JsonObject jsonObject = addressArray.get(i).getAsJsonObject();
 
-		for (int i = 0; i < addressArray.size(); i++) {
-			final JsonObject jsonObject = addressArray.get(i).getAsJsonObject();
+				// validate every address
+				this.fromApiJsonDeserializer.validateForCreate(jsonObject.toString(), true);
 
-			// validate every address
-			this.fromApiJsonDeserializer.validateForCreate(jsonObject.toString(), true);
+				if (jsonObject.get("stateProvinceId") != null) {
+					stateId = jsonObject.get("stateProvinceId").getAsLong();
+					stateIdobj = this.codeValueRepository.getOne(stateId);
+				}
 
-			if (jsonObject.get("stateProvinceId") != null) {
-				stateId = jsonObject.get("stateProvinceId").getAsLong();
-				stateIdobj = this.codeValueRepository.getOne(stateId);
+				if (jsonObject.get("countryId") != null) {
+					countryId = jsonObject.get("countryId").getAsLong();
+					countryIdObj = this.codeValueRepository.getOne(countryId);
+				}
+
+				final long addressTypeId = jsonObject.get("addressTypeId").getAsLong();
+				final CodeValue addressTypeIdObj = this.codeValueRepository.getOne(addressTypeId);
+
+				final Address add = Address.fromJsonObject(jsonObject, stateIdobj, countryIdObj);
+				this.addressRepository.save(add);
+				final Long addressid = add.getId();
+				final Address addobj = this.addressRepository.getOne(addressid);
+
+				//final boolean isActive = jsonObject.get("isActive").getAsBoolean();
+				boolean isActive=false;
+				if(jsonObject.get("isActive")!= null)
+				{
+					isActive= jsonObject.get("isActive").getAsBoolean();
+				}
+				
+
+				clientAddressobj = ClientAddress.fromJson(isActive, client, addobj, addressTypeIdObj);
+				this.clientAddressRepository.save(clientAddressobj);
+
 			}
-
-			if (jsonObject.get("countryId") != null) {
-				countryId = jsonObject.get("countryId").getAsLong();
-				countryIdObj = this.codeValueRepository.getOne(countryId);
-			}
-
-			final long addressTypeId = jsonObject.get("addressTypeId").getAsLong();
-			final CodeValue addressTypeIdObj = this.codeValueRepository.getOne(addressTypeId);
-
-			final Address add = Address.fromJsonObject(jsonObject, stateIdobj, countryIdObj);
-			this.addressRepository.save(add);
-			final Long addressid = add.getId();
-			final Address addobj = this.addressRepository.getOne(addressid);
-
-			//final boolean isActive = jsonObject.get("isActive").getAsBoolean();
-			boolean isActive=false;
-			if(jsonObject.get("isActive")!= null)
-			{
-				isActive= jsonObject.get("isActive").getAsBoolean();
-			}
-			
-
-			clientAddressobj = ClientAddress.fromJson(isActive, client, addobj, addressTypeIdObj);
-			this.clientAddressRepository.save(clientAddressobj);
-
 		}
 
 		return new CommandProcessingResultBuilder().withCommandId(command.commandId())

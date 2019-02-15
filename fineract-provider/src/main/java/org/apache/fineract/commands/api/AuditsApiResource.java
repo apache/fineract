@@ -33,6 +33,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.data.AuditData;
 import org.apache.fineract.commands.data.AuditSearchData;
@@ -51,6 +52,7 @@ import org.springframework.stereotype.Component;
 @Path("/audits")
 @Component
 @Scope("singleton")
+@Api(value = "Audits",description = "Every non-read Mifos API request is audited. A fully processed request can not be changed or deleted. See maker checker api for situations where an audit is not fully processed.\n" + "\n" + "Permissions: To search and look at audit entries a user needs to be attached to a role that has one of the ALL_FUNCTIONS, ALL_FUNCTIONS_READ or READ_AUDIT permissions.\n" + "\n" + "Data Scope: A user can only see audits that are within their data scope. However, 'head office' users can see all audits including those that aren't office/branch related e.g. Loan Product changes.")
 public class AuditsApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "actionName", "entityName", "resourceId",
@@ -79,17 +81,19 @@ public class AuditsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAuditEntries(@Context final UriInfo uriInfo, @QueryParam("actionName") final String actionName,
-            @QueryParam("entityName") final String entityName, @QueryParam("resourceId") final Long resourceId,
-            @QueryParam("makerId") final Long makerId, @QueryParam("makerDateTimeFrom") final String makerDateTimeFrom,
-            @QueryParam("makerDateTimeTo") final String makerDateTimeTo, @QueryParam("checkerId") final Long checkerId,
-            @QueryParam("checkerDateTimeFrom") final String checkerDateTimeFrom,
-            @QueryParam("checkerDateTimeTo") final String checkerDateTimeTo,
-            @QueryParam("processingResult") final Integer processingResult, @QueryParam("officeId") final Integer officeId,
-            @QueryParam("groupId") final Integer groupId, @QueryParam("clientId") final Integer clientId,
-            @QueryParam("loanid") final Integer loanId, @QueryParam("savingsAccountId") final Integer savingsAccountId,
-            @QueryParam("paged") final Boolean paged, @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
+    @ApiOperation(value = "List Audits", notes = "Get a 200 list of audits that match the criteria supplied and sorted by audit id in descending order, and are within the requestors' data scope. Also it supports pagination and sorting\n" + "\n" + "Example Requests:\n" + "\n" + "audits\n" + "\n" + "audits?fields=madeOnDate,maker,processingResult\n" + "\n" + "audits?makerDateTimeFrom=2013-03-25 08:00:00&makerDateTimeTo=2013-04-04 18:00:00\n" + "\n" + "audits?officeId=1\n" + "\n" + "audits?officeId=1&includeJson=true")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = MakercheckersApiResourceSwagger.GetMakerCheckerResponse.class, responseContainer = "list")})
+    public String retrieveAuditEntries(@Context final UriInfo uriInfo, @QueryParam("actionName") @ApiParam(value = "actionName") final String actionName,
+            @QueryParam("entityName") @ApiParam(value = "entityName") final String entityName, @QueryParam("resourceId") @ApiParam(value = "resourceId") final Long resourceId,
+            @QueryParam("makerId") @ApiParam(value = "makerId") final Long makerId, @QueryParam("makerDateTimeFrom") @ApiParam(value = "makerDateTimeFrom") final String makerDateTimeFrom,
+            @QueryParam("makerDateTimeTo") @ApiParam(value = "makerDateTimeTo") final String makerDateTimeTo, @QueryParam("checkerId") @ApiParam(value = "checkerId") final Long checkerId,
+            @QueryParam("checkerDateTimeFrom") @ApiParam(value = "checkerDateTimeFrom") final String checkerDateTimeFrom,
+            @QueryParam("checkerDateTimeTo") @ApiParam(value = "checkerDateTimeTo") final String checkerDateTimeTo,
+            @QueryParam("processingResult") @ApiParam(value = "processingResult") final Integer processingResult, @QueryParam("officeId") @ApiParam(value = "officeId") final Integer officeId,
+            @QueryParam("groupId") @ApiParam(value = "groupId") final Integer groupId, @QueryParam("clientId") @ApiParam(value = "clientId") final Integer clientId,
+            @QueryParam("loanid") @ApiParam(value = "loanid") final Integer loanId, @QueryParam("savingsAccountId") @ApiParam(value = "savingsAccountId") final Integer savingsAccountId,
+            @QueryParam("paged") @ApiParam(value = "paged") final Boolean paged, @QueryParam("offset") @ApiParam(value = "offset") final Integer offset, @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
+            @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy, @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
         final PaginationParameters parameters = PaginationParameters.instance(paged, offset, limit, orderBy, sortOrder);
@@ -114,7 +118,9 @@ public class AuditsApiResource {
     @Path("{auditId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAuditEntry(@PathParam("auditId") final Long auditId, @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "Retrieve an Audit Entry", notes = "Example Requests:\n" + "\n" + "audits/20\n" + "audits/20?fields=madeOnDate,maker,processingResult")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = MakercheckersApiResourceSwagger.GetMakerCheckerResponse.class)})
+    public String retrieveAuditEntry(@PathParam("auditId") @ApiParam(value = "auditId") final Long auditId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
@@ -128,6 +134,8 @@ public class AuditsApiResource {
     @Path("/searchtemplate")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiOperation(value = "Audit Search Template", notes = "This is a convenience resource. It can be useful when building an Audit Search UI. \"appUsers\" are data scoped to the office/branch the requestor is associated with.\n" + "\n" + "Example Requests:\n" + "\n" + "audits/searchtemplate\n" + "audits/searchtemplate?fields=actionNames")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = MakercheckersApiResourceSwagger.GetMakerCheckersSearchTemplateResponse.class)})
     public String retrieveAuditSearchTemplate(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);

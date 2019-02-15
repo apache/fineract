@@ -131,7 +131,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
                  row=addGuarantorSheet.getRow(rowIndex++);
                 }
                 writeString(GuarantorConstants.LOOKUP_SAVINGS_CLIENT_NAME_COL, row, savingsAccount.getClientName()  + "(" + savingsAccount.getClientId() + ")");
-                writeLong(GuarantorConstants.LOOKUP_SAVINGS_ACCOUNT_NO_COL, row, Long.parseLong(savingsAccount.getAccountNo()));
+                writeString(GuarantorConstants.LOOKUP_SAVINGS_ACCOUNT_NO_COL, row,savingsAccount.getAccountNo());
             }
 
     }

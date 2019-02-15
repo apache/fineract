@@ -186,7 +186,9 @@ public class ClientApiConstants {
     public static final String staffOptionsParamName = "staffOptions";
 
     public static final String datatables = "datatables";
+    public static final String obligeeData = "ObligeeDetails";
 
+    public static final String clientEntityName = "clients";
 
     /**
      * These parameters will match the class level parameters of

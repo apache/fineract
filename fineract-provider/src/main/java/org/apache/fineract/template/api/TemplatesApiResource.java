@@ -43,6 +43,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.*;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -67,6 +68,7 @@ import org.springframework.stereotype.Component;
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
 @Scope("singleton")
+@Api(value = "User Generated Documents", description = "User Generated Documents(alternatively, Templates) are used for end-user features such as custom user defined document generation (AKA UGD). They are based on {{ moustache }} templates. Think of them as a sort of built-in \"mail merge\" functionality.\n" + "\n" + "User Generated Documents (and other types of templates) can aggregate data from several Apache Fineract back-end API calls via mappers. Mappers can even access non-Apache Fineract REST services from other servers. UGDs can render such data in tables, show images, etc. TBD: Please have a look at some of the Example UGDs included in Apache Fineract (or the Wiki page, for now.).\n" + "\n" + "UGDs can be assigned to an entity like client or loan and be of a type like Document or SMS. The entity and type of a UGD is only there for the convenience of user agents (UIs), in order to know where to show UGDs for the user (i.e. which tab). The Template Engine back-end runner does not actually need this metadata.")
 public class TemplatesApiResource {
 
     private final Set<String> RESPONSE_TEMPLATES_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id"));
@@ -98,8 +100,10 @@ public class TemplatesApiResource {
     }
 
     @GET
-    public String retrieveAll(@DefaultValue("-1") @QueryParam("typeId") final int typeId,
-            @DefaultValue("-1") @QueryParam("entityId") final int entityId, @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "Retrieve all UGDs", notes = "Example Requests:\n" + "\n" + "templates\n" + "\n" + "It is also possible to get specific UGDs by entity and type:\n" + "\n" + "templates?type=0&entity=0\n" + "[Entity: Id]\n\n\n\n" + "\n\n" + "client: 0, loan: 1" + "\n\n" + "[Type: Id]\n\n\n\n" + "Document: 0, E-Mail (not yet): 1,  SMS: 2" )
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = TemplatesApiResourcesSwagger.GetTemplatesResponse.class)})
+    public String retrieveAll(@DefaultValue("-1") @QueryParam("typeId") @ApiParam(value = "typeId") final int typeId,
+            @DefaultValue("-1") @QueryParam("entityId") @ApiParam(value = "entityId") final int entityId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.RESOURCE_NAME_FOR_PERMISSION);
 
@@ -119,6 +123,8 @@ public class TemplatesApiResource {
 
     @GET
     @Path("template")
+    @ApiOperation(value = "Retrieve UGD Details Template", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for UGDs. The UGD data returned consists of any or all of:\n" + "\n" + "ARGUMENTS\n" + "name String entity String type String text String optional mappers Mapper optional\n" + "Example Request:\n" + "\n" + "templates/template")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = TemplatesApiResourcesSwagger.GetTemplatesTemplateResponse.class)})
     public String template(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.RESOURCE_NAME_FOR_PERMISSION);
@@ -130,7 +136,10 @@ public class TemplatesApiResource {
     }
 
     @POST
-    public String createTemplate(final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Add a UGD", notes = "Adds a new UGD.\n" + "\n" + "Mandatory Fields\n" + "name\n\n\n\n" + "Example Requests:\n" + "\n" + "templates/1")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TemplatesApiResourcesSwagger.PostTemplatesRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = TemplatesApiResourcesSwagger.PostTemplatesResponse.class)})
+    public String createTemplate(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createTemplate().withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -140,7 +149,9 @@ public class TemplatesApiResource {
 
     @GET
     @Path("{templateId}")
-    public String retrieveOne(@PathParam("templateId") final Long templateId, @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "Retrieve a UGD", notes = "Example Requests:\n" + "\n" + "templates/1")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = TemplatesApiResourcesSwagger.GetTemplatesTemplateIdResponse.class)})
+    public String retrieveOne(@PathParam("templateId") @ApiParam(value = "templateId") final Long templateId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.RESOURCE_NAME_FOR_PERMISSION);
 
@@ -164,7 +175,10 @@ public class TemplatesApiResource {
 
     @PUT
     @Path("{templateId}")
-    public String saveTemplate(@PathParam("templateId") final Long templateId, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Update a UGD", notes = "")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TemplatesApiResourcesSwagger.PutTemplatesTemplateIdRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = TemplatesApiResourcesSwagger.PutTemplatesTemplateIdResponse.class)})
+    public String saveTemplate(@PathParam("templateId") @ApiParam(value = "templateId") final Long templateId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateTemplate(templateId).withJson(apiRequestBodyAsJson).build();
 
@@ -175,7 +189,9 @@ public class TemplatesApiResource {
 
     @DELETE
     @Path("{templateId}")
-    public String deleteTemplate(@PathParam("templateId") final Long templateId) {
+    @ApiOperation(value = "Delete a UGD", notes = "")
+    @ApiResponses({@ApiResponse(code = 200, message = "", response = TemplatesApiResourcesSwagger.DeleteTemplatesTemplateIdResponse.class)})
+    public String deleteTemplate(@PathParam("templateId") @ApiParam(value = "templateId") final Long templateId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteTemplate(templateId).build();
 

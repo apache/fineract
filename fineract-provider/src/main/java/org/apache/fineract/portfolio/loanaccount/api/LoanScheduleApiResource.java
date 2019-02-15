@@ -18,18 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.api;
 
-import java.util.HashSet;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
-
+import io.swagger.annotations.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -45,9 +34,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
+import java.util.HashSet;
+
 @Path("/loans/{loanId}/schedule")
 @Component
 @Scope("singleton")
+@Api(value = "Loan Rescheduling", description = "Loan Term Variations provides the ability to change due dates, amounts and number of instalments before loan approval.")
 public class LoanScheduleApiResource {
 
     private final String resourceNameForPermissions = "LOAN";
@@ -73,8 +69,11 @@ public class LoanScheduleApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String calculateLoanScheduleOrSubmitVariableSchedule(@PathParam("loanId") final Long loanId,
-            @QueryParam("command") final String commandParam, @Context final UriInfo uriInfo, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Calculate loan repayment schedule based on Loan term variations | Updates loan repayment schedule based on Loan term variations | Updates loan repayment schedule by removing Loan term variations", httpMethod = "POST", notes = "Calculate loan repayment schedule based on Loan term variations:\n\n" + "Mandatory Fields: exceptions,locale,dateFormat\n\n" + "Updates loan repayment schedule based on Loan term variations:\n\n" + "Mandatory Fields: exceptions,locale,dateFormat\n\n" + "Updates loan repayment schedule by removing Loan term variations:\n\n" + "It updates the loan repayment schedule by removing Loan term variations\n\n" + "Showing request/response for 'Updates loan repayment schedule by removing Loan term variations'")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = LoanScheduleApiResourceSwagger.PostLoansLoanIdScheduleRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = LoanScheduleApiResourceSwagger.PostLoansLoanIdScheduleResponse.class)})
+    public String calculateLoanScheduleOrSubmitVariableSchedule(@PathParam("loanId") @ApiParam(value = "loanId") final Long loanId,
+            @QueryParam("command") @ApiParam(value = "command") final String commandParam, @Context final UriInfo uriInfo, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         CommandWrapper commandRequest = null;
         if (is(commandParam, "calculateLoanSchedule")) {

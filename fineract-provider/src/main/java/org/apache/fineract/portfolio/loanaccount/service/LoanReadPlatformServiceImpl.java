@@ -2197,5 +2197,16 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
 
     }
-    
+
+	@Override
+	public Long retrieveLoanIdByAccountNumber(String loanAccountNumber) {
+		try {
+			return this.jdbcTemplate.queryForObject("select l.id from m_loan l where l.account_no = ?",
+					new Object[] { loanAccountNumber }, Long.class);
+
+		} catch (final EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
 }

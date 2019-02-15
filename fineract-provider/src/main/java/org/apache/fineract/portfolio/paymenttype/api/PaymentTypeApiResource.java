@@ -18,20 +18,7 @@
  */
 package org.apache.fineract.portfolio.paymenttype.api;
 
-import java.util.Collection;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
-
+import io.swagger.annotations.*;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -46,8 +33,15 @@ import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatform
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
+import java.util.Collection;
+
 @Path("/paymenttypes")
 @Component
+@Api(value = "Payment Type", description = "This defines the payment type")
 public class PaymentTypeApiResource {
 
     private final PlatformSecurityContext securityContext;
@@ -77,6 +71,8 @@ public class PaymentTypeApiResource {
     @GET
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Retrieve all Payment Types", httpMethod = "GET", notes = "Retrieve list of payment types")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = PaymentTypeApiResourceSwagger.GetPaymentTypesResponse.class)})
     public String getAllPaymentTypes(@Context final UriInfo uriInfo) {
         this.securityContext.authenticatedUser().validateHasReadPermission(PaymentTypeApiResourceConstants.resourceNameForPermissions);
         final Collection<PaymentTypeData> paymentTypes = this.readPlatformService.retrieveAllPaymentTypes();
@@ -88,7 +84,9 @@ public class PaymentTypeApiResource {
     @Path("{paymentTypeId}")
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
-    public String retrieveOnePaymentType(@PathParam("paymentTypeId") final Long paymentTypeId, @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "Retrieve a Payment Type", httpMethod = "GET", notes = "Retrieves a payment type")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = PaymentTypeApiResourceSwagger.GetPaymentTypesPaymentTypeIdResponse.class)})
+    public String retrieveOnePaymentType(@PathParam("paymentTypeId") @ApiParam(value = "paymentTypeId") final Long paymentTypeId, @Context final UriInfo uriInfo) {
         this.securityContext.authenticatedUser().validateHasReadPermission(PaymentTypeApiResourceConstants.resourceNameForPermissions);
         this.paymentTypeRepositoryWrapper.findOneWithNotFoundDetection(paymentTypeId);
         final PaymentTypeData paymentTypes = this.readPlatformService.retrieveOne(paymentTypeId);
@@ -99,7 +97,10 @@ public class PaymentTypeApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createPaymentType(final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Create a Payment Type", httpMethod = "POST", notes = "Creates a new Payment type\n\n" + "Mandatory Fields: name\n\n" + "Optional Fields: Description, isCashPayment,Position")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = PaymentTypeApiResourceSwagger.PostPaymentTypesRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = PaymentTypeApiResourceSwagger.PostPaymentTypesResponse.class)})
+    public String createPaymentType(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createPaymentType().withJson(apiRequestBodyAsJson).build();
 
@@ -112,7 +113,10 @@ public class PaymentTypeApiResource {
     @Path("{paymentTypeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updatePaymentType(@PathParam("paymentTypeId") final Long paymentTypeId, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Update a Payment Type", httpMethod = "PUT", notes = "Updates a Payment Type")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = PaymentTypeApiResourceSwagger.PutPaymentTypesPaymentTypeIdRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = PaymentTypeApiResourceSwagger.PutPaymentTypesPaymentTypeIdResponse.class)})
+    public String updatePaymentType(@PathParam("paymentTypeId") @ApiParam(value = "paymentTypeId") final Long paymentTypeId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePaymentType(paymentTypeId).withJson(apiRequestBodyAsJson)
                 .build();
@@ -126,7 +130,9 @@ public class PaymentTypeApiResource {
     @Path("{paymentTypeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteCode(@PathParam("paymentTypeId") final Long paymentTypeId) {
+    @ApiOperation(value = "Delete a Payment Type", httpMethod = "DELETE", notes = "Deletes payment type")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = PaymentTypeApiResourceSwagger.DeletePaymentTypesPaymentTypeIdResponse.class)})
+    public String deleteCode(@PathParam("paymentTypeId") @ApiParam(value = "paymentTypeId") final Long paymentTypeId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deletePaymentType(paymentTypeId).build();
 

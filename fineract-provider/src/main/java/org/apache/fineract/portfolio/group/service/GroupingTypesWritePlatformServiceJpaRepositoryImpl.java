@@ -356,7 +356,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     @Override
     public CommandProcessingResult updateCenter(final Long centerId, final JsonCommand command) {
 
-        this.fromApiJsonDeserializer.validateForUpdateCenter(command);
+        this.fromApiJsonDeserializer.validateForUpdateCenter(command, centerId);
 
         return updateGroupingType(centerId, command, GroupTypes.CENTER);
     }
@@ -365,7 +365,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     @Override
     public CommandProcessingResult updateGroup(final Long groupId, final JsonCommand command) {
 
-        this.fromApiJsonDeserializer.validateForUpdateGroup(command);
+        this.fromApiJsonDeserializer.validateForUpdateGroup(command, groupId);
 
         return updateGroupingType(groupId, command, GroupTypes.GROUP);
     }

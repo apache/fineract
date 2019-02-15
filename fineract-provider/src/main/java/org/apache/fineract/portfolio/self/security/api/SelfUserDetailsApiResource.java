@@ -18,22 +18,24 @@
  */
 package org.apache.fineract.portfolio.self.security.api;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-
+import io.swagger.annotations.*;
 import org.apache.fineract.infrastructure.security.api.UserDetailsApiResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+
 @Path("/self/userdetails")
 @Component
 @Profile("oauth")
 @Scope("singleton")
+@Api(value = "Self User Details", description = "")
 public class SelfUserDetailsApiResource {
 
 	private final UserDetailsApiResource userDetailsApiResource;
@@ -46,8 +48,10 @@ public class SelfUserDetailsApiResource {
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON })
+	@ApiOperation(value = "Fetch authenticated user details", httpMethod = "GET", notes = "Checks the Authentication and returns the set roles and permissions allowed\n\n" + "For more info visit this link - https://demo.openmf.org/api-docs/apiLive.htm#selfoauth")
+	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfUserDetailsApiResourceSwagger.GetSelfUserDetailsResponse.class)})
 	public String fetchAuthenticatedUserData(
-			@QueryParam("access_token") final String accessToken) {
+			@QueryParam("access_token") @ApiParam(value = "äccess_token") final String accessToken) {
 		return this.userDetailsApiResource
 				.fetchAuthenticatedUserData(accessToken);
 	}

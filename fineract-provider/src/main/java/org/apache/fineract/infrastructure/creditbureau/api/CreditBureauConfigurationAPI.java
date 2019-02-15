@@ -35,6 +35,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.Api;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -58,6 +59,7 @@ import org.springframework.stereotype.Component;
 @Path("/CreditBureauConfiguration")
 @Component
 @Scope("singleton")
+@Api(value = "CreditBureau Configuration")
 public class CreditBureauConfigurationAPI {
 	private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
 			Arrays.asList("creditBureauId", "alias", "country", "creditBureauProductId", "startDate", "endDate", "isActive"));

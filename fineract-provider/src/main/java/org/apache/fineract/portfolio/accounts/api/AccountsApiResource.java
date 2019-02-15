@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.accounts.api;
 
+import io.swagger.annotations.*;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -62,6 +63,7 @@ import java.io.InputStream;
 @Path("/accounts/{type}")
 @Component
 @Scope("singleton")
+@Api(value = "Share Account", description = "Share accounts are instances of a praticular share product created for an individual. An application process around the creation of accounts is also supported.")
 public class AccountsApiResource {
 
     private final ApplicationContext applicationContext ;
@@ -93,9 +95,11 @@ public class AccountsApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String template(@PathParam("type") final String accountType, @QueryParam("clientId") final Long clientId, 
-    		@QueryParam("productId") final Long productId,
-            @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "Retrieve Share Account Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Requests:\n" + "\n" + "accounts/share/template?clientId=1\n" + "\n" + "\n" + "accounts/share/template?clientId=1&productId=1")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = AccountsApiResourceSwagger.GetAccountsTypeTemplateResponse.class)})
+    public String template(@PathParam("type") @ApiParam(value = "type") final String accountType, @QueryParam("clientId") @ApiParam(value = "clientId") final Long clientId,
+                           @QueryParam("productId") @ApiParam(value = "productId") final Long productId,
+                           @Context final UriInfo uriInfo) {
         try {
             this.platformSecurityContext.authenticatedUser() ;
             String serviceName = accountType+AccountsApiConstants.READPLATFORM_NAME ;
@@ -112,7 +116,9 @@ public class AccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAccount(@PathParam("accountId") final Long accountId, @PathParam("type") final String accountType,
+    @ApiOperation(value = "Retrieve a share application/account", httpMethod = "GET", notes = "Retrieves a share application/account\n\n" + "Example Requests :\n" + "\n" + "shareaccount/1")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = AccountsApiResourceSwagger.GetAccountsTypeAccountIdResponse.class)})
+    public String retrieveAccount(@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId, @PathParam("type") @ApiParam(value = "type") final String accountType,
             @Context final UriInfo uriInfo) {
         try {
             String serviceName = accountType+AccountsApiConstants.READPLATFORM_NAME ;
@@ -128,7 +134,9 @@ public class AccountsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllAccounts(@PathParam("type") final String accountType, @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit, @Context final UriInfo uriInfo) {
+    @ApiOperation(value = "List share applications/accounts", httpMethod = "GET", notes = "Lists share applications/accounts\n\n" + "Example Requests:\n" + "\n" + "shareaccount")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = AccountsApiResourceSwagger.GetAccountsTypeResponse.class)})
+    public String retrieveAllAccounts(@PathParam("type") @ApiParam(value = "type") final String accountType, @QueryParam("offset") @ApiParam(value = "offset") final Integer offset, @QueryParam("limit") @ApiParam(value = "limit") final Integer limit, @Context final UriInfo uriInfo) {
         try {
             String serviceName = accountType+AccountsApiConstants.READPLATFORM_NAME ;
             AccountReadPlatformService service = (AccountReadPlatformService) this.applicationContext.getBean(serviceName) ;
@@ -143,7 +151,10 @@ public class AccountsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createAccount(@PathParam("type") final String accountType, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Submit new share application", httpMethod = "POST", notes = "Submits new share application\n\n" + "Mandatory Fields: clientId, productId, submittedDate, savingsAccountId, requestedShares, applicationDate\n\n" + "Optional Fields: accountNo, externalId\n\n" + "Inherited from Product (if not provided): minimumActivePeriod, minimumActivePeriodFrequencyType, lockinPeriodFrequency, lockinPeriodFrequencyType")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = AccountsApiResourceSwagger.PostAccountsTypeRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = AccountsApiResourceSwagger.PostAccountsTypeResponse.class)})
+    public String createAccount(@PathParam("type") @ApiParam(value = "type") final String accountType, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         CommandWrapper commandWrapper = null;
         this.platformSecurityContext.authenticatedUser();
         commandWrapper = new CommandWrapperBuilder().createAccount(accountType).withJson(apiRequestBodyAsJson).build();
@@ -155,8 +166,11 @@ public class AccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String handleCommands(@PathParam("type") final String accountType, @PathParam("accountId") final Long accountId, @QueryParam("command") final String commandParam,
-            final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Approve share application | Undo approval share application | Reject share application | Activate a share account | Close a share account | Apply additional shares on a share account | Approve additional shares request on a share account | Reject additional shares request on a share account | Redeem shares on a share account", httpMethod = "POST", notes = "Approve share application:\n\n" + "Approves share application so long as its in 'Submitted and pending approval' state.\n\n" + "Undo approval share application:\n\n" + "Will move 'approved' share application back to 'Submitted and pending approval' state.\n\n" + "Reject share application:\n\n" + "Rejects share application so long as its in 'Submitted and pending approval' state.\n\n" + "Activate a share account:\n\n" + "Results in an approved share application being converted into an 'active' share account.\n\n" + "Close a share account:\n\n" + "Results in an Activated share application being converted into an 'closed' share account.\n" + "\n" + "closedDate is closure date of share account\n\n" + "Mandatory Fields: dateFormat,locale,closedDate\n\n" + "Apply additional shares on a share account:\n\n" + "requestedDate is requsted date of share purchase\n" + "\n" + "requestedShares is number of shares to be purchase\n\n" + "Mandatory Fields: dateFormat,locale,requestedDate, requestedShares\n\n" + "Approve additional shares request on a share account\n\n" + "requestedShares is Share purchase transaction ids\n\n" + "Mandatory Fields: requestedShares\n\n" + "Reject additional shares request on a share account:\n\n" + "requestedShares is Share purchase transaction ids\n\n" + "Mandatory Fields: requestedShares\n\n" + "Redeem shares on a share account:\n\n" + "Results redeem some/all shares from share account.\n" + "\n" + "requestedDate is requsted date of shares redeem\n" + "\n" + "requestedShares is number of shares to be redeemed\n\n" + "Mandatory Fields: dateFormat,locale,requestedDate,requestedShares\n\n" + "Showing request/response for 'Reject additional shares request on a share account'\n\n" + "For more info visit this link - https://demo.openmf.org/api-docs/apiLive.htm#shareaccounts")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = AccountsApiResourceSwagger.PostAccountsTypeAccountIdRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = AccountsApiResourceSwagger.PostAccountsTypeAccountIdResponse.class)})
+    public String handleCommands(@PathParam("type") @ApiParam(value = "type") final String accountType, @PathParam("accountId") @ApiParam(value = "accountId") final Long accountId, @QueryParam("command") @ApiParam(value = "command") final String commandParam,
+            @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         CommandWrapper commandWrapper = null;
         this.platformSecurityContext.authenticatedUser();
         commandWrapper = new CommandWrapperBuilder().createAccountCommand(accountType, accountId, commandParam).withJson(apiRequestBodyAsJson).build();
@@ -168,7 +182,10 @@ public class AccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateAccount(@PathParam("type") final String accountType, @PathParam("accountId") final Long accountId, final String apiRequestBodyAsJson) {
+    @ApiOperation(value = "Modify a share application", httpMethod = "PUT", notes = "Share application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc")
+    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = AccountsApiResourceSwagger.PutAccountsTypeAccountIdRequest.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = AccountsApiResourceSwagger.PutAccountsTypeAccountIdResponse.class)})
+    public String updateAccount(@PathParam("type") @ApiParam(value = "type") final String accountType, @PathParam("accountId") @ApiParam(value = "accountId") final Long accountId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         this.platformSecurityContext.authenticatedUser();
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateAccount(accountType, accountId)
                 .withJson(apiRequestBodyAsJson).build();
