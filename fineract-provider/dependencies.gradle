@@ -88,8 +88,8 @@ dependencies {
                 //[group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0']
 
                 [group: 'io.swagger', name: 'swagger-jersey-jaxrs', version: '1.5.15'],
-                [group: 'org.springframework', name:'spring-jms'],
-                [group: 'org.apache.activemq', name: 'activemq-broker'],
+                [group: 'org.springframework', name:'spring-jms', version: '4.0.7.RELEASE'],
+                [group: 'org.apache.activemq', name: 'activemq-broker', version: '5.9.1'],
                 [group: 'javax.validation', name: 'validation-api', version: '2.0.0.Final']
     )
 

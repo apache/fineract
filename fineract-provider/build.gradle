@@ -41,7 +41,7 @@ buildscript {
      classpath 'org.gradle.api.plugins:gradle-tomcat-plugin:1.0',
                'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0',
                'org.zeroturnaround:gradle-jrebel-plugin:1.1.2',
-               'org.springframework.boot:spring-boot-gradle-plugin:1.1.6.RELEASE' // also change springDataJpaVersion above
+               'org.springframework.boot:spring-boot-gradle-plugin:2.1.3.RELEASE' // also change springDataJpaVersion below
      classpath "org.apache.openjpa:openjpa-all:$openJPAVersion"
      classpath 'at.schmutterer.oss.gradle:gradle-openjpa:0.2.0'
      classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.2.2'
@@ -52,7 +52,7 @@ apply plugin: "org.nosphere.apache.rat"
 apply plugin: 'rebel'
 apply plugin: 'license'
 apply plugin: 'war'
-apply plugin: 'spring-boot'
+apply plugin: 'org.springframework.boot'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'tomcat'
@@ -299,7 +299,7 @@ war {
 	from('../DISCLAIMER') { // notice the parens
 		into "WEB-INF/" // no leading slash
 	}
-    war.finalizedBy(bootRepackage)
+    war.finalizedBy(bootWar)
 }
 
 license {
@@ -439,8 +439,8 @@ def qualifyVersionIfNecessary(version) {
 }
 
 springBoot {
-    mainClass = 'org.apache.fineract.ServerWithMariaDB4jApplication'
+    mainClassName = 'org.apache.fineract.ServerWithMariaDB4jApplication'
 }
-bootRepackage {
-    mainClass = 'org.apache.fineract.ServerWithMariaDB4jApplication'
+bootWar {
+    mainClassName = 'org.apache.fineract.ServerWithMariaDB4jApplication'
 }
