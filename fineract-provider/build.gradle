@@ -33,7 +33,7 @@ buildscript {
                'org.zeroturnaround:gradle-jrebel-plugin:1.1.2',
                'org.springframework.boot:spring-boot-gradle-plugin:2.1.3.RELEASE' // also change springDataJpaVersion below
      classpath 'org.apache.openjpa:openjpa-all:2.4.1'
-     classpath 'at.schmutterer.oss.gradle:gradle-openjpa:0.2.0'
+     classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.0.0'
      classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.2.2'
   }
 }
@@ -73,12 +73,12 @@ repositories {
 	jcenter()
 	// mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
 }
+
 openjpa {
-    files = fileTree(sourceSets.main.output.classesDirs.filter {
-		include '**/AbstractPersistableCustom.class'
-		include '**/domain/*.class'
-    })
-    enforcePropertyRestrictions = true
+    includes = ['**/AbstractPersistableCustom.class', '**/domain/*.class']
+    enhance {
+        enforcePropertyRestrictions true
+    }
 }
 
 rat {
