@@ -157,30 +157,6 @@ public class BatchHelper {
 
     /**
      * Creates and returns a
-     * {@link org.apache.fineract.batch.command.internal.CreateClientCommandStrategy}
-     * Request as one of the request in Batch.
-     *
-     * @param reqId
-     * @param externalId
-     * @return BatchRequest
-     */
-    public static BatchRequest createActiveClientRequest(final Long requestId, final String externalId) {
-
-        final BatchRequest br = new BatchRequest();
-        br.setRequestId(requestId);
-        br.setRelativeUrl("clients");
-        br.setMethod("POST");
-
-        final String body = "{ \"officeId\": 1, \"firstname\": \"Petra\", \"lastname\": \"Yton\"," + "\"externalId\": " + externalId
-                + ",  \"dateFormat\": \"dd MMMM yyyy\", \"locale\": \"en\"," + "\"active\": true, \"activationDate\": \"04 March 2010\", \"submittedOnDate\": \"04 March 2010\"}";
-
-        br.setBody(body);
-
-        return br;
-    }
-
-    /**
-     * Creates and returns a
      * {@link org.apache.fineract.batch.command.internal.UpdateClientCommandStrategy}
      * Request with given requestId and reference.
      * 
