@@ -34,6 +34,8 @@ public class ExternalServicesConstants {
     public static final String SMTP_HOST = "host";
     public static final String SMTP_PORT = "port";
     public static final String SMTP_USE_TLS = "useTLS";
+    public static final String SMTP_FROM_EMAIL = "fromEmail";
+    public static final String SMTP_FROM_NAME = "fromName";
 
     public static final String SMS_SERVICE_NAME = "MESSAGE_GATEWAY";
     public static final String SMS_HOST = "host_name";
@@ -78,7 +80,7 @@ public class ExternalServicesConstants {
     }
 
     public static enum SMTP_JSON_INPUT_PARAMS {
-        USERNAME("username"), PASSWORD("password"), HOST("host"), PORT("port"), USETLS("useTLS");
+        USERNAME("username"), PASSWORD("password"), HOST("host"), PORT("port"), USETLS("useTLS"), FROM_EMAIL("fromEmail"), FROM_NAME("fromName");
 
         private final String value;
 
