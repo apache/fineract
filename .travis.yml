@@ -20,6 +20,14 @@ language: java
 jdk:
   - openjdk8
 
+services:
+  - mysql
+
+before_install:
+  - echo "USE mysql;\nUPDATE user SET password=PASSWORD('mysql') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
+  - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `mifosplatform-tenants`;'
+  - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `mifostenant-default`;'
+
 # https://docs.travis-ci.com/user/languages/java/#caching
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -36,3 +44,6 @@ cache:
 # @see http://forums.gradle.org/gradle/topics/whats_new_in_gradle_1_1_test_logging for alternative
 script:
   - ./gradlew --info licenseMain licenseTest licenseIntegrationTest test
+  - ./gradlew migrateTenantListDB -PdbName=mifosplatform-tenants
+  - ./gradlew migrateTenantDB -PdbName=mifostenant-default
+  - ./gradlew clean integrationTest
