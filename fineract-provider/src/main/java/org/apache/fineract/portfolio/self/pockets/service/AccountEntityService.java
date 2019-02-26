@@ -16,27 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.shareaccounts.service;
 
-import java.util.Collection;
-import java.util.Set;
+package org.apache.fineract.portfolio.self.pockets.service;
 
-import org.apache.fineract.portfolio.accounts.service.AccountReadPlatformService;
-import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountData;
-import org.joda.time.LocalDate;
+public interface AccountEntityService {
 
-public interface ShareAccountReadPlatformService extends AccountReadPlatformService {
+	String getKey();
 
-    @Override
-    public ShareAccountData retrieveTemplate(final Long clientId, final Long productId);
+	void validateSelfUserAccountMapping(Long accountId);
 
-    @Override
-    public ShareAccountData retrieveOne(Long id, boolean includeTemplate);
-
-    @Override
-    public Set<String> getResponseDataParams();
-
-    Collection<ShareAccountData> retrieveAllShareAccountDataForDividends(Long productId, boolean fetchInActiveAccounts, LocalDate startDate);
-    
 	String retrieveAccountNumberByAccountId(Long accountId);
 }

@@ -2209,4 +2209,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		}
 	}
 
+	public String retrieveAccountNumberByAccountId(Long accountId) {
+		try {
+			final String sql = "select loan.account_no from m_loan loan where loan.id = ?";
+			return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
+		} catch (final EmptyResultDataAccessException e) {
+			throw new LoanNotFoundException(accountId);
+		}
+	}
 }
