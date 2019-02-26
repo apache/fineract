@@ -6497,20 +6497,14 @@ public class Loan extends AbstractPersistableCustom<Long> {
         return this.charges;
     }
     public void initializeLazyCollections() {
-        checkAndFetchLazyCollection(this.charges);
-        checkAndFetchLazyCollection(this.trancheCharges);
-        checkAndFetchLazyCollection(this.repaymentScheduleInstallments);
-        checkAndFetchLazyCollection(this.loanTransactions);
-        checkAndFetchLazyCollection(this.disbursementDetails);
-        checkAndFetchLazyCollection(this.loanTermVariations);
-        checkAndFetchLazyCollection(this.collateral);
-        checkAndFetchLazyCollection(this.loanOfficerHistory);
-    }
-
-    private void checkAndFetchLazyCollection(Collection lazyCollection){
-        if (lazyCollection != null) {
-            lazyCollection.size();
-        }
+        this.charges.size() ;
+        this.trancheCharges.size() ;
+        this.repaymentScheduleInstallments.size() ;
+        this.loanTransactions.size() ;
+        this.disbursementDetails.size() ;
+        this.loanTermVariations.size() ;
+        this.collateral.size() ;
+        this.loanOfficerHistory.size() ;
     }
     
     public void initializeLoanOfficerHistory() {
