@@ -57,8 +57,8 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 /* define binary compatibility version */
 targetCompatibility = JavaVersion.VERSION_1_8
 
-project.ext.springBootVersion = '1.1.6.RELEASE'
-project.ext.springVersion = '4.0.7.RELEASE'
+project.ext.springBootVersion = '1.2.8.RELEASE'
+project.ext.springVersion = '4.1.9.RELEASE'
 project.ext.springOauthVersion = '2.0.4.RELEASE'
 project.ext.jerseyVersion = '1.17'
 project.ext.springDataJpaVersion = '1.7.0.RELEASE' // also change spring-boot-gradle-plugin version above
@@ -101,6 +101,8 @@ rat {
 	'**/.classpath',
 	'**/.project',
 	'**/.idea/**',
+    '**/*.ipr',
+    '**/*.iws',
 	'**/.settings/**',
 	'**/bin/**',
 	'**/.git/**',
