@@ -41,6 +41,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.ws.rs.core.HttpHeaders;
@@ -63,6 +64,7 @@ public class SavingsImportHandlerTest {
     }
 
     @Test
+    @Ignore
     public void testSavingsImport() throws InterruptedException, IOException, ParseException {
 
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
