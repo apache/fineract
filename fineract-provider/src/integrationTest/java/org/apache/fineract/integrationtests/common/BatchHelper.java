@@ -197,7 +197,7 @@ public class BatchHelper {
         br.setReference(reference);
 
         final String body = "{\"dateFormat\": \"dd MMMM yyyy\", \"locale\": \"en_GB\", \"clientId\": \"$.clientId\"," + "\"productId\": "
-                + productId + ", \"principal\": \"10,000.00\", \"loanTermFrequency\": 12,"
+                + productId + ", \"principal\": \"10,000.00\", \"loanTermFrequency\": 10,"
                 + "\"loanTermFrequencyType\": 2, \"loanType\": \"individual\", \"numberOfRepayments\": 10,"
                 + "\"repaymentEvery\": 1, \"repaymentFrequencyType\": 2, \"interestRatePerPeriod\": 10,"
                 + "\"amortizationType\": 1, \"interestType\": 0, \"interestCalculationPeriodType\": 1,"
