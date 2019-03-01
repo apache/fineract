@@ -4,7 +4,7 @@ Describe the changes made and why they were made. Ignore if these details are pr
 ## Checklist
 Please make sure these boxes are checked before submitting your pull request - thanks!
 
-- [ ] Commit message starts with the issues number from https://issues.apache.org/jira/projects/FINERACT/. Ex: FINERACT-646 Pockets API.
+- [ ] Commit message starts with the issue number from https://issues.apache.org/jira/projects/FINERACT/. Ex: FINERACT-646 Pockets API.
 
 - [ ] Coding conventions at https://cwiki.apache.org/confluence/display/FINERACT/Coding+Conventions have been followed.
 
