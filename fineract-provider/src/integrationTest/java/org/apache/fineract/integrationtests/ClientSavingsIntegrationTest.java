@@ -1634,9 +1634,10 @@ public class ClientSavingsIntegrationTest {
         final String INTEREST_POSTING_DATE = dateFormat.format(interestPostingDate.getTime());
         final String TODYS_POSTING_DATE = dateFormat.format(todysDate.getTime());
         String withdrawBalance = "true";
+        
 
         if (TODYS_POSTING_DATE.equalsIgnoreCase(INTEREST_POSTING_DATE)) {
-            final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
+            final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, responseSpec);
             validationErrorHelper.closeSavingsAccountPostInterestAndGetBackRequiredField(savingsId, withdrawBalance,
                     CommonConstants.RESPONSE_ERROR, CLOSEDON_DATE);
         } else {
