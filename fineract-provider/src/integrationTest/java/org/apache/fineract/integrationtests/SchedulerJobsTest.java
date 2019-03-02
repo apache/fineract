@@ -108,7 +108,7 @@ public class SchedulerJobsTest {
                 Thread.sleep(15000);
                 schedulerJob = this.schedulerJobHelper.getSchedulerJobById(this.requestSpec, this.responseSpec, jobId.toString());
                 Assert.assertNotNull(schedulerJob);
-                System.out.println("Job is Still Running");
+                System.out.println("Job " +jobId.toString() +" is Still Running");
             }
             ArrayList<HashMap> jobHistoryData = this.schedulerJobHelper.getSchedulerJobHistory(this.requestSpec, this.responseSpec,
                     jobId.toString());
