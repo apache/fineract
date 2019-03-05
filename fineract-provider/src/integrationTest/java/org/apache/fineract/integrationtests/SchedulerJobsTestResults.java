@@ -24,6 +24,8 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -136,7 +138,6 @@ public class SchedulerJobsTestResults {
         savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
         SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
 
-        HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
         String JobName = "Apply Annual Fee For Savings";
 
         this.schedulerJobHelper.executeJob(JobName);
@@ -144,9 +145,14 @@ public class SchedulerJobsTestResults {
 
         Float chargeAmount = (Float) chargeData.get("amount");
 
-        final HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
-        Assert.assertEquals("Verifying Annual Fee after Running Scheduler Job for Apply Anual Fee", chargeAmount,
-                (Float) summaryAfter.get("totalAnnualFees"));
+		final HashMap savingsDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
+		final HashMap annualFeeDetails = (HashMap) savingsDetails.get("annualFee");
+		ArrayList<Integer> annualFeeDueDateAsArrayList = (ArrayList<Integer>) annualFeeDetails.get("dueDate");
+		LocalDate nextDueDateForAnnualFee = LocalDate.of(annualFeeDueDateAsArrayList.get(0), annualFeeDueDateAsArrayList.get(1), annualFeeDueDateAsArrayList.get(2));
+		LocalDate todaysDate = LocalDate.now(ZoneId.of("Asia/Kolkata"));
+
+		Assert.assertTrue("Verifying that all due Annual Fees have been paid ",
+				nextDueDateForAnnualFee.isAfter(todaysDate));
 
     }
 
