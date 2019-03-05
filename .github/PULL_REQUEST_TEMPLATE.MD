@@ -15,3 +15,5 @@ Please make sure these boxes are checked before submitting your pull request - t
 - [ ] All Integrations tests are passing with the new commit.
 
 - [ ] PR contains a single commit (If you have multiple commits, please squash them into a single commit).
+
+Our guidelines for code reviews is at https://cwiki.apache.org/confluence/display/FINERACT/Code+Review+Guide
