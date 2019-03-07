@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.fineract.batch.domain.BatchRequest;
@@ -421,5 +422,52 @@ public class BatchApiTest {
 
         Assert.assertEquals("Verify Status Code 200 for Approve Loan", 200L, (long) response.get(3).getStatusCode());
         Assert.assertEquals("Verify Status Code 200 for Disburse Loan", 200L, (long) response.get(4).getStatusCode());
+    }
+
+    /**
+     * Test for the successful create client, apply loan,approval and disbursal of a loan using
+     * Batch API with enclosingTransaction. A '200' status code is expected on successful activation.
+     *
+     * @see org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy
+     */
+    @Test
+    public void shouldReturnOkStatusOnSuccessfulLoanApprovalAndDisburseWithTransaction(){
+        final String loanProductJSON = new LoanProductTestBuilder() //
+                .withPrincipal("10000000.00") //
+                .withNumberOfRepayments("24") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("2") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withAmortizationTypeAsEqualPrincipalPayment() //
+                .withInterestTypeAsDecliningBalance() //
+                .currencyDetails("0", "100").build(null);
+
+        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+
+        // Create a createClient Request
+        final BatchRequest br1 = BatchHelper.createActiveClientRequest(4740L, "");
+
+        // Create a ApplyLoan Request
+        final BatchRequest br2 = BatchHelper.applyLoanRequest(4742L, 4740L, productId);
+
+        // Create a approveLoan Request
+        final BatchRequest br3 = BatchHelper.approveLoanRequest(4743L, 4742L);
+
+        // Create a disburseLoan Request
+        final BatchRequest br4 = BatchHelper.disburseLoanRequest(4744L, 4743L);
+
+        final List<BatchRequest> batchRequests = Arrays.asList(br1,br2,br3,br4);
+
+        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
+
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+                jsonifiedRequest);
+
+        Assert.assertEquals("Verify Status Code 200 for create client", 200L, (long) response.get(0).getStatusCode());
+        Assert.assertEquals("Verify Status Code 200 for apply Loan", 200L, (long) response.get(1).getStatusCode());
+        Assert.assertEquals("Verify Status Code 200 for approve Loan", 200L, (long) response.get(2).getStatusCode());
+        Assert.assertEquals("Verify Status Code 200 for disburse Loan", 200L, (long) response.get(3).getStatusCode());
     }
 }
