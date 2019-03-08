@@ -1,0 +1,53 @@
+//Request URI:
+//POST <FSPIOP-Notification>/channel/quotes/notification
+//HTTP/1.1
+//X-Tenant-Identifier: T111
+
+//Request Body:
+{
+  "clientRefId": "0f4f8eb4-1d83-11e9-ab14-d663bd873d93", // String(1..36)
+  "transactionId": "11436b17-c690-4a30-8505-42a2c4eafb9d", // mandatory, UUID String(36) ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$
+  "requestId": "18e43330-187e-11e9-ab14-d663bd873d93", // optional, UUID String(36) ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$
+  "quoteId": "61058cea-187e-11e9-ab14-d663bd873d93", // mandatory, UUID String(36) ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$
+  "payee": { // mandatory
+    "partyIdInfo": { // mandatory
+      "partyIdType": "MSISDN", // mandatory, constant, type: Enum of String(1..32): MSISDN, EMAIL, PERSONAL_ID, BUSINESS, DEVICE, ACCOUNT_ID, IBAN, ALIAS
+      "partyIdentifier": "12345678901", // mandatory, String(1..128)
+      "partySubIdOrType": "nothing", // optional, String(1..128)
+      "fspId": "BankNrOne" // optional, String(1..32)
+    }
+  },
+  "payer": { // mandatory
+    "partyIdInfo": { // mandatory
+      "partyIdType": "IBAN", // mandatory, constant, type: Enum of String(1..32): MSISDN, EMAIL, PERSONAL_ID, BUSINESS, DEVICE, ACCOUNT_ID, IBAN, ALIAS
+      "partyIdentifier": "IN93116000060000000012345676", // mandatory, String(1..128)
+      "partySubIdOrType": "something" // optional, String(1..128)
+    },
+    "name": "" // optional, String(1..128) ^(?!\s*$)[\w .,'-]{1,128}$
+  },
+  "amountType": "SEND", // mandatory, constant, type: Enum of String(1..32): SEND, RECEIVE
+  "amount": {
+    "amount": "100",
+    "currency": "USD"
+  },
+  "transferAmount": {
+    "amount": "99",
+    "currency": "USD"
+  },
+  "fspFee": { // optional
+    "amount": "1", // mandatory, Number(22, 4) ^([0]|([1-9][0-9]{0,17}))([.][0-9]{0,3}[1-9])?$
+    "currency": "IDR" // mandatory, ISO 4217 (Rupee)
+  },
+  "fspCommission": { // optional
+    "amount": "0", // mandatory, Number(22, 4) ^([0]|([1-9][0-9]{0,17}))([.][0-9]{0,3}[1-9])?$
+    "currency": "IDR" // mandatory, ISO 4217 (Rupee)
+  },
+  "transactionRole": "PAYEE",
+  "transactionType": { // mandatory
+    "scenario": "TRANSFER", // mandatory, constant, type: Enum of String(1..32): DEPOSIT, WITHDRAWAL, TRANSFER, PAYMENT, REFUND
+    "initiator": "PAYER", // mandatory, constant, type: Enum of String(1..32): PAYER, PAYEE
+    "initiatorType": "CONSUMER" // mandatory, constant, type: Enum of String(1..32): CONSUMER, AGENT, BUSINESS, DEVICE
+  },
+  "note": "From Mats", // optional, String(1..128)
+  "expiration": "2017-11-15T22:17:28.985-01:00" // optional, ISO 8601
+}
