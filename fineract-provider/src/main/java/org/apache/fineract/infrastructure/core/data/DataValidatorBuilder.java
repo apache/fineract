@@ -51,6 +51,18 @@ public class DataValidatorBuilder {
         return new DataValidatorBuilder(this.dataValidationErrors).resource(this.resource);
     }
 
+    public void merge(DataValidatorBuilder other) {
+        dataValidationErrors.addAll(other.dataValidationErrors);
+    }
+
+    public boolean hasError() {
+        return !dataValidationErrors.isEmpty();
+    }
+
+    public List<ApiParameterError> getDataValidationErrors() {
+        return dataValidationErrors;
+    }
+
     public DataValidatorBuilder resource(final String resource) {
         this.resource = resource;
         return this;

@@ -49,6 +49,11 @@ public class MonetaryCurrency {
         return new MonetaryCurrency(this.code, this.digitsAfterDecimal, this.inMultiplesOf);
     }
 
+    public static MonetaryCurrency fromApplicationCurrency(ApplicationCurrency applicationCurrency) {
+        return new MonetaryCurrency(applicationCurrency.getCode(), applicationCurrency.getDecimalPlaces(),
+                applicationCurrency.getCurrencyInMultiplesOf());
+    }
+
     public String getCode() {
         return this.code;
     }

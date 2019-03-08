@@ -22,6 +22,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -82,7 +83,7 @@ public class FromJsonHelper {
         return this.gsonConverter.toJson(object);
     }
 
-    public void checkForUnsupportedParameters(final Type typeOfMap, final String json, final Set<String> supportedParams) {
+    public void checkForUnsupportedParameters(final Type typeOfMap, final String json, final Collection<String> supportedParams) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Map<String, Object> requestMap = this.gsonConverter.fromJson(json, typeOfMap);
@@ -97,7 +98,7 @@ public class FromJsonHelper {
         if (!unsupportedParameterList.isEmpty()) { throw new UnsupportedParameterException(unsupportedParameterList); }
     }
 
-    public void checkForUnsupportedParameters(final JsonObject object, final Set<String> supportedParams) {
+    public void checkForUnsupportedParameters(final JsonObject object, final Collection<String> supportedParams) {
         if (object == null) { throw new InvalidParameterException(); }
 
         final Set<Entry<String, JsonElement>> entries = object.entrySet();
@@ -196,17 +197,26 @@ public class FromJsonHelper {
     }
 
     public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element) {
-        return this.helperDelegator.extractLocalDateNamed(parameterName, element, new HashSet<String>());
+        return this.helperDelegator.extractLocalDateNamed(parameterName, element, new HashSet<>());
     }
     
     public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonElement element) {
-        return this.helperDelegator.extractLocalTimeNamed(parameterName, element, new HashSet<String>());
+        return this.helperDelegator.extractLocalTimeNamed(parameterName, element, new HashSet<>());
     }
-    
+
+    public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonElement element, final String dateFormat,
+                                               final Locale locale) {
+        return this.helperDelegator.extractLocalTimeNamed(parameterName, element, dateFormat, locale, new HashSet<>());
+    }
+
+    public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonElement element, String timeFormat) {
+        return this.helperDelegator.extractLocalTimeNamed(parameterName, element, timeFormat, new HashSet<>());
+    }
+
     public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element, final String dateFormat,
             final Locale locale) {
         return this.helperDelegator.extractLocalDateNamed(parameterName, element.getAsJsonObject(), dateFormat, locale,
-                new HashSet<String>());
+                new HashSet<>());
     }
 
     public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element,
