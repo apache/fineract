@@ -86,18 +86,6 @@ Video Demonstration
 
 Apache Fineract / Mifos X Demo (November 2016) - <https://www.youtube.com/watch?v=h61g9TptMBo>
 
-Governance and Policies
-=======================
-
-This project does not accept "code dumps" 
-i.e. massive huge Pull Requests of major new 
-features consisting of thousands of lines of new code,
-typically developed in "downstream" closed source 
-munged into a single PR, because such contributions 
-are typically simply impossible to code review realistically. 
-Instead, please engage in the usual open source way of proposing 
-small incremental changes leading up to bigger new features. 
-
 More Information
 ============
 More details of the project can be found at <https://cwiki.apache.org/confluence/display/FINERACT>.
