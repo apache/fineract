@@ -86,6 +86,12 @@ Video Demonstration
 
 Apache Fineract / Mifos X Demo (November 2016) - <https://www.youtube.com/watch?v=h61g9TptMBo>
 
+Governance and Policies
+=======================
+
+[Becoming a Committer](https://cwiki.apache.org/confluence/display/FINERACT/Becoming+a+Committer)
+documents the process through which you can become a committer in this project.
+
 More Information
 ============
 More details of the project can be found at <https://cwiki.apache.org/confluence/display/FINERACT>.
