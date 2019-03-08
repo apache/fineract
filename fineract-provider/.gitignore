@@ -9,4 +9,4 @@ repos
 *.log
 .idea
 !gradle/wrapper/gradle-wrapper.jar
-/gradle
+
