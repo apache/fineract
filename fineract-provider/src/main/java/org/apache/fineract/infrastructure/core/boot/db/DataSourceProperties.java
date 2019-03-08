@@ -18,88 +18,38 @@
  */
 package org.apache.fineract.infrastructure.core.boot.db;
 
-import javax.validation.constraints.NotNull;
-
 import org.apache.tomcat.jdbc.pool.PoolProperties;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 
-/**
- * Configurable DataSource. Properties have sensible defaults, but end-users can
- * override those via the Spring Values listed below; i.e. via -D Java System
- * properties, or main() command line arguments, OS environment variables, from
- * JNDI, or application.properties (thanks Spring Boot). For example:
- * -Dfineract.datasource.port=3307.
- */
-// NOT a @Component - we do not want this to picked up by component scan, only explicitly declared in DataSourceConfiguration (if that's active)
 public class DataSourceProperties extends PoolProperties {
 
-    public final static String PORT = "fineract.datasource.port";
-    public final static String HOST = "fineract.datasource.host";
-    public final static String DB = "fineract.datasource.db";
-    public final static String UID = "fineract.datasource.username";
-    public final static String PWD = "fineract.datasource.password";
-    public final static String PROTOCOL = "fineract.datasource.protocol";
-    public final static String SUBPROTOCOL = "fineract.datasource.subprotocol";
+	private JdbcDriverConfig jdbcConfig;
 
-    @Value("${" + PORT + ":3306}")
-    private volatile @NotNull int port;
+	public DataSourceProperties(JdbcDriverConfig jdbcConfig) {
+		super();
+		this.jdbcConfig = jdbcConfig;
+		setDriverClassName(jdbcConfig.getDriverClassName());
+		setDefaults();
+	}
 
-    @Value("${" + HOST + ":localhost}")
-    private volatile @NotNull String hostname;
+	protected void setDefaults() {
+		setInitialSize(3);
+		// setMaxIdle(6); -- strange, why?
+		// setMinIdle(3); -- JavaDoc says default is initialSize.. so shouldn't
+		// be needed
+		if (getValidationQuery() == null)
+			setValidationQuery("SELECT 1");
+		setTestOnBorrow(true);
+		setTestOnReturn(true);
+		setTestWhileIdle(true);
+		setTimeBetweenEvictionRunsMillis(30000);
+		setTimeBetweenEvictionRunsMillis(60000);
+		setLogAbandoned(true);
+		setSuspectTimeout(60);
 
-    @Value("${" + DB + ":mifosplatform-tenants}")
-    private volatile @NotNull String dbName;
-
-    @Value("${" + UID + ":root}")
-    private volatile @NotNull String username;
-
-    @Value("${" + PWD + ":mysql}")
-    private volatile @NotNull String password;
-
-    @Value("${" + PROTOCOL + ":jdbc}")
-    private volatile @NotNull String jdbcProtocol;
-
-    @Value("${" + SUBPROTOCOL + ":mysql:thin}")
-    private volatile @NotNull String jdbcSubprotocol;
-
-    public DataSourceProperties(String driverClassName, String protocol, String subProtocol, Integer port) {
-        super();
-        setDriverClassName(driverClassName);
-        this.jdbcProtocol = protocol ;
-        this.jdbcSubprotocol = subProtocol ;
-        this.port = port ;
-        setDefaults();
-    }
-
-    /**
-     * as per (some of..) INSTALL.md and
-     * org.apache.fineract.infrastructure.core.service
-     * .TomcatJdbcDataSourcePerTenantService
-     * .createNewDataSourceFor(FineractPlatformTenant)
-     */
-    protected void setDefaults() {
-        setInitialSize(3);
-        // setMaxIdle(6); -- strange, why?
-        // setMinIdle(3); -- JavaDoc says default is initialSize.. so shouldn't
-        // be needed
-        if (getValidationQuery() == null) setValidationQuery("SELECT 1");
-        setTestOnBorrow(true);
-        setTestOnReturn(true);
-        setTestWhileIdle(true);
-        setTimeBetweenEvictionRunsMillis(30000);
-        setTimeBetweenEvictionRunsMillis(60000);
-        setLogAbandoned(true);
-        setSuspectTimeout(60);
-
-        setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
-                + "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer;org.apache.tomcat.jdbc.pool.interceptor.SlowQueryReport");
-    }
-
-    @Override
-    public void setUrl(@SuppressWarnings("unused") String url) {
-	throw new UnsupportedOperationException("Use setHost/Port/DB() instead of setURL()");
-    }
+		setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
+				+ "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer;org.apache.tomcat.jdbc.pool.interceptor.SlowQueryReport");
+	}
 
 	@Override
 	public String getUrl() {
@@ -107,51 +57,43 @@ public class DataSourceProperties extends PoolProperties {
 		if (StringUtils.hasText(url)) {
 			throw new IllegalStateException();
 		}
-		return jdbcProtocol + ":" + jdbcSubprotocol + "://" + getHost() + ":" + getPort() + "/" + getDBName();
+		return jdbcConfig.getProtocol() + ":" + jdbcConfig.getSubProtocol() + "://" + getHost() + ":" + getPort() + "/" + getDBName();
 	}
 
 	public String getHost() {
-		return hostname;
+		return jdbcConfig.getHost();
 	}
 
 	public int getPort() {
-		return port;
+		return jdbcConfig.getPort();
 	}
 
 	public String getDBName() {
-		return dbName;
-	}
-
-	public void setPort(int port) {
-		this.port = port;
-	}
-
-	public void setHost(String hostname) {
-		this.hostname = hostname;
-	}
-
-	public void setDBName(String dbName) {
-		this.dbName = dbName;
+		return jdbcConfig.getDbName();
 	}
 
 	@Override
 	public String getUsername() {
-		return this.username;
-	}
-
-	@Override
-	public void setUsername(String username) {
-		this.username = username;
+		return this.jdbcConfig.getUsername();
 	}
 
 	@Override
 	public String getPassword() {
-		return this.password;
+		return this.jdbcConfig.getPassword();
+	}
+
+	@Override
+	public void setUrl(String url) {
+		throw new UnsupportedOperationException("Can not change url!");
+	}
+
+	@Override
+	public void setUsername(String username) {
+		throw new UnsupportedOperationException("Can not change username!");
 	}
 
 	@Override
 	public void setPassword(String password) {
-		this.password = password;
+		throw new UnsupportedOperationException("Can not change password!");
 	}
-
 }

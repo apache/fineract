@@ -31,10 +31,22 @@
 	<bean id="entityManagerFactory"
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
 		depends-on="tenantDatabaseUpgradeService">
+		<property name="packagesToScan">
+			<array value-type="java.lang.String">
+				<value>org.apache.fineract</value>
+			</array>
+		</property>
 		<property name="dataSource" ref="routingDataSource" />
-		<property name="persistenceUnitName" value="jpa-pu" />
+		<!--<property name="persistenceUnitName" value="jpa-pu" />-->
 		<property name="jpaVendorAdapter">
 		   <bean class="org.springframework.orm.jpa.vendor.OpenJpaVendorAdapter"/>
+		</property>
+		<property name="jpaProperties">
+			<props>
+				<prop key="openjpa.Compatibility">QuotedNumbersInQueries=true</prop>
+				<prop key="openjpa.jdbc.DBDictionary">org.apache.fineract.infrastructure.core.domain.MySQLDictionaryCustom</prop>
+				<prop key="openjpa.jdbc.MappingDefaults">ForeignKeyDeleteAction=CASCADE</prop>
+			</props>
 		</property>
 	</bean>
 

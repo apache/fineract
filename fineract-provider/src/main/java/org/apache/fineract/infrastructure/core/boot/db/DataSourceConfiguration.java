@@ -20,11 +20,8 @@ package org.apache.fineract.infrastructure.core.boot.db;
 
 import javax.sql.DataSource;
 
-import org.apache.fineract.infrastructure.core.boot.JDBCDriverConfig;
-import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,24 +31,17 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class DataSourceConfiguration {
+
 	private static final Logger logger = LoggerFactory.getLogger(DataSourceConfiguration.class);
-	
-	@Autowired JDBCDriverConfig config ;
-	
+
     @Bean
-    public DataSourceProperties dataSourceProperties() {
-	return new DataSourceProperties(config.getDriverClassName(), config.getProtocol(), config.getSubProtocol(), config.getPort());
+    public DataSourceProperties dataSourceProperties(JdbcDriverConfig config) {
+    	return new DataSourceProperties(config);
     }
 
     @Bean
-    public DataSource tenantDataSourceJndi() {
-	PoolConfiguration p = getProperties();
-        org.apache.tomcat.jdbc.pool.DataSource ds = new org.apache.tomcat.jdbc.pool.DataSource(p);
-        logger.info("Created new DataSource; url=" + p.getUrl());
-        return ds;
-    }
-
-    protected DataSourceProperties getProperties() {
-        return dataSourceProperties();
+    public DataSource tenantDataSourceJndi(DataSourceProperties dataSourceProperties) {
+        logger.info("Created new DataSource; url=" + dataSourceProperties.getUrl());
+        return new org.apache.tomcat.jdbc.pool.DataSource(dataSourceProperties);
     }
 }

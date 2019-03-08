@@ -58,11 +58,8 @@ public class TenantDataSourcePortFixService {
     @Value("${" + ENABLED + ":true}")
     private boolean enabled;
 
-	// required=false is important here, because in
-	// WebApplicationInitializerConfiguration for classic WAR there
-	// is (intentionally) no MariaDB4j nor a DataSourceProperties
-	// bean (because in the WAR we're using a DS from JNDI)
-	private @Autowired(required = false) DataSourceProperties dsp;
+    @Autowired
+	private JdbcDriverConfig jdbcConfig;
 
 	private JdbcTemplate jdbcTemplate;
 
@@ -71,26 +68,25 @@ public class TenantDataSourcePortFixService {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
+    /**
+     * This method updates the default 3306 port of the default flyway inserted 'mifostenant-default' tenant overriden by application.properties
+     */
     public void fixUpTenantsSchemaServerPort() {
-	if (!enabled)  {
-		logger.info("No schema_server_port UPDATE made to tenant_server_connections table of the mifosplatform-tenants schema, because " + ENABLED + " = false");
-		return;
-	}
-	if (dsp == null) {
-		// we don't have any generic mechanism to know the DB port, given just a tenant DataSource
-		logger.debug("No schema_server_port UPDATE made to tenant_server_connections table of the mifosplatform-tenants schema (because neither MariaDB4j nor our own Spring Boot DataSourceConfiguration is used in a traditional WAR)");
-		return;
-	}
+		if (!enabled)  {
+			logger.info("No schema_server_port UPDATE made to tenant_server_connections table of the mifosplatform-tenants schema, because " + ENABLED + " = false");
+			return;
+		}
+	
 		int r = jdbcTemplate
 				.update("UPDATE tenant_server_connections SET schema_server = ?, schema_server_port = ?, schema_username = ?, schema_password = ?",
-						dsp.getHost(), dsp.getPort(), dsp.getUsername(), dsp.getPassword());
-	if ( r == 0 )
-		logger.warn("UPDATE tenant_server_connections SET ... did not update ANY rows - something is probably wrong");
-	else
-			logger.info("Upated "
-					+ r
-					+ " rows in the tenant_server_connections table of the mifosplatform-tenants schema to the real current host: "
-					+ dsp.getHost() + ", port: " + dsp.getPort());
+						jdbcConfig.getHost(), jdbcConfig.getPort(), jdbcConfig.getUsername(), jdbcConfig.getPassword());
+		if ( r == 0 ) {
+			logger.warn("UPDATE tenant_server_connections SET ... did not update ANY rows - something is probably wrong");
+		} else {
+				logger.info("Upated "
+						+ r
+						+ " rows in the tenant_server_connections table of the mifosplatform-tenants schema to the real current host: "
+						+ jdbcConfig.getHost() + ", port: " + jdbcConfig.getPort());
+		}
     }
-
 }

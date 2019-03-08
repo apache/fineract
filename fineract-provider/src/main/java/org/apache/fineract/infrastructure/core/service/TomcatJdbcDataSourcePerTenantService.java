@@ -23,7 +23,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.fineract.infrastructure.core.boot.JDBCDriverConfig;
+import org.apache.fineract.infrastructure.core.boot.db.JdbcDriverConfig;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
@@ -47,7 +47,7 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
     private final DataSource tenantDataSource;
 
     @Autowired
-    private JDBCDriverConfig driverConfig ;
+    private JdbcDriverConfig driverConfig ;
     
     @Autowired
     public TomcatJdbcDataSourcePerTenantService(final @Qualifier("tenantDataSourceJndi") DataSource tenantDataSource) {

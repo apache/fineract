@@ -23,7 +23,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
-import org.apache.fineract.infrastructure.core.boot.JDBCDriverConfig;
+import org.apache.fineract.infrastructure.core.boot.db.JdbcDriverConfig;
 import org.apache.fineract.infrastructure.core.boot.db.TenantDataSourcePortFixService;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
@@ -47,7 +47,8 @@ public class TenantDatabaseUpgradeService {
     protected final DataSource tenantDataSource;
     protected final TenantDataSourcePortFixService tenantDataSourcePortFixService;
     
-    @Autowired private JDBCDriverConfig driverConfig ;
+    @Autowired 
+    private JdbcDriverConfig driverConfig ;
     
     @Autowired
     public TenantDatabaseUpgradeService(final TenantDetailsService detailsService,
