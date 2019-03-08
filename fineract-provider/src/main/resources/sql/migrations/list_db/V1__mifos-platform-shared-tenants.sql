@@ -67,6 +67,8 @@ CREATE TABLE `tenants` (
 LOCK TABLES `tenants` WRITE;
 /*!40000 ALTER TABLE `tenants` DISABLE KEYS */;
 INSERT INTO `tenants` VALUES (1,'default','Default Demo Tenant','mifostenant-default','Asia/Kolkata',NULL,NULL,NULL,NULL,'localhost','3306','root','mysql',1);
+INSERT INTO `tenants` VALUES (2,'tn03','Rhino','tn03','Africa/Bujumbura',NULL,NULL,NULL,NULL,'localhost','3306','root','mysql',1);
+INSERT INTO `tenants` VALUES (3,'tn04','Elephant','tn04','Africa/Bujumbura',NULL,NULL,NULL,NULL,'localhost','3306','root','mysql',1);
 /*!40000 ALTER TABLE `tenants` ENABLE KEYS */;
 UNLOCK TABLES;
 
