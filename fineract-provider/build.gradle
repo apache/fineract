@@ -158,7 +158,9 @@ rat {
 	'**/assets/html5shiv.js',
 
 	//BSD License
-	'**/assets/uglify.js'
+	'**/assets/uglify.js',
+         //Ignore out folder
+         '**/out/**'
 	]
 }
 
