@@ -64,7 +64,6 @@ public class SavingsImportHandlerTest {
     }
 
     @Test
-    @Ignore
     public void testSavingsImport() throws InterruptedException, IOException, ParseException {
 
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
@@ -146,6 +145,9 @@ public class SavingsImportHandlerTest {
 
         //check status column of output excel
         String location=savingsAccountHelper.getOutputTemplateLocation(importDocumentId);
+
+        Utils.waitUntilFileCreation(location);
+
         FileInputStream fileInputStream = new FileInputStream(location);
         Workbook Outputworkbook=new HSSFWorkbook(fileInputStream);
         Sheet OutputSavingsSheet = Outputworkbook.getSheet(TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME);

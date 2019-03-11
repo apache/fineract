@@ -195,4 +195,18 @@ public class Utils {
                 .andReturn().asString();
         return templateLocation.substring(1,templateLocation.length()-1);
     }
+
+    public static void waitUntilFileCreation(String location){
+        Long start= System.currentTimeMillis();
+
+        while (!new File(location).exists()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (System.currentTimeMillis() - start > 30000)
+                break;
+        }
+    }
 }

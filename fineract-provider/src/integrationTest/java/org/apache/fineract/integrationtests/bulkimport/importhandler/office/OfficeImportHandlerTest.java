@@ -60,7 +60,6 @@ public class OfficeImportHandlerTest {
     }
 
     @Test
-    @Ignore
     public void testOfficeImport() throws IOException, InterruptedException, NoSuchFieldException, ParseException {
         OfficeHelper officeHelper=new OfficeHelper(requestSpec,responseSpec);
         Workbook workbook=officeHelper.getOfficeWorkBook("dd MMMM yyyy");
@@ -94,6 +93,9 @@ public class OfficeImportHandlerTest {
 
         //check  status column of output excel
         String location=officeHelper.getOutputTemplateLocation(importDocumentId);
+
+        Utils.waitUntilFileCreation(location);
+
         FileInputStream fileInputStream = new FileInputStream(location);
         Workbook outputWorkbook=new HSSFWorkbook(fileInputStream);
         Sheet officeSheet = outputWorkbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);

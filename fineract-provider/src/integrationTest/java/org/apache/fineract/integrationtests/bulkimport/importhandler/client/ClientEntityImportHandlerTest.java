@@ -60,7 +60,6 @@ public class ClientEntityImportHandlerTest {
     }
 
     @Test
-    @Ignore
     public void testClientImport() throws InterruptedException, IOException, ParseException {
 
         //in order to populate helper sheets
@@ -134,6 +133,9 @@ public class ClientEntityImportHandlerTest {
 
         //check status column of output excel
         String location=clientHelper.getOutputTemplateLocation(importDocumentId);
+
+        Utils.waitUntilFileCreation(location);
+
         FileInputStream fileInputStream = new FileInputStream(location);
         Workbook outputWorkbook=new HSSFWorkbook(fileInputStream);
         Sheet outputClientEntitySheet = outputWorkbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);
