@@ -42,13 +42,14 @@ cache:
     - $HOME/.gradle/wrapper/
     - $HOME/.m2
 
-# NOTE: The --info, while quite a bit more verbose, is VERY useful to understand failures on Travis,
+# NOTE: We used to run with --info, which is quite a bit more verbose, but is VERY useful to understand failures on Travis,
 # where you do not have access to any files like build/reports/tests/index.html, only the Console.
 # @see http://mrhaki.blogspot.ch/2013/05/gradle-goodness-show-more-information.html
 # @see http://forums.gradle.org/gradle/topics/whats_new_in_gradle_1_1_test_logging for alternative
+# https://jira.apache.org/jira/browse/FINERACT-732 removed that again, because it made Travis CI fail.
 script:
   - date
-  - ./gradlew --info licenseMain licenseTest licenseIntegrationTest test
+  - ./gradlew licenseMain licenseTest licenseIntegrationTest test
   - ./gradlew migrateTenantListDB -PdbName=mifosplatform-tenants
   - ./gradlew migrateTenantDB -PdbName=mifostenant-default
   - ./gradlew clean integrationTest
