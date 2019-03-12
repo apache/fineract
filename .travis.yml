@@ -49,7 +49,7 @@ cache:
 # https://jira.apache.org/jira/browse/FINERACT-732 removed that again, because it made Travis CI fail.
 script:
   - date
-  - ./gradlew licenseMain licenseTest licenseIntegrationTest test
-  - ./gradlew migrateTenantListDB -PdbName=mifosplatform-tenants
-  - ./gradlew migrateTenantDB -PdbName=mifostenant-default
-  - ./gradlew clean integrationTest
+  - ./gradlew --console=plain licenseMain licenseTest licenseIntegrationTest test
+  - ./gradlew --console=plain migrateTenantListDB -PdbName=mifosplatform-tenants
+  - ./gradlew --console=plain migrateTenantDB -PdbName=mifostenant-default
+  - ./gradlew --console=plain clean integrationTest
