@@ -4,3 +4,9 @@
 *.ear
 .gradle
 build
+*.iml
+*.ipr
+*.iws
+*.DS_Store
+.idea
+gradle

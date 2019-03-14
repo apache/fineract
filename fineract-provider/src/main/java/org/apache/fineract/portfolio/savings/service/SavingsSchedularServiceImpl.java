@@ -27,6 +27,7 @@ import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,12 +41,12 @@ public class SavingsSchedularServiceImpl implements SavingsSchedularService {
     private final SavingsAccountAssembler savingAccountAssembler;
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
     private final SavingsAccountReadPlatformService savingAccountReadPlatformService;
-    private final SavingsAccountRepository savingsAccountRepository;
+    private final SavingsAccountRepositoryWrapper savingsAccountRepository;
 
     @Autowired
     public SavingsSchedularServiceImpl(final SavingsAccountAssembler savingAccountAssembler,
             final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
-            final SavingsAccountReadPlatformService savingAccountReadPlatformService, final SavingsAccountRepository savingsAccountRepository) {
+            final SavingsAccountReadPlatformService savingAccountReadPlatformService, final SavingsAccountRepositoryWrapper savingsAccountRepository) {
         this.savingAccountAssembler = savingAccountAssembler;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingAccountReadPlatformService = savingAccountReadPlatformService;

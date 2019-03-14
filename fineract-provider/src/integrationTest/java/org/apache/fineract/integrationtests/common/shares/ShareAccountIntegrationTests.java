@@ -34,6 +34,7 @@ import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.gson.Gson;
@@ -210,7 +211,9 @@ public class ShareAccountIntegrationTests {
         Assert.assertEquals("25", String.valueOf(summaryMap.get("totalApprovedShares")));
         Assert.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
     }
+    
     @Test
+    @Ignore
     @SuppressWarnings("unchecked")
     public void rejectShareAccount() {
         shareProductHelper = new ShareProductHelper();

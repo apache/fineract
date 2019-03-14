@@ -3864,7 +3864,7 @@
 								<td>self/loans/{loanId}/guarantors</td>
 								<td></td>
 								<td><a href="#self_guarantors_list">Guarantors list</a></td>
-								<td></td>
+                                <td></td>
 								<td></td>
 							</tr>
 							<tr>
@@ -3875,6 +3875,7 @@
 								</td>
 								</td>
 							</tr>
+							
 							<tr>
 								<td><a href="#self_service_user_reports">Run Report</a></td>
 								<td>self/runreports/{reportName}</td>
@@ -3904,6 +3905,30 @@
 								<td>self/surveys/scorecards/clients/{clientId}</td>
 								<td></td>
 								<td><a href="#survey_score">Survey Scorecards</a></td>
+                                <td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#linkaccountstopocket">Link/Delink accounts to pocket</a></td>
+								<td>self/pockets?command=linkAccounts</td>
+								<td><a href="#linkaccountstopocket">Link accounts to pocket</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+							    <td></td>
+								<td>self/pockets?command=delinkAccounts</td>
+								<td><a href="#delinkaccountstopocket">Delink accounts from pocket</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/pockets</td>
+								<td></td>
+								<td><a href="#retrievepocketaccounts">Retrieve accounts linked to pocket</a></td>
 								<td></td>
 								<td></td>
 							</tr>
@@ -50691,6 +50716,102 @@ GET https://DomainName/api/v1/self/runreports/{reportName}
 					</code>
 				</div>
 			</div>
+			
+    <a id="linkaccountstopocket" name="linkaccountstopocket" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Link/delink accounts to/from pocket</h2>
+	        <p>Pockets behave as favourites. An user can link his/her Loan, Savings and Share accounts to pocket for faster access. In a similar way linked accounts can be delinked from the pocket.</p>
+	         <h2>Link accounts to pocket</h2>
+			<p>Example Requests:</p>
+	        <div class=apiClick>self/pockets?command=linkAccounts</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://DomainName/api/v1/self/pockets?command=linkAccounts</code>
+			  <code class="method-request">POST self/pockets?command=linkAccounts
+Content-Type: application/json
+Request Body:
+
+{  
+   "accountsDetail":[  
+      {  
+         "accountId":"11",
+         "accountType":"LOAN"
+      },
+      {  
+         "accountId":"2",
+         "accountType":"SAVINGS"
+      }
+   ]
+}
+			</code>
+			<code class="method-response">
+{
+    "resourceId": 6
+}
+			</code>
+	    </div>
+	</div>
+	
+	 <a id="delinkaccountstopocket" name="delinkaccountstopocket" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Delink accounts from pocket</h2>
+			<p>Example Requests:</p>
+	        <div class=apiClick>self/pockets?command=delinkAccounts</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://DomainName/api/v1/self/pockets?command=delinkAccounts</code>
+			  <code class="method-request">POST self/pockets?command=delinkAccounts
+Content-Type: application/json
+Request Body:
+
+{  "pocketAccountMappingIds" :[8,9]
+}
+			</code>
+			<code class="method-response">
+{
+    "resourceId":10
+}
+			</code>
+	    </div>
+	</div>
+
+	 <a id="retrievepocketaccounts" name="retrievepocketaccounts" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve accounts linked to pocket</h2>
+			<p>All linked loan </p>
+			<p>Example Requests:</p>
+	        <div class=apiClick>self/pockets</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://DomainName/api/v1/self/pockets</code>
+			<code class="method-response">
+{
+    "loanAccounts": [
+        {
+            "pocketId": 6,
+            "accountId": 11,
+            "accountType": 2,
+            "accountNumber": "000000011",
+            "id": 10
+        }
+    ],
+    "savingsAccounts": [
+        {
+            "pocketId": 6,
+            "accountId": 2,
+            "accountType": 3,
+            "accountNumber": "000000002",
+            "id": 11
+        }
+    ],
+    "shareAccounts": []
+}
+			</code>
+	    </div>
+	</div>
 			<!-- end of Customer Self Service APIs-->
         </div>
 		<!-- main-content-wrapper -->

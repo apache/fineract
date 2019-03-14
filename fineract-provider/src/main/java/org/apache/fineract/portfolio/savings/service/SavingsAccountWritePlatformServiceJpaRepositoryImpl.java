@@ -364,9 +364,15 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository
                 .findOneWithNotFoundDetection(savingsAccountChargeId, accountId);
 
+        final LocalDate todaysDate = DateUtils.getLocalDateOfTenant();
         final DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MM yyyy");
-
-        this.payCharge(savingsAccountCharge, savingsAccountCharge.getDueLocalDate(), savingsAccountCharge.amount(), fmt, user);
+        fmt.withZone(DateUtils.getDateTimeZoneOfTenant());
+        
+		while (todaysDate.isAfter(savingsAccountCharge.getDueLocalDate())) {
+			this.payCharge(savingsAccountCharge, savingsAccountCharge.getDueLocalDate(), savingsAccountCharge.amount(),
+					fmt, user);
+		}
+        
         return new CommandProcessingResultBuilder() //
                 .withEntityId(savingsAccountCharge.getId()) //
                 .withOfficeId(savingsAccountCharge.savingsAccount().officeId()) //

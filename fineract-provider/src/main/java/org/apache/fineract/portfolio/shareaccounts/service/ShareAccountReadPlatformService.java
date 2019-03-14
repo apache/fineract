@@ -37,5 +37,6 @@ public interface ShareAccountReadPlatformService extends AccountReadPlatformServ
     public Set<String> getResponseDataParams();
 
     Collection<ShareAccountData> retrieveAllShareAccountDataForDividends(Long productId, boolean fetchInActiveAccounts, LocalDate startDate);
-
+    
+	String retrieveAccountNumberByAccountId(Long accountId);
 }

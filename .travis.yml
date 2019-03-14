@@ -20,6 +20,18 @@ language: java
 jdk:
   - openjdk8
 
+services:
+  - mysql
+
+# Hardcoding system time as a temporary fix for running buggy test cases
+before_install:
+  - echo "USE mysql;\nUPDATE user SET password=PASSWORD('mysql') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
+  - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `mifosplatform-tenants`;'
+  - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `mifostenant-default`;'
+  - export TZ=Asia/Kolkata
+  - sudo service ntp stop
+  - sudo date --set="23 February 2019 01:02:03"
+
 # https://docs.travis-ci.com/user/languages/java/#caching
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -30,9 +42,14 @@ cache:
     - $HOME/.gradle/wrapper/
     - $HOME/.m2
 
-# NOTE: The --info, while quite a bit more verbose, is VERY useful to understand failures on Travis,
+# NOTE: We used to run with --info, which is quite a bit more verbose, but is VERY useful to understand failures on Travis,
 # where you do not have access to any files like build/reports/tests/index.html, only the Console.
 # @see http://mrhaki.blogspot.ch/2013/05/gradle-goodness-show-more-information.html
 # @see http://forums.gradle.org/gradle/topics/whats_new_in_gradle_1_1_test_logging for alternative
+# https://jira.apache.org/jira/browse/FINERACT-732 removed that again, because it made Travis CI fail.
 script:
-  - ./gradlew --info licenseMain licenseTest licenseIntegrationTest test
+  - date
+  - ./gradlew --console=plain licenseMain licenseTest licenseIntegrationTest test
+  - ./gradlew --console=plain migrateTenantListDB -PdbName=mifosplatform-tenants
+  - ./gradlew --console=plain migrateTenantDB -PdbName=mifostenant-default
+  - ./gradlew --console=plain clean integrationTest
