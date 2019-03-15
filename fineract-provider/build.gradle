@@ -52,6 +52,7 @@ apply plugin: 'openjpa'
 apply plugin: 'pmd'
 apply plugin: 'findbugs'
 
+
 /* define the valid syntax level for source files */
 sourceCompatibility = JavaVersion.VERSION_1_8
 /* define binary compatibility version */
@@ -420,15 +421,15 @@ task setBlankPassword {
     }
 }
 
-
-apply plugin: 'flyway'
+apply plugin: 'org.flywaydb.flyway'
 buildscript {
     repositories {
         mavenCentral()
     }
 
     dependencies {
-        classpath "org.flywaydb:flyway-gradle-plugin:3.0" // version upgraded during Spring Boot & MariaDB4j work, as prev. used v0.2 didn't work well after *.sql moved from fineract-db to fineract-provider/src/main/resources (new version also has clearer errors, e.g. in case of missing DB)
+<<<<<<< HEAD
+        classpath "org.flywaydb:flyway-gradle-plugin:5.2.4" // version upgraded during Spring Boot & MariaDB4j work, as prev. used v0.2 didn't work well after *.sql moved from fineract-db to fineract-provider/src/main/resources (new version also has clearer errors, e.g. in case of missing DB)
 
         // NOT classpath 'org.drizzle.jdbc:drizzle-jdbc:1.3' as it is not compatible with Flyway 3.1+ (only up to 3.0)
         // We require Flyway 3.1+ because =< 3.0 is not compatible with current Gradle versions (only ancient ones we originally used to use).
@@ -500,8 +501,9 @@ task showTenantDBInfo {
 }
 
 
-task migrateTenantListDB {
+task migrateTenantListDB(type: org.flywaydb.gradle.task.FlywayMigrateTask) {
     description="Migrates a Tenant List DB. Optionally can pass dbName. Defaults to 'mifosplatform-tenants' (Example: -PdbName=someDBname)"
+<<<<<<< HEAD
     doLast {
         def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
         def tenantsDbName = 'mifosplatform-tenants';
@@ -519,7 +521,19 @@ task migrateTenantListDB {
     flyway.driver = "org.mariadb.jdbc.Driver"
     flyway.locations= [filePath]
     flywayMigrate.execute()
+=======
+    def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
+    def tenantsDbName = 'mifosplatform-tenants';
+    if (rootProject.hasProperty("dbName")) {
+        tenantsDbName = rootProject.getProperty("dbName")
+>>>>>>> upgraded flyaway plugin for migrations
     }
+
+    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
+    flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
+    flyway.user = 'root'
+    flyway.password = '.....'
+    flyway.locations= [filePath]
 }
 
 task showTenantListDBInfo {
