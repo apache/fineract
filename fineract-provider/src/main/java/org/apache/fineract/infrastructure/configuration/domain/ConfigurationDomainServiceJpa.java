@@ -333,4 +333,15 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         }
         return configurations.get(key);
     }
+
+    @Override
+    public boolean isSubRatesEnabled() {
+        GlobalConfigurationPropertyData configuration = getGlobalConfigurationPropertyData("sub-rates");
+        if (configuration==null){
+            return false;
+        }else{
+            return configuration.isEnabled();
+        }
+    }
+
 }

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import com.google.gson.JsonArray;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -71,6 +72,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementData
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
+import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
@@ -78,6 +80,8 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanTransactionProcessin
 import org.apache.fineract.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
+import org.apache.fineract.portfolio.rate.domain.Rate;
+import org.apache.fineract.portfolio.rate.service.RateAssembler;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,6 +110,7 @@ public class LoanAssembler {
     private final ConfigurationDomainService configurationDomainService;
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
     private final LoanUtilService loanUtilService;
+    private final RateAssembler rateAssembler;
 
     @Autowired
     public LoanAssembler(final FromJsonHelper fromApiJsonHelper, final LoanRepositoryWrapper loanRepository,
@@ -117,7 +122,7 @@ public class LoanAssembler {
             final CollateralAssembler loanCollateralAssembler, final LoanSummaryWrapper loanSummaryWrapper,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             final HolidayRepository holidayRepository, final ConfigurationDomainService configurationDomainService,
-            final WorkingDaysRepositoryWrapper workingDaysRepository, final LoanUtilService loanUtilService) {
+            final WorkingDaysRepositoryWrapper workingDaysRepository, final LoanUtilService loanUtilService, RateAssembler rateAssembler) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.loanRepository = loanRepository;
         this.loanProductRepository = loanProductRepository;
@@ -136,6 +141,7 @@ public class LoanAssembler {
         this.configurationDomainService = configurationDomainService;
         this.workingDaysRepository = workingDaysRepository;
         this.loanUtilService = loanUtilService;
+        this.rateAssembler = rateAssembler;
     }
 
     public Loan assembleFrom(final Long accountId) {
@@ -224,6 +230,9 @@ public class LoanAssembler {
         Client client = null;
         Group group = null;
 
+        //Here we add Rates to LoanApplication
+        final List<Rate> rates = this.rateAssembler.fromParsedJson(element);
+
         final LoanProductRelatedDetail loanProductRelatedDetail = this.loanScheduleAssembler.assembleLoanProductRelatedDetail(element);
         
         final BigDecimal interestRateDifferential = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.interestRateDifferentialParameterName, element);
@@ -252,21 +261,21 @@ public class LoanAssembler {
             loanApplication = Loan.newIndividualLoanApplicationFromGroup(accountNo, client, group, loanType.getId().intValue(),
                     loanProduct, fund, loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges,
                     collateral, syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance,
-                    createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential);
+                    createStandingInstructionAtDisbursement, isFloatingInterestRate, interestRateDifferential, rates);
 
         } else if (group != null) {
 
             loanApplication = Loan.newGroupLoanApplication(accountNo, group, loanType.getId().intValue(), loanProduct, fund, loanOfficer,
                     loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral,
                     syncDisbursementWithMeeting, fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance,
-                    createStandingInstructionAtDisbursement,isFloatingInterestRate, interestRateDifferential);
+                    createStandingInstructionAtDisbursement,isFloatingInterestRate, interestRateDifferential, rates);
 
         } else if (client != null) {
 
             loanApplication = Loan.newIndividualLoanApplication(accountNo, client, loanType.getId().intValue(), loanProduct, fund,
                     loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral,
                     fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement,
-                    isFloatingInterestRate, interestRateDifferential);
+                    isFloatingInterestRate, interestRateDifferential, rates);
 
         }
 
