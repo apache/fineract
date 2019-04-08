@@ -8,6 +8,12 @@ Requirements
 * gradle-wrapper.jar version 2.10
 * MySQL 5.5
 
+Instructions to download Java
+============
+Run `java -version` command below to check the Java version
+
+If there is no Java installed or the version of Java is less than 1.8, install it from [Java 1.8](https://java.com/en/download/help/download_options.xml "Java 1.8")
+
 Instructions to download gradle wrapper
 ============
 If the file fineract-provider/gradle/wrapper/gradle-wrapper.jar doesn't already exist in your copy of the Fineract codebase, the same needs to be downloaded using the commands below
@@ -17,6 +23,10 @@ wget --no-check-certificate -P fineract-provider/gradle/wrapper https://github.c
 (or)
 
 curl --insecure -L https://github.com/apache/fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar > fineract-provider/gradle/wrapper/gradle-wrapper.jar
+
+Instructions to download MySQL
+============
+If MySQL is not installed in the device, download from [MySQL](https://www.mysql.com/downloads/ "MySQL").
 
 Instructions to run Apache RAT (Release Audit Tool)
 ============
