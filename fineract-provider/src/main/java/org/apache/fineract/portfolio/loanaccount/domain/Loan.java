@@ -2929,7 +2929,7 @@ public class Loan extends AbstractPersistableCustom<Long> {
         validateRepaymentDateIsOnNonWorkingDay(paymentTransaction.getTransactionDate(), holidayDetailDTO.getWorkingDays(),
                 holidayDetailDTO.isAllowTransactionsOnNonWorkingDay());
 
-        if (paymentTransaction.getTransactionDate().isAfter(new LocalDate())) {
+        if (paymentTransaction.getTransactionDate().isAfter(DateUtils.getLocalDateOfTenant())) {
             final String errorMessage = "The date on which a loan charge paid cannot be in the future.";
             throw new InvalidLoanStateTransitionException("charge.payment", "cannot.be.a.future.date", errorMessage,
                     paymentTransaction.getTransactionDate());
@@ -3767,7 +3767,7 @@ public class Loan extends AbstractPersistableCustom<Long> {
                     rescheduledOnLocalDate, getDisbursementDate());
         }
 
-        if (rescheduledOnLocalDate.isAfter(new LocalDate())) {
+        if (rescheduledOnLocalDate.isAfter(DateUtils.getLocalDateOfTenant())) {
             final String errorMessage = "The date on which a loan is rescheduled cannot be in the future.";
             throw new InvalidLoanStateTransitionException("close.reschedule", "cannot.be.a.future.date", errorMessage,
                     rescheduledOnLocalDate);
