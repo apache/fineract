@@ -2738,7 +2738,7 @@ public class Loan extends AbstractPersistableCustom<Long> {
 
         validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_DISBURSED, disbursedOn);
 
-        if (disbursedOn.isAfter(new LocalDate())) {
+        if (disbursedOn.isAfter(DateUtils.getLocalDateOfTenant())) {
             final String errorMessage = "The date on which a loan with identifier : " + this.accountNumber
                     + " is disbursed cannot be in the future.";
             throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.a.future.date", errorMessage, disbursedOn);
