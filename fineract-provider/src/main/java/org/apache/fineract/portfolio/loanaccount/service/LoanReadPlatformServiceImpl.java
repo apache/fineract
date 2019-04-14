@@ -306,7 +306,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             String sqlQueryCriteria = searchParameters.getSqlSearch();
             if (StringUtils.isNotBlank(sqlQueryCriteria)) {
                 SQLInjectionValidator.validateSQLInput(sqlQueryCriteria);
-                sqlQueryCriteria = sqlQueryCriteria.replaceAll("accountNo", "l.account_no");
+                sqlQueryCriteria = sqlQueryCriteria.replace("accountNo", "l.account_no");
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), sqlQueryCriteria);
                 sqlBuilder.append(" and (").append(sqlQueryCriteria).append(")");
             }
