@@ -38,7 +38,11 @@ import org.springframework.stereotype.Component;
 @Path("/runaccruals")
 @Component
 @Scope("singleton")
-@Api(value = "Periodic Accrual Accounting", description = "Periodic Accrual is to accrue the loan income till the specific date or till batch job scheduled time.\n\n ")
+@Api(tags = {"Periodic Accrual Accounting"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Periodic Accrual Accounting", description = "Periodic Accrual is to accrue the loan income till the specific date or till batch job scheduled time.\n\n")
+})
+
 public class AccrualAccountingApiResource {
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
