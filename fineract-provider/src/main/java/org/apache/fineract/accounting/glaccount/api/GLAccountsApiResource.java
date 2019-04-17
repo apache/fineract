@@ -70,7 +70,11 @@ import org.springframework.stereotype.Component;
 @Path("/glaccounts")
 @Component
 @Scope("singleton")
-@Api(value = "General Ledger Account", description = "Ledger accounts represent an Individual account within an Organizations Chart Of Accounts(COA) and are assigned a name and unique number by which they can be identified. \n" + "All transactions relating to a company's assets, liabilities, owners' equity, revenue and expenses are recorded against these accounts")
+@Api(tags = {"General Ledger Account"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "General Ledger Account", description = "Ledger accounts represent an Individual account within an Organizations Chart Of Accounts(COA) and are assigned a name and unique number by which they can be identified. \\n\" + \"All transactions relating to a company's assets, liabilities, owners' equity, revenue and expenses are recorded against these accounts")
+})
+
 public class GLAccountsApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "parentId", "glCode",
