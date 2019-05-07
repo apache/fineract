@@ -71,7 +71,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
 
-    @ManyToOne(optional = true)
+    @ManyToOne(cascade = CascadeType.ALL, optional = true)
     @JoinColumn(name = "payment_detail_id", nullable = true)
     private PaymentDetail paymentDetail;
 

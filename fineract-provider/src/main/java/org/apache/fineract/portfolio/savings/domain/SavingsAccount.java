@@ -81,6 +81,7 @@ import org.apache.fineract.infrastructure.security.service.RandomPasswordGenerat
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
@@ -435,6 +436,10 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
             final SavingsHelper savingsHelper) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.savingsHelper = savingsHelper;
+    }
+
+    public String getExternalId() {
+        return externalId;
     }
 
     public boolean isNotActive() {
@@ -1023,10 +1028,23 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
         return transaction;
     }
 
-    private void payWithdrawalFee(final BigDecimal transactionAmoount, final LocalDate transactionDate, final AppUser user) {
+    public BigDecimal calculateWithdrawalFee(final BigDecimal transactionAmount) {
+        BigDecimal result = BigDecimal.ZERO;
+        System.out.println("isWithdrawalFeeApplicableForTransfer() = " + isWithdrawalFeeApplicableForTransfer());
+        if (isWithdrawalFeeApplicableForTransfer()) {
+            for (SavingsAccountCharge charge : this.charges()) {
+                if (charge.isWithdrawalFee() && charge.isActive()) {
+                    result = result.add(charge.calculateWithdralFeeAmount(transactionAmount), MoneyHelper.getMathContext());
+                }
+            }
+        }
+        return result;
+    }
+
+    private void payWithdrawalFee(final BigDecimal transactionAmount, final LocalDate transactionDate, final AppUser user) {
         for (SavingsAccountCharge charge : this.charges()) {
             if (charge.isWithdrawalFee() && charge.isActive()) {
-                charge.updateWithdralFeeAmount(transactionAmoount);
+                charge.updateWithdralFeeAmount(transactionAmount);
                 this.payCharge(charge, charge.getAmountOutstanding(this.getCurrency()), transactionDate, user);
             }
         }
@@ -2710,6 +2728,28 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
 
     public boolean isTransactionsAllowed() {
         return isActive();
+    }
+
+    public boolean isTransactionAllowed(SavingsAccountTransactionType transactionType, LocalDate transactionDate) {
+        if (!isTransactionsAllowed())
+            return false;
+
+        Client client = getClient();
+        if (client != null && !client.isActive()) {
+            return false;
+        }
+        Group group = group();
+        if (group != null && !group.isActive()) {
+            return false;
+        }
+
+        if (transactionDate == null)
+            return true;
+        if (DateUtils.isDateInTheFuture(transactionDate) || transactionDate.isBefore(getActivationLocalDate()))
+            return false;
+        if (transactionType.isCredit())
+            return true;
+        return !isAccountLocked(transactionDate);
     }
 
     public BigDecimal minBalanceForInterestCalculation() {

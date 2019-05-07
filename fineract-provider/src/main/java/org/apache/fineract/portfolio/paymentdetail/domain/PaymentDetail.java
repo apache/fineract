@@ -115,5 +115,11 @@ public final class PaymentDetail extends AbstractPersistableCustom<Long> {
         return this.paymentType;
     }
 
-    public String getReceiptNumber() { return this.receiptNumber; }
+    public String getReceiptNumber() {
+        return this.receiptNumber;
+    }
+
+    public String getRoutingCode() {
+        return routingCode;
+    }
 }

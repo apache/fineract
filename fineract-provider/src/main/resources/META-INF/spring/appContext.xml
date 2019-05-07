@@ -47,11 +47,12 @@
 										  org.apache.fineract.infrastructure.*,
 										  org.apache.fineract.scheduledjobs.*,
 										  org.apache.fineract.organisation.*,
+										  org.apache.fineract.interoperation.*,
 										  org.apache.fineract.portfolio.loanaccount.*,
 										  org.apache.fineract.portfolio.savingsaccount.*,
 										  org.apache.fineract.portfolio.*,
 										  org.apache.fineract.useradministration.*,
-										  org.apache.fineract.mix.*, 
+										  org.apache.fineract.mix.*,
 										  org.apache.fineract.notification.*,
 										  org.apache.fineract.template.*,
 										  org.apache.fineract.template.service.*,
@@ -86,8 +87,9 @@
 	<jpa:repositories base-package="org.apache.fineract.adhocquery.domain" />
 	<jpa:repositories base-package="org.apache.fineract.notification.domain"/>
 	<jpa:repositories base-package="org.apache.fineract.infrastructure.campaigns.email.domain"/>
-	
-	
+	<jpa:repositories base-package="org.apache.fineract.interoperation.domain"/>
+
+
 	<import resource="infrastructure.xml" />
 
 	<import resource="securityContext.xml" />
@@ -103,6 +105,4 @@
 	<import resource="spmContext.xml"/>
 
 	<import resource="swagger.xml"/>
-
-
 </beans>
