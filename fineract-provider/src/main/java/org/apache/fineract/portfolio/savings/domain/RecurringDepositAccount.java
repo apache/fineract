@@ -333,7 +333,7 @@ public class RecurringDepositAccount extends SavingsAccount {
                 .fromInt(this.interestCalculationDaysInYearType);
         List<LocalDate> PostedAsOnDates =  getManualPostingDates();
         final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(depositStartDate(),
-                maturityDate, postingPeriodType, financialYearBeginningMonth, PostedAsOnDates);
+                maturityDate, postingPeriodType, financialYearBeginningMonth, PostedAsOnDates,isSavingsInterestPostingAtCurrentPeriodEnd);
 
         final List<PostingPeriod> allPostingPeriods = new ArrayList<>();
 
@@ -346,8 +346,10 @@ public class RecurringDepositAccount extends SavingsAccount {
         final Money minBalanceForInterestCalculation = Money.of(getCurrency(), minBalanceForInterestCalculation());
         for (final LocalDateInterval periodInterval : postingPeriodIntervals) {
             boolean isUserPosting = false;
-            if (PostedAsOnDates.contains(periodInterval.endDate())) {
-                isUserPosting = true;
+            if(isSavingsInterestPostingAtCurrentPeriodEnd){
+                if (PostedAsOnDates.contains(periodInterval.endDate())) {isUserPosting = true;}
+            }else{
+                if(PostedAsOnDates.contains(periodInterval.endDate().plusDays(1))){ isUserPosting = true; }
             }
             final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance, transactions,
                     this.currency, compoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYearType.getValue(),

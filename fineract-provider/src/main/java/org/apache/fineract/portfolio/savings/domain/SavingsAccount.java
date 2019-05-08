@@ -703,7 +703,7 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
          }
         final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(
                 getStartInterestCalculationDate(), upToInterestCalculationDate, postingPeriodType, financialYearBeginningMonth,
-                postedAsOnDates);
+                postedAsOnDates,isSavingsInterestPostingAtCurrentPeriodEnd);
 
         final List<PostingPeriod> allPostingPeriods = new ArrayList<>();
 
@@ -741,8 +741,11 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
         for (final LocalDateInterval periodInterval : postingPeriodIntervals) {
             
             boolean isUserPosting = false;
-            if(postedAsOnDates.contains(periodInterval.endDate().plusDays(1))){
-                isUserPosting = true;
+
+            if(isSavingsInterestPostingAtCurrentPeriodEnd){
+                if(postedAsOnDates.contains(periodInterval.endDate())){ isUserPosting = true;}
+            }else{
+                if(postedAsOnDates.contains(periodInterval.endDate().plusDays(1))){ isUserPosting = true; }
             }
 
             final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance,
