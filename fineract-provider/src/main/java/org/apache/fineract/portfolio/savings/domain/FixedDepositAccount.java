@@ -301,7 +301,7 @@ public class FixedDepositAccount extends SavingsAccount {
         
         final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(
                 accountSubmittedOrActivationDate(), maturityDate, postingPeriodType, financialYearBeginningMonth,
-                postedAsOnTransactionDates);
+                postedAsOnTransactionDates,isSavingsInterestPostingAtCurrentPeriodEnd);
 
         final List<PostingPeriod> allPostingPeriods = new ArrayList<>();
 
@@ -314,9 +314,11 @@ public class FixedDepositAccount extends SavingsAccount {
         final Money minBalanceForInterestCalculation = Money.of(getCurrency(), minBalanceForInterestCalculation());
         for (final LocalDateInterval periodInterval : postingPeriodIntervals) {
             boolean isUserPosting = false;
-            if (postedAsOnTransactionDates.contains(periodInterval.endDate())) {
+
+            if(postedAsOnTransactionDates.contains(periodInterval.endDate().plusDays(1))){
                 isUserPosting = true;
             }
+
             final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance, transactions,
                     this.currency, compoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYearType.getValue(),
                     maturityDate, interestPostTransactions, isInterestTransfer, minBalanceForInterestCalculation,
