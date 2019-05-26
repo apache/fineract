@@ -291,6 +291,19 @@ public class LoanTransactionHelper {
                 getRepaymentBodyAsJSON(date, amountToBePaid), "");
     }
 
+    public Object makeRepaymentObject(final Integer loanId, final ResponseSpecification responseSpecification, final String date,
+            final Float amountToBePaid) {
+        final String REPAYMENT_URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions?command=" + MAKE_REPAYMENT_COMMAND + "&"
+                + Utils.TENANT_IDENTIFIER;
+        // final String ADD_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/repayment?" +
+        // Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPost(this.requestSpec, responseSpecification, REPAYMENT_URL, getRepaymentBodyAsJSON(date, amountToBePaid),
+                CommonConstants.RESPONSE_ERROR);
+
+        // return Utils.performServerPost(this.requestSpec, responseValidationError, postURLForLoanTransaction,
+        // jsonToBeSent, CommonConstants.RESPONSE_ERROR);
+    }
+
     public HashMap forecloseLoan(final String transactionDate, final Integer loanID) {
         return (HashMap) performLoanTransaction(createLoanTransactionURL(FORECLOSURE_COMMAND, loanID),
                 getForeclosureBodyAsJSON(transactionDate, loanID), "");

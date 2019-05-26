@@ -117,6 +117,9 @@ public final class LoanSummary {
     @Column(name = "total_outstanding_derived", scale = 6, precision = 19)
     private BigDecimal totalOutstanding;
 
+    @Column(name = "total_recovered_derived", scale = 6, precision = 19)
+    private BigDecimal totalRecoveryPaid;
+
     public static LoanSummary create(final BigDecimal totalFeeChargesDueAtDisbursement) {
         return new LoanSummary(totalFeeChargesDueAtDisbursement);
     }
@@ -199,6 +202,7 @@ public final class LoanSummary {
         this.totalWaived = BigDecimal.ZERO;
         this.totalWrittenOff = BigDecimal.ZERO;
         this.totalOutstanding = BigDecimal.ZERO;
+        this.totalRecoveryPaid = BigDecimal.ZERO;
     }
 
     public void updateSummary(final MonetaryCurrency currency, final Money principal,
@@ -335,5 +339,9 @@ public final class LoanSummary {
 
     public BigDecimal getTotalExpectedRepayment() {
         return this.totalExpectedRepayment;
+    }
+
+    public BigDecimal getTotalRecoveryPaid() {
+        return this.totalRecoveryPaid;
     }
 }

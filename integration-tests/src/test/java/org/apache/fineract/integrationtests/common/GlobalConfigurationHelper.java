@@ -362,6 +362,14 @@ public class GlobalConfigurationHelper {
         isInterestAppropriationEnabled.put("trapDoor", false);
         defaults.add(isInterestAppropriationEnabled);
 
+        HashMap<String, Object> isBlockLoanOverpayment = new HashMap<>();
+        isBlockLoanOverpayment.put("id", 35);
+        isBlockLoanOverpayment.put("name", "block-loan-overpayment");
+        isBlockLoanOverpayment.put("value", 0);
+        isBlockLoanOverpayment.put("enabled", false);
+        isBlockLoanOverpayment.put("trapDoor", false);
+        defaults.add(isBlockLoanOverpayment);
+
         return defaults;
     }
 
