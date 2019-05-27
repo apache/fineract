@@ -110,6 +110,13 @@ public class InterestRateChartDataValidator {
             toDate = this.fromApiJsonHelper.extractLocalDateNamed(endDateParamName, element);
             baseDataValidator.reset().parameter(endDateParamName).value(toDate).notNull();
         }
+        //made changes for not to be allow empty value in chartslabs
+        if (this.fromApiJsonHelper.parameterExists(chartSlabs, element)) {
+        	JsonArray chartSlab = this.fromApiJsonHelper.extractJsonArrayNamed(chartSlabs, element);
+        	baseDataValidator.reset().parameter(chartSlabs).value(chartSlab).notBlank(); 
+        		if(chartSlab.size()==0) {
+        			throw new InterestRatePeriodValidateException();
+        			}}
         
         Boolean isPrimaryGroupingByAmount = this.fromApiJsonHelper.extractBooleanNamed(isPrimaryGroupingByAmountParamName, element);
         if (isPrimaryGroupingByAmount == null) {
