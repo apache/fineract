@@ -19,8 +19,11 @@
 
 package org.apache.fineract.portfolio.rate.service;
 
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.charge.service.ChargeEnumerations;
+import org.apache.fineract.portfolio.rate.domain.RateAppliesTo;
 import org.apache.fineract.portfolio.rate.exception.RateNotFoundException;
 import org.apache.fineract.portfolio.rate.domain.Rate;
 import org.apache.fineract.portfolio.rate.data.RateData;
@@ -92,7 +95,7 @@ public class RateReadServiceImpl implements RateReadService {
     this.context.authenticatedUser();
     final RateMapper rm = new RateMapper();
     final String sql = "select " + rm.rateSchema() + " where r.active = ? and product_apply=?";
-    return this.jdbcTemplate.query(sql, rm, new Object[]{true, "m_loan"});
+    return this.jdbcTemplate.query(sql, rm, new Object[]{true, RateAppliesTo.LOAN.getValue() });
   }
 
   @Override
@@ -133,16 +136,17 @@ public class RateReadServiceImpl implements RateReadService {
       final Long id = resultSet.getLong("id");
       final String name = resultSet.getString("name");
       final BigDecimal percentage = resultSet.getBigDecimal("percentage");
-      final String productApply = resultSet.getString("productApply");
+      final Integer productApply = resultSet.getInt("productApply");
+      final EnumOptionData productAppliesTo = RateEnumerations.rateAppliesTo(productApply);
       final boolean active = resultSet.getBoolean("active");
-      return RateData.instance(id, name, percentage, productApply, active);
+      return RateData.instance(id, name, percentage, productAppliesTo, active);
     }
 
     public RateData mapRow(Rate rateResponse, int i) {
       final Long id = rateResponse.getId();
       final String name = rateResponse.getName();
       final BigDecimal percentage = rateResponse.getPercentage();
-      final String productApply = rateResponse.getProductApply();
+      final EnumOptionData productApply = RateEnumerations.rateAppliesTo(rateResponse.getProductApply());;
       final boolean active = rateResponse.isActive();
       return RateData.instance(id, name, percentage, productApply, active);
     }
