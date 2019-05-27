@@ -249,7 +249,8 @@ public class InterestRateChartSlabDataValidator {
         if (this.fromApiJsonHelper.parameterExists(annualInterestRateParamName, element)) {
             final BigDecimal annualInterestRate = this.fromApiJsonHelper.extractBigDecimalNamed(annualInterestRateParamName, element,
                     locale);
-            baseDataValidator.reset().parameter(annualInterestRateParamName).value(annualInterestRate).notNull().zeroOrPositiveAmount();
+		 //Change made to not to allow interest rate more than 100%
+            baseDataValidator.reset().parameter(annualInterestRateParamName).value(annualInterestRate).notNull().zeroOrPositiveAmount().notGreaterThanMax(new BigDecimal(100));
         }
 
         if (this.fromApiJsonHelper.parameterExists(currencyCodeParamName, element)) {
