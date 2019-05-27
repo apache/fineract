@@ -1,3 +1,4 @@
+package org.apache.fineract.portfolio.interestratechart.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 public class InterestRatePeriodValidateException extends AbstractPlatformResourceNotFoundException {
