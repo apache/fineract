@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `m_rate` (
   `name` varchar(250) NOT NULL,
   `percentage` decimal(10,2) NOT NULL,
   `active` tinyint(1) DEFAULT '0',
-  `product_apply` varchar(100) NOT NULL,
+  `product_apply` smallint(5) NOT NULL,
   `created_date` datetime NULL DEFAULT NULL,
   `createdby_id` bigint(20) NOT NULL,
   `lastmodifiedby_id` bigint(20) NOT NULL,
@@ -58,10 +58,10 @@ CREATE TABLE IF NOT EXISTS `m_product_loan_rate` (
 
 INSERT INTO `m_permission`
 (`grouping`,`code`,`entity_name`,`action_name`,`can_maker_checker`) VALUES
+  ('organisation', 'READ_RATE', 'RATE', 'CREATE', '1'),
   ('organisation', 'CREATE_RATE', 'RATE', 'CREATE', '1'),
   ('organisation', 'UPDATE_RATE', 'RATE', 'UPDATE', '1');
 
 INSERT INTO `c_configuration`
 (`name`, `value`, `enabled`, `is_trap_door`, `description`) VALUES
-('vat-tax', 12, 0, 0, 'VAT tax'),
-('sub-rates', 12, 0, 0, 'Enable Rates Module');;
+('sub-rates', 0, 0, 0, 'Enable Rates Module');

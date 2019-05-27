@@ -19,11 +19,18 @@
 
 package org.apache.fineract.portfolio.rate.domain;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.portfolio.charge.exception.ChargeParameterUpdateNotSupportedException;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.apache.fineract.portfolio.rate.domain.RateAppliesTo;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -45,7 +52,7 @@ public class Rate extends AbstractAuditableCustom<AppUser, Long> {
   private BigDecimal percentage;
 
   @Column(name = "product_apply", length = 100)
-  private String productApply;
+  private Integer productApply;
 
   @Column(name = "active", nullable = false)
   private boolean active;
@@ -59,19 +66,19 @@ public class Rate extends AbstractAuditableCustom<AppUser, Long> {
   }
 
 
-  public Rate(String name, BigDecimal percentage, String productApply, boolean active,
+  public Rate(String name, BigDecimal percentage, RateAppliesTo productApply, boolean active,
       AppUser approveUser) {
     this.name = name;
     this.percentage = percentage;
-    this.productApply = productApply;
+    this.productApply = productApply.getValue();
     this.active = active;
     this.approveUser = approveUser;
   }
 
-  public Rate(String name, BigDecimal percentage, String productApply, boolean active) {
+  public Rate(String name, BigDecimal percentage, RateAppliesTo productApply, boolean active) {
     this.name = name;
     this.percentage = percentage;
-    this.productApply = productApply;
+    this.productApply = productApply.getValue();
     this.active = active;
   }
 
@@ -107,11 +114,11 @@ public class Rate extends AbstractAuditableCustom<AppUser, Long> {
     this.approveUser = approveUser;
   }
 
-  public String getProductApply() {
+  public Integer getProductApply() {
     return productApply;
   }
 
-  public void setProductApply(String productApply) {
+  public void setProductApply(Integer productApply) {
     this.productApply = productApply;
   }
 
@@ -126,7 +133,7 @@ public class Rate extends AbstractAuditableCustom<AppUser, Long> {
         '}';
   }
 
-  public static Rate from(String name, BigDecimal percentage, String productApply, Boolean active) {
+  public static Rate from(String name, BigDecimal percentage, RateAppliesTo productApply, Boolean active) {
     return new Rate(name, percentage, productApply, active);
   }
 
@@ -136,8 +143,8 @@ public class Rate extends AbstractAuditableCustom<AppUser, Long> {
 
     final BigDecimal percentage = command.bigDecimalValueOfParameterNamed("percentage");
 
-    final String productApply = command.stringValueOfParameterNamed("productApply");
-
+    final RateAppliesTo productApply = RateAppliesTo.fromInt(command.integerValueOfParameterNamed("productApply"));
+    
     final boolean active = command.booleanPrimitiveValueOfParameterNamed("active");
 
     return new Rate(name, percentage, productApply, active, user);
@@ -162,10 +169,9 @@ public class Rate extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     final String productApplyParamName = "productApply";
-    if (command.isChangeInStringParameterNamed(productApplyParamName, this.productApply)) {
-      final String newValue = command.stringValueOfParameterNamed(productApplyParamName);
-      actualChanges.put(productApplyParamName, newValue);
-      this.productApply = StringUtils.defaultIfEmpty(newValue, null);
+    if (command.isChangeInIntegerParameterNamed(productApplyParamName, this.productApply)) {
+      final String errorMessage = "Update of Rate applies to is not supported";
+      throw new ChargeParameterUpdateNotSupportedException("rate.applies.to", errorMessage);
     }
 
     final String activeParamName = "active";
@@ -192,7 +198,7 @@ public class Rate extends AbstractAuditableCustom<AppUser, Long> {
     return approveUserId;
   }
 
-  public void assembleFrom(String name, BigDecimal percentage, String productApply, boolean active){
+  public void assembleFrom(String name, BigDecimal percentage, Integer productApply, boolean active){
     this.name = name;
     this.percentage = percentage;
     this.productApply = productApply;

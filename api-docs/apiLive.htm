@@ -2546,6 +2546,24 @@
 								<td></td>
 								<td></td>
 							</tr>
+                            <tr>
+                                <td><a href="#rates">Rates</a></td>
+                                <td>rates</td>
+                                <td><a href="#create_rate">Create Rate</a></td>
+                                <td><a href="#rate_list">List Rates</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>rates/{rateId}</td>
+                                <td></td>
+                                <td><a href="#retrieve_rate">Retrieve Rate</a></td>
+                                <td><a href="#update_rate">Update Rate</a></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
 						</table>
 					</div>
 				</div>
@@ -12142,7 +12160,17 @@ GET https://DomainName/api/v1/loans/{loanId}/transactions/{transactionId}
     "displayLabel": "US Dollar ($)"
   },
   "amount": 559.88,
-  "interestPortion": 559.88
+  "interestPortion": 559.88,
+  "loanChargePaidByList": [
+    {
+      "id": 29,
+      "amount": 138.700000,
+      "installmentNumber": 0,
+      "chargeId": 7,
+      "transactionId": 35,
+      "name": "Late Penalty Charge"
+    } 
+  ]
 }
 					</code>
 				</div>
@@ -16174,7 +16202,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							numberOfRepaymentVariationsForBorrowerCycle,
 							interestRateVariationsForBorrowerCycle,
 							multiDisburseLoan,maxTrancheCount,
-							outstandingLoanBalance,overdueDaysForNPA,holdGuaranteeFunds, principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount, installmentAmountInMultiplesOf, allowAttributeOverrides, allowPartialPeriodInterestCalcualtion
+							outstandingLoanBalance,overdueDaysForNPA,holdGuaranteeFunds, principalThresholdForLastInstalment, accountMovesOutOfNPAOnlyOnArrearsCompletion, canDefineInstallmentAmount, installmentAmountInMultiplesOf, allowAttributeOverrides, allowPartialPeriodInterestCalcualtion, rates
 							</td>
 						</tr>
 					</table>
@@ -43279,7 +43307,198 @@ No Request Body:
 			</div>
 			<!-- End of Tax Group -->
 
-		<!-- start of clients api docs -->
+            <!-- Start of Rates-->
+            <a id="rates" name="rates" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h3>Rates</h3>
+                    <p>This defines the Rates</p>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG">
+                            <td>
+                                <div class="fineractHeading2">Field Descriptions</div>
+                            </td>
+                        </tr>
+                        <tr class=alt>
+                            <td>name</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Name of Rate
+                            </td>
+                        </tr>
+                        <tr class=alt>
+                            <td>productApply</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>
+                                Enum value that defines to which entity the rate will be applicable.
+                                Available options are:
+                                1=Loans
+
+                                Once a rate definition is created, this attribute cannot be changed at any point
+                            </td>
+                        </tr>
+                        <tr class=alt>
+                            <td>Active</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>
+                                Flag indicating if the rate is currently active
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <a id="create_rate" name="create_rate"
+               class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Create a new Rate</h4>
+                    <p>Creates a new Rate</p>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG">
+                            <td>
+                                <div class="fineractHeading2">Mandatory Fields</div>
+                            </td>
+                        </tr>
+                        <tr class=alt>
+                            <td>name</td>
+                        </tr>
+                        <tr class=alt>
+                            <td>percentage</td>
+                        </tr>
+                        <tr class=alt>
+                            <td>productApply</td>
+                        </tr>
+                        <tr class=alt>
+                            <td>active</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+                        POST https://DomainName/api/v1/rates
+                    </code>
+                    <code class="method-request">
+                        POST rates
+                        Content-Type: application/json
+                        Request Body:
+                        {
+                        "productApply":1,
+                        "name":"Loan rate",
+                        "percentage":"12",
+                        "active":true,
+                        "locale":"en"
+                        }
+                    </code>
+                    <code class="method-response">
+                        {
+                        "resourceId": 1
+                        }
+                    </code>
+                </div>
+            </div>
+            <a id="rate_list" name="rate_list"
+               class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>List Rates</h4>
+                    <p>List Rates</p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+                        GET https://DomainName/api/v1/rates
+                    </code>
+                    <code class="method-request">
+                        GET rates
+                        Content-Type: application/json
+                    </code>
+                    <code class="method-response">
+                        [
+                        {
+                        "id":1,
+                        "name":"Loan Rate",
+                        "percentage":12.00,
+                        "productApply":1,
+                        "active":true
+                        },
+                        {
+                        "id":2,
+                        "name":"Public Rate",
+                        "percentage":30.00,
+                        "productApply":1,
+                        "active":true
+                        },
+                        {
+                        "id":3,
+                        "name":"Private Rate",
+                        "percentage":14.00,
+                        "productApply":1,
+                        "active":true
+                        }
+                        ]
+                    </code>
+                </div>
+            </div>
+            <a id="retrieve_rate" name="retrieve_rate"
+               class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Retrieve a Rate</h4>
+                    <p>Return the details of an existing Rate</p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+                        GET https://DomainName/api/v1/rates/{rateId}
+                    </code>
+                    <code class="method-request">
+                        GET rates/1
+                        Content-Type: application/json
+                    </code>
+                    <code class="method-response">
+                        {
+                        "id":1,
+                        "name":"Loan Rate",
+                        "percentage":12.00,
+                        "productApply":1,
+                        "active":true
+                        }
+                    </code>
+                </div>
+            </div>
+            <a id="update_rate" name="update_rate"
+               class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Update a Rate</h4>
+                    <p>Updates an existing Rate</p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+                        POST https://DomainName/api/v1/rates/{rateId}
+                    </code>
+                    <code class="method-request">
+                        POST rates/3
+                        Content-Type: application/json
+                        Request Body:
+                        {
+                        "percentage":"17",
+                        }
+                    </code>
+                    <code class="method-response">
+                        {
+                        "resourceId":3,
+                        "changes":
+                        {
+                        "percentage":17
+                        }
+                        }
+                    </code>
+                </div>
+            </div>
+            <!-- End of Rates -->
+
+            <!-- start of clients api docs -->
 		<a id="templates" name="clients" class="old-syle-anchor">&nbsp;</a>
 		<div class="method-section">
 			<div class="method-description">
@@ -46751,7 +46970,7 @@ GET https://DomainName/api/v1/self/loans/{loanId}/transactions/{transactionId}
   },
   "amount": 559.88,
   "interestPortion": 559.88
-}
+   }
 					</code>
 				</div>
 			</div>

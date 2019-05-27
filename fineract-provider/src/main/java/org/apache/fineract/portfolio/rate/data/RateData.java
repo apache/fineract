@@ -19,6 +19,8 @@
 
 package org.apache.fineract.portfolio.rate.data;
 
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -33,17 +35,17 @@ public class RateData implements Serializable {
 
   private BigDecimal percentage;
 
-  private String productApply;
+  private EnumOptionData productApply;
 
   private boolean active;
 
   public static RateData instance(final Long id, final String name, final BigDecimal percentage,
-      final String productApply, final boolean active) {
+      final EnumOptionData productApply, final boolean active) {
     return new RateData(id, name, percentage, productApply, active);
   }
 
   private RateData(final Long id, final String name, final BigDecimal percentage,
-      final String productApply, final boolean active) {
+      final EnumOptionData productApply, final boolean active) {
     this.id = id;
     this.name = name;
     this.percentage = percentage;
