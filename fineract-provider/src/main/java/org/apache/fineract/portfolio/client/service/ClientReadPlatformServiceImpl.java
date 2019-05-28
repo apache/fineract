@@ -251,7 +251,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         if (externalId != null) {
-        	paramList.add(ApiParameterHelper.sqlEncodeString(externalId));
+        	paramList.add(externalId);
             extraCriteria += " and c.external_id like ? " ;
         }
 
@@ -262,17 +262,17 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         if (firstname != null) {
-        	paramList.add(ApiParameterHelper.sqlEncodeString(firstname));
+        	paramList.add(firstname);
             extraCriteria += " and c.firstname like ? " ;
         }
 
         if (lastname != null) {
-        	paramList.add(ApiParameterHelper.sqlEncodeString(lastname));
+        	paramList.add(lastname);
             extraCriteria += " and c.lastname like ? ";
         }
 
         if (searchParameters.isScopedByOfficeHierarchy()) {
-        	paramList.add(ApiParameterHelper.sqlEncodeString(searchParameters.getHierarchy() + "%"));
+        	paramList.add(searchParameters.getHierarchy() + "%");
             extraCriteria += " and o.hierarchy like ? ";
         }
 
