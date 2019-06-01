@@ -52,7 +52,10 @@ import java.util.Set;
 @Path("/loans/{loanId}/transactions")
 @Component
 @Scope("singleton")
-@Api(value = "Loan Transactions", description = "Capabilities include loan repayment's, interest waivers and the ability to 'adjust' an existing transaction. An 'adjustment' of a transaction is really a 'reversal' of existing transaction followed by creation of a new transaction with the provided details.")
+@Api(tags = {"Loan Transactions"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Loan Transactions", description = "Capabilities include loan repayment's, interest waivers and the ability to 'adjust' an existing transaction. An 'adjustment' of a transaction is really a 'reversal' of existing transaction followed by creation of a new transaction with the provided details.")
+})
 public class LoanTransactionsApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "type", "date", "currency", "amount",

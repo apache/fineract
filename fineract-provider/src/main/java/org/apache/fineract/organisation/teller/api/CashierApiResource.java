@@ -29,6 +29,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.*;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -44,7 +45,10 @@ import org.springframework.stereotype.Component;
 @Path("cashiers")
 @Component
 @Scope("singleton")
-@Api(value = "cashiers", description = "")
+@Api(tags = {"Cashiers"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Cashiers", description = "")
+})
 public class CashierApiResource {
 
     private final DefaultToApiJsonSerializer<CashierData> jsonSerializer;

@@ -52,7 +52,10 @@ import org.springframework.stereotype.Component;
 @Path("/self/savingsaccounts")
 @Component
 @Scope("singleton")
-@Api(value = "Self Savings Account", description = "")
+@Api(tags = {"Self Savings Account"})
+@SwaggerDefinition(tags = {
+		@Tag(name = "Self Savings Account", description = "")
+})
 public class SelfSavingsApiResource {
 
 	private final PlatformSecurityContext context;

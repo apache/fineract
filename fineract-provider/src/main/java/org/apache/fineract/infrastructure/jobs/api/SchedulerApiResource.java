@@ -44,7 +44,10 @@ import org.springframework.stereotype.Component;
 
 @Path("/scheduler")
 @Component
-@Api(value = "Scheduler", description = "")
+@Api(tags = {"Scheduler"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Scheduler", description = "")
+})
 public class SchedulerApiResource {
 
     private final PlatformSecurityContext context;

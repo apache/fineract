@@ -35,7 +35,10 @@ import javax.ws.rs.core.MediaType;
 @Component
 @Profile("basicauth")
 @Scope("singleton")
-@Api(value = "Self Authentication", description = "")
+@Api(tags = {"Self Authentication"})
+@SwaggerDefinition(tags = {
+		@Tag(name = "Self Authentication", description = "Authenticates the credentials provided and returns the set roles and permissions allowed")
+})
 public class SelfAuthenticationApiResource {
 
 	private final AuthenticationApiResource authenticationApiResource;

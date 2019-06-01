@@ -33,11 +33,15 @@ import org.apache.fineract.mix.service.XBRLResultService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import io.swagger.annotations.*;
 
 @Path("/mixreport")
 @Component
 @Scope("singleton")
-@Api(value = "Mix Report", description = "")
+@Api(tags = {"Mix Report"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Mix Report", description = "")
+})
 public class MixReportApiResource {
 
     private final XBRLResultService xbrlResultService;

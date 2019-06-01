@@ -52,10 +52,15 @@ import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import io.swagger.annotations.*;
 
 @Path("/self/accounttransfers")
 @Component
 @Scope("singleton")
+@Api(tags = {"Self Account Transfer"})
+@SwaggerDefinition(tags = {
+		@Tag(name = "Self Account transfer", description = "")
+})
 public class SelfAccountTransferApiResource {
 
 	private final PlatformSecurityContext context;
@@ -94,8 +99,11 @@ public class SelfAccountTransferApiResource {
 	@Path("template")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
+	@ApiOperation(value = "Retrieve Account Transfer Template", httpMethod = "GET", notes = "Returns list of loan/savings accounts that can be used for account transfer\n" +
+			"\n" + "\n" + "Example Requests:\n" + "\n" + "self/accounttransfers/template\n")
+	@ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = SelfAccountTransferApiResourceSwagger.GetAccountTransferTemplateResponse.class)})
 	public String template(
-			@DefaultValue("") @QueryParam("type") final String type,
+			@DefaultValue("") @QueryParam("type") @ApiParam("type") final String type,
 			@Context final UriInfo uriInfo) {
 
 		AppUser user = this.context.authenticatedUser();
@@ -120,8 +128,11 @@ public class SelfAccountTransferApiResource {
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
+	@ApiOperation(value = "Create new Transfer", httpMethod = "POST", notes = "Ability to create new transfer of monetary funds from one account to another.\n" +
+			"\n" + "\n" + "Example Requests:\n" + "\n" + " self/accounttransfers/\n")
+	@ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = SelfAccountTransferApiResourceSwagger.PostNewTransferResponse.class)})
 	public String create(
-			@DefaultValue("") @QueryParam("type") final String type,
+			@DefaultValue("") @QueryParam("type") @ApiParam("type") final String type,
 			final String apiRequestBodyAsJson) {
 		Map<String, Object> params = this.dataValidator.validateCreate(type,
 				apiRequestBodyAsJson);

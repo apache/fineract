@@ -50,7 +50,10 @@ import java.util.Set;
 @Path("/clients/{clientId}/identifiers")
 @Component
 @Scope("singleton")
-@Api(value = "Client Identifier", description = "Client Identifiers refer to documents that are used to uniquely identify a customer\n" + "Ex: Drivers License, Passport, Ration card etc ")
+@Api(tags = {"Client Identifier"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Client Identifier", description = "Client Identifiers refer to documents that are used to uniquely identify a customer\n" + "Ex: Drivers License, Passport, Ration card etc ")
+})
 public class ClientIdentifiersApiResource {
 
     private static final Set<String> CLIENT_IDENTIFIER_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "clientId",
