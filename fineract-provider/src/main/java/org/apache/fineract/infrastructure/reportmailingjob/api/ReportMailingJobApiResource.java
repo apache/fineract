@@ -54,7 +54,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 @Api(tags = {"Report Mailing Jobs"})
 @SwaggerDefinition(tags = {
-        @Tag(name = "Report Mailing Jobs", description = "This resource allows you to create a scheduled job that runs a report and sents it by email to specified email addresses.\\n\" + \"\\n\" + \"The scheduled job can be configured to run once or on a regular basis (once a day, twice a week, etc)")
+        @Tag(name = "Report Mailing Jobs", description = "This resource allows you to create a scheduled job that runs a report and sents it by email to specified email addresses.\n\nThe scheduled job can be configured to run once or on a regular basis (once a day, twice a week, etc)")
 })
 public class ReportMailingJobApiResource {
 
