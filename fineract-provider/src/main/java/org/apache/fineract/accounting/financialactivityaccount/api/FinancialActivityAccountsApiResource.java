@@ -53,9 +53,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 @Api(tags = {"Mapping Financial Activities to Accounts"})
 @SwaggerDefinition(tags = {
-        @Tag(name = "Mapping Financial Activities to Accounts", description = "Organization Level Financial Activities like Asset and Liability Transfer can be mapped to GL Account. Integrated accounting takes these accounts into consideration when an Account transfer is made between a savings to loan/savings account and vice-versa\\n\" + \"\\n\" +\"\\nField Descriptions\\n\" +\"financialActivityId\\n\" +\"The identifier of the Financial Activity\\n\" +\"glAccountId\\n\" +\"The identifier of a GL Account ( Ledger Account) which shall be used as the default account for the selected Financial Activity")
+        @Tag(name = "Mapping Financial Activities to Accounts", description = "Organization Level Financial Activities like Asset and Liability Transfer can be mapped to GL Account. Integrated accounting takes these accounts into consideration when an Account transfer is made between a savings to loan/savings account and vice-versa\n" + "\n" + "Field Descriptions\n" + "financialActivityId\n" + "The identifier of the Financial Activity\n" + "glAccountId\n" + "The identifier of a GL Account ( Ledger Account) which shall be used as the default account for the selected Financial Activity")
 })
-
 public class FinancialActivityAccountsApiResource {
 
     private final FinancialActivityAccountReadPlatformService financialActivityAccountReadPlatformService;

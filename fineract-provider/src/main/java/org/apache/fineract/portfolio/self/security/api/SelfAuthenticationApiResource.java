@@ -29,14 +29,15 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 @Component
 @Scope("singleton")
 @Profile("basicauth")
 @Path("/self/authentication")
-@Api(value = "Self Authentication", description = "")
+@SwaggerDefinition(tags = {
+		@Tag(name = "Self Authentication", description = "Authenticates the credentials provided and returns the set roles and permissions allowed")
+})
 public class SelfAuthenticationApiResource {
 
 	private final AuthenticationApiResource authenticationApiResource;

@@ -47,7 +47,10 @@ import java.util.HashMap;
 @Path("/self/loans")
 @Component
 @Scope("singleton")
-@Api(value = "Self Loans", description = "")
+@Api(tags = {"Self Loans"})
+@SwaggerDefinition(tags = {
+		@Tag(name = "Self Loans", description = "")
+})
 public class SelfLoansApiResource {
 
 	private final PlatformSecurityContext context;

@@ -45,7 +45,10 @@ import java.util.Set;
 @Path("/floatingrates")
 @Component
 @Scope("singleton")
-@Api(value = "Floating Rates", description = "It lets you create, list, retrieve and upload the floating rates")
+@Api(tags = {"Floating Rates"})
+@SwaggerDefinition(tags = {
+		@Tag(name = "Floating Rates", description = "It lets you create, list, retrieve and upload the floating rates")
+})
 public class FloatingRatesApiResource {
 
 	private static final String RESOURCE_NAME = "FLOATINGRATE";

@@ -51,7 +51,10 @@ import com.google.gson.Gson;
 @Path("/surveys")
 @Component
 @Scope("singleton")
-@Api(value = "SPM - Serveys", description = "")
+@Api(tags = {"Spm-Surveys"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Spm-Surveys", description = "")
+})
 public class SpmApiResource {
 
     private final PlatformSecurityContext securityContext;

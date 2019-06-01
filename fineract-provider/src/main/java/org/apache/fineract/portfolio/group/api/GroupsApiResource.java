@@ -94,7 +94,10 @@ import org.springframework.util.CollectionUtils;
 @Path("/groups")
 @Component
 @Scope("singleton")
-@Api(value = "Groups", description = "Groups are used to provide a distinctive banking distribution channel used in microfinances throughout the world. The Group is an administrative unit. It can contain as few as 5 people or as many as 40 depending on how its used.\n\n" + "\n\n" + "Different styles of group lending - Joint-Liability Group, Grameen Model (Center-Group), Self-Help Groups, Village/Communal Banks)")
+@Api(tags = {"Groups"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Groups", description = "Groups are used to provide a distinctive banking distribution channel used in microfinances throughout the world. The Group is an administrative unit. It can contain as few as 5 people or as many as 40 depending on how its used.\n" + "\n" + "Different styles of group lending - Joint-Liability Group, Grameen Model (Center-Group), Self-Help Groups, Village/Communal Banks)")
+})
 public class GroupsApiResource {
 
     private final PlatformSecurityContext context;

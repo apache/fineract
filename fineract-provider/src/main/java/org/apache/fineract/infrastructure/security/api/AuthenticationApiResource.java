@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.security.api;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +27,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import io.swagger.annotations.*;
@@ -59,7 +57,10 @@ import com.sun.jersey.core.util.Base64;
 @Scope("singleton")
 @Profile("basicauth")
 @Path("/authentication")
-@Api(value = "Authentication HTTP Basic", description = "An API capability that allows client applications to verify authentication details using HTTP Basic Authentication.")
+@Api(tags = {"Authentication HTTP Basic"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Authentication HTTP Basic", description = "An API capability that allows client applications to verify authentication details using HTTP Basic Authentication.")
+})
 public class AuthenticationApiResource {
 
     public static class AuthenticateRequest {

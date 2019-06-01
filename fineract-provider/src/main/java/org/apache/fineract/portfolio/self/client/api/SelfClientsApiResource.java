@@ -57,7 +57,10 @@ import com.sun.jersey.multipart.FormDataParam;
 @Path("/self/clients")
 @Component
 @Scope("singleton")
-@Api(value = "Self Client", description = "")
+@Api(tags = {"Self Client"})
+@SwaggerDefinition(tags = {
+		@Tag(name = "Self Client", description = "")
+})
 public class SelfClientsApiResource {
 
 	private final PlatformSecurityContext context;

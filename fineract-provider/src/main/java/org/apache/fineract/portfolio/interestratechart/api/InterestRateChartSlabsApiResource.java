@@ -48,7 +48,10 @@ import static org.apache.fineract.portfolio.interestratechart.InterestRateChartS
 @Path("/interestratecharts/{chartId}/chartslabs")
 @Component
 @Scope("singleton")
-@Api(value = "Interest Rate Slab (A.K.A interest bands)", description = "The slabs a.k.a interest bands are associated with Interest Rate Chart. These bands allow to define different interest rates for different deposit term periods.")
+@Api(tags = {"Interest Rate Slab (A.K.A interest bands)"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Interest Rate Slab (A.K.A interest bands)", description = "The slabs a.k.a interest bands are associated with Interest Rate Chart. These bands allow to define different interest rates for different deposit term periods.")
+})
 public class InterestRateChartSlabsApiResource {
 
     private final InterestRateChartSlabReadPlatformService interestRateChartSlabReadPlatformService;

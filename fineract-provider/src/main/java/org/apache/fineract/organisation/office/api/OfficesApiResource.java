@@ -62,7 +62,10 @@ import org.springframework.stereotype.Component;
 @Path("/offices")
 @Component
 @Scope("singleton")
-@Api(value = "Offices", description = "Offices are used to model an MFIs structure. A hierarchical representation of offices is supported. There will always be at least one office (which represents the MFI or an MFIs head office). All subsequent offices added must have a parent office.")
+@Api(tags = {"Offices"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Offices", description = "Offices are used to model an MFIs structure. A hierarchical representation of offices is supported. There will always be at least one office (which represents the MFI or an MFIs head office). All subsequent offices added must have a parent office.")
+})
 public class OfficesApiResource {
 
     /**

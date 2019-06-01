@@ -86,7 +86,10 @@ import org.springframework.stereotype.Component;
 @Path("/centers")
 @Component
 @Scope("singleton")
-@Api(value = "Centers", description = "Centers along with Groups are used to provided a distinctive banking distribution channel used in microfinance. Its common in areas such as Southern Asia to use Centers and Group as administrative units in grameen style lending. Typically groups will contain one to five people and centers themselves will be made of anywhere between 2-10 groups.")
+@Api(tags = {"Centers"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Centers", description = "Centers along with Groups are used to provided a distinctive banking distribution channel used in microfinance. Its common in areas such as Southern Asia to use Centers and Group as administrative units in grameen style lending. Typically groups will contain one to five people and centers themselves will be made of anywhere between 2-10 groups.")
+})
 public class CentersApiResource {
 
     private final PlatformSecurityContext context;

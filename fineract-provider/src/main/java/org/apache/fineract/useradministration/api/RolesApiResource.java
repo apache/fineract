@@ -58,7 +58,10 @@ import org.springframework.stereotype.Component;
 @Path("/roles")
 @Component
 @Scope("singleton")
-@Api(value = "Roles", description = "An API capability to support management of application roles for user administration.")
+@Api(tags = {"Roles"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Roles", description = "An API capability to support management of application roles for user administration.")
+})
 public class RolesApiResource {
 
     /**
