@@ -33,11 +33,16 @@ import org.apache.fineract.spm.data.SurveyData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import io.swagger.annotations.*;
 import org.springframework.transaction.annotation.Transactional;
 
 @Path("/self/surveys")
 @Component
 @Scope("singleton")
+@Api(tags = {"Self Spm"})
+@SwaggerDefinition(tags = {
+		@Tag(name = "Self Spm", description = "")
+})
 public class SelfSpmApiResource {
 
 	private final PlatformSecurityContext securityContext;

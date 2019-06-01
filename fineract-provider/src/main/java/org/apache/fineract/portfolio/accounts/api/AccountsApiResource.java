@@ -63,7 +63,10 @@ import java.io.InputStream;
 @Path("/accounts/{type}")
 @Component
 @Scope("singleton")
-@Api(value = "Share Account", description = "Share accounts are instances of a praticular share product created for an individual. An application process around the creation of accounts is also supported.")
+@Api(tags = {"Share Account"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Share Account", description = "Share accounts are instances of a praticular share product created for an individual. An application process around the creation of accounts is also supported.")
+})
 public class AccountsApiResource {
 
     private final ApplicationContext applicationContext ;

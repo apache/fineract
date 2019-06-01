@@ -54,7 +54,10 @@ import org.springframework.stereotype.Component;
 @Component
 @Profile("oauth")
 @Scope("singleton")
-@Api(value = "Fetch authenticated user details", description = "")
+@Api(tags = {"Fetch authenticated user details"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Fetch authenticated user details", description = "")
+})
 public class UserDetailsApiResource {
 
     private final ResourceServerTokenServices tokenServices;

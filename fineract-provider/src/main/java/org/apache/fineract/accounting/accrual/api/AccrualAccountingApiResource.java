@@ -40,9 +40,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 @Api(tags = {"Periodic Accrual Accounting"})
 @SwaggerDefinition(tags = {
-        @Tag(name = "Periodic Accrual Accounting", description = "Periodic Accrual is to accrue the loan income till the specific date or till batch job scheduled time.\n\n")
+        @Tag(name = "Periodic Accrual Accounting", description = "Periodic Accrual is to accrue the loan income till the specific date or till batch job scheduled time.\n")
 })
-
 public class AccrualAccountingApiResource {
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;

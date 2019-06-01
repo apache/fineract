@@ -43,8 +43,10 @@ import org.springframework.stereotype.Component;
 
 @Path("/" + ReportMailingJobConstants.REPORT_MAILING_JOB_RUN_HISTORY_RESOURCE_NAME)
 @Component
-@Scope("singleton")
-@Api(value = "List Report Mailing Job History", description = "")
+@Api(tags = {"List Report Mailing Job History"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "List Report Mailing Job History", description = "")
+})
 public class ReportMailingJobRunHistoryApiResource {
     
     private final PlatformSecurityContext platformSecurityContext;

@@ -42,7 +42,10 @@ import java.util.List;
 @Path("/surveys/{surveyId}/lookuptables")
 @Component
 @Scope("singleton")
-@Api(value = "SPM API - LookUp Table", description = "The Apache Fineract SPM API provides the ability to create custom surveys to collect social performance measurentment data or any additional questionnaire a financial institute want to collect.")
+@Api(tags = {"SPM API - LookUp Table"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "SPM API - LookUp Table", description = "The Apache Fineract SPM API provides the ability to create custom surveys to collect social performance measurentment data or any additional questionnaire a financial institute want to collect.")
+})
 public class LookupTableApiResource {
 
     private final PlatformSecurityContext securityContext;

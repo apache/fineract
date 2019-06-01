@@ -52,7 +52,10 @@ import java.util.Set;
 @Path("/recurringdepositaccounts/{recurringDepositAccountId}/transactions")
 @Component
 @Scope("singleton")
-@Api(value = "Recurring Deposit Account Transactions", description = "Transactions possible on a recurring deposit account.")
+@Api(tags = {"Recurring Deposit Account Transactions"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Recurring Deposit Account Transactions", description = "Transactions possible on a recurring deposit account.")
+})
 public class RecurringDepositAccountTransactionsApiResource {
 
     private final PlatformSecurityContext context;
