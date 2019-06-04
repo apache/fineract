@@ -34,4 +34,6 @@ public interface AccountDetailsReadPlatformService {
     public Collection<LoanAccountSummaryData> retrieveGroupLoanAccountsByLoanOfficerId(final Long groupId, final Long loanOfficerId);
 
     public Collection<LoanAccountSummaryData> retrieveClientActiveLoanAccountSummary(final Long clientId);
+
+    public Collection<LoanAccountSummaryData> retrieveGroupActiveLoanAccountSummary(final Long groupId);
 }
