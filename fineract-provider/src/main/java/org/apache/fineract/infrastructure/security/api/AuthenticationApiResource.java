@@ -54,7 +54,10 @@ import com.sun.jersey.core.util.Base64;
 @Component
 @Profile("basicauth")
 @Scope("singleton")
-@Api(value = "Authentication HTTP Basic", description = "An API capability that allows client applications to verify authentication details using HTTP Basic Authentication.")
+@Api(tags = {"Authentication HTTP Basic"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Authentication HTTP Basic", description = "An API capability that allows client applications to verify authentication details using HTTP Basic Authentication.")
+})
 public class AuthenticationApiResource {
 
     private final DaoAuthenticationProvider customAuthenticationProvider;
