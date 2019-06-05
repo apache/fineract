@@ -83,7 +83,11 @@ import org.springframework.util.CollectionUtils;
 @Path("/fixeddepositaccounts")
 @Component
 @Scope("singleton")
-@Api(value = "Fixed Deposit Account", description = "Fixed Deposit accounts are instances of a praticular fixed deposit product created. An application process around the creation of accounts is also supported.")
+@Api(tags = {"Fixed Deposit Account"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Fixed Deposit Account", description = "Fixed Deposit accounts are instances of a praticular fixed deposit product created. An application process around the creation of accounts is also supported.")
+})
+
 public class FixedDepositAccountsApiResource {
 
     private final DepositAccountReadPlatformService depositAccountReadPlatformService;

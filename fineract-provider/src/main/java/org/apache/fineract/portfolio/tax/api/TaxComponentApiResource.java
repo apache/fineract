@@ -42,7 +42,11 @@ import java.util.Collection;
 @Path("/taxes/component")
 @Component
 @Scope("singleton")
-@Api(value = "Tax Components", description = "This defines the Tax Components")
+@Api(tags = {"Tax Components"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Tax Components", description = "This defines the Tax Components")
+})
+
 public class TaxComponentApiResource {
 
     private final String resourceNameForPermissions = "TAXCOMPONENT";

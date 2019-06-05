@@ -41,7 +41,11 @@ import java.util.Collection;
 
 @Path("/paymenttypes")
 @Component
-@Api(value = "Payment Type", description = "This defines the payment type")
+@Api(tags = {"Payment Type"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Payment Type", description = "This defines the payment type")
+})
+
 public class PaymentTypeApiResource {
 
     private final PlatformSecurityContext securityContext;

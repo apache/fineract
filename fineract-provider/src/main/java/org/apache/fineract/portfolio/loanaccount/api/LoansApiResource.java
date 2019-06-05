@@ -123,7 +123,11 @@ import org.springframework.util.CollectionUtils;
 @Path("/loans")
 @Component
 @Scope("singleton")
-@Api(value = "Loans", description = "The API concept of loans models the loan application process and the loan contract/monitoring process.")
+@Api(tags = {"Loans"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Loans", description = "The API concept of loans models the loan application process and the loan contract/monitoring process.")
+})
+
 public class LoansApiResource {
 
     private final Set<String> LOAN_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "accountNo", "status", "externalId", "clientId",
