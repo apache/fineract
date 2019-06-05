@@ -53,7 +53,11 @@ import org.springframework.stereotype.Component;
 @Path("/reports")
 @Component
 @Scope("singleton")
-@Api(value = "Reports", description = "Non-core reports can be added, updated and deleted.")
+@Api(tags = {"Reports"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Reports", description = "Non-core reports can be added, updated and deleted.")
+})
+
 public class ReportsApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "reportName", "reportType", "reportSubType",

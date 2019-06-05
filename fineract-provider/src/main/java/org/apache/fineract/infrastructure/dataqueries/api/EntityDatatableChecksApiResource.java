@@ -53,7 +53,11 @@ import org.springframework.stereotype.Component;
 @Path("/entityDatatableChecks")
 @Component
 @Scope("singleton")
-@Api(value = "Entity-Datatable Checks", description = "This defines Entity-Datatable Check.")
+@Api(tags = {"Entity Datatable Check"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Entity Data Table", description = "This defines Entity-Datatable Check.")
+})
+
 public class EntityDatatableChecksApiResource {
 
     private final PlatformSecurityContext context;

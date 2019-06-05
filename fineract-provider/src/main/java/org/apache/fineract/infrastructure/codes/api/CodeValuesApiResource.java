@@ -55,7 +55,11 @@ import org.springframework.stereotype.Component;
 @Path("/codes/{codeId}/codevalues")
 @Component
 @Scope("singleton")
-@Api(value = "Code Values", description = "Code and code values: Codes represent a specific category of data, their code values are a specific instance of that category.\n" + "\n" + "Codes are mostly system defined which means the code itself comes out of the box and cannot be modified however its code values can be. e.g. 'Customer Identifier', it defaults to a code value of 'Passport' but could be 'Drivers License, National Id' etc")
+@Api(tags = {"Code Values"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Code Values", description = "Code and code values: Codes represent a specific category of data, their code values are a specific instance of that category.\n" + "\n" + "Codes are mostly system defined which means the code itself comes out of the box and cannot be modified however its code values can be. e.g. 'Customer Identifier', it defaults to a code value of 'Passport' but could be 'Drivers License, National Id' etc")
+})
+
 public class CodeValuesApiResource {
 
     /**

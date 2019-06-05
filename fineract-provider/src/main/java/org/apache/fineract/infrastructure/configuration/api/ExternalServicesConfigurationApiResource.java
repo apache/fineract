@@ -48,7 +48,11 @@ import org.springframework.stereotype.Component;
 @Path("/externalservice")
 @Component
 @Scope("singleton")
-@Api(value = "External Services", description = "External Services Configuration related to set of supported configurations for third party services like Amazon S3 and SMTP:\n" + "\n" + "S3 (Amazon S3):\n" + "s3_access_key -\n" + "s3_bucket_name -\n" + "s3_secret_key -\n" + "\n" + "\n" + "SMTP (Email Service):\n" + "username -\n" + "password -\n" + "host -\n" + "port -\n" + "useTLS -")
+@Api(tags = {"External Services"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "External Services", description = "External Services Configuration related to set of supported configurations for third party services like Amazon S3 and SMTP:\n" + "\n" + "S3 (Amazon S3):\n" + "s3_access_key -\n" + "s3_bucket_name -\n" + "s3_secret_key -\n" + "\n" + "\n" + "SMTP (Email Service):\n" + "username -\n" + "password -\n" + "host -\n" + "port -\n" + "useTLS -")
+})
+
 public class ExternalServicesConfigurationApiResource {
 
     private final PlatformSecurityContext context;
