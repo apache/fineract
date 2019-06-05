@@ -53,7 +53,11 @@ import org.springframework.stereotype.Component;
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
 @Scope("singleton")
-@Api(value = "Cache", description = "The following settings are possible for cache:\n" + "\n" + "No Caching: caching turned off\n" + "Single node: caching on for single instance deployments of platorm (works for multiple tenants but only one tomcat)\n" + "By default caching is set to No Caching. Switching between caches results in the cache been clear e.g. from Single node to No cache and back again would clear down the single node cache.")
+@Api(tags = {"Cache"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Cache", description = "The following settings are possible for cache:\n" + "\n" + "No Caching: caching turned off\n" + "Single node: caching on for single instance deployments of platorm (works for multiple tenants but only one tomcat)\n" + "By default caching is set to No Caching. Switching between caches results in the cache been clear e.g. from Single node to No cache and back again would clear down the single node cache.")
+})
+
 public class CacheApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id"));

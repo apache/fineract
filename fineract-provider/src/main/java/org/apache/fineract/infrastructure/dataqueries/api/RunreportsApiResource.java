@@ -58,8 +58,12 @@ import org.springframework.stereotype.Component;
 @Path("/runreports")
 @Component
 @Scope("singleton")
-@Api(value = "Run Reports", description = "")
-public class RunreportsApiResource {
+@Api(tags = {"Run Reports"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Run Reports", description = "")
+})
+
+        public class RunreportsApiResource {
 
     private final PlatformSecurityContext context;
     private final ToApiJsonSerializer<ReportData> toApiJsonSerializer;
