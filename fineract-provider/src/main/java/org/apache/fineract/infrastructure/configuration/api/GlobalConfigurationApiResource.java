@@ -46,7 +46,7 @@ import org.springframework.stereotype.Component;
 @Path("/configurations")
 @Component
 @Scope("singleton")
-Api(tags = {"Global Configuration"})
+@Api(tags = {"Global Configuration"})
 @SwaggerDefinition(tags = {
         @Tag(name = "Global Configuration", description = "Global configuration related to set of supported enable/disable configurations:\n" + "\n" + "maker-checker - defaults to false - if true turns on maker-checker functionality\n" + "reschedule-future-repayments - defaults to false - if true reschedules repayemnts which falls on a non-working day to configured repayment rescheduling rule\n" + "allow-transactions-on-non_workingday - defaults to false - if true allows transactions on non-working days\n" + "reschedule-repayments-on-holidays - defaults to false - if true reschedules repayemnts which falls on a non-working day to defined reschedule date\n" + "allow-transactions-on-holiday - defaults to false - if true allows transactions on holidays\n" + "savings-interest-posting-current-period-end - Set it at the database level before any savings interest is posted. When set as false(default), interest will be posted on the first date of next period. If set as true, interest will be posted on last date of current period. There is no difference in the interest amount posted.\n" + "financial-year-beginning-month - Set it at the database level before any savings interest is posted. Allowed values 1 - 12 (January - December). Interest posting periods are evaluated based on this configuration.\n" + "meetings-mandatory-for-jlg-loans - if set to true, enforces all JLG loans to follow a meeting schedule belonging to either the parent group or Center.")
 })
