@@ -42,7 +42,10 @@ import java.util.Date;
 @Path("/standinginstructionrunhistory")
 @Component
 @Scope("singleton")
-@Api(value = "Standing Instructions History", description = "The list capability of history can support pagination and sorting.")
+@Api(tags = {"Standing Instructions History"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Standing Instructions History", description = "The list capability of history can support pagination and sorting.")
+})
 public class StandingInstructionHistoryApiResource {
 
     private final PlatformSecurityContext context;

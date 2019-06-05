@@ -73,7 +73,11 @@ import org.springframework.util.CollectionUtils;
 @Path("/savingsaccounts")
 @Component
 @Scope("singleton")
-@Api(value = "Savings Account", description = "Savings accounts are instances of a particular savings product created for an individual or group. An application process around the creation of accounts is also supported.")
+@Api(tags = {"Savings Account"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Savings Account", description = "Savings accounts are instances of a particular savings product created for an individual or group. An application process around the creation of accounts is also supported.")
+})
+
 public class SavingsAccountsApiResource {
 
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;

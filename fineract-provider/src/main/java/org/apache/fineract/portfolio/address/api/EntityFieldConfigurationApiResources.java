@@ -43,7 +43,11 @@ import java.util.Set;
 @Path("/fieldconfiguration/{entity}")
 @Component
 @Scope("singleton")
-@Api(value = "Entity Field Configuration", description = "Entity Field configuration API is a generic and extensible \n" + "wherein various entities and subentities can be related.\n" + "Also it gives the user an ability to enable/disable fields,\n" + "add regular expression for validation")
+@Api(tags = {"Entity Field Configuration"})
+@SwaggerDefinition(tags = {
+		@Tag(name = "Entity Field Configuration", description = "Entity Field configuration API is a generic and extensible \\n\" + \"wherein various entities and subentities can be related.\\n\" + \"Also it gives the user an ability to enable/disable fields,\\n\" + \"add regular expression for validation")
+})
+
 public class EntityFieldConfigurationApiResources {
 
 	private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("clientAddressId", "client_id",

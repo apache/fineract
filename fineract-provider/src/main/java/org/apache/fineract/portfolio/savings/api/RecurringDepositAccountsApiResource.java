@@ -80,7 +80,11 @@ import org.springframework.util.CollectionUtils;
 @Path("/recurringdepositaccounts")
 @Component
 @Scope("singleton")
-@Api(value = "Recurring Deposit Account", description = "Recurring Deposit accounts are instances of a praticular recurring deposit product created. An application process around the creation of accounts is also supported.")
+@Api(tags = {"Recurring Deposit Account"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Recurring Deposit Account", description = "Recurring Deposit accounts are instances of a praticular recurring deposit product created. An application process around the creation of accounts is also supported.")
+})
+
 public class RecurringDepositAccountsApiResource {
 
     private final DepositAccountReadPlatformService depositAccountReadPlatformService;

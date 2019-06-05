@@ -75,7 +75,11 @@ import com.sun.jersey.multipart.FormDataParam;
 @Path("/clients")
 @Component
 @Scope("singleton")
-@Api(value = "Client", description = "Clients are people and businesses that have applied (or may apply) to an MFI for loans.\n" + "\n" + "Clients can be created in Pending or straight into Active state.")
+@Api(tags = {"Client"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Client", description = "Clients are people and businesses that have applied (or may apply) to an MFI for loans.\\n\" + \"\\n\" + \"Clients can be created in Pending or straight into Active state.")
+})
+
 public class ClientsApiResource {
 
     private final PlatformSecurityContext context;
