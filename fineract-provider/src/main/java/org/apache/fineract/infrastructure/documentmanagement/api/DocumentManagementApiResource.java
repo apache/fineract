@@ -61,7 +61,11 @@ import com.sun.jersey.multipart.FormDataParam;
 @Path("{entityType}/{entityId}/documents")
 @Component
 @Scope("singleton")
-@Api(value = "Documents", description = "Multiple Documents (a combination of a name, description and a file) may be attached to different Entities like Clients, Groups, Staff, Loans, Savings and Client Identifiers in the system\n" + "\n" + "Note: The currently allowed Entities are\n" + "\n" + "Clients: URL Pattern as clients\n" + "Staff: URL Pattern as staff\n" + "Loans: URL Pattern as loans\n" + "Savings: URL Pattern as savings\n" + "Client Identifiers: URL Pattern as client_identifiers\n" + "Groups: URL Pattern as groups")
+@Api(tags = {"Documents"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Documents", description = "Multiple Documents (a combination of a name, description and a file) may be attached to different Entities like Clients, Groups, Staff, Loans, Savings and Client Identifiers in the system\n" + "\n" + "Note: The currently allowed Entities are\n" + "\n" + "Clients: URL Pattern as clients\n" + "Staff: URL Pattern as staff\n" + "Loans: URL Pattern as loans\n" + "Savings: URL Pattern as savings\n" + "Client Identifiers: URL Pattern as client_identifiers\n" + "Groups: URL Pattern as groups")
+})
+
 public class DocumentManagementApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "parentEntityType", "parentEntityId",

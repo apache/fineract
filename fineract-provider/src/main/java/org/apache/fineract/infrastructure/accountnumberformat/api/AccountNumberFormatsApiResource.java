@@ -55,7 +55,11 @@ import org.springframework.stereotype.Component;
 @Path(AccountNumberFormatConstants.resourceRelativeURL)
 @Component
 @Scope("singleton")
-@Api(value = "Account number format", description = "Account number preferences are used to describe custom formats for account numbers associated with Customer, Loan and Savings accounts." )
+@Api(tags = {"Account number format"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Account number format", description = "Account number preferences are used to describe custom formats for account numbers associated with Customer, Loan and Savings accounts." )
+})
+
 public class AccountNumberFormatsApiResource {
 
     private final PlatformSecurityContext context;

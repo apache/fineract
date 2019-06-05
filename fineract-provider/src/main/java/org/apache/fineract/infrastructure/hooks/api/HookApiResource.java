@@ -55,7 +55,11 @@ import org.springframework.stereotype.Component;
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
 @Scope("singleton")
-@Api(value = "Hooks", description = "Hooks are a mechanism to trigger custom code on the occurence of events.")
+@Api(tags = {"Hooks")
+@SwaggerDefinition(tags = {
+		@Tag(name = "Hooks", description = "Hooks are a mechanism to trigger custom code on the occurence of events. ")
+})
+
 public class HookApiResource {
 
 	private final PlatformSecurityContext context;
