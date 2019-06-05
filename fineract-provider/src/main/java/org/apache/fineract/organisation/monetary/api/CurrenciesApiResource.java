@@ -49,7 +49,11 @@ import org.springframework.stereotype.Component;
 @Path("/currencies")
 @Component
 @Scope("singleton")
-@Api(value = "Currency", description = "Application related configuration around viewing/updating the currencies permitted for use within the MFI.")
+@Api(tags = {"Currency"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Currency", description = "Application related configuration around viewing/updating the currencies permitted for use within the MFI.")
+})
+
 public class CurrenciesApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));

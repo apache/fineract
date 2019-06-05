@@ -58,7 +58,11 @@ import org.springframework.stereotype.Component;
 @Path("tellers")
 @Component
 @Scope("singleton")
-@Api(value = "Teller Cash Management", description = "Teller cash management which will allow an organization to manage their cash transactions at branches or head office more effectively.")
+@Api(tags = {"Teller Cash Management"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Teller Cash Management", description = "Teller cash management which will allow an organization to manage their cash transactions at branches or head office more effectively.")
+})
+
 public class TellerApiResource {
 
     private final PlatformSecurityContext securityContext;
