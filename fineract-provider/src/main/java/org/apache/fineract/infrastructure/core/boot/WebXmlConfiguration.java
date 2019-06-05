@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.core.boot;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
-import org.apache.fineract.infrastructure.core.filters.ResponseCompressFilter;
 import org.apache.fineract.infrastructure.core.filters.ResponseCorsFilter;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,8 +63,6 @@ public class WebXmlConfiguration {
         jerseyServletRegistration.addInitParameter("com.sun.jersey.spi.container.ContainerResponseFilters",
                 ResponseCorsFilter.class.getName());
         jerseyServletRegistration.addInitParameter("com.sun.jersey.config.feature.DisableWADL", "true");
-        jerseyServletRegistration.addInitParameter("com.sun.jersey.spi.container.ContainerResponseFilters",
-                ResponseCompressFilter.class.getName());
         // debugging for development:
         // jerseyServletRegistration.addInitParameter("com.sun.jersey.spi.container.ContainerRequestFilters",
         // LoggingFilter.class.getName());
