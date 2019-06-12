@@ -5,7 +5,17 @@ Fineract is a mature platform with open APIs that provides a reliable, robust, a
 Requirements
 ============
 * Java >= 1.8 (Oracle JVMs have been tested)
-* MySQL 5.5
+* MySQL 5.5 or MariaDB
+
+On Fedora:
+
+    sudo dnf install java-1.8.0-openjdk-devel
+    sudo dnf install mariadb-server
+    sudo systemctl enable mariadb
+    sudo systemctl start mariadb
+
+Now set the database password for the development environment which is hard-coded in build scripts like fineract-provider/build.gradle by [looking at how .travis.yml does it](https://github.com/apache/fineract/blob/develop/.travis.yml).
+
 
 Instructions to download gradle wrapper
 ============
