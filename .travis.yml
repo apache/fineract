@@ -15,6 +15,10 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+
+# https://issues.apache.org/jira/browse/FINERACT-763
+dist: trusty
+
 language: java
 
 jdk:
