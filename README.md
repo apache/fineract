@@ -5,7 +5,6 @@ Fineract is a mature platform with open APIs that provides a reliable, robust, a
 Requirements
 ============
 * Java >= 1.8 (Oracle JVMs have been tested)
-* gradle-wrapper.jar version 2.10
 * MySQL 5.5
 
 Instructions to download gradle wrapper
