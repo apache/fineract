@@ -7,6 +7,16 @@ Requirements
 * Java >= 1.8 (Oracle JVMs have been tested)
 * MySQL 5.5
 
+You can run the required version of the database server in a container, instead of having to install it, like this:
+
+    docker run --name mysql-5.5 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mysql -d mysql:5.5
+    
+and stop and destroy it like this:
+
+    docker rm -f myql-5.5
+
+Beware that this database container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mysql) re. how to make it persistant instead of ephemeral.
+
 Instructions to run Apache RAT (Release Audit Tool)
 ============
 1. Extract the archive file to your local directory.
@@ -22,16 +32,15 @@ Instructions to build a war file
 
 Instructions to execute Integration tests
 ============
-1. Login to mysql DB using `mysql -u root -p mysql`
 > Note that if this is the first time to access MySQL DB, then you may need to reset your password. 
-2. Create the mifosplatform-tenants database using `CREATE DATABASE mifosplatform-tenants`.
-3. Create the default tenant database using `CREATE DATABASE mifostenant-default`.
-4. Download gradle-wrapper.jar version 2.10 and place it in the fineract-provider/gradle/wrapper folder. See 'Instructions to download gradle wrapper' above.
-5. Run the following commands:
-    1. `./gradlew migrateTenantListDB -PdbName=mifosplatform-tenants`
-    2. `./gradlew migrateTenantDB -PdbName=mifostenant-default`
-6. Run `./gradlew clean integrationTest`
-7. Run `./gradlew tomcatRunWar`
+
+Run the following commands:
+1. `./gradlew createDB -PdbName=mifosplatform-tenants`
+1. `./gradlew createDB -PdbName=mifostenant-default`
+1. `./gradlew migrateTenantListDB -PdbName=mifosplatform-tenants`
+1. `./gradlew migrateTenantDB -PdbName=mifostenant-default`
+1. `./gradlew clean integrationTest`
+1. `./gradlew tomcatRunWar`
 
 Version
 ============
