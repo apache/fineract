@@ -10,14 +10,12 @@ Requirements
 Instructions to run Apache RAT (Release Audit Tool)
 ============
 1. Extract the archive file to your local directory.
-2. Download gradle-wrapper.jar version 2.10 and place it in the fineract-provider/gradle/wrapper folder. See 'Instructions to download gradle wrapper' above.
-3. Run `./gradlew rat`. A report will be generated under build/reports/rat/rat-report.txt
+2. Run `./gradlew rat`. A report will be generated under build/reports/rat/rat-report.txt
 
 Instructions to build a war file
 ============
 1. Extract the archive file to your local directory.
-2. Ensure gradle-wrapper.jar version 2.10 is present in the fineract-provider/gradle/wrapper folder. See 'Instructions to download gradle wrapper' above.
-3. Run `./gradlew clean war` or `./gradlew build` to build deployable war file which will be created at build/libs directory.
+2. Run `./gradlew clean war` or `./gradlew build` to build deployable war file which will be created at build/libs directory.
 
 
 Instructions to execute Integration tests
