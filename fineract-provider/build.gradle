@@ -362,12 +362,12 @@ configurations {
     integrationTestRuntime.extendsFrom testRuntime
 }
 
+task integrationTest()
 task integrationTest(type:Test){
     description = "Run integration tests (located in src/integrationTest/java). Starts tomcat in daemon mode before executing the tests."
     it.dependsOn war
     doFirst {
         tomcatRunWar.daemon = true
-        tomcatRunWar.execute()
     }
     testClassesDirs = project.sourceSets.integrationTest.output.classesDirs
     classpath = project.sourceSets.integrationTest.runtimeClasspath
@@ -428,7 +428,6 @@ buildscript {
     }
 
     dependencies {
-<<<<<<< HEAD
         classpath "org.flywaydb:flyway-gradle-plugin:5.2.4" // version upgraded during Spring Boot & MariaDB4j work, as prev. used v0.2 didn't work well after *.sql moved from fineract-db to fineract-provider/src/main/resources (new version also has clearer errors, e.g. in case of missing DB)
 
         // NOT classpath 'org.drizzle.jdbc:drizzle-jdbc:1.3' as it is not compatible with Flyway 3.1+ (only up to 3.0)
@@ -443,6 +442,7 @@ buildscript {
         // see https://github.com/apache/fineract/pull/525
         // see https://github.com/apache/fineract/pull/550
 	    classpath 'org.mariadb.jdbc:mariadb-java-client:2.4.1'
+
     }
 }
 
@@ -454,56 +454,38 @@ flyway {
     password = mysqlPassword
 }
 
-task migrateTenantDB {
-    description="Migrates a Tenant DB. Optionally can pass dbName. Defaults to 'mifostenant-default' (Example: -PdbName=someTenantDBname)"
-    doLast {
-        def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/core_db'
-        def tenantDbName = 'mifostenant-default';
-        if (rootProject.hasProperty("dbName")) {
-            tenantDbName = rootProject.getProperty("dbName")
-        }
 
-	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/core_db'
-	def tenantDbName = 'mifostenant-default';
+task migrateTenantDB(type: org.flywaydb.gradle.task.FlywayMigrateTask) {
+    description="Migrates a Tenant DB. Optionally can pass dbName. Defaults to 'mifostenant-default' (Example: -PdbName=someTenantDBname)"
+    def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/core_db'
+    def tenantsDbName = 'mifostenant-default';
     if (rootProject.hasProperty("dbName")) {
-		tenantDbName = rootProject.getProperty("dbName")
-	}
+        tenantsDbName = rootProject.getProperty("dbName")
+    }
 
     flyway.url= "jdbc:mariadb://localhost:3306/$tenantDbName"
     flyway.driver = "org.mariadb.jdbc.Driver"
     flyway.locations= [filePath]
-    /**We use ${ as the prefix for strecthy reporting, do not want them to be interpreted by Flyway**/
     flyway.placeholderPrefix = "\$\${"
-    flywayMigrate.execute()
-    }
+
 }
 
-task showTenantDBInfo {
+task showTenantDBInfo(type: org.flywaydb.gradle.task.FlywayInfoTask){
     description="Shows the migration info for a Tenant DB. Optionally can pass dbName. Defaults to 'mifostenant-default' (Example: -PdbName=someTenantDBname)"
-    doLast {
-        def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/core_db'
-        def tenantDbName = 'mifostenant-default';
-        if (rootProject.hasProperty("dbName")) {
-            tenantDbName = rootProject.getProperty("dbName")
-        }
-
-	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/core_db'
+    def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/core_db'
     def tenantDbName = 'mifostenant-default';
     if (rootProject.hasProperty("dbName")) {
-		tenantDbName = rootProject.getProperty("dbName")
-	}
+        tenantDbName = rootProject.getProperty("dbName")
+    }
 
     flyway.url= "jdbc:mariadb://localhost:3306/$tenantDbName"
     flyway.driver = "org.mariadb.jdbc.Driver"
     flyway.locations= [filePath]
-    flywayInfo.execute()
-    }
 }
 
 
 task migrateTenantListDB(type: org.flywaydb.gradle.task.FlywayMigrateTask) {
     description="Migrates a Tenant List DB. Optionally can pass dbName. Defaults to 'mifosplatform-tenants' (Example: -PdbName=someDBname)"
-<<<<<<< HEAD
     doLast {
         def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
         def tenantsDbName = 'mifosplatform-tenants';
@@ -511,68 +493,40 @@ task migrateTenantListDB(type: org.flywaydb.gradle.task.FlywayMigrateTask) {
             tenantsDbName = rootProject.getProperty("dbName")
         }
 
-	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
- 	def tenantsDbName = 'mifosplatform-tenants';
-    if (rootProject.hasProperty("dbName")) {
-		tenantsDbName = rootProject.getProperty("dbName")
-	}
+        flyway.url= "jdbc:mariadb://localhost:3306/$tenantsDbName"
+        flyway.driver = "org.mariadb.jdbc.Driver"
+        flyway.locations= [filePath]
+}
 
-    flyway.url= "jdbc:mariadb://localhost:3306/$tenantsDbName"
-    flyway.driver = "org.mariadb.jdbc.Driver"
-    flyway.locations= [filePath]
-    flywayMigrate.execute()
-=======
+
+task showTenantListDBInfo(type: org.flywaydb.gradle.task.FlywayInfoTask){
+    description="Shows the migration info for a List DB. Optionally can pass dbName. Defaults to 'mifosplatform-tenants' (Example: -PdbName=someDBname)"
     def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
     def tenantsDbName = 'mifosplatform-tenants';
     if (rootProject.hasProperty("dbName")) {
         tenantsDbName = rootProject.getProperty("dbName")
->>>>>>> upgraded flyaway plugin for migrations
     }
 
-    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
-    flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
-    flyway.user = 'root'
-    flyway.password = '.....'
-    flyway.locations= [filePath]
+    flyway.url = "jdbc:mariadb://localhost:3306/$tenantsDbName"
+    flyway.driver = "org.mariadb.jdbc.Driver"
+    flyway.locations = [filePath]
 }
 
-task showTenantListDBInfo {
-    description="Shows the migration info for a List DB. Optionally can pass dbName. Defaults to 'mifosplatform-tenants' (Example: -PdbName=someDBname)"
-    doLast {
-        def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
-        def tenantsDbName = 'mifosplatform-tenants';
-        if (rootProject.hasProperty("dbName")) {
-            tenantsDbName = rootProject.getProperty("dbName")
-        }
 
-	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
+
+task repairTenantDB(type: org.flywaydb.gradle.task.FlywayRepairTask){
+    description="repair migrate"
+    def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
     def tenantsDbName = 'mifosplatform-tenants';
     if (rootProject.hasProperty("dbName")) {
-		tenantsDbName = rootProject.getProperty("dbName")
-	}
+        tenantsDbName = rootProject.getProperty("dbName")
+    }
 
-    flyway.url= "jdbc:mariadb://localhost:3306/$tenantsDbName"
+    flyway.url = "jdbc:mariadb://localhost:3306/$tenantsDbName"
     flyway.driver = "org.mariadb.jdbc.Driver"
-    flyway.locations= [filePath]
-    flywayInfo.execute()
-    }
+    flyway.locations = [filePath]
 }
 
-task repairTenantDB {
-    description="repair migrate"
-    doLast {
-        def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
-        def tenantsDbName = 'mifosplatform-tenants';
-        if (rootProject.hasProperty("dbName")) {
-            tenantsDbName = rootProject.getProperty("dbName")
-        }
-
-        flyway.url = "jdbc:mariadb://localhost:3306/$tenantsDbName"
-        flyway.driver = "org.mariadb.jdbc.Driver"
-        flyway.locations = [filePath]
-        flywayRepair.execute()
-    }
-}
 
 /*
 * Support publication of artifacts versioned by topic branch.
