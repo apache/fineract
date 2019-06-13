@@ -18,7 +18,7 @@
  */
 description = '''\
 Run as:
-gradle clean tomcatrunwar
+gradle clean bootRun
 '''
 buildscript {
   repositories {
@@ -332,13 +332,12 @@ tomcatRunWar {
 sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
 sourceSets.test.output.resourcesDir = sourceSets.test.output.classesDir
 
-/* Exclude maria db and embedded tomcat related files for non dev builds */
+/* FINERACT-730: Exclude MariaDB4j for non dev builds */
 if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
 sourceSets {
     main {
         java {
-            exclude '**/Server*'
-            exclude '**/MariaDB4j*'
+            exclude '**/*MariaDB4j*'
             exclude '**/EmbeddedTomcatWithSSLConfiguration.java'
         }
     }
@@ -546,8 +545,8 @@ def qualifyVersionIfNecessary(version) {
 }
 
 springBoot {
-    mainClass = 'org.apache.fineract.ServerWithMariaDB4jApplication'
+    mainClass = 'org.apache.fineract.ServerApplication'
 }
 bootRepackage {
-    mainClass = 'org.apache.fineract.ServerWithMariaDB4jApplication'
+    mainClass = 'org.apache.fineract.ServerApplication'
 }
