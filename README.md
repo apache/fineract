@@ -13,7 +13,7 @@ You can run the required version of the database server in a container, instead 
     
 and stop and destroy it like this:
 
-    docker rm -f myql-5.5
+    docker rm -f mysql-5.5
 
 Beware that this database container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mysql) re. how to make it persistant instead of ephemeral.
 
@@ -34,7 +34,7 @@ Instructions to execute Integration tests
 ============
 > Note that if this is the first time to access MySQL DB, then you may need to reset your password. 
 
-Run the following commands:
+Run the following commands, very similarly to how [.travis.yml](.travis.yml) does:
 1. `./gradlew createDB -PdbName=mifosplatform-tenants`
 1. `./gradlew createDB -PdbName=mifostenant-default`
 1. `./gradlew migrateTenantListDB -PdbName=mifosplatform-tenants`
