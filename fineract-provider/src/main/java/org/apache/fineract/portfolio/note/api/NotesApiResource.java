@@ -47,7 +47,11 @@ import java.util.Set;
 @Path("/{resourceType}/{resourceId}/notes")
 @Component
 @Scope("singleton")
-@Api(value = "Notes", description = "Notes API allows to enter notes for supported resources.")
+@Api(tags = {"Notes"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Notes", description = "Notes API allows to enter notes for supported resources.")
+})
+
 public class NotesApiResource {
 
     private final Set<String> NOTE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "clientId", "groupId", "loanId",

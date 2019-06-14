@@ -43,7 +43,11 @@ import java.util.HashSet;
 @Path("/loans/{loanId}/schedule")
 @Component
 @Scope("singleton")
-@Api(value = "Loan Rescheduling", description = "Loan Term Variations provides the ability to change due dates, amounts and number of instalments before loan approval.")
+@Api(tags = {"Loan Rescheduling"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Loan Rescheduling", description = "Loan Term Variations provides the ability to change due dates, amounts and number of instalments before loan approval.")
+})
+
 public class LoanScheduleApiResource {
 
     private final String resourceNameForPermissions = "LOAN";

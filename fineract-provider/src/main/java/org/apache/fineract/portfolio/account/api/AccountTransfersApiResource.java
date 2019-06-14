@@ -43,7 +43,11 @@ import javax.ws.rs.core.UriInfo;
 @Path("/accounttransfers")
 @Component
 @Scope("singleton")
-@Api(value = "Account Transfers", description = "Ability to be able to transfer monetary funds from one account to another.\n\n" + "\n\n" + "Note: At present only savings account to savings account transfers are supported.")
+@Api(tags = {"Account Transfers"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Account Transfers", description = "Ability to be able to transfer monetary funds from one account to another.\\n\\n\" + \"\\n\\n\" + \"Note: At present only savings account to savings account transfers are supported.")
+})
+@Api(value = "Account Transfers", description = "")
 public class AccountTransfersApiResource {
 
     private final PlatformSecurityContext context;
