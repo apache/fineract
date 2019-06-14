@@ -19,7 +19,9 @@ Beware that this database container database keeps its state inside the containe
 
 Instructions to download gradle wrapper
 ============
-If the file fineract-provider/gradle/wrapper/gradle-wrapper.jar doesn't already exist in your copy of the Fineract codebase, the same needs to be downloaded using the commands below
+The file fineract-provider/gradle/wrapper/gradle-wrapper.jar binary is checked into this projects's Git source repository,
+but won't exist in your copy of the Fineract codebase if you downloaded a released source archive from apache.org.
+In that case, you need to downloaded it using the commands below:
 
 wget --no-check-certificate -P fineract-provider/gradle/wrapper https://github.com/apache/fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar
 
