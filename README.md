@@ -17,6 +17,16 @@ and stop and destroy it like this:
 
 Beware that this database container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mysql) re. how to make it persistant instead of ephemeral.
 
+Instructions to download gradle wrapper
+============
+If the file fineract-provider/gradle/wrapper/gradle-wrapper.jar doesn't already exist in your copy of the Fineract codebase, the same needs to be downloaded using the commands below
+
+wget --no-check-certificate -P fineract-provider/gradle/wrapper https://github.com/apache/fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar
+
+(or)
+
+curl --insecure -L https://github.com/apache/fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar > fineract-provider/gradle/wrapper/gradle-wrapper.jar
+
 Instructions to run Apache RAT (Release Audit Tool)
 ============
 1. Extract the archive file to your local directory.
