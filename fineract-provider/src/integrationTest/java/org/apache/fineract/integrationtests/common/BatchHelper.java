@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests.common;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
@@ -56,6 +57,16 @@ public class BatchHelper {
      */
     public static String toJsonString(final List<BatchRequest> batchRequests) {
         return new Gson().toJson(batchRequests);
+    }
+
+    /**
+     * Returns a Map from Json String
+     *
+     * @param jsonBody
+     * @return Map
+     */
+    public static Map generateMapFromJsonString(final String jsonString) {
+        return new Gson().fromJson(jsonString, Map.class);
     }
 
     /**
@@ -376,6 +387,29 @@ public class BatchHelper {
         br.setReference(reference);
         br.setMethod("POST");
         br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"actualDisbursementDate\": \"15 September 2013\"}");
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a
+     * {@link org.apache.fineract.batch.command.internal.RepayLoanCommandStrategy}
+     * Request with given requestId.
+     *
+     *
+     * @param requestId
+     * @param reference
+     * @return BatchRequest
+     */
+    public static BatchRequest repayLoanRequest(final Long requestId, final Long reference) {
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setReference(reference);
+        br.setRelativeUrl("loans/$.loanId/transactions?command=repayment");
+        br.setMethod("POST");
+        br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " +
+                "\"transactionDate\": \"15 September 2013\",  \"transactionAmount\": 500}");
 
         return br;
     }
