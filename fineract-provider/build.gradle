@@ -362,7 +362,6 @@ configurations {
     integrationTestRuntime.extendsFrom testRuntime
 }
 
-task integrationTest()
 task integrationTest(type:Test){
     description = "Run integration tests (located in src/integrationTest/java). Starts tomcat in daemon mode before executing the tests."
     it.dependsOn war
@@ -458,9 +457,9 @@ flyway {
 task migrateTenantDB(type: org.flywaydb.gradle.task.FlywayMigrateTask) {
     description="Migrates a Tenant DB. Optionally can pass dbName. Defaults to 'mifostenant-default' (Example: -PdbName=someTenantDBname)"
     def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/core_db'
-    def tenantsDbName = 'mifostenant-default';
+    def tenantDbName = 'mifostenant-default';
     if (rootProject.hasProperty("dbName")) {
-        tenantsDbName = rootProject.getProperty("dbName")
+        tenantDbName = rootProject.getProperty("dbName")
     }
 
     flyway.url= "jdbc:mariadb://localhost:3306/$tenantDbName"
@@ -485,7 +484,7 @@ task showTenantDBInfo(type: org.flywaydb.gradle.task.FlywayInfoTask){
 
 
 task migrateTenantListDB(type: org.flywaydb.gradle.task.FlywayMigrateTask) {
-    description="Migrates a Tenant List DB. Optionally can pass dbName. Defaults to 'mifosplatform-tenants' (Example: -PdbName=someDBname)"
+    description = "Migrates a Tenant List DB. Optionally can pass dbName. Defaults to 'mifosplatform-tenants' (Example: -PdbName=someDBname)"
     doLast {
         def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
         def tenantsDbName = 'mifosplatform-tenants';
@@ -493,9 +492,10 @@ task migrateTenantListDB(type: org.flywaydb.gradle.task.FlywayMigrateTask) {
             tenantsDbName = rootProject.getProperty("dbName")
         }
 
-        flyway.url= "jdbc:mariadb://localhost:3306/$tenantsDbName"
+        flyway.url = "jdbc:mariadb://localhost:3306/$tenantsDbName"
         flyway.driver = "org.mariadb.jdbc.Driver"
-        flyway.locations= [filePath]
+        flyway.locations = [filePath]
+    }
 }
 
 
