@@ -54,6 +54,4 @@ cache:
 script:
   - date
   - ./gradlew --console=plain licenseMain licenseTest licenseIntegrationTest test
-  - ./gradlew --console=plain migrateTenantListDB -PdbName=mifosplatform-tenants
-  - ./gradlew --console=plain migrateTenantDB -PdbName=mifostenant-default
   - ./gradlew --console=plain clean integrationTest
