@@ -37,10 +37,7 @@ Instructions to execute Integration tests
 Run the following commands, very similarly to how [.travis.yml](.travis.yml) does:
 1. `./gradlew createDB -PdbName=mifosplatform-tenants`
 1. `./gradlew createDB -PdbName=mifostenant-default`
-1. `./gradlew migrateTenantListDB -PdbName=mifosplatform-tenants`
-1. `./gradlew migrateTenantDB -PdbName=mifostenant-default`
 1. `./gradlew clean integrationTest`
-1. `./gradlew tomcatRunWar`
 
 Version
 ============
