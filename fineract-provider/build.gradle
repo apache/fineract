@@ -125,6 +125,10 @@ rat {
     '**/native/**',
     '**/wrapper/**',
 	'**/build/**',
+    // docker
+    '**/Dockerfile/**',
+    '**/docker-compose.yml/**',
+    '**/initdb/**',
 
 	//Api Docs
 	'**/api-docs/*.*',
