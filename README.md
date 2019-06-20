@@ -49,6 +49,26 @@ Run the following commands, very similarly to how [.travis.yml](.travis.yml) doe
 1. `./gradlew createDB -PdbName=mifostenant-default`
 1. `./gradlew clean integrationTest`
 
+
+Instructions to run using Docker and docker-compose
+===================================================
+
+It is possible to do a 'one-touch' installation of Fineract using docker-compose
+
+  Prerequisites:
+  * docker and docker-compose installed on your machine
+
+
+  Installing a new Fineract instance:
+
+  * Clone the Fineract Github repository
+  * Navigate to the docker directory
+  * Run the following commands:
+      * docker-compose build
+      * docker-compose up -d
+  * Fineract will run at https://localhost:8443/fineract-provider
+
+
 Version
 ============
 
