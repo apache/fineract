@@ -1,0 +1,24 @@
+version: '3.7'
+services:
+  fineractmysql:
+    image: mysql:5.7
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./initdb:/docker-entrypoint-initdb.d
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: mysql
+    ports:
+      - "3306:3306"
+  fineract-server:
+    build:
+      context: .
+      target: fineract
+    ports: 
+      - 443:443
+    depends_on:
+      - fineractmysql
+volumes:
+  dbdata:
