@@ -51,9 +51,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unchecked")
 public final class Utils {
 
-    private Utils() {
-
-    }
+    private Utils() {}
 
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 

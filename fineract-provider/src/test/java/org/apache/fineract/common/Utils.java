@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
@@ -40,9 +41,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unchecked")
 public final class Utils {
 
-    private Utils() {
-
-    }
+    private Utils() {}
 
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
     public static final String TENANT_IDENTIFIER = "tenantIdentifier=default";
@@ -57,16 +56,16 @@ public final class Utils {
         RestAssured.useRelaxedHTTPSValidation();
     }
 
-    public static void initializeRESTAssuredPort(int http) {
-        RestAssured.port = http;
-    }
-
     public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
         try {
-            LOG.info("-----------------------------------LOGIN-----------------------------------------");
-            final String json = RestAssured.post(LOGIN_URL).asString();
+            LOG.info("Logging in, for integration test...");
+            // system.out.println("-----------------------------------LOGIN-----------------------------------------");
+            String json = RestAssured.given().contentType(ContentType.JSON).body("{\"username\":\"mifos\", \"password\":\"password\"}")
+                    .expect().log().ifError().when().post(LOGIN_URL).asString();
             assertThat("Failed to login into fineract platform", StringUtils.isBlank(json), is(false));
-            return JsonPath.with(json).get("base64EncodedAuthenticationKey");
+            String key = JsonPath.with(json).get("base64EncodedAuthenticationKey");
+            assertThat("Failed to obtain key: " + json, StringUtils.isBlank(key), is(false));
+            return key;
         } catch (final Exception e) {
             if (e instanceof HttpHostConnectException) {
                 final HttpHostConnectException hh = (HttpHostConnectException) e;
@@ -79,8 +78,8 @@ public final class Utils {
 
     public static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String getURL, final String jsonAttributeToGetBack) {
+        LOG.info("HTTP GET {}", getURL);
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
         return (T) JsonPath.from(json).get(jsonAttributeToGetBack);
     }
-
 }

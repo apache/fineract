@@ -24,7 +24,6 @@ import org.apache.fineract.infrastructure.core.boot.EmbeddedTomcatWithSSLConfigu
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 
@@ -46,7 +45,7 @@ public class ServerApplication extends SpringBootServletInitializer {
 
     @Import({ EmbeddedTomcatWithSSLConfiguration.class })
     @ImportResource({ "classpath*:META-INF/spring/hikariDataSource.xml" })
-    private static class Configuration extends AbstractApplicationConfiguration {}
+    public static class Configuration extends AbstractApplicationConfiguration {}
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
@@ -58,7 +57,6 @@ public class ServerApplication extends SpringBootServletInitializer {
     }
 
     public static void main(String[] args) throws IOException {
-        ConfigurableApplicationContext ctx = configureApplication(new SpringApplicationBuilder(ServerApplication.class)).run(args);
-        // ApplicationExitUtil.waitForKeyPressToCleanlyExit(ctx);
+        configureApplication(new SpringApplicationBuilder(ServerApplication.class)).run(args);
     }
 }

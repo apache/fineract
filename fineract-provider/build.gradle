@@ -382,7 +382,7 @@ if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
         }
         test {
             java {
-                exclude '**/core/boot/tests/**'
+                exclude '**/core/boot/*MariaDB4j*'
             }
         }
     }

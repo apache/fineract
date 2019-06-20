@@ -34,14 +34,12 @@ public class RestAssuredFixture {
 
     private final int httpPort;
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
+    private final ResponseSpecification responseSpec;
+    private final RequestSpecification requestSpec;
 
-    public RestAssuredFixture(int http) {
-
-        this.httpPort = http;
+    public RestAssuredFixture() {
+        this.httpPort = 844;
         Utils.initializeRESTAssured();
-        Utils.initializeRESTAssuredPort(http);
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
@@ -61,7 +59,6 @@ public class RestAssuredFixture {
     }
 
     protected String getApiUrl(String apiPath) {
-        return "http://localhost:" + httpPort + getApiPath(apiPath);
+        return "https://localhost:" + httpPort + getApiPath(apiPath);
     }
-
 }
