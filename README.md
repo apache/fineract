@@ -62,7 +62,6 @@ It is possible to do a 'one-touch' installation of Fineract using docker-compose
   Installing a new Fineract instance:
 
   * Clone the Fineract Github repository
-  * Navigate to the docker directory
   * Run the following commands:
       * docker-compose build
       * docker-compose up -d
