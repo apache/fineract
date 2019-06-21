@@ -40,9 +40,98 @@
             &lt;br/&gt;The API
 
                is organized around REST [ https://en.wikipedia.org/wiki/Representational_state_transfer ]
-              &lt;br/&gt; Find out more about Apache Fineract on [ https://demo.openmf.org/api-docs/apiLive.htm#top ]
+              &lt;br/&gt; The API is designed to have:
+              &lt;br/&gt; - predictable, resource-oriented URLs
+              &lt;br/&gt; - to use HTTP response codes to indicate API errors
+              &lt;br/&gt; - to use built-in HTTP features, like HTTP authentication and HTTP verbs, which can be understood by off-the-shelf HTTP clients.
+              &lt;br/&gt;
+              &lt;br/&gt; JSON is returned in all responses from the API, including errors.
+              &lt;br/&gt;
+              &lt;br/&gt;Much of the API presentation and design ideas are owed to the excellent Apigee "Web API Design" eBook/PDF and the very good Stripe API reference.
+              &lt;br/&gt;
+              &lt;br/&gt;Try The API From Your Browser &lt;br/&gt;
+            GET (read) examples can be run directly from this documentation. It is just a matter of clicking a link. Most browsers display the output on the same page (or another tab if you right click and select that option). Internet Explorer will probably treat the output as if you wanted to download a file. In that case just elect to open the output in a text editor.&lt;br/&gt;
 
-            &lt;br/&gt; You can Try The API From Your Browser itself at [ https://demo.openmf.org/api-docs/apiLive.htm#interact ]
+            &lt;br/&gt; If you want to check out the POST, PUT and DELETE (update) examples a good approach is to take a moment to install a REST plugin for your browser e.g. RESTClient for FireFox. &lt;br/&gt;
+
+            The REST plugins will allow you to;&lt;br/&gt;
+            Select the "Verb" (e.g. POST)&lt;br/&gt;
+            Enter the resource name (e.g. offices)&lt;br/&gt;
+             Add a header to indicate you are sending JSON data as part of the request body (Content-Type: application/json)&lt;br/&gt;
+            Add a header to indicate your 'tenant' (X-Mifos-Platform-TenantId: default)&lt;br/&gt;
+            Paste the example JSON into a Request Body&lt;br/&gt;
+            Send the Request (and receive a Response)&lt;br/&gt;
+            &lt;br/&gt;
+            &lt;br/&gt;
+            &lt;br/&gt;Generic Options&lt;br/&gt;
+            Convenience Templates&lt;br/&gt;
+            There are a list of convenience resources (see Template menu option). These resources end with [/template] and can be useful when building maintenance user interface screens for client applications. The template data returned may consist of any or all of:&lt;br/&gt;
+
+        Field Defaults&lt;br/&gt;
+        Allowed Value Lists&lt;br/&gt;
+        Also, many "Retrieve a" type resources (Retrieve a Client for example) allow the parameter option "template=true". This appends any "Allowed Value Lists" which can be useful when building update functionality.&lt;br/&gt;
+
+        Restrict Returned Fields&lt;br/&gt;
+        Parameter fields={fieldlist} can be used on GET requests to restrict the fields returned.&lt;br/&gt;
+
+        Normal Request:&lt;br/&gt;
+
+        offices/1&lt;br/&gt;
+        Request (restricting fields returned):&lt;br/&gt;
+
+        offices/1?fields=id,name&lt;br/&gt;
+        Pretty JSON Formatting&lt;br/&gt;
+        Parameter "pretty=true" can be used to display JSON from GET requests in an easy-to-read format. This parameter is used in this documentation.&lt;br/&gt;
+
+        Easy-to-read JSON output for POSTs, PUTs and DELETEs will available in the REST plugin you use e.g. RESTClient for FireFox&lt;br/&gt;
+
+        Normal Request (with pretty printing/formatting):&lt;br/&gt;
+
+        offices/1?pretty=true&lt;br/&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+
+
+            Pretty JSON Formatting&lt;br/&gt;
+            Parameter "pretty=true" can be used to display JSON from GET requests in an easy-to-read format. This parameter is used in this documentation.&lt;br/&gt;
+
+        Easy-to-read JSON output for POSTs, PUTs and DELETEs will available in the REST plugin you use e.g. RESTClient for FireFox&lt;br/&gt;
+
+        Normal Request (with pretty printing/formatting):&lt;br/&gt;
+
+        offices/1?pretty=true&lt;br/&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+
+        Creating and Updating&lt;br/&gt;
+        When you want to 'Create a ...' you have to at least supply the mandatory fields. The mandatory fields are listed in this documentation under the relevant 'Create a ...' heading.&lt;br/&gt;
+
+        When you want to 'Update a ...' you can update individual fields or a combination of fields (subject to data integrity rules).&lt;br/&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+        &lt;br/&gt;
+
+
+
+       Updating Dates and Numbers&lt;br/&gt;
+       Dates&lt;br/&gt;&lt;br/&gt;
+        Dates are returned in GET requests as an array e.g. [ 2007, 4, 11]. However, the API accepts them as strings in POST and PUT requests. If there are any dates in your POST or PUT requests, you need to provide the "locale" and "dateFormat". This can be any date pattern supported by Joda-Time. This capability can help you when saving data in your client application as you shouldn't need to do any date format conversion prior to issuing your POST or PUT request.&lt;br/&gt;
+
+    JSON examples:
+    {&lt;br/&gt;
+	locale: en_US,&lt;br/&gt;
+	dateFormat: dd MMMM yyyy,&lt;br/&gt;
+	openingDate: 01 July 2007&lt;br/&gt;
+        }&lt;br/&gt;&lt;br/&gt;
+
+        {&lt;br/&gt;
+        locale: en_US,&lt;br/&gt;
+        dateFormat: yyyy-MM-dd,&lt;br/&gt;
+        openingDate: 2007-03-21&lt;br/&gt;
+        }&lt;br/&gt;
 
             &lt;br/&gt; The Generic Options are available at [ https://demo.openmf.org/api-docs/apiLive.htm#genopts ]
 
