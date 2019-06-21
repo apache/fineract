@@ -53,11 +53,7 @@ import org.springframework.stereotype.Component;
 @Produces({ MediaType.APPLICATION_JSON })
 @Component
 @Scope("singleton")
-@Api(tags = {"DomainName/api/v1/entitytoentitymapping"})
-@SwaggerDefinition(tags = {
-        @Tag(name = "DomainName/api/v1/entitytoentitymapping", description = "")
-})
- // https://github.com/swagger-api/swagger-ui/issues/1655
+@Api(value = "DomainName/api/v1/entitytoentitymapping", description = "") // https://github.com/swagger-api/swagger-ui/issues/1655
 public class FineractEntityApiResource {
 
     private final PlatformSecurityContext context;
