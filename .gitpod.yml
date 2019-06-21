@@ -1,0 +1,5 @@
+image: gitpod/workspace-mysql
+ports:
+- port: 8005
+tasks:
+- command: ./gradlew install
