@@ -1,0 +1,42 @@
+//Request URI:
+//POST paymenthub-schema:// payment-hub-domain:payment-hub-port/channel/transactions
+// HTTP/1.1
+
+//Request Header:
+//Accept: application/vnd.interoperability.quotes+json;version=1
+//Content-Type: application/vnd.interoperability.quotes+json;version=1.0
+//Content-Length: 975
+//Date: Tue, 15 Nov 2017 10: 13:40 GMT
+//Origin: http://www.example.com
+//X-Tenant-Identifier: T111
+
+//Request Body:
+{
+  "clientRefId": "0f4f8eb4-1d83-11e9-ab14-d663bd873d93", // String(1..36)
+  "payee": { // mandatory
+    "partyIdInfo": { // mandatory
+      "partyIdType": "MSISDN", // mandatory, constant, type: Enum of String(1..32): MSISDN, EMAIL, PERSONAL_ID, BUSINESS, DEVICE, ACCOUNT_ID, IBAN, ALIAS
+      "partyIdentifier": "+12345678901", // mandatory, String(1..128)
+      "partySubIdOrType": "nothing" // optional, String(1..128)
+    }
+  },
+  "payer": { // mandatory
+    "partyIdInfo": { // mandatory
+      "partyIdType": "IBAN", // mandatory, constant, type: Enum of String(1..32): MSISDN, EMAIL, PERSONAL_ID, BUSINESS, DEVICE, ACCOUNT_ID, IBAN, ALIAS
+      "partyIdentifier": "IN93116000060000000012345676", // mandatory, String(1..128)
+      "partySubIdOrType": "something" // optional, String(1..128)
+    }
+  },
+  "amountType": "SEND", // mandatory, constant, type: Enum of String(1..32): SEND, RECEIVE
+  "amount": { // mandatory
+    "amount": "100", // mandatory, Number(22, 4) ^([0]|([1-9][0-9]{0,17}))([.][0-9]{0,3}[1-9])?$
+    "currency": "IDR" // mandatory, ISO 4217 (Rupee)
+  },
+  "transactionType": { // mandatory
+    "scenario": "TRANSFER", // mandatory, constant, type: Enum of String(1..32): DEPOSIT, WITHDRAWAL, TRANSFER, PAYMENT, REFUND
+    "initiator": "PAYER", // mandatory, constant, type: Enum of String(1..32): PAYER, PAYEE
+    "initiatorType": "CONSUMER" // mandatory, constant, type: Enum of String(1..32): CONSUMER, AGENT, BUSINESS, DEVICE
+  },
+  "note": "From Mats", // optional, String(1..128)
+  "expiration": "2017-11-15T22:17:28.985-01:00" // optional, ISO 8601
+}

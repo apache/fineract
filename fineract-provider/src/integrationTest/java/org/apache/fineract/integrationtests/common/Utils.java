@@ -46,7 +46,9 @@ import com.jayway.restassured.specification.ResponseSpecification;
 @SuppressWarnings("unchecked")
 public class Utils {
 
-    public static final String TENANT_IDENTIFIER = "tenantIdentifier=default";
+    public static final String TENANT_PARAM_NAME = "tenantIdentifier";
+    public static final String DEFAULT_TENANT = "default";
+    public static final String TENANT_IDENTIFIER = TENANT_PARAM_NAME + '=' + DEFAULT_TENANT;
 
     public static final String TENANT_TIME_ZONE = "Asia/Kolkata";
 
@@ -111,6 +113,13 @@ public class Utils {
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().delete(deleteURL).andReturn()
                 .asString();
         return (T) from(json).get(jsonAttributeToGetBack);
+    }
+
+    public static <T> T performServerDelete(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String deleteURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
+        final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when()
+                .delete(deleteURL).andReturn().asString();
+        return (T) (jsonAttributeToGetBack == null ? json : from(json).get(jsonAttributeToGetBack));
     }
 
     public static String convertDateToURLFormat(final String dateToBeConvert) {

@@ -378,15 +378,25 @@ public class JsonParserHelper {
 
         if (element.isJsonObject()) {
             final JsonObject object = element.getAsJsonObject();
+            value = extractLocalTimeNamed(parameterName, element, extractTimeFormatParameter(object), parametersPassedInCommand);
+        }
+        return value;
+    }
 
-            final String timeFormat = extractTimeFormatParameter(object);
+    public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonElement element, String timeFormat,
+            final Set<String> parametersPassedInCommand) {
+
+        LocalDateTime value = null;
+
+        if (element.isJsonObject()) {
+            final JsonObject object = element.getAsJsonObject();
             final Locale clientApplicationLocale = extractLocaleParameter(object);
             value = extractLocalTimeNamed(parameterName, object, timeFormat, clientApplicationLocale, parametersPassedInCommand);
         }
         return value;
     }
-    
-    public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonObject element, final String timeFormat,
+
+    public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonElement element, final String timeFormat,
             final Locale clientApplicationLocale, final Set<String> parametersPassedInCommand) {
         LocalDateTime value = null;
         String timeValueAsString=null;
@@ -419,7 +429,7 @@ public class JsonParserHelper {
         return value;
     }
 
-    public LocalDate extractLocalDateNamed(final String parameterName, final JsonObject element, final String dateFormat,
+    public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element, final String dateFormat,
             final Locale clientApplicationLocale, final Set<String> parametersPassedInCommand) {
         LocalDate value = null;
         if (element.isJsonObject()) {

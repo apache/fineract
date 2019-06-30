@@ -94,7 +94,8 @@ dependencies {
 
                 [group: 'io.swagger', name: 'swagger-jersey-jaxrs', version: '1.5.15'],
                 [group: 'org.springframework', name:'spring-jms'],
-                [group: 'org.apache.activemq', name: 'activemq-broker']
+                [group: 'org.apache.activemq', name: 'activemq-broker'],
+                [group: 'javax.validation', name: 'validation-api', version: '2.0.0.Final']
     )
 
      testCompile 'junit:junit:4.11',
