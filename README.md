@@ -1,8 +1,15 @@
-Apache Fineract: A Platform for Microfinance [![Build Status](https://travis-ci.org/apache/fineract.svg?branch=develop)](https://travis-ci.org/apache/fineract)  [![Docker Hub](https://img.shields.io/docker/pulls/apache/fineract.svg)](https://hub.docker.com/r/apache/fineract)  [![Docker Build](https://img.shields.io/docker/cloud/build/apache/fineract.svg)](https://hub.docker.com/r/apache/fineract/builds)
+Apache Fineract: A Platform for Microfinance  [![Build Status](https://travis-ci.org/apache/fineract.svg?branch=develop)](https://travis-ci.org/apache/fineract)  [![Docker Hub](https://img.shields.io/docker/pulls/apache/fineract.svg)](https://hub.docker.com/r/apache/fineract)  [![Docker Build](https://img.shields.io/docker/cloud/build/apache/fineract.svg)](https://hub.docker.com/r/apache/fineract/builds)
 ============
-Fineract is a mature platform with open APIs that provides a reliable, robust, and affordable core banking solution for financial institutions offering services to the world’s 2 billion underbanked and unbanked.  
+
+Fineract is a mature platform with open APIs that provides a reliable, robust, and affordable core banking solution for financial institutions offering services to the world’s 2 billion underbanked and unbanked.
 
 [Have a look at the FAQ on our Wiki at apache.org](https://cwiki.apache.org/confluence/display/FINERACT/FAQ) if this README does not answer what you are looking for.
+
+[![Code Now! (Gitpod)](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/apache/fineract)
+to start contributing to this project in the online web-based IDE GitPod.io right away!
+(You may initially have to press F1 to Find Command and run "Java: Start Language Server".)
+It's of course also possible to contribute with a "traditional" loca ldevelopment environment (see below).
+
 
 Requirements
 ============
@@ -35,18 +42,20 @@ The file fineract-provider/gradle/wrapper/gradle-wrapper.jar binary is checked i
 but won't exist in your copy of the Fineract codebase if you downloaded a released source archive from apache.org.
 In that case, you need to downloaded it using the commands below:
 
-wget --no-check-certificate -P fineract-provider/gradle/wrapper https://github.com/apache/fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar
+    wget --no-check-certificate -P fineract-provider/gradle/wrapper https://github.com/apache/fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar
 
 (or)
 
-curl --insecure -L https://github.com/apache/fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar > fineract-provider/gradle/wrapper/gradle-wrapper.jar
+    curl --insecure -L https://github.com/apache/fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar > fineract-provider/gradle/wrapper/gradle-wrapper.jar
+
 
 Instructions to run Apache RAT (Release Audit Tool)
 ============
 1. Extract the archive file to your local directory.
 2. Run `./gradlew rat`. A report will be generated under build/reports/rat/rat-report.txt
 
-Instructions to build a war file
+
+Instructions to build a WAR file
 ============
 1. Extract the archive file to your local directory.
 2. Run `./gradlew clean war` or `./gradlew build` to build deployable war file which will be created at build/libs directory.
@@ -84,11 +93,12 @@ https://hub.docker.com/r/apache/fineract has a pre-built container of this proje
 
 You can use a MySQL database from a different or remote server by passing the server's IP address to the docker finerect buid process like this:
 
-    `docker build --build-arg mysqlserver=<MySQL server IP> -t fineract:latest .`
+    docker build --build-arg mysqlserver=<MySQL server IP> -t fineract:latest .
 
 The run it:
 
-    `docker run -d fineract:latest`
+    docker run -d fineract:latest
+
 
 Version
 ============
@@ -96,6 +106,7 @@ Version
 The latest stable release can be viewed on the develop branch: [Latest Release on Develop](https://github.com/apache/fineract/tree/develop "Latest Release").
 
 The progress of this project can be viewed here: [View change log](https://github.com/apache/fineract/blob/develop/CHANGELOG.md "Latest release change log")
+
 
 License
 ============
@@ -117,11 +128,13 @@ Apache Fineract Platform API
 
 The API for the Fineract-platform (project named 'Apache Fineract') is documented in the API-docs under <b><i>Full API Matrix</i></b> and can be viewed [here](https://demo.openmf.org/api-docs/apiLive.htm "API Documentation").
 
+
 Online Demos
 ============
 
 * [Community App](https://demo.openmf.org "Reference Client App")
 > For this demo, a demo account is also provided for users to experience the functionality of this Community App. Users can use "mifos" for USERNAME and "password" for PASSWORD(without quotation marks).
+
 
 Developers
 ============
@@ -137,10 +150,12 @@ Roadmap
 
 [Project Release Roadmap on JIRA (Detailed View)](https://issues.apache.org/jira/browse/FINERACT-268?jql=project%20%3D%20FINERACT "Project Release Roadmap on JIRA (Detailed View)")
 
+
 Video Demonstration
 ============
 
 Apache Fineract / Mifos X Demo (November 2016) - <https://www.youtube.com/watch?v=h61g9TptMBo>
+
 
 Governance and Policies
 =======================
@@ -150,6 +165,7 @@ documents the process through which you can become a committer in this project.
 
 [Pull Request Size Limit](https://cwiki.apache.org/confluence/display/FINERACT/Pull+Request+Size+Limit)
 documents that we cannot accept huge "code dump" Pull Requests, with some related suggestions.
+
 
 More Information
 ============
