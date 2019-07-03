@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.interoperation.data;
 
-import org.apache.bval.constraints.NotEmpty;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 import javax.validation.constraints.NotNull;
@@ -26,9 +25,7 @@ import java.util.Map;
 
 public class InteropIdentifierResponseData extends CommandProcessingResult {
 
-    @NotEmpty
     private String accountId;
-
 
     protected InteropIdentifierResponseData(Long resourceId, Long officeId, Long commandId, Map<String, Object> changesOnly, @NotNull String accountId) {
         super(resourceId, officeId, commandId, changesOnly);
