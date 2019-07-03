@@ -19,13 +19,13 @@
 package org.apache.fineract.interoperation.data;
 
 import com.google.gson.JsonObject;
-import org.apache.bval.constraints.NotEmpty;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.interoperation.domain.InteropIdentifierType;
 import org.apache.fineract.interoperation.domain.InteropTransactionRole;
 import org.joda.time.LocalDateTime;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.List;

@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.interoperation.data;
 
-import org.apache.bval.constraints.NotEmpty;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Map;
 
