@@ -86,8 +86,6 @@ dependencies {
                 // Although fineract (at the time of writing) doesn't have any compile time dep. on this,
                 // it's useful to have this for the Spring Boot TestRestTemplate http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#boot-features-rest-templates-test-utility
                 [group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.3.5'],
-                // Once we've switched to Java 8 this dep can be removed.
-                //[group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0']
 
                 [group: 'io.swagger', name: 'swagger-jersey-jaxrs', version: '1.5.15'],
                 [group: 'org.springframework', name:'spring-jms', version: '4.0.7.RELEASE'],
@@ -100,9 +98,9 @@ dependencies {
      testCompile 'junit:junit:4.11',
                  'junit:junit-dep:4.11',
                  'org.mockito:mockito-core:1.9.5',
+                 'io.github.classgraph:classgraph:4.8.43',
                  'com.jayway.restassured:rest-assured:2.3.3',
                  [group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion],
                  [group: 'com.mockrunner', name: 'mockrunner-jms', version: '1.0.6'],
                  [group: 'com.mockrunner', name: 'mockrunner-jdbc', version: '1.0.6']
-
 }
