@@ -20,6 +20,13 @@ description = '''\
 Run as:
 gradle clean tomcatrunwar
 '''
+
+project.ext.springBootVersion = '1.2.8.RELEASE'
+project.ext.springVersion = '4.1.9.RELEASE'
+project.ext.springOauthVersion = '2.0.4.RELEASE'
+project.ext.jerseyVersion = '1.17'
+project.ext.springDataJpaVersion = '1.7.0.RELEASE' // also change spring-boot-gradle-plugin version below
+
 buildscript {
   repositories {
   	 jcenter()
@@ -31,7 +38,7 @@ buildscript {
      classpath 'org.gradle.api.plugins:gradle-tomcat-plugin:1.0',
                'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0',
                'org.zeroturnaround:gradle-jrebel-plugin:1.1.2',
-               'org.springframework.boot:spring-boot-gradle-plugin:1.1.6.RELEASE' // also change springDataJpaVersion below
+               'org.springframework.boot:spring-boot-gradle-plugin:1.1.6.RELEASE' // also change springDataJpaVersion above
      classpath 'org.apache.openjpa:openjpa-all:2.4.1'
      classpath 'at.schmutterer.oss.gradle:gradle-openjpa:0.2.0'
      classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.2.2'
@@ -57,15 +64,8 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 /* define binary compatibility version */
 targetCompatibility = JavaVersion.VERSION_1_8
 
-project.ext.springBootVersion = '1.2.8.RELEASE'
-project.ext.springVersion = '4.1.9.RELEASE'
-project.ext.springOauthVersion = '2.0.4.RELEASE'
-project.ext.jerseyVersion = '1.17'
-project.ext.springDataJpaVersion = '1.7.0.RELEASE' // also change spring-boot-gradle-plugin version above
-
 project.ext.mysqlUser='root'
 project.ext.mysqlPassword='mysql'
-
 
 group = 'org.apache.fineract'
 buildDir = new File(rootProject.projectDir, "../build")
