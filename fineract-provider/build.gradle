@@ -384,7 +384,7 @@ configurations {
     driver
 }
 dependencies {
-    driver 'org.drizzle.jdbc:drizzle-jdbc:1.3'
+    driver 'org.drizzle.jdbc:drizzle-jdbc:1.4'
 }
 
 test {

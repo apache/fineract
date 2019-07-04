@@ -68,7 +68,7 @@ dependencies {
                 // no slf4j & logback here (anymore), as spring-boot-starter-logging already brings this now, better assembled (log4j-over-slf4j was originally forgotten here)
 
                 //[group: 'mysql', name: 'mysql-connector-java', version: '5.1.27'],
-                [group: 'org.drizzle.jdbc', name: 'drizzle-jdbc', version: '1.3'],
+                [group: 'org.drizzle.jdbc', name: 'drizzle-jdbc', version: '1.4'],
                // [group: 'org.apache.tomcat', name: 'tomcat-jdbc', version: tomcatVersion],
 
 
