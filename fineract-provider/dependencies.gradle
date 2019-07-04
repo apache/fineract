@@ -17,7 +17,7 @@
  * under the License.
  */
 dependencies {
-        def tomcatVersion = '7.0.54'
+        def tomcatVersion = '7.0.94'
         tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
                "org.apache.tomcat.embed:tomcat-embed-logging-log4j:${tomcatVersion}" // NOT tomcat-embed-logging-juli (http://stackoverflow.com/questions/23963049/classcircularityerror-java-util-logging-logrecord-running-gradle-webapp-with-ja)
         tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
