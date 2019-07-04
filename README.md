@@ -17,6 +17,16 @@ and stop and destroy it like this:
 
 Beware that this database container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mysql) re. how to make it persistant instead of ephemeral.
 
+
+Instructions how to run for local development
+============
+
+Run the following commands:
+1. `./gradlew createDB -PdbName=mifosplatform-tenants`
+1. `./gradlew createDB -PdbName=mifostenant-default`
+1. `./gradlew tomcatRunWAR`
+
+
 Instructions to download gradle wrapper
 ============
 The file fineract-provider/gradle/wrapper/gradle-wrapper.jar binary is checked into this projects's Git source repository,
