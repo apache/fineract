@@ -35,5 +35,5 @@ RUN keytool -genkey -keyalg RSA -alias tomcat -keystore /opt/bitnami/tomcat/tomc
 COPY ./docker/server.xml /opt/bitnami/tomcat/conf
 RUN chmod 664 /opt/bitnami/tomcat/conf/server.xml
 WORKDIR /opt/bitnami/tomcat/lib
-RUN wget http://central.maven.org/maven2/org/drizzle/jdbc/drizzle-jdbc/1.3/drizzle-jdbc-1.3.jar
+RUN wget http://central.maven.org/maven2/org/drizzle/jdbc/drizzle-jdbc/1.4/drizzle-jdbc-1.4.jar
 
