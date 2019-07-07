@@ -59,8 +59,8 @@ apply plugin: 'tomcat'
 apply plugin: 'project-report'
 apply plugin: 'java'
 apply plugin: 'openjpa'
-apply plugin: 'pmd'
-apply plugin: 'findbugs'
+// apply plugin: 'pmd'
+// apply plugin: 'findbugs'
 
 /* define the valid syntax level for source files */
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -273,6 +273,7 @@ task dist(type:Zip){
 compileJava{
     dependsOn rat
 }
+/*
 pmd {
     sourceSets = [sourceSets.main]
     ignoreFailures = true
@@ -281,6 +282,7 @@ findbugs {
     ignoreFailures = true
     sourceSets = [sourceSets.main]
 }
+*/
 
 war {
 	from('../licenses/binary/') { // notice the parens
