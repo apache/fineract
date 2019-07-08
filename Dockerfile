@@ -26,7 +26,6 @@ RUN mkdir fineract
 COPY . fineract
 
 WORKDIR fineract
-RUN sed -i 's/localhost/fineractmysql/' ./fineract-provider/build.gradle
 RUN sed -i 's/localhost/fineractmysql/' ./fineract-provider/src/main/resources/sql/migrations/list_db/V1__mifos-platform-shared-tenants.sql
 RUN ./gradlew clean war
 RUN mv build/libs/fineract-provider.war /opt/bitnami/tomcat/webapps
