@@ -37,6 +37,8 @@ dependencies {
                 [group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion],
                 [group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springBootVersion],
                 [group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: springBootVersion],
+                [group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springBootVersion],
+
 				//[group: 'org.eclipse.persistence', name: 'javax.persistence', version: '2.0.0'],
                 [group: 'org.springframework', name: 'spring-context-support', version: springVersion],
 				
