@@ -333,6 +333,23 @@ tomcatRunWar {
     configFile = file('src/test/resources/META-INF/context.xml')
 }
 
+task tomcatRunWarAsDaemonForIntegrationTest(type: com.bmuschko.gradle.tomcat.tasks.TomcatRunWar) {
+    httpPort = 8080
+    httpsPort = 8443
+    stopPort = 8081
+    stopKey=   'stopKey'
+    enableSSL = true
+    keystoreFile = file('src/main/resources/keystore.jks')
+    keystorePass = 'openmf'
+    configFile = file('src/test/resources/META-INF/context.xml')
+    daemon = true
+}
+
+task tomcatStopAfterIntegrationTest(type: com.bmuschko.gradle.tomcat.tasks.TomcatStop) {
+    stopPort = 8081
+    stopKey = 'stopKey'
+}
+
 /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
 sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
 sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
@@ -368,11 +385,12 @@ configurations {
 }
 
 task integrationTest(type:Test) {
-    description = "Run integration tests (located in src/integrationTest/java). Starts tomcat in daemon mode before executing the tests."
-    it.dependsOn war
-    doFirst {
-        tomcatRunWar.daemon = true
-    }
+    description = "Run integration tests (located in src/integrationTest/java). Starts Tomcat in daemon mode before executing the tests (and stops it after)."
+    dependsOn war
+    dependsOn tomcatRunWarAsDaemonForIntegrationTest
+    tasks.findByName('tomcatRunWarAsDaemonForIntegrationTest').mustRunAfter 'war'
+    finalizedBy tomcatStopAfterIntegrationTest
+
     testClassesDirs = project.sourceSets.integrationTest.output.classesDirs
     classpath = project.sourceSets.integrationTest.runtimeClasspath
 }
