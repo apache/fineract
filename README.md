@@ -13,7 +13,7 @@ It's of course also possible to contribute with a "traditional" loca ldevelopmen
 
 Requirements
 ============
-* Java >= 1.8 (Oracle JVMs have been tested)
+* Java 11 (OpenJDK and Oracle distributions have been tested)
 * MySQL 5.5
 
 You can run the required version of the database server in a container, instead of having to install it, like this:
