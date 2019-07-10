@@ -42,7 +42,7 @@ buildscript {
                'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0',
                'org.zeroturnaround:gradle-jrebel-plugin:1.1.2',
                'org.springframework.boot:spring-boot-gradle-plugin:1.1.6.RELEASE' // also change springDataJpaVersion above
-     classpath "org.apache.openjpa:openjpa-all:$openJPAVersion"
+     classpath "org.apache.openjpa:openjpa:$openJPAVersion"
      classpath 'at.schmutterer.oss.gradle:gradle-openjpa:0.2.0'
      classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.2.2'
   }
@@ -178,9 +178,6 @@ configurations {
 		exclude module: 'bcmail-jdk14'
 		exclude module: 'bcprov-jdk14'
 		exclude module: 'bctsp-jdk14'
-		exclude module: 'bval-core'
-		exclude module: 'org.apache.bval.bundle'
-		exclude module: 'bval-jsr303'
 		exclude module: 'c3p0'
 		exclude module: 'stax-api'
 		exclude module: 'jaxb-api'
@@ -188,9 +185,6 @@ configurations {
 		exclude module: 'jboss-logging'
 		exclude module: 'itext-rtf'
 		exclude module: 'classworlds'
-		exclude module: 'jcl-over-slf4j'
-		exclude module: 'jul-to-slf4j'
-		exclude module: 'serp'
 	}
 	runtime
 	all*.exclude group: 'commons-logging'
