@@ -187,6 +187,7 @@ configurations {
 	}
 	runtime
 	all*.exclude group: 'commons-logging'
+	all*.exclude module: 'jul-to-slf4j' // see FINERACT-700 re. ClassCircularityError: java/util/logging/LogRecord
 }
 /* Pick up dependencies based on the environemnt, defaults to production */
 if (project.hasProperty('env') && project.getProperty('env') == 'dev') {
