@@ -38,7 +38,7 @@ dependencies {
 
 	       		[group: 'org.springframework.security.oauth', name: 'spring-security-oauth2', version: springOauthVersion],
 
-                [group: 'org.apache.openjpa', name:'openjpa-all', version: openJPAVersion],
+                [group: 'org.apache.openjpa', name:'openjpa', version: openJPAVersion],
                 //[group: 'javax.ws.rs', name: 'jsr311-api', version: '1.1.1'],
                 [group: 'com.sun.jersey', name: 'jersey-core', version: jerseyVersion],
                 [group: 'com.sun.jersey', name: 'jersey-servlet', version: jerseyVersion],
@@ -92,6 +92,9 @@ dependencies {
                 [group: 'org.apache.activemq', name: 'activemq-broker', version: '5.9.1'],
                 [group: 'javax.validation', name: 'validation-api', version: '2.0.0.Final']
     )
+
+     // TODO FINERACT-777 use "implementation" instead of "compile" once we have upgraded Gradle (FINERACT-700)
+     compile 'org.apache.bval:org.apache.bval.bundle:2.0.2'
 
      testCompile 'junit:junit:4.11',
                  'junit:junit-dep:4.11',
