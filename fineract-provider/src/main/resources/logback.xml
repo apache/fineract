@@ -39,9 +39,9 @@
 
 
 	<logger name="org.fineract.platform" level="debug" />
-	<logger name="org.apache.fineract.infrastructure.security.filter"
-		level="info" />
+	<logger name="org.apache.fineract.infrastructure.security.filter" level="info" />
 	<logger name="org.apache.fineract" level="debug" />
+	<logger name="org.springframework.boot.actuate.audit.listener" level="debug" /> <!-- FINERACT-779 -->
 	<logger name="org.springframework.web" level="info" />
 	<logger name="org.springframework.beans" level="info" />
 	<logger name="net.sf.ehcache" level="error" />
