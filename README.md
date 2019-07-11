@@ -1,4 +1,4 @@
-Apache Fineract: A Platform for Microfinance [![Build Status](https://travis-ci.org/apache/fineract.svg?branch=develop)](https://travis-ci.org/apache/fineract)
+Apache Fineract: A Platform for Microfinance [![Build Status](https://travis-ci.org/apache/fineract.svg?branch=develop)](https://travis-ci.org/apache/fineract)  [![Docker Hub](https://img.shields.io/docker/pulls/apache/fineract.svg)](https://hub.docker.com/r/apache/fineract)  [![Docker Build](https://img.shields.io/docker/cloud/build/apache/fineract.svg)](https://hub.docker.com/r/apache/fineract/builds)
 ============
 Fineract is a mature platform with open APIs that provides a reliable, robust, and affordable core banking solution for financial institutions offering services to the world’s 2 billion underbanked and unbanked. 
 
@@ -63,20 +63,22 @@ Run the following commands, very similarly to how [.travis.yml](.travis.yml) doe
 Instructions to run using Docker and docker-compose
 ===================================================
 
-It is possible to do a 'one-touch' installation of Fineract using docker-compose
+It is possible to do a 'one-touch' installation of Fineract using docker-compose:
 
-  Prerequisites:
-  * docker and docker-compose installed on your machine
+Prerequisites:
+* docker and docker-compose installed on your machine
 
+Installing a new Fineract instance:
 
-  Installing a new Fineract instance:
+* Clone the Fineract Github repository
+* Run the following commands:
+  * docker-compose build
+  * docker-compose up -d
+* Fineract will run at https://localhost:8443/fineract-provider
 
-  * Clone the Fineract Github repository
-  * Run the following commands:
-      * docker-compose build
-      * docker-compose up -d
-  * Fineract will run at https://localhost:8443/fineract-provider
+The [`docker-compose.yml`](docker-compose.yml) will build the `fineract` container from source.
 
+https://hub.docker.com/r/apache/fineract has a pre-built container of this project, built continously.
 
 Version
 ============
