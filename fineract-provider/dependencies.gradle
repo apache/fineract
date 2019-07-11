@@ -93,8 +93,7 @@ dependencies {
                 [group: 'javax.validation', name: 'validation-api', version: '2.0.0.Final']
     )
 
-     // TODO FINERACT-777 use "implementation" instead of "compile" once we have upgraded Gradle (FINERACT-700)
-     compile 'org.apache.bval:org.apache.bval.bundle:2.0.2'
+     implementation 'org.apache.bval:org.apache.bval.bundle:2.0.2'
 
      testCompile 'junit:junit:4.11',
                  'junit:junit-dep:4.11',
