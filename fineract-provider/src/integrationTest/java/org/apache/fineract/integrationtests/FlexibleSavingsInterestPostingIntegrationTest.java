@@ -148,7 +148,10 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
     // Reset configuration fields
     @After
     public void tearDown() {
+        // TODO: Remove this resetting of only a *single* global config.
         configureInterestPosting(false, 1);
+        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
     }
 
 }
