@@ -29,7 +29,7 @@ project.ext.springDataJpaVersion = '1.7.0.RELEASE' // also change spring-boot-gr
 
 buildscript {
   ext {
-    openJPAVersion = '2.4.1'
+    openJPAVersion = '2.4.3'
   }
   repositories {
   	 jcenter()
