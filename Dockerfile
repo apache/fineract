@@ -28,7 +28,7 @@ RUN ./gradlew clean war
 FROM bitnami/tomcat:7.0.94 as fineract
 
 USER root
-RUN apt-get update -qq && apt-get install -y git openjdk-8-jdk wget
+RUN apt-get update -qq && apt-get install -y wget
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/jre
 
 COPY --from=builder /fineract/build/libs/fineract-provider.war /opt/bitnami/tomcat/webapps
