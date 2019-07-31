@@ -1,6 +1,6 @@
 Apache Fineract: A Platform for Microfinance [![Build Status](https://travis-ci.org/apache/fineract.svg?branch=develop)](https://travis-ci.org/apache/fineract)  [![Docker Hub](https://img.shields.io/docker/pulls/apache/fineract.svg)](https://hub.docker.com/r/apache/fineract)  [![Docker Build](https://img.shields.io/docker/cloud/build/apache/fineract.svg)](https://hub.docker.com/r/apache/fineract/builds)
 ============
-Fineract is a mature platform with open APIs that provides a reliable, robust, and affordable core banking solution for financial institutions offering services to the world’s 2 billion underbanked and unbanked. 
+Fineract is a mature platform with open APIs that provides a reliable, robust, and affordable core banking solution for financial institutions offering services to the world’s 2 billion underbanked and unbanked.
 
 Requirements
 ============
@@ -10,7 +10,7 @@ Requirements
 You can run the required version of the database server in a container, instead of having to install it, like this:
 
     docker run --name mysql-5.5 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mysql -d mysql:5.5
-    
+
 and stop and destroy it like this:
 
     docker rm -f mysql-5.5
@@ -52,7 +52,7 @@ Instructions to build a war file
 
 Instructions to execute Integration tests
 ============
-> Note that if this is the first time to access MySQL DB, then you may need to reset your password. 
+> Note that if this is the first time to access MySQL DB, then you may need to reset your password.
 
 Run the following commands, very similarly to how [.travis.yml](.travis.yml) does:
 1. `./gradlew createDB -PdbName=mifosplatform-tenants`
@@ -79,6 +79,14 @@ Installing a new Fineract instance:
 The [`docker-compose.yml`](docker-compose.yml) will build the `fineract` container from source.
 
 https://hub.docker.com/r/apache/fineract has a pre-built container of this project, built continously.
+
+You can use a MySQL database from a different or remote server by passing the server's IP address to the docker finerect buid process like this:
+
+    `docker build --build-arg mysqlserver=<MySQL server IP> -t fineract:latest .`
+
+The run it:
+
+    `docker run -d fineract:latest`
 
 Version
 ============
@@ -111,7 +119,7 @@ Online Demos
 ============
 
 * [Community App](https://demo.openmf.org "Reference Client App")
-> For this demo, a demo account is also provided for users to experience the functionality of this Community App. Users can use "mifos" for USERNAME and "password" for PASSWORD(without quotation marks). 
+> For this demo, a demo account is also provided for users to experience the functionality of this Community App. Users can use "mifos" for USERNAME and "password" for PASSWORD(without quotation marks).
 
 Developers
 ============
