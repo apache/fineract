@@ -56,7 +56,10 @@ import org.springframework.stereotype.Component;
 @Path("/users")
 @Component
 @Scope("singleton")
-@Api(value = "Users", description = "An API capability to support administration of application users.")
+@Api(tags = {"Users"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Users", description = "An API capability to support administration of application users.")
+})
 public class UsersApiResource {
 
     /**

@@ -48,7 +48,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Path("/surveys/scorecards")
 @Component
 @Scope("singleton")
-@Api(value = "SPM - Scorecards", description = " ")
+@Api(tags = {"Score Card"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Score Card", description = "")
+})
 public class ScorecardApiResource {
 
     private final PlatformSecurityContext securityContext;

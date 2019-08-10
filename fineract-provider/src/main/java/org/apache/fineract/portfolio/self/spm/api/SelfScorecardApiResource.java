@@ -38,11 +38,16 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import io.swagger.annotations.*;
 import org.springframework.transaction.annotation.Transactional;
 
 @Path("/self/surveys/scorecards")
 @Component
 @Scope("singleton")
+@Api(tags = {"Self Score Card"})
+@SwaggerDefinition(tags = {
+		@Tag(name = "Self Score Card", description = "")
+})
 public class SelfScorecardApiResource {
 
 	private final PlatformSecurityContext context;

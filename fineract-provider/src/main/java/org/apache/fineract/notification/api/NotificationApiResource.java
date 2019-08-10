@@ -30,6 +30,7 @@ import org.apache.fineract.notification.service.NotificationReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import io.swagger.annotations.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -39,6 +40,10 @@ import javax.ws.rs.core.UriInfo;
 @Path("/notifications")
 @Component
 @Scope("singleton")
+@Api(tags = {"Notification"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Notification", description = "")
+})
 public class NotificationApiResource {
 
     private final PlatformSecurityContext context;

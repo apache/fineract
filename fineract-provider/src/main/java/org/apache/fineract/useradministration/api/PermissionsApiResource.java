@@ -50,7 +50,10 @@ import org.springframework.stereotype.Component;
 @Path("/permissions")
 @Component
 @Scope("singleton")
-@Api(value = "Permissions", description = "An API capability to support management of application permissions for user administration.\n" + "\n" + "There is no Apache Fineract functionality for creating or deleting permissions. Permissions come pre-installed.\n" + "\n" + "Permissions are not updated, except in the case of enabling or disabling non-read transactions for Maker Checker functionality")
+@Api(tags = {"Permissions"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Permissions", description = "An API capability to support management of application permissions for user administration.\\n\" + \"\\n\" + \"There is no Apache Fineract functionality for creating or deleting permissions. Permissions come pre-installed.\\n\" + \"\\n\" + \"Permissions are not updated, except in the case of enabling or disabling non-read transactions for Maker Checker functionality")
+})
 public class PermissionsApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("grouping", "code", "entityName", "actionName",
