@@ -46,10 +46,15 @@ import org.apache.fineract.portfolio.shareproducts.service.ShareProductDividendR
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import io.swagger.annotations.*;
 
 @Path("/shareproduct/{productId}/dividend")
 @Component
 @Scope("singleton")
+@Api(tags = {"Self Dividend"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Self Dividend", description = "")
+})
 public class ShareDividendApiResource {
 
     private final DefaultToApiJsonSerializer<ShareProductDividendPayOutData> toApiJsonSerializer;

@@ -35,7 +35,10 @@ import javax.ws.rs.core.MediaType;
 @Component
 @Profile("oauth")
 @Scope("singleton")
-@Api(value = "Self User Details", description = "")
+@Api(tags = {"Self User Details"})
+@SwaggerDefinition(tags = {
+		@Tag(name = "Self User Details", description = "")
+})
 public class SelfUserDetailsApiResource {
 
 	private final UserDetailsApiResource userDetailsApiResource;

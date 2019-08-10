@@ -40,10 +40,15 @@ import org.apache.fineract.portfolio.self.pockets.service.PocketAccountMappingRe
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import io.swagger.annotations.*;
 
 @Path("/self/pockets")
 @Component
 @Scope("singleton")
+@Api(tags = {"Pocket"})
+@SwaggerDefinition(tags = {
+		@Tag(name = "Pocket", description = "")
+})
 public class PocketApiResource {
 	private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 	@SuppressWarnings("rawtypes")
@@ -63,7 +68,9 @@ public class PocketApiResource {
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String handleCommands(@QueryParam("command") final String commandParam, @Context final UriInfo uriInfo,
+	@ApiOperation(value = "Link/delink accounts to/from pocket", httpMethod = "POST", notes = "Pockets behave as favourites. An user can link his/her Loan, Savings and Share accounts to pocket for faster access. In a similar way linked accounts can be delinked from the pocket.\n\n" + "Example Requests:\n" + "\n" + "self/pockets?command=linkAccounts\n" + "\n" + "self/pockets?command=delinkAccounts")
+	@ApiResponses({@ApiResponse(code = 200, message = "OK", response =  PocketApiResourceSwagger.PostLinkDelinkAccountsToFromPocketResponse.class)})
+	public String handleCommands(@QueryParam("command") @ApiParam(value = "command") final String commandParam, @Context final UriInfo uriInfo,
 			final String apiRequestBodyAsJson) {
 
 		final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
@@ -88,6 +95,8 @@ public class PocketApiResource {
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
+	@ApiOperation(value = "Retrieve accounts linked to pocket", httpMethod = "GET", notes = "All linked loan\n\n" + "Example Requests:\n" + "\n"  + "\n" + "self/pockets")
+	@ApiResponses({@ApiResponse(code = 200, message = "OK", response =  PocketApiResourceSwagger.GetAccountsLinkedToPocketResponse.class)})
 	public String retrieveAll() {
 		return this.toApiJsonSerializer.serialize(this.pocketAccountMappingReadPlatformService.retrieveAll());
 	}
