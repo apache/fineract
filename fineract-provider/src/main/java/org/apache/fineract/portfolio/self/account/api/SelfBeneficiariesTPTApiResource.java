@@ -48,7 +48,10 @@ import java.util.Set;
 @Path("/self/beneficiaries/tpt")
 @Component
 @Scope("singleton")
-@Api(value = "Beneficiary Third Party Transfer", description = "")
+@Api(tags = {"Self Third Party Transfer"})
+@SwaggerDefinition(tags = {
+		@Tag(name = "Self Third Party Transfer", description = "")
+})
 public class SelfBeneficiariesTPTApiResource {
 
 	private final PlatformSecurityContext context;

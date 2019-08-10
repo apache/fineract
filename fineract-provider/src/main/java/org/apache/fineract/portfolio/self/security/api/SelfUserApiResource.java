@@ -40,7 +40,10 @@ import java.util.Set;
 
 @Path("/self/user")
 @Component
-@Api(value = "Self User", description = "")
+@Api(tags = {"Self User"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Self User", description = "")
+})
 public class SelfUserApiResource {
 
         private final UsersApiResource usersApiResource;

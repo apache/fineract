@@ -95,7 +95,7 @@ final class SearchApiResourceSwagger {
     @ApiModel(value = "PostAdhocQuerySearchResponse")
     public static final class PostAdhocQuerySearchResponse {
         private PostAdhocQuerySearchResponse() {
-            // don't allow to instantiate; use only for live API documentation
+
         }
 
         @ApiModelProperty(example = "HFC")
