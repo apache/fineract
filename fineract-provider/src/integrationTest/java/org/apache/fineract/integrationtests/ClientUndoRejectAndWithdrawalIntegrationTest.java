@@ -173,9 +173,11 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
 		ClientStatusChecker.verifyClientRejected(status);
 		DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
 		Calendar todaysDate = Calendar.getInstance();
+		todaysDate.setTime(Utils.getDateOfTenant());
 		todaysDate.add(Calendar.DATE, 1);
 		final String undoRejectDate = dateFormat.format(todaysDate.getTime());
-		ArrayList<HashMap> clientErrorData = (ArrayList<HashMap>) validationErrorHelper.undoWithdrawclient(clientId,
+
+		ArrayList<HashMap> clientErrorData = (ArrayList<HashMap>) validationErrorHelper.undoRejectedclient(clientId,
 				CommonConstants.RESPONSE_ERROR, undoRejectDate);
 		assertEquals("validation.msg.client.reopenedDate.is.greater.than.date",
 				((HashMap<String, Object>) clientErrorData.get(0)).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
@@ -286,8 +288,10 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
 		ClientStatusChecker.verifyClientWithdrawn(status);
 		DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
 		Calendar todaysDate = Calendar.getInstance();
+		todaysDate.setTime(Utils.getDateOfTenant());
 		todaysDate.add(Calendar.DATE, 1);
 		final String undoWithdrawDate = dateFormat.format(todaysDate.getTime());
+
 		ArrayList<HashMap> clientErrorData = (ArrayList<HashMap>) validationErrorHelper.undoWithdrawclient(clientId,
 				CommonConstants.RESPONSE_ERROR, undoWithdrawDate);
 		assertEquals("validation.msg.client.reopenedDate.is.greater.than.date",

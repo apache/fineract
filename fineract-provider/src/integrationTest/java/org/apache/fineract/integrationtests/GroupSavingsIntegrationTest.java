@@ -530,9 +530,9 @@ public class GroupSavingsIntegrationTest {
                 .plusWeeks((Integer) paidCharge.get("feeInterval"));
         assertEquals(expectedNextDueDate, nextDueDate);
         cal = Calendar.getInstance();
-        
-        this.savingsAccountHelper.closeSavingsAccountAndGetBackRequiredField(savingsId, "true", null, sdf.format(cal.getTime()));
-        
+
+        this.savingsAccountHelper.closeSavingsAccountAndGetBackRequiredField(savingsId, "true", null, sdf.format(Utils.getDateOfTenant()));
+
     }
 
     public static Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

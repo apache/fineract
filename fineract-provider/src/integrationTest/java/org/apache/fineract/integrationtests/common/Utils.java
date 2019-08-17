@@ -177,6 +177,10 @@ public class Utils {
         return today;
     }
 
+    public static Date getDateOfTenant() {
+        return getLocalDateOfTenant().toDateTimeAtStartOfDay().toDate();
+    }
+
     public static TimeZone getTimeZoneOfTenant() {
         return TimeZone.getTimeZone(TENANT_TIME_ZONE);
     }
