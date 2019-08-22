@@ -27,14 +27,10 @@ jdk:
 services:
   - mysql
 
-# Hardcoding system time as a temporary fix for running buggy test cases
 before_install:
   - echo "USE mysql;\nUPDATE user SET password=PASSWORD('mysql') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
   - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `mifosplatform-tenants`;'
   - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `mifostenant-default`;'
-  - export TZ=Asia/Kolkata
-  - sudo service ntp stop
-  - sudo date --set="23 February 2019 01:02:03"
 
 # https://docs.travis-ci.com/user/languages/java/#caching
 before_cache:
