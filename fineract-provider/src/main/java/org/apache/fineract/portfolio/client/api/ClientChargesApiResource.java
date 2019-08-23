@@ -87,6 +87,9 @@ public class ClientChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Client Charges", notes = "The list capability of client charges supports pagination." + "Example Requests:\n" + "clients/1/charges\n" + "\nclients/1/charges?offset=0&limit=5" )
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientChargesApiResourceSwagger.GetClientsClientIdChargesResponse.class) })
     public String retrieveAllClientCharges(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
             @DefaultValue(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS_VALUE_ALL) @QueryParam(ClientApiConstants.CLIENT_CHARGE_QUERY_PARAM_STATUS) @ApiParam(value = "chargeStatus") final String chargeStatus,
@@ -134,6 +137,9 @@ public class ClientChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Client Charge", notes = "Example Requests:\n" + "clients/1/charges/1\n" + "\n" + "\n" + "clients/1/charges/1?fields=name,id" )
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = ClientChargesApiResourceSwagger.GetClientsClientIdChargesResponse.GetClientsChargesPageItems.class) })
     public String retrieveClientCharge(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId, @PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId,
             @Context final UriInfo uriInfo) {
@@ -163,7 +169,10 @@ public class ClientChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Add Client Charge", notes = " This API associates a Client charge with an implicit Client account\n" + "Mandatory Fields : \n" + "chargeId and dueDate  \n" + "Optional Fields : \n" + "amount" )
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientChargesApiResourceSwagger.PostClientsClientIdChargesRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientChargesApiResourceSwagger.PostClientsClientIdChargesRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = ClientChargesApiResourceSwagger.PostClientsClientIdChargesResponse.class) })
     public String applyClientCharge(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -180,7 +189,10 @@ public class ClientChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Pay a Client Charge | Waive a Client Charge", notes = "Pay a Client Charge:\n\n" + "Mandatory Fields:" + "transactionDate and amount " + "" + "\"Pay either a part of or the entire due amount for a charge.(command=paycharge)\n" + "\n" + "Waive a Client Charge:\n" + "\n" + "\n" + "This API provides the facility of waiving off the remaining amount on a client charge (command=waive)\n\n" + "Showing request/response for 'Pay a Client Charge'" )
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientChargesApiResourceSwagger.PostClientsClientIdChargesChargeIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientChargesApiResourceSwagger.PostClientsClientIdChargesChargeIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientChargesApiResourceSwagger.PostClientsClientIdChargesChargeIdResponse.class)})
     public String payOrWaiveClientCharge(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId, @PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId,
             @QueryParam("command") @ApiParam(value = "command") final String commandParam, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
@@ -219,6 +231,9 @@ public class ClientChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Client Charge", notes = "Deletes a Client Charge on which no transactions have taken place (either payments or waivers). ")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientChargesApiResourceSwagger.DeleteClientsClientIdChargesChargeIdResponse.class)})
     public String deleteClientCharge(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId, @PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId) {
 

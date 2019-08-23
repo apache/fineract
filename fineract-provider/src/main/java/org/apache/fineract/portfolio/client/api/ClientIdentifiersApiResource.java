@@ -90,6 +90,9 @@ public class ClientIdentifiersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List all Identifiers for a Client", notes = "Example Requests:\n" + "clients/1/identifiers\n" + "\n" + "\n" + "clients/1/identifiers?fields=documentKey,documentType,description")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = ClientIdentifiersApiResourceSwagger.GetClientsClientIdIdentifiersResponse.class)})
     public String retrieveAllClientIdentifiers(@Context final UriInfo uriInfo, @PathParam("clientId") @ApiParam(value = "clientId") final Long clientId) {
 
@@ -107,6 +110,9 @@ public class ClientIdentifiersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve Client Identifier Details Template", notes = "This is a convenience resource useful for building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n" + "\n" + " Field Defaults\n" + " Allowed Value Lists\n" + "\n\nExample Request:\n" + "clients/1/identifiers/template" )
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientIdentifiersApiResourceSwagger.GetClientsClientIdIdentifiersTemplateResponse.class)})
     public String newClientIdentifierDetails(@Context final UriInfo uriInfo) {
 
@@ -123,7 +129,10 @@ public class ClientIdentifiersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create an Identifier for a Client", notes = "Mandatory Fields\n" + "documentKey, documentTypeId " )
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientIdentifiersApiResourceSwagger.PostClientsClientIdIdentifiersRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientIdentifiersApiResourceSwagger.PostClientsClientIdIdentifiersRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientIdentifiersApiResourceSwagger.PostClientsClientIdIdentifiersResponse.class)})
     public String createClientIdentifier(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -152,6 +161,9 @@ public class ClientIdentifiersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Client Identifier", notes = "Example Requests:\n" + "clients/1/identifier/2\n" + "\n" + "\n" + "clients/1/identifier/2?template=true\n" + "\n" + "clients/1/identifiers/2?fields=documentKey,documentType,description" )
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientIdentifiersApiResourceSwagger.GetClientsClientIdIdentifiersResponse.class)})
     public String retrieveClientIdentifiers(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
             @PathParam("identifierId") @ApiParam(value = "identifierId") final Long clientIdentifierId, @Context final UriInfo uriInfo) {
@@ -175,7 +187,10 @@ public class ClientIdentifiersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Client Identifier", notes = "Updates a Client Identifier")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientIdentifiersApiResourceSwagger.PutClientsClientIdIdentifiersIdentifierIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientIdentifiersApiResourceSwagger.PutClientsClientIdIdentifiersIdentifierIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientIdentifiersApiResourceSwagger.PutClientsClientIdIdentifiersIdentifierIdResponse.class)})
     public String updateClientIdentifer(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
             @PathParam("identifierId") @ApiParam(value = "identifierId") final Long clientIdentifierId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
@@ -204,6 +219,9 @@ public class ClientIdentifiersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Client Identifier", notes = "Deletes a Client Identifier")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientIdentifiersApiResourceSwagger.DeleteClientsClientIdIdentifiersIdentifierIdResponse.class)})
     public String deleteClientIdentifier(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
             @PathParam("identifierId") @ApiParam(value = "identifierId") final Long clientIdentifierId) {

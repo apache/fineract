@@ -75,6 +75,9 @@ public class PasswordPreferencesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = PasswordPreferencesApiResourceSwagger.GetPasswordPreferencesTemplateResponse.class)})
     public String retrieve(@Context final UriInfo uriInfo) {
 
@@ -92,7 +95,10 @@ public class PasswordPreferencesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update password preferences", notes = "")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = PasswordPreferencesApiResourceSwagger.PutPasswordPreferencesTemplateRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = PasswordPreferencesApiResourceSwagger.PutPasswordPreferencesTemplateRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "")})
     public String update(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -111,6 +117,9 @@ public class PasswordPreferencesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Application Password validation policies", notes = "ARGUMENTS\n" + "Example Requests:\n" + "\n" + "passwordpreferences")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = PasswordPreferencesApiResourceSwagger.GetPasswordPreferencesTemplateResponse.class, responseContainer = "List")})
     public String template(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(PasswordPreferencesApiConstants.ENTITY_NAME);

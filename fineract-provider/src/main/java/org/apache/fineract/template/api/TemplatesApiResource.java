@@ -104,6 +104,9 @@ public class TemplatesApiResource {
 
     @GET
     @ApiOperation(value = "Retrieve all UGDs", notes = "Example Requests:\n" + "\n" + "templates\n" + "\n" + "It is also possible to get specific UGDs by entity and type:\n" + "\n" + "templates?type=0&entity=0\n" + "[Entity: Id]\n\n\n\n" + "\n\n" + "client: 0, loan: 1" + "\n\n" + "[Type: Id]\n\n\n\n" + "Document: 0, E-Mail (not yet): 1,  SMS: 2" )
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TemplatesApiResourcesSwagger.GetTemplatesResponse.class)})
     public String retrieveAll(@DefaultValue("-1") @QueryParam("typeId") @ApiParam(value = "typeId") final int typeId,
             @DefaultValue("-1") @QueryParam("entityId") @ApiParam(value = "entityId") final int entityId, @Context final UriInfo uriInfo) {
@@ -127,6 +130,9 @@ public class TemplatesApiResource {
     @GET
     @Path("template")
     @ApiOperation(value = "Retrieve UGD Details Template", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for UGDs. The UGD data returned consists of any or all of:\n" + "\n" + "ARGUMENTS\n" + "name String entity String type String text String optional mappers Mapper optional\n" + "Example Request:\n" + "\n" + "templates/template")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TemplatesApiResourcesSwagger.GetTemplatesTemplateResponse.class)})
     public String template(@Context final UriInfo uriInfo) {
 
@@ -140,7 +146,10 @@ public class TemplatesApiResource {
 
     @POST
     @ApiOperation(value = "Add a UGD", notes = "Adds a new UGD.\n" + "\n" + "Mandatory Fields\n" + "name\n\n\n\n" + "Example Requests:\n" + "\n" + "templates/1")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TemplatesApiResourcesSwagger.PostTemplatesRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TemplatesApiResourcesSwagger.PostTemplatesRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TemplatesApiResourcesSwagger.PostTemplatesResponse.class)})
     public String createTemplate(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createTemplate().withJson(apiRequestBodyAsJson).build();
@@ -153,6 +162,9 @@ public class TemplatesApiResource {
     @GET
     @Path("{templateId}")
     @ApiOperation(value = "Retrieve a UGD", notes = "Example Requests:\n" + "\n" + "templates/1")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TemplatesApiResourcesSwagger.GetTemplatesTemplateIdResponse.class)})
     public String retrieveOne(@PathParam("templateId") @ApiParam(value = "templateId") final Long templateId, @Context final UriInfo uriInfo) {
 
@@ -179,7 +191,10 @@ public class TemplatesApiResource {
     @PUT
     @Path("{templateId}")
     @ApiOperation(value = "Update a UGD", notes = "")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TemplatesApiResourcesSwagger.PutTemplatesTemplateIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TemplatesApiResourcesSwagger.PutTemplatesTemplateIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TemplatesApiResourcesSwagger.PutTemplatesTemplateIdResponse.class)})
     public String saveTemplate(@PathParam("templateId") @ApiParam(value = "templateId") final Long templateId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -193,6 +208,9 @@ public class TemplatesApiResource {
     @DELETE
     @Path("{templateId}")
     @ApiOperation(value = "Delete a UGD", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TemplatesApiResourcesSwagger.DeleteTemplatesTemplateIdResponse.class)})
     public String deleteTemplate(@PathParam("templateId") @ApiParam(value = "templateId") final Long templateId) {
 

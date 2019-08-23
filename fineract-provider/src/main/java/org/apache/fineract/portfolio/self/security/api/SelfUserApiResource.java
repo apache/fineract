@@ -63,7 +63,10 @@ public class SelfUserApiResource {
 
         @PUT
         @ApiOperation(value = "Update User", httpMethod = "PUT", notes = "This API can be used by Self Service user to update their own user information. Currently, \"password\" and \"repeatPassword\" are the only parameters accepted.")
-        @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SelfUserApiResourceSwagger.PutSelfUserRequest.class)})
+        @ApiImplicitParams({
+                @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+                @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+                @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SelfUserApiResourceSwagger.PutSelfUserRequest.class)})
         @ApiResponses({@ApiResponse(code = 200,message = "OK", response = SelfUserApiResourceSwagger.PutSelfUserResponse.class)})
         public String update(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
                 if (StringUtils.isBlank(apiRequestBodyAsJson)) { throw new InvalidJsonException(); }

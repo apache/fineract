@@ -73,6 +73,9 @@ public class ClientTransactionsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Client Transactions", notes = "The list capability of client transaction can support pagination." + "\n\n" + "Example Requests:\n\n" + "clients/189/transactions\n\n" + "clients/189/transactions?offset=10&limit=50" )
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsResponse.class)})
     public String retrieveAllClientTransactions(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId, @Context final UriInfo uriInfo,
             @QueryParam("offset") @ApiParam(value = "offset") final Integer offset, @QueryParam("limit") @ApiParam(value = "limit") final Integer limit) {
@@ -92,6 +95,9 @@ public class ClientTransactionsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Client Transaction", notes = "Example Requests:\n" + "clients/1/transactions/1\n" + "\n" + "\n" + "clients/1/transactions/1?fields=id,officeName" )
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientTransactionsApiResourceSwagger.GetClientsClientIdTransactionsTransactionIdResponse.class)})
     public String retrieveClientTransaction(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
             @PathParam("transactionId") @ApiParam(value = "transactionId") final Long transactionId, @Context final UriInfo uriInfo) {
@@ -111,6 +117,9 @@ public class ClientTransactionsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Undo a Client Transaction", notes = "Undoes a Client Transaction")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientTransactionsApiResourceSwagger.PostClientsClientIdTransactionsTransactionIdResponse.class)})
     public String undoClientTransaction(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId, @PathParam("transactionId") @ApiParam(value = "transactionId") final Long transactionId,
             @QueryParam("command") @ApiParam(value = "command") final String commandParam, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {

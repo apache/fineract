@@ -73,6 +73,9 @@ public class AccountTransfersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve Account Transfer Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n\n" + "\n\n" + "Field Defaults\n\n" + "Allowed Value Lists\n\n" + "Example Requests:\n\n" + "\n\n" + "accounttransfers/template?fromAccountType=2&fromOfficeId=1\n\n" + "\n\n" + "accounttransfers/template?fromAccountType=2&fromOfficeId=1&fromClientId=1\n\n" + "\n\n" + "accounttransfers/template?fromClientId=1&fromAccountType=2&fromAccountId=1")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response =  AccountTransfersApiResourceSwagger.GetAccountTransfersTemplateResponse.class)})
     public String template(@QueryParam("fromOfficeId") @ApiParam(value = "fromOfficeId") final Long fromOfficeId, @QueryParam("fromClientId") @ApiParam(value = "fromClientId") final Long fromClientId,
                            @QueryParam("fromAccountId") @ApiParam(value = "fromAccountId") final Long fromAccountId, @QueryParam("fromAccountType") @ApiParam(value = "fromAccountType") final Integer fromAccountType,
@@ -93,7 +96,10 @@ public class AccountTransfersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create new Transfer", httpMethod = "POST", notes = "Ability to create new transfer of monetary funds from one account to another.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = AccountTransfersApiResourceSwagger.PostAccountTransfersRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = AccountTransfersApiResourceSwagger.PostAccountTransfersRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = AccountTransfersApiResourceSwagger.PostAccountTransfersResponse.class)})
     public String create(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -108,6 +114,9 @@ public class AccountTransfersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List account transfers", httpMethod = "GET", notes = "Lists account's transfers\n\n" + "Example Requests:\n\n" + "\n\n" + "accounttransfers")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = AccountTransfersApiResourceSwagger.GetAccountTransfersResponse.class)})
     public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") @ApiParam(value = "sqlSearch") final String sqlSearch,
             @QueryParam("externalId") @ApiParam(value = "externalId") final String externalId, @QueryParam("offset") @ApiParam(value = "offset") final Integer offset,
@@ -130,6 +139,9 @@ public class AccountTransfersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve account transfer", httpMethod = "GET", notes = "Retrieves account transfer\n\n" + "Example Requests :\n\n" + "\n\n" + "accounttransfers/1")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = AccountTransfersApiResourceSwagger.GetAccountTransfersResponse.GetAccountTransfersPageItems.class)})
     public String retrieveOne(@PathParam("transferId") @ApiParam(value = "transferId") final Long transferId, @Context final UriInfo uriInfo) {
 
@@ -146,6 +158,9 @@ public class AccountTransfersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve Refund of an Active Loan by Transfer Template", httpMethod = "GET", notes = "Retrieves Refund of an Active Loan by Transfer Template" + "Example Requests :\n\n" + "\n\n" + "accounttransfers/templateRefundByTransfer?fromAccountId=2&fromAccountType=1& toAccountId=1&toAccountType=2&toClientId=1&toOfficeId=1")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = AccountTransfersApiResourceSwagger.GetAccountTransfersTemplateRefundByTransferResponse.class)})
     public String templateRefundByTransfer(@QueryParam("fromOfficeId") @ApiParam(value = "fromOfficeId") final Long fromOfficeId, @QueryParam("fromClientId") @ApiParam(value = "fromClientId") final Long fromClientId,
             @QueryParam("fromAccountId") @ApiParam(value = "fromAccountId") final Long fromAccountId, @QueryParam("fromAccountType") @ApiParam(value = "fromAccountType") final Integer fromAccountType,
@@ -167,7 +182,10 @@ public class AccountTransfersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Refund of an Active Loan by Transfer", httpMethod = "POST", notes = "Ability to refund an active loan by transferring to a savings account.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = AccountTransfersApiResourceSwagger.PostAccountTransfersRefundByTransferRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = AccountTransfersApiResourceSwagger.PostAccountTransfersRefundByTransferRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = AccountTransfersApiResourceSwagger.PostAccountTransfersRefundByTransferResponse.class)})
     public String templateRefundByTransferPost(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 

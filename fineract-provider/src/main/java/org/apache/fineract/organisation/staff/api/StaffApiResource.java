@@ -110,6 +110,9 @@ public class StaffApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve Staff", notes = "Returns the list of staff members.\n" + "\n" + "Example Requests:\n" + "\n" + "staff\n\n\n\n" + "\n" + "Retrieve a Staff by status\n" + "\n" + "Returns the details of a Staff based on status.\n" + "\n" + "By default it Returns all the ACTIVE Staff.\n" + "\n" + "If status=INACTIVE, then it returns all INACTIVE Staff.\n" + "\n" + "and for status=ALL, it Returns both ACTIVE and INACTIVE Staff.\n" + "\n" + "Example Requests:\n" + "\n" + "staff?status=active")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = StaffApiResourceSwagger.GetStaffResponse.class, responseContainer = "List"), @ApiResponse(code = 200, message = "GET https://DomainName/api/v1/staff?status={ACTIVE|INACTIVE|ALL}", response = StaffApiResourceSwagger.GetStaffResponse.class)})
     public String retrieveStaff(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") @ApiParam(value = "sqlSearch") final String sqlSearch,
             @QueryParam("officeId") @ApiParam(value = "officeId") final Long officeId,
@@ -134,7 +137,10 @@ public class StaffApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create a staff member", notes = "Creates a staff member.\n" + "\n" + "Mandatory Fields: \n" + "officeId, firstname, lastname\n" + "\n" + "Optional Fields: \n" + "isLoanOfficer, isActive")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = StaffApiResourceSwagger.PostStaffRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = StaffApiResourceSwagger.PostStaffRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = StaffApiResourceSwagger.PostStaffResponse.class)})
     public String createStaff(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -150,6 +156,9 @@ public class StaffApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Staff Member", notes = "Returns the details of a Staff Member.\n" + "\n" + "Example Requests:\n" + "\n" + "staff/1")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = StaffApiResourceSwagger.GetStaffResponse.class)})
     public String retreiveStaff(@PathParam("staffId") @ApiParam(value = "staffId") final Long staffId, @Context final UriInfo uriInfo) {
 
@@ -170,7 +179,10 @@ public class StaffApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Staff Member", notes = "Updates the details of a staff member.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = StaffApiResourceSwagger.PutStaffRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = StaffApiResourceSwagger.PutStaffRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = StaffApiResourceSwagger.PutStaffResponse.class)})
     public String updateStaff(@PathParam("staffId") @ApiParam(value = "staffId") final Long staffId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 

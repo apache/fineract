@@ -96,6 +96,9 @@ public class PocketApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Retrieve accounts linked to pocket", httpMethod = "GET", notes = "All linked loan\n\n" + "Example Requests:\n" + "\n"  + "\n" + "self/pockets")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response =  PocketApiResourceSwagger.GetAccountsLinkedToPocketResponse.class)})
 	public String retrieveAll() {
 		return this.toApiJsonSerializer.serialize(this.pocketAccountMappingReadPlatformService.retrieveAll());

@@ -89,6 +89,9 @@ public class SelfSavingsApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Retrieve a savings account", httpMethod = "GET", notes = "Retrieves a savings account\n\n" + "Example Requests :\n" + "\n" + "self/savingsaccounts/1\n" + "\n" + "\n" + "self/savingsaccounts/1?associations=transactions")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfSavingsApiResourceSwagger.GetSelfSavingsAccountsResponse.class)})
 	public String retrieveSavings(
 			@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId,
@@ -109,6 +112,9 @@ public class SelfSavingsApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Retrieve Savings Account Transaction", httpMethod = "GET", notes = "Retrieves Savings Account Transaction\n\n" + "Example Requests:\n" + "\n" + "self/savingsaccounts/1/transactions/1")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfSavingsApiResourceSwagger.GetSelfSavingsAccountsAccountIdTransactionsTransactionIdResponse.class)})
 	public String retrieveSavingsTransaction(
 			@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId,
@@ -128,6 +134,9 @@ public class SelfSavingsApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "List Savings Charges", httpMethod = "GET", notes = "Lists Savings Charges\n\n" + "Example Requests:\n" + "\n" + "self/savingsaccounts/1/charges\n" + "\n" + "self/savingsaccounts/1/charges?chargeStatus=inactive\n" + "\n" + "self/savingsaccounts/1/charges?fields=name,amountOrPercentage")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfSavingsApiResourceSwagger.GetSelfSavingsAccountsAccountIdChargesResponse.class, responseContainer = "List")})
 	public String retrieveAllSavingsAccountCharges(
 			@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId,
@@ -146,6 +155,9 @@ public class SelfSavingsApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Retrieve a Savings account Charge", httpMethod = "GET", notes = "Retrieves a Savings account Charge\n\n" + "Example Requests:\n" + "\n" + "self/savingsaccounts/1/charges/5\n" + "\n" + "\n" + "self/savingsaccounts/1/charges/5?fields=name,amountOrPercentage")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfSavingsApiResourceSwagger.GetSelfSavingsAccountsAccountIdChargesSavingsAccountChargeIdResponse.class)})
 	public String retrieveSavingsAccountCharge(
 			@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId,

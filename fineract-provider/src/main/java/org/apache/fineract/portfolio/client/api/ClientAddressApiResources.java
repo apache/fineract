@@ -96,7 +96,10 @@ public class ClientAddressApiResources {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Create an address for a Client", notes = "Mandatory Fields : \n" + "type and clientId")
-	@ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientAddressApiResourcesSwagger.PostClientClientIdAddressesRequest.class)})
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+			@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientAddressApiResourcesSwagger.PostClientClientIdAddressesRequest.class)})
 	@ApiResponses({ @ApiResponse(code = 200, message = "OK", response = ClientAddressApiResourcesSwagger.PostClientClientIdAddressesResponse.class)})
 	public String AddClientAddress(@QueryParam("type") @ApiParam(value = "type") final long addressTypeId,
 			@PathParam("clientid") @ApiParam(value = "clientId") final long clientid, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
@@ -114,6 +117,9 @@ public class ClientAddressApiResources {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "List all addresses for a Client", notes = "Example Requests:\n" + "\n" +"client/1/addresses\n" + "\n" +	"\n" +"clients/1/addresses?status=false,true&&type=1,2,3" )
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = ClientAddressApiResourcesSwagger.GetClientClientIdAddressesResponse.class)})
 	public String getAddresses(@QueryParam("status") @ApiParam(value = "status") final String status, @QueryParam("type") @ApiParam(value = "type") final long addressTypeId,
 							   @PathParam("clientid") @ApiParam(value = "clientId") final long clientid, @Context final UriInfo uriInfo) {
@@ -142,7 +148,10 @@ public class ClientAddressApiResources {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Update an address for a Client", notes = "All the address fields can be updated by using update client address API\n" + "\n" + "Mandatory Fields\n" + "type and addressId")
-	@ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientAddressApiResourcesSwagger.PutClientClientIdAddressesRequest.class)})
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+			@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientAddressApiResourcesSwagger.PutClientClientIdAddressesRequest.class)})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "OK", response = ClientAddressApiResourcesSwagger.PutClientClientIdAddressesResponse.class)})
 	public String UpdateClientAddress(@PathParam("clientid") @ApiParam(value = "clientId") final long clientid, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 

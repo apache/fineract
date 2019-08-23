@@ -74,6 +74,9 @@ public class WorkingDaysApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Working days", notes = "Example Requests:\n" + "\n" + "workingdays")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = WorkingDaysApiResourceSwagger.GetWorkingDaysResponse.class, responseContainer = "list")})
     public String retrieveAll(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(WorkingDaysApiConstants.WORKING_DAYS_RESOURCE_NAME);
@@ -87,7 +90,10 @@ public class WorkingDaysApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Working Day", notes = "Mandatory Fields\n" + "recurrence,repaymentRescheduleType,extendTermForDailyRepayments,locale")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = WorkingDaysApiResourceSwagger.PutWorkingDaysRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = WorkingDaysApiResourceSwagger.PutWorkingDaysRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = WorkingDaysApiResourceSwagger.PutWorkingDaysResponse.class)})
     public String update(@ApiParam(hidden = true) final String jsonRequestBody) {
 
@@ -103,6 +109,9 @@ public class WorkingDaysApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Working Days Template", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for working days.\n" + "\n" + "Example Request:\n" + "\n" + "workingdays/template")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = WorkingDaysApiResourceSwagger.GetWorkingDaysTemplateResponse.class )})
     public String template(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(WorkingDaysApiConstants.WORKING_DAYS_RESOURCE_NAME);

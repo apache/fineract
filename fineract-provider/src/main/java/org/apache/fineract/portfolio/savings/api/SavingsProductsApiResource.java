@@ -114,7 +114,10 @@ public class SavingsProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create a Savings Product", httpMethod = "POST", notes = "Creates a Savings Product\n\n" + "Mandatory Fields: name, shortName, description, currencyCode, digitsAfterDecimal,inMultiplesOf, nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType,accountingRule\n\n" + "Mandatory Fields for Cash based accounting (accountingRule = 2): savingsReferenceAccountId, savingsControlAccountId, interestOnSavingsAccountId, incomeFromFeeAccountId, transfersInSuspenseAccountId, incomeFromPenaltyAccountId\n\n" + "Optional Fields: minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeForTransfers, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges, allowOverdraft, overdraftLimit, minBalanceForInterestCalculation,withHoldTax,taxGroupId")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SavingsProductsApiResourceSwagger.PostSavingsProductsRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SavingsProductsApiResourceSwagger.PostSavingsProductsRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = SavingsProductsApiResourceSwagger.PostSavingsProductsResponse.class)})
     public String create(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -130,7 +133,10 @@ public class SavingsProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Savings Product", httpMethod = "PUT", notes = "Updates a Savings Product")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SavingsProductsApiResourceSwagger.PutSavingsProductsProductIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SavingsProductsApiResourceSwagger.PutSavingsProductsProductIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = SavingsProductsApiResourceSwagger.PutSavingsProductsProductIdResponse.class)})
     public String update(@PathParam("productId") @ApiParam(value = "productId") final Long productId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -147,6 +153,9 @@ public class SavingsProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Savings Products", httpMethod = "GET", notes = "Lists Savings Products\n\n" + "Example Requests:\n" + "\n" + "savingsproducts\n" + "\n" + "savingsproducts?fields=name")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = SavingsProductsApiResourceSwagger.GetSavingsProductsResponse.class)})
     public String retrieveAll(@Context final UriInfo uriInfo) {
 
@@ -164,6 +173,9 @@ public class SavingsProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Savings Product", httpMethod = "GET", notes = "Retrieves a Savings Product\n\n" + "Example Requests:\n" + "\n" + "savingsproducts/1\n" + "\n" + "savingsproducts/1?template=true\n" + "\n" + "savingsproducts/1?fields=name,description")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = SavingsProductsApiResourceSwagger.GetSavingsProductsProductIdResponse.class)})
     public String retrieveOne(@PathParam("productId") @ApiParam(value = "productId") final Long productId, @Context final UriInfo uriInfo) {
 
@@ -203,6 +215,9 @@ public class SavingsProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve Savings Product Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "savingsproducts/template")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = SavingsProductsApiResourceSwagger.GetSavingsProductsTemplateResponse.class)})
     public String retrieveTemplate(@Context final UriInfo uriInfo) {
 
@@ -291,6 +306,9 @@ public class SavingsProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Savings Product", httpMethod = "DELETE", notes = "Deletes a Savings Product")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = SavingsProductsApiResourceSwagger.DeleteSavingsProductsProductIdResponse.class)})
     public String delete(@PathParam("productId") @ApiParam(value = "productId") final Long productId) {
 

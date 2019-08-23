@@ -73,6 +73,9 @@ public class TaxComponentApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Tax Components", httpMethod = "GET", notes = "List Tax Components")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = TaxComponentApiResourceSwagger.GetTaxesComponentsResponse.class, responseContainer = "List")})
     public String retrieveAllTaxComponents(@Context final UriInfo uriInfo) {
 
@@ -89,6 +92,9 @@ public class TaxComponentApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve Tax Component", httpMethod = "GET", notes = "Retrieve Tax Component")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = TaxComponentApiResourceSwagger.GetTaxesComponentsResponse.class)})
     public String retrieveTaxComponent(@PathParam("taxComponentId") @ApiParam(value = "taxComponentId") final Long taxComponentId, @Context final UriInfo uriInfo) {
 
@@ -118,7 +124,10 @@ public class TaxComponentApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create a new Tax Component", httpMethod = "POST", notes = "Creates a new Tax Component\n\n" + "Mandatory Fields: name, percentage\n\n" + "Optional Fields: debitAccountType, debitAcountId, creditAccountType, creditAcountId, startDate")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TaxComponentApiResourceSwagger.PostTaxesComponentsRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TaxComponentApiResourceSwagger.PostTaxesComponentsRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = TaxComponentApiResourceSwagger.PostTaxesComponentsResponse.class)})
     public String createTaxCompoent(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -134,7 +143,10 @@ public class TaxComponentApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update Tax Component", httpMethod = "PUT", notes = "Updates Tax component. Debit and credit account details cannot be modified. All the future tax components would be replaced with the new percentage.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body",dataTypeClass = TaxComponentApiResourceSwagger.PutTaxesComponentsTaxComponentIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body",dataTypeClass = TaxComponentApiResourceSwagger.PutTaxesComponentsTaxComponentIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = TaxComponentApiResourceSwagger.PutTaxesComponentsTaxComponentIdResponse.class)})
     public String updateTaxCompoent(@PathParam("taxComponentId") @ApiParam(value = "taxComponentId") final Long taxComponentId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 

@@ -93,6 +93,9 @@ public class SelfClientsApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "List Clients associated to the user", httpMethod = "GET", notes = "The list capability of clients can support pagination and sorting.\n\n" + "Example Requests:\n" + "\n" + "self/clients\n" + "\n" + "self/clients?fields=displayName,officeName\n" + "\n" + "self/clients?offset=10&limit=50\n" + "\n" + "self/clients?orderBy=displayName&sortOrder=DESC")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfClientsApiResourceSwagger.GetSelfClientsResponse.class)})
 	public String retrieveAll(@Context final UriInfo uriInfo,
 			@QueryParam("displayName") @ApiParam(value = "displayName") final String displayName,
@@ -118,8 +121,11 @@ public class SelfClientsApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Retrieve a Client", httpMethod = "GET", notes = "Retrieves a Client\n\n" + "Example Requests:\n" + "\n" + "self/clients/1\n" + "\n" + "self/clients/1?fields=id,displayName,officeName")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfClientsApiResourceSwagger.GetSelfClientsClientIdResponse.class)})
-	public String retrieveOne(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
+	public String retrieveOne(@PathParam("clientId") @ApiParam(value = "clientId")  final Long clientId,
 			@Context final UriInfo uriInfo) {
 
 		this.dataValidator.validateRetrieveOne(uriInfo);
@@ -136,6 +142,9 @@ public class SelfClientsApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Retrieve client accounts overview", httpMethod = "GET", notes = "An example of how a loan portfolio summary can be provided. This is requested in a specific use case of the community application.\n" + "It is quite reasonable to add resources like this to simplify User Interface development.\n" + "\n" + "Example Requests:\n" + "\n" + "self/clients/1/accounts\n" + "\n" + "\n" + "self/clients/1/accounts?fields=loanAccounts,savingsAccounts")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfClientsApiResourceSwagger.GetSelfClientsClientIdAccountsResponse.class)})
 	public String retrieveAssociatedAccounts(
 			@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
@@ -153,6 +162,9 @@ public class SelfClientsApiResource {
 			MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.TEXT_PLAIN })
 	@ApiOperation(value = "Retrieve Client Image", httpMethod = "GET", notes = "Optional arguments are identical to those of Get Image associated with an Entity (Binary file)\n" + "\n" + "Example Requests:\n" + "\n" + "self/clients/1/images")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK")})
 	public Response retrieveImage(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
 			@QueryParam("maxWidth") @ApiParam(example = "maxWidth") final Integer maxWidth,
@@ -170,6 +182,9 @@ public class SelfClientsApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "List Client Charges", httpMethod = "GET", notes = "The list capability of client charges supports pagination.\n\n" + "Example Requests:\n" + "\n" + "self/clients/1/charges\n\n" + "self/clients/1/charges?offset=0&limit=5")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfClientsApiResourceSwagger.GetSelfClientsClientIdChargesResponse.class)})
 	public String retrieveAllClientCharges(
 			@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
@@ -190,6 +205,9 @@ public class SelfClientsApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Retrieve a Client Charge", httpMethod = "GET", notes = "Retrieves a Client Charge\n\n" + "Example Requests:\n" + "\n" + "self/clients/1/charges/1\n" + "\n" + "\n" + "self/clients/1/charges/1?fields=name,id")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfClientsApiResourceSwagger.GetSelfClientsClientIdChargesChargeIdResponse.class)})
 	public String retrieveClientCharge(
 			@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
@@ -209,6 +227,9 @@ public class SelfClientsApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "List Client Transactions", httpMethod = "GET", notes = "The list capability of client transaction can support pagination.\n\n" + "Example Requests:\n" + "\n" + "self/clients/189/transactions\n\n" + "self/clients/189/transactions?offset=10&limit=50")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfClientsApiResourceSwagger.GetSelfClientsClientIdTransactionsResponse.class)})
 	public String retrieveAllClientTransactions(
 			@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,
@@ -227,6 +248,9 @@ public class SelfClientsApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Retrieve a Client Transaction", httpMethod = "GET", notes = "Retrieves a Client Transaction" + "Example Requests:\n" + "\n" + "self/clients/1/transactions/1\n" + "\n" + "\n" + "self/clients/1/transactions/1?fields=id,officeName")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfClientsApiResourceSwagger.GetSelfClientsClientIdTransactionsTransactionIdResponse.class)})
 	public String retrieveClientTransaction(
 			@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId,

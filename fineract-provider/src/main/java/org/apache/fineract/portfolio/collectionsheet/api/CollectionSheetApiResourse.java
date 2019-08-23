@@ -73,7 +73,10 @@ public class CollectionSheetApiResourse {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Generate Individual Collection Sheet | Save Collection Sheet", httpMethod = "POST", notes = "Generate Individual Collection Sheet:\n\n" + "This Api retrieves repayment details of all individual loans under a office as on a specified meeting date.\n\n" + "Save Collection Sheet:\n\n" + "This Api allows the loan officer to perform bulk repayments of individual loans and deposit of mandatory savings on a given meeting date.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CollectionSheetApiResourceSwagger.PostCollectionSheetRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CollectionSheetApiResourceSwagger.PostCollectionSheetRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = CollectionSheetApiResourceSwagger.PostCollectionSheetResponse.class)})
     public String generateCollectionSheet(@QueryParam("command") @ApiParam(value = "command") final String commandParam, @ApiParam(hidden = true) final String apiRequestBodyAsJson,
                                           @Context final UriInfo uriInfo) {

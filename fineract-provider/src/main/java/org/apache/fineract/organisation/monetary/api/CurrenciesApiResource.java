@@ -82,6 +82,9 @@ public class CurrenciesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve Currency Configuration", notes = "Returns the list of currencies permitted for use AND the list of currencies not selected (but available for selection).\n" + "\n" + "Example Requests:\n" + "\n" + "currencies\n" + "\n" + "\n" + "currencies?fields=selectedCurrencyOptions")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = CurrenciesApiResourceSwagger.GetCurrenciesResponse.class)})
     public String retrieveCurrencies(@Context final UriInfo uriInfo) {
 
@@ -97,7 +100,10 @@ public class CurrenciesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update Currency Configuration", notes = "Updates the list of currencies permitted for use.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CurrenciesApiResourceSwagger.PutCurrenciesRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CurrenciesApiResourceSwagger.PutCurrenciesRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = CurrenciesApiResourceSwagger.PutCurrenciesResponse.class)})
     public String updateCurrencies(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 

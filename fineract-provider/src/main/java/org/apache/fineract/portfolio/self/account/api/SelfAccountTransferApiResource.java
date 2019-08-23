@@ -102,6 +102,9 @@ public class SelfAccountTransferApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Retrieve Account Transfer Template", httpMethod = "GET", notes = "Returns list of loan/savings accounts that can be used for account transfer\n" +
 			"\n" + "\n" + "Example Requests:\n" + "\n" + "self/accounttransfers/template\n")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = SelfAccountTransferApiResourceSwagger.GetAccountTransferTemplateResponse.class)})
 	public String template(
 			@DefaultValue("") @QueryParam("type") @ApiParam("type") final String type,
@@ -131,6 +134,10 @@ public class SelfAccountTransferApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Create new Transfer", httpMethod = "POST", notes = "Ability to create new transfer of monetary funds from one account to another.\n" +
 			"\n" + "\n" + "Example Requests:\n" + "\n" + " self/accounttransfers/\n")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+			@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SelfAccountTransferApiResourceSwagger.PostNewTransferRequest.class)})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = SelfAccountTransferApiResourceSwagger.PostNewTransferResponse.class)})
 	public String create(
 			@DefaultValue("") @QueryParam("type") @ApiParam("type") final String type,

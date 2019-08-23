@@ -143,6 +143,9 @@ public class CentersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Center Template", httpMethod = "GET", notes = "Retrieves a Center Template\n\n" + "Example Requests:\n\n" + "\n\n" + "centers/template\n\n" + "\n\n" + "centers/template?officeId=2")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = CentersApiResourceSwagger.GetCentersTemplateResponse.class)})
     public String retrieveTemplate(@Context final UriInfo uriInfo, @QueryParam("command") @ApiParam(value = "command") final String commandParam,
             @QueryParam("officeId") @ApiParam(value = "officeId") final Long officeId,
@@ -170,6 +173,9 @@ public class CentersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Centers", httpMethod = "GET", notes = "The default implementation supports pagination and sorting with the default pagination size set to 200 records. The parameter limit with value -1 will return all entries.\n\n" + "Example Requests:\n\n" + "\n\n" + "centers\n\n" + "\n\n" + "centers?fields=name,officeName,joinedDate\n\n" + "\n\n" + "centers?offset=10&limit=50\n\n" + "\n\n" + "centers?orderBy=name&sortOrder=DESC")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = CentersApiResourceSwagger.GetCentersResponse.class)})
     public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") @ApiParam(value = "sqlSearch") final String sqlSearch,
             @QueryParam("officeId") @ApiParam(value = "officeId") final Long officeId, @QueryParam("staffId") @ApiParam(value = "staffId") final Long staffId,
@@ -207,6 +213,9 @@ public class CentersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Center", httpMethod = "GET", notes = "Retrieves a Center\n\n" + "Example Requests:\n\n" + "\n\n" + "centers/1\n\n" + "\n\n" + "centers/1?associations=groupMembers")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = CentersApiResourceSwagger.GetCentersCenterIdResponse.class)})
     public String retrieveOne(@Context final UriInfo uriInfo, @PathParam("centerId") @ApiParam(value = "centerId") final Long centerId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @ApiParam(value = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
@@ -258,7 +267,10 @@ public class CentersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create a Center", httpMethod = "POST", notes = "Creates a Center\n\n" + "Mandatory Fields: name, officeId, active, activationDate (if active=true)\n\n" + "Optional Fields: externalId, staffId, groupMembers")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CentersApiResourceSwagger.PostCentersRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CentersApiResourceSwagger.PostCentersRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = CentersApiResourceSwagger.PostCentersResponse.class)})
     public String create(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -276,7 +288,10 @@ public class CentersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Center", httpMethod = "PUT", notes = "Updates a Center")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CentersApiResourceSwagger.PutCentersCenterIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CentersApiResourceSwagger.PutCentersCenterIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = CentersApiResourceSwagger.PutCentersCenterIdResponse.class)})
     public String update(@PathParam("centerId") @ApiParam(value = "centerId") final Long centerId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -293,6 +308,9 @@ public class CentersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Center", httpMethod = "DELETE", notes = "A Center can be deleted if it is in pending state and has no association - groups, loans or savings")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = CentersApiResourceSwagger.DeleteCentersCenterIdResponse.class)})
     public String delete(@PathParam("centerId") @ApiParam(value = "centerId") final Long centerId) {
 
@@ -308,7 +326,10 @@ public class CentersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Activate a Center | Generate Collection Sheet | Save Collection Sheet | Close a Center | Associate Groups | Disassociate Groups", httpMethod = "POST", notes = "Activate a Center:\n\n" + "Centers can be created in a Pending state. This API exists to enable center activation. If the center happens to be already active, this API will result in an error.\n\n" + "Close a Center:\n\n" + "Centers can be closed if they don't have any non-closed groups or saving accounts. If the Center has any active groups or savings accounts, this API will result in an error.\n\n" + "Associate Groups:\n\n" + "This API allows associating existing groups to a center. The groups are listed from the office to which the center is associated. If group(s) is already associated with a center, this API will result in an error.\n\n" + "Disassociate Groups:\n\n" + "This API allows to disassociate groups from a center.\n\n" + "Generate Collection Sheet:\n\n" + "This Api retrieves repayment details of all jlg loans under a center as on a specified meeting date.\n\n" + "Save Collection Sheet:\n\n" + "This Api allows the loan officer to perform bulk repayments of JLG loans for a center on a given meeting date.\n\n" + "Showing Request/Response for Close a Center")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CentersApiResourceSwagger.PostCentersCenterIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CentersApiResourceSwagger.PostCentersCenterIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = CentersApiResourceSwagger.PostCentersCenterIdResponse.class)})
     public String activate(@PathParam("centerId") @ApiParam(value = "centerId") final Long centerId, @QueryParam("command") @ApiParam(value = "command") final String commandParam,
            @ApiParam(hidden = true) final String apiRequestBodyAsJson, @Context final UriInfo uriInfo) {
@@ -359,6 +380,9 @@ public class CentersApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve Center accounts overview", httpMethod = "GET", notes = "An example of how a savings summary for a Center can be provided. This is requested in a specific use case of the reference application.\n\n" + "It is quite reasonable to add resources like this to simplify User Interface development.\n\n" + "\n\n" + "Example Requests:\n\n" + "\n\n" + "centers/9/accounts")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = CentersApiResourceSwagger.GetCentersCenterIdAccountsResponse.class)})
     public String retrieveGroupAccount(@PathParam("centerId") @ApiParam(value = "centerId") final Long centerId, @Context final UriInfo uriInfo) {
 

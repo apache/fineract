@@ -106,6 +106,9 @@ public class RolesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Roles", notes = "Example Requests:\n" + "\n" + "roles\n" + "\n" + "\n" + "roles?fields=name")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = RolesApiResourceSwagger.GetRolesResponse.class, responseContainer = "List")})
     public String retrieveAllRoles(@Context final UriInfo uriInfo) {
 
@@ -121,7 +124,10 @@ public class RolesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create a New Role", notes = "Mandatory Fields\n" + "name, description")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = RolesApiResourceSwagger.PostRolesRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = RolesApiResourceSwagger.PostRolesRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = RolesApiResourceSwagger.PostRolesResponse.class)})
     public String createRole(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -140,6 +146,9 @@ public class RolesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Role", notes = "Example Requests:\n" + "\n" + "roles/1\n" + "\n" + "\n" + "roles/1?fields=name")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = RolesApiResourceSwagger.GetRolesRoleIdResponse.class)})
     public String retrieveRole(@PathParam("roleId") @ApiParam(value = "roleId") final Long roleId, @Context final UriInfo uriInfo) {
 
@@ -165,7 +174,10 @@ public class RolesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Enable Role | Disable Role", notes = "Description : Enable role in case role is disabled. | Disable the role in case role is not associated with any users.\n\n\n\n" + "\n\n" + "Example Request:   https://DomainName/api/v1/roles/{roleId}?command=enable" + "\n\n\n\n" + "\n\n" + "https://DomainName/api/v1/roles/{roleId}?command=disable")
-    @ApiImplicitParams({@ApiImplicitParam(value = "No Request Body", name = "No Request Body")})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "No Request Body", name = "No Request Body")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = RolesApiResourceSwagger.PostRolesRoleIdResponse.class)})
     public String actionsOnRoles(@PathParam("roleId") @ApiParam(value = "roleId") final Long roleId, @QueryParam("command") @ApiParam(value = "command") final String commandParam,
             @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
@@ -189,7 +201,10 @@ public class RolesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Role", notes = "")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = RolesApiResourceSwagger.PutRolesRoleIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = RolesApiResourceSwagger.PutRolesRoleIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = RolesApiResourceSwagger.PutRolesRoleIdResponse.class)})
     public String updateRole(@PathParam("roleId") @ApiParam(value = "roleId") final Long roleId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -208,6 +223,9 @@ public class RolesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Role's Permissions", notes = "Example Requests:\n" + "\n" + "roles/1/permissions")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = RolesApiResourceSwagger.GetRolesRoleIdPermissionsResponse.class)})
     public String retrieveRolePermissions(@PathParam("roleId") @ApiParam(value = "roleId") final Long roleId, @Context final UriInfo uriInfo) {
 
@@ -226,7 +244,10 @@ public class RolesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Role's Permissions", notes = "")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = RolesApiResourceSwagger.PutRolesRoleIdPermissionsRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = RolesApiResourceSwagger.PutRolesRoleIdPermissionsRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = RolesApiResourceSwagger.PutRolesRoleIdPermissionsResponse.class)})
     public String updateRolePermissions(@PathParam("roleId") @ApiParam(value = "roleId") final Long roleId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -251,6 +272,9 @@ public class RolesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Role", notes = "Description : Delete the role in case role is not associated with any users.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = RolesApiResourceSwagger.DeleteRolesRoleIdResponse.class)})
     public String deleteRole(@PathParam("roleId") @ApiParam(value = "roleId") final Long roleId) {
 

@@ -86,6 +86,9 @@ public class SelfBeneficiariesTPTApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Beneficiary Third Party Transfer Template", httpMethod = "GET", notes = "Returns Account Type enumerations. Self User is expected to know office name and account number to be able to add beneficiary.\n" + "\n" + "Example Requests:\n" + "\n" + "/self/beneficiaries/tpt/template")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfBeneficiariesTPTApiResourceSwagger.GetSelfBeneficiariesTPTTemplateResponse.class)})
 	public String template(@Context final UriInfo uriInfo) {
 
@@ -109,7 +112,10 @@ public class SelfBeneficiariesTPTApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Add TPT Beneficiary", httpMethod = "POST", notes = "Api to add third party beneficiary linked to current user.\n" + "\n" + "Parameter Definitions\n" + "\n" + "name : Nick name for beneficiary, should be unique for an self service user\n" + "\n" + "officeName : Office Name of beneficiary(not id)\n" + "\n" + "accountNumber : Account Number of beneficiary(not id)\n" + "\n" + "transferLimit : Each transfer initiated to this account will not exceed this amount\n" + "\n" + "Example Requests:\n" + "\n" + "/self/beneficiaries/tpt\n\n" + "Mandatory Fields: name, officeName, accountNumber, accountType\n\n" + "Optional Fields: transferLimit")
-	@ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SelfBeneficiariesTPTApiResourceSwagger.PostSelfBeneficiariesTPTRequest.class)})
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+			@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SelfBeneficiariesTPTApiResourceSwagger.PostSelfBeneficiariesTPTRequest.class)})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfBeneficiariesTPTApiResourceSwagger.PostSelfBeneficiariesTPTResponse.class)})
 	public String add(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -126,7 +132,10 @@ public class SelfBeneficiariesTPTApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Update TPT Beneficiary", httpMethod = "PUT", notes = "Api to update third party beneficiary linked to current user.\n" + "\n" + "Example Requests:\n" + "\n" + "/self/beneficiaries/tpt/{beneficiaryId}\n\n" + "Optional Fields: name, transferLimit")
-	@ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SelfBeneficiariesTPTApiResourceSwagger.PutSelfBeneficiariesTPTBeneficiaryIdRequest.class)})
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+			@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SelfBeneficiariesTPTApiResourceSwagger.PutSelfBeneficiariesTPTBeneficiaryIdRequest.class)})
 	@ApiResponses({@ApiResponse(code = 200,message = "OK", response = SelfBeneficiariesTPTApiResourceSwagger.PutSelfBeneficiariesTPTBeneficiaryIdResponse.class)})
 	public String update(@PathParam("beneficiaryId") @ApiParam(value = "beneficiaryId") final Long beneficiaryId,
 			@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
@@ -144,6 +153,9 @@ public class SelfBeneficiariesTPTApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Delete TPT Beneficiary", httpMethod = "DELETE", notes = "Api to delete third party beneficiary linked to current user.\n" + "\n" + "Example Requests:\n" + "\n" + "/self/beneficiaries/tpt/{beneficiaryId}")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfBeneficiariesTPTApiResourceSwagger.DeleteSelfBeneficiariesTPTBeneficiaryIdResponse.class)})
 	public String delete(@PathParam("beneficiaryId") final Long beneficiaryId,
 			@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
@@ -160,6 +172,9 @@ public class SelfBeneficiariesTPTApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Get All TPT Beneficiary", httpMethod = "GET", notes = "Api to get all third party beneficiary linked to current user.\n" + "\n" + "Example Requests:\n" + "\n" + "/self/beneficiaries/tpt")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfBeneficiariesTPTApiResourceSwagger.GetSelfBeneficiariesTPTResponse.class, responseContainer = "List")})
 	public String retrieveAll(@Context final UriInfo uriInfo) {
 
