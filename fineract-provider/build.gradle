@@ -23,6 +23,7 @@ gradle clean tomcatrunwar
 buildscript {
   repositories {
   	 jcenter()
+      mavenLocal()
   	 mavenCentral()
   	 maven { url "https://plugins.gradle.org/m2/" }
   }
@@ -35,6 +36,8 @@ buildscript {
      classpath 'org.apache.openjpa:openjpa-all:2.4.1'
      classpath 'at.schmutterer.oss.gradle:gradle-openjpa:0.2.0'
      classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.2.2'
+      classpath "io.swagger.core.v3:swagger-gradle-plugin:2.0.8"
+      classpath "gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.18.1"
   }
 }
 
@@ -48,6 +51,8 @@ apply plugin: 'idea'
 apply plugin: 'tomcat'
 apply plugin: 'project-report'
 apply plugin: 'java'
+apply plugin: "io.swagger.core.v3.swagger-gradle-plugin"
+apply plugin: "org.hidetake.swagger.generator"
 apply plugin: 'openjpa'
 apply plugin: 'pmd'
 apply plugin: 'findbugs'
@@ -539,3 +544,32 @@ springBoot {
 bootRepackage {
     mainClass = 'org.apache.fineract.ServerWithMariaDB4jApplication'
 }
+// This is to save json file at build time
+resolve {
+    outputFileName = 'response.json'
+    outputFormat = 'JSON'
+    prettyPrint = 'TRUE'
+    classpath = sourceSets.main.runtimeClasspath
+    resourcePackages = ['org.apache.fineract']
+    outputPath = '/src/main/resources/swagger-ui/response.json'
+}
+
+//This is for code generation
+dependencies {
+    swaggerCodegen 'io.swagger:swagger-codegen-cli:2.4.2'             // Swagger Codegen V2
+    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.5'  // or Swagger Codegen V3
+    swaggerCodegen 'org.openapitools:openapi-generator-cli:3.3.4'     // or OpenAPI Generator
+}
+
+swaggerSources {
+    fineract {
+        inputFile = file('src/main/resources/swagger-ui/response.json')
+        code {
+            language = 'java'
+        }
+    }
+}
+"
+
+
+
