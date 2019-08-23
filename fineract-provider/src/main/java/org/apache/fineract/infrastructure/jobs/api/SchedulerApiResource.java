@@ -65,6 +65,9 @@ public class SchedulerApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve Scheduler Status", notes = "Returns the scheduler status.\n" + "\n" + "Example Requests:\n" + "\n" + "scheduler")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = SchedulerApiResourceSwagger.GetSchedulerResponse.class)})
     public String retrieveStatus(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
@@ -79,6 +82,9 @@ public class SchedulerApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Activate Scheduler Jobs | Suspend Scheduler Jobs", notes = "Activates the scheduler job service. | Suspends the scheduler job service.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "POST :  scheduler?command=start\n\n"+"\n"+"POST : scheduler?command=stop")})
     public Response changeSchedulerStatus(@QueryParam(SchedulerJobApiConstants.COMMAND) @ApiParam(value = "command") final String commandParam) {
         // check the logged in user have permissions to update scheduler status

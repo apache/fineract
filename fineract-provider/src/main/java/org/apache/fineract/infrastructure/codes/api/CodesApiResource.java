@@ -86,6 +86,9 @@ public class CodesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve Codes", notes = "Returns the list of codes.\n" + "\n" + "Example Requests:\n" + "\n" + "codes")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = CodesApiResourceSwagger.GetCodesResponse.class, responseContainer = "list")})
     public String retrieveCodes(@Context final UriInfo uriInfo) {
 
@@ -101,7 +104,10 @@ public class CodesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create a Code", notes = "Creates a code. Codes created through api are always 'user defined' and so system defined is marked as false.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CodesApiResourceSwagger.PostCodesRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CodesApiResourceSwagger.PostCodesRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = CodesApiResourceSwagger.PostCodesResponse.class)})
     public String createCode(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -117,6 +123,9 @@ public class CodesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Code", notes = "Returns the details of a Code.\n" + "\n" + "Example Requests:\n" + "\n" + "codes/1")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = CodesApiResourceSwagger.GetCodesResponse.class)})
     public String retrieveCode(@PathParam("codeId") @ApiParam(value = "codeId") final Long codeId, @Context final UriInfo uriInfo) {
 
@@ -131,7 +140,10 @@ public class CodesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Code", notes = "Updates the details of a code if it is not system defined.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CodesApiResourceSwagger.PutCodesRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CodesApiResourceSwagger.PutCodesRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = CodesApiResourceSwagger.PutCodesResponse.class)})
     public String updateCode(@PathParam("codeId") @ApiParam(value = "codeId") final Long codeId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -147,6 +159,9 @@ public class CodesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Code", notes = "Deletes a code if it is not system defined.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = CodesApiResourceSwagger.DeleteCodesResponse.class)})
     public String deleteCode(@PathParam("codeId") @ApiParam(value = "codeId") final Long codeId) {
 

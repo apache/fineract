@@ -111,6 +111,9 @@ public class JournalEntriesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Journal Entries", notes = "The list capability of journal entries can support pagination and sorting.\n\n" + "Example Requests:\n" + "\n" + "journalentries\n" + "\n" + "journalentries?transactionId=PB37X8Y21EQUY4S\n" + "\n" + "journalentries?officeId=1&manualEntriesOnly=true&fromDate=1 July 2013&toDate=15 July 2013&dateFormat=dd MMMM yyyy&locale=en\n" + "\n" + "journalentries?fields=officeName,glAccountName,transactionDate\n" + "\n" + "journalentries?offset=10&limit=50\n" + "\n" + "journalentries?orderBy=transactionId&sortOrder=DESC\n" + "\n" + "journalentries?runningBalance=true\n" + "\n" + "journalentries?transactionDetails=true\n" + "\n" + "journalentries?loanId=12\n" + "\n" + "journalentries?savingsId=24")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+        @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = JournalEntryData.class, responseContainer = "list")})
     public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("officeId") @ApiParam(value = "officeId") final Long officeId,
             @QueryParam("glAccountId") @ApiParam(value = "glAccountId") final Long glAccountId, @QueryParam("manualEntriesOnly") @ApiParam(value = "manualEntriesOnly") final Boolean onlyManualEntries,
@@ -149,6 +152,9 @@ public class JournalEntriesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a single Entry", notes = "Example Requests:\n" + "\n" + "journalentries/1\n" + "\n" + "\n" + "\n" + "journalentries/1?fields=officeName,glAccountId,entryType,amount\n" + "\n" + "journalentries/1?runningBalance=true\n" + "\n" + "journalentries/1?transactionDetails=true")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+        @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = JournalEntryData.class)})
     public String retreiveJournalEntryById(@PathParam("journalEntryId") @ApiParam(value = "journalEntryId") final Long journalEntryId, @Context final UriInfo uriInfo,
             @QueryParam("runningBalance") @ApiParam(value = "runningBalance") final boolean runningBalance, @QueryParam("transactionDetails") @ApiParam(value = "transactionDetails") final boolean transactionDetails) {
@@ -167,7 +173,10 @@ public class JournalEntriesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create \"Balanced\" Journal Entries", notes = "Note: A Balanced (simple) Journal entry would have atleast one \"Debit\" and one \"Credit\" entry whose amounts are equal \n" + "Compound Journal entries may have \"n\" debits and \"m\" credits where both \"m\" and \"n\" are greater than 0 and the net sum or all debits and credits are equal \n\n" + "\n" + "Mandatory Fields\n" + "officeId, transactionDate\n\n" + "\ncredits- glAccountId, amount, comments\n\n " + "\ndebits-  glAccountId, amount, comments\n\n " + "\n" + "Optional Fields\n" + "paymentTypeId, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber")
-    @ApiImplicitParams({@ApiImplicitParam(paramType = "body", value = "body", dataType = "body", dataTypeClass = JournalEntryCommand.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(paramType = "body", value = "body", dataType = "body", dataTypeClass = JournalEntryCommand.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = JournalEntriesApiResourceSwagger.PostJournalEntriesResponse.class)})
     public String createGLJournalEntry(@ApiParam(hidden = true) final String jsonRequestBody, @QueryParam("command") @ApiParam(value = "command") final String commandParam) {
 
@@ -192,7 +201,10 @@ public class JournalEntriesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update Running balances for Journal Entries", notes = "This API calculates the running balances for office. If office ID not provided this API calculates running balances for all offices. \n" + "Mandatory Fields\n" + "officeId")
-    @ApiImplicitParams({@ApiImplicitParam(paramType = "body", value = "body", dataType = "body", dataTypeClass = JournalEntriesApiResourceSwagger.PostJournalEntriesTransactionIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(paramType = "body", value = "body", dataType = "body", dataTypeClass = JournalEntriesApiResourceSwagger.PostJournalEntriesTransactionIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = JournalEntriesApiResourceSwagger.PostJournalEntriesTransactionIdResponse.class)})
     public String createReversalJournalEntry(@ApiParam(hidden = true) final String jsonRequestBody, @PathParam("transactionId") @ApiParam(value = "transactionId") final String transactionId,
             @QueryParam("command") @ApiParam(value = "command") final String commandParam) {

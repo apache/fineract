@@ -92,6 +92,9 @@ public class GLClosuresApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Accounting closures", notes = "Example Requests:\n" + "\n" + "glclosures")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, response = GLClosuresApiResourceSwagger.GetGlClosureResponse.class, message = "", responseContainer = "list")})
     public String retrieveAllClosures(@Context final UriInfo uriInfo, @QueryParam("officeId") @ApiParam(value = "officeId") final Long officeId) {
 
@@ -107,6 +110,9 @@ public class GLClosuresApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve an Accounting Closure", notes = "Example Requests:\n" + "\n" + "glclosures/1\n" + "\n" + "\n" + "/glclosures/1?fields=officeName,closingDate")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = GLClosuresApiResourceSwagger.GetGlClosureResponse.class)})
     public String retreiveClosure(@PathParam("glClosureId") @ApiParam(value = "glClosureId") final Long glClosureId, @Context final UriInfo uriInfo) {
 
@@ -127,7 +133,10 @@ public class GLClosuresApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create an Accounting Closure", notes = "Mandatory Fields\n" + "officeId,closingDate")
-    @ApiImplicitParams({@ApiImplicitParam(paramType = "body", required = true, type = "body", dataTypeClass = GLClosuresApiResourceSwagger.PostGlClosuresRequest.class, value = "Request Body")})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(paramType = "body", required = true, type = "body", dataTypeClass = GLClosuresApiResourceSwagger.PostGlClosuresRequest.class, value = "Request Body")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = GLClosuresApiResourceSwagger.PostGlClosuresResponse.class)})
     public String createGLClosure(@ApiParam(hidden = true) final String jsonRequestBody) {
 
@@ -143,7 +152,10 @@ public class GLClosuresApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update an Accounting closure", notes = "Once an accounting closure is created, only the comments associated with it may be edited")
-    @ApiImplicitParams({@ApiImplicitParam(paramType = "body", value = "Request body", dataType = "body", dataTypeClass = GLClosuresApiResourceSwagger.PutGlClosuresRequest.class, required = true)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(paramType = "body", value = "Request body", dataType = "body", dataTypeClass = GLClosuresApiResourceSwagger.PutGlClosuresRequest.class, required = true)})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = GLClosuresApiResourceSwagger.PutGlClosuresResponse.class)})
     public String updateGLClosure(@PathParam("glClosureId") @ApiParam(value = "glClosureId") final Long glClosureId, @ApiParam(hidden = true) final String jsonRequestBody) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateGLClosure(glClosureId).withJson(jsonRequestBody).build();
@@ -158,6 +170,9 @@ public class GLClosuresApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete an accounting closure", notes = "Note: Only the latest accounting closure associated with a branch may be deleted.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = GLClosuresApiResourceSwagger.DeleteGlClosuresResponse.class)})
     public String deleteGLClosure(@PathParam("glClosureId") @ApiParam(value = "glclosureId") final Long glClosureId) {
 

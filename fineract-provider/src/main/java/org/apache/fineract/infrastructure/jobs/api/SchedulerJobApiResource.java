@@ -87,6 +87,9 @@ public class SchedulerJobApiResource {
 
     @GET
     @ApiOperation(value = "Retrieve Scheduler Jobs", notes = "Returns the list of jobs.\n" + "\n" + "Example Requests:\n" + "\n" + "jobs")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = SchedulerJobApiResourceSwagger.GetJobsResponse.class, responseContainer = "list")})
     public String retrieveAll(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
@@ -98,6 +101,9 @@ public class SchedulerJobApiResource {
     @GET
     @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
     @ApiOperation(value = "Retrieve a Job", notes = "Returns the details of a Job.\n" + "\n" + "Example Requests:\n" + "\n" + "jobs/5")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = SchedulerJobApiResourceSwagger.GetJobsResponse.class)})
     public String retrieveOne(@PathParam(SchedulerJobApiConstants.JOB_ID) @ApiParam(value = "jobId") final Long jobId, @Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(SchedulerJobApiConstants.SCHEDULER_RESOURCE_NAME);
@@ -109,6 +115,9 @@ public class SchedulerJobApiResource {
     @GET
     @Path("{" + SchedulerJobApiConstants.JOB_ID + "}/" + SchedulerJobApiConstants.JOB_RUN_HISTORY)
     @ApiOperation(value = "Retrieve Job Run History", notes = "Example Requests:\n" + "\n" + "jobs/5/runhistory?offset=0&limit=200")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = SchedulerJobApiResourceSwagger.GetJobsJobIDJobRunHistoryResponse.class)})
     public String retrieveHistory(@Context final UriInfo uriInfo, @PathParam(SchedulerJobApiConstants.JOB_ID) @ApiParam(value = "jobId") final Long jobId,
             @QueryParam("offset") @ApiParam(value = "offset") final Integer offset, @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
@@ -125,6 +134,9 @@ public class SchedulerJobApiResource {
     @POST
     @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
     @ApiOperation(value = "Run a Job", notes = "Manually Execute Specific Job.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "POST: jobs/1?command=executeJob")})
     public Response executeJob(@PathParam(SchedulerJobApiConstants.JOB_ID) @ApiParam(value = "jobId") final Long jobId,
             @QueryParam(SchedulerJobApiConstants.COMMAND) @ApiParam(value = "command") final String commandParam) {
@@ -147,7 +159,10 @@ public class SchedulerJobApiResource {
     @PUT
     @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
     @ApiOperation(value = "Update a Job", notes = "Updates the details of a job.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SchedulerJobApiResourceSwagger.PutJobsJobIDRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SchedulerJobApiResourceSwagger.PutJobsJobIDRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "")})
     public String updateJobDetail(@PathParam(SchedulerJobApiConstants.JOB_ID) @ApiParam(value = "jobId") final Long jobId, @ApiParam(hidden = true) final String jsonRequestBody) {
 

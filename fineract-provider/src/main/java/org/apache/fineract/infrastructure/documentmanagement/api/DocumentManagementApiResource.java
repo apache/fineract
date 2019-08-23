@@ -94,6 +94,9 @@ public class DocumentManagementApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List documents", notes = "Example Requests:\n" + "\n" + "clients/1/documents\n" + "\n" + "client_identifiers/1/documents\n" + "\n" + "loans/1/documents?fields=name,description")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = DocumentManagementApiResourceSwagger.GetEntityTypeEntityIdDocumentsResponse.class, responseContainer = "list")})
     public String retreiveAllDocuments(@Context final UriInfo uriInfo, @PathParam("entityType") @ApiParam(value = "entityType") final String entityType,
             @PathParam("entityId") @ApiParam(value = "entityId") final Long entityId) {
@@ -110,6 +113,9 @@ public class DocumentManagementApiResource {
     @Consumes({ MediaType.MULTIPART_FORM_DATA })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create a Document", notes = "Note: A document is created using a Multi-part form upload \n" + "\n" + "Body Parts\n" + "\n" + "name : \n" + "Name or summary of the document\n" + "\n" + "description : \n" + "Description of the document\n" + "\n" + "file : \n" + "The file to be uploaded\n" + "\n" + "Mandatory Fields : \n" + "file and description")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "Not Shown (multi-part form data)", response = DocumentManagementApiResourceSwagger.PostEntityTypeEntityIdDocumentsResponse.class)})
     public String createDocument(@PathParam("entityType") @ApiParam(value = "entityType") final String entityType, @PathParam("entityId") @ApiParam(value = "entityId") final Long entityId,
             @HeaderParam("Content-Length") @ApiParam(value = "Content-Length") final Long fileSize, @FormDataParam("file") @ApiParam(value = "file") final InputStream inputStream,
@@ -138,6 +144,9 @@ public class DocumentManagementApiResource {
     @Consumes({ MediaType.MULTIPART_FORM_DATA })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Document", notes = "Note: A document is updated using a Multi-part form upload \n" + "Body Parts\n" + "name\n" + "Name or summary of the document\n" + "description\n" + "Description of the document\n" + "file\n" + "The file to be uploaded")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "Not Shown (multi-part form data)", response = DocumentManagementApiResourceSwagger.PutEntityTypeEntityIdDocumentsResponse.class)})
     public String updateDocument(@PathParam("entityType") @ApiParam(value = "entityType") final String entityType, @PathParam("entityId") @ApiParam(value = "entityId") final Long entityId,
             @PathParam("documentId") @ApiParam(value = "documentId") final Long documentId, @HeaderParam("Content-Length") @ApiParam(value = "Content-Length") final Long fileSize,
@@ -179,6 +188,9 @@ public class DocumentManagementApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Document", notes = "Example Requests:\n" + "\n" + "clients/1/documents/1\n" + "\n" + "\n" + "loans/1/documents/1\n" + "\n" + "\n" + "client_identifiers/1/documents/1?fields=name,description")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = DocumentManagementApiResourceSwagger.GetEntityTypeEntityIdDocumentsResponse.class)})
     public String getDocument(@PathParam("entityType") @ApiParam(value = "entityType") final String entityType, @PathParam("entityId") @ApiParam(value = "entityId") final Long entityId,
             @PathParam("documentId") @ApiParam(value = "documentId") final Long documentId, @Context final UriInfo uriInfo) {
@@ -196,6 +208,9 @@ public class DocumentManagementApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_OCTET_STREAM })
     @ApiOperation(value = "Retrieve Binary File associated with Document", notes = "Request used to download the file associated with the document\n" + "\n" + "Example Requests:\n" + "\n" + "clients/1/documents/1/attachment\n" + "\n" + "\n" + "loans/1/documents/1/attachment")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "Not Shown: The corresponding Binary file")})
     public Response downloadFile(@PathParam("entityType") @ApiParam(value = "entityType") final String entityType, @PathParam("entityId") @ApiParam(value = "entityId") final Long entityId,
             @PathParam("documentId") @ApiParam(value = "documentId") final Long documentId) {
@@ -215,6 +230,9 @@ public class DocumentManagementApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Remove a Document", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = DocumentManagementApiResourceSwagger.DeleteEntityTypeEntityIdDocumentsResponse.class)})
     public String deleteDocument(@PathParam("entityType") @ApiParam(value = "entityType") final String entityType, @PathParam("entityId") @ApiParam(value = "entityId") final Long entityId,
             @PathParam("documentId") @ApiParam(value = "documentId") final Long documentId) {

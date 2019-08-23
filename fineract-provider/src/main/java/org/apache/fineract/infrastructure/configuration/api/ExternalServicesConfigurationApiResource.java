@@ -82,6 +82,9 @@ public class ExternalServicesConfigurationApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve External Services Configuration", notes = "Returns a external Service configurations based on the Service Name.\n" + "\n" + "Service Names supported are S3 and SMTP.\n" + "\n" + "Example Requests:\n" + "\n" + "externalservice/SMTP")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = ExternalServicesPropertiesData.class)})
     public String retrieveOne(@PathParam("servicename") @ApiParam(value = "servicename") final String serviceName, @Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(ExternalServiceConfigurationApiConstant.EXTERNAL_SERVICE_RESOURCE_NAME);
@@ -97,7 +100,10 @@ public class ExternalServicesConfigurationApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update External Service", notes = "Updates the external Service Configuration for a Service Name.\n" + "\n" + "Example: \n" + "\n" + "externalservice/S3")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ExternalServicesConfigurationApiResourceSwagger.PutExternalServiceRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ExternalServicesConfigurationApiResourceSwagger.PutExternalServiceRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "")})
     public String updateExternalServiceProperties(@PathParam("servicename") @ApiParam(value = "servicename") final String serviceName,
                                                   @ApiParam(hidden = true) final String apiRequestBodyAsJson) {

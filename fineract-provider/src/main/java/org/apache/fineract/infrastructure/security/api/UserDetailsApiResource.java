@@ -76,6 +76,9 @@ public class UserDetailsApiResource {
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Fetch authenticated user details\n", notes = "checks the Authentication and returns the set roles and permissions allowed.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = UserDetailsApiResourceSwagger.GetUserDetailsResponse.class)})
     public String fetchAuthenticatedUserData(@QueryParam("access_token") @ApiParam(value = "access_token") final String accessToken) {
 

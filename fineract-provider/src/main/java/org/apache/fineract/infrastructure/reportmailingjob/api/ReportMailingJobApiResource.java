@@ -82,7 +82,10 @@ public class ReportMailingJobApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create a Report Mailing Job", notes = "Mandatory Fields: " + "name, startDateTime, stretchyReportId, emailRecipients, emailSubject, emailMessage, emailAttachmentFileFormatId, recurrence, isActive\n" + "\n" + "Optional Fields: " + "description, stretchyReportParamMap")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ReportMailingJobApiResourceSwagger.PostReportMailingJobsRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ReportMailingJobApiResourceSwagger.PostReportMailingJobsRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = ReportMailingJobApiResourceSwagger.PostReportMailingJobsResponse.class)})
     public String createReportMailingJob(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapper commandWrapper = new CommandWrapperBuilder().
@@ -99,7 +102,10 @@ public class ReportMailingJobApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Report Mailing Job\n", notes = "")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ReportMailingJobApiResourceSwagger.PutReportMailingJobsRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ReportMailingJobApiResourceSwagger.PutReportMailingJobsRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = ReportMailingJobApiResourceSwagger.PutReportMailingJobsResponse.class)})
     public String updateReportMailingJob(@PathParam("entityId") @ApiParam(value = "entityId") final Long entityId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapper commandWrapper = new CommandWrapperBuilder().
@@ -116,7 +122,10 @@ public class ReportMailingJobApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Report Mailing Job", notes = "")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ReportMailingJobApiResourceSwagger.DeleteReportMailingJobsRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ReportMailingJobApiResourceSwagger.DeleteReportMailingJobsRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = ReportMailingJobApiResourceSwagger.DeleteReportMailingJobsResponse.class)})
     public String deleteReportMailingJob(@PathParam("entityId") @ApiParam(value = "entityId") final Long entityId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
         final CommandWrapper commandWrapper = new CommandWrapperBuilder().
@@ -133,6 +142,9 @@ public class ReportMailingJobApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Report Mailing Job", notes = "Example Requests:\n" + "\n" + "reportmailingjobs/1\n" + "\n" + "\n" + "reportmailingjobs/1?template=true")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = ReportMailingJobApiResourceSwagger.GetReportMailingJobsResponse.class)})
     public String retrieveReportMailingJob(@PathParam("entityId") @ApiParam(value = "entityId") final Long entityId, @Context final UriInfo uriInfo) {
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(ReportMailingJobConstants.REPORT_MAILING_JOB_ENTITY_NAME);
@@ -153,6 +165,9 @@ public class ReportMailingJobApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve Report Mailing Job Details Template", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for report mailing job applications. The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "reportmailingjobs/template")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = ReportMailingJobApiResourceSwagger.GetReportMailingJobsTemplate.class)})
     public String retrieveReportMailingJobTemplate(@Context final UriInfo uriInfo) {
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(ReportMailingJobConstants.REPORT_MAILING_JOB_ENTITY_NAME);
@@ -167,6 +182,9 @@ public class ReportMailingJobApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Report Mailing Jobs", notes = "Example Requests:\n" + "\n" + "reportmailingjobs")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = ReportMailingJobApiResourceSwagger.GetReportMailingJobsResponse.class, responseContainer = "list")})
     public String retrieveAllReportMailingJobs(@Context final UriInfo uriInfo, 
             @QueryParam("offset") @ApiParam(value = "offset") final Integer offset,

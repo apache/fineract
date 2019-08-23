@@ -83,6 +83,9 @@ public class CacheApiResource {
 
     @GET
     @ApiOperation(value = "Retrieve Cache Types", notes = "Returns the list of caches.\n" + "\n" + "Example Requests:\n" + "\n" + "caches")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = CacheApiResourceSwagger.GetCachesResponse.class, responseContainer = "list")})
     public String retrieveAll(@Context final UriInfo uriInfo) {
 
@@ -96,7 +99,10 @@ public class CacheApiResource {
 
     @PUT
     @ApiOperation(value = "Switch Cache", notes = "Switches the cache to chosen one.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CacheApiResourceSwagger.PutCachesRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CacheApiResourceSwagger.PutCachesRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = CacheApiResourceSwagger.PutCachesResponse.class)})
     public String switchCache(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
