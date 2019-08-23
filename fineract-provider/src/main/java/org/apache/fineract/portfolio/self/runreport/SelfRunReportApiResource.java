@@ -68,6 +68,9 @@ public class SelfRunReportApiResource {
     @Produces({ MediaType.APPLICATION_JSON, "text/csv", "application/vnd.ms-excel", "application/pdf", "text/html" })
     @ApiOperation(value = "Running A Report", httpMethod = "GET", notes = "" + "Example Requests:\n" + "\n"  + "\n" + "self/runreports/Client%20Details?R_officeId=1" + "\n"  + "\n" + "\n" +
             "self/runreports/Client%20Details?R_officeId=1&exportCSV=true")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response =  SelfRunReportApiResourceSwagger.GetRunReportResponse.class)})
     public Response runReport(@PathParam("reportName") @ApiParam(value = "reportName") final String reportName, @Context final UriInfo uriInfo) {
         this.context.authenticatedUser();

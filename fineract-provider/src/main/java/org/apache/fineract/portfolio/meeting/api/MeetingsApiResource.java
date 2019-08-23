@@ -38,6 +38,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -70,6 +71,10 @@ import org.springframework.stereotype.Component;
 @Path("/{entityType}/{entityId}/meetings")
 @Component
 @Scope("singleton")
+@Api(tags = {"Meetings"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Meetings", description = "")
+})
 public class MeetingsApiResource {
 
     private final PlatformSecurityContext context;

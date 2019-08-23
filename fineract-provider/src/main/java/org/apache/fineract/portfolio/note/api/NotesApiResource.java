@@ -79,6 +79,9 @@ public class NotesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Resource's Notes", httpMethod = "GET", notes = "Retrieves a Resource's Notes\n\n" + "Note: Notes are returned in descending createOn order.\n" + "\n" + "Example Requests:\n" + "\n" + "clients/2/notes\n" + "\n" + "\n" + "groups/2/notes?fields=note,createdOn,createdByUsername")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = NotesApiResourceSwagger.GetResourceTypeResourceIdNotesResponse.class)})
     public String retrieveNotesByResource(@PathParam("resourceType") @ApiParam(value = "resourceType") final String resourceType,
             @PathParam("resourceId") @ApiParam(value = "resourceId") final Long resourceId, @Context final UriInfo uriInfo) {
@@ -102,6 +105,9 @@ public class NotesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Resource Note", httpMethod = "GET", notes = "Retrieves a Resource Note\n\n" + "Example Requests:\n" + "\n" + "clients/1/notes/76\n" + "\n" + "\n" + "groups/1/notes/20\n" + "\n" + "\n" + "clients/1/notes/76?fields=note,createdOn,createdByUsername\n" + "\n" + "\n" + "groups/1/notes/20?fields=note,createdOn,createdByUsername")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = NotesApiResourceSwagger.GetResourceTypeResourceIdNotesNoteIdResponse.class)})
     public String retrieveNote(@PathParam("resourceType") @ApiParam(value = "resourceType")final String resourceType, @PathParam("resourceId") @ApiParam(value = "resourceId")final Long resourceId,
             @PathParam("noteId") @ApiParam(value = "noteId") final Long noteId, @Context final UriInfo uriInfo) {
@@ -124,7 +130,10 @@ public class NotesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Add a Resource Note", httpMethod = "POST", notes = "Adds a new note to a supported resource.\n\n" + "Example Requests:\n" + "\n" + "clients/1/notes\n" + "\n" + "\n" + "groups/1/notes")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = NotesApiResourceSwagger.PostResourceTypeResourceIdNotesRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = NotesApiResourceSwagger.PostResourceTypeResourceIdNotesRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = NotesApiResourceSwagger.PostResourceTypeResourceIdNotesResponse.class)})
     public String addNewNote(@PathParam("resourceType") @ApiParam(value = "resourceType")final String resourceType, @PathParam("resourceId") @ApiParam(value = "resourceId")final Long resourceId,
             @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
@@ -147,7 +156,10 @@ public class NotesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Resource Note", httpMethod = "PUT", notes = "Updates a Resource Note")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = NotesApiResourceSwagger.PutResourceTypeResourceIdNotesNoteIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = NotesApiResourceSwagger.PutResourceTypeResourceIdNotesNoteIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = NotesApiResourceSwagger.PutResourceTypeResourceIdNotesNoteIdResponse.class)})
     public String updateNote(@PathParam("resourceType") @ApiParam(value = "resourceType") final String resourceType, @PathParam("resourceId") @ApiParam(value = "resourceId") final Long resourceId,
             @PathParam("noteId") @ApiParam(value = "noteId") final Long noteId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
@@ -171,6 +183,9 @@ public class NotesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Resource Note", httpMethod = "DELETE", notes = "Deletes a Resource Note")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = NotesApiResourceSwagger.DeleteResourceTypeResourceIdNotesNoteIdResponse.class)})
     public String deleteNote(@PathParam("resourceType") @ApiParam(value = "resourceType")final String resourceType, @PathParam("resourceId") @ApiParam(value = "resourceId")final Long resourceId,
             @PathParam("noteId") @ApiParam(value = "noteId")final Long noteId) {

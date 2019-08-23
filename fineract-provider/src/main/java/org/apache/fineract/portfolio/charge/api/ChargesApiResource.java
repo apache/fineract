@@ -81,6 +81,9 @@ public class ChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve Charges", httpMethod = "GET", notes = "Returns the list of defined charges.\n" + "\n" + "Example Requests:\n" + "\n" + "charges")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.GetChargesResponse.class, responseContainer = "List")})
     public String retrieveAllCharges(@Context final UriInfo uriInfo) {
 
@@ -97,6 +100,9 @@ public class ChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Charge", httpMethod = "GET", notes = "Returns the details of a defined Charge.\n" + "\n" + "Example Requests:\n" + "\n" + "charges/1")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.GetChargesResponse.class)})
     public String retrieveCharge(@PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId, @Context final UriInfo uriInfo) {
 
@@ -118,6 +124,9 @@ public class ChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve Charge Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "charges/template\n")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.GetChargesTemplateResponse.class)})
     public String retrieveNewChargeDetails(@Context final UriInfo uriInfo) {
 
@@ -133,7 +142,10 @@ public class ChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create/Define a Charge", httpMethod = "POST", notes = "Define a new charge that can later be associated with loans and savings through their respective product definitions or directly on each account instance.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ChargesApiResourceSwagger.PostChargesRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ChargesApiResourceSwagger.PostChargesRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.PostChargesResponse.class)})
     public String createCharge(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -149,7 +161,10 @@ public class ChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Charge", httpMethod = "PUT", notes = "Updates the details of a Charge.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ChargesApiResourceSwagger.PutChargesChargeIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ChargesApiResourceSwagger.PutChargesChargeIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.PutChargesChargeIdResponse.class)})
     public String updateCharge(@PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -165,6 +180,9 @@ public class ChargesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Charge", httpMethod = "DELETE", notes = "Deletes a Charge.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ChargesApiResourceSwagger.DeleteChargesChargeIdResponse.class)})
     public String deleteCharge(@PathParam("chargeId") @ApiParam(value = "chargeId") final Long chargeId) {
 

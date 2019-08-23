@@ -85,6 +85,9 @@ public class TellerApiResource {
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "List all tellers", notes = "Retrieves list tellers")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TellerApiResourceSwagger.GetTellersResponse.class, responseContainer = "List")})
     public String getTellerData(@QueryParam("officeId") @ApiParam(value = "officeId") final Long officeId) {
         final Collection<TellerData> foundTellers = this.readPlatformService.getTellers(officeId);
@@ -97,6 +100,9 @@ public class TellerApiResource {
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Retrieve tellers", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TellerApiResourceSwagger.GetTellersResponse.class)})
     public String findTeller(@PathParam("tellerId") @ApiParam(value = "tellerId") final Long tellerId) {
         final TellerData teller = this.readPlatformService.findTeller(tellerId);
@@ -108,7 +114,10 @@ public class TellerApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Create teller", notes = "Mandatory Fields\n" + "Teller name, OfficeId, Description, Start Date, Status\n" + "Optional Fields\n" + "End Date")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TellerApiResourceSwagger.PostTellersRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TellerApiResourceSwagger.PostTellersRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TellerApiResourceSwagger.PostTellersResponse.class)})
     public String createTeller(@ApiParam(hidden = true) final String tellerData) {
         final CommandWrapper request = new CommandWrapperBuilder().createTeller().withJson(tellerData).build();
@@ -123,7 +132,10 @@ public class TellerApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Update teller", notes = "")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TellerApiResourceSwagger.PutTellersRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TellerApiResourceSwagger.PutTellersRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TellerApiResourceSwagger.PutTellersResponse.class)})
     public String updateTeller(@PathParam("tellerId") @ApiParam(value = "tellerId") final Long tellerId, @ApiParam(hidden = true) final String tellerData) {
         final CommandWrapper request = new CommandWrapperBuilder().updateTeller(tellerId).withJson(tellerData).build();
@@ -150,6 +162,9 @@ public class TellerApiResource {
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "List Cashiers", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TellerApiResourceSwagger.GetTellersTellerIdCashiersResponse.class)})
     public String getCashierData(@PathParam("tellerId") @ApiParam(value = "tellerId") final Long tellerId, @QueryParam("fromdate") @ApiParam(value = "fromdate") final String fromDateStr,
             @QueryParam("todate") @ApiParam(value = "todate") final String toDateStr) {
@@ -176,6 +191,9 @@ public class TellerApiResource {
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Retrieve a cashier", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TellerApiResourceSwagger.GetTellersTellerIdCashiersCashierIdResponse.class)})
     public String findCashierData(@PathParam("tellerId") @ApiParam(value = "tellerId") final Long tellerId, @PathParam("cashierId") @ApiParam(value = "cashierId") final Long cashierId) {
         final CashierData cashier = this.readPlatformService.findCashier(cashierId);
@@ -188,6 +206,9 @@ public class TellerApiResource {
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Find Cashiers", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TellerApiResourceSwagger.GetTellersTellerIdCashiersTemplateResponse.class)})
     public String getCashierTemplate(@PathParam("tellerId") @ApiParam(value = "tellerId") final Long tellerId) {
 
@@ -204,7 +225,10 @@ public class TellerApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Create Cashiers", notes = "Mandatory Fields: \n" + "Cashier/staff, Fromm Date, To Date, Full Day or From time and To time\n" + "\n\n\n" + "Optional Fields: \n" + "Description/Notes")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TellerApiResourceSwagger.PostTellersTellerIdCashiersRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TellerApiResourceSwagger.PostTellersTellerIdCashiersRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TellerApiResourceSwagger.PostTellersTellerIdCashiersResponse.class)})
     public String createCashier(@PathParam("tellerId") @ApiParam(value = "tellerId") final Long tellerId, @ApiParam(hidden = true) final String cashierData) {
         final CommandWrapper request = new CommandWrapperBuilder().allocateTeller(tellerId).withJson(cashierData).build();
@@ -219,7 +243,10 @@ public class TellerApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Update Cashier", notes = "")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TellerApiResourceSwagger.PutTellersTellerIdCashiersCashierIdRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TellerApiResourceSwagger.PutTellersTellerIdCashiersCashierIdRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TellerApiResourceSwagger.PutTellersTellerIdCashiersCashierIdResponse.class)})
     public String updateCashier(@PathParam("tellerId") @ApiParam(value = "tellerId") final Long tellerId, @PathParam("cashierId") @ApiParam(value = "cashierId") final Long cashierId,
             @ApiParam(hidden = true) final String cashierDate) {
@@ -236,6 +263,9 @@ public class TellerApiResource {
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Delete Cashier", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TellerApiResourceSwagger.DeleteTellersTellerIdCashiersCashierIdResponse.class)})
     public String deleteCashier(@PathParam("tellerId") @ApiParam(value = "tellerId") final Long tellerId, @PathParam("cashierId") @ApiParam(value = "cashierId") final Long cashierId) {
         final CommandWrapper request = new CommandWrapperBuilder().deleteAllocationTeller(tellerId, cashierId).build();
@@ -250,7 +280,10 @@ public class TellerApiResource {
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Allocate Cash To Cashier", notes = "Mandatory Fields: \n" + "Date, Amount, Currency, Notes/Comments")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TellerApiResourceSwagger.PostTellersTellerIdCashiersCashierIdAllocateRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TellerApiResourceSwagger.PostTellersTellerIdCashiersCashierIdAllocateRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TellerApiResourceSwagger.PostTellersTellerIdCashiersCashierIdAllocateResponse.class)})
     public String allocateCashToCashier(@PathParam("tellerId") @ApiParam(value = "tellerId") final Long tellerId, @PathParam("cashierId") @ApiParam(value = "cashierId") final Long cashierId,
             @ApiParam(hidden = true) final String cashierTxnData) {
@@ -268,7 +301,10 @@ public class TellerApiResource {
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Settle Cash From Cashier", notes = "Mandatory Fields\n" + "Date, Amount, Currency, Notes/Comments")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TellerApiResourceSwagger.PostTellersTellerIdCashiersCashierIdSettleRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = TellerApiResourceSwagger.PostTellersTellerIdCashiersCashierIdSettleRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TellerApiResourceSwagger.PostTellersTellerIdCashiersCashierIdSettleResponse.class)})
     public String settleCashFromCashier(@PathParam("tellerId") @ApiParam(value = "tellerId") final Long tellerId, @PathParam("cashierId") @ApiParam(value = "cashierId") final Long cashierId,
             @ApiParam(hidden = true) final String cashierTxnData) {
@@ -286,6 +322,9 @@ public class TellerApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Retrieve Cashier Transaction", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TellerApiResourceSwagger.GetTellersTellerIdCashiersCashiersIdTransactionsResponse.class, responseContainer = "List")})
     public String getTransactionsForCashier(@PathParam("tellerId") @ApiParam(value = "tellerId") final Long tellerId, @PathParam("cashierId") @ApiParam(value = "cashierId") final Long cashierId,
             @QueryParam("currencyCode") @ApiParam(value = "currencyCode") final String currencyCode, @QueryParam("offset") @ApiParam(value = "offset") final Integer offset, @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
@@ -300,14 +339,20 @@ public class TellerApiResource {
                 fromDate, toDate, currencyCode, searchParameters);
 
         return this.jsonSerializer.serialize(cashierTxns);
+
     }
+
 
     @GET
     @Path("{tellerId}/cashiers/{cashierId}/summaryandtransactions")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Transactions Wtih Summary For Cashier", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TellerApiResourceSwagger.GetTellersTellerIdCashiersCashiersIdSummaryAndTransactionsResponse.class)})
+
     public String getTransactionsWtihSummaryForCashier(@PathParam("tellerId") @ApiParam(value = "tellerId") final Long tellerId,
             @PathParam("cashierId") @ApiParam(value = "cashierId") final Long cashierId, @QueryParam("currencyCode") @ApiParam(value = "currencyCode") final String currencyCode,
             @QueryParam("offset") @ApiParam(value = "offset") final Integer offset, @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
@@ -331,6 +376,9 @@ public class TellerApiResource {
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Retrieve Cashier Transaction Template", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = TellerApiResourceSwagger.GetTellersTellerIdCashiersCashiersIdTransactionsTemplateResponse.class)})
     public String getCashierTxnTemplate(@PathParam("tellerId") @ApiParam(value = "tellerId") final Long tellerId, @PathParam("cashierId") @ApiParam(value = "cashierId") final Long cashierId) {
 

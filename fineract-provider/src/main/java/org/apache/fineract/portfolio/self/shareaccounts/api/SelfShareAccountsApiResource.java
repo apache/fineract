@@ -111,7 +111,10 @@ public class SelfShareAccountsApiResource {
             "Field Defaults\n" + "\n"+
             "Allowed Value Lists\n" + "\n"+ "\n"+ "Arguments\n"+ "\n"+ "clientId:Integer mandatory\n"+ "productId:Integer optionalIf entered, productId, productName and selectedProduct fields are returned.\n"+ "Example Requests:\n" + "\n" + "self/shareaccounts/template?clientId=14\n" + "\n" +
             "self/shareaccounts/template?clientId=14&productId=3\n")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = SelfShareAccountsApiResourceSwagger.GetShareAccountsClientIdProductIdResponse.class)})
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
+	@ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = SelfShareAccountsApiResourceSwagger.GetShareAccountsClientIdProductIdResponse.class)})
 	public String template(@QueryParam("clientId") @ApiParam("clientId") final Long clientId, @QueryParam("productId") @ApiParam("productId") final Long productId,
 			@Context final UriInfo uriInfo) {
 		

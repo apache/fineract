@@ -84,6 +84,9 @@ public class InterestRateChartsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve Chart Details Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for creating a chart. The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "interestratecharts/template")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InterestRateChartsApiResourceSwagger.GetInterestRateChartsTemplateResponse.class)})
     public String template(@Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(InterestRateChartApiConstants.INTERESTRATE_CHART_RESOURCE_NAME);
@@ -98,6 +101,9 @@ public class InterestRateChartsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve all Charts", httpMethod = "GET", notes = "Retrieve list of charts associated with a term deposit product(FD or RD).\n" + "Example Requests:\n" + "\n" + "interestratecharts?productId=1")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = InterestRateChartsApiResourceSwagger.GetInterestRateChartsResponse.class)})
     public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("productId") @ApiParam(value = "productId") final Long productId) {
 
@@ -114,6 +120,9 @@ public class InterestRateChartsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Chart", httpMethod = "GET", notes = "It retrieves the Interest Rate Chart\n" + "Example Requests:\n" + "\n" + "interestratecharts/1")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InterestRateChartsApiResourceSwagger.GetInterestRateChartsResponse.class)})
     public String retrieveOne(@PathParam("chartId") @ApiParam(value = "chartId") final Long chartId, @Context final UriInfo uriInfo) {
 
@@ -139,7 +148,10 @@ public class InterestRateChartsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create a Chart", httpMethod = "POST", notes = "Creates a new chart which can be attached to a term deposit products (FD or RD).")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = InterestRateChartsApiResourceSwagger.PostInterestRateChartsRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = InterestRateChartsApiResourceSwagger.PostInterestRateChartsRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InterestRateChartsApiResourceSwagger.PostInterestRateChartsResponse.class)})
     public String create(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -155,7 +167,10 @@ public class InterestRateChartsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Chart", notes = "It updates the Chart.", httpMethod = "PUT")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = InterestRateChartsApiResourceSwagger.PutInterestRateChartsChartIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = InterestRateChartsApiResourceSwagger.PutInterestRateChartsChartIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InterestRateChartsApiResourceSwagger.PutInterestRateChartsChartIdResponse.class)})
     public String update(@PathParam("chartId") @ApiParam(value = "chartId") final Long chartId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -172,6 +187,9 @@ public class InterestRateChartsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Chart", notes = "It deletes the chart", httpMethod = "DELETE")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InterestRateChartsApiResourceSwagger.DeleteInterestRateChartsChartIdResponse.class)})
     public String delete(@PathParam("chartId") @ApiParam(value = "chartId") final Long chartId) {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteInterestRateChart(chartId).build();

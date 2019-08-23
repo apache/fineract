@@ -123,6 +123,9 @@ public class ClientsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve Client Details Template", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Request:\n" + "\n" + "clients/template")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientsApiResourceSwagger.GetClientsTemplateResponse.class)})
     public String retrieveTemplate(@Context final UriInfo uriInfo, @ApiParam(value = "officeId") @QueryParam("officeId") final Long officeId, @QueryParam("commandParam") @ApiParam(value = "commandParam") final String commandParam,
             @DefaultValue("false")  @QueryParam("staffInSelectedOfficeOnly") @ApiParam(value = "staffInSelectedOfficeOnly")final boolean staffInSelectedOfficeOnly) {
@@ -151,6 +154,9 @@ public class ClientsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Clients", notes = "The list capability of clients can support pagination and sorting.\n\n" + "Example Requests:\n" + "\n" + "clients\n" + "\n" + "clients?fields=displayName,officeName,timeline\n" + "\n" + "clients?offset=10&limit=50\n" + "\n" + "clients?orderBy=displayName&sortOrder=DESC" )
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientsApiResourceSwagger.GetClientsResponse.class)})
     public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") @ApiParam(value = "sqlSearch") final String sqlSearch,
             @QueryParam("officeId") @ApiParam(value = "officeId") final Long officeId, @QueryParam("externalId") @ApiParam(value = "externalId") final String externalId,
@@ -188,6 +194,9 @@ public class ClientsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Client", notes = "Example Requests:\n" + "\n" + "clients/1\n" +"\n" + "\n" + "clients/1?template=true\n" + "\n" + "\n" + "clients/1?fields=id,displayName,officeName" )
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientsApiResourceSwagger.GetClientsClientIdResponse.class)})
     public String retrieveOne(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId, @Context final UriInfo uriInfo,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @ApiParam(value = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
@@ -214,7 +223,10 @@ public class ClientsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create a Client", httpMethod = "POST", notes = "Note:\n\n" + "1. You can enter either:firstname/middlename/lastname - for a person (middlename is optional) OR fullname - for a business or organisation (or person known by one name).\n" + "\n" + "2.If address is enable(enable-address=true), then additional field called address has to be passed.\n\n" + "Mandatory Fields: firstname and lastname OR fullname, officeId, active=true and activationDate OR active=false, if(address enabled) address\n\n" + "Optional Fields: groupId, externalId, accountNo, staffId, mobileNo, savingsProductId, genderId, clientTypeId, clientClassificationId")
-    @ApiImplicitParams({@ApiImplicitParam(paramType = "body", dataType = "ClientData", required = true, type = "body", dataTypeClass = ClientsApiResourceSwagger.PostClientsRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(paramType = "body", dataType = "ClientData", required = true, type = "body", dataTypeClass = ClientsApiResourceSwagger.PostClientsRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientsApiResourceSwagger.PostClientsResponse.class) })
     public String create(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -234,7 +246,10 @@ public class ClientsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Client", notes = "Note: You can update any of the basic attributes of a client (but not its associations) using this API.\n" + "\n" + "Changing the relationship between a client and its office is not supported through this API. An API specific to handling transfers of clients between offices is available for the same.\n" + "\n" + "The relationship between a client and a group must be removed through the Groups API." )
-    @ApiImplicitParams({@ApiImplicitParam( paramType = "body", dataType = "ClientData", required = true, type = "body", dataTypeClass = ClientsApiResourceSwagger.PutClientsClientIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam( paramType = "body", dataType = "ClientData", required = true, type = "body", dataTypeClass = ClientsApiResourceSwagger.PutClientsClientIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = ClientsApiResourceSwagger.PutClientsClientIdResponse.class) })
     public String update(@ApiParam(value = "clientId") @PathParam("clientId") final Long clientId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -253,7 +268,10 @@ public class ClientsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Client", notes = "If a client is in Pending state, you are allowed to Delete it. The delete is a 'hard delete' and cannot be recovered from. Once clients become active or have loans or savings associated with them, you cannot delete the client but you may Close the client if they have left the program.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientsApiResourceSwagger.DeleteClientsClientIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientsApiResourceSwagger.DeleteClientsClientIdRequest.class)})
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = ClientsApiResourceSwagger.DeleteClientsClientIdResponse.class) })
     public String delete(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId) {
 
@@ -271,7 +289,10 @@ public class ClientsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Activate a Client | Close a Client | Reject a Client | Withdraw a Client | Reactivate a Client | UndoReject a Client | UndoWithdraw a Client | Assign a Staff | Unassign a Staff | Update Default Savings Account | Propose a Client Transfer | Withdraw a Client Transfer | Reject a Client Transfer | Accept a Client Transfer | Propose and Accept a Client Transfer", notes = "Activate a Client:\n\n" + "Clients can be created in a Pending state. This API exists to enable client activation (for when a client becomes an approved member of the financial Institution).\n" + "\n" + "If the client happens to be already active this API will result in an error.\n\n" + "Close a Client:\n\n" + "Clients can be closed if they do not have any non-closed loans/savingsAccount. This API exists to close a client .\n" + "\n" + "If the client have any active loans/savingsAccount this API will result in an error.\n\n" + "Reject a Client:\n\n" + "Clients can be rejected when client is in pending for activation status.\n" + "\n" + "If the client is any other status, this API throws an error.\n\n" + "Mandatory Fields: rejectionDate, rejectionReasonId\n\n" + "Withdraw a Client:\n\n" + "Client applications can be withdrawn when client is in a pending for activation status.\n" + "\n" + "If the client is any other status, this API throws an error.\n\n" + "Mandatory Fields: withdrawalDate, withdrawalReasonId\n\n" + "Reactivate a Client: Clients can be reactivated after they have been closed.\n" + "\n" + "Trying to reactivate a client in any other state throws an error.\n\n" + "Mandatory Fields: reactivationDate\n\n" + "UndoReject a Client:\n\n" + "Clients can be reactivated after they have been rejected.\n" + "\n" + "Trying to reactivate a client in any other state throws an error.\n\n" + "Mandatory Fields: reopenedDate" + "UndoWithdraw a Client:\n\n" + "Clients can be reactivated after they have been withdrawn.\n" + "\n" + "Trying to reactivate a client in any other state throws an error.\n\n" + "Mandatory Fields: reopenedDate\n\n" + "Assign a Staff:\n\n" + "Allows you to assign a Staff for existed Client.\n" + "\n" + "The selected Staff should belong to the same office (or an officer higher up in the hierarchy) as the Client he manages.\n\n" + "Unassign a Staff:\n\n" + "Allows you to unassign the Staff assigned to a Client.\n\n" + "Update Default Savings Account:\n\n" + "Allows you to modify or assign a default savings account for an existing Client.\n" + "\n" + "The selected savings account should be one among the existing savings account for a particular customer.\n\n" + "Propose a Client Transfer:\n\n" + "Allows you to propose the transfer of a Client to a different Office.\n\n" + "Withdraw a Client Transfer:\n\n" + "Allows you to withdraw the proposed transfer of a Client to a different Office.\n" + "\n" + "Withdrawal can happen only if the destination Branch (to which the transfer was proposed) has not already accepted the transfer proposal\n\n" + "Reject a Client Transfer:\n\n" + "Allows the Destination Branch to reject the proposed Client Transfer.\n\n" + "Accept a Client Transfer:\n\n" + "Allows the Destination Branch to accept the proposed Client Transfer.\n" + "\n" + "The destination branch may also choose to link this client to a group (in which case, any existing active JLG loan of the client is rescheduled to match the meeting frequency of the group) and loan Officer at the time of accepting the transfer\n\n" + "Propose and Accept a Client Transfer:\n\n" + "Abstraction over the Propose and Accept Client Transfer API's which enable a user with Data Scope over both the Target and Destination Branches to directly transfer a Client to the destination Office.\n\n" + "Showing request/response for 'Reject a Client Transfer'")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientsApiResourceSwagger.PostClientsClientIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = ClientsApiResourceSwagger.PostClientsClientIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK",response = ClientsApiResourceSwagger.PostClientsClientIdResponse.class)})
     public String activate(@PathParam("clientId") @ApiParam(value = "clientId") final Long clientId, @QueryParam("command") @ApiParam(value = "command") final String commandParam,
             @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
@@ -345,6 +366,9 @@ public class ClientsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve client accounts overview", notes = "An example of how a loan portfolio summary can be provided. This is requested in a specific use case of the community application.\n" + "It is quite reasonable to add resources like this to simplify User Interface development.\n" + "\n" + "Example Requests:\n " + "\n" + "clients/1/accounts\n"+ "\n" + "clients/1/accounts?fields=loanAccounts,savingsAccounts" )
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK", response = ClientsApiResourceSwagger.GetClientsClientIdAccountsResponse.class),
             @ApiResponse(code = 400, message = "Bad Request")

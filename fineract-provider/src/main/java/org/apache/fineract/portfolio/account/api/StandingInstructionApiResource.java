@@ -86,6 +86,9 @@ public class StandingInstructionApiResource {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation(value = "Retrieve Standing Instruction Template", httpMethod = "GET", notes = "This is a convenience resource. " + "It can be useful when building maintenance user interface screens for client applications. " + "The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Requests:\n" + "\n" + "standinginstructions/template?fromAccountType=2&fromOfficeId=1\n" + "\n" + "standinginstructions/template?fromAccountType=2&fromOfficeId=1&fromClientId=1&transferType=1\n" + "\n" + "standinginstructions/template?fromClientId=1&fromAccountType=2&fromAccountId=1&transferType=1")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses(@ApiResponse(code = 200, message = "OK", response = StandingInstructionApiResourceSwagger.GetStandingInstructionsTemplateResponse.class))
     public String template(@QueryParam("fromOfficeId") @ApiParam(value = "fromOfficeId") final Long fromOfficeId, @QueryParam("fromClientId") @ApiParam(value = "fromClientId") final Long fromClientId,
                            @QueryParam("fromAccountId") @ApiParam(value = "fromAccountId") final Long fromAccountId, @QueryParam("fromAccountType") @ApiParam(value = "fromAccountType") final Integer fromAccountType,
@@ -107,7 +110,10 @@ public class StandingInstructionApiResource {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation(value = "Create new Standing Instruction", httpMethod = "POST", notes = "Ability to create new instruction for transfer of monetary funds from one account to another")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = StandingInstructionApiResourceSwagger.PostStandingInstructionsRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = StandingInstructionApiResourceSwagger.PostStandingInstructionsRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = StandingInstructionApiResourceSwagger.PostStandingInstructionsResponse.class)})
     public String create(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -124,7 +130,10 @@ public class StandingInstructionApiResource {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation(value = "Update Standing Instruction | Delete Standing Instruction", httpMethod = "PUT", notes = "Ability to modify existing instruction for transfer of monetary funds from one account to another.\n" + "\n" + "PUT https://DomainName/api/v1/standinginstructions/1?command=update\n" + "\n\n" + "Ability to modify existing instruction for transfer of monetary funds from one account to another.\n" + "\n" + "PUT https://DomainName/api/v1/standinginstructions/1?command=delete")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = false, paramType = "body", dataType = "body", format = "body", dataTypeClass = StandingInstructionApiResourceSwagger.PutStandingInstructionsStandingInstructionIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = false, paramType = "body", dataType = "body", format = "body", dataTypeClass = StandingInstructionApiResourceSwagger.PutStandingInstructionsStandingInstructionIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = StandingInstructionApiResourceSwagger.PutStandingInstructionsStandingInstructionIdResponse.class)})
     public String update(@PathParam("standingInstructionId") @ApiParam(value = "standingInstructionId") final Long standingInstructionId, @ApiParam(hidden = true) final String apiRequestBodyAsJson,
                          @QueryParam("command") @ApiParam(value = "command") final String commandParam) {
@@ -155,6 +164,9 @@ public class StandingInstructionApiResource {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation(value = "List Standing Instructions", httpMethod = "GET", notes = "Example Requests:\n" + "\n" + "standinginstructions")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = StandingInstructionApiResourceSwagger.GetStandingInstructionsResponse.class)})
     public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") @ApiParam(value = "sqlSearch") final String sqlSearch,
                               @QueryParam("externalId") @ApiParam(value = "externalId") final String externalId, @QueryParam("offset") @ApiParam(value = "offset") final Integer offset,
@@ -184,6 +196,9 @@ public class StandingInstructionApiResource {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation(value = "Retrieve Standing Instruction", httpMethod = "GET", notes = "Example Requests :\n" + "\n" + "standinginstructions/1")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = StandingInstructionApiResourceSwagger.GetStandingInstructionsStandingInstructionIdResponse.class)})
     public String retrieveOne(@PathParam("standingInstructionId") @ApiParam(value = "standingInstructionId") final Long standingInstructionId, @Context final UriInfo uriInfo,
                               @QueryParam("sqlSearch") @ApiParam(value = "sqlSearch") final String sqlSearch, @QueryParam("externalId") @ApiParam(value = "externalId") final String externalId,

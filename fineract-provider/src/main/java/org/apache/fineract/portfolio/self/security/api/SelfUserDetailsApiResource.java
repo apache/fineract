@@ -52,6 +52,9 @@ public class SelfUserDetailsApiResource {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Fetch authenticated user details", httpMethod = "GET", notes = "Checks the Authentication and returns the set roles and permissions allowed\n\n" + "For more info visit this link - https://demo.openmf.org/api-docs/apiLive.htm#selfoauth")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfUserDetailsApiResourceSwagger.GetSelfUserDetailsResponse.class)})
 	public String fetchAuthenticatedUserData(
 			@QueryParam("access_token") @ApiParam(value = "äccess_token") final String accessToken) {

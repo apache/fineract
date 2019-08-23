@@ -129,7 +129,10 @@ public class FixedDepositProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create a Fixed Deposit Product", httpMethod = "POST", notes = "Creates a Fixed Deposit Product\n\n" + "Mandatory Fields: name, shortName, description, currencyCode, digitsAfterDecimal,inMultiplesOf, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minDepositTerm, minDepositTermTypeId, accountingRule\n\n" + "Optional Fields: lockinPeriodFrequency, lockinPeriodFrequencyType, maxDepositTerm, maxDepositTermTypeId, inMultiplesOfDepositTerm, inMultiplesOfDepositTermTypeId, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, charges, charts, , withHoldTax, taxGroupId\n\n" + "\n" + "Mandatory Fields for Cash based accounting (accountingRule = 2): savingsReferenceAccountId, savingsControlAccountId, interestOnSavingsAccountId, incomeFromFeeAccountId, transfersInSuspenseAccountId, incomeFromPenaltyAccountId")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FixedDepositProductsApiResourceSwagger.PostFixedDepositProductsRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FixedDepositProductsApiResourceSwagger.PostFixedDepositProductsRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FixedDepositProductsApiResourceSwagger.PostFixedDepositProductsResponse.class)})
     public String create(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -146,7 +149,10 @@ public class FixedDepositProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Fixed Deposit Product", httpMethod = "PUT", notes = "Updates a Fixed Deposit Product")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FixedDepositProductsApiResourceSwagger.PutFixedDepositProductsProductIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FixedDepositProductsApiResourceSwagger.PutFixedDepositProductsProductIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FixedDepositProductsApiResourceSwagger.PutFixedDepositProductsProductIdResponse.class)})
     public String update(@PathParam("productId") @ApiParam(value = "productId") final Long productId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -163,6 +169,9 @@ public class FixedDepositProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Fixed Deposit Products", httpMethod = "GET", notes = "Lists Fixed Deposit Products\n\n" + "Example Requests:\n" + "\n" +"fixeddepositproducts\n" + "\n" + "\n" + "fixeddepositproducts?fields=name")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FixedDepositProductsApiResourceSwagger.GetFixedDepositProductsResponse.class, responseContainer = "List")})
     public String retrieveAll(@Context final UriInfo uriInfo) {
 
@@ -181,6 +190,9 @@ public class FixedDepositProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Fixed Deposit Product", httpMethod = "GET", notes = "Retrieves a Fixed Deposit Product\n\n" + "Example Requests:\n" + "\n" + "fixeddepositproducts/1\n" + "\n" + "\n" + "fixeddepositproducts/1?template=true\n" + "\n" + "\n" + "fixeddepositproducts/1?fields=name,description")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FixedDepositProductsApiResourceSwagger.GetFixedDepositProductsProductIdResponse.class)})
     public String retrieveOne(@PathParam("productId") @ApiParam(value = "productId") final Long productId, @Context final UriInfo uriInfo) {
 
@@ -323,6 +335,9 @@ public class FixedDepositProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Fixed Deposit Product", httpMethod = "DELETE", notes = "Deletes a Fixed Deposit Product")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FixedDepositProductsApiResourceSwagger.DeleteFixedDepositProductsProductIdResponse.class)})
     public String delete(@PathParam("productId") @ApiParam(value = "productId") final Long productId) {
 

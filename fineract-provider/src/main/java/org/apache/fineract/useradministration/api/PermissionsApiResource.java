@@ -82,6 +82,9 @@ public class PermissionsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Application Permissions", notes = "ARGUMENTS\n" + "makerCheckerableoptional, Values are true, false. Default is false.\n" + "If makerCheckerable=false or not supplied then a list of application permissions is returned. The \"selected\" attribute is always true in this case.\n" + "\n" + "If makerCheckerable=true then the \"selected\" attribute shows whether the permission is enabled for Maker Check functionality.\n" + "\n" + "Note: Each Apache Fineract transaction is associated with a permission.\n" + "\n" + "Example Requests:\n" + "\n" + "permissions\n" + "\n" + "\n" + "permissions?makerCheckerable=true\n" + "\n" + "\n" + "permissions?fields=grouping,code")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = PermissionsApiResourceSwagger.GetPermissionsResponse.class, responseContainer = "List")})
     public String retrieveAllPermissions(@Context final UriInfo uriInfo) {
 
@@ -103,7 +106,10 @@ public class PermissionsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Enable/Disable Permissions for Maker Checker", notes = "")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = PermissionsApiResourceSwagger.PutPermissionsRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = PermissionsApiResourceSwagger.PutPermissionsRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = CommandProcessingResult.class)})
     public String updatePermissionsDetails(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 

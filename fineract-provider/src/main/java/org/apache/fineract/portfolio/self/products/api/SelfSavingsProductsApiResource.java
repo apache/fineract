@@ -29,6 +29,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.*;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.api.SavingsProductsApiResource;
 import org.apache.fineract.portfolio.self.client.service.AppuserClientMapperReadService;
@@ -39,6 +40,10 @@ import org.springframework.stereotype.Component;
 @Path("/self/savingsproducts")
 @Component
 @Scope("singleton")
+@Api(tags = {"Self Savings Products"})
+@SwaggerDefinition(tags = {
+		@Tag(name = "Self Savings Products", description = "")
+})
 public class SelfSavingsProductsApiResource {
 
 	private final SavingsProductsApiResource savingsProductsApiResource;

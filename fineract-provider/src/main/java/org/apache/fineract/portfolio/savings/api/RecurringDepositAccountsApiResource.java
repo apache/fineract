@@ -125,6 +125,9 @@ public class RecurringDepositAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve recurring Deposit Account Template", httpMethod = "GET", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for recurring deposit applications. The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Requests:\n" + "\n" + "recurringdepositaccounts/template?clientId=1\n" + "\n" + "\n" + "recurringdepositaccounts/template?clientId=1&productId=1")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = RecurringDepositAccountsApiResourceSwagger.GetRecurringDepositAccountsTemplateResponse.class)})
     public String template(@QueryParam("clientId") @ApiParam(value = "clientId") final Long clientId, @QueryParam("groupId") @ApiParam(value = "groupId") final Long groupId,
                            @QueryParam("productId") @ApiParam(value = "productId") final Long productId,
@@ -145,6 +148,9 @@ public class RecurringDepositAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Recurring deposit applications/accounts", httpMethod = "GET", notes = "Lists Recurring deposit applications/accounts\n\n" + "Example Requests:\n" + "\n" + "recurringdepositaccounts\n" + "\n" + "\n" + "recurringdepositaccounts?fields=name")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = RecurringDepositAccountsApiResourceSwagger.GetRecurringDepositAccountsResponse.class, responseContainer = "List")})
     public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("paged") @ApiParam(value = "paged") final Boolean paged,
             @QueryParam("offset") @ApiParam(value = "offset") final Integer offset, @QueryParam("limit") @ApiParam(value = "limit") final Integer limit,
@@ -172,7 +178,10 @@ public class RecurringDepositAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Submit new recurring deposit application", httpMethod = "POST", notes = "Submits new recurring deposit application\n\n" + "Mandatory Fields: clientId or groupId, productId, submittedOnDate, depositAmount, depositPeriod, depositPeriodFrequencyId\n\n" + "Optional Fields: accountNo, externalId, fieldOfficerId,linkAccountId(if provided initial deposit amount will be collected from this account),transferInterestToSavings(By enabling this flag all interest postings will be transferred to linked saving account )\n\n" + "Inherited from Product (if not provided): interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, lockinPeriodFrequency, lockinPeriodFrequencyType, preClosurePenalApplicable, preClosurePenalInterest, preClosurePenalInterestOnTypeId, charts, withHoldTax")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = RecurringDepositAccountsApiResourceSwagger.PostRecurringDepositAccountsRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = RecurringDepositAccountsApiResourceSwagger.PostRecurringDepositAccountsRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = RecurringDepositAccountsApiResourceSwagger.PostRecurringDepositAccountsResponse.class)})
     public String submitApplication(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -189,6 +198,9 @@ public class RecurringDepositAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a recurring deposit application/account", httpMethod = "GET", notes = "Retrieves a recurring deposit application/account\n\n" + "Example Requests :\n" + "\n" + "recurringdepositaccounts/1\n" + "\n" + "\n" + "recurringdepositaccounts/1?associations=all")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = RecurringDepositAccountsApiResourceSwagger.GetRecurringDepositAccountsAccountIdResponse.class)})
     public String retrieveOne(@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") @ApiParam(value = "staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
@@ -262,7 +274,10 @@ public class RecurringDepositAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Modify a recurring deposit application", httpMethod = "PUT", notes = "Recurring deposit application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = RecurringDepositAccountsApiResourceSwagger.PutRecurringDepositAccountsAccountIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = RecurringDepositAccountsApiResourceSwagger.PutRecurringDepositAccountsAccountIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = RecurringDepositAccountsApiResourceSwagger.PutRecurringDepositAccountsAccountIdResponse.class)})
     public String update(@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -279,7 +294,10 @@ public class RecurringDepositAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Approve recurring deposit application | Undo approval recurring deposit application | Reject recurring deposit application | Withdraw recurring deposit application | Activate a recurring deposit account | Update the recommended deposit amount for a recurring deposit account | Close a recurring deposit account | Premature Close a recurring deposit account | Calculate Premature amount on Recurring deposit account | Calculate Interest on recurring Deposit Account | Post Interest on recurring Deposit Account", httpMethod = "POST", notes = "Approve recurring deposit application:\n\n" + "Approves recurring deposit application so long as its in 'Submitted and pending approval' state.\n\n" + "Undo approval recurring deposit application:\n\n" + "Will move 'approved' recurring deposit application back to 'Submitted and pending approval' state.\n\n" + "Reject recurring deposit application\n\n" +  "Rejects recurring deposit application so long as its in 'Submitted and pending approval' state.\n\n" + "Withdraw recurring deposit application:\n\n" + "Used when an applicant withdraws from the recurring deposit application. It must be in 'Submitted and pending approval' state.\n\n" + "Activate a recurring deposit account:\n\n" + "Results in an approved recurring deposit application being converted into an 'active' recurring deposit account.\n\n" + "Update the recommended deposit amount for a recurring deposit account:\n\n" + "Updates the recommended deposit amount for a RD account as on the effective date.\n\n" + "Close a recurring deposit account\n\n" + "Results in a Matured recurring deposit account being converted into a 'closed' recurring deposit account.\n" + "\n" + "On account close allowed actions are." + "Premature Close a recurring deposit account:\n\n" + "Results in an Active recurring deposit account being converted into a 'Premature Closed' recurring deposit account with options to withdraw prematured amount. (premature amount is calculated using interest rate chart applicable along with penal interest if any.)\n" + "\n" + "On account premature closure allowed actions are.\n\n" + "Calculate Premature amount on Recurring deposit account:\n\n"  + "Calculate premature amount on recurring deposit till premature close date. Premature amount is calculated based on interest chart and penal interest applicable if any.\n\n" + "Calculate Interest on recurring Deposit Account:\n\n" + "Calculates interest earned on a recurring deposit account based on todays date. It does not attempt to post or credit the interest on the account. That is responsibility of the Post Interest API that will likely be called by overnight process.\n\n" +  "Post Interest on recurring Deposit Account:\n\n" + "Calculates and Posts interest earned on a recurring deposit account based on todays date and whether an interest posting or crediting event is due.\n\n" + "Showing request/response for 'Post Interest on recurring Deposit Account'")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = RecurringDepositAccountsApiResourceSwagger.PostRecurringDepositAccountsAccountIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = RecurringDepositAccountsApiResourceSwagger.PostRecurringDepositAccountsAccountIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = RecurringDepositAccountsApiResourceSwagger.PostRecurringDepositAccountsAccountIdResponse.class)})
     public String handleCommands(@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId, @QueryParam("command") @ApiParam(value = "command") final String commandParam,
             @Context final UriInfo uriInfo, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
@@ -349,6 +367,9 @@ public class RecurringDepositAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a recurring deposit application", httpMethod = "DELETE", notes = "At present we support hard delete of recurring deposit application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the recurring deposit account.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = RecurringDepositAccountsApiResourceSwagger.DeleteRecurringDepositAccountsResponse.class)})
     public String delete(@PathParam("accountId") @ApiParam(value = "accountId") final Long accountId) {
 

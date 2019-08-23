@@ -76,6 +76,9 @@ public class PaymentTypeApiResource {
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Retrieve all Payment Types", httpMethod = "GET", notes = "Retrieve list of payment types")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = PaymentTypeApiResourceSwagger.GetPaymentTypesResponse.class)})
     public String getAllPaymentTypes(@Context final UriInfo uriInfo) {
         this.securityContext.authenticatedUser().validateHasReadPermission(PaymentTypeApiResourceConstants.resourceNameForPermissions);
@@ -89,6 +92,9 @@ public class PaymentTypeApiResource {
     @Consumes({ MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Retrieve a Payment Type", httpMethod = "GET", notes = "Retrieves a payment type")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = PaymentTypeApiResourceSwagger.GetPaymentTypesPaymentTypeIdResponse.class)})
     public String retrieveOnePaymentType(@PathParam("paymentTypeId") @ApiParam(value = "paymentTypeId") final Long paymentTypeId, @Context final UriInfo uriInfo) {
         this.securityContext.authenticatedUser().validateHasReadPermission(PaymentTypeApiResourceConstants.resourceNameForPermissions);
@@ -102,7 +108,10 @@ public class PaymentTypeApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create a Payment Type", httpMethod = "POST", notes = "Creates a new Payment type\n\n" + "Mandatory Fields: name\n\n" + "Optional Fields: Description, isCashPayment,Position")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = PaymentTypeApiResourceSwagger.PostPaymentTypesRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = PaymentTypeApiResourceSwagger.PostPaymentTypesRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = PaymentTypeApiResourceSwagger.PostPaymentTypesResponse.class)})
     public String createPaymentType(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -118,7 +127,10 @@ public class PaymentTypeApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Payment Type", httpMethod = "PUT", notes = "Updates a Payment Type")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = PaymentTypeApiResourceSwagger.PutPaymentTypesPaymentTypeIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = PaymentTypeApiResourceSwagger.PutPaymentTypesPaymentTypeIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = PaymentTypeApiResourceSwagger.PutPaymentTypesPaymentTypeIdResponse.class)})
     public String updatePaymentType(@PathParam("paymentTypeId") @ApiParam(value = "paymentTypeId") final Long paymentTypeId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -135,6 +147,9 @@ public class PaymentTypeApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Payment Type", httpMethod = "DELETE", notes = "Deletes payment type")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = PaymentTypeApiResourceSwagger.DeletePaymentTypesPaymentTypeIdResponse.class)})
     public String deleteCode(@PathParam("paymentTypeId") @ApiParam(value = "paymentTypeId") final Long paymentTypeId) {
 

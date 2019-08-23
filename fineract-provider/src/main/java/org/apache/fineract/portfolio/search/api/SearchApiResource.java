@@ -81,6 +81,9 @@ public class SearchApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrive Adhoc Search query template", httpMethod = "GET", notes = "Mandatory Fields\n" + "\n" + "search?query=000000001\n")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = SearchApiResourceSwagger.GetSearchResponse.class)})
     public String retrieveAdHocSearchQueryTemplate(@Context final UriInfo uriInfo) {
 
@@ -94,6 +97,9 @@ public class SearchApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Search Resources", notes = "Example Requests:\n" + "\n" + "search?query=000000001\n" + "\n" + "\n" + "search?query=Petra&resource=clients,groups\n" + "\n" + "\n" + "search?query=Petra&resource=clients,groups&exactMatch=true")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = SearchApiResourceSwagger.GetSearchResponse.class)})
     public String searchData(@Context final UriInfo uriInfo, @QueryParam("query")  @ApiParam(value = "query")final String query,
             @QueryParam("resource")  @ApiParam(value = "resource") final String resource ,@DefaultValue("false") @QueryParam("exactMatch")  @ApiParam(value = "exactMatch")  Boolean exactMatch) {
@@ -115,7 +121,10 @@ public class SearchApiResource {
             "minOutStandingAmountPercentage and maxOutStandingAmountPercentage OR outStandingAmountPercentage, \n" +
             "includeOutstandingAmount, outstandingAmountCondition, \n" +
             "minOutstandingAmount and maxOutstandingAmount OR outstandingAmount" )
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SearchApiResourceSwagger.PostAdhocQuerySearchRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SearchApiResourceSwagger.PostAdhocQuerySearchRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = SearchApiResourceSwagger.PostAdhocQuerySearchResponse.class)})
     public String advancedSearch(@Context final UriInfo uriInfo, final String json) {
 

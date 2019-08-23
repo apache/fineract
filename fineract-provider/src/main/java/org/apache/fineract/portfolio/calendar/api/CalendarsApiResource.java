@@ -39,6 +39,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.*;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -64,6 +65,10 @@ import org.springframework.stereotype.Component;
 @Path("/{entityType}/{entityId}/calendars")
 @Component
 @Scope("singleton")
+@Api(tags = {"Calenders"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Calendars", description = "")
+})
 public class CalendarsApiResource {
 
     /**

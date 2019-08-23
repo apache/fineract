@@ -84,7 +84,10 @@ public class FloatingRatesApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Create a new Floating Rate", httpMethod = "POST", notes = "Creates a new Floating Rate\n" + "Mandatory Fields: name\n" + "Optional Fields: isBaseLendingRate, isActive, ratePeriods")
-	@ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FloatingRatesApiResourceSwagger.PostFloatingRatesRequest.class)})
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+			@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FloatingRatesApiResourceSwagger.PostFloatingRatesRequest.class)})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = FloatingRatesApiResourceSwagger.PostFloatingRatesResponse.class)})
 	public String createFloatingRate(@ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -99,6 +102,9 @@ public class FloatingRatesApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "List Floating Rates", httpMethod = "GET", notes = "Lists Floating Rates")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = FloatingRatesApiResourceSwagger.GetFloatingRatesResponse.class, responseContainer = "List")})
 	public String retrieveAll(@Context final UriInfo uriInfo) {
 		this.context.authenticatedUser().validateHasReadPermission(
@@ -116,6 +122,9 @@ public class FloatingRatesApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Retrieve Floating Rate", httpMethod = "GET", notes = "Retrieves Floating Rate")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = FloatingRatesApiResourceSwagger.GetFloatingRatesFloatingRateIdResponse.class)})
 	public String retrieveOne(
 			@PathParam("floatingRateId") @ApiParam(value = "floatingRateId") final Long floatingRateId,
@@ -135,7 +144,10 @@ public class FloatingRatesApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ApiOperation(value = "Update Floating Rate", httpMethod = "PUT", notes = "Updates new Floating Rate. Rate Periods in the past cannot be modified. All the future rateperiods would be replaced with the new ratePeriods data sent.")
-	@ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FloatingRatesApiResourceSwagger.PutFloatingRatesFloatingRateIdRequest.class)})
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+			@ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+			@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = FloatingRatesApiResourceSwagger.PutFloatingRatesFloatingRateIdRequest.class)})
 	@ApiResponses({@ApiResponse(code = 200, message = "OK", response = FloatingRatesApiResourceSwagger.PutFloatingRatesFloatingRateIdResponse.class)})
 	public String updateFloatingRate(
 			@PathParam("floatingRateId") @ApiParam(value = "floatingRateId") final Long floatingRateId,

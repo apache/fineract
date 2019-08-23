@@ -29,6 +29,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.*;
 import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
 import org.apache.fineract.portfolio.products.api.ProductsApiResource;
 import org.apache.fineract.portfolio.self.client.service.AppuserClientMapperReadService;
@@ -39,6 +40,10 @@ import org.springframework.stereotype.Component;
 @Path("/self/products/share")
 @Component
 @Scope("singleton")
+@Api(tags = {"Self Share Products"})
+@SwaggerDefinition(tags = {
+		@Tag(name = "Self Share Products", description = "")
+})
 public class SelfShareProductsApiResource {
 
 	private final ProductsApiResource productsApiResource;
