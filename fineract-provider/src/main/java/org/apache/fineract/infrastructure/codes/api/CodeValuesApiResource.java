@@ -93,6 +93,9 @@ public class CodeValuesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Code Values", notes = "Returns the list of Code Values for a given Code\n" + "\n" + "Example Requests:\n" + "\n" + "codes/1/codevalues")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "A List of Given response", response = CodeValuesApiResourceSwagger.GetCodeValuesDataResponse.class, responseContainer = "list")})
     public String retrieveAllCodeValues(@Context final UriInfo uriInfo, @PathParam("codeId") @ApiParam(value = "codeId") final Long codeId) {
 
@@ -109,6 +112,9 @@ public class CodeValuesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Code Value", notes = "Returns the details of a Code Value\n" + "\n" + "Example Requests:\n" + "\n" + "codes/1/codevalues/1")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = CodeValuesApiResourceSwagger.GetCodeValuesDataResponse.class)})
     public String retrieveCodeValue(@Context final UriInfo uriInfo, @PathParam("codeValueId") @ApiParam(value = "codeValueId") final Long codeValueId) {
 
@@ -124,7 +130,10 @@ public class CodeValuesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create a Code Value", notes = "")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CodeValuesApiResourceSwagger.PostCodeValuesDataRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CodeValuesApiResourceSwagger.PostCodeValuesDataRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = CodeValuesApiResourceSwagger.PostCodeValueDataResponse.class)})
     public String createCodeValue(@PathParam("codeId") @ApiParam(value = "codeId") final Long codeId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 
@@ -141,7 +150,10 @@ public class CodeValuesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Code Value", notes = "Updates the details of a code value.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CodeValuesApiResourceSwagger.PutCodeValuesDataRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = CodeValuesApiResourceSwagger.PutCodeValuesDataRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = CodeValuesApiResourceSwagger.PutCodeValueDataResponse.class)})
     public String updateCodeValue(@PathParam("codeId") @ApiParam(value = "codeId") final Long codeId, @PathParam("codeValueId") @ApiParam(value = "codeValueId") final Long codeValueId,
             @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
@@ -159,6 +171,9 @@ public class CodeValuesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Code Value", notes = "Deletes a code value")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = CodeValuesApiResourceSwagger.DeleteCodeValueDataResponse.class)})
     public String deleteCodeValue(@PathParam("codeId") @ApiParam(value = "codeId") final Long codeId, @PathParam("codeValueId") @ApiParam(value = "codeValueId") final Long codeValueId) {
 

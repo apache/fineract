@@ -81,6 +81,9 @@ public class SurveyApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve surveys", notes = "Retrieve surveys. This allows to retrieve the list of survey tables registered .")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = SurveyApiResourceSwagger.GetSurveyResponse.class, responseContainer = "List")})
     public String retrieveSurveys() {
 
@@ -95,6 +98,9 @@ public class SurveyApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve survey", notes = "Lists a registered survey table details and the Apache Fineract Core application table they are registered to.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = SurveyApiResourceSwagger.GetSurveyResponse.class)})
     public String retrieveSurvey(@PathParam("surveyName") @ApiParam(value = "surveyName") final String surveyName) {
 
@@ -111,7 +117,10 @@ public class SurveyApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create an entry in the survey table", notes = "Insert and entry in a survey table (full fill the survey)." + "\n" + "\n" + "Refer Link for sample Body:  [ https://demo.openmf.org/api-docs/apiLive.htm#survey_create ] ")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = SurveyApiResourceSwagger.PostSurveySurveyNameApptableIdResponse.class)})
     public String createDatatableEntry(@PathParam("surveyName") @ApiParam(value = "surveyName") final String datatable, @PathParam("apptableId") @ApiParam(value = "apptableId") final Long apptableId,
             final String apiRequestBodyAsJson) {
@@ -175,6 +184,9 @@ public class SurveyApiResource {
     @Path("{surveyName}/{clientId}/{fulfilledId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     public String deleteDatatableEntries(@PathParam("surveyName") final String surveyName, @PathParam("clientId") final Long clientId,
             @PathParam("fulfilledId") final Long fulfilledId) {
 

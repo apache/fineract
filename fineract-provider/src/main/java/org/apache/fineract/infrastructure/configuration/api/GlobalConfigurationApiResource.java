@@ -83,6 +83,9 @@ public class GlobalConfigurationApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve Global Configuration | Retrieve Global Configuration for surveys", notes = "Returns the list global enable/disable configurations.\n" + "\n" + "Example Requests:\n" + "\n" + "configurations\n\n" + "\n" + "Returns the list global enable/disable survey configurations.\n" + "\n" + "Example Requests:\n" + "\n" + "configurations/survey")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "List of example \n response \nsurveys response   \ngiven below", response = GlobalConfigurationApiResourceSwagger.GetGlobalConfigurationsResponse.class, responseContainer = "list")})
     public String retrieveConfiguration(@Context final UriInfo uriInfo,@DefaultValue("false") @QueryParam("survey") @ApiParam(value = "survey") final boolean survey) {
 
@@ -99,6 +102,9 @@ public class GlobalConfigurationApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve Global Configuration", notes = "Returns a global enable/disable configurations.\n" + "\n" + "Example Requests:\n" + "\n" + "configurations/1")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = GlobalConfigurationApiResourceSwagger.GetGlobalConfigurationsResponse.class)})
     public String retrieveOne(@PathParam("configId") @ApiParam(value = "configId") final Long configId, @Context final UriInfo uriInfo) {
 
@@ -116,7 +122,10 @@ public class GlobalConfigurationApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update Global Configuration", notes = "Updates an enable/disable global configuration item.")
-    @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = GlobalConfigurationApiResourceSwagger.PutGlobalConfigurationsRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body", dataTypeClass = GlobalConfigurationApiResourceSwagger.PutGlobalConfigurationsRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = GlobalConfigurationApiResourceSwagger.PutGlobalConfigurationsResponse.class)})
     public String updateConfiguration(@PathParam("configId") @ApiParam(value = "configId") final Long configId, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
 

@@ -121,6 +121,9 @@ public class GLAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve GL Accounts Template", notes = "This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:\n" + "\n" + "Field Defaults\n" + "Allowed Value Lists\n" + "Example Request:\n" + "\n" + "glaccounts/template\n" + "glaccounts/template?type=1\n" + "\n" + "type is optional and integer value from 1 to 5.\n" + "\n" + "1.Assets \n" + "2.Liabilities \n" + "3.Equity \n" + "4.Income \n" + "5.Expenses")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = GLAccountsApiResourceSwagger.GetGLAccountsTemplateResponse.class)})
     public String retrieveNewAccountDetails(@Context final UriInfo uriInfo, @QueryParam("type") @ApiParam(value = "type") final Integer type) {
 
@@ -137,6 +140,9 @@ public class GLAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List General Ledger Accounts", notes = "ARGUMENTS\n" + "type Integer optional manualEntriesAllowed boolean optional usage Integer optional disabled boolean optional parentId Long optional tagId Long optional\n" + "Example Requests:\n" + "\n" + "glaccounts\n" + "\n" + "\n" + "glaccounts?type=1&manualEntriesAllowed=true&usage=1&disabled=false\n" + "\n" + "glaccounts?fetchRunningBalance=true")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = GLAccountsApiResourceSwagger.GetGLAccountsResponse.class, responseContainer = "list")})
     public String retrieveAllAccounts(@Context final UriInfo uriInfo, @QueryParam("type") @ApiParam(value = "type") final Integer type,
             @QueryParam("searchParam") @ApiParam(value = "searchParam") final String searchParam, @QueryParam("usage") @ApiParam(value = "usage") final Integer usage,
@@ -157,6 +163,9 @@ public class GLAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a General Ledger Account", notes = "Example Requests:\n" + "\n" + "glaccounts/1\n" + "\n" + "\n" + "glaccounts/1?template=true\n" + "\n" + "\n" + "glaccounts/1?fields=name,glCode\n" + "\n" + "\n" + "glaccounts/1?fetchRunningBalance=true")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = GLAccountsApiResourceSwagger.GetGLAccountsResponse.class)})
     public String retreiveAccount(@PathParam("glAccountId") @ApiParam(value = "glAccountId") final Long glAccountId, @Context final UriInfo uriInfo,
             @QueryParam("fetchRunningBalance") @ApiParam(value = "fetchRunningBalance") final boolean runningBalance) {
@@ -177,7 +186,10 @@ public class GLAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create a General Ledger Account", notes = "Note: You may optionally create Hierarchical Chart of Accounts by using the \"parentId\" property of an Account\n" + "Mandatory Fields: \n" + "name, glCode, type, usage and manualEntriesAllowed")
-    @ApiImplicitParams({@ApiImplicitParam(paramType = "body", value = "body", dataType = "body", dataTypeClass = GLAccountsApiResourceSwagger.PostGLAccountsRequest.class )})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(paramType = "body", value = "body", dataType = "body", dataTypeClass = GLAccountsApiResourceSwagger.PostGLAccountsRequest.class )})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = GLAccountsApiResourceSwagger.PostGLAccountsResponse.class)})
     public String createGLAccount(@ApiParam(hidden = true) final String jsonRequestBody) {
 
@@ -193,7 +205,10 @@ public class GLAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update an Accounting closure", notes = "Once an accounting closure is created, only the comments associated with it may be edited\n" + "\n")
-    @ApiImplicitParams({@ApiImplicitParam(paramType = "body", value = "body", dataType = "body", dataTypeClass = GLAccountsApiResourceSwagger.PutGLAccountsRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(paramType = "body", value = "body", dataType = "body", dataTypeClass = GLAccountsApiResourceSwagger.PutGLAccountsRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = GLAccountsApiResourceSwagger.PutGLAccountsResponse.class)})
     public String updateGLAccount(@PathParam("glAccountId") @ApiParam(value = "glAccountId") final Long glAccountId, @ApiParam(hidden = true) final String jsonRequestBody) {
 
@@ -209,6 +224,9 @@ public class GLAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete an accounting closure", notes = "Note: Only the latest accounting closure associated with a branch may be deleted.")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+        @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = GLAccountsApiResourceSwagger.DeleteGLAccountsRequest.class)})
     public String deleteGLAccount(@PathParam("glAccountId") @ApiParam(value = "glAccountId") final Long glAccountId) {
 

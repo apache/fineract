@@ -97,6 +97,9 @@ public class FinancialActivityAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "List Financial Activities to Accounts Mappings", notes = "Example Requests:\n" + "\n" + "financialactivityaccounts")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = FinancialActivityAccountsApiResourceSwagger.GetFinancialActivityAccountsResponse.class, responseContainer = "list" )})
     public String retrieveAll(@Context final UriInfo uriInfo) {
 
@@ -113,6 +116,9 @@ public class FinancialActivityAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Retrieve a Financial Activity to Account Mapping\n", notes = "Example Requests:\n" + "\n" + "financialactivityaccounts/1")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = FinancialActivityAccountsApiResourceSwagger.GetFinancialActivityAccountsResponse.class)})
     public String retreive(@PathParam("mappingId") @ApiParam(value = "mappingId") final Long mappingId, @Context final UriInfo uriInfo) {
 
@@ -133,7 +139,10 @@ public class FinancialActivityAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Create a new Financial Activity to Accounts Mapping", notes = "Mandatory Fields\n" + "financialActivityId, glAccountId")
-    @ApiImplicitParams({@ApiImplicitParam(value = "Request body", paramType = "body", dataType = "body", dataTypeClass = FinancialActivityAccountsApiResourceSwagger.PostFinancialActivityAccountsRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "Request body", paramType = "body", dataType = "body", dataTypeClass = FinancialActivityAccountsApiResourceSwagger.PostFinancialActivityAccountsRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = FinancialActivityAccountsApiResourceSwagger.PostFinancialActivityAccountsResponse.class)})
     public String createGLAccount(@ApiParam(hidden = true) final String jsonRequestBody) {
 
@@ -150,7 +159,10 @@ public class FinancialActivityAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Update a Financial Activity to Account Mapping", notes = "the API updates the Ledger account linked to a Financial Activity \n")
-    @ApiImplicitParams({@ApiImplicitParam(value = "Request body", dataType = "body", paramType = "body", dataTypeClass = FinancialActivityAccountsApiResourceSwagger.PostFinancialActivityAccountsRequest.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header"),
+            @ApiImplicitParam(value = "Request body", dataType = "body", paramType = "body", dataTypeClass = FinancialActivityAccountsApiResourceSwagger.PostFinancialActivityAccountsRequest.class)})
     @ApiResponses({@ApiResponse(code = 200, message = "", response = FinancialActivityAccountsApiResourceSwagger.PutFinancialActivityAccountsResponse.class)})
     public String updateGLAccount(@PathParam("mappingId") @ApiParam(value = "mappingId") final Long mappingId, @ApiParam(hidden = true) final String jsonRequestBody) {
 
@@ -167,6 +179,9 @@ public class FinancialActivityAccountsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Delete a Financial Activity to Account Mapping")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Enter Authorisation key", paramType = "header"),
+            @ApiImplicitParam(name = "Fineract-Platform-TenantId", value = "default", paramType = "header")})
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = FinancialActivityAccountsApiResourceSwagger.DeleteFinancialActivityAccountsResponse.class)})
     public String deleteGLAccount(@PathParam("mappingId") @ApiParam(value = "mappingId") final Long mappingId) {
 
