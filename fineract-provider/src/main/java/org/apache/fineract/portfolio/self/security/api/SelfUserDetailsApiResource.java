@@ -37,7 +37,7 @@ import javax.ws.rs.core.MediaType;
 @Scope("singleton")
 @Api(tags = {"Self User Details"})
 @SwaggerDefinition(tags = {
-		@Tag(name = "Self User Details", description = "")
+		@Tag(name = "Self User Details", description = "Checks the Authentication and returns the set roles and permissions allowed")
 })
 public class SelfUserDetailsApiResource {
 

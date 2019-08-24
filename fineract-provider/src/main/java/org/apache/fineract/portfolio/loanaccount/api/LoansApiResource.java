@@ -127,99 +127,99 @@ import org.springframework.util.CollectionUtils;
 @SwaggerDefinition(tags = {
         @Tag(name = "Loans", description = "The API concept of loans models the loan application process and the loan contract/monitoring process.\n" +
                 "\n" +
-                "Field Descriptions\n" +
-                "accountNo\n" +
+                "Field Descriptions\n" + "\n" +
+                "accountNo\n" + "\n" +
                 "The account no. associated with this loan. Is auto generated if not provided at loan application creation time.\n" +
-                "externalId\n" +
+                "externalId:\n" + "\n" +
                 "A place to put an external reference for this loan e.g. The ID another system uses.\n" +
-                "If provided, it must be unique.\n" +
-                "fundId\n" +
-                "Optional: For associating a loan with a given fund.\n" +
-                "loanOfficerId\n" +
+                "If provided, it must be unique.\n" + "\n" +
+                "fundId:\n" + "\n" +
+                "Optional: For associating a loan with a given fund.\n" + "\n" +
+                "loanOfficerId:\n" + "\n" +
                 "Optional: For associating a loan with a given staff member who is a loan officer.\n" +
-                "loanPurposeId\n" +
+                "loanPurposeId:\n" + "\n" +
                 "Optional: For marking a loan with a given loan purpose option. Loan purposes are configurable and can be setup by system admin through code/code values screens.\n" +
-                "principal\n" +
-                "The loan amount to be disbursed to through loan.\n" +
-                "loanTermFrequency\n" +
-                "The length of loan term\n" +
-                "Used like: loanTermFrequency loanTermFrequencyType\n" +
-                "e.g. 12 Months\n" +
-                "loanTermFrequencyType\n" +
-                "The loan term period to use. Used like: loanTermFrequency loanTermFrequencyType\n" +
-                "e.g. 12 Months Example Values: 0=Days, 1=Weeks, 2=Months, 3=Years\n" +
-                "numberOfRepayments\n" +
-                "Number of installments to repay.\n" +
-                "Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType\n" +
-                "e.g. 10 (repayments) Every 12 Weeks\n" +
-                "repaymentEvery\n" +
-                "Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType\n" +
-                "e.g. 10 (repayments) Every 12 Weeks\n" +
-                "repaymentFrequencyType\n" +
-                "Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType\n" +
-                "e.g. 10 (repayments) Every 12 Weeks \n" +
-                "Example Values: 0=Days, 1=Weeks, 2=Months\n" +
-                "interestRatePerPeriod\n" +
-                "Interest Rate.\n" +
-                "Used like: interestRatePerPeriod % interestRateFrequencyType - interestType\n" +
-                "e.g. 12.0000% Per year - Declining Balance\n" +
-                "interestRateFrequencyType\n" +
-                "Used like: interestRatePerPeriod% interestRateFrequencyType - interestType\n" +
-                "e.g. 12.0000% Per year - Declining Balance \n" +
-                "Example Values: 2=Per month, 3=Per year\n" +
-                "graceOnPrincipalPayment\n" +
+                "principal:\n" + "\n" +
+                "The loan amount to be disbursed to through loan.\n" + "\n" +
+                "loanTermFrequency:\n" + "\n" +
+                "The length of loan term\n" + "\n" +
+                "Used like: loanTermFrequency loanTermFrequencyType\n" + "\n" +
+                "e.g. 12 Months\n" + "\n" +
+                "loanTermFrequencyType:\n" + "\n" +
+                "The loan term period to use. Used like: loanTermFrequency loanTermFrequencyType\n" + "\n" +
+                "e.g. 12 Months Example Values: 0=Days, 1=Weeks, 2=Months, 3=Years\n" + "\n" +
+                "numberOfRepayments:\n" + "\n" +
+                "Number of installments to repay.\n" + "\n" +
+                "Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType\n" + "\n" +
+                "e.g. 10 (repayments) Every 12 Weeks\n" + "\n" +
+                "repaymentEvery:\n" + "\n" +
+                "Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType\n" + "\n" +
+                "e.g. 10 (repayments) Every 12 Weeks\n" + "\n" +
+                "repaymentFrequencyType:\n" + "\n" +
+                "Used like: numberOfRepayments Every repaymentEvery repaymentFrequencyType\n" + "\n" +
+                "e.g. 10 (repayments) Every 12 Weeks \n" + "\n" +
+                "Example Values: 0=Days, 1=Weeks, 2=Months\n" + "\n" +
+                "interestRatePerPeriod:\n" + "\n" +
+                "Interest Rate:\n" + "\n" +
+                "Used like: interestRatePerPeriod % interestRateFrequencyType - interestType\n" + "\n" +
+                "e.g. 12.0000% Per year - Declining Balance\n" + "\n" +
+                "interestRateFrequencyType:\n" + "\n" +
+                "Used like: interestRatePerPeriod% interestRateFrequencyType - interestType\n" + "\n" +
+                "e.g. 12.0000% Per year - Declining Balance \n" + "\n" +
+                "Example Values: 2=Per month, 3=Per year\n" + "\n" +
+                "graceOnPrincipalPayment:\n" + "\n" +
                 "Optional: Integer - represents the number of repayment periods that grace should apply to the principal component of a repayment period.\n" +
-                "graceOnInterestPayment\n" +
+                "graceOnInterestPayment:\n" + "\n" +
                 "Optional: Integer - represents the number of repayment periods that grace should apply to the interest component of a repayment period. Interest is still calculated but offset to later repayment periods.\n" +
-                "graceOnInterestCharged\n" +
-                "Optional: Integer - represents the number of repayment periods that should be interest-free.\n" +
-                "graceOnArrearsAgeing\n" +
+                "graceOnInterestCharged\n" + "\n" +
+                "Optional: Integer - represents the number of repayment periods that should be interest-free.\n" + "\n" +
+                "graceOnArrearsAgeing:\n" + "\n" +
                 "Optional: Integer - Used in Arrears calculation to only take into account loans that are more than graceOnArrearsAgeing days overdue.\n" +
-                "interestChargedFromDate\n" +
-                "Optional: Date - The date from with interest is to start being charged.\n" +
-                "expectedDisbursementDate\n" +
-                "The proposed disbursement date of the loan so a proposed repayment schedule can be provided.\n" +
-                "submittedOnDate\n" +
-                "The date the loan application was submitted by applicant.\n" +
-                "linkAccountId\n" +
-                "The Savings Account id for linking with loan account for payments.\n" +
-                "amortizationType\n" +
-                "Example Values: 0=Equal principle payments, 1=Equal installments\n" +
-                "interestType\n" +
-                "Used like: interestRatePerPeriod% interestRateFrequencyType - interestType\n" +
-                "e.g. 12.0000% Per year - Declining Balance \n" +
-                "Example Values: 0=Declining Balance, 1=Flat\n" +
-                "interestCalculationPeriodType\n" +
-                "Example Values: 0=Daily, 1=Same as repayment period\n" +
-                "allowPartialPeriodInterestCalcualtion\n" +
+                "interestChargedFromDate\n" + "\n" +
+                "Optional: Date - The date from with interest is to start being charged.\n" + "\n" +
+                "expectedDisbursementDate:\n" + "\n" +
+                "The proposed disbursement date of the loan so a proposed repayment schedule can be provided.\n" + "\n" +
+                "submittedOnDate:\n" + "\n" +
+                "The date the loan application was submitted by applicant.\n" + "\n" +
+                "linkAccountId:\n" + "\n" +
+                "The Savings Account id for linking with loan account for payments.\n" + "\n" +
+                "amortizationType:\n" + "\n" +
+                "Example Values: 0=Equal principle payments, 1=Equal installments\n" + "\n" +
+                "interestType:\n" + "\n" +
+                "Used like: interestRatePerPeriod% interestRateFrequencyType - interestType\n" + "\n" +
+                "e.g. 12.0000% Per year - Declining Balance \n" + "\n" +
+                "Example Values: 0=Declining Balance, 1=Flat\n" + "\n" +
+                "interestCalculationPeriodType:\n" + "\n" +
+                "Example Values: 0=Daily, 1=Same as repayment period\n" + "\n" +
+                "allowPartialPeriodInterestCalcualtion:\n" + "\n" +
                 "This value will be supported along with interestCalculationPeriodType as Same as repayment period to calculate interest for partial periods. Example: Interest charged from is 5th of April , Principal is 10000 and interest is 1% per month then the interest will be (10000 * 1%)* (25/30) , it calculates for the month first then calculates exact periods between start date and end date(can be a decimal)\n" +
-                "inArrearsTolerance\n" +
-                "The amount that can be 'waived' at end of all loan payments because it is too small to worry about.\n" +
-                "This is also the tolerance amount assessed when determining if a loan is in arrears.\n" +
-                "transactionProcessingStrategyId\n" +
+                "inArrearsTolerance\n" + "\n" +
+                "The amount that can be 'waived' at end of all loan payments because it is too small to worry about.\n" + "\n" +
+                "This is also the tolerance amount assessed when determining if a loan is in arrears.\n" + "\n" +
+                "transactionProcessingStrategyId:\n" + "\n" +
                 "An enumeration that indicates the type of transaction processing strategy to be used. This relates to functionality that is also known as Payment Application Logic.\n" +
                 "A number of out of the box approaches exist, some are custom to specific MFIs, some are more general and indicate the order in which payments are processed.\n" +
-                "\n" +
+                "\n" + "\n" +
                 "Refer to the Payment Application Logic / Transaction Processing Strategy section in the appendix for more detailed overview of each available payment application logic provided out of the box.\n" +
-                "\n" +
-                "List of current approaches:\n" +
-                "1 = Mifos style (Similar to Old Mifos)\n" +
-                "2 = Heavensfamily (Custom MFI approach)\n" +
-                "3 = Creocore (Custom MFI approach)\n" +
-                "4 = RBI (India)\n" +
-                "5 = Principal Interest Penalties Fees Order\n" +
-                "6 = Interest Principal Penalties Fees Order\n" +
-                "7 = Early Payment Strategy\n" +
-                "loanType\n" +
-                "To represent different type of loans.\n" +
-                "At present there are three type of loans are supported. \n" +
-                "Available loan types:\n" +
-                "individual: Loan given to individual member\n" +
-                "group: Loan given to group as a whole\n" +
+                "\n" + "\n" +
+                "List of current approaches:\n" + "\n" +
+                "1 = Mifos style (Similar to Old Mifos)\n" + "\n" +
+                "2 = Heavensfamily (Custom MFI approach)\n" + "\n" +
+                "3 = Creocore (Custom MFI approach)\n" + "\n" +
+                "4 = RBI (India)\n" + "\n" +
+                "5 = Principal Interest Penalties Fees Order\n" + "\n" +
+                "6 = Interest Principal Penalties Fees Order\n" + "\n" +
+                "7 = Early Payment Strategy\n" + "\n" +
+                "loanType:\n" + "\n" +
+                "To represent different type of loans.\n" + "\n" +
+                "At present there are three type of loans are supported. \n" + "\n" +
+                "Available loan types:\n" + "\n" +
+                "individual: Loan given to individual member\n" + "\n" +
+                "group: Loan given to group as a whole\n" + "\n" +
                 "jlg: Joint liability group loan given to members in a group on individual basis. JLG loan can be given to one or more members in a group.\n" +
-                "recalculationRestFrequencyDate\n" +
-                "Specifies rest frequency start date for interest recalculation. This date must be before or equal to disbursement date\n" +
-                "recalculationCompoundingFrequencyDate\n" +
+                "recalculationRestFrequencyDate:\n" + "\n" +
+                "Specifies rest frequency start date for interest recalculation. This date must be before or equal to disbursement date\n" + "\n" +
+                "recalculationCompoundingFrequencyDate:\n" + "\n" +
                 "Specifies compounding frequency start date for interest recalculation. This date must be equal to disbursement date")
 })
 
