@@ -35,6 +35,7 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
@@ -73,6 +74,10 @@ public class AccountTransferDetails extends AbstractPersistableCustom<Long> {
     @JoinColumn(name = "from_loan_account_id", nullable = true)
     private Loan fromLoanAccount;
 
+    @ManyToOne
+    @JoinColumn(name = "to_share_account_id", nullable = true)
+    private ShareAccount toShareAccount;
+
     @Column(name = "transfer_type")
     private Integer transferType;
 
@@ -87,22 +92,30 @@ public class AccountTransferDetails extends AbstractPersistableCustom<Long> {
             Integer transferType) {
 
         return new AccountTransferDetails(fromOffice, fromClient, fromSavingsAccount, null, toOffice, toClient, toSavingsAccount, null,
-                transferType, null);
+                null, transferType, null);
     }
 
     public static AccountTransferDetails savingsToLoanTransfer(final Office fromOffice, final Client fromClient,
             final SavingsAccount fromSavingsAccount, final Office toOffice, final Client toClient, final Loan toLoanAccount,
             Integer transferType) {
         return new AccountTransferDetails(fromOffice, fromClient, fromSavingsAccount, null, toOffice, toClient, null, toLoanAccount,
-                transferType, null);
+                null, transferType, null);
     }
 
     public static AccountTransferDetails LoanTosavingsTransfer(final Office fromOffice, final Client fromClient,
             final Loan fromLoanAccount, final Office toOffice, final Client toClient, final SavingsAccount toSavingsAccount,
             Integer transferType) {
         return new AccountTransferDetails(fromOffice, fromClient, null, fromLoanAccount, toOffice, toClient, toSavingsAccount, null,
-                transferType, null);
+                null, transferType, null);
     }
+
+    public static AccountTransferDetails savingsToShareTransfer(final Office fromOffice, final Client fromClient,
+            final SavingsAccount fromSavingsAccount, final Office toOffice, final Client toClient, final ShareAccount toShareAccount,
+            Integer transferType) {
+
+        return new AccountTransferDetails(fromOffice, fromClient, fromSavingsAccount, null, toOffice, toClient, null, null, toShareAccount,
+                transferType, null);
+    }    
 
     protected AccountTransferDetails() {
         //
@@ -110,7 +123,7 @@ public class AccountTransferDetails extends AbstractPersistableCustom<Long> {
 
     private AccountTransferDetails(final Office fromOffice, final Client fromClient, final SavingsAccount fromSavingsAccount,
             final Loan fromLoanAccount, final Office toOffice, final Client toClient, final SavingsAccount toSavingsAccount,
-            final Loan toLoanAccount, final Integer transferType,
+            final Loan toLoanAccount, final ShareAccount toShareAccount, final Integer transferType,
             final AccountTransferStandingInstruction accountTransferStandingInstruction) {
         this.fromOffice = fromOffice;
         this.fromClient = fromClient;
@@ -121,6 +134,7 @@ public class AccountTransferDetails extends AbstractPersistableCustom<Long> {
         this.toSavingsAccount = toSavingsAccount;
         this.toLoanAccount = toLoanAccount;
         this.transferType = transferType;
+        this.toShareAccount = toShareAccount;
         this.accountTransferStandingInstruction = accountTransferStandingInstruction;
     }
 
@@ -148,6 +162,10 @@ public class AccountTransferDetails extends AbstractPersistableCustom<Long> {
         return this.fromLoanAccount;
     }
 
+    public ShareAccount toShareAccount(){
+        return this.toShareAccount;
+    }
+
     public AccountTransferStandingInstruction accountTransferStandingInstruction() {
         return this.accountTransferStandingInstruction;
     }
@@ -159,6 +177,6 @@ public class AccountTransferDetails extends AbstractPersistableCustom<Long> {
     public static AccountTransferDetails LoanToLoanTransfer(Office fromOffice, Client fromClient, Loan fromLoanAccount, Office toOffice, Client toClient,
             Loan toLoanAccount, Integer transferType) {
         return new AccountTransferDetails(fromOffice, fromClient, null, fromLoanAccount, toOffice, toClient, null, toLoanAccount,
-                transferType, null);
+                null, transferType, null);
     }
 }

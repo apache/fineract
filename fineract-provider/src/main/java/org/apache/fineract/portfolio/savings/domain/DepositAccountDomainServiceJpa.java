@@ -245,7 +245,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(closedDate, account.getAccountBalance(),
                     PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS, null, null, transferDescription, locale, fmt, null, null,
                     null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account,
-                    isAccountTransfer, isExceptionForBalanceCheck);
+                    null, isAccountTransfer, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);  
         } else {
@@ -320,7 +320,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(closedDate, transactionAmount,
                     PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS, null, null, transferDescription, locale, fmt, null, null,
                     null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account,
-                    isRegularTransaction, isExceptionForBalanceCheck);
+                    null, isRegularTransaction, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);  
         } else {
@@ -412,7 +412,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(closedDate, account.getAccountBalance(),
                     PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS, null, null, transferDescription, locale, fmt, null, null,
                     null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account,
-                    isRegularTransaction, isExceptionForBalanceCheck);
+                    null, isRegularTransaction, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);          
         } else {
@@ -469,7 +469,7 @@ public class DepositAccountDomainServiceJpa implements DepositAccountDomainServi
             final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(closedDate, account.getAccountBalance(),
                     PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS, null, null, transferDescription, locale, fmt, null, null,
                     null, null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, toSavingsAccount, account,
-                    isRegularTransaction, isExceptionForBalanceCheck);
+                    null, isRegularTransaction, isExceptionForBalanceCheck);
             this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
             updateAlreadyPostedTransactions(existingTransactionIds, account);  
         } else {

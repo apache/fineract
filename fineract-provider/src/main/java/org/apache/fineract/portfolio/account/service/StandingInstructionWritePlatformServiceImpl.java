@@ -239,7 +239,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
                 AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, transactionAmount, data.fromAccountType(),
                         data.toAccountType(), data.fromAccount().accountId(), data.toAccount().accountId(), data.name()
                                 + " Standing instruction trasfer ", null, null, null, null, data.toTransferType(), null, null, data
-                                .transferType().getValue(), null, null, null, null, null, fromSavingsAccount,
+                                .transferType().getValue(), null, null, null, null, null, fromSavingsAccount, null, 
                         isRegularTransaction, isExceptionForBalanceCheck);
                 final boolean transferCompleted = transferAmount(sb, accountTransferDTO, data.getId());
 

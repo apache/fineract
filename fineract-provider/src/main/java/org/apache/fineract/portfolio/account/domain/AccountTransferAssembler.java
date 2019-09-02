@@ -31,6 +31,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
+import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
+import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountTransaction;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -156,6 +158,24 @@ public class AccountTransferAssembler {
         AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.LoanToLoanTransfer(accountTransferDetails,
                 disburseTransaction, repaymentTransaction, accountTransferDTO.getTransactionDate(), transactionMonetaryAmount,
                 accountTransferDTO.getDescription());
+        accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
+        return accountTransferDetails;
+    }
+
+    public AccountTransferDetails assembleSavingsToShareTransfer(final JsonCommand command, final SavingsAccount fromSavingsAccount,
+            final ShareAccount toShareAccount, final SavingsAccountTransaction withdrawal, final ShareAccountTransaction purshasedShareTransaction) {
+
+       final AccountTransferDetails accountTransferDetails = this.accountTransferDetailAssembler.assembleSavingsToShareTransfer(command,
+                fromSavingsAccount, toShareAccount);
+
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed(transferDateParamName);
+        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed(transferAmountParamName);
+        final Money transactionMonetaryAmount = Money.of(toShareAccount.getCurrency(), transactionAmount);
+
+        final String description = command.stringValueOfParameterNamed(transferDescriptionParamName);
+
+        AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.savingsToShareTransfer(accountTransferDetails,
+                withdrawal, purshasedShareTransaction, transactionDate, transactionMonetaryAmount, description);
         accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
         return accountTransferDetails;
     }

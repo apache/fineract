@@ -55,7 +55,8 @@ public class AccountTransfersDataValidator {
 			AccountDetailConstants.toOfficeIdParamName, AccountDetailConstants.toClientIdParamName,
 			AccountDetailConstants.toAccountTypeParamName, AccountDetailConstants.toAccountIdParamName,
 			AccountTransfersApiConstants.transferDateParamName, AccountTransfersApiConstants.transferAmountParamName,
-			AccountTransfersApiConstants.transferDescriptionParamName));
+			AccountTransfersApiConstants.requestedshares_paramname, AccountTransfersApiConstants.requesteddate_paramname, 
+            AccountTransfersApiConstants.transferDescriptionParamName));
 
 
     @Autowired
@@ -91,6 +92,15 @@ public class AccountTransfersDataValidator {
                 (AccountTransfersApiConstants.transferAmountParamName, element);
         baseDataValidator.reset().parameter(AccountTransfersApiConstants.transferAmountParamName).value
                 (transactionAmount).notNull().positiveAmount();
+
+        final BigDecimal requestedShares = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed
+                (AccountTransfersApiConstants.requestedshares_paramname, element);
+        baseDataValidator.reset().parameter(AccountTransfersApiConstants.requestedshares_paramname).value
+                (requestedShares);
+
+        final LocalDate requestedDate = this.fromApiJsonHelper.extractLocalDateNamed(AccountTransfersApiConstants.requesteddate_paramname, element);
+        baseDataValidator.reset().parameter(AccountTransfersApiConstants.requesteddate_paramname).value
+                (requestedDate);
 
         final String transactionDescription = this.fromApiJsonHelper.extractStringNamed(AccountTransfersApiConstants
                 .transferDescriptionParamName, element);

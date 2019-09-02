@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR_SHARES;
+import org.apache.fineract.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
 import org.apache.fineract.accounting.journalentry.data.ChargePaymentDTO;
 import org.apache.fineract.accounting.journalentry.data.SharesDTO;
 import org.apache.fineract.accounting.journalentry.data.SharesTransactionDTO;
@@ -112,9 +113,16 @@ public class CashBasedAccountingProcessorForShares implements AccountingProcesso
             if (chargeAmount != null && chargeAmount.compareTo(BigDecimal.ZERO) == 1) {
                 amountForJE = amount.subtract(chargeAmount);
             }
+
+            if (transactionDTO.isAccountTransfer()) {
+               this.helper.createJournalEntriesForShares(office, currencyCode, FINANCIAL_ACTIVITY.LIABILITY_TRANSFER.getValue(),
+                    CASH_ACCOUNTS_FOR_SHARES.SHARES_EQUITY.getValue(), shareProductId, paymentTypeId, shareAccountId, transactionId,
+                    transactionDate, amountForJE); 
+           } else {
             this.helper.createJournalEntriesForShares(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.SHARES_SUSPENSE.getValue(),
                     CASH_ACCOUNTS_FOR_SHARES.SHARES_EQUITY.getValue(), shareProductId, paymentTypeId, shareAccountId, transactionId,
                     transactionDate, amountForJE);
+            }
         } else if (transactionDTO.getTransactionStatus().isRejected()) {
             if (chargeAmount != null && chargeAmount.compareTo(BigDecimal.ZERO) == 1) {
                 this.helper.revertCashBasedJournalEntryForSharesCharges(office, currencyCode, CASH_ACCOUNTS_FOR_SHARES.INCOME_FROM_FEES,

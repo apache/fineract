@@ -261,6 +261,7 @@ public class AccountingProcessorHelper {
         final Long officeId = (Long) accountingBridgeData.get("officeId");
         final CurrencyData currencyData = (CurrencyData) accountingBridgeData.get("currency");
         final List<SharesTransactionDTO> newTransactions = new ArrayList<>();
+        boolean isAccountTransfer = (Boolean) accountingBridgeData.get("isAccountTransfer");
 
         @SuppressWarnings("unchecked")
         final List<Map<String, Object>> newTransactionsMap = (List<Map<String, Object>>) accountingBridgeData.get("newTransactions");
@@ -288,8 +289,14 @@ public class AccountingProcessorHelper {
                     feePayments.add(chargePaymentDTO);
                 }
             }
+
+            if (!isAccountTransfer) {
+               isAccountTransfer = this.accountTransfersReadPlatformService.isAccountTransfer(Long.parseLong(transactionId),
+                       PortfolioAccountType.SHARES);
+           }
+
             final SharesTransactionDTO transaction = new SharesTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
-                    transactionDate, transactionType, transactionStatus, amount, chargeAmount, feePayments);
+                    transactionDate, transactionType, transactionStatus, amount, chargeAmount, feePayments, isAccountTransfer);
 
             newTransactions.add(transaction);
 

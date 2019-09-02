@@ -45,5 +45,8 @@ public interface ShareAccountWritePlatformService {
     public CommandProcessingResult rejectAdditionalShares(Long accountId, JsonCommand jsonCommand) ;
 
     public CommandProcessingResult redeemShares(Long accountId, JsonCommand jsonCommand);
+
+    public CommandProcessingResult applyAndApproveTransferedShares(final Long accountId, JsonCommand jsonCommand, boolean isAccountTransfer);
+ 
 }
 

@@ -229,7 +229,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                             amountForDeposit.getAmount(), PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS,
                             portfolioAccountData.accountId(), account.getId(), "Account Transfer", locale, fmt, null, null, null, null,
                             null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, account, fromSavingsAccount,
-                            isRegularTransaction, isExceptionForBalanceCheck);
+                            null, isRegularTransaction, isExceptionForBalanceCheck);
                     this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
                 }
                 final boolean isInterestTransfer = false;
@@ -333,7 +333,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                             amountForDeposit.getAmount(), PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS,
                             portfolioAccountData.accountId(), account.getId(), "Account Transfer", locale, fmt, null, null, null, null,
                             null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, account, fromSavingsAccount,
-                            isRegularTransaction, isExceptionForBalanceCheck);
+                            null, isRegularTransaction, isExceptionForBalanceCheck);
                     this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
                 }
                 updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);

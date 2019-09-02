@@ -261,7 +261,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                         AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, remainingAmount, fromAccountType,
                                 toAccountType, fromAccountId, toAccountId, description, locale, fmt, paymentDetail, fromTransferType,
                                 toTransferType, chargeId, loanInstallmentNumber, transferType, accountTransferDetails, noteText,
-                                txnExternalId, loan, toSavingsAccount, fromSavingsAccount, isRegularTransaction,
+                                txnExternalId, loan, toSavingsAccount, fromSavingsAccount, null, isRegularTransaction,
                                 isExceptionForBalanceCheck);
                         transferAmount(accountTransferDTO);
                     } finally {

@@ -38,6 +38,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
+import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -210,5 +211,29 @@ public class AccountTransferDetailAssembler {
 
         return AccountTransferDetails.LoanToLoanTransfer(fromOffice, fromClient, fromLoanAccount, toOffice, toClient, toLoanAccount,
                 transferType);
+    }
+
+     public AccountTransferDetails assembleSavingsToShareTransfer(final JsonCommand command, final SavingsAccount fromSavingsAccount,
+            final ShareAccount toShareAccount) {
+
+        final JsonElement element = command.parsedJson();
+
+        final Long fromOfficeId = this.fromApiJsonHelper.extractLongNamed(fromOfficeIdParamName, element);
+        final Office fromOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(fromOfficeId);
+
+        final Long fromClientId = this.fromApiJsonHelper.extractLongNamed(fromClientIdParamName, element);
+        final Client fromClient = this.clientRepository.findOneWithNotFoundDetection(fromClientId);
+
+        final Long toOfficeId = this.fromApiJsonHelper.extractLongNamed(toOfficeIdParamName, element);
+        final Office toOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(toOfficeId);
+
+        final Long toClientId = this.fromApiJsonHelper.extractLongNamed(toClientIdParamName, element);
+        final Client toClient = this.clientRepository.findOneWithNotFoundDetection(toClientId);
+
+        final Integer transfertype = this.fromApiJsonHelper.extractIntegerNamed(transferTypeParamName, element, Locale.getDefault());
+
+        return AccountTransferDetails.savingsToShareTransfer(fromOffice, fromClient, fromSavingsAccount, toOffice, toClient, toShareAccount,
+                transfertype);
+
     }
 }

@@ -1492,7 +1492,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final LocalDate transactionDate = JdbcSupport.getLocalDate(rs, "transactionDate");
             return new AccountTransferDTO(transactionDate, transactionAmount, PortfolioAccountType.SAVINGS, PortfolioAccountType.SAVINGS,
                     fromAccountId, toAccountId, "trasfer interest to savings", null, null, null, null, null, null, null,
-                    AccountTransferType.INTEREST_TRANSFER.getValue(), null, null, null, null, null, null, isRegularTransaction,
+                    AccountTransferType.INTEREST_TRANSFER.getValue(), null, null, null, null, null, null, null, isRegularTransaction,
                     isExceptionForBalanceCheck);
         }
 

@@ -26,6 +26,7 @@ import org.apache.fineract.portfolio.account.domain.AccountTransferDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccount;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -54,6 +55,7 @@ public class AccountTransferDTO {
     private final Loan toLoan;
     private final SavingsAccount toSavingsAccount;
     private final SavingsAccount fromSavingsAccount;
+    private final ShareAccount toShareAccount;
     private final Boolean isRegularTransaction;
     private final Boolean isExceptionForBalanceCheck;
 
@@ -63,7 +65,7 @@ public class AccountTransferDTO {
             final PaymentDetail paymentDetail, final Integer fromTransferType, final Integer toTransferType, final Long chargeId,
             Integer loanInstallmentNumber, Integer transferType, final AccountTransferDetails accountTransferDetails,
             final String noteText, final String txnExternalId, final Loan loan, SavingsAccount toSavingsAccount,
-            final SavingsAccount fromSavingsAccount, final Boolean isRegularTransaction, Boolean isExceptionForBalanceCheck) {
+            final SavingsAccount fromSavingsAccount, final ShareAccount toShareAccount, final Boolean isRegularTransaction, Boolean isExceptionForBalanceCheck) {
         this.transactionDate = transactionDate;
         this.transactionAmount = transactionAmount;
         this.fromAccountType = fromAccountType;
@@ -87,6 +89,7 @@ public class AccountTransferDTO {
         this.toLoan = null;
         this.toSavingsAccount = toSavingsAccount;
         this.fromSavingsAccount = fromSavingsAccount;
+        this.toShareAccount = toShareAccount;
         this.isRegularTransaction = isRegularTransaction;
         this.isExceptionForBalanceCheck = isExceptionForBalanceCheck;
     }
@@ -119,6 +122,7 @@ public class AccountTransferDTO {
         this.loan = null;
         this.toSavingsAccount = null;
         this.fromSavingsAccount = null;
+        this.toShareAccount = null;
         this.isRegularTransaction = null;
         this.isExceptionForBalanceCheck = null;
     }

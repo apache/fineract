@@ -42,10 +42,13 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
+import org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants;
+import org.apache.fineract.portfolio.account.AccountDetailConstants;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
+import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
@@ -62,6 +65,7 @@ import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountStatusType
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountTransaction;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProduct;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProductRepositoryWrapper;
+import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -108,7 +112,8 @@ public class ShareAccountDataSerializer {
     private static final Set<String> addtionalSharesParameters = new HashSet<>(Arrays.asList(ShareAccountApiConstants
                     .locale_paramname,
             ShareAccountApiConstants.requesteddate_paramname, ShareAccountApiConstants.requestedshares_paramname,
-            ShareAccountApiConstants.purchasedprice_paramname, ShareAccountApiConstants.dateformat_paramname));
+            ShareAccountApiConstants.purchasedprice_paramname, ShareAccountApiConstants.dateformat_paramname, AccountDetailConstants.fromOfficeIdParamName, AccountDetailConstants.fromClientIdParamName, AccountDetailConstants.fromAccountIdParamName, AccountDetailConstants.fromAccountTypeParamName, AccountDetailConstants.toOfficeIdParamName, AccountDetailConstants.toClientIdParamName, 
+            AccountDetailConstants.toAccountIdParamName, AccountDetailConstants.toAccountTypeParamName, AccountTransfersApiConstants.transferDateParamName, AccountTransfersApiConstants.transferAmountParamName, AccountTransfersApiConstants.requestedshares_paramname, AccountTransfersApiConstants.transferDescriptionParamName));
 
     
     @Autowired
@@ -791,6 +796,100 @@ public class ShareAccountDataSerializer {
         actualChanges.put(ShareAccountApiConstants.requestedshares_paramname, purchasedShares);
         return actualChanges;
     }
+
+     public Map<String, Object> validateApplyAndApproveTransferedShares(JsonCommand jsonCommand, ShareAccount account) {
+        Map<String, Object> actualChanges = new HashMap<>();
+        if (StringUtils.isBlank(jsonCommand.json())) { throw new InvalidJsonException(); }
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, jsonCommand.json(),
+                addtionalSharesParameters);
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("sharesaccount");
+        JsonElement element = jsonCommand.parsedJson();
+        ShareAccountTransaction purchaseTransaction = null;
+        
+        if (element.isJsonObject() && this.fromApiJsonHelper.parameterExists(ClientApiConstants.sharesParamName, element)) {
+                       
+                    final JsonObject jsonObject = element.getAsJsonObject();
+                    LocalDate requestedDate = this.fromApiJsonHelper.extractLocalDateNamed(ShareAccountApiConstants.requesteddate_paramname, element);
+                    if (jsonObject.get(ClientApiConstants.sharesParamName).isJsonArray()) {
+                        
+                    final JsonArray array = jsonObject.get(ClientApiConstants.sharesParamName).getAsJsonArray();                    
+                        
+                    for (int i = 1; i <= array.size(); i++) {
+                        final JsonObject shareElement = array.get(i - 1).getAsJsonObject();
+                            
+                            final Long sharesRequested = this.fromApiJsonHelper.extractLongNamed(ShareAccountApiConstants.requestedshares_paramname, shareElement);
+                            
+                            if(!account.status().equals(ShareAccountStatusType.ACTIVE.getValue())) {
+                                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("is.not.in.active.state") ;
+                            }
+                            ShareProduct shareProduct = account.getShareProduct();
+                            if (sharesRequested != null) {
+                                Long totalSharesAfterapproval = account.getTotalApprovedShares() + sharesRequested;
+                                if(shareProduct.getMaximumClientShares() != null && totalSharesAfterapproval > shareProduct.getMaximumClientShares()) {
+                                    baseDataValidator.reset().parameter(ShareAccountApiConstants.requestedshares_paramname).value(sharesRequested)
+                                    .failWithCode("exceeding.maximum.limit.defined.in.the.shareproduct", "Existing and requested shares count is more than product definition");
+                                }
+                            }
+                        
+                        
+                       // final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(jsonCommand, actualChanges);
+                        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+                        final BigDecimal unitPrice = shareProduct.deriveMarketPrice(requestedDate.toDate());        
+                        purchaseTransaction = new ShareAccountTransaction(requestedDate.toDate(), sharesRequested, unitPrice);
+                        account.addAdditionalPurchasedShares(purchaseTransaction);
+                        handleAdditionalSharesChargeTransactions(account, purchaseTransaction);
+                        actualChanges.put(ShareAccountApiConstants.additionalshares_paramname, purchaseTransaction);
+                  }
+              }
+        }else{
+            if(!account.status().equals(ShareAccountStatusType.ACTIVE.getValue())) {
+                baseDataValidator.failWithCodeNoParameterAddedToErrorCode("is.not.in.active.state") ;
+            }
+            
+                LocalDate requestedDate = this.fromApiJsonHelper.extractLocalDateNamed(ShareAccountApiConstants.requesteddate_paramname, element);
+                baseDataValidator.reset().parameter(ShareAccountApiConstants.requesteddate_paramname).value(requestedDate).notNull();
+                final Long sharesRequested = this.fromApiJsonHelper.extractLongNamed(ShareAccountApiConstants.requestedshares_paramname, element);
+                baseDataValidator.reset().parameter(ShareAccountApiConstants.requestedshares_paramname).value(sharesRequested).notNull();
+                ShareProduct shareProduct = account.getShareProduct();
+                if (sharesRequested != null) {
+                    Long totalSharesAfterapproval = account.getTotalApprovedShares() + sharesRequested;
+                   if(shareProduct.getMaximumClientShares() != null && totalSharesAfterapproval > shareProduct.getMaximumClientShares()) {
+                        baseDataValidator.reset().parameter(ShareAccountApiConstants.requestedshares_paramname).value(sharesRequested)
+                        .failWithCode("exceeding.maximum.limit.defined.in.the.shareproduct", "Existing and requested shares count is more than product definition");
+                    }
+                }
+            
+            
+           // final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(jsonCommand, actualChanges);
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            final BigDecimal unitPrice = shareProduct.deriveMarketPrice(requestedDate.toDate());        
+            purchaseTransaction = new ShareAccountTransaction(requestedDate.toDate(), sharesRequested, unitPrice);
+            account.addAdditionalPurchasedShares(purchaseTransaction);
+            handleAdditionalSharesChargeTransactions(account, purchaseTransaction);
+            actualChanges.put(ShareAccountApiConstants.additionalshares_paramname, purchaseTransaction);
+        }
+       // return actualChanges;
+         //Approving the applied shares
+            long totalShares = 0;
+
+            if (purchaseTransaction != null){
+            validateTotalSubsribedShares(account, purchaseTransaction, baseDataValidator) ;
+            totalShares += purchaseTransaction.getTotalShares().longValue();
+            purchaseTransaction.approve();
+          }
+         //purchasedShares.add(purchaseTransaction);
+            
+            if (totalShares > 0) {
+                account.updateApprovedShares(new Long(totalShares));
+            }
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        actualChanges.put(ShareAccountApiConstants.requestedshares_paramname, purchaseTransaction);
+        return actualChanges;
+    }
+
+
 
     private void updateTotalChargeDerivedForAdditonalSharesReject(final ShareAccount shareAccount, final ShareAccountTransaction transaction) {
         Set<ShareAccountChargePaidBy> paidBySet = transaction.getChargesPaidBy();

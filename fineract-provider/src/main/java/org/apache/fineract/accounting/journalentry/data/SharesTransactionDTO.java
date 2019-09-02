@@ -41,9 +41,11 @@ public class SharesTransactionDTO {
     /** Breakdowns of fees and penalties this Transaction pays **/
     private final List<ChargePaymentDTO> feePayments;
 
+    private final boolean isAccountTransfer;
+
     public SharesTransactionDTO(final Long officeId, final Long paymentTypeId, final String transactionId, final Date transactionDate,
             final ShareAccountTransactionEnumData transactionType, ShareAccountTransactionEnumData transactionStatus,
-            final BigDecimal amount, final BigDecimal chargeAmount, final List<ChargePaymentDTO> feePayments) {
+            final BigDecimal amount, final BigDecimal chargeAmount, final List<ChargePaymentDTO> feePayments, boolean isAccountTransfer) {
         this.paymentTypeId = paymentTypeId;
         this.transactionId = transactionId;
         this.transactionDate = transactionDate;
@@ -53,6 +55,7 @@ public class SharesTransactionDTO {
         this.transactionStatus = transactionStatus;
         this.feePayments = feePayments;
         this.officeId = officeId;
+        this.isAccountTransfer = isAccountTransfer;
     }
 
     public Long getOfficeId() {
@@ -89,6 +92,10 @@ public class SharesTransactionDTO {
 
     public BigDecimal getChargeAmount() {
         return this.chargeAmount;
+    }
+
+    public boolean isAccountTransfer(){
+       return this.isAccountTransfer;
     }
 
 }

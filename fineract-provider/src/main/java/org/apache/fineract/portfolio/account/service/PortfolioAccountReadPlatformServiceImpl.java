@@ -47,6 +47,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
     private final PortfolioSavingsAccountMapper savingsAccountMapper;
     private final PortfolioLoanAccountMapper loanAccountMapper;
     private final PortfolioLoanAccountRefundByTransferMapper accountRefundByTransferMapper;
+    private final PortfolioShareAccountMapper shareAccountMapper;
 
     @Autowired
     public PortfolioAccountReadPlatformServiceImpl(final RoutingDataSource dataSource) {
@@ -54,6 +55,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
         this.savingsAccountMapper = new PortfolioSavingsAccountMapper();
         this.loanAccountMapper = new PortfolioLoanAccountMapper();
         this.accountRefundByTransferMapper = new PortfolioLoanAccountRefundByTransferMapper();
+        this.shareAccountMapper = new PortfolioShareAccountMapper();
     }
 
     @Override
@@ -90,6 +92,15 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                     }
 
                     accountData = this.jdbcTemplate.queryForObject(sql, this.savingsAccountMapper, sqlParams);
+                break;
+                case SHARES:
+                    sql = "select " + this.shareAccountMapper.schema() + " where sh.id = ?";
+                    if (currencyCode != null) {
+                        sql += " and sh.currency_code = ?";
+                        sqlParams = new Object[] { accountId, currencyCode };
+                    }
+
+                    accountData = this.jdbcTemplate.queryForObject(sql, this.shareAccountMapper, sqlParams);
                 break;
                 default:
                 break;
@@ -162,6 +173,21 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                 }
                 
                 accounts = this.jdbcTemplate.query(sql, this.savingsAccountMapper, sqlParams.toArray());
+            break;
+            case SHARES:
+                sql = "select " + this.shareAccountMapper.schema() + " where ";
+                if (portfolioAccountDTO.getClientId() != null) {
+                    sql += " sh.client_id = ? and sh.status_enum in (" + defaultAccountStatus.toString() + ") ";
+                    sqlParams.add(portfolioAccountDTO.getClientId());
+                } else {
+                    sql += " sh.status_enum in (" + defaultAccountStatus.toString() + ") ";
+                }                if (portfolioAccountDTO.getCurrencyCode() != null) {
+                    sql += " and sh.currency_code = ?";
+                    sqlParams.add(portfolioAccountDTO.getCurrencyCode());
+                }
+
+                accounts = this.jdbcTemplate.query(sql, this.shareAccountMapper, sqlParams.toArray());
+
             break;
             default:
             break;
@@ -373,6 +399,61 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                     fieldOfficerId, fieldOfficerName, currency, amtForTransfer);
         }
     }
+
+    private static final class PortfolioShareAccountMapper implements RowMapper<PortfolioAccountData> {
+
+        private final String schemaSql;
+
+        public PortfolioShareAccountMapper() {
+
+            final StringBuilder sqlBuilder = new StringBuilder(400);
+            sqlBuilder.append("sh.id as id, sh.account_no as accountNo, sh.external_id as externalId, ");
+            sqlBuilder.append("c.id as clientId, c.display_name as clientName, ");
+            sqlBuilder.append("sp.id as productId, sp.name as productName, ");
+            sqlBuilder.append("sh.currency_code as currencyCode, sh.currency_digits as currencyDigits,");
+            sqlBuilder.append("sh.currency_multiplesof as inMultiplesOf, ");
+            sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
+            sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol ");
+            sqlBuilder.append("from m_share_account sh ");
+            sqlBuilder.append("join m_share_product sp ON sh.product_id = sp.id ");
+            sqlBuilder.append("join m_currency curr on curr.code = sh.currency_code ");
+            sqlBuilder.append("left join m_client c ON c.id = sh.client_id ");
+
+            this.schemaSql = sqlBuilder.toString();
+        }
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        @Override
+        public PortfolioAccountData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = rs.getLong("id");
+            final String accountNo = rs.getString("accountNo");
+            final String externalId = rs.getString("externalId");
+
+            final Long clientId = JdbcSupport.getLong(rs, "clientId");
+            final String clientName = rs.getString("clientName");
+
+            final Long productId = rs.getLong("productId");
+            final String productName = rs.getString("productName");
+
+            final String currencyCode = rs.getString("currencyCode");
+            final String currencyName = rs.getString("currencyName");
+            final String currencyNameCode = rs.getString("currencyNameCode");
+            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+            final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMulitplesOf,
+                    currencyDisplaySymbol, currencyNameCode);
+
+            return new PortfolioAccountData(id, accountNo, externalId, null, null, clientId, clientName, productId, productName,
+                    null, null, currency);
+        }
+    }
+
+
     
     @Override
     public PortfolioAccountData retrieveOneByPaidInAdvance(Long accountId, Integer accountTypeId) {

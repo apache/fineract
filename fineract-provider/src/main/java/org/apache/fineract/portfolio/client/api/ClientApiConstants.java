@@ -190,6 +190,16 @@ public class ClientApiConstants {
 
     public static final String clientEntityName = "clients";
 
+    public static final  String sharesParamName = "shares";
+    public static final  String shareAccountIdParamName = "shareAccountId";
+    public static final  String shareAmountParamName = "shareAmount";
+     
+    //Share transactions constants;
+    public static final  String requestedshares_paramname = "requestedShares";
+    public static final  String requesteddate_paramname = "requestedDate";
+    public static final  String chargeAccountIdParamName = "chargeAccountId";
+    public static final  String totalAmountPaidParamName = "totalAmountPaid";
+
     /**
      * These parameters will match the class level parameters of
      * {@link ClientData}. Where possible, we try to get response parameters to

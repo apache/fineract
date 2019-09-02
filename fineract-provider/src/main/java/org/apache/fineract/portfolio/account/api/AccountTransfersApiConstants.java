@@ -25,6 +25,7 @@ import java.util.Set;
 import org.apache.fineract.portfolio.account.AccountDetailConstants;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
 
+
 public class AccountTransfersApiConstants {
 
     public static final String ACCOUNT_TRANSFER_RESOURCE_NAME = "accounttransfer";
@@ -34,6 +35,8 @@ public class AccountTransfersApiConstants {
     public static final String transferAmountParamName = "transferAmount";
     public static final String transferDescriptionParamName = "transferDescription";
     public static final String currencyParamName = "currency";
+    public static final String requestedshares_paramname = "requestedShares";
+    public static final String requesteddate_paramname = "requestedDate";
 
     /**
      * These parameters will match the class level parameters of
@@ -41,5 +44,5 @@ public class AccountTransfersApiConstants {
      * parameters to match those of request parameters.
      */
 	protected static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(AccountDetailConstants.idParamName, transferDescriptionParamName, currencyParamName));
+			Arrays.asList(AccountDetailConstants.idParamName, requestedshares_paramname, requesteddate_paramname, transferDescriptionParamName, currencyParamName));
 }
