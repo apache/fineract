@@ -64,8 +64,8 @@ dependencies {
 
                 // no slf4j & logback here (anymore), as spring-boot-starter-logging already brings this now, better assembled (log4j-over-slf4j was originally forgotten here)
 
-                //[group: 'mysql', name: 'mysql-connector-java', version: '5.1.27'],
-                [group: 'org.drizzle.jdbc', name: 'drizzle-jdbc', version: '1.4'],
+                [group: 'mysql', name: 'mysql-connector-java', version: '8.0.17'],
+                //[group: 'org.drizzle.jdbc', name: 'drizzle-jdbc', version: '1.4'],
                // [group: 'org.apache.tomcat', name: 'tomcat-jdbc', version: tomcatVersion],
 
 
@@ -92,17 +92,21 @@ dependencies {
                 [group: 'io.swagger', name: 'swagger-jersey-jaxrs', version: '1.5.15'],
                 [group: 'org.springframework', name:'spring-jms', version: '4.0.7.RELEASE'],
                 [group: 'org.apache.activemq', name: 'activemq-broker', version: '5.9.1'],
-                [group: 'javax.validation', name: 'validation-api', version: '2.0.0.Final']
+                [group: 'javax.validation', name: 'validation-api', version: '2.0.0.Final'],
+
+    		    [group: 'junit', name: 'junit', version: '4.11'],
+    		    [group: 'junit', name: 'junit-dep', version: '4.11', ext: 'pom'],
+    		    [group: 'com.jayway.restassured', name: 'rest-assured', version: '2.3.4'],
+    		    'org.mockito:mockito-core:1.9.5'
     )
 
      implementation 'org.apache.bval:org.apache.bval.bundle:2.0.2'
 
-     testCompile 'junit:junit:4.11',
-                 'junit:junit-dep:4.11',
-                 'org.mockito:mockito-core:1.9.5',
-                 'com.jayway.restassured:rest-assured:2.3.3',
+     testCompile 'org.mockito:mockito-core:1.9.5',
+            	 [group: 'junit', name: 'junit', version: '4.11'],
+            	 [group: 'junit', name: 'junit-dep', version: '4.11', ext: 'pom'],
+            	 [group: 'com.jayway.restassured', name: 'rest-assured', version: '2.3.4'],
                  [group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion],
                  [group: 'com.mockrunner', name: 'mockrunner-jms', version: '1.0.6'],
                  [group: 'com.mockrunner', name: 'mockrunner-jdbc', version: '1.0.6']
-
 }
