@@ -17,5 +17,9 @@
 -- under the License.
 --
 
-INSERT	INTO `m_permission` (`grouping`,code,`entity_name`,`action_name`,`can_maker_checker`)
-values('portfolio_group','ASSIGNSTAFF_GROUP','GROUP','ASSIGNSTAFF',0);
+--
+-- Updating data for table `tenants`
+--
+
+UPDATE `tenants` SET `schema_name`= 'mifostenant-default?serverTimezone=UTC' where id=1;
+
