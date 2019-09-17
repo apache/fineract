@@ -206,10 +206,10 @@ public enum SavingsAccountTransactionType {
     }
 
     public boolean isDebit() {
-        return isWithdrawal() || isWithdrawalFee() || isAnnualFee() || isPayCharge() || isIncomeFromInterest() || isWithHoldTax() || isEscheat() || isAmountOnHold();
+        return isWithdrawal() || isWithdrawalFee() || isAnnualFee() || isPayCharge() || isIncomeFromInterest() || isWithHoldTax() || isEscheat();
     }
 
     public boolean isCredit() {
-        return isDeposit() || isInterestPosting() || isDividendPayout() || isAmountRelease();
+        return isDeposit() || isInterestPosting() || isDividendPayout();
     }
 }
