@@ -57,6 +57,7 @@ import org.apache.fineract.useradministration.domain.UserDomainService;
 import org.apache.fineract.useradministration.exception.PasswordPreviouslyUsedException;
 import org.apache.fineract.useradministration.exception.RoleNotFoundException;
 import org.apache.fineract.useradministration.exception.UserNotFoundException;
+import org.apache.fineract.useradministration.exception.IncorrectPasswordException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -216,6 +217,28 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             	clients = this.clientRepositoryWrapper.findAll(clientIds);
             }
 
+            final String passwordParamName = "password";
+            final String currentPasswordParamName = "currentPassword";
+            final String currentPasswordEncodedValue = command.passwordValueOfParameterNamed(currentPasswordParamName, platformPasswordEncoder,
+                        userToUpdate.getId());
+            AppUser currentUser = getAppUserIfPresent();
+
+            if (command.hasParameter(passwordParamName)) {
+            for(String id : currentUser.getRolesAsIdStringArray()) {
+                if (!id.equals("1")){
+            if (!currentPasswordEncodedValue.equals(userToUpdate.getPassword())){
+                     
+                  throw new IncorrectPasswordException();
+
+             }
+
+            }
+
+            break;
+
+            }
+          }
+
             final Map<String, Object> changes = userToUpdate.update(command, this.platformPasswordEncoder, clients);
 
             this.topicDomainService.updateUserSubscription(userToUpdate, changes);
@@ -266,6 +289,14 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                     .build();
         }
     }
+
+     private AppUser getAppUserIfPresent() {
+        AppUser user = null;
+        if (this.context != null) {
+            user = this.context.getAuthenticatedUserIfPresent();
+        }
+        return user;
+        }
 
     /**
      * encode the new submitted password retrieve the last n used password check

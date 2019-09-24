@@ -230,7 +230,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         final String passwordEncodedParamName = "passwordEncoded";
         if (command.hasParameter(passwordParamName)) {
             if (command.isChangeInPasswordParameterNamed(passwordParamName, this.password, platformPasswordEncoder, getId())) {
-                final String passwordEncodedValue = command.passwordValueOfParameterNamed(passwordParamName, platformPasswordEncoder,
+                String passwordEncodedValue = command.passwordValueOfParameterNamed(passwordParamName, platformPasswordEncoder,
                         getId());
                 actualChanges.put(passwordEncodedParamName, passwordEncodedValue);
                 updatePassword(passwordEncodedValue);
@@ -329,7 +329,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         return actualChanges;
     }
 
-    private String[] getRolesAsIdStringArray() {
+    public String[] getRolesAsIdStringArray() {
         final List<String> roleIds = new ArrayList<>();
 
         for (final Role role : this.roles) {

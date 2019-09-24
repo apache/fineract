@@ -64,7 +64,7 @@ public class UsersApiResource {
      * {@link AppUserData}.
      */
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "officeId", "officeName", "username",
-            "firstname", "lastname", "email", "allowedOffices", "availableRoles", "selectedRoles", "staff"));
+            "firstname", "lastname", "email", "allowedOffices", "availableRoles", "selectedRoles", "staff", "currentPassword"));
 
     private final String resourceNameForPermissions = "USER";
 
