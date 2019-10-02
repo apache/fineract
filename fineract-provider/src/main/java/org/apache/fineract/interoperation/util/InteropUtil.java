@@ -64,6 +64,8 @@ public class InteropUtil {
     public static final String PARAM_SUB_SCENARIO = "subScenario";
     public static final String PARAM_INITIATOR = "initiator";
     public static final String PARAM_INITIATOR_TYPE = "initiatorType";
+    public static final String PARAM_REFUND_INFO = "refundInfo";
+    public static final String PARAM_BALANCE_OF_PAYMENTS = "balanceOfPayments";
     public static final String PARAM_EXPIRATION = "expiration";
 
     public static final String PARAM_LATITUDE = "latitude";
