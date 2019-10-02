@@ -29,6 +29,8 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.springframework.jdbc.support.JdbcUtils;
 
+import static org.apache.fineract.infrastructure.core.service.DateUtils.getDateTimeZoneOfTenant;
+
 /**
  * Support for retrieving possibly null values from jdbc recordset delegating to
  * springs {@link JdbcUtils} where possible.
@@ -40,6 +42,15 @@ public class JdbcSupport {
         final Timestamp dateValue = rs.getTimestamp(columnName);
         if (dateValue != null) {
             dateTime = new DateTime(dateValue.getTime());
+        }
+        return dateTime;
+    }
+
+    public static DateTime getLocalDateTime(final ResultSet rs, final String columnName) throws SQLException {
+        DateTime dateTime = null;
+        final Timestamp dateValue = rs.getTimestamp(columnName);
+        if (dateValue != null) {
+            dateTime = new DateTime(dateValue.getTime()).withZone(getDateTimeZoneOfTenant());
         }
         return dateTime;
     }

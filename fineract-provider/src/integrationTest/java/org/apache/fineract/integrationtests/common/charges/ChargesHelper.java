@@ -275,10 +275,10 @@ public class ChargesHelper {
         return chargesCreateJson;
     }
     
-    public static String getLoanOverdueFeeJSONWithCalculattionTypePercentage() {
+    public static String getLoanOverdueFeeJSONWithCalculattionTypePercentage(String penaltyPercentageAmount) {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("penalty", ChargesHelper.penalty);
-        map.put("amount", "10");
+        map.put("amount", penaltyPercentageAmount);
         map.put("chargePaymentMode", ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
         map.put("chargeTimeType", CHARGE_OVERDUE_INSTALLMENT_FEE);
         map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST);

@@ -27,14 +27,12 @@ jdk:
 services:
   - mysql
 
-# Hardcoding system time as a temporary fix for running buggy test cases
 before_install:
   - echo "USE mysql;\nUPDATE user SET password=PASSWORD('mysql') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
   - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `mifosplatform-tenants`;'
   - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `mifostenant-default`;'
+# Hardcoding the time zone is a temporary fix for https://issues.apache.org/jira/browse/FINERACT-723
   - export TZ=Asia/Kolkata
-  - sudo service ntp stop
-  - sudo date --set="23 February 2019 01:02:03"
 
 # https://docs.travis-ci.com/user/languages/java/#caching
 before_cache:
@@ -53,5 +51,6 @@ cache:
 # https://jira.apache.org/jira/browse/FINERACT-732 removed that again, because it made Travis CI fail.
 script:
   - date
-  - ./gradlew --console=plain licenseMain licenseTest licenseIntegrationTest test
-  - ./gradlew --console=plain clean integrationTest
+  - ./gradlew --console=plain licenseMain licenseTest licenseIntegrationTest test  &&  ./gradlew --console=plain integrationTest
+# using "&&" instead of x2 "-" means that integrationTest does not run if test fails, which makes sense.
+# @see https://docs.travis-ci.com/user/job-lifecycle/#customizing-the-build-phase

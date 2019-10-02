@@ -106,6 +106,12 @@ public class LoanTransactionHelper {
         return (ArrayList) response.get("periods");
     }
 
+    public ArrayList getLoanCharges(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer loanID) {
+        final String URL = "/fineract-provider/api/v1/loans/" + loanID + "?associations=charges&" + Utils.TENANT_IDENTIFIER;
+        return (ArrayList)  Utils.performServerGet(requestSpec, responseSpec, URL, "charges");
+    }
+
     public ArrayList getLoanFutureRepaymentSchedule(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final Integer loanID) {
         final String URL = "/fineract-provider/api/v1/loans/" + loanID + "?associations=repaymentSchedule,futureSchedule&"

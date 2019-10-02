@@ -2490,6 +2490,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
                 final LoanCharge loanCharge = LoanCharge.createNewFromJson(loan, chargeDefinition, command, entry.getValue());
 
+                if (BigDecimal.ZERO.compareTo(loanCharge.amount()) == 0) {
+                    continue;
+                }
                 LoanOverdueInstallmentCharge overdueInstallmentCharge = new LoanOverdueInstallmentCharge(loanCharge, installment,
                         entry.getKey());
                 loanCharge.updateOverdueInstallmentCharge(overdueInstallmentCharge);
