@@ -25,6 +25,10 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
     ports:
       - "3306:3306"
   fineract-server:
