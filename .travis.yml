@@ -26,6 +26,7 @@ jdk:
 
 services:
   - mysql
+  - docker
 
 before_install:
   - echo "USE mysql;\nUPDATE user SET password=PASSWORD('mysql') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
@@ -52,5 +53,6 @@ cache:
 script:
   - date
   - ./gradlew --console=plain licenseMain licenseTest licenseIntegrationTest test  &&  ./gradlew --console=plain integrationTest
+  - docker-compose build  &&  docker-compose up -d  &&  sleep 5s  &&  http --verify no --timeout 240 --check-status get https://localhost:8443/fineract-provider/health
 # using "&&" instead of x2 "-" means that integrationTest does not run if test fails, which makes sense.
 # @see https://docs.travis-ci.com/user/job-lifecycle/#customizing-the-build-phase

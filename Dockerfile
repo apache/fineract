@@ -23,7 +23,7 @@ COPY . fineract
 WORKDIR fineract
 ARG mysqlserver=fineractmysql
 RUN sed -i "s/localhost/${mysqlserver}/" ./fineract-provider/src/main/resources/sql/migrations/list_db/V1__mifos-platform-shared-tenants.sql
-RUN ./gradlew clean war
+RUN ./gradlew clean -x test war
 
 
 FROM bitnami/tomcat:7.0.94 as fineract
