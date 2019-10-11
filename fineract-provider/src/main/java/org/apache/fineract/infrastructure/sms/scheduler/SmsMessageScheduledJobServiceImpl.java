@@ -135,7 +135,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                         }
                     }
                     if(toSaveMessages.size()>0){
-                    	this.smsMessageRepository.save(toSaveMessages);
+                    	this.smsMessageRepository.saveAll(toSaveMessages);
                         this.smsMessageRepository.flush();
                         this.genericExecutorService.execute(new SmsTask(ThreadLocalContextUtil.getTenant(), apiQueueResourceDatas));
                     }                    
@@ -214,7 +214,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                         }
                     }
                     if(toSaveMessages.size()>0){
-                        this.smsMessageRepository.save(toSaveMessages);
+                        this.smsMessageRepository.saveAll(toSaveMessages);
                         this.smsMessageRepository.flush();
                         this.triggeredExecutorService.execute(new SmsTask(ThreadLocalContextUtil.getTenant(), apiQueueResourceDatas));
                     }
@@ -243,7 +243,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                 apiQueueResourceDatas.add(apiQueueResourceData);
                 smsMessage.setStatusType(SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue());
             }
-            this.smsMessageRepository.save(smsMessages);
+            this.smsMessageRepository.saveAll(smsMessages);
             request.append(SmsMessageApiQueueResourceData.toJsonString(apiQueueResourceDatas));
             logger.info("Sending triggered SMS to specific provider with request - " + request.toString());
             this.triggeredExecutorService.execute(new SmsTask(ThreadLocalContextUtil.getTenant(),
@@ -285,9 +285,9 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
 
                         if (!smsMessageDeliveryReportData.getHasError()
                                 && (deliveryStatus != 100)) {
-                            SmsMessage smsMessage = this.smsMessageRepository.findOne(smsMessageDeliveryReportData.getId());
-                            Integer statusType = smsMessage.getStatusType();
-                            boolean statusChanged = false;
+                            SmsMessage smsMessage = this.smsMessageRepository.findById(smsMessageDeliveryReportData.getId()).orElse(null);
+                            Integer statusType;
+                            boolean statusChanged;
 
                             switch (deliveryStatus) {
                                 case 0:

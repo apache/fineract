@@ -33,11 +33,8 @@ public class ShareAccountRepositoryWrapper {
 	}
 	
 	public ShareAccount findOneWithNotFoundDetection(final Long accountId) {
-		ShareAccount account = this.shareAccountRepository.findOne(accountId) ;
-		if(account == null) {
-			throw new ShareAccountNotFoundException(accountId) ;
-		}
-		return account ;
+		return this.shareAccountRepository.findById(accountId)
+				.orElseThrow(() -> new ShareAccountNotFoundException(accountId));
 	}
 	public void save(final ShareAccount shareAccount) {
 		this.shareAccountRepository.save(shareAccount) ;

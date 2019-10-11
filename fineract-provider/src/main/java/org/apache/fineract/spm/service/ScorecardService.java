@@ -46,7 +46,7 @@ public class ScorecardService {
     public List<Scorecard> createScorecard(final List<Scorecard> scorecards) {
         this.securityContext.authenticatedUser();
 
-        return this.scorecardRepository.save(scorecards);
+        return this.scorecardRepository.saveAll(scorecards);
     }
 
     public List<Scorecard> findBySurvey(final Survey survey) {

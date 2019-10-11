@@ -175,8 +175,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     private LoanTransactionProcessingStrategy findStrategyByIdIfProvided(final Long transactionProcessingStrategyId) {
         LoanTransactionProcessingStrategy strategy = null;
         if (transactionProcessingStrategyId != null) {
-            strategy = this.loanTransactionProcessingStrategyRepository.findOne(transactionProcessingStrategyId);
-            if (strategy == null) { throw new LoanTransactionProcessingStrategyNotFoundException(transactionProcessingStrategyId); }
+            return this.loanTransactionProcessingStrategyRepository.findById(transactionProcessingStrategyId)
+                    .orElseThrow(() -> new LoanTransactionProcessingStrategyNotFoundException(transactionProcessingStrategyId));
         }
         return strategy;
     }
@@ -184,8 +184,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     private Fund findFundByIdIfProvided(final Long fundId) {
         Fund fund = null;
         if (fundId != null) {
-            fund = this.fundRepository.findOne(fundId);
-            if (fund == null) { throw new FundNotFoundException(fundId); }
+            fund = this.fundRepository.findById(fundId)
+                    .orElseThrow(() -> new FundNotFoundException(fundId));
         }
         return fund;
     }
@@ -197,8 +197,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         try {
             this.context.authenticatedUser();
 
-            final LoanProduct product = this.loanProductRepository.findOne(loanProductId);
-            if (product == null) { throw new LoanProductNotFoundException(loanProductId); }
+            final LoanProduct product = this.loanProductRepository.findById(loanProductId)
+                    .orElseThrow(() -> new LoanProductNotFoundException(loanProductId));
 
             this.fromApiJsonDeserializer.validateForUpdate(command.json(), product);
             validateInputDates(command);

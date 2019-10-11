@@ -66,7 +66,7 @@ dependencies {
 
                 //[group: 'mysql', name: 'mysql-connector-java', version: '5.1.27'],
                 [group: 'org.drizzle.jdbc', name: 'drizzle-jdbc', version: '1.4'],
-               // [group: 'org.apache.tomcat', name: 'tomcat-jdbc', version: tomcatVersion],
+                [group: 'org.apache.tomcat', name: 'tomcat-jdbc', version: tomcatVersion],
 
 
                 [group: 'org.apache.poi',name: 'poi', version: '3.9'],
@@ -101,8 +101,10 @@ dependencies {
                  'junit:junit-dep:4.11',
                  'org.mockito:mockito-core:1.9.5',
                  'com.jayway.restassured:rest-assured:2.3.3',
-                 [group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion],
                  [group: 'com.mockrunner', name: 'mockrunner-jms', version: '1.0.6'],
                  [group: 'com.mockrunner', name: 'mockrunner-jdbc', version: '1.0.6']
 
+    testCompile ("org.springframework.boot:spring-boot-starter-test:$springBootVersion") {
+        exclude group: 'com.jayway.jsonpath', module: 'json-path'
+    }
 }

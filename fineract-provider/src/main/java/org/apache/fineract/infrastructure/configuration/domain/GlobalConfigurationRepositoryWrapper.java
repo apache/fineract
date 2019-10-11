@@ -45,9 +45,8 @@ public class GlobalConfigurationRepositoryWrapper {
     }
 
     public GlobalConfigurationProperty findOneWithNotFoundDetection(final Long configId) {
-        final GlobalConfigurationProperty property = this.repository.findOne(configId);
-        if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(configId); }
-        return property;
+        return this.repository.findById(configId)
+                .orElseThrow(() -> new GlobalConfigurationPropertyNotFoundException(configId));
     }
 
     public void save(final GlobalConfigurationProperty globalConfigurationProperty) {

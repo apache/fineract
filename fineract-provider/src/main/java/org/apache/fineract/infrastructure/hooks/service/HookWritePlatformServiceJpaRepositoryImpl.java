@@ -123,10 +123,8 @@ public class HookWritePlatformServiceJpaRepositoryImpl
             if (command.hasParameter(templateIdParamName)) {
                 final Long ugdTemplateId = command
                         .longValueOfParameterNamed(templateIdParamName);
-                ugdTemplate = this.ugdTemplateRepository.findOne(ugdTemplateId);
-                if (ugdTemplate == null) {
-                    throw new TemplateNotFoundException(ugdTemplateId);
-                }
+                ugdTemplate = this.ugdTemplateRepository.findById(ugdTemplateId)
+                        .orElseThrow(() -> new TemplateNotFoundException(ugdTemplateId));
             }
             final Hook hook = Hook.fromJson(command, template, config,
                     allEvents, ugdTemplate);
@@ -168,8 +166,7 @@ public class HookWritePlatformServiceJpaRepositoryImpl
                 if (changes.containsKey(templateIdParamName)) {
                     final Long ugdTemplateId = command
                             .longValueOfParameterNamed(templateIdParamName);
-                    final Template ugdTemplate = this.ugdTemplateRepository
-                            .findOne(ugdTemplateId);
+                    final Template ugdTemplate = this.ugdTemplateRepository.findById(ugdTemplateId).orElse(null);
                     if (ugdTemplate == null) {
                         changes.remove(templateIdParamName);
                         throw new TemplateNotFoundException(ugdTemplateId);
@@ -236,11 +233,8 @@ public class HookWritePlatformServiceJpaRepositoryImpl
     }
 
     private Hook retrieveHookBy(final Long hookId) {
-        final Hook hook = this.hookRepository.findOne(hookId);
-        if (hook == null) {
-            throw new HookNotFoundException(hookId);
-        }
-        return hook;
+        return this.hookRepository.findById(hookId)
+                .orElseThrow(() -> new HookNotFoundException(hookId));
     }
 
     private HookTemplate retrieveHookTemplateBy(final String templateName) {

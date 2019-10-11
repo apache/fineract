@@ -335,8 +335,8 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
         for (final String creditOrDebitTag : creditOrDebitTagArray) {
             if (creditOrDebitTag != null && StringUtils.isNotBlank(creditOrDebitTag)) {
                 final Long creditOrDebitTagIdLongValue = Long.valueOf(creditOrDebitTag);
-                final CodeValue creditOrDebitAccount = this.codeValueRepository.findOne(creditOrDebitTagIdLongValue);
-                if (creditOrDebitAccount == null) { throw new CodeValueNotFoundException(creditOrDebitTagIdLongValue); }
+                final CodeValue creditOrDebitAccount = this.codeValueRepository.findById(creditOrDebitTagIdLongValue)
+                        .orElseThrow(() -> new CodeValueNotFoundException(creditOrDebitTagIdLongValue));
                 final AccountingTagRule accountingTagRule = AccountingTagRule.create(creditOrDebitAccount, transactionType.getValue());
                 accountingTagRules.add(accountingTagRule);
             }

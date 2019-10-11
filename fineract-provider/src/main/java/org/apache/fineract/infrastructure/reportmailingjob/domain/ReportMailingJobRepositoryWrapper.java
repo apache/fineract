@@ -38,9 +38,10 @@ public class ReportMailingJobRepositoryWrapper {
      * @return ReportMailingJob object
      **/
     public ReportMailingJob findOneThrowExceptionIfNotFound(final Long id) {
-        final ReportMailingJob reportMailingJob = this.reportMailingJobRepository.findOne(id);
+        final ReportMailingJob reportMailingJob = this.reportMailingJobRepository.findById(id)
+                .orElseThrow(() -> new ReportMailingJobNotFoundException(id));
         
-        if (reportMailingJob == null || reportMailingJob.isDeleted()) {
+        if (reportMailingJob.isDeleted()) {
             throw new ReportMailingJobNotFoundException(id);
         }
         

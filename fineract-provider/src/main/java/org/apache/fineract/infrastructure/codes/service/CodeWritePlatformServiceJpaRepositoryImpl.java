@@ -135,9 +135,8 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
     }
 
     private Code retrieveCodeBy(final Long codeId) {
-        final Code code = this.codeRepository.findOne(codeId);
-        if (code == null) { throw new CodeNotFoundException(codeId.toString()); }
-        return code;
+        return this.codeRepository.findById(codeId)
+                .orElseThrow(() -> new CodeNotFoundException(codeId.toString()));
     }
 
     /*
