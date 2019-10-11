@@ -116,8 +116,9 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 
         this.context.authenticatedUser();
 
-        final AppUser user = this.appUserRepository.findOne(userId);
-        if (user == null || user.isDeleted()) { throw new UserNotFoundException(userId); }
+        final AppUser user = this.appUserRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        if (user.isDeleted()) { throw new UserNotFoundException(userId); }
 
         final Collection<RoleData> availableRoles = this.roleReadPlatformService.retrieveAll();
 

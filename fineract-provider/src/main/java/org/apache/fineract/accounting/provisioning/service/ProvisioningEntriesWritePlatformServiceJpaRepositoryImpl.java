@@ -104,8 +104,8 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
 
     @Override
     public CommandProcessingResult createProvisioningJournalEntries(Long provisioningEntryId, JsonCommand command) {
-        ProvisioningEntry requestedEntry = this.provisioningEntryRepository.findOne(provisioningEntryId);
-        if (requestedEntry == null) { throw new ProvisioningEntryNotfoundException(provisioningEntryId); }
+        ProvisioningEntry requestedEntry = this.provisioningEntryRepository.findById(provisioningEntryId)
+                .orElseThrow(() -> new ProvisioningEntryNotfoundException(provisioningEntryId));
 
         ProvisioningEntryData exisProvisioningEntryData = this.provisioningEntriesReadPlatformService
                 .retrieveExistingProvisioningIdDateWithJournals();
@@ -205,8 +205,8 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
 
     @Override
     public CommandProcessingResult reCreateProvisioningEntries(Long provisioningEntryId, JsonCommand command) {
-        ProvisioningEntry requestedEntry = this.provisioningEntryRepository.findOne(provisioningEntryId);
-        if (requestedEntry == null) { throw new ProvisioningEntryNotfoundException(provisioningEntryId); }
+        ProvisioningEntry requestedEntry = this.provisioningEntryRepository.findById(provisioningEntryId)
+                .orElseThrow(() -> new ProvisioningEntryNotfoundException(provisioningEntryId));
         requestedEntry.getLoanProductProvisioningEntries().clear();
         this.provisioningEntryRepository.save(requestedEntry);
         Collection<LoanProductProvisioningEntry> entries = generateLoanProvisioningEntry(requestedEntry, requestedEntry.getCreatedDate());
@@ -220,11 +220,11 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
                 .retrieveLoanProductsProvisioningData(date);
         Map<LoanProductProvisioningEntry, LoanProductProvisioningEntry> provisioningEntries = new HashMap<>();
         for (LoanProductProvisioningEntryData data : entries) {
-            LoanProduct loanProduct = this.loanProductRepository.findOne(data.getProductId());
+            LoanProduct loanProduct = this.loanProductRepository.findById(data.getProductId()).get();
             Office office = this.officeRepositoryWrapper.findOneWithNotFoundDetection(data.getOfficeId());
-            ProvisioningCategory provisioningCategory = provisioningCategoryRepository.findOne(data.getCategoryId());
-            GLAccount liabilityAccount = glAccountRepository.findOne(data.getLiablityAccount());
-            GLAccount expenseAccount = glAccountRepository.findOne(data.getExpenseAccount());
+            ProvisioningCategory provisioningCategory = provisioningCategoryRepository.findById(data.getCategoryId()).get();
+            GLAccount liabilityAccount = glAccountRepository.findById(data.getLiablityAccount()).get();
+            GLAccount expenseAccount = glAccountRepository.findById(data.getExpenseAccount()).get();
             MonetaryCurrency currency = loanProduct.getPrincipalAmount().getCurrency();
             Money money = Money.of(currency, data.getOutstandingBalance());
             Money amountToReserve = money.percentageOf(data.getPercentage(), MoneyHelper.getRoundingMode());

@@ -104,7 +104,7 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
         changes.put("currencies", allowedCurrencyCodes.toArray(new String[allowedCurrencyCodes.size()]));
 
         this.organisationCurrencyRepository.deleteAll();
-        this.organisationCurrencyRepository.save(allowedCurrencies);
+        this.organisationCurrencyRepository.saveAll(allowedCurrencies);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

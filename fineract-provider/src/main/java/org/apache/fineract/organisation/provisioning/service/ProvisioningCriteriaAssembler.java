@@ -74,7 +74,7 @@ public class ProvisioningCriteriaAssembler {
                     jsonElement);
             for (JsonElement element : jsonloanProducts) {
                 Long productId = this.fromApiJsonHelper.extractLongNamed("id", element.getAsJsonObject());
-                loanProducts.add(loanProductRepository.findOne(productId));
+                loanProducts.add(loanProductRepository.findById(productId).orElse(null));
             }
         } else {
             loanProducts = loanProductRepository.findAll();
@@ -138,9 +138,9 @@ public class ProvisioningCriteriaAssembler {
         Long liabilityAccountId = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_LIABILITY_ACCOUNT_PARAM, jsonObject);
         Long expenseAccountId = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_EXPENSE_ACCOUNT_PARAM, jsonObject);
 
-        ProvisioningCategory provisioningCategory = provisioningCategoryRepository.findOne(categoryId);
-        GLAccount liabilityAccount = glAccountRepository.findOne(liabilityAccountId);
-        GLAccount expenseAccount = glAccountRepository.findOne(expenseAccountId);
+        ProvisioningCategory provisioningCategory = provisioningCategoryRepository.findById(categoryId).orElse(null);
+        GLAccount liabilityAccount = glAccountRepository.findById(liabilityAccountId).orElse(null);
+        GLAccount expenseAccount = glAccountRepository.findById(expenseAccountId).orElse(null);
         return ProvisioningCriteriaDefinition.newPrivisioningCriteria(criteria, provisioningCategory, minimumAge, maximumAge,
                 provisioningpercentage, liabilityAccount, expenseAccount);
     }

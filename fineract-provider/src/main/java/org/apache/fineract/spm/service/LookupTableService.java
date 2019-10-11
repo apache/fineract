@@ -56,6 +56,6 @@ public class LookupTableService {
     public List<LookupTable> createLookupTable(final List<LookupTable> lookupTable) {
         this.securityContext.authenticatedUser();
 
-        return this.lookupTableRepository.save(lookupTable);
+        return this.lookupTableRepository.saveAll(lookupTable);
     }
 }

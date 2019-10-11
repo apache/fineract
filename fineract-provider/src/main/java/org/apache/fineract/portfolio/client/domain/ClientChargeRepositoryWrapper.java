@@ -37,8 +37,8 @@ public class ClientChargeRepositoryWrapper {
     }
 
     public ClientCharge findOneWithNotFoundDetection(final Long id) {
-        final ClientCharge clientCharge = this.repository.findOne(id);
-        if (clientCharge == null) { throw new ChargeNotFoundException(id); }
+        final ClientCharge clientCharge = this.repository.findById(id)
+                .orElseThrow(() -> new ChargeNotFoundException(id));
         // enrich Client charge with details of Organizational currency
         clientCharge.setCurrency(organisationCurrencyRepository.findOneWithNotFoundDetection(clientCharge.getCharge().getCurrencyCode()));
         return clientCharge;

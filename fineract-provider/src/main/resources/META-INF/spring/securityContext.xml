@@ -25,15 +25,16 @@
 	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
 	xsi:schemaLocation="
    http://www.springframework.org/schema/beans
-   http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+   http://www.springframework.org/schema/beans/spring-beans.xsd
    http://www.springframework.org/schema/security/oauth2
    http://www.springframework.org/schema/security/spring-security-oauth2.xsd
    http://www.springframework.org/schema/security
-   http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+   http://www.springframework.org/schema/security/spring-security.xsd">
 
-	<beans:beans profile="basicauth"> 
+	<beans:beans profile="basicauth">
 		<http create-session="stateless" use-expressions="true" pattern="/api/**"
 			entry-point-ref="basicAuthenticationEntryPoint">
+			<csrf disabled="true"/>
 			<intercept-url pattern="/api/*/authentication" access="permitAll"
 				method="POST" requires-channel="https" />
 			<intercept-url pattern="/api/*/self/authentication" access="permitAll"
@@ -59,8 +60,7 @@
 			<intercept-url pattern="/api/**" access="isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')"
 				method="HEAD" requires-channel="https" />
 	
-			<custom-filter after="SECURITY_CONTEXT_FILTER"
-				ref="basicAuthenticationProcessingFilter" />
+			<custom-filter after="SECURITY_CONTEXT_FILTER" ref="basicAuthenticationProcessingFilter" />
 			<custom-filter ref="twoFactorAuthFilter" after="BASIC_AUTH_FILTER" />
 		</http>
 	
@@ -68,22 +68,15 @@
 			class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
 			<beans:property name="realmName" value="Fineract Platform API" />
 		</beans:bean>
-	
-		<beans:bean id="passwordEncoder"
-			class="org.springframework.security.authentication.encoding.ShaPasswordEncoder">
-			<beans:constructor-arg value="256" />
+
+		<beans:bean id="passwordEncoder" class="org.apache.fineract.infrastructure.core.domain.DefaultPasswordEncoderFactories"
+					factory-method="createDelegatingPasswordEncoder">
 		</beans:bean>
-	
-		<beans:bean id="saltSource"
-			class="org.springframework.security.authentication.dao.ReflectionSaltSource">
-			<beans:property name="userPropertyToUse" value="id" />
-		</beans:bean>
-	
+
 		<beans:bean id="customAuthenticationProvider"
 			class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
 			<beans:property name="userDetailsService" ref="userDetailsService" />
 			<beans:property name="passwordEncoder" ref="passwordEncoder" />
-			<beans:property name="saltSource" ref="saltSource" />
 		</beans:bean>
 	
 		<authentication-manager alias="authenticationManager"
@@ -95,6 +88,7 @@
 		<http create-session="stateless" use-expressions="true" pattern="/api/v1/**"
 			entry-point-ref="oauthAuthenticationEntryPoint"
 			access-decision-manager-ref="accessDecisionManager">
+			<csrf disabled="true"/>
 			<anonymous enabled="false" />
 			<intercept-url pattern="/api//v1/**" method="OPTIONS"
 					access="permitAll" requires-channel="https" />
@@ -184,26 +178,12 @@
 			<beans:constructor-arg ref="clientDetailsService" />
 		</beans:bean>
 	
-	
-		<beans:bean id="passwordEncoder"
-			class="org.springframework.security.authentication.encoding.ShaPasswordEncoder">
-			<beans:constructor-arg value="256" />
-		</beans:bean>
-	
-		<beans:bean id="saltSource"
-			class="org.springframework.security.authentication.dao.ReflectionSaltSource">
-			<beans:property name="userPropertyToUse" value="id" />
-		</beans:bean>
-	
 		<beans:bean id="customAuthenticationProvider"
 			class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
 			<beans:property name="userDetailsService" ref="userDetailsService" />
 			<beans:property name="passwordEncoder" ref="passwordEncoder" />
-			<beans:property name="saltSource" ref="saltSource" />
 		</beans:bean>
-	
-	
-	
+
 		<beans:bean id="clientDetailsService"
 			class="org.springframework.security.oauth2.provider.client.JdbcClientDetailsService">
 			<beans:constructor-arg ref="routingDataSource" />

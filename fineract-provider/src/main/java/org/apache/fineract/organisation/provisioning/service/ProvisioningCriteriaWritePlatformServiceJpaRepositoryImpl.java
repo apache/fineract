@@ -98,14 +98,12 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
 
     @Override
     public CommandProcessingResult deleteProvisioningCriteria(Long criteriaId) {
-        ProvisioningCriteria criteria = this.provisioningCriteriaRepository.findOne(criteriaId) ;
-        if(criteria == null) {
-            throw new ProvisioningCriteriaNotFoundException(criteriaId) ;
-        }
+        this.provisioningCriteriaRepository.findById(criteriaId)
+                .orElseThrow(() -> new ProvisioningCriteriaNotFoundException(criteriaId));
         if(this.provisioningEntriesReadPlatformService.retrieveProvisioningEntryDataByCriteriaId(criteriaId) != null) {
             throw new ProvisioningCriteriaCannotBeDeletedException(criteriaId) ;
         }
-        this.provisioningCriteriaRepository.delete(criteriaId) ;
+        this.provisioningCriteriaRepository.deleteById(criteriaId); ;
         return new CommandProcessingResultBuilder().withEntityId(criteriaId).build();
     }
 
@@ -113,7 +111,7 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
     public CommandProcessingResult updateProvisioningCriteria(final Long criteriaId, JsonCommand command) {
     	try {
     		this.fromApiJsonDeserializer.validateForUpdate(command.json());
-            ProvisioningCriteria provisioningCriteria = provisioningCriteriaRepository.findOne(criteriaId) ;
+            ProvisioningCriteria provisioningCriteria = provisioningCriteriaRepository.findById(criteriaId).orElse(null);
             if(provisioningCriteria == null) {
                 throw new ProvisioningCategoryNotFoundException(criteriaId) ;
             }
@@ -148,8 +146,8 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
                     jsonObject, locale);
             Long liabilityAccountId = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_LIABILITY_ACCOUNT_PARAM, jsonObject);
             Long expenseAccountId = this.fromApiJsonHelper.extractLongNamed(ProvisioningCriteriaConstants.JSON_EXPENSE_ACCOUNT_PARAM, jsonObject);
-            GLAccount liabilityAccount = glAccountRepository.findOne(liabilityAccountId);
-            GLAccount expenseAccount = glAccountRepository.findOne(expenseAccountId);
+            GLAccount liabilityAccount = glAccountRepository.findById(liabilityAccountId).orElse(null);
+            GLAccount expenseAccount = glAccountRepository.findById(expenseAccountId).orElse(null);
             String categoryName = null ;
             String liabilityAccountName = null ;
             String expenseAccountName = null ;

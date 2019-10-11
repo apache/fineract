@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.shareproducts.domain;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,6 +40,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.google.common.base.Optional;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -161,9 +163,9 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
         this.minimumActivePeriod = minimumActivePeriod;
         this.minimumActivePeriodType = minimumActivePeriodForDividendsType;
         setCreatedBy(createdBy);
-        setCreatedDate(createdDate);
+        setCreatedDate(Instant.ofEpochMilli(createdDate.getMillis()));
         setLastModifiedBy(lastModifiedBy);
-        setLastModifiedDate(lastModifiedDate);
+        setLastModifiedDate(Instant.ofEpochMilli(lastModifiedDate.getMillis()));
         startDate = DateUtils.getDateOfTenant();
         endDate = DateUtils.getDateOfTenant();
         if (accountingRuleType != null) {
