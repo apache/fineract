@@ -25,17 +25,15 @@ import org.apache.fineract.interoperation.domain.InteropInitiatorType;
 import org.apache.fineract.interoperation.domain.InteropTransactionRole;
 import org.apache.fineract.interoperation.domain.InteropTransactionScenario;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 
-import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_INITIATOR;
-import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_INITIATOR_TYPE;
-import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_SCENARIO;
-import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_SUB_SCENARIO;
+import static org.apache.fineract.interoperation.util.InteropUtil.*;
 
 public class InteropTransactionTypeData {
 
-    public static final String[] PARAMS = {PARAM_SCENARIO, PARAM_SUB_SCENARIO, PARAM_INITIATOR, PARAM_INITIATOR_TYPE};
+    public static final String[] PARAMS = {PARAM_SCENARIO, PARAM_SUB_SCENARIO, PARAM_INITIATOR, PARAM_INITIATOR_TYPE, PARAM_REFUND_INFO, PARAM_BALANCE_OF_PAYMENTS};
 
     @NotNull
     private final InteropTransactionScenario scenario;
@@ -45,12 +43,24 @@ public class InteropTransactionTypeData {
     private final InteropTransactionRole initiator;
     @NotNull
     private final InteropInitiatorType initiatorType;
+    //TODO: SKIP FOR NOW
+    @Valid
+    private InteropRefundData refundInfo;
 
-    public InteropTransactionTypeData(InteropTransactionScenario scenario, String subScenario, InteropTransactionRole initiator, InteropInitiatorType initiatorType) {
+    private String balanceOfPayments; // 3 digits number, see https://www.imf.org/external/np/sta/bopcode/
+
+    InteropTransactionTypeData(InteropTransactionScenario scenario, String subScenario, InteropTransactionRole initiator, InteropInitiatorType initiatorType,
+                                      InteropRefundData refundInfo, String balanceOfPayments) {
         this.scenario = scenario;
         this.subScenario = subScenario;
         this.initiator = initiator;
         this.initiatorType = initiatorType;
+        this.refundInfo = refundInfo;
+        this.balanceOfPayments = balanceOfPayments;
+    }
+
+    private InteropTransactionTypeData(InteropTransactionScenario scenario, String subScenario, InteropTransactionRole initiator, InteropInitiatorType initiatorType) {
+        this(scenario, subScenario, initiator, initiatorType, null, null);
     }
 
     public InteropTransactionScenario getScenario() {

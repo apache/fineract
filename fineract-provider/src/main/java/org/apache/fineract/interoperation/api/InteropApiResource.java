@@ -32,14 +32,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.interoperation.data.InteropIdentifierRequestData;
-import org.apache.fineract.interoperation.data.InteropIdentifierResponseData;
-import org.apache.fineract.interoperation.data.InteropQuoteRequestData;
-import org.apache.fineract.interoperation.data.InteropQuoteResponseData;
-import org.apache.fineract.interoperation.data.InteropTransactionRequestData;
-import org.apache.fineract.interoperation.data.InteropTransactionRequestResponseData;
-import org.apache.fineract.interoperation.data.InteropTransferRequestData;
-import org.apache.fineract.interoperation.data.InteropTransferResponseData;
+import org.apache.fineract.interoperation.data.*;
 import org.apache.fineract.interoperation.domain.InteropIdentifierType;
 import org.apache.fineract.interoperation.domain.InteropTransferActionType;
 import org.apache.fineract.interoperation.service.InteropService;
@@ -47,17 +40,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static org.apache.fineract.interoperation.util.InteropUtil.ENTITY_NAME_QUOTE;
 import static org.apache.fineract.interoperation.util.InteropUtil.ENTITY_NAME_REQUEST;
@@ -103,13 +92,60 @@ public class InteropApiResource {
     @GET
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
+    @Path("accounts/{accountId}")
+    @ApiOperation(value = "Query Interoperation Account details", httpMethod = "GET", notes = "")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InteropAccountData.class)})
+    public String getAccountDetails(@PathParam("accountId") @ApiParam(value = "accountId") String accountId, @Context UriInfo uriInfo) {
+        InteropAccountData result = interopService.getAccountDetails(accountId);
+        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+
+        return jsonSerializer.serialize(settings, result);
+    }
+
+    @GET
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    @Path("accounts/{accountId}/transactions")
+    @ApiOperation(value = "Query transactions by Account Id", httpMethod = "GET", notes = "")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InteropTransactionsData.class)})
+    public String getAccountTransactions(@PathParam("accountId") @ApiParam(value = "accountId") String accountId,
+                                         @DefaultValue("true") @QueryParam("debit") @ApiParam(value = "debit") boolean debit,
+                                         @DefaultValue("false") @QueryParam("credit") @ApiParam(value = "credit") boolean credit,
+                                         @QueryParam("fromBookingDateTime") @ApiParam(value = "fromBookingDateTime") String fromBookingDateTime,
+                                         @QueryParam("toBookingDateTime") @ApiParam(value = "toBookingDateTime") String toBookingDateTime,
+                                         @Context UriInfo uriInfo) {
+        LocalDateTime transactionsFrom = fromBookingDateTime == null ? null : LocalDateTime.parse(fromBookingDateTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        LocalDateTime transactionsTo = toBookingDateTime == null ? null : LocalDateTime.parse(toBookingDateTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+        InteropTransactionsData result = interopService.getAccountTransactions(accountId, debit, credit, transactionsFrom, transactionsTo);
+        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+
+        return jsonSerializer.serialize(settings, result);
+    }
+
+    @GET
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    @Path("accounts/{accountId}/identifiers")
+    @ApiOperation(value = "Query Interoperation secondary identifiers by Account Id", httpMethod = "GET", notes = "")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InteropIdentifiersResponseData.class)})
+    public String getAccountIdentifiers(@PathParam("accountId") @ApiParam(value = "accountId") String accountId, @Context UriInfo uriInfo) {
+        InteropIdentifiersResponseData result = interopService.getAccountIdentifiers(accountId);
+        ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+
+        return jsonSerializer.serialize(settings, result);
+    }
+
+    @GET
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
     @Path("parties/{idType}/{idValue}")
     @ApiOperation(value = "Query Interoperation Account by secondary identifier", httpMethod = "GET", notes = "")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InteropIdentifierResponseData.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InteropIdentifierAccountResponseData.class)})
     public String getAccountByIdentifier(@PathParam("idType") @ApiParam(value = "idType") InteropIdentifierType idType,
                                          @PathParam("idValue") @ApiParam(value = "idValue") String idValue,
                                          @Context UriInfo uriInfo) {
-        InteropIdentifierResponseData result = interopService.getAccountByIdentifier(idType, idValue, null);
+        InteropIdentifierAccountResponseData result = interopService.getAccountByIdentifier(idType, idValue, null);
         ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         return jsonSerializer.serialize(settings, result);
@@ -120,12 +156,12 @@ public class InteropApiResource {
     @Produces({MediaType.APPLICATION_JSON})
     @Path("parties/{idType}/{idValue}/{subIdOrType}")
     @ApiOperation(value = "Query Interoperation Account by secondary identifier", httpMethod = "GET", notes = "")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InteropIdentifierResponseData.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InteropIdentifierAccountResponseData.class)})
     public String getAccountByIdentifier(@PathParam("idType") @ApiParam(value = "idType") InteropIdentifierType idType,
                                          @PathParam("idValue") @ApiParam(value = "idValue") String idValue,
                                          @PathParam("subIdOrType") @ApiParam(value = "subIdOrType") String subIdOrType,
                                          @Context UriInfo uriInfo) {
-        InteropIdentifierResponseData result = interopService.getAccountByIdentifier(idType, idValue, subIdOrType);
+        InteropIdentifierAccountResponseData result = interopService.getAccountByIdentifier(idType, idValue, subIdOrType);
         ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         return jsonSerializer.serialize(settings, result);
@@ -138,14 +174,14 @@ public class InteropApiResource {
     @ApiOperation(value = "Interoperation Identifier registration", httpMethod = "POST", notes = "")
     @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body",
             dataTypeClass = InteropIdentifierRequestData.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InteropIdentifierResponseData.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InteropIdentifierAccountResponseData.class)})
     public String registerAccountIdentifier(@PathParam("idType") @ApiParam(value = "idType") InteropIdentifierType idType,
                                             @PathParam("idValue") @ApiParam(value = "idValue") String idValue,
                                             @ApiParam(hidden = true) String identifierJson, @Context UriInfo uriInfo)
             throws Throwable {
         CommandWrapper commandRequest = new InteropWrapperBuilder().registerAccountIdentifier(idType, idValue, null).withJson(identifierJson).build();
 
-        InteropIdentifierResponseData result = (InteropIdentifierResponseData) commandsSourceService.logCommandSource(commandRequest);
+        InteropIdentifierAccountResponseData result = (InteropIdentifierAccountResponseData) commandsSourceService.logCommandSource(commandRequest);
         ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         return jsonSerializer.serialize(settings, result);
@@ -158,7 +194,7 @@ public class InteropApiResource {
     @ApiOperation(value = "Interoperation Identifier registration", httpMethod = "POST", notes = "")
     @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body",
             dataTypeClass = InteropIdentifierRequestData.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InteropIdentifierResponseData.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InteropIdentifierAccountResponseData.class)})
     public String registerAccountIdentifier(@PathParam("idType") @ApiParam(value = "idType") InteropIdentifierType idType,
                                             @PathParam("idValue") @ApiParam(value = "idValue") String idValue,
                                             @PathParam("subIdOrType") @ApiParam(value = "subIdOrType") String subIdOrType,
@@ -166,7 +202,7 @@ public class InteropApiResource {
             throws Throwable {
         CommandWrapper commandRequest = new InteropWrapperBuilder().registerAccountIdentifier(idType, idValue, subIdOrType).withJson(identifierJson).build();
 
-        InteropIdentifierResponseData result = (InteropIdentifierResponseData) commandsSourceService.logCommandSource(commandRequest);
+        InteropIdentifierAccountResponseData result = (InteropIdentifierAccountResponseData) commandsSourceService.logCommandSource(commandRequest);
         ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         return jsonSerializer.serialize(settings, result);
@@ -179,14 +215,14 @@ public class InteropApiResource {
     @ApiOperation(value = "Allow Interoperation Identifier registration", httpMethod = "DELETE", notes = "")
     @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body",
             dataTypeClass = InteropIdentifierRequestData.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InteropIdentifierResponseData.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InteropIdentifierAccountResponseData.class)})
     public String deleteAccountIdentifier(@PathParam("idType") @ApiParam(value = "idType") InteropIdentifierType idType,
                                           @PathParam("idValue") @ApiParam(value = "idValue") String idValue,
                                           @Context UriInfo uriInfo)
             throws Throwable {
         CommandWrapper commandRequest = new InteropWrapperBuilder().deleteAccountIdentifier(idType, idValue, null).build();
 
-        InteropIdentifierResponseData result = (InteropIdentifierResponseData) commandsSourceService.logCommandSource(commandRequest);
+        InteropIdentifierAccountResponseData result = (InteropIdentifierAccountResponseData) commandsSourceService.logCommandSource(commandRequest);
         ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         return jsonSerializer.serialize(settings, result);
@@ -199,7 +235,7 @@ public class InteropApiResource {
     @ApiOperation(value = "Allow Interoperation Identifier registration", httpMethod = "DELETE", notes = "")
     @ApiImplicitParams({@ApiImplicitParam(value = "body", required = true, paramType = "body", dataType = "body", format = "body",
             dataTypeClass = InteropIdentifierRequestData.class)})
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InteropIdentifierResponseData.class)})
+    @ApiResponses({@ApiResponse(code = 200, message = "OK", response = InteropIdentifierAccountResponseData.class)})
     public String deleteAccountIdentifier(@PathParam("idType") @ApiParam(value = "idType") InteropIdentifierType idType,
                                           @PathParam("idValue") @ApiParam(value = "idValue") String idValue,
                                           @PathParam("subIdOrType") @ApiParam(value = "subIdOrType") String subIdOrType,
@@ -207,7 +243,7 @@ public class InteropApiResource {
             throws Throwable {
         CommandWrapper commandRequest = new InteropWrapperBuilder().deleteAccountIdentifier(idType, idValue, subIdOrType).build();
 
-        InteropIdentifierResponseData result = (InteropIdentifierResponseData) commandsSourceService.logCommandSource(commandRequest);
+        InteropIdentifierAccountResponseData result = (InteropIdentifierAccountResponseData) commandsSourceService.logCommandSource(commandRequest);
         ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         return jsonSerializer.serialize(settings, result);

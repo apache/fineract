@@ -21,6 +21,7 @@ package org.apache.fineract.interoperation.service;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.interoperation.data.*;
 import org.apache.fineract.interoperation.domain.InteropIdentifier;
@@ -68,13 +69,14 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Predicate;
 
 import static org.apache.fineract.interoperation.util.InteropUtil.DEFAULT_LOCALE;
 import static org.apache.fineract.interoperation.util.InteropUtil.DEFAULT_ROUTING_CODE;
-import static org.apache.fineract.interoperation.util.InteropUtil.ISO8601_DATE_TIME_FORMAT;
 
 @Service
 public class InteropServiceImpl implements InteropService {
@@ -125,19 +127,56 @@ public class InteropServiceImpl implements InteropService {
     }
 
     @NotNull
+    @Override
     @Transactional
-    public InteropIdentifierResponseData getAccountByIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType) {
+    public InteropAccountData getAccountDetails(@NotNull String accountId) {
+        SavingsAccount savingsAccount = validateAndGetSavingAccount(accountId);
+        return InteropAccountData.build(savingsAccount);
+    }
+
+    @NotNull
+    @Override
+    @Transactional
+    public InteropTransactionsData getAccountTransactions(@NotNull String accountId, boolean debit, boolean credit, java.time.LocalDateTime transactionsFrom, java.time.LocalDateTime transactionsTo) {
+        SavingsAccount savingsAccount = validateAndGetSavingAccount(accountId);
+        ZoneId zoneId = ZoneId.of(ThreadLocalContextUtil.getTenant().getTimezoneId());
+        Predicate<SavingsAccountTransaction> transFilter = t -> {
+            SavingsAccountTransactionType transactionType = SavingsAccountTransactionType.fromInt(t.getTypeOf());
+            if (debit != transactionType.isDebit() && credit != transactionType.isCredit())
+                return false;
+
+            if (transactionsFrom == null && transactionsTo == null)
+                return true;
+
+            java.time.LocalDateTime transactionDate = t.getTransactionLocalDate().toDateTimeAtStartOfDay().toDate().toInstant().atZone(zoneId).toLocalDateTime();
+            return (transactionsTo == null || transactionsTo.compareTo(transactionDate) > 0)
+                    && (transactionsFrom == null || transactionsFrom.compareTo(transactionDate.withHour(23).withMinute(59).withSecond(59)) <= 0);
+        };
+        return InteropTransactionsData.build(savingsAccount, transFilter);
+    }
+
+    @NotNull
+    @Override
+    @Transactional
+    public InteropIdentifiersResponseData getAccountIdentifiers(@NotNull String accountId) {
+        SavingsAccount savingsAccount = validateAndGetSavingAccount(accountId);
+        return InteropIdentifiersResponseData.build(savingsAccount);
+    }
+
+    @NotNull
+    @Transactional
+    public InteropIdentifierAccountResponseData getAccountByIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType) {
         InteropIdentifier identifier = findIdentifier(idType, idValue, subIdOrType);
         if (identifier == null)
             throw new UnsupportedOperationException("Account not found for identifier " + idType + "/" + idValue + (subIdOrType == null ? "" : ("/" + subIdOrType)));
 
-        return InteropIdentifierResponseData.build(identifier.getAccount().getExternalId());
+        return InteropIdentifierAccountResponseData.build(identifier.getAccount().getExternalId());
     }
 
     @NotNull
     @Transactional(propagation = Propagation.MANDATORY)
-    public InteropIdentifierResponseData registerAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
-                                                                   String subIdOrType, @NotNull JsonCommand command) {
+    public InteropIdentifierAccountResponseData registerAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
+                                                                          String subIdOrType, @NotNull JsonCommand command) {
         InteropIdentifierRequestData request = dataValidator.validateAndParseCreateIdentifier(idType, idValue, subIdOrType, command);
         //TODO: error handling
         SavingsAccount savingsAccount = validateAndGetSavingAccount(request.getAccountId());
@@ -149,13 +188,13 @@ public class InteropServiceImpl implements InteropService {
 
         identifierRepository.save(identifier);
 
-        return InteropIdentifierResponseData.build(savingsAccount.getExternalId());
+        return InteropIdentifierAccountResponseData.build(savingsAccount.getExternalId());
     }
 
     @NotNull
     @Transactional(propagation = Propagation.MANDATORY)
-    public InteropIdentifierResponseData deleteAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
-                                                          String subIdOrType) {
+    public InteropIdentifierAccountResponseData deleteAccountIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue,
+                                                                        String subIdOrType) {
         InteropIdentifier identifier = findIdentifier(idType, idValue, subIdOrType);
         if (identifier == null)
             throw new UnsupportedOperationException("Account not found for identifier " + idType + "/" + idValue + (subIdOrType == null ? "" : ("/" + subIdOrType)));
@@ -164,7 +203,7 @@ public class InteropServiceImpl implements InteropService {
 
         identifierRepository.delete(identifier);
 
-        return InteropIdentifierResponseData.build(accountId);
+        return InteropIdentifierAccountResponseData.build(accountId);
     }
 
     @Override
