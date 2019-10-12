@@ -21,7 +21,7 @@ services:
   fineractmysql:
     image: mysql:5.7
     volumes:
-      - ./fineract-db/docker:/docker-entrypoint-initdb.d
+      - ./fineract-db/docker:/docker-entrypoint-initdb.d:Z,ro
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: mysql
