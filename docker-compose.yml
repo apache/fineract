@@ -16,7 +16,9 @@
 # under the License.
 #
 
-version: '3.7'
+# NB: Travis CI (dist: trusty) supports only v3.3
+# (unless we'd install a more recent version in .travis.yml)
+version: '3.3'
 services:
   fineractmysql:
     image: mysql:5.7
@@ -34,7 +36,8 @@ services:
   fineract-server:
     build:
       context: .
-      target: fineract
+      # NB: Target is Docker Compose 3.4+ only (but it works without as well)
+      # target: fineract
     ports: 
       - 8443:8443
     depends_on:
