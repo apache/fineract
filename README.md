@@ -74,20 +74,24 @@ Run the following commands, very similarly to how [.travis.yml](.travis.yml) doe
 Instructions to run using Docker and docker-compose
 ===================================================
 
-It is possible to do a 'one-touch' installation of Fineract using docker-compose:
+It is possible to do a 'one-touch' installation of Fineract using containers (AKA "Docker").
 
-Prerequisites:
-* docker and docker-compose installed on your machine
+As Prerequisites, you must have `docker` and `docker-compose` installed on your machine; see
+[Docker Install](https://docs.docker.com/install/) and
+[Docker Compose Install](https://docs.docker.com/compose/install/).
 
-Installing a new Fineract instance:
+Alternatively, you can also use [Podman](https://github.com/containers/libpod)
+(e.g. via `dnf install podman-docker`), and [Podman Compose](https://github.com/containers/podman-compose/)
+(e.g. via `pip3 install podman-compose`) instead of Docker.
 
-* Clone the Fineract Github repository
-* Run the following commands:
-  * docker-compose build
-  * docker-compose up -d
-* Fineract will run at https://localhost:8443/fineract-provider
+Now to run a new Fineract instance you can simply:
 
-The [`docker-compose.yml`](docker-compose.yml) will build the `fineract` container from source.
+1. `git clone https://github.com/apache/fineract.git ; cd fineract`
+1. `docker-compose build`
+1. `docker-compose up -d`
+1. Fineract will run at https://localhost:8443/fineract-provider now!
+
+The [`docker-compose.yml`](docker-compose.yml) will build the `fineract` container from source based on the [`Dockerfile`](Dockerfile).
 
 https://hub.docker.com/r/apache/fineract has a pre-built container of this project, built continously.
 
