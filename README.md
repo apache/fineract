@@ -24,7 +24,7 @@ and stop and destroy it like this:
 
     docker rm -f mysql-5.5
 
-Beware that this database container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mysql) re. how to make it persistant instead of ephemeral.
+Beware that this database container database keeps its state inside the container and not on the host filesystem.  It is lost when you destroy (rm) this container.  This is typically fine for development.  See [Caveats: Where to Store Data on the database container documentation](https://hub.docker.com/_/mysql) re. how to make it persistent instead of ephemeral.
 
 
 Instructions how to run for local development
@@ -38,9 +38,9 @@ Run the following commands:
 
 Instructions to download gradle wrapper
 ============
-The file fineract-provider/gradle/wrapper/gradle-wrapper.jar binary is checked into this projects's Git source repository,
+The file fineract-provider/gradle/wrapper/gradle-wrapper.jar binary is checked into this projects Git source repository,
 but won't exist in your copy of the Fineract codebase if you downloaded a released source archive from apache.org.
-In that case, you need to downloaded it using the commands below:
+In that case, you need to download it using the commands below:
 
     wget --no-check-certificate -P fineract-provider/gradle/wrapper https://github.com/apache/fineract/raw/develop/fineract-provider/gradle/wrapper/gradle-wrapper.jar
 
@@ -58,7 +58,7 @@ Instructions to run Apache RAT (Release Audit Tool)
 Instructions to build a WAR file
 ============
 1. Extract the archive file to your local directory.
-2. Run `./gradlew clean war` or `./gradlew build` to build deployable war file which will be created at build/libs directory.
+2. Run `./gradlew clean war` or `./gradlew build` to build a deployable war file which will be created at build/libs directory.
 
 
 Instructions to execute Integration tests
@@ -91,11 +91,11 @@ Now to run a new Fineract instance you can simply:
 1. `docker-compose up -d`
 1. Fineract will run at https://localhost:8443/fineract-provider now!
 
-The [`docker-compose.yml`](docker-compose.yml) will build the `fineract` container from source based on the [`Dockerfile`](Dockerfile).
+The [`docker-compose.yml`](docker-compose.yml) will build the `fineract` container from the source based on the [`Dockerfile`](Dockerfile).
 
-https://hub.docker.com/r/apache/fineract has a pre-built container of this project, built continously.
+https://hub.docker.com/r/apache/fineract has a pre-built container of this project, built continuously.
 
-You can use a MySQL database from a different or remote server by passing the server's IP address to the docker finerect buid process like this:
+You can use a MySQL database from a different or remote server by passing the server's IP address to the docker fineract build process like this:
 
     docker build --build-arg mysqlserver=<MySQL server IP> -t fineract:latest .
 
@@ -115,11 +115,11 @@ The progress of this project can be viewed here: [View change log](https://githu
 License
 ============
 
-This project is licensed under Apache License Version 2.0. See <https://github.com/apache/incubator-fineract/blob/develop/LICENSE.md> for referece.
+This project is licensed under Apache License Version 2.0. See <https://github.com/apache/incubator-fineract/blob/develop/LICENSE.md> for reference.
 
 The Connector/J JDBC Driver client library from MariaDB.org, which is licensed under the LGPL,
 is used in development when running integration tests that use the Flyway library.  That JDBC
-driver is however not included in and distributed with the Fineract product, and is not
+driver is however not included in and distributed with the Fineract product and is not
 required to use the product.
 If you are developer and object to using the LGPL licensed Connector/J JDBC driver,
 simply do not run the integration tests that use the Flyway library.
@@ -144,7 +144,7 @@ Developers
 ============
 Please see <https://cwiki.apache.org/confluence/display/FINERACT/Contributor%27s+Zone> for the developers wiki page.
 
-Please refer to <https://cwiki.apache.org/confluence/display/FINERACT/Fineract+101> for first time contribution for this project.
+Please refer to <https://cwiki.apache.org/confluence/display/FINERACT/Fineract+101> for the first-time contribution to this project.
 
 Please see <https://cwiki.apache.org/confluence/display/FINERACT/How-to+articles> for technical details to get started.
 
