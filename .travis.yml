@@ -28,6 +28,12 @@ services:
   - mysql
   - docker
 
+addons:
+  apt:
+    packages:
+    # https://httpie.org is used by the docker-compose test below
+    - httpie
+
 before_install:
   - echo "USE mysql;\nUPDATE user SET password=PASSWORD('mysql') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
   - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `mifosplatform-tenants`;'
