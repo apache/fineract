@@ -61,7 +61,7 @@ public class Utils {
 
     public static final String TENANT_TIME_ZONE = "Asia/Kolkata";
 
-        private static final String HEALTH_URL = "/fineract-provider/actuator/health";
+    private static final String HEALTH_URL = "/fineract-provider/actuator/health";
     private static final String LOGIN_URL  = "/fineract-provider/api/v1/authentication?username=mifos&password=password&" + TENANT_IDENTIFIER;
 
     public static void initializeRESTAssured() {
