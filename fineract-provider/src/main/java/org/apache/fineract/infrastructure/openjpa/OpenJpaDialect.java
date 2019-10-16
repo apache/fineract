@@ -38,6 +38,14 @@ import org.springframework.transaction.SavepointManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
+/**
+ * {@link org.springframework.orm.jpa.JpaDialect} implementation for Apache OpenJPA.
+ * Developed and tested against OpenJPA 2.2.
+ *
+ * @author Costin Leau
+ * @author Juergen Hoeller
+ * @since 2.0
+ */
 public class OpenJpaDialect extends DefaultJpaDialect {
 
 	@Override

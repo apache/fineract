@@ -34,8 +34,6 @@
 	<sec:global-method-security
 		pre-post-annotations="enabled" />
 
-<!--	<tx:annotation-driven />-->
-
 	<context:component-scan
 		base-package="org.apache.fineract.accounting.*,
 									      org.apache.fineract.commands.provider.*,

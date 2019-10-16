@@ -19,7 +19,7 @@
 
 package org.apache.fineract.notification;
 
-import edu.emory.mathcs.backport.java.util.Collections;
+import java.util.Collections;
 import org.apache.fineract.notification.domain.Notification;
 import org.apache.fineract.notification.domain.NotificationMapper;
 import org.apache.fineract.notification.service.NotificationGeneratorReadRepositoryWrapper;

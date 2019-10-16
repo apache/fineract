@@ -30,7 +30,19 @@ import org.apache.openjpa.persistence.PersistenceProviderImpl;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.Database;
 
-
+/**
+ * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Apache OpenJPA.
+ * Developed and tested against OpenJPA 2.2.
+ *
+ * <p>Exposes OpenJPA's persistence provider and EntityManager extension interface,
+ * and supports {@link AbstractJpaVendorAdapter}'s common configuration settings.
+ *
+ * @author Costin Leau
+ * @author Juergen Hoeller
+ * @since 2.0
+ * @see org.apache.openjpa.persistence.PersistenceProviderImpl
+ * @see org.apache.openjpa.persistence.OpenJPAEntityManager
+ */
 public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
 	private final PersistenceProvider persistenceProvider = new PersistenceProviderImpl();
