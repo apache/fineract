@@ -47,13 +47,6 @@ public class WebXmlConfiguration {
     @Autowired
     private TenantAwareBasicAuthenticationFilter basicAuthenticationProcessingFilter;
 
-/*
-    @Bean
-    public Filter springSecurityFilterChain() {
-        return new DelegatingFilterProxy();
-    }
-*/
-
     @Bean
     public ServletRegistrationBean jersey() {
         Servlet jerseyServlet = new SpringServlet();
