@@ -32,7 +32,6 @@ public class PaginationHelper<E> {
         final List<E> items = jt.query(sqlFetchRows, args, rowMapper);
 
         // determine how many rows are available
-//        final int totalFilteredRecords = jt.queryForInt(sqlCountRows);
         final int totalFilteredRecords = jt.queryForObject(sqlCountRows, Integer.class);
 
         return new Page<>(items, totalFilteredRecords);

@@ -147,7 +147,6 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                 }
             }
 
-//            filterChain.doFilter(request, response);
             super.doFilterInternal(request, response, filterChain);
         } catch (final InvalidTenantIdentiferException e) {
             // deal with exception at low level
