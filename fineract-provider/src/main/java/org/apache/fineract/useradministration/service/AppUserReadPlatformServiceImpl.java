@@ -107,8 +107,9 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
 
         final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
         final Collection<RoleData> availableRoles = this.roleReadPlatformService.retrieveAllActiveRoles();
+        final Collection<RoleData> selfServiceRoles = this.roleReadPlatformService.retrieveAllSelfServiceRoles();
 
-        return AppUserData.template(offices, availableRoles);
+        return AppUserData.template(offices, availableRoles, selfServiceRoles);
     }
 
     @Override
@@ -138,7 +139,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         }
 
         AppUserData retUser = AppUserData.instance(user.getId(), user.getUsername(), user.getEmail(), user.getOffice().getId(),
-                user.getOffice().getName(), user.getFirstname(), user.getLastname(), availableRoles, selectedUserRoles, linkedStaff,
+                user.getOffice().getName(), user.getFirstname(), user.getLastname(), availableRoles, null, selectedUserRoles, linkedStaff,
                 user.getPasswordNeverExpires(), user.isSelfServiceUser());
         
         if(retUser.isSelfServiceUser()){
@@ -185,7 +186,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
             } else {
                 linkedStaff = null;
             }
-            return AppUserData.instance(id, username, email, officeId, officeName, firstname, lastname, null, selectedRoles, linkedStaff,
+            return AppUserData.instance(id, username, email, officeId, officeName, firstname, lastname, null, null, selectedRoles, linkedStaff,
                     passwordNeverExpire, isSelfServiceUser);
         }
 

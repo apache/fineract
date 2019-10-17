@@ -49,6 +49,7 @@ public class AppUserData {
     @SuppressWarnings("unused")
     private final Collection<OfficeData> allowedOffices;
     private final Collection<RoleData> availableRoles;
+    private final Collection<RoleData> selfServiceRoles;
     private final Collection<RoleData> selectedRoles;
     private final StaffData staff;
     private final Boolean isSelfServiceUser;
@@ -79,6 +80,7 @@ public class AppUserData {
         this.rowIndex = rowIndex;
         this.allowedOffices = null;
         this.availableRoles = null;
+        this.selfServiceRoles = null;
         this.selectedRoles = null;
         this.staff = null;
         this.isSelfServiceUser = null;
@@ -91,27 +93,30 @@ public class AppUserData {
 
     public static AppUserData template(final AppUserData user, final Collection<OfficeData> officesForDropdown) {
         return new AppUserData(user.id, user.username, user.email, user.officeId, user.officeName, user.firstname, user.lastname,
-                user.availableRoles, user.selectedRoles, officesForDropdown, user.staff, user.passwordNeverExpires, user.isSelfServiceUser);
+                user.availableRoles, user.selfServiceRoles, user.selectedRoles, officesForDropdown, user.staff, user.passwordNeverExpires,
+                user.isSelfServiceUser);
     }
 
-    public static AppUserData template(final Collection<OfficeData> offices, final Collection<RoleData> availableRoles) {
-        return new AppUserData(null, null, null, null, null, null, null, availableRoles, null, offices, null, null, null);
+    public static AppUserData template(final Collection<OfficeData> offices, final Collection<RoleData> availableRoles, final Collection<RoleData> selfServiceRoles) {
+        return new AppUserData(null, null, null, null, null, null, null, availableRoles, selfServiceRoles, null, offices, null, null, null);
     }
 
     public static AppUserData dropdown(final Long id, final String username) {
-        return new AppUserData(id, username, null, null, null, null, null, null, null, null, null, null, null);
+        return new AppUserData(id, username, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     public static AppUserData instance(final Long id, final String username, final String email, final Long officeId,
             final String officeName, final String firstname, final String lastname, final Collection<RoleData> availableRoles,
-            final Collection<RoleData> selectedRoles, final StaffData staff, final Boolean passwordNeverExpire, final Boolean isSelfServiceUser) {
-        return new AppUserData(id, username, email, officeId, officeName, firstname, lastname, availableRoles, selectedRoles, null, staff,
-                passwordNeverExpire, isSelfServiceUser);
+            final Collection<RoleData> selfServiceRoles, final Collection<RoleData> selectedRoles, final StaffData staff,
+            final Boolean passwordNeverExpire, final Boolean isSelfServiceUser) {
+        return new AppUserData(id, username, email, officeId, officeName, firstname, lastname, availableRoles, selfServiceRoles, selectedRoles, null,
+                staff, passwordNeverExpire, isSelfServiceUser);
     }
 
     private AppUserData(final Long id, final String username, final String email, final Long officeId, final String officeName,
             final String firstname, final String lastname, final Collection<RoleData> availableRoles,
-            final Collection<RoleData> selectedRoles, final Collection<OfficeData> allowedOffices, final StaffData staff,
+            final Collection<RoleData> selfServiceRoles, final Collection<RoleData> selectedRoles,
+            final Collection<OfficeData> allowedOffices, final StaffData staff,
             final Boolean passwordNeverExpire, final Boolean isSelfServiceUser) {
         this.id = id;
         this.username = username;
@@ -122,6 +127,7 @@ public class AppUserData {
         this.email = email;
         this.allowedOffices = allowedOffices;
         this.availableRoles = availableRoles;
+        this.selfServiceRoles = selfServiceRoles;
         this.selectedRoles = selectedRoles;
         this.staff = staff;
         this.passwordNeverExpires = passwordNeverExpire;
