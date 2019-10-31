@@ -99,8 +99,12 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                 final String fileExtension = Files.getFileExtension(fileDetail.getFileName()).toLowerCase();
                 ImportFormatType format = ImportFormatType.of(fileExtension);
                 if (!fileType.contains("msoffice")) {
-                    throw new GeneralPlatformDomainRuleException("error.msg.invalid.file.extension",
-                            "Uploaded file extension is not recognized.");
+                    // We had a problem where we tried to upload the downloaded file from the import options, it was somehow changed the
+                    // extension we use this fix.
+                    if (!fileType.contains("application/vnd.ms-excel")) {
+                        throw new GeneralPlatformDomainRuleException("error.msg.invalid.file.extension",
+                                "Uploaded file extension is not recognized.");
+                    }
                 }
                 Workbook workbook = new HSSFWorkbook(clonedInputStreamWorkbook);
                 GlobalEntityType entityType=null;
