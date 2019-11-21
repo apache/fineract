@@ -40,12 +40,6 @@ import com.sun.jersey.spi.spring.container.servlet.SpringServlet;
 @Profile("oauth")
 public class WebXmlOauthConfiguration {
 
-
-    @Bean
-    public Filter springSecurityFilterChain() {
-        return new DelegatingFilterProxy();
-    }
-
     @Bean
     public ServletRegistrationBean jersey() {
         Servlet jerseyServlet = new SpringServlet();

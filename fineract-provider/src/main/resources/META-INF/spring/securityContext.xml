@@ -131,6 +131,11 @@
 				before="BASIC_AUTH_FILTER" />
 			<access-denied-handler ref="oauthAccessDeniedHandler" />
 		</http>
+
+        <beans:bean id="passwordEncoder" class="org.apache.fineract.infrastructure.core.domain.DefaultPasswordEncoderFactories"
+                    factory-method="createDelegatingPasswordEncoder">
+        </beans:bean>
+
 		<beans:bean id="oauthAuthenticationEntryPoint"
 			class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
 			<beans:property name="realmName" value="Fineract Platform API" />
