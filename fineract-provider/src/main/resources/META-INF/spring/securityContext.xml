@@ -118,6 +118,7 @@
 		<http pattern="/api/oauth/token" create-session="stateless"
 			entry-point-ref="oauthAuthenticationEntryPoint" use-expressions="true"
 			authentication-manager-ref="clientAuthenticationManager">
+            <csrf disabled="true"/>
 			<intercept-url pattern="/api/oauth/token" method="OPTIONS"
 				access="permitAll" requires-channel="https" />
 			<intercept-url pattern="/api/oauth/token" method="POST"
