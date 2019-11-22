@@ -17,4 +17,5 @@
 -- under the License.
 --
 
-UPDATE m_appuser SET password = CONCAT('{', id, '}', password) WHERE password NOT LIKE '{%';
+UPDATE m_appuser SET password = CONCAT('{SHA-256}{', id, '}', password) WHERE password NOT LIKE '{%';
+UPDATE oauth_client_details SET client_secret = CONCAT('{SHA-256}', SHA2(client_secret, 256)) WHERE client_secret NOT LIKE '{%';
