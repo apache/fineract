@@ -31,6 +31,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.LoanScheduleTestDataHelper;
@@ -43,17 +50,10 @@ import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-
 public class TemplateMergeServiceTest {
 
     private TemplateMergeService tms = new TemplateMergeService();
-    
+
     @Before
     public void setUpForEachTestCase() throws Exception {
 
@@ -62,7 +62,7 @@ public class TemplateMergeServiceTest {
         field.set(null, RoundingMode.HALF_EVEN);
     }
 
-    
+
 
     @Test
     public void compileHelloTemplate() throws Exception {
@@ -89,8 +89,7 @@ public class TemplateMergeServiceTest {
         String expectedOutput = Resources.toString(Resources.getResource("template-expected.html"), Charsets.UTF_8);
 
         String output = compileTemplateText(templateText, scopes);
-        // System.out.println(output);
-       // assertEquals(expectedOutput, output);
+        assertEquals(expectedOutput, output);
     }
 
     @Test
@@ -124,7 +123,7 @@ public class TemplateMergeServiceTest {
         Template template = new Template("TemplateName", templateText, null, null, mappers);
         return tms.compile(template, scope);
     }
-    
+
     protected Map<String, Object> createMapFromJSON(String jsonText) {
         Gson gson = new Gson();
         Type ssMap = new TypeToken<Map<String, Object>>(){}.getType();

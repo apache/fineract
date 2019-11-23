@@ -20,7 +20,17 @@ description = '''\
 Run as:
 gradle clean tomcatrunwar
 '''
+
+project.ext.springBootVersion = '1.2.8.RELEASE'
+project.ext.springVersion = '4.1.9.RELEASE'
+project.ext.springOauthVersion = '2.0.4.RELEASE'
+project.ext.jerseyVersion = '1.17'
+project.ext.springDataJpaVersion = '1.7.0.RELEASE' // also change spring-boot-gradle-plugin version below
+
 buildscript {
+  ext {
+    openJPAVersion = '2.4.3'
+  }
   repositories {
   	 jcenter()
   	 mavenCentral()
@@ -28,12 +38,12 @@ buildscript {
   }
 
   dependencies {
-     classpath 'org.gradle.api.plugins:gradle-tomcat-plugin:1.0',
+     classpath 'com.bmuschko:gradle-tomcat-plugin:2.5',
                'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0',
                'org.zeroturnaround:gradle-jrebel-plugin:1.1.2',
-               'org.springframework.boot:spring-boot-gradle-plugin:1.1.6.RELEASE' // also change springDataJpaVersion below
-     classpath 'org.apache.openjpa:openjpa-all:2.4.1'
-     classpath 'at.schmutterer.oss.gradle:gradle-openjpa:0.2.0'
+               'org.springframework.boot:spring-boot-gradle-plugin:2.1.3.RELEASE' // also change springDataJpaVersion below
+     classpath "org.apache.openjpa:openjpa:$openJPAVersion"
+     classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.0.0'
      classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.2.2'
   }
 }
@@ -42,30 +52,23 @@ apply plugin: "org.nosphere.apache.rat"
 apply plugin: 'rebel'
 apply plugin: 'license'
 apply plugin: 'war'
-apply plugin: 'spring-boot'
+apply plugin: 'org.springframework.boot'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'tomcat'
+apply plugin: 'com.bmuschko.tomcat'
 apply plugin: 'project-report'
 apply plugin: 'java'
 apply plugin: 'openjpa'
-apply plugin: 'pmd'
-apply plugin: 'findbugs'
+// apply plugin: 'pmd'
+// apply plugin: 'findbugs'
 
 /* define the valid syntax level for source files */
 sourceCompatibility = JavaVersion.VERSION_1_8
 /* define binary compatibility version */
 targetCompatibility = JavaVersion.VERSION_1_8
 
-project.ext.springBootVersion = '1.2.8.RELEASE'
-project.ext.springVersion = '4.1.9.RELEASE'
-project.ext.springOauthVersion = '2.0.4.RELEASE'
-project.ext.jerseyVersion = '1.17'
-project.ext.springDataJpaVersion = '1.7.0.RELEASE' // also change spring-boot-gradle-plugin version above
-
 project.ext.mysqlUser='root'
 project.ext.mysqlPassword='mysql'
-
 
 group = 'org.apache.fineract'
 buildDir = new File(rootProject.projectDir, "../build")
@@ -73,13 +76,12 @@ repositories {
 	jcenter()
 	// mavenLocal() // useful for local dev using MariaDB4j SNAPSHOTs (not needed for real-world non-SNAPHOT builds)
 }
-openjpa {
-    files = fileTree(sourceSets.main.output.classesDir).matching {
-		include '**/AbstractPersistableCustom.class'
-		include '**/domain/*.class'
 
+openjpa {
+    includes = ['**/AbstractPersistableCustom.class', '**/domain/*.class']
+    enhance {
+        enforcePropertyRestrictions true
     }
-    enforcePropertyRestrictions = true
 }
 
 rat {
@@ -134,6 +136,7 @@ rat {
 	'**/docs/system-architecture/**/*.xml',
 	'**/bootstrap-3.0.0/assets/application.js',
 	'**/system-architecture/js/plugins.js',
+    '**/docs/interoperation/specification/json/*.json',
 
 	//Apache License
 	'**/bootstrap-3.0.0/assets/less.js',
@@ -158,7 +161,9 @@ rat {
 	'**/assets/html5shiv.js',
 
 	//BSD License
-	'**/assets/uglify.js'
+	'**/assets/uglify.js',
+         //Ignore out folder
+         '**/out/**'
 	]
 }
 
@@ -172,9 +177,6 @@ configurations {
 		exclude module: 'bcmail-jdk14'
 		exclude module: 'bcprov-jdk14'
 		exclude module: 'bctsp-jdk14'
-		exclude module: 'bval-core'
-		exclude module: 'org.apache.bval.bundle'
-		exclude module: 'bval-jsr303'
 		exclude module: 'c3p0'
 		exclude module: 'stax-api'
 		exclude module: 'jaxb-api'
@@ -182,12 +184,10 @@ configurations {
 		exclude module: 'jboss-logging'
 		exclude module: 'itext-rtf'
 		exclude module: 'classworlds'
-		exclude module: 'jcl-over-slf4j'
-		exclude module: 'jul-to-slf4j'
-		exclude module: 'serp'
 	}
 	runtime
 	all*.exclude group: 'commons-logging'
+	all*.exclude module: 'jul-to-slf4j' // see FINERACT-700 re. ClassCircularityError: java/util/logging/LogRecord
 }
 /* Pick up dependencies based on the environemnt, defaults to production */
 if (project.hasProperty('env') && project.getProperty('env') == 'dev') {
@@ -267,6 +267,7 @@ task dist(type:Zip){
 compileJava{
     dependsOn rat
 }
+/*
 pmd {
     sourceSets = [sourceSets.main]
     ignoreFailures = true
@@ -275,6 +276,7 @@ findbugs {
     ignoreFailures = true
     sourceSets = [sourceSets.main]
 }
+*/
 
 war {
 	from('../licenses/binary/') { // notice the parens
@@ -292,7 +294,7 @@ war {
 	from('../DISCLAIMER') { // notice the parens
 		into "WEB-INF/" // no leading slash
 	}
-    war.finalizedBy(bootRepackage)
+    war.finalizedBy(bootWar)
 }
 
 license {
@@ -326,9 +328,26 @@ tomcatRunWar {
     configFile = file('src/test/resources/META-INF/context.xml')
 }
 
+task tomcatRunWarAsDaemonForIntegrationTest(type: com.bmuschko.gradle.tomcat.tasks.TomcatRunWar) {
+    httpPort = 8080
+    httpsPort = 8443
+    stopPort = 8081
+    stopKey=   'stopKey'
+    enableSSL = true
+    keystoreFile = file('src/main/resources/keystore.jks')
+    keystorePass = 'openmf'
+    configFile = file('src/test/resources/META-INF/context.xml')
+    daemon = true
+}
+
+task tomcatStopAfterIntegrationTest(type: com.bmuschko.gradle.tomcat.tasks.TomcatStop) {
+    stopPort = 8081
+    stopKey = 'stopKey'
+}
+
 /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
-sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
-sourceSets.test.output.resourcesDir = sourceSets.test.output.classesDir
+sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
+sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
 
 /* Exclude maria db and embedded tomcat related files for non dev builds */
 if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
@@ -360,14 +379,14 @@ configurations {
     integrationTestRuntime.extendsFrom testRuntime
 }
 
-task integrationTest(type:Test){
-    description = "Run integration tests (located in src/integrationTest/java). Starts tomcat in daemon mode before executing the tests."
-    it.dependsOn war
-    doFirst {
-        tomcatRunWar.daemon = true
-        tomcatRunWar.execute()
-    }
-    testClassesDir = project.sourceSets.integrationTest.output.classesDir
+task integrationTest(type:Test) {
+    description = "Run integration tests (located in src/integrationTest/java). Starts Tomcat in daemon mode before executing the tests (and stops it after)."
+    dependsOn war
+    dependsOn tomcatRunWarAsDaemonForIntegrationTest
+    tasks.findByName('tomcatRunWarAsDaemonForIntegrationTest').mustRunAfter 'war'
+    finalizedBy tomcatStopAfterIntegrationTest
+
+    testClassesDirs = project.sourceSets.integrationTest.output.classesDirs
     classpath = project.sourceSets.integrationTest.runtimeClasspath
 }
 
@@ -381,14 +400,7 @@ configurations {
     driver
 }
 dependencies {
-    driver 'org.drizzle.jdbc:drizzle-jdbc:1.3'
-}
-
-test {
-	filter {
-        //includeTestsMatching "org.apache.fineract.infrastructure.configuration.spring.SpringConfigurationTest.*"
-        includeTestsMatching "org.apache.fineract.template.TemplateMergeServiceTest.*"
-    }
+    driver 'org.drizzle.jdbc:drizzle-jdbc:1.4'
 }
 
 URLClassLoader loader = GroovyObject.class.classLoader
@@ -396,122 +408,29 @@ configurations.driver.each {File file ->
     loader.addURL(file.toURL())
 }
 
-task createDB<<{
+task createDB {
     description= "Creates the Database. Needs database name to be passed (like: -PdbName=someDBname)"
-    sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
-    sql.execute( 'create database '+"`$dbName`" )
+    doLast {
+        def sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
+        sql.execute( 'create database '+"`$dbName`" )
+    }
 }
 
-task dropDB<<{
+task dropDB {
     description= "Drops the specified database. The database name has to be passed (like: -PdbName=someDBname)"
-    sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
-    sql.execute( 'DROP DATABASE '+"`$dbName`")
-}
-task setBlankPassword<<{
-    sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
-    sql.execute('USE `mifosplatform-tenants`')
-    sql.execute('UPDATE mifosplatform-tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
-}
-
-
-apply plugin: 'flyway'
-buildscript {
-    repositories {
-        mavenCentral()
+    doLast {
+        def sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
+        sql.execute( 'DROP DATABASE '+"`$dbName`")
     }
-
-    dependencies {
-        classpath "org.flywaydb:flyway-gradle-plugin:3.0" // version upgraded during Spring Boot & MariaDB4j work, as prev. used v0.2 didn't work well after *.sql moved from fineract-db to fineract-provider/src/main/resources (new version also has clearer errors, e.g. in case of missing DB)
-        classpath 'org.drizzle.jdbc:drizzle-jdbc:1.3'
+}
+task setBlankPassword {
+    doLast {
+        def sql = Sql.newInstance( 'jdbc:mysql:thin://localhost:3306/', mysqlUser, mysqlPassword, 'org.drizzle.jdbc.DrizzleDriver' )
+        sql.execute('USE `mifosplatform-tenants`')
+        sql.execute('UPDATE mifosplatform-tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
     }
 }
 
-
-flyway {
-    url = "jdbc:mysql:thin://localhost:3306/mifostenant-default"
-	driver = "org.drizzle.jdbc.DrizzleDriver"
-    user = mysqlUser
-    password = mysqlPassword
-}
-
-task migrateTenantDB<<{
-    description="Migrates a Tenant DB. Optionally can pass dbName. Defaults to 'mifostenant-default' (Example: -PdbName=someTenantDBname)"
-
-	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/core_db'
-	def tenantDbName = 'mifostenant-default';
-    if (rootProject.hasProperty("dbName")) {
-		tenantDbName = rootProject.getProperty("dbName")
-	}
-
-    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantDbName"
-	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
-    flyway.locations= [filePath]
-    /**We use ${ as the prefix for strecthy reporting, do not want them to be interpreted by Flyway**/
-    flyway.placeholderPrefix = "\$\${"
-    flywayMigrate.execute()
-}
-
-task showTenantDBInfo<<{
-    description="Shows the migration info for a Tenant DB. Optionally can pass dbName. Defaults to 'mifostenant-default' (Example: -PdbName=someTenantDBname)"
-
-	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/core_db'
-    def tenantDbName = 'mifostenant-default';
-    if (rootProject.hasProperty("dbName")) {
-		tenantDbName = rootProject.getProperty("dbName")
-	}
-
-    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantDbName"
-	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
-    flyway.locations= [filePath]
-    flywayInfo.execute()
-}
-
-
-task migrateTenantListDB<<{
-    description="Migrates a Tenant List DB. Optionally can pass dbName. Defaults to 'mifosplatform-tenants' (Example: -PdbName=someDBname)"
-
-	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
- 	def tenantsDbName = 'mifosplatform-tenants';
-    if (rootProject.hasProperty("dbName")) {
-		tenantsDbName = rootProject.getProperty("dbName")
-	}
-
-    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
-	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
-    flyway.locations= [filePath]
-
-    flywayMigrate.execute()
-}
-
-task showTenantListDBInfo<<{
-    description="Shows the migration info for a List DB. Optionally can pass dbName. Defaults to 'mifosplatform-tenants' (Example: -PdbName=someDBname)"
-
-	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
-    def tenantsDbName = 'mifosplatform-tenants';
-    if (rootProject.hasProperty("dbName")) {
-		tenantsDbName = rootProject.getProperty("dbName")
-	}
-
-    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
-	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
-    flyway.locations= [filePath]
-    flywayInfo.execute()
-}
-
-task repairTenantDB<<{
-    description="repair migrate"
-
-	def filePath = "filesystem:$projectDir" + '/src/main/resources/sql/migrations/list_db'
-    def tenantsDbName = 'mifosplatform-tenants';
-    if (rootProject.hasProperty("dbName")) {
-        tenantsDbName = rootProject.getProperty("dbName")
-    }
-
-    flyway.url= "jdbc:mysql:thin://localhost:3306/$tenantsDbName"
-	flyway.driver = "org.drizzle.jdbc.DrizzleDriver"
-    flyway.locations= [filePath]
-    flywayRepair.execute()
-}
 
 /*
 * Support publication of artifacts versioned by topic branch.
@@ -532,8 +451,8 @@ def qualifyVersionIfNecessary(version) {
 }
 
 springBoot {
-    mainClass = 'org.apache.fineract.ServerWithMariaDB4jApplication'
+    mainClassName = 'org.apache.fineract.ServerWithMariaDB4jApplication'
 }
-bootRepackage {
-    mainClass = 'org.apache.fineract.ServerWithMariaDB4jApplication'
+bootWar {
+    mainClassName = 'org.apache.fineract.ServerWithMariaDB4jApplication'
 }

@@ -40,6 +40,7 @@ import org.apache.fineract.useradministration.domain.RoleRepository;
 import org.junit.Test;
 import org.mockito.Mock;
 
+@org.junit.Ignore // see FINERACT-776
 public class TopicTest {
 
 	@Mock

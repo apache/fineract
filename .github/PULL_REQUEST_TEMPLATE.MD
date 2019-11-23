@@ -12,8 +12,8 @@ Please make sure these boxes are checked before submitting your pull request - t
 
 - [ ] Integration tests have been created/updated for verifying the changes made.
 
-- [ ] All Integrations tests are passing with the new commit.
+- [ ] All Integrations tests are passing with the new commits.
 
-- [ ] PR contains a single commit (If you have multiple commits, please squash them into a single commit).
+- [ ] Submission is not a "code dump".  (Large changes can be made "in repository" via a branch.  Ask on the list.)
 
 Our guidelines for code reviews is at https://cwiki.apache.org/confluence/display/FINERACT/Code+Review+Guide

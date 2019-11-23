@@ -28,17 +28,24 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.Random;
+import java.util.TimeZone;
+
+import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.path.json.JsonPath;
+import com.jayway.restassured.response.Response;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.path.json.JsonPath;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
 /**
  * Util for RestAssured tests. This class here in src/integrationTest is
  * copy/pasted to src/test; please keep them in sync.
@@ -46,11 +53,16 @@ import com.jayway.restassured.specification.ResponseSpecification;
 @SuppressWarnings("unchecked")
 public class Utils {
 
-    public static final String TENANT_IDENTIFIER = "tenantIdentifier=default";
+   private final static Logger logger = LoggerFactory.getLogger(Utils.class);
+
+    public static final String TENANT_PARAM_NAME = "tenantIdentifier";
+    public static final String DEFAULT_TENANT = "default";
+    public static final String TENANT_IDENTIFIER = TENANT_PARAM_NAME + '=' + DEFAULT_TENANT;
 
     public static final String TENANT_TIME_ZONE = "Asia/Kolkata";
 
-    private static final String LOGIN_URL = "/fineract-provider/api/v1/authentication?username=mifos&password=password&" + TENANT_IDENTIFIER;
+    private static final String HEALTH_URL = "/fineract-provider/health";
+    private static final String LOGIN_URL  = "/fineract-provider/api/v1/authentication?username=mifos&password=password&" + TENANT_IDENTIFIER;
 
     public static void initializeRESTAssured() {
         RestAssured.baseURI = "https://localhost";
@@ -58,8 +70,51 @@ public class Utils {
         RestAssured.keystore("src/main/resources/keystore.jks", "openmf");
     }
 
-    public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
+    private static void awaitSpringBootActuatorHealthyUp() {
+        int attempt = 0;
+        final int max_attempts = 10;
+        Response response = null;
+        Exception lastException = null;
+        do {
+            try {
+                response = RestAssured.get(HEALTH_URL);
+                int healthHttpStatus = response.statusCode();
+                if (healthHttpStatus == 200) {
+                    logger.info("{} return HTTP 200, application is now ready for integration testing!", HEALTH_URL);
+                    return;
+                } else {
+                    logger.info("{} returned HTTP {}, going to wait and retry (attempt {})", new Object[] { HEALTH_URL, healthHttpStatus, attempt++ });
+                    sleep(3);
+                }
+            } catch (Exception e) {
+                logger.info("{} caused {}, going to wait and retry (attempt {})", HEALTH_URL, new Object[] {  e.getMessage(), attempt++ });
+                lastException = e;
+                sleep(3);
+            }
+        } while (attempt < max_attempts);
+
+        if (lastException != null) {
+            logger.error("{} still not reachable, giving up", HEALTH_URL, lastException);
+            throw new AssertionError(HEALTH_URL + " not reachable", lastException);
+        } else {
+            logger.error("{} still has not returned HTTP 200, giving up; (last) body: ", HEALTH_URL, response.prettyPrint());
+            fail(HEALTH_URL + " returned " + response.prettyPrint());
+        }
+    }
+
+    private static void sleep(int seconds) {
         try {
+            Thread.sleep(seconds * 1000);
+        } catch (InterruptedException e) {
+            logger.warn("Unexpected InterruptedException", e);
+            throw new IllegalStateException("Unexpected InterruptedException", e);
+        }
+    }
+
+    public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
+        awaitSpringBootActuatorHealthyUp();
+        try {
+            logger.info("Logging in, for integration test...");
             System.out.println("-----------------------------------LOGIN-----------------------------------------");
             final String json = RestAssured.post(LOGIN_URL).asString();
             assertThat("Failed to login into fineract platform", StringUtils.isBlank(json), is(false));
@@ -111,6 +166,13 @@ public class Utils {
         final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().delete(deleteURL).andReturn()
                 .asString();
         return (T) from(json).get(jsonAttributeToGetBack);
+    }
+
+    public static <T> T performServerDelete(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String deleteURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
+        final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when()
+                .delete(deleteURL).andReturn().asString();
+        return (T) (jsonAttributeToGetBack == null ? json : from(json).get(jsonAttributeToGetBack));
     }
 
     public static String convertDateToURLFormat(final String dateToBeConvert) {
@@ -196,3 +258,4 @@ public class Utils {
         return templateLocation.substring(1,templateLocation.length()-1);
     }
 }
+

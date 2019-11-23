@@ -45,6 +45,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
@@ -71,7 +72,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
 
-    @ManyToOne(optional = true)
+    @ManyToOne(cascade = CascadeType.ALL, optional = true)
     @JoinColumn(name = "payment_detail_id", nullable = true)
     private PaymentDetail paymentDetail;
 
@@ -124,6 +125,10 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     
     @Column(name = "release_id_of_hold_amount", length = 20)
     private Long releaseIdOfHoldAmountTransaction;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "savings_account_transaction_id", referencedColumnName = "id")
+    private List<Note> notes = new ArrayList<>();
 
     protected SavingsAccountTransaction() {
         this.dateOf = null;
@@ -432,12 +437,8 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
         return new LocalDate(this.dateOf);
     }
 
-    private LocalDate getEndOfBalanceLocalDate() {
-        LocalDate endDate = null;
-        if (this.balanceEndDate != null) {
-            endDate = new LocalDate(this.balanceEndDate);
-        }
-        return endDate;
+    public LocalDate getEndOfBalanceLocalDate() {
+        return balanceEndDate == null ? null : new LocalDate(balanceEndDate);
     }
 
     public boolean isAcceptableForDailyBalance(final LocalDateInterval interestPeriodInterval) {
@@ -756,6 +757,10 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
         return this.taxDetails;
     }
 
+    public List<Note> getNotes() {
+        return notes;
+    }
+
     public void updateAmount(final Money amount) {
         this.amount = amount.getAmount();
     }
@@ -790,9 +795,5 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     
 	public boolean isAmountOnHoldNotReleased() {
 		return (isAmountOnHold() && getReleaseIdOfHoldAmountTransaction() == null);
-	}
-	
-	public Date getCreatedDate() {
-		return createdDate;
 	}
 }

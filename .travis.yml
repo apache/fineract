@@ -15,6 +15,10 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+
+# https://issues.apache.org/jira/browse/FINERACT-763
+dist: trusty
+
 language: java
 
 jdk:
@@ -22,15 +26,20 @@ jdk:
 
 services:
   - mysql
+  - docker
 
-# Hardcoding system time as a temporary fix for running buggy test cases
+addons:
+  apt:
+    packages:
+    # https://httpie.org is used by the docker-compose test below
+    - httpie
+
 before_install:
   - echo "USE mysql;\nUPDATE user SET password=PASSWORD('mysql') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
   - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `mifosplatform-tenants`;'
   - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `mifostenant-default`;'
+# Hardcoding the time zone is a temporary fix for https://issues.apache.org/jira/browse/FINERACT-723
   - export TZ=Asia/Kolkata
-  - sudo service ntp stop
-  - sudo date --set="23 February 2019 01:02:03"
 
 # https://docs.travis-ci.com/user/languages/java/#caching
 before_cache:
@@ -42,13 +51,15 @@ cache:
     - $HOME/.gradle/wrapper/
     - $HOME/.m2
 
-# NOTE: The --info, while quite a bit more verbose, is VERY useful to understand failures on Travis,
+# NOTE: We used to run with --info, which is quite a bit more verbose, but is VERY useful to understand failures on Travis,
 # where you do not have access to any files like build/reports/tests/index.html, only the Console.
 # @see http://mrhaki.blogspot.ch/2013/05/gradle-goodness-show-more-information.html
 # @see http://forums.gradle.org/gradle/topics/whats_new_in_gradle_1_1_test_logging for alternative
+# https://jira.apache.org/jira/browse/FINERACT-732 removed that again, because it made Travis CI fail.
 script:
   - date
-  - ./gradlew --info licenseMain licenseTest licenseIntegrationTest test
-  - ./gradlew migrateTenantListDB -PdbName=mifosplatform-tenants
-  - ./gradlew migrateTenantDB -PdbName=mifostenant-default
-  - ./gradlew clean integrationTest
+# using "&&" instead of x2 "-" means that integrationTest does not run if test fails, which makes sense.
+# @see https://docs.travis-ci.com/user/job-lifecycle/#customizing-the-build-phase
+  - ./gradlew --console=plain licenseMain licenseTest licenseIntegrationTest test  &&  ./gradlew --console=plain integrationTest
+# We must stop mysql the mysql system service to avoid port 3306 conflicts (unless we run the mysql in docker-compose on another port; req. FINERACT-773)
+  - sudo service mysql stop  &&  docker-compose build  &&  docker-compose up -d  &&  sleep 30s  &&  http --verify=no --timeout 240 --check-status get https://localhost:8443/fineract-provider/health

@@ -25,7 +25,7 @@ dependencies {
         }
         tomcat "org.apache.tomcat:tomcat-dbcp:${tomcatVersion}"
 
-    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
+    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat:${springBootVersion}")
 
     providedCompile(
 //              [group: 'javax.servlet', name: 'servlet-api', version: '2.5'],
@@ -93,7 +93,8 @@ dependencies {
 
                 [group: 'io.swagger', name: 'swagger-jersey-jaxrs', version: '1.5.15'],
                 [group: 'org.springframework', name:'spring-jms'],
-                [group: 'org.apache.activemq', name: 'activemq-broker']
+                [group: 'org.apache.activemq', name: 'activemq-broker'],
+                [group: 'javax.validation', name: 'validation-api', version: '2.0.0.Final']
     )
 
      testCompile 'junit:junit:4.11',

@@ -213,7 +213,6 @@ public class ShareAccountIntegrationTests {
     }
     
     @Test
-    @Ignore
     @SuppressWarnings("unchecked")
     public void rejectShareAccount() {
         shareProductHelper = new ShareProductHelper();
@@ -270,7 +269,7 @@ public class ShareAccountIntegrationTests {
             String transactionType = (String) transactionTypeMap.get("code");
             if (transactionType.equals("purchasedSharesType.purchased")) {
                 Assert.assertEquals("25", String.valueOf(transaction.get("numberOfShares")));
-                Assert.assertEquals("52.0", String.valueOf(transaction.get("amount")));
+                Assert.assertEquals("50.0", String.valueOf(transaction.get("amount")));
                 Assert.assertEquals("50.0", String.valueOf(transaction.get("amountPaid")));
                 Assert.assertEquals("2.0", String.valueOf(transaction.get("chargeAmount")));
                 Assert.assertEquals("2.0", String.valueOf(transaction.get("purchasedPrice")));

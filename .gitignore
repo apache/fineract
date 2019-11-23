@@ -8,3 +8,5 @@ build
 *.ipr
 *.iws
 *.DS_Store
+.idea
+gradle
