@@ -355,7 +355,6 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         final Object targetObject = getBeanObject(Class.forName(jobDetails.className));
         final MethodInvokingJobDetailFactoryBean jobDetailFactoryBean = new MethodInvokingJobDetailFactoryBean();
         jobDetailFactoryBean.setName(scheduledJobDetail.getJobName() + "JobDetail" + tenant.getId());
-        jobDetailFactoryBean.setArguments(new Object[]{getJobParameter(scheduledJobDetail)});
         jobDetailFactoryBean.setTargetObject(targetObject);
         jobDetailFactoryBean.setTargetMethod(jobDetails.methodName);
         jobDetailFactoryBean.setGroup(scheduledJobDetail.getGroupName());
