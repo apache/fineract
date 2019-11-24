@@ -42,6 +42,6 @@ public class TrialBalanceRepositoryWrapper {
     }
 
     public void save(final List<TrialBalance> tbRows){
-        this.repository.save(tbRows);
+        this.repository.saveAll(tbRows);
     }
 }

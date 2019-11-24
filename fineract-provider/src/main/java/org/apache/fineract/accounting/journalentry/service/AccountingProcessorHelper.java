@@ -774,11 +774,11 @@ public class AccountingProcessorHelper {
     }
 
     public LoanTransaction getLoanTransactionById(final long loanTransactionId) {
-        return this.loanTransactionRepository.findOne(loanTransactionId);
+        return this.loanTransactionRepository.findById(loanTransactionId).get();
     }
 
     public SavingsAccountTransaction getSavingsTransactionById(final long savingsTransactionId) {
-        return this.savingsAccountTransactionRepository.findOne(savingsTransactionId);
+        return this.savingsAccountTransactionRepository.findById(savingsTransactionId).get();
     }
 
     private void createCreditJournalEntryOrReversalForLoan(final Office office, final String currencyCode, final int accountMappingTypeId,
@@ -828,7 +828,7 @@ public class AccountingProcessorHelper {
         String modifiedTransactionId = transactionId;
         if (StringUtils.isNumeric(transactionId)) {
             long id = Long.parseLong(transactionId);
-            savingsAccountTransaction = this.savingsAccountTransactionRepository.findOne(id);
+            savingsAccountTransaction = this.savingsAccountTransactionRepository.findById(id).get();
             modifiedTransactionId = SAVINGS_TRANSACTION_IDENTIFIER + transactionId;
         }
         final JournalEntry journalEntry = JournalEntry.createNew(office, paymentDetail, account, currencyCode, modifiedTransactionId,
@@ -848,7 +848,7 @@ public class AccountingProcessorHelper {
         String modifiedTransactionId = transactionId;
         if (StringUtils.isNumeric(transactionId)) {
             long id = Long.parseLong(transactionId);
-            loanTransaction = this.loanTransactionRepository.findOne(id);
+            loanTransaction = this.loanTransactionRepository.findById(id).get();
             modifiedTransactionId = LOAN_TRANSACTION_IDENTIFIER + transactionId;
         }
         final JournalEntry journalEntry = JournalEntry.createNew(office, paymentDetail, account, currencyCode, modifiedTransactionId,
@@ -898,7 +898,7 @@ public class AccountingProcessorHelper {
         String modifiedTransactionId = transactionId;
         if (StringUtils.isNumeric(transactionId)) {
             long id = Long.parseLong(transactionId);
-            loanTransaction = this.loanTransactionRepository.findOne(id);
+            loanTransaction = this.loanTransactionRepository.findById(id).get();
             modifiedTransactionId = LOAN_TRANSACTION_IDENTIFIER + transactionId;
         }
         final JournalEntry journalEntry = JournalEntry.createNew(office, paymentDetail, account, currencyCode, modifiedTransactionId,
@@ -918,7 +918,7 @@ public class AccountingProcessorHelper {
         String modifiedTransactionId = transactionId;
         if (StringUtils.isNumeric(transactionId)) {
             long id = Long.parseLong(transactionId);
-            savingsAccountTransaction = this.savingsAccountTransactionRepository.findOne(id);
+            savingsAccountTransaction = this.savingsAccountTransactionRepository.findById(id).get();
             modifiedTransactionId = SAVINGS_TRANSACTION_IDENTIFIER + transactionId;
         }
         final JournalEntry journalEntry = JournalEntry.createNew(office, paymentDetail, account, currencyCode, modifiedTransactionId,

@@ -310,7 +310,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
 
             if (!guarantorFundingDetailList.isEmpty()) {
                 loan.setGuaranteeAmount(null);
-                this.guarantorFundingRepository.save(guarantorFundingDetailList);
+                this.guarantorFundingRepository.saveAll(guarantorFundingDetailList);
             }
         }
     }
@@ -369,8 +369,8 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
             }
             loan.setGuaranteeAmount(totalGuarantee);
             if (!guarantorFundingDetailList.isEmpty()) {
-                this.depositAccountOnHoldTransactionRepository.save(onHoldTransactions);
-                this.guarantorFundingRepository.save(guarantorFundingDetailList);
+                this.depositAccountOnHoldTransactionRepository.saveAll(onHoldTransactions);
+                this.guarantorFundingRepository.saveAll(guarantorFundingDetailList);
             }
         }
     }
@@ -422,8 +422,8 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                 }
 
                 if (!externalGuarantorList.isEmpty()) {
-                    this.depositAccountOnHoldTransactionRepository.save(accountOnHoldTransactions);
-                    this.guarantorFundingRepository.save(externalGuarantorList);
+                    this.depositAccountOnHoldTransactionRepository.saveAll(accountOnHoldTransactions);
+                    this.guarantorFundingRepository.saveAll(externalGuarantorList);
                 }
             }
         }
@@ -463,8 +463,8 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
             }
 
             if (!saveGuarantorFundingDetails.isEmpty()) {
-                this.depositAccountOnHoldTransactionRepository.save(onHoldTransactions);
-                this.guarantorFundingRepository.save(saveGuarantorFundingDetails);
+                this.depositAccountOnHoldTransactionRepository.saveAll(onHoldTransactions);
+                this.guarantorFundingRepository.saveAll(saveGuarantorFundingDetails);
             }
         }
     }
@@ -476,7 +476,8 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
      */
     private void completeGuarantorFund(final LoanTransaction loanTransaction) {
         Loan loan = loanTransaction.getLoan();
-        GuarantorFundingDetails guarantorFundingDetails = this.guarantorFundingRepository.findOne(releaseLoanIds.get(loan.getId()));
+        GuarantorFundingDetails guarantorFundingDetails = this.guarantorFundingRepository.findById(releaseLoanIds.get(loan.getId()))
+                .orElse(null);
         if (guarantorFundingDetails != null) {
             BigDecimal amountForRelease = loanTransaction.getAmount(loan.getCurrency()).getAmount();
             BigDecimal guarantorGuarantee = amountForRelease;
@@ -484,7 +485,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
             final List<DepositAccountOnHoldTransaction> accountOnHoldTransactions = new ArrayList<>();
             calculateAndRelaseGuarantorFunds(guarantorList, guarantorGuarantee, amountForRelease, loanTransaction,
                     accountOnHoldTransactions);
-            this.depositAccountOnHoldTransactionRepository.save(accountOnHoldTransactions);
+            this.depositAccountOnHoldTransactionRepository.saveAll(accountOnHoldTransactions);
             this.guarantorFundingRepository.save(guarantorFundingDetails);
         }
     }
@@ -525,7 +526,7 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
             fundingTransaction.reverseTransaction();
         }
         if (!fundingTransactions.isEmpty()) {
-            this.guarantorFundingTransactionRepository.save(fundingTransactions);
+            this.guarantorFundingTransactionRepository.saveAll(fundingTransactions);
         }
     }
 

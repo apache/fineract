@@ -176,9 +176,8 @@ public class LoanScheduleAssembler {
     public LoanApplicationTerms assembleLoanTerms(final JsonElement element) {
         final Long loanProductId = this.fromApiJsonHelper.extractLongNamed("productId", element);
 
-        final LoanProduct loanProduct = this.loanProductRepository.findOne(loanProductId);
-        if (loanProduct == null) { throw new LoanProductNotFoundException(loanProductId); }
-
+        final LoanProduct loanProduct = this.loanProductRepository.findById(loanProductId)
+                .orElseThrow(() -> new LoanProductNotFoundException(loanProductId));
         return assembleLoanApplicationTermsFrom(element, loanProduct);
     }
 
@@ -254,8 +253,8 @@ public class LoanScheduleAssembler {
          * meeting freq multiples
          */
         if ((loanType.isJLGAccount() || loanType.isGroupAccount()) && calendarId != null) {
-            calendar = this.calendarRepository.findOne(calendarId);
-            if (calendar == null) { throw new CalendarNotFoundException(calendarId); }
+            calendar = this.calendarRepository.findById(calendarId)
+                    .orElseThrow(() -> new CalendarNotFoundException(calendarId));
             final PeriodFrequencyType meetingPeriodFrequency = CalendarUtils.getMeetingPeriodFrequencyType(calendar.getRecurrence());
             validateRepaymentFrequencyIsSameAsMeetingFrequency(meetingPeriodFrequency.getValue(), repaymentFrequencyType,
                     CalendarUtils.getInterval(calendar.getRecurrence()), repaymentEvery);

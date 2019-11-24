@@ -439,7 +439,7 @@ public class InteropServiceImpl implements InteropService {
     }
 
     public InteropIdentifier findIdentifier(@NotNull InteropIdentifierType idType, @NotNull String idValue, String subIdOrType) {
-        return identifierRepository.findOne(Specifications.where(idTypeEqual(idType)).and(idValueEqual(idValue)).and(subIdOrTypeEqual(subIdOrType)));
+        return identifierRepository.findOne(Specifications.where(idTypeEqual(idType)).and(idValueEqual(idValue)).and(subIdOrTypeEqual(subIdOrType))).get();
     }
 
     public static Specification<InteropIdentifier> idTypeEqual(@NotNull InteropIdentifierType idType) {

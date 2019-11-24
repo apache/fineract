@@ -589,7 +589,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 		List<Long> subscriberIds = new ArrayList<>();
 		Long entityId = officeId;
 		String entityType= "";
-		if (officeRepository.findOne(entityId).getParent() == null) {
+		if (officeRepository.findById(entityId).get().getParent() == null) {
 			entityType = "OFFICE";
 		} else {
 			entityType = "BRANCH";

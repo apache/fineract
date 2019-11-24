@@ -24,9 +24,11 @@ import javax.persistence.Table;
 
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
+import java.io.Serializable;
+
 @Entity
 @Table(name = "m_permission")
-public class Permission extends AbstractPersistableCustom<Long> {
+public class Permission extends AbstractPersistableCustom<Long> implements Serializable {
 
     @Column(name = "grouping", nullable = false, length = 45)
     private String grouping;

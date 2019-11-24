@@ -37,7 +37,7 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.MonthDay;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.springframework.format.number.NumberFormatter;
+import org.springframework.format.number.NumberStyleFormatter;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -622,7 +622,7 @@ public class JsonParserHelper {
                     source = source.replaceAll(" ", Character.toString('\u00a0'));
                 }
 
-                final NumberFormatter numberFormatter = new NumberFormatter();
+                final NumberStyleFormatter numberFormatter = new NumberStyleFormatter();
                 final Number parsedNumber = numberFormatter.parse(source, clientApplicationLocale);
                 if (parsedNumber instanceof BigDecimal) {
                     number = (BigDecimal) parsedNumber;
