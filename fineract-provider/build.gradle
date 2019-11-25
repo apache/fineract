@@ -96,6 +96,7 @@ rat {
 	'**/*.md',
 	'**/*.github/*',
 	'**/MANIFEST.MF',
+    '**/*.json',
 	'**/*.txt',
 	'**/*.log',
 	'**/fineractdev-eclipse-preferences.epf',
@@ -136,7 +137,6 @@ rat {
 	'**/docs/system-architecture/**/*.xml',
 	'**/bootstrap-3.0.0/assets/application.js',
 	'**/system-architecture/js/plugins.js',
-    '**/docs/interoperation/specification/json/*.json',
 
 	//Apache License
 	'**/bootstrap-3.0.0/assets/less.js',
