@@ -851,6 +851,15 @@ public class SavingsAccount extends AbstractPersistableCustom<Long> {
                     transaction.updateOverdraftAmount(overdraftAmount.getAmount());
                 } else if (overdraftAmount.isNotEqualTo(transaction.getOverdraftAmount(getCurrency()))) {
                     SavingsAccountTransaction accountTransaction = SavingsAccountTransaction.copyTransaction(transaction);
+                    if(transaction.isChargeTransaction()){
+                        Set<SavingsAccountChargePaidBy> chargesPaidBy = transaction.getSavingsAccountChargesPaid();
+                        final Set<SavingsAccountChargePaidBy> newChargePaidBy = new HashSet<>();
+                        chargesPaidBy.forEach(x->
+                            newChargePaidBy.add(SavingsAccountChargePaidBy.instance(accountTransaction,x.getSavingsAccountCharge(),
+                                    x.getAmount()))
+                        );
+                        accountTransaction.getSavingsAccountChargesPaid().addAll(newChargePaidBy);
+                    }
                     transaction.reverse();
                     if (overdraftAmount.isGreaterThanZero()) {
                         accountTransaction.updateOverdraftAmount(overdraftAmount.getAmount());

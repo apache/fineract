@@ -265,8 +265,18 @@ public class SavingsAccountHelper {
 
     public Integer addChargesForSavings(final Integer savingsId, final Integer chargeId, boolean addDueDate, BigDecimal amount) {
         System.out.println("--------------------------------- ADD CHARGES FOR SAVINGS --------------------------------");
+
+        Object ob  = performSavingActions(SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges?" + Utils.TENANT_IDENTIFIER,
+                getPeriodChargeRequestJSON(chargeId, addDueDate, amount), CommonConstants.RESPONSE_RESOURCE_ID);
+        System.out.println("whats in the object "  +ob.toString());
         return (Integer) performSavingActions(SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges?" + Utils.TENANT_IDENTIFIER,
                 getPeriodChargeRequestJSON(chargeId, addDueDate, amount), CommonConstants.RESPONSE_RESOURCE_ID);
+    }
+
+    public Integer addChargesForSavingsWithDueDate(final Integer savingsId, final Integer chargeId, String addDueDate,Integer amount) {
+        System.out.println("--------------------------------- ADD CHARGES FOR SAVINGS --------------------------------");
+        return (Integer) performSavingActions(SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges?" + Utils.TENANT_IDENTIFIER,
+                getPeriodChargeRequestJSONWithDueDate(chargeId, addDueDate, amount), CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public Integer payCharge(final Integer chargeId, final Integer savingsId, String amount, String dueDate) {
@@ -589,6 +599,17 @@ public class SavingsAccountHelper {
         if(addDueDate){
             map.put("dueDate", "10 January 2013");
         }
+        String json = new Gson().toJson(map);
+        return json;
+    }
+
+    private String getPeriodChargeRequestJSONWithDueDate(Integer chargeId, String addDueDate, Integer amount) {
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("chargeId", chargeId);
+        map.put("amount", amount);
+        map.put("locale", CommonConstants.locale);
+        map.put("dateFormat", "dd MMMM yyy");
+        map.put("dueDate", addDueDate);
         String json = new Gson().toJson(map);
         return json;
     }
