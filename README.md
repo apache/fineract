@@ -95,13 +95,11 @@ The [`docker-compose.yml`](docker-compose.yml) will build the `fineract` contain
 
 https://hub.docker.com/r/apache/fineract has a pre-built container of this project, built continuously.
 
-You can use a MySQL database from a different or remote server by passing the server's IP address to the docker fineract build process like this:
-
-    docker build --build-arg mysqlserver=<MySQL server IP> -t fineract:latest .
-
-The run it:
-
-    docker run -d fineract:latest
+You must specify the MySQL tenants database JDBC URL by passing it to the `fineract` container via environment
+variables; please consult the [`docker-compose.yml`](docker-compose.yml) for exact details how to specify those.
+_(Note that in previous versions, the `mysqlserver` environment variable used at `docker build` time instead of at
+`docker run` time did something similar; this has changed in [FINERACT-773](https://issues.apache.org/jira/browse/FINERACT-773)),
+and the `mysqlserver` environment variable is now no longer supported.)_
 
 
 Version
