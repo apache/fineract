@@ -118,8 +118,8 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
             final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
             CodeValue collateralType = null;
 
-            final LoanCollateral collateralForUpdate = this.collateralRepository.findOne(collateralId);
-            if (collateralForUpdate == null) { throw new CollateralNotFoundException(loanId, collateralId); }
+            final LoanCollateral collateralForUpdate = this.collateralRepository.findById(collateralId)
+                    .orElseThrow(() -> new CollateralNotFoundException(loanId, collateralId));
 
             final Map<String, Object> changes = collateralForUpdate.update(command);
 

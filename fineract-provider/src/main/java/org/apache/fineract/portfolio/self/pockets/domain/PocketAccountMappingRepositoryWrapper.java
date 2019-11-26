@@ -41,11 +41,11 @@ public class PocketAccountMappingRepositoryWrapper {
 	}
 
 	public List<PocketAccountMapping> save(final List<PocketAccountMapping> pocketAccountsList) {
-		return this.pocketAccountMappingRepository.save(pocketAccountsList);
+		return this.pocketAccountMappingRepository.saveAll(pocketAccountsList);
 	}
 
 	public void delete(final List<PocketAccountMapping> pocketAccountsList) {
-		this.pocketAccountMappingRepository.delete(pocketAccountsList);
+		this.pocketAccountMappingRepository.deleteAll(pocketAccountsList);
 	}
 
 	public PocketAccountMapping findByIdAndPocketIdWithNotFoundException(final Long id, final Long pocketId) {

@@ -63,7 +63,7 @@ public class WriteLikelihoodServiceImpl implements WriteLikelihoodService {
 
             this.likelihoodDataValidator.validateForUpdate(command);
 
-            final Likelihood likelihood = this.repository.findOne(likelihoodId);
+            final Likelihood likelihood = this.repository.findById(likelihoodId).orElse(null);
 
             if (!likelihood.update(command).isEmpty()) {
                 this.repository.save(likelihood);
@@ -75,7 +75,7 @@ public class WriteLikelihoodServiceImpl implements WriteLikelihoodService {
                     for (Likelihood aLikelihood : likelihoods) {
                         aLikelihood.disable();
                     }
-                    this.repository.save(likelihoods);
+                    this.repository.saveAll(likelihoods);
                 }
 
             }

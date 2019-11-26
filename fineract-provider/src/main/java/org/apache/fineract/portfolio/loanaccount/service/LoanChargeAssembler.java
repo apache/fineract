@@ -93,8 +93,8 @@ public class LoanChargeAssembler {
         final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
         final Integer numberOfRepayments = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("numberOfRepayments", element);
         final Long productId = this.fromApiJsonHelper.extractLongNamed("productId", element);
-        final LoanProduct loanProduct = this.loanProductRepository.findOne(productId);
-        if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
+        final LoanProduct loanProduct = this.loanProductRepository.findById(productId)
+                .orElseThrow(() -> new LoanProductNotFoundException(productId));
         final boolean isMultiDisbursal = loanProduct.isMultiDisburseLoan();
         LocalDate expectedDisbursementDate = null;
 
@@ -203,7 +203,7 @@ public class LoanChargeAssembler {
                         }
                     } else {
                         final Long loanChargeId = id;
-                        final LoanCharge loanCharge = this.loanChargeRepository.findOne(loanChargeId);
+                        final LoanCharge loanCharge = this.loanChargeRepository.findById(loanChargeId).orElse(null);
                         if (loanCharge != null) {
                             if(!loanCharge.isTrancheDisbursementCharge()
                                     || disbursementChargeIds.contains(loanChargeId)){

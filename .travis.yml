@@ -62,4 +62,5 @@ script:
 # @see https://docs.travis-ci.com/user/job-lifecycle/#customizing-the-build-phase
   - ./gradlew --console=plain licenseMain licenseTest licenseIntegrationTest test  &&  ./gradlew --console=plain integrationTest
 # We must stop mysql the mysql system service to avoid port 3306 conflicts (unless we run the mysql in docker-compose on another port; req. FINERACT-773)
-  - sudo service mysql stop  &&  docker-compose build  &&  docker-compose up -d  &&  sleep 30s  &&  http --verify=no --timeout 240 --check-status get https://localhost:8443/fineract-provider/health
+  - sudo service mysql stop  &&  docker-compose build  &&  docker-compose up -d  &&  sleep 30s  &&  http --verify=no --timeout 240 --check-status get https://localhost:8443/fineract-provider/actuator/health || docker logs fineract_fineract-server_1
+# The || docker logs lets use see the root cause in case of failures

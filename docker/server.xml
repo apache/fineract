@@ -42,7 +42,7 @@
         name="jdbc/mifosplatform-tenants"
         factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
         driverClassName="org.drizzle.jdbc.DrizzleDriver"
-        url="jdbc:mysql:thin://fineractmysql:3306/mifosplatform-tenants"
+        url="${fineract_tenants_url}"
         username="root"
         password="mysql"
         initialSize="3"

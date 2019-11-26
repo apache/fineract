@@ -225,8 +225,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final AppUser currentUser = getAppUserIfPresent();
             boolean isMeetingMandatoryForJLGLoans = configurationDomainService.isMeetingMandatoryForJLGLoans();
             final Long productId = this.fromJsonHelper.extractLongNamed("productId", command.parsedJson());
-            final LoanProduct loanProduct = this.loanProductRepository.findOne(productId);
-            if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
+            final LoanProduct loanProduct = this.loanProductRepository.findById(productId)
+                    .orElseThrow(() -> new LoanProductNotFoundException(productId));
 
             final Long clientId = this.fromJsonHelper.extractLongNamed("clientId", command.parsedJson());
                         if(clientId !=null){
@@ -353,8 +353,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             Calendar calendar = null;
 
             if (calendarId != null && calendarId != 0) {
-                calendar = this.calendarRepository.findOne(calendarId);
-                if (calendar == null) { throw new CalendarNotFoundException(calendarId); }
+                calendar = this.calendarRepository.findById(calendarId)
+                        .orElseThrow(() -> new CalendarNotFoundException(calendarId));
 
                 final CalendarInstance calendarInstance = new CalendarInstance(calendar, newLoanApplication.getId(),
                         CalendarEntityType.LOANS.getValue());
@@ -578,8 +578,8 @@ public void checkForProductMixRestrictions(final Loan loan) {
             LoanProduct newLoanProduct = null;
             if (command.isChangeInLongParameterNamed(productIdParamName, existingLoanApplication.loanProduct().getId())) {
                 final Long productId = command.longValueOfParameterNamed(productIdParamName);
-                newLoanProduct = this.loanProductRepository.findOne(productId);
-                if (newLoanProduct == null) { throw new LoanProductNotFoundException(productId); }
+                newLoanProduct = this.loanProductRepository.findById(productId)
+                        .orElseThrow(() -> new LoanProductNotFoundException(productId));
             }
 
             LoanProduct loanProductForValidations = newLoanProduct == null ? existingLoanApplication.loanProduct() : newLoanProduct;
@@ -847,8 +847,8 @@ public void checkForProductMixRestrictions(final Loan loan) {
             final Long calendarId = command.longValueOfParameterNamed("calendarId");
             Calendar calendar = null;
             if (calendarId != null && calendarId != 0) {
-                calendar = this.calendarRepository.findOne(calendarId);
-                if (calendar == null) { throw new CalendarNotFoundException(calendarId); }
+                calendar = this.calendarRepository.findById(calendarId)
+                        .orElseThrow(() -> new CalendarNotFoundException(calendarId));
             }
 
             final List<CalendarInstance> ciList = (List<CalendarInstance>) this.calendarInstanceRepository.findByEntityIdAndEntityTypeId(

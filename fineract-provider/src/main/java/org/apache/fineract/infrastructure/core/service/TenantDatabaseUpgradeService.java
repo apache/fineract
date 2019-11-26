@@ -32,6 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.ImmutableMap;
+
 import com.googlecode.flyway.core.Flyway;
 import com.googlecode.flyway.core.api.FlywayException;
 import com.googlecode.flyway.core.util.jdbc.DriverDataSource;
@@ -90,6 +92,9 @@ public class TenantDatabaseUpgradeService {
         flyway.setDataSource(tenantDataSource);
         flyway.setLocations("sql/migrations/list_db");
         flyway.setOutOfOrder(true);
+        flyway.setPlaceholders(ImmutableMap.of( // FINERACT-773
+            "fineract_default_tenantdb_hostname", System.getProperty("FINERACT_DEFAULT_TENANTDB_HOSTNAME", "localhost"),
+            "fineract_default_tenantdb_port",     System.getProperty("FINERACT_DEFAULT_TENANTDB_PORT", "3306")));
         flyway.migrate();
 
         tenantDataSourcePortFixService.fixUpTenantsSchemaServerPort();

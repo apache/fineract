@@ -34,7 +34,7 @@
 		<property name="dataSource" ref="routingDataSource" />
 		<property name="persistenceUnitName" value="jpa-pu" />
 		<property name="jpaVendorAdapter">
-		   <bean class="org.springframework.orm.jpa.vendor.OpenJpaVendorAdapter"/>
+			<bean class="org.apache.fineract.infrastructure.openjpa.OpenJpaVendorAdapter"/>
 		</property>
 	</bean>
 
@@ -45,6 +45,6 @@
 	<!-- Create instance of transaction template for programmatic transaction manipulation -->
 	<bean id="txTemplate" class="org.springframework.transaction.support.TransactionTemplate">
 		<property name="transactionManager" ref="transactionManager"></property>
-	</bean>	
+	</bean>
 
 </beans>

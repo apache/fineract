@@ -185,7 +185,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 								"Loan Type cannot be Invalid for the Triggered Sms Campaign");
 					}
 					if (loan.isGroupLoan()) {
-						Group group = this.groupRepository.findOne(loan.getGroupId());
+						Group group = this.groupRepository.findById(loan.getGroupId()).orElse(null);
 						groupClients.addAll(group.getClientMembers());
 					} else {
 						groupClients.add(loan.client());
@@ -206,7 +206,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 								}
 								if (spkeycheck && !(value.equals("-1") || spvalue.equals(value))) {
 									if (key.equals("officeId")) {
-										Office campaignOffice = this.officeRepository.findOne(Long.valueOf(value));
+										Office campaignOffice = this.officeRepository.findById(Long.valueOf(value)).orElse(null);
 										if (campaignOffice
 												.doesNotHaveAnOfficeInHierarchyWithId(client.getOffice().getId())) {
 											throw new SmsRuntimeException("error.msg.no.office",
@@ -266,7 +266,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 						}
 						if (spkeycheck && !(value.equals("-1") || spvalue.equals(value))) {
 							if (key.equals("officeId")) {
-								Office campaignOffice = this.officeRepository.findOne(Long.valueOf(value));
+								Office campaignOffice = this.officeRepository.findById(Long.valueOf(value)).orElse(null);
 								if (campaignOffice.doesNotHaveAnOfficeInHierarchyWithId(client.getOffice().getId())) {
 									throw new SmsRuntimeException("error.msg.no.office",
 											"Office not found for the id");

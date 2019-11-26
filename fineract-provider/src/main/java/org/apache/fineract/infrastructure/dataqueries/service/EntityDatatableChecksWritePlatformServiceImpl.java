@@ -258,8 +258,8 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
     @Override
     public CommandProcessingResult deleteCheck(final Long entityDatatableCheckId) {
 
-        final EntityDatatableChecks check = this.entityDatatableChecksRepository.findOne(entityDatatableCheckId);
-        if (check == null) { throw new EntityDatatableChecksNotFoundException(entityDatatableCheckId); }
+        final EntityDatatableChecks check = this.entityDatatableChecksRepository.findById(entityDatatableCheckId)
+                .orElseThrow(() -> new EntityDatatableChecksNotFoundException(entityDatatableCheckId));
 
         this.entityDatatableChecksRepository.delete(check);
 

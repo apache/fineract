@@ -144,8 +144,7 @@ public class SelfBeneficiariesTPTWritePlatformServiceImpl implements
 				.validateForUpdate(command.json());
 		AppUser user = this.context.authenticatedUser();
 		Long beneficiaryId = command.entityId();
-		SelfBeneficiariesTPT beneficiary = this.repository
-				.findOne(beneficiaryId);
+		SelfBeneficiariesTPT beneficiary = this.repository.findById(beneficiaryId).orElse(null);
 		if (beneficiary != null
 				&& beneficiary.getAppUserId().equals(user.getId())) {
 			String name = (String) params.get(NAME_PARAM_NAME);
@@ -174,8 +173,7 @@ public class SelfBeneficiariesTPTWritePlatformServiceImpl implements
 	public CommandProcessingResult delete(JsonCommand command) {
 		AppUser user = this.context.authenticatedUser();
 		Long beneficiaryId = command.entityId();
-		SelfBeneficiariesTPT beneficiary = this.repository
-				.findOne(beneficiaryId);
+		SelfBeneficiariesTPT beneficiary = this.repository.findById(beneficiaryId).orElse(null);
 		if (beneficiary != null
 				&& beneficiary.getAppUserId().equals(user.getId())) {
 

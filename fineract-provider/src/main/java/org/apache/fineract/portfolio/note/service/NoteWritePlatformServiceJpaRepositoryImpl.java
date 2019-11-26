@@ -99,8 +99,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
         final Long resourceId = command.getGroupId();
 
-        final Group group = this.groupRepository.findOne(resourceId);
-        if (group == null) { throw new GroupNotFoundException(resourceId); }
+        final Group group = this.groupRepository.findById(resourceId).orElseThrow(() -> new GroupNotFoundException(resourceId));
         final Note newNote = Note.groupNoteFromJson(group, command);
 
         this.noteRepository.save(newNote);
@@ -135,8 +134,8 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
         final Long resourceId = command.subentityId();
 
-        final LoanTransaction loanTransaction = this.loanTransactionRepository.findOne(resourceId);
-        if (loanTransaction == null) { throw new LoanTransactionNotFoundException(resourceId); }
+        final LoanTransaction loanTransaction = this.loanTransactionRepository
+                .findById(resourceId).orElseThrow(() -> new LoanTransactionNotFoundException(resourceId));
 
         final Loan loan = loanTransaction.getLoan();
 
@@ -261,8 +260,9 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
         final NoteType type = NoteType.GROUP;
 
-        final Group group = this.groupRepository.findOne(resourceId);
-        if (group == null) { throw new GroupNotFoundException(resourceId); }
+        final Group group = this.groupRepository.findById(resourceId)
+                .orElseThrow(() -> new GroupNotFoundException(resourceId));
+
         final Note noteForUpdate = this.noteRepository.findByGroupIdAndId(resourceId, noteId);
 
         if (noteForUpdate == null) { throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase()); }
@@ -309,8 +309,8 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
         final NoteType type = NoteType.LOAN_TRANSACTION;
 
-        final LoanTransaction loanTransaction = this.loanTransactionRepository.findOne(resourceId);
-        if (loanTransaction == null) { throw new LoanTransactionNotFoundException(resourceId); }
+        final LoanTransaction loanTransaction = this.loanTransactionRepository.findById(resourceId)
+                .orElseThrow(() -> new LoanTransactionNotFoundException(resourceId));
         final Loan loan = loanTransaction.getLoan();
 
         final Note noteForUpdate = this.noteRepository.findByLoanTransactionIdAndId(resourceId, noteId);

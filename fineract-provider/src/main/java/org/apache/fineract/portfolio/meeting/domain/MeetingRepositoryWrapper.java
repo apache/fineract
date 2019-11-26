@@ -45,9 +45,8 @@ public class MeetingRepositoryWrapper {
     }
 
     public Meeting findOneWithNotFoundDetection(final Long meetingId) {
-        final Meeting meeting = this.repository.findOne(meetingId);
-        if (meeting == null) { throw new MeetingNotFoundException(meetingId); }
-        return meeting;
+        return this.repository.findById(meetingId)
+                .orElseThrow(() -> new MeetingNotFoundException(meetingId));
     }
 
     public void save(final Meeting meeting) {

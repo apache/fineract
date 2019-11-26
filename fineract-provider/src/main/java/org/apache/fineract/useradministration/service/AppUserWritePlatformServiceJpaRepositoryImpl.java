@@ -194,9 +194,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
-            final AppUser userToUpdate = this.appUserRepository.findOne(userId);
-
-            if (userToUpdate == null) { throw new UserNotFoundException(userId); }
+            final AppUser userToUpdate = this.appUserRepository.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException(userId));
 
             final AppUserPreviousPassword currentPasswordToSaveAsPreview = getCurrentPasswordToSaveAsPreview(userToUpdate, command);
             
@@ -312,8 +311,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         if (!ObjectUtils.isEmpty(rolesArray)) {
             for (final String roleId : rolesArray) {
                 final Long id = Long.valueOf(roleId);
-                final Role role = this.roleRepository.findOne(id);
-                if (role == null) { throw new RoleNotFoundException(id); }
+                final Role role = this.roleRepository.findById(id)
+                        .orElseThrow(() -> new RoleNotFoundException(id));
                 allRoles.add(role);
             }
         }
@@ -326,8 +325,9 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     @Caching(evict = { @CacheEvict(value = "users", allEntries = true), @CacheEvict(value = "usersByUsername", allEntries = true) })
     public CommandProcessingResult deleteUser(final Long userId) {
 
-        final AppUser user = this.appUserRepository.findOne(userId);
-        if (user == null || user.isDeleted()) { throw new UserNotFoundException(userId); }
+        final AppUser user = this.appUserRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        if (user.isDeleted()) { throw new UserNotFoundException(userId); }
 
         user.delete();
         this.topicDomainService.unsubcribeUserFromTopic(user);

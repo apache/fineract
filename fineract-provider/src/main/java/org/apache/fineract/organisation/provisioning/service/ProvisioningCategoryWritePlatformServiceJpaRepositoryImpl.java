@@ -95,8 +95,8 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
     public CommandProcessingResult updateProvisioningCategory(final Long categoryId, JsonCommand command) {
         try {
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
-            final ProvisioningCategory provisioningCategoryForUpdate = this.provisioningCategoryRepository.findOne(categoryId);
-            if (provisioningCategoryForUpdate == null) { throw new ProvisioningCategoryNotFoundException(categoryId); }
+            final ProvisioningCategory provisioningCategoryForUpdate = this.provisioningCategoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new ProvisioningCategoryNotFoundException(categoryId));
             final Map<String, Object> changes = provisioningCategoryForUpdate.update(command);
             if (!changes.isEmpty()) {
                 this.provisioningCategoryRepository.save(provisioningCategoryForUpdate);

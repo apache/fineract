@@ -43,12 +43,7 @@ public class ReportRepositoryWrapper {
      * @return {@link Report} object
      */
     public Report findOneThrowExceptionIfNotFound(final Long id) {
-        final Report report = this.reportRepository.findOne(id);
-        
-        if (report == null) {
-            throw new ReportNotFoundException(id);
-        }
-        
-        return report;
+        return this.reportRepository.findById(id)
+                .orElseThrow(() -> new ReportNotFoundException(id));
     }
 }

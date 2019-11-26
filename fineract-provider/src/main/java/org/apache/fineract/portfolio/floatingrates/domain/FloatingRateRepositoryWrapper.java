@@ -38,12 +38,8 @@ public class FloatingRateRepositoryWrapper {
 	}
 
 	public FloatingRate findOneWithNotFoundDetection(final Long id) {
-		final FloatingRate floatingRate = this.floatingRateRepository
-				.findOne(id);
-		if (floatingRate == null) {
-			throw new FloatingRateNotFoundException(id);
-		}
-		return floatingRate;
+		return this.floatingRateRepository
+				.findById(id).orElseThrow(() -> new FloatingRateNotFoundException(id));
 	}
 
 	public void save(FloatingRate newFloatingRate) {
