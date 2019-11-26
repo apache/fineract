@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.util.*;
 import java.util.concurrent.*;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
@@ -30,9 +29,9 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.apache.fineract.organisation.office.domain.Office;
-import org.apache.fineract.organisation.office.domain.OfficeRepository;
+import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
+import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +40,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class LoanSchedularServiceImpl implements LoanSchedularService {
@@ -49,18 +49,18 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
 	private final ConfigurationDomainService configurationDomainService;
 	private final LoanReadPlatformService loanReadPlatformService;
 	private final LoanWritePlatformService loanWritePlatformService;
-	private final OfficeRepository officeRepository;
+	private final OfficeReadPlatformService officeReadPlatformService;
 	private final ApplicationContext applicationContext;
 
 	@Autowired
 	public LoanSchedularServiceImpl(final ConfigurationDomainService configurationDomainService,
 									final LoanReadPlatformService loanReadPlatformService, final LoanWritePlatformService loanWritePlatformService,
-									final OfficeRepository	officeRepository,
+									final OfficeReadPlatformService officeReadPlatformService,
 									final ApplicationContext applicationContext) {
 		this.configurationDomainService = configurationDomainService;
 		this.loanReadPlatformService = loanReadPlatformService;
 		this.loanWritePlatformService = loanWritePlatformService;
-		this.officeRepository=officeRepository;
+		this.officeReadPlatformService = officeReadPlatformService;
 		this.applicationContext=applicationContext;
 	}
 
@@ -199,7 +199,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
 		logger.info(officeId);
 		Long officeIdLong=Long.valueOf(officeId);
 		//gets the Office object
-		final Office office = this.officeRepository.findOne(officeIdLong);
+		final OfficeData office = this.officeReadPlatformService.retrieveOffice(officeIdLong);
 		if(office == null)
 			throw new OfficeNotFoundException(officeIdLong);
 		final int threadPoolSize=Integer.parseInt(jobParameters.get("thread-pool-size"));
@@ -209,7 +209,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
 	}
 
 	@Override
-	public void recalculateInterest(Office office, int threadPoolSize, int batchSize) {
+	public void recalculateInterest(OfficeData office, int threadPoolSize, int batchSize) {
 		final int pageSize = batchSize * threadPoolSize;
 
 		//initialise the executor service with fetched configurations
