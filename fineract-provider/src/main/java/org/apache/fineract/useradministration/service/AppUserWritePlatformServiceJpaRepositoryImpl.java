@@ -192,7 +192,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
             this.context.authenticatedUser(new CommandWrapperBuilder().updateUser(null).build());
 
-            this.fromApiJsonDeserializer.validateForUpdate(command.json());
+            this.fromApiJsonDeserializer.validateForUpdate(command.json(), userId);
 
             final AppUser userToUpdate = this.appUserRepository.findById(userId)
                     .orElseThrow(() -> new UserNotFoundException(userId));
