@@ -219,8 +219,9 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
 		final String officeHierarchy = office.getHierarchy() + "%";
 
 		//Get the loanIds from service
-		List<Long> loanIds = this.loanReadPlatformService
-				.fetchLoansForInterestRecalculation(pageSize, maxLoanIdInList, officeHierarchy);
+		List<Long> loanIds = Collections.synchronizedList(this.loanReadPlatformService
+				.fetchLoansForInterestRecalculation(pageSize, maxLoanIdInList, officeHierarchy));
+
 
 		// gets the loanIds data set iteratively and call addAccuruals for that paginated dataset
 		do {
@@ -228,9 +229,9 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
 			logger.info("Starting accrual - total filtered records - " + totalFilteredRecords);
 			recalculateInterest(loanIds, threadPoolSize, batchSize,
 					executorService);
-			maxLoanIdInList+=pageSize+1;
-			loanIds = this.loanReadPlatformService
-					.fetchLoansForInterestRecalculation(pageSize, maxLoanIdInList, officeHierarchy);
+			maxLoanIdInList+= pageSize+1;
+			loanIds = Collections.synchronizedList(this.loanReadPlatformService
+					.fetchLoansForInterestRecalculation(pageSize, maxLoanIdInList, officeHierarchy));
 		} while (!CollectionUtils.isEmpty(loanIds));
 
 		//shutdown the executor when done
