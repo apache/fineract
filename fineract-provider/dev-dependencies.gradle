@@ -123,7 +123,7 @@ dependencies {
             [group: 'com.sun.jersey', name: 'jersey-core', version: jerseyVersion],
             [group: 'com.mockrunner', name: 'mockrunner-jdbc', version: '1.0.6']
 
-    testImplementation ("org.springframework.boot:spring-boot-starter-test:$springBootVersion") {
+    testCompile ("org.springframework.boot:spring-boot-starter-test:$springBootVersion") {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
     }
 }
