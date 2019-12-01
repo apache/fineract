@@ -21,11 +21,7 @@ Run as:
 gradle clean tomcatrunwar
 '''
 
-// project.ext.springBootVersion = '2.1.9.RELEASE'
-// project.ext.springVersion = '5.1.10.RELEASE'
-// project.ext.springOauthVersion = '2.3.6.RELEASE'
-// project.ext.jerseyVersion = '1.17'
-// project.ext.springDataJpaVersion = '2.2.0.RELEASE' // also change spring-boot-gradle-plugin version below
+project.ext.jerseyVersion = '1.17'
 
 buildscript {
   ext {
@@ -111,13 +107,13 @@ dependencyManagement {
         entry 'spring-boot-starter-actuator'
         entry 'spring-boot-starter-tomcat'
      }
-     dependencySet(group: 'com.sun.jersey', version: '1.17') {
+     dependencySet(group: 'com.sun.jersey', version: jerseyVersion) {
          entry 'jersey-core'
          entry 'jersey-servlet'
          entry 'jersey-server'
          entry 'jersey-json'
      }
-     dependencySet(group: 'com.sun.jersey.contribs', version: '1.17') {
+     dependencySet(group: 'com.sun.jersey.contribs', version: jerseyVersion) {
          entry 'jersey-spring'
          entry 'jersey-multipart'
      }
