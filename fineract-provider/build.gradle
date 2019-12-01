@@ -65,6 +65,7 @@ dependencyManagement {
   imports {
     mavenBom 'org.springframework:spring-framework-bom:5.1.10.RELEASE'
   }
+  
   dependencies {
      dependency 'org.springframework.security.oauth:spring-security-oauth2:2.3.6.RELEASE'
      dependency 'org.apache.openjpa:openjpa:3.1.0'
@@ -100,13 +101,6 @@ dependencyManagement {
      dependency 'com.mockrunner:mockrunner-jms:2.0.1'
      dependency 'com.mockrunner:mockrunner-jdbc:2.0.1'
 
-     dependencySet(group:'org.springframework.boot', version: '2.1.9.RELEASE') {
-        entry 'spring-boot-starter-web'
-        entry 'spring-boot-starter-data-jpa'
-        entry 'spring-boot-starter-security'
-        entry 'spring-boot-starter-actuator'
-        entry 'spring-boot-starter-tomcat'
-     }
      dependencySet(group: 'com.sun.jersey', version: jerseyVersion) {
          entry 'jersey-core'
          entry 'jersey-servlet'

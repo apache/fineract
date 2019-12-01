@@ -79,10 +79,13 @@ public class XBRLBuilderTest {
             nodes = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(result.getBytes()))
                     .getElementsByTagName("Assets");
         } catch (final SAXException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (final IOException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (final ParserConfigurationException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         assertNotNull(nodes);
