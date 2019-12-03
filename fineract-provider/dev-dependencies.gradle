@@ -17,15 +17,14 @@
  * under the License.
  */
 dependencies {
-        def tomcatVersion = '7.0.94'
-        tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
-               "org.apache.tomcat.embed:tomcat-embed-logging-log4j:${tomcatVersion}" // NOT tomcat-embed-logging-juli (http://stackoverflow.com/questions/23963049/classcircularityerror-java-util-logging-logrecord-running-gradle-webapp-with-ja)
-        tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
+        tomcat "org.apache.tomcat.embed:tomcat-embed-core",
+               "org.apache.tomcat.embed:tomcat-embed-logging-log4j" // NOT tomcat-embed-logging-juli (http://stackoverflow.com/questions/23963049/classcircularityerror-java-util-logging-logrecord-running-gradle-webapp-with-ja)
+        tomcat("org.apache.tomcat.embed:tomcat-embed-jasper") {
             exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
         }
-        tomcat "org.apache.tomcat:tomcat-dbcp:${tomcatVersion}"
+        tomcat "org.apache.tomcat:tomcat-dbcp"
 
-    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat:${springBootVersion}")
+    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
      api(
             [group: 'com.google.code.gson', name: 'gson', version: '2.2.4'],
@@ -123,7 +122,7 @@ dependencies {
             [group: 'com.sun.jersey', name: 'jersey-core', version: jerseyVersion],
             [group: 'com.mockrunner', name: 'mockrunner-jdbc', version: '1.0.6']
 
-    testCompile ("org.springframework.boot:spring-boot-starter-test:$springBootVersion") {
-        exclude group: 'com.jayway.jsonpath', module: 'json-path'
-    }
+     testCompile ("org.springframework.boot:spring-boot-starter-test") {
+         exclude group: 'com.jayway.jsonpath', module: 'json-path'
+     }
 }

@@ -17,17 +17,16 @@
  * under the License.
  */
 dependencies {
-        def tomcatVersion = '7.0.94'
-        tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
-               "org.apache.tomcat.embed:tomcat-embed-logging-log4j:${tomcatVersion}" // NOT tomcat-embed-logging-juli (http://stackoverflow.com/questions/23963049/classcircularityerror-java-util-logging-logrecord-running-gradle-webapp-with-ja)
-        tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
+        tomcat "org.apache.tomcat.embed:tomcat-embed-core",
+               "org.apache.tomcat.embed:tomcat-embed-logging-log4j" // NOT tomcat-embed-logging-juli (http://stackoverflow.com/questions/23963049/classcircularityerror-java-util-logging-logrecord-running-gradle-webapp-with-ja)
+        tomcat("org.apache.tomcat.embed:tomcat-embed-jasper") {
             exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
         }
-        tomcat "org.apache.tomcat:tomcat-dbcp:${tomcatVersion}"
+        tomcat "org.apache.tomcat:tomcat-dbcp"
 
-    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat:${springBootVersion}")
+    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
-    compile ("org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion") {
+    compile ("org.springframework.boot:spring-boot-starter-data-jpa") {
         exclude group: 'com.zaxxer', module: 'HikariCP'
     }
 
@@ -120,7 +119,7 @@ dependencies {
             [group: 'com.google.code.gson', name: 'gson', version: '2.2.4'],
             [group: 'org.springframework', name:'spring-jms', version: '4.0.7.RELEASE'],
             [group: 'joda-time', name: 'joda-time', version: '2.4'],
-            [  group: 'org.mnode.ical4j', name: 'ical4j', version: '1.0.4'],
+            [group: 'org.mnode.ical4j', name: 'ical4j', version: '1.0.4'],
             [group: 'com.google.guava', name: 'guava', version: '15.0'],
             [group: 'org.apache.poi',name: 'poi-ooxml', version: '3.9'],
             [group: 'org.springframework', name: 'spring-context-support', version: springVersion],
