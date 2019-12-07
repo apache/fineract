@@ -95,7 +95,7 @@ dependencyManagement {
         dependency 'javax.validation:validation-api:+'
         dependency 'org.apache.bval:org.apache.bval.bundle:2.0.2'
         dependency 'junit:junit:4.12'
-//     dependency 'junit:junit-dep:4.11'
+        dependency 'junit:junit-dep:4.11'
         dependency 'org.mockito:mockito-core:+'
         dependency 'com.jayway.restassured:rest-assured:2.3.3'
         dependency 'com.mockrunner:mockrunner-jms:2.0.1'
