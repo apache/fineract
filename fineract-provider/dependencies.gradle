@@ -17,12 +17,12 @@
  * under the License.
  */
 dependencies {
-        tomcat "org.apache.tomcat.embed:tomcat-embed-core",
-               "org.apache.tomcat.embed:tomcat-embed-logging-log4j" // NOT tomcat-embed-logging-juli (http://stackoverflow.com/questions/23963049/classcircularityerror-java-util-logging-logrecord-running-gradle-webapp-with-ja)
-        tomcat("org.apache.tomcat.embed:tomcat-embed-jasper") {
-            exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
-        }
-        tomcat "org.apache.tomcat:tomcat-dbcp"
+    tomcat "org.apache.tomcat.embed:tomcat-embed-core",
+            "org.apache.tomcat.embed:tomcat-embed-logging-log4j" // NOT tomcat-embed-logging-juli (http://stackoverflow.com/questions/23963049/classcircularityerror-java-util-logging-logrecord-running-gradle-webapp-with-ja)
+    tomcat("org.apache.tomcat.embed:tomcat-embed-jasper") {
+        exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
+    }
+    tomcat "org.apache.tomcat:tomcat-dbcp"
 
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
@@ -30,7 +30,7 @@ dependencies {
         exclude group: 'com.zaxxer', module: 'HikariCP'
     }
 
-     api(
+    api(
             'com.google.code.gson:gson',
             'org.quartz-scheduler:quartz',
             'org.apache.openjpa:openjpa',
@@ -107,7 +107,7 @@ dependencies {
     implementation 'org.apache.bval:org.apache.bval.bundle'
 
     testCompile 'junit:junit',
-            'junit:junit-dep',
+//            'junit:junit-dep',
             'org.mockito:mockito-core',
             'com.jayway.restassured:rest-assured',
             'com.mockrunner:mockrunner-jms',
@@ -122,6 +122,6 @@ dependencies {
             'com.mockrunner:mockrunner-jdbc'
 
     testCompile ("org.springframework.boot:spring-boot-starter-test") {
-         exclude group: 'com.jayway.jsonpath', module: 'json-path'
-     }
+        exclude group: 'com.jayway.jsonpath', module: 'json-path'
+    }
 }

@@ -17,16 +17,16 @@
  * under the License.
  */
 dependencies {
-        tomcat "org.apache.tomcat.embed:tomcat-embed-core",
-               "org.apache.tomcat.embed:tomcat-embed-logging-log4j" // NOT tomcat-embed-logging-juli (http://stackoverflow.com/questions/23963049/classcircularityerror-java-util-logging-logrecord-running-gradle-webapp-with-ja)
-        tomcat("org.apache.tomcat.embed:tomcat-embed-jasper") {
-            exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
-        }
-        tomcat "org.apache.tomcat:tomcat-dbcp"
+    tomcat "org.apache.tomcat.embed:tomcat-embed-core",
+            "org.apache.tomcat.embed:tomcat-embed-logging-log4j" // NOT tomcat-embed-logging-juli (http://stackoverflow.com/questions/23963049/classcircularityerror-java-util-logging-logrecord-running-gradle-webapp-with-ja)
+    tomcat("org.apache.tomcat.embed:tomcat-embed-jasper") {
+        exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
+    }
+    tomcat "org.apache.tomcat:tomcat-dbcp"
 
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 
-     api(
+    api(
             'com.google.code.gson:gson',
             'org.quartz-scheduler:quartz',
             'joda-time:joda-time',
@@ -52,7 +52,7 @@ dependencies {
 
 
 
-            'org.apache.openjpa:openjpa-maven-plugin'
+            'org.apache.openjpa:openjpa-maven-plugin',
             'javax.ws.rs:jsr311-api',
 
             'com.sun.jersey:jersey-servlet',
@@ -107,7 +107,7 @@ dependencies {
     )
 
     testCompile 'junit:junit:4.11',
-            'junit:junit-dep:4.11',
+//            'junit:junit-dep:4.11',
             'org.mockito:mockito-core:1.9.5',
             'com.jayway.restassured:rest-assured:2.3.3',
             'com.mockrunner:mockrunner-jms',
@@ -122,7 +122,7 @@ dependencies {
             'com.sun.jersey:jersey-core',
             'com.mockrunner:mockrunner-jdbc',
 
-     testCompile ("org.springframework.boot:spring-boot-starter-test") {
-         exclude group: 'com.jayway.jsonpath', module: 'json-path'
-     }
+            testCompile ("org.springframework.boot:spring-boot-starter-test") {
+                exclude group: 'com.jayway.jsonpath', module: 'json-path'
+            }
 }
