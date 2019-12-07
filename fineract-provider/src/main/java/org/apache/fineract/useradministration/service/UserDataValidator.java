@@ -32,8 +32,6 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.useradministration.domain.AppUser;
-import org.apache.fineract.useradministration.domain.AppUserRepository;
 import org.apache.fineract.useradministration.domain.PasswordValidationPolicy;
 import org.apache.fineract.useradministration.domain.PasswordValidationPolicyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,13 +55,10 @@ public final class UserDataValidator {
 
     private final PasswordValidationPolicyRepository passwordValidationPolicy;
 
-    private final AppUserRepository appUserRepository;
-
     @Autowired
-    public UserDataValidator(final FromJsonHelper fromApiJsonHelper, final PasswordValidationPolicyRepository passwordValidationPolicy, AppUserRepository appUserRepository) {
+    public UserDataValidator(final FromJsonHelper fromApiJsonHelper, final PasswordValidationPolicyRepository passwordValidationPolicy) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.passwordValidationPolicy = passwordValidationPolicy;
-        this.appUserRepository = appUserRepository;
     }
 
     public void validateForCreate(final String json) {
@@ -79,14 +74,6 @@ public final class UserDataValidator {
 
         final String username = this.fromApiJsonHelper.extractStringNamed("username", element);
         baseDataValidator.reset().parameter("username").value(username).notBlank().notExceedingLengthOf(100);
-
-        if (!StringUtils.isEmpty(username)) {
-            AppUser exists = appUserRepository.findAppUserByName(username);
-            if (exists != null) {
-                final String errorMessage = "User with username '" + username + "' already exists.";
-                baseDataValidator.reset().parameter("username").failWithMessage("constraint.violation.duplicate.username", errorMessage);
-            }
-        }
 
         final String firstname = this.fromApiJsonHelper.extractStringNamed("firstname", element);
         baseDataValidator.reset().parameter("firstname").value(firstname).notBlank().notExceedingLengthOf(100);
@@ -162,7 +149,7 @@ public final class UserDataValidator {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
-    public void validateForUpdate(final String json, final Long userId) {
+    public void validateForUpdate(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -186,11 +173,6 @@ public final class UserDataValidator {
         if (this.fromApiJsonHelper.parameterExists("username", element)) {
             final String username = this.fromApiJsonHelper.extractStringNamed("username", element);
             baseDataValidator.reset().parameter("username").value(username).notBlank().notExceedingLengthOf(100);
-            AppUser current = appUserRepository.findAppUserByName(username);
-            if (current != null && !current.hasIdOf(userId)) {
-                final String errorMessage = "User with username '" + username + "' already exists.";
-                baseDataValidator.reset().parameter("username").failWithMessage("constraint.violation.duplicate.username", errorMessage);
-            }
         }
 
         if (this.fromApiJsonHelper.parameterExists("firstname", element)) {
