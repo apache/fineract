@@ -52,7 +52,7 @@ dependencies {
 
 
 
-            'org.apache.openjpa:openjpa-maven-plugin'
+            'org.apache.openjpa:openjpa-maven-plugin',
             'javax.ws.rs:jsr311-api',
 
             'com.sun.jersey:jersey-servlet',
@@ -107,7 +107,7 @@ dependencies {
     )
 
     testCompile 'junit:junit:4.11',
-            'junit:junit-dep:4.11',
+            //'junit:junit-dep:4.11',
             'org.mockito:mockito-core:1.9.5',
             'com.jayway.restassured:rest-assured:2.3.3',
             'com.mockrunner:mockrunner-jms',
