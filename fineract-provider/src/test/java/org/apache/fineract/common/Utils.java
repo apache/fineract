@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.common;
 
-import static io.restassured.RestAssured.given;
-import static io.restassured.path.json.JsonPath.from;
+import static com.jayway.restassured.RestAssured.given;
+import static com.jayway.restassured.path.json.JsonPath.from;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -32,10 +32,10 @@ import java.util.Random;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
 
-import io.restassured.RestAssured;
-import io.restassured.path.json.JsonPath;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.path.json.JsonPath;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 
 /**
  * Util for RestAssured tests. This class here in src/test is copy/pasted :(
@@ -54,7 +54,7 @@ public class Utils {
     public static void initializeRESTAssured() {
         RestAssured.baseURI = "https://localhost";
         RestAssured.port = 8443;
-        RestAssured.keyStore("src/main/resources/keystore.jks", "openmf");
+        RestAssured.keystore("src/main/resources/keystore.jks", "openmf");
     }
 
     public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {

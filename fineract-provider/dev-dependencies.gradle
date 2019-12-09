@@ -109,7 +109,7 @@ dependencies {
     testCompile 'junit:junit:4.11',
             //'junit:junit-dep:4.11',
             'org.mockito:mockito-core',
-            'io.rest-assured:rest-assured',
+            'com.jayway.restassured:rest-assured',
             'com.mockrunner:mockrunner-jms',
             'com.google.code.gson:gson',
             'org.springframework:spring-jms',
@@ -120,7 +120,7 @@ dependencies {
             'org.springframework:spring-context-support',
 
             'com.sun.jersey:jersey-core',
-            'com.mockrunner:mockrunner-jdbc',
+            'com.mockrunner:mockrunner-jdbc'
 
      testCompile ("org.springframework.boot:spring-boot-starter-test") {
          exclude group: 'com.jayway.jsonpath', module: 'json-path'

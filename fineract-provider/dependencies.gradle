@@ -109,7 +109,7 @@ dependencies {
     testCompile 'junit:junit',
             //'junit:junit-dep',
             'org.mockito:mockito-core',
-            'io.rest-assured:rest-assured',
+            'com.jayway.restassured:rest-assured',
             'com.mockrunner:mockrunner-jms',
             'com.google.code.gson:gson',
             'org.springframework:spring-jms',
