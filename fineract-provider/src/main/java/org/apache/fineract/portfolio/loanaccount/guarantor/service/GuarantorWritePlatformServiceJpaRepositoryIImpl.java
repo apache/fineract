@@ -18,11 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.guarantor.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -43,11 +38,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.guarantor.GuarantorConstants;
 import org.apache.fineract.portfolio.loanaccount.guarantor.GuarantorConstants.GUARANTOR_JSON_INPUT_PARAMS;
 import org.apache.fineract.portfolio.loanaccount.guarantor.command.GuarantorCommand;
-import org.apache.fineract.portfolio.loanaccount.guarantor.domain.Guarantor;
-import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorFundStatusType;
-import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorFundingDetails;
-import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorRepository;
-import org.apache.fineract.portfolio.loanaccount.guarantor.domain.GuarantorType;
+import org.apache.fineract.portfolio.loanaccount.guarantor.domain.*;
 import org.apache.fineract.portfolio.loanaccount.guarantor.exception.DuplicateGuarantorException;
 import org.apache.fineract.portfolio.loanaccount.guarantor.exception.GuarantorNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.guarantor.exception.InvalidGuarantorException;
@@ -61,6 +52,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements GuarantorWritePlatformService {
@@ -229,8 +225,8 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                 }
             }
 
-            if (changesOnly.containsKey(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID)
-                    || changesOnly.containsKey(GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID)) {
+            if (changesOnly.containsKey(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID.getValue())
+                    || changesOnly.containsKey(GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID.getValue())) {
                 validateGuarantorBusinessRules(guarantorForUpdate);
             }
 

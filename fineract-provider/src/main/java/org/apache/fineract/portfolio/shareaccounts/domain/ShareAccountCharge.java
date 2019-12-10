@@ -28,6 +28,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -414,17 +415,52 @@ public class ShareAccountCharge extends AbstractPersistableCustom<Long> {
     public void setActive(boolean active) {
         this.active = active ;
     }
-    
+
     @Override
-    public boolean equals(final Object obj) {
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) { return false; }
-        final ShareAccountCharge rhs = (ShareAccountCharge) obj;
-        return new EqualsBuilder().appendSuper(super.equals(obj)) //
-                .append(getId(), rhs.getId()) //
-                .append(this.charge.getId(), rhs.charge.getId()) //
-                .append(this.amount, rhs.amount) //
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof ShareAccountCharge)) return false;
+
+        ShareAccountCharge that = (ShareAccountCharge) o;
+
+        return new EqualsBuilder()
+                .append(paid, that.paid)
+                .append(waived, that.waived)
+                .append(active, that.active)
+                .append(shareAccount, that.shareAccount)
+                .append(charge, that.charge)
+                .append(chargeTime, that.chargeTime)
+                .append(chargeCalculation, that.chargeCalculation)
+                .append(percentage, that.percentage)
+                .append(amountPercentageAppliedTo, that.amountPercentageAppliedTo)
+                .append(amount, that.amount)
+                .append(amountPaid, that.amountPaid)
+                .append(amountWaived, that.amountWaived)
+                .append(amountWrittenOff, that.amountWrittenOff)
+                .append(amountOutstanding, that.amountOutstanding)
+                .append(amountOrPercentage, that.amountOrPercentage)
                 .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(shareAccount)
+                .append(charge)
+                .append(chargeTime)
+                .append(chargeCalculation)
+                .append(percentage)
+                .append(amountPercentageAppliedTo)
+                .append(amount)
+                .append(amountPaid)
+                .append(amountWaived)
+                .append(amountWrittenOff)
+                .append(amountOutstanding)
+                .append(paid)
+                .append(waived)
+                .append(active)
+                .append(amountOrPercentage)
+                .toHashCode();
     }
 }

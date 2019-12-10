@@ -34,7 +34,7 @@ public class InteropResponseData extends CommandProcessingResult {
 
     public static final String ISO_DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ssZ";
 //    public static final SimpleDateFormat ISO_DATE_TIME_FORMATTER = new SimpleDateFormat(ISO_DATE_TIME_PATTERN); // TODO: not synchronized
-    public static DateTimeFormatter ISO_DATE_TIME_FORMATTER = DateTimeFormat.forPattern(ISO_DATE_TIME_PATTERN);
+    public static final DateTimeFormatter ISO_DATE_TIME_FORMATTER = DateTimeFormat.forPattern(ISO_DATE_TIME_PATTERN);
 
     @NotNull
     private final String transactionCode;

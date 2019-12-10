@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public enum ReportMailingJobStretchyReportParamDateOption {
     INVALID(0, "ReportMailingJobStretchyReportParamDateOption.INVALID", "Invalid"),
@@ -74,11 +74,11 @@ public enum ReportMailingJobStretchyReportParamDateOption {
     public static ReportMailingJobStretchyReportParamDateOption newInstance(final Integer id) {
         ReportMailingJobStretchyReportParamDateOption reportMailingJobStretchyReportParamDateOption = INVALID;
         
-        if (id == TODAY.id) {
+        if (id.equals(TODAY.id)) {
             reportMailingJobStretchyReportParamDateOption = TODAY;
-        } else if (id == YESTERDAY.id) {
+        } else if (id.equals(YESTERDAY.id)) {
             reportMailingJobStretchyReportParamDateOption = YESTERDAY;
-        } else if (id == TOMORROW.id) {
+        } else if (id.equals(TOMORROW.id)) {
             reportMailingJobStretchyReportParamDateOption = TOMORROW;
         }
         

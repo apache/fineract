@@ -58,7 +58,7 @@ public enum GroupTypes {
     }
 
     public static GroupTypes fromInt(final int i) {
-        final GroupTypes type = intToEnumMap.get(Integer.valueOf(i));
+        final GroupTypes type = intToEnumMap.get(Integer.toUnsignedLong(i));
         return type;
     }
 
