@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.data;
 
-public class DatatableCheckStatusData {
+import java.io.Serializable;
+
+public class DatatableCheckStatusData implements Serializable {
 
 	private final String name;
 	private final int code;

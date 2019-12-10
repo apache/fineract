@@ -427,7 +427,7 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
             final Integer interval, final Integer repeatsOnDay, final Integer repeatsOnNthDay) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
-        if (calendarStartDate != null & this.startDate != null) {
+        if (calendarStartDate != null && this.startDate != null) {
             if (!calendarStartDate.equals(this.getStartDateLocalDate())) {
                 actualChanges.put("startDate", calendarStartDate);
                 this.startDate = calendarStartDate.toDate();
@@ -609,12 +609,12 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
             }
         }
         if (frequencyType.isMonthly()) {
-            if (repeatsOnNthDayOfMonth != null && (repeatsOnDay == null || repeatsOnDay == CalendarWeekDaysType.INVALID.getValue())) {
+            if (repeatsOnNthDayOfMonth != null && (repeatsOnDay == null || repeatsOnDay.equals(CalendarWeekDaysType.INVALID.getValue()))) {
                 if (repeatsOnNthDayOfMonth >= -1 && repeatsOnNthDayOfMonth <= 28) {
                     recurrenceBuilder.append(";BYMONTHDAY=");
                     recurrenceBuilder.append(repeatsOnNthDayOfMonth);
                 }
-            } else if (repeatsOnNthDayOfMonth != null && repeatsOnDay != null && repeatsOnDay != CalendarWeekDaysType.INVALID.getValue()) {
+            } else if (repeatsOnNthDayOfMonth != null && repeatsOnDay != null && !repeatsOnDay.equals(CalendarWeekDaysType.INVALID.getValue())) {
                 final NthDayType nthDay = NthDayType.fromInt(repeatsOnNthDayOfMonth);
                 if (!nthDay.isInvalid()) {
                     recurrenceBuilder.append(";BYSETPOS=");

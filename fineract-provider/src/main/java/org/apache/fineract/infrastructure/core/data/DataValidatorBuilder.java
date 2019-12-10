@@ -475,7 +475,7 @@ public class DataValidatorBuilder {
 
         if (this.value != null) {
             final Integer intValue = Integer.valueOf(this.value.toString());
-            if (intValue != number) {
+            if (!intValue.equals(number)) {
                 final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
                         .append(this.parameter).append(".not.equal.to.specified.number");
                 final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(this.parameter)

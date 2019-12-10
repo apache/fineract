@@ -18,40 +18,12 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
+import net.sf.ehcache.util.FindBugsSuppressWarnings;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
@@ -102,34 +74,10 @@ import org.apache.fineract.portfolio.loanaccount.data.HolidayDetailDTO;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
-import org.apache.fineract.portfolio.loanaccount.exception.ExceedingTrancheCountException;
-import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
-import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
-import org.apache.fineract.portfolio.loanaccount.exception.InvalidRefundDateException;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanDisbursalException;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanForeclosureException;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerAssignmentDateException;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
-import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerUnassignmentDateException;
-import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementDataRequiredException;
-import org.apache.fineract.portfolio.loanaccount.exception.UndoLastTrancheDisbursementException;
+import org.apache.fineract.portfolio.loanaccount.exception.*;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleDTO;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleParams;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
-import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
-import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
-import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
-import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
-import org.apache.fineract.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
-import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.*;
+import org.apache.fineract.portfolio.loanproduct.domain.*;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -140,10 +88,11 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+import java.util.*;
 
 @Entity
 @Component
@@ -785,6 +734,9 @@ public class Loan extends AbstractPersistableCustom<Long> {
         updateLoanSummaryDerivedFields();
     }
 
+    // TODO Fix this correctly...
+    // See this review: https://github.com/apache/fineract/pull/670/files/0409af3903d350afe43ef4837e4d915ccbe14285#r357920211
+    @FindBugsSuppressWarnings("GC_UNRELATED_TYPES")
     private void removeOrModifyTransactionAssociatedWithLoanChargeIfDueAtDisbursement(final LoanCharge loanCharge) {
         if (loanCharge.isDueAtDisbursement()) {
             LoanTransaction transactionToRemove = null;
@@ -792,19 +744,18 @@ public class Loan extends AbstractPersistableCustom<Long> {
             for (final LoanTransaction transaction : transactions) {
                 if (transaction.isRepaymentAtDisbursement() && transaction.getLoanChargesPaid().contains(loanCharge)) {
 
-                    final MonetaryCurrency currency = loanCurrency();
-                    final Money chargeAmount = Money.of(currency, loanCharge.amount());
-                    if (transaction.isGreaterThan(chargeAmount)) {
-                        final Money principalPortion = Money.zero(currency);
-                        final Money interestPortion = Money.zero(currency);
-                        final Money penaltychargesPortion = Money.zero(currency);
+                        final MonetaryCurrency currency = loanCurrency();
+                        final Money chargeAmount = Money.of(currency, loanCharge.amount());
+                        if (transaction.isGreaterThan(chargeAmount)) {
+                            final Money principalPortion = Money.zero(currency);
+                            final Money interestPortion = Money.zero(currency);
+                            final Money penaltychargesPortion = Money.zero(currency);
 
-                        final Money feeChargesPortion = chargeAmount;
-                        transaction.updateComponentsAndTotal(principalPortion, interestPortion, feeChargesPortion, penaltychargesPortion);
-                    } else {
-                        transactionToRemove = transaction;
+                            transaction.updateComponentsAndTotal(principalPortion, interestPortion, chargeAmount, penaltychargesPortion);
+                        } else {
+                            transactionToRemove = transaction;
+                        }
                     }
-                }
             }
 
             if (transactionToRemove != null) {
@@ -2687,10 +2638,10 @@ public class Loan extends AbstractPersistableCustom<Long> {
         final Integer installmentNumber = null;
         for (final LoanCharge charge : charges()) {
             Date actualDisbursementDate = getActualDisbursementDate(charge);
-            if ((charge.getCharge().getChargeTimeType() == ChargeTimeType.DISBURSEMENT.getValue()
+            if ((charge.getCharge().getChargeTimeType().equals(ChargeTimeType.DISBURSEMENT.getValue())
                     && disbursedOn.equals(new LocalDate(actualDisbursementDate)) && actualDisbursementDate != null && !charge.isWaived() && !charge
                         .isFullyPaid())
-                    || (charge.getCharge().getChargeTimeType() == ChargeTimeType.TRANCHE_DISBURSEMENT.getValue()
+                    || (charge.getCharge().getChargeTimeType().equals(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue())
                             && disbursedOn.equals(new LocalDate(actualDisbursementDate)) && actualDisbursementDate != null
                             && !charge.isWaived() && !charge.isFullyPaid())) {
                 if (totalFeeChargesDueAtDisbursement.isGreaterThanZero() && !charge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
@@ -2768,6 +2719,8 @@ public class Loan extends AbstractPersistableCustom<Long> {
         return chargesPayment;
     }
 
+    // TODO FIX THIS
+    @FindBugsSuppressWarnings("EC_UNRELATED_TYPES")   // see this review: https://github.com/apache/fineract/pull/670/files/0409af3903d350afe43ef4837e4d915ccbe14285#r357920364
     public Map<String, Object> undoDisbursal(final ScheduleGeneratorDTO scheduleGeneratorDTO, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds, AppUser currentUser) {
 
@@ -2787,7 +2740,8 @@ public class Loan extends AbstractPersistableCustom<Long> {
             final boolean isScheduleRegenerateRequired = isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate);
             this.actualDisbursementDate = null;
             this.disbursedBy = null;
-            boolean isDisbursedAmountChanged = !this.approvedPrincipal.equals(this.loanRepaymentScheduleDetail.getPrincipal());
+            boolean isDisbursedAmountChanged =
+                    !this.approvedPrincipal.equals(this.loanRepaymentScheduleDetail.getPrincipal());
             this.loanRepaymentScheduleDetail.setPrincipal(this.approvedPrincipal);
             if (this.loanProduct.isMultiDisburseLoan()) {
                 for (final LoanDisbursementDetails details : this.disbursementDetails) {
@@ -6092,7 +6046,7 @@ public class Loan extends AbstractPersistableCustom<Long> {
 
     public BigDecimal getDerivedAmountForCharge(final LoanCharge loanCharge) {
         BigDecimal amount = BigDecimal.ZERO;
-        if (isMultiDisburmentLoan() && (loanCharge.getCharge().getChargeTimeType() == ChargeTimeType.DISBURSEMENT.getValue())) {
+        if (isMultiDisburmentLoan() && (loanCharge.getCharge().getChargeTimeType().equals(ChargeTimeType.DISBURSEMENT.getValue()))) {
             amount = getApprovedPrincipal();
         } else {
             // If charge type is specified due date and loan is multi disburment

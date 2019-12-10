@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.portfolio.calendar.data;
 
-import java.util.Collection;
-import java.util.List;
-
-import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarRemindBy;
@@ -33,10 +29,15 @@ import org.apache.fineract.portfolio.common.domain.NthDayType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+
 /**
  * Immutable data object representing a Calendar.
  */
-public class CalendarData {
+public class CalendarData implements Serializable {
 
     private final Long id;
     private final Long calendarInstanceId;
@@ -491,4 +492,59 @@ public class CalendarData {
 	public EnumOptionData getRepeatsOnNthDayOfMonth() {
 		return this.repeatsOnNthDayOfMonth;
 	}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CalendarData)) return false;
+        CalendarData that = (CalendarData) o;
+        return Objects.equals(repeating, that.repeating) &&
+                Objects.equals(id, that.id) &&
+                Objects.equals(calendarInstanceId, that.calendarInstanceId) &&
+                Objects.equals(entityId, that.entityId) &&
+                Objects.equals(entityType, that.entityType) &&
+                Objects.equals(title, that.title) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(location, that.location) &&
+                Objects.equals(startDate, that.startDate) &&
+                Objects.equals(endDate, that.endDate) &&
+                Objects.equals(meetingTime, that.meetingTime) &&
+                Objects.equals(duration, that.duration) &&
+                Objects.equals(type, that.type) &&
+                Objects.equals(recurrence, that.recurrence) &&
+                Objects.equals(frequency, that.frequency) &&
+                Objects.equals(interval, that.interval) &&
+                Objects.equals(repeatsOnDay, that.repeatsOnDay) &&
+                Objects.equals(repeatsOnNthDayOfMonth, that.repeatsOnNthDayOfMonth) &&
+                Objects.equals(remindBy, that.remindBy) &&
+                Objects.equals(firstReminder, that.firstReminder) &&
+                Objects.equals(secondReminder, that.secondReminder) &&
+                Objects.equals(recurringDates, that.recurringDates) &&
+                Objects.equals(nextTenRecurringDates, that.nextTenRecurringDates) &&
+                Objects.equals(humanReadable, that.humanReadable) &&
+                Objects.equals(recentEligibleMeetingDate, that.recentEligibleMeetingDate) &&
+                Objects.equals(createdDate, that.createdDate) &&
+                Objects.equals(lastUpdatedDate, that.lastUpdatedDate) &&
+                Objects.equals(createdByUserId, that.createdByUserId) &&
+                Objects.equals(createdByUsername, that.createdByUsername) &&
+                Objects.equals(lastUpdatedByUserId, that.lastUpdatedByUserId) &&
+                Objects.equals(lastUpdatedByUsername, that.lastUpdatedByUsername) &&
+                Objects.equals(repeatsOnDayOfMonth, that.repeatsOnDayOfMonth) &&
+                Objects.equals(entityTypeOptions, that.entityTypeOptions) &&
+                Objects.equals(calendarTypeOptions, that.calendarTypeOptions) &&
+                Objects.equals(remindByOptions, that.remindByOptions) &&
+                Objects.equals(frequencyOptions, that.frequencyOptions) &&
+                Objects.equals(repeatsOnDayOptions, that.repeatsOnDayOptions) &&
+                Objects.equals(frequencyNthDayTypeOptions, that.frequencyNthDayTypeOptions) &&
+                Objects.equals(rowIndex, that.rowIndex) &&
+                Objects.equals(dateFormat, that.dateFormat) &&
+                Objects.equals(locale, that.locale) &&
+                Objects.equals(centerId, that.centerId) &&
+                Objects.equals(typeId, that.typeId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, calendarInstanceId, entityId, entityType, title, description, location, startDate, endDate, meetingTime, duration, type, repeating, recurrence, frequency, interval, repeatsOnDay, repeatsOnNthDayOfMonth, remindBy, firstReminder, secondReminder, recurringDates, nextTenRecurringDates, humanReadable, recentEligibleMeetingDate, createdDate, lastUpdatedDate, createdByUserId, createdByUsername, lastUpdatedByUserId, lastUpdatedByUsername, repeatsOnDayOfMonth, entityTypeOptions, calendarTypeOptions, remindByOptions, frequencyOptions, repeatsOnDayOptions, frequencyNthDayTypeOptions, rowIndex, dateFormat, locale, centerId, typeId);
+    }
 }

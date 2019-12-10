@@ -121,10 +121,9 @@ public class ProvisioningCriteriaAssembler {
 
     private ProvisioningCriteria createCriteria(final JsonElement jsonElement) {
         final String criteriaName = this.fromApiJsonHelper.extractStringNamed(ProvisioningCriteriaConstants.JSON_CRITERIANAME_PARAM, jsonElement);
-        AppUser modifiedBy = null;
-        DateTime modifiedOn = null;
+
         ProvisioningCriteria criteria = new ProvisioningCriteria(criteriaName, platformSecurityContext.authenticatedUser(), new DateTime(),
-                modifiedBy, modifiedOn);
+                platformSecurityContext.authenticatedUser(), new DateTime());
         return criteria;
     }
 

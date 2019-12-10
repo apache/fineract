@@ -162,7 +162,7 @@ public class TopicDomainServiceImpl implements TopicDomainService {
             
             for (TopicSubscriber subscriber : oldSubscriptions) {
             	for (Topic topic : oldTopics) {
-            		if (subscriber.getTopic().getId() == topic.getId()) {
+            		if (subscriber.getTopic().getId().equals(topic.getId())) {
             			topicSubscriberRepository.delete(subscriber);
             		}
             	}

@@ -43,6 +43,12 @@ public enum GroupingTypeStatus {
             case 300:
                 enumeration = GroupingTypeStatus.ACTIVE;
             break;
+            case 303:
+                enumeration = GroupingTypeStatus.TRANSFER_IN_PROGRESS;
+            break;
+            case 304:
+                enumeration = GroupingTypeStatus.TRANSFER_ON_HOLD;
+            break;
             case 600:
                 enumeration = GroupingTypeStatus.CLOSED;
             break;
@@ -50,7 +56,7 @@ public enum GroupingTypeStatus {
         return enumeration;
     }
 
-    private GroupingTypeStatus(final Integer value, final String code) {
+    GroupingTypeStatus(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }
@@ -80,11 +86,11 @@ public enum GroupingTypeStatus {
     }
 
     public boolean isTransferInProgress() {
-        return isTransferInProgress();
+        return this.value.equals(GroupingTypeStatus.TRANSFER_IN_PROGRESS.getValue());
     }
 
     public boolean isTransferOnHold() {
-        return isTransferOnHold();
+        return this.value.equals(GroupingTypeStatus.TRANSFER_ON_HOLD.getValue());
     }
 
     public boolean isUnderTransfer() {
