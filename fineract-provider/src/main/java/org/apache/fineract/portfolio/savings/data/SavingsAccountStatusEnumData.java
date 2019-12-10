@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
+import java.io.Serializable;
+
 /**
  * Immutable data object represent savings account status enumerations.
  */
-public class SavingsAccountStatusEnumData {
+public class SavingsAccountStatusEnumData implements Serializable {
 
     private final Long id;
     @SuppressWarnings("unused")

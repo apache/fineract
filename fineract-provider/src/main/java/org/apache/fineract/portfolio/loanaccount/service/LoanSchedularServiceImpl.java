@@ -18,9 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import java.util.*;
-import java.util.concurrent.*;
-
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
@@ -41,6 +38,9 @@ import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.util.*;
+import java.util.concurrent.*;
 
 @Service
 public class LoanSchedularServiceImpl implements LoanSchedularService {
@@ -240,14 +240,15 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
 
 	private void recalculateInterest(List<Long> loanIds,
 									 int threadPoolSize, int batchSize, final ExecutorService executorService) {
-		StringBuilder sb = new StringBuilder();
+		//StringBuilder sb = new StringBuilder();
 
 		List<Callable<Object>> posters = new ArrayList<Callable<Object>>();
 		int fromIndex = 0;
 		// get the size of current paginated dataset
 		int size = loanIds.size();
 		//calculate the batch size
-		batchSize = (int) Math.ceil(size / threadPoolSize);
+		double toGetCeilValue = (double) (size / threadPoolSize);
+		batchSize = (int) Math.ceil(toGetCeilValue);
 
 		if(batchSize == 0)
 			return;

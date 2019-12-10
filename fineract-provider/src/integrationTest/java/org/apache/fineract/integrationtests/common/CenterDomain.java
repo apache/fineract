@@ -18,12 +18,11 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
+import com.google.gson.Gson;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 
-import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class CenterDomain implements Comparable<CenterDomain> {
 
@@ -45,7 +44,6 @@ public class CenterDomain implements Comparable<CenterDomain> {
                 final String name, final String externalId, final Integer staffId, final int officeID, final String officeName,
                 final String hierarchy, final ArrayList<HashMap> groupMembers) {
             this.id = id;
-            this.accountNo = accountNo;
             this.status = new HashMap();
             this.status.put("id", statusid);
             this.status.put("code", statuscode);

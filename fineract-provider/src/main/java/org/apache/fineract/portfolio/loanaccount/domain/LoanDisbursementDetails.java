@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -73,6 +74,11 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom<Long> {
                 && loanDisbursementDetails.expectedDisbursementDate.equals(this.expectedDisbursementDate)) 
         { return true; }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(expectedDisbursementDate, principal);
     }
 
     public void copy(final LoanDisbursementDetails disbursementDetails) {

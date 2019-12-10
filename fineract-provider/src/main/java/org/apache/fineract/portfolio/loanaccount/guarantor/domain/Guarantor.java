@@ -18,29 +18,15 @@
  */
 package org.apache.fineract.portfolio.loanaccount.guarantor.domain;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.guarantor.GuarantorConstants.GUARANTOR_JSON_INPUT_PARAMS;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+
+import javax.persistence.*;
+import java.util.*;
 
 @Entity
 @Table(name = "m_guarantor")
@@ -208,7 +194,7 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
                 newValue = command.integerValueOfParameterNamed(paramName);
             }
             actualChanges.put(paramName, newValue);
-            propertyToBeUpdated = newValue;
+            //propertyToBeUpdated = newValue;
 
             // now update actual property
             if (paramName.equals(GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID.getValue())) {
@@ -222,7 +208,7 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
         if (command.isChangeInStringParameterNamed(paramName, propertyToBeUpdated)) {
             final String newValue = command.stringValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
-            propertyToBeUpdated = newValue;
+            //propertyToBeUpdated = newValue;
 
             // now update actual property
             if (paramName.equals(GUARANTOR_JSON_INPUT_PARAMS.FIRSTNAME.getValue())) {
@@ -256,7 +242,7 @@ public class Guarantor extends AbstractPersistableCustom<Long> {
         if (command.isChangeInDateParameterNamed(paramName, propertyToBeUpdated)) {
             final Date newValue = command.DateValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
-            propertyToBeUpdated = newValue;
+            //propertyToBeUpdated = newValue;
 
             // now update actual property
             if (paramName.equals(GUARANTOR_JSON_INPUT_PARAMS.DATE_OF_BIRTH.getValue())) {

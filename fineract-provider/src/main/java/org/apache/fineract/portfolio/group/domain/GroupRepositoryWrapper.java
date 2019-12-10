@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.portfolio.group.domain;
 
-import java.util.Date;
-
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.group.exception.GroupNotFoundException;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 /**
  * <p>
@@ -49,7 +49,7 @@ public class GroupRepositoryWrapper {
 
     public Group findByOfficeWithNotFoundDetection(final Long id, final Office office) {
         final Group group = findOneWithNotFoundDetection(id);
-        if (group.getOffice().getId() != office.getId()) { throw new GroupNotFoundException(id); }
+        if (!group.getOffice().getId().equals(office.getId())) { throw new GroupNotFoundException(id); }
         return group;
     }
 

@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanproduct.domain;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -101,6 +102,11 @@ public class LoanProductBorrowerCycleVariations extends AbstractPersistableCusto
                 && borrowerCycleVariations.valueConditionType.equals(this.valueConditionType)
                 && borrowerCycleVariations.paramType.equals(this.paramType)) { return true; }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(borrowerCycleNumber, minValue, maxValue);
     }
 
     public void copy(final LoanProductBorrowerCycleVariations borrowerCycleVariations) {

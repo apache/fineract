@@ -94,7 +94,7 @@ public class SelfBeneficiariesTPTWritePlatformServiceImpl implements
 		Long officeId = null;
 
 		boolean validAccountDetails = true;
-		if (accountType.equals(PortfolioAccountType.LOAN)) {
+		if (accountType.equals(PortfolioAccountType.LOAN.getValue())) {
 			Loan loan = this.loanRepositoryWrapper.findNonClosedLoanByAccountNumber(accountNumber);
 			if (loan != null && loan.getClientId() != null
 					&& loan.getOffice().getName().equals(officeName)) {

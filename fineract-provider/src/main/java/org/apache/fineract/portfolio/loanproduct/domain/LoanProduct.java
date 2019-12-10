@@ -18,36 +18,12 @@
  */
 package org.apache.fineract.portfolio.loanproduct.domain;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
-
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.charge.domain.Charge;
@@ -61,10 +37,10 @@ import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.joda.time.LocalDate;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * Loan products allow for categorisation of an organisations loans into
@@ -1234,7 +1210,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             Integer interestCycleUsed = 0;
             Integer repaymentCycleUsed = 0;
             for (LoanProductBorrowerCycleVariations cycleVariation : this.borrowerCycleVariations) {
-                if (cycleVariation.getBorrowerCycleNumber() == cycleNumber
+                if (cycleVariation.getBorrowerCycleNumber().equals(cycleNumber)
                         && cycleVariation.getValueConditionType().equals(LoanProductValueConditionType.EQUAL)) {
                     switch (cycleVariation.getParamType()) {
                         case PRINCIPAL:

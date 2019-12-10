@@ -18,11 +18,13 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.data;
 
+import java.io.Serializable;
+
 /**
  * Immutable data object represent savings account status enumerations.
  */
 @SuppressWarnings("unused")
-public class ShareAccountStatusEnumData {
+public class ShareAccountStatusEnumData implements Serializable {
 
     private final Long id;
    

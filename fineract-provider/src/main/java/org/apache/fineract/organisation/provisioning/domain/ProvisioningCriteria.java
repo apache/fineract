@@ -18,21 +18,6 @@
  */
 package org.apache.fineract.organisation.provisioning.domain;
 
-import java.time.Instant;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
@@ -41,6 +26,10 @@ import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaDe
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.DateTime;
+
+import javax.persistence.*;
+import java.time.Instant;
+import java.util.*;
 
 @Entity
 @Table(name = "m_provisioning_criteria", uniqueConstraints = { @UniqueConstraint(columnNames = { "criteria_name" }, name = "criteria_name") })
@@ -72,7 +61,7 @@ public class ProvisioningCriteria extends AbstractAuditableCustom<AppUser, Long>
         setCreatedBy(createdBy) ;
         setCreatedDate(Instant.ofEpochMilli(createdDate.getMillis()));
         setLastModifiedBy(lastModifiedBy) ;
-        setLastModifiedDate(lastModifiedDate  == null ? null : Instant.ofEpochMilli(lastModifiedDate.getMillis()));
+        setLastModifiedDate(Instant.ofEpochMilli(lastModifiedDate.getMillis()));
     }
 
     public void setProvisioningCriteriaDefinitions(Set<ProvisioningCriteriaDefinition> provisioningCriteriaDefinition) {
