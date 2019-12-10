@@ -147,7 +147,7 @@ public class CenterImportHandler implements ImportHandler {
 
     private boolean containsGroupId(List<GroupGeneralData> groupMembers,Long groupId){
         for (GroupGeneralData group: groupMembers) {
-            if (group.getId()==groupId){
+            if (group.getId().equals(groupId)){
                 return true;
             }
         }

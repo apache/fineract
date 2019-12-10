@@ -141,7 +141,7 @@ public class SelfLoansApiResource {
 
 		validateAppuserLoanMapping(loanId);
 
-		return this.retrieveLoanCharge(loanId, loanChargeId, uriInfo);
+		return this.loanChargesApiResource.retrieveLoanCharge(loanId, loanChargeId, uriInfo);
 	}
 
     @GET

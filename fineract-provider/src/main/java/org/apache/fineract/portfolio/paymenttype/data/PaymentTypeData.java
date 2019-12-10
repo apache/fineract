@@ -18,7 +18,12 @@
  */
 package org.apache.fineract.portfolio.paymenttype.data;
 
-public class PaymentTypeData {
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import java.io.Serializable;
+
+public class PaymentTypeData implements Serializable {
 
     @SuppressWarnings("unused")
     private Long id;
@@ -57,5 +62,33 @@ public class PaymentTypeData {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof PaymentTypeData)) return false;
+
+        PaymentTypeData that = (PaymentTypeData) o;
+
+        return new EqualsBuilder()
+                .append(id, that.id)
+                .append(name, that.name)
+                .append(description, that.description)
+                .append(isCashPayment, that.isCashPayment)
+                .append(position, that.position)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(id)
+                .append(name)
+                .append(description)
+                .append(isCashPayment)
+                .append(position)
+                .toHashCode();
     }
 }

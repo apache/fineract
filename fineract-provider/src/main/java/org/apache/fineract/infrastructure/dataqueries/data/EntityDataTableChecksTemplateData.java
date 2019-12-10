@@ -18,12 +18,14 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.data;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
+import org.apache.fineract.portfolio.savings.data.SavingsProductData;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
-
-import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
-import org.apache.fineract.portfolio.savings.data.SavingsProductData;
 
 /**
  * Immutable data object for role data.
@@ -52,5 +54,39 @@ public class EntityDataTableChecksTemplateData implements Serializable {
 		this.datatables = datatables;
 		this.loanProductDatas = loanProductDatas;
 		this.savingsProductDatas = savingsProductDatas;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+
+		if (!(o instanceof EntityDataTableChecksTemplateData)) return false;
+
+		EntityDataTableChecksTemplateData that = (EntityDataTableChecksTemplateData) o;
+
+		return new EqualsBuilder()
+						.append(entities, that.entities)
+						.append(statusClient, that.statusClient)
+						.append(statusGroup, that.statusGroup)
+						.append(statusSavings, that.statusSavings)
+						.append(statusLoans, that.statusLoans)
+						.append(datatables, that.datatables)
+						.append(loanProductDatas, that.loanProductDatas)
+						.append(savingsProductDatas, that.savingsProductDatas)
+						.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+						.append(entities)
+						.append(statusClient)
+						.append(statusGroup)
+						.append(statusSavings)
+						.append(statusLoans)
+						.append(datatables)
+						.append(loanProductDatas)
+						.append(savingsProductDatas)
+						.toHashCode();
 	}
 }

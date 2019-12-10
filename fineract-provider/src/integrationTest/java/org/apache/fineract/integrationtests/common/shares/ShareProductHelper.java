@@ -18,19 +18,18 @@
  */
 package org.apache.fineract.integrationtests.common.shares;
 
+import com.google.gson.Gson;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.integrationtests.common.Utils;
+import org.joda.time.LocalDate;
+import org.junit.Assert;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.joda.time.LocalDate;
-import org.junit.Assert;
-
-import com.google.gson.Gson;
 
 
 public class ShareProductHelper {
@@ -191,9 +190,9 @@ public class ShareProductHelper {
         String lockinPeriodFrequencyType = String.valueOf(lockinPeriodType.get("id")) ;
         Assert.assertEquals(this.lockinPeriodFrequencyType, lockinPeriodFrequencyType);
         
-        ArrayList<Map<String, String>> charges = (ArrayList<Map<String, String>>)shareProductData.get("chargesSelected") ;
+        //ArrayList<Map<String, String>> charges = (ArrayList<Map<String, String>>)shareProductData.get("chargesSelected") ;
         
-        ArrayList<Map<String, String>> marketPrices = (ArrayList<Map<String, String>>)shareProductData.get("marketPricePeriods") ;
+       // ArrayList<Map<String, String>> marketPrices = (ArrayList<Map<String, String>>)shareProductData.get("marketPricePeriods") ;
         
     }
 }

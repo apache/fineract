@@ -218,13 +218,13 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
             final MonthDay monthDay = command.extractMonthDayNamed(recurrenceOnMonthDayParamName);
             final String actualValueEntered = command.stringValueOfParameterNamed(recurrenceOnMonthDayParamName);
             final Integer dayOfMonthValue = monthDay.getDayOfMonth();
-            if (this.recurrenceOnDay != dayOfMonthValue) {
+            if (!this.recurrenceOnDay.equals(dayOfMonthValue)) {
                 actualChanges.put(recurrenceOnMonthDayParamName, actualValueEntered);
                 this.recurrenceOnDay = dayOfMonthValue;
             }
 
             final Integer monthOfYear = monthDay.getMonthOfYear();
-            if (this.recurrenceOnMonth != monthOfYear) {
+            if (!this.recurrenceOnMonth.equals(monthOfYear)) {
                 actualChanges.put(recurrenceOnMonthDayParamName, actualValueEntered);
                 this.recurrenceOnMonth = monthOfYear;
             }

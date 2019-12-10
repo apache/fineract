@@ -18,15 +18,16 @@
  */
 package org.apache.fineract.portfolio.floatingrates.data;
 
-import java.math.BigDecimal;
-
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.joda.time.LocalDate;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
+
 public class FloatingRatePeriodData implements
-		Comparable<FloatingRatePeriodData> {
+		Comparable<FloatingRatePeriodData>, Serializable {
 
 	private Long id;
 	private LocalDate fromDate;

@@ -21,7 +21,9 @@ package org.apache.fineract.accounting.producttoaccountmapping.data;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 
-public class PaymentTypeToGLAccountMapper {
+import java.io.Serializable;
+
+public class PaymentTypeToGLAccountMapper implements Serializable {
 
     @SuppressWarnings("unused")
     private final PaymentTypeData paymentType;

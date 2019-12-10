@@ -18,14 +18,14 @@
  */
 package org.apache.fineract.organisation.monetary.domain;
 
-import java.math.MathContext;
-import java.math.RoundingMode;
-
-import javax.annotation.PostConstruct;
-
+import net.sf.ehcache.util.FindBugsSuppressWarnings;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.math.MathContext;
+import java.math.RoundingMode;
 
 @Component
 public class MoneyHelper {
@@ -40,6 +40,7 @@ public class MoneyHelper {
     private ConfigurationDomainService configurationDomainService;
 
     @PostConstruct
+    @FindBugsSuppressWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
     public void someFunction () {
         staticConfigurationDomainService = configurationDomainService;
     }

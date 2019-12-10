@@ -19,6 +19,7 @@
 package org.apache.fineract.accounting.provisioning.domain;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -124,5 +125,10 @@ public class LoanProductProvisioningEntry extends AbstractPersistableCustom<Long
                 && entry.provisioningCategory.getId().equals(this.provisioningCategory.getId())
                 && entry.office.getId().equals(this.office.getId())
                 && entry.getCurrencyCode().equals(this.getCurrencyCode());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(entry, criteriaId, office, currencyCode, loanProduct, provisioningCategory, overdueInDays, reservedAmount, liabilityAccount, expenseAccount);
     }
 }
