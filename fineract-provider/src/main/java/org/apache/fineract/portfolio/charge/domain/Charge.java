@@ -19,10 +19,7 @@
 package org.apache.fineract.portfolio.charge.domain;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -208,24 +205,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) { return false; }
-        final LoanCharge rhs = (LoanCharge) obj;
-        return new EqualsBuilder().appendSuper(super.equals(obj)) //
-                .append(getId(), rhs.getId()) //
-                .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(3, 5) //
-                .append(getId()) //
-                .toHashCode();
     }
 
     public String getName() {
@@ -428,14 +407,14 @@ public class Charge extends AbstractPersistableCustom<Long> {
             final MonthDay monthDay = command.extractMonthDayNamed("feeOnMonthDay");
             final String actualValueEntered = command.stringValueOfParameterNamed("feeOnMonthDay");
             final Integer dayOfMonthValue = monthDay.getDayOfMonth();
-            if (this.feeOnDay != dayOfMonthValue) {
+            if (!this.feeOnDay.equals(dayOfMonthValue)) {
                 actualChanges.put("feeOnMonthDay", actualValueEntered);
                 actualChanges.put("locale", localeAsInput);
                 this.feeOnDay = dayOfMonthValue;
             }
 
             final Integer monthOfYear = monthDay.getMonthOfYear();
-            if (this.feeOnMonth != monthOfYear) {
+            if (!this.feeOnMonth.equals(monthOfYear)) {
                 actualChanges.put("feeOnMonthDay", actualValueEntered);
                 actualChanges.put("locale", localeAsInput);
                 this.feeOnMonth = monthOfYear;
@@ -620,5 +599,35 @@ public class Charge extends AbstractPersistableCustom<Long> {
 
     public void setTaxGroup(TaxGroup taxGroup) {
         this.taxGroup = taxGroup;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Charge)) return false;
+        Charge charge = (Charge) o;
+        return penalty == charge.penalty &&
+                active == charge.active &&
+                deleted == charge.deleted &&
+                name.equals(charge.name) &&
+                amount.equals(charge.amount) &&
+                currencyCode.equals(charge.currencyCode) &&
+                chargeAppliesTo.equals(charge.chargeAppliesTo) &&
+                chargeTimeType.equals(charge.chargeTimeType) &&
+                chargeCalculation.equals(charge.chargeCalculation) &&
+                chargePaymentMode.equals(charge.chargePaymentMode) &&
+                feeOnDay.equals(charge.feeOnDay) &&
+                feeInterval.equals(charge.feeInterval) &&
+                feeOnMonth.equals(charge.feeOnMonth) &&
+                minCap.equals(charge.minCap) &&
+                maxCap.equals(charge.maxCap) &&
+                feeFrequency.equals(charge.feeFrequency) &&
+                account.equals(charge.account) &&
+                taxGroup.equals(charge.taxGroup);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculation, chargePaymentMode, feeOnDay, feeInterval, feeOnMonth, penalty, active, deleted, minCap, maxCap, feeFrequency, account, taxGroup);
     }
 }

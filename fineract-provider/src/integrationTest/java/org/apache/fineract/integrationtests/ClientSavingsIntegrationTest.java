@@ -18,28 +18,13 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.Assert.assertEquals;
-
-import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
-import org.apache.fineract.integrationtests.common.TaxComponentHelper;
-import org.apache.fineract.integrationtests.common.TaxGroupHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.*;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
@@ -52,16 +37,19 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Client Savings Integration Test for checking Savings Application.
  */
-@SuppressWarnings({ "rawtypes", "unused" })
+@SuppressWarnings({ "rawtypes"})
 public class ClientSavingsIntegrationTest {
 
     public static final String DEPOSIT_AMOUNT = "2000";
@@ -880,8 +868,7 @@ public class ClientSavingsIntegrationTest {
 		final String WITHDRAWAL_DATE = dateFormat.format(todaysDate.getTime());
 		Float balance = Float.valueOf(zeroOpeningBalance);
 
-		DateFormat transactionDateFormat = new SimpleDateFormat("dd MMMM yyyy",
-				Locale.US);
+		//DateFormat transactionDateFormat = new SimpleDateFormat("dd MMMM yyyy",Locale.US);
 		Calendar transactionDate = Calendar.getInstance();
 		transactionDate.set(Calendar.DAY_OF_MONTH, 2);
 		String TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
@@ -1011,8 +998,7 @@ public class ClientSavingsIntegrationTest {
 		System.out
 				.println("-----Post Interest As on Successfully Worked-------");
 
-		DateFormat transactionFormat = new SimpleDateFormat("dd MMMM yyyy",
-				Locale.US);
+		//DateFormat transactionFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
 		Calendar transactionCalendarDateFormat = Calendar.getInstance();
 		transactionCalendarDateFormat.add(Calendar.DAY_OF_MONTH, 0);
 		transactionDate.set(Calendar.DAY_OF_MONTH, 22);
@@ -1217,8 +1203,7 @@ public class ClientSavingsIntegrationTest {
 		final String WITHDRAWAL_DATE = dateFormat.format(todaysDate.getTime());
 		Float balance = Float.valueOf(zeroOpeningBalance);
 
-		DateFormat transactionDateFormat = new SimpleDateFormat("dd MMMM yyyy",
-				Locale.US);
+		//DateFormat transactionDateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
 		Calendar transactionDate = Calendar.getInstance();
 		transactionDate.set(Calendar.DAY_OF_MONTH, 2);
 		String TRANSACTION_DATE = dateFormat.format(transactionDate.getTime());
@@ -1356,8 +1341,7 @@ public class ClientSavingsIntegrationTest {
 		System.out
 				.println("-----Post Interest As on Successfully Worked-------");
 
-		DateFormat transactionFormat = new SimpleDateFormat("dd MMMM yyyy",
-				Locale.US);
+		//DateFormat transactionFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
 		Calendar transactionCalendarDateFormat = Calendar.getInstance();
 		transactionCalendarDateFormat.add(Calendar.DAY_OF_MONTH, 0);
 		transactionDate.set(Calendar.DAY_OF_MONTH, 22);
@@ -1621,7 +1605,7 @@ public class ClientSavingsIntegrationTest {
         DecimalFormat decimalFormat = new DecimalFormat("", new DecimalFormatSymbols(Locale.US));
         decimalFormat.applyPattern("#.###");
         interestPosted = new Float(decimalFormat.format(interestPosted));
-        actualInterestPosted = new Float(decimalFormat.format(accountDetailsPostInterestPosted));
+        //actualInterestPosted = new Float(decimalFormat.format(accountDetailsPostInterestPosted));
         assertEquals("Verifying interest posted", interestPosted, accountDetailsPostInterestPosted);
         System.out.println("------Post Interest As On After doing a post interest Successfully worked--------");
 
@@ -1651,12 +1635,11 @@ public class ClientSavingsIntegrationTest {
 
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testPostInterestAsOnSavingsAccountWithOverdraft() {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
-        final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
+        //final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
+        //final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
 
         /***
          * Create a client to apply for savings account (overdraft account).

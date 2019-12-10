@@ -18,30 +18,24 @@
  */
 package org.apache.fineract.integrationtests.common.savings;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-
+import com.google.gson.Gson;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Assert;
 
-import com.google.gson.Gson;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
-
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @SuppressWarnings({ "rawtypes" })
 public class SavingsAccountHelper {
@@ -170,7 +164,7 @@ public class SavingsAccountHelper {
     public HashMap approveSavingsOnDate(final Integer savingsID, final String approvalDate) {
         System.out.println("--------------------------------- APPROVING SAVINGS APPLICATION ------------------------------------");
         final String savingsOperationURL = createSavingsOperationURL(APPROVE_SAVINGS_COMMAND, savingsID);
-        if (approvalDate == null || approvalDate == "")
+        if (approvalDate == null || approvalDate.equals(""))
             return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJSON(), isBlock);
         return performSavingApplicationActions(savingsOperationURL, getApproveSavingsAsJsonOnDate(approvalDate), isBlock);
     }

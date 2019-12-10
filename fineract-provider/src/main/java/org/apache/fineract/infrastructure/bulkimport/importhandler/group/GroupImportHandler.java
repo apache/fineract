@@ -33,7 +33,6 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSe
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.EnumOptionDataValueSerializer;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.infrastructure.core.exception.*;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
@@ -143,7 +142,7 @@ public class GroupImportHandler implements ImportHandler {
 
    private boolean containsClientId(List<ClientData> clientMembers,Long clientId){
        for (ClientData client: clientMembers) {
-           if (client.getId()==clientId){
+           if (client.getId().equals(clientId)){
                return true;
            }
        }

@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.accounting.common;
 
+import org.apache.fineract.accounting.financialactivityaccount.data.FinancialActivityData;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.fineract.accounting.financialactivityaccount.data.FinancialActivityData;
-import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 
 public class AccountingConstants {
 
@@ -243,7 +243,7 @@ public class AccountingConstants {
         private final Integer value;
         private final String code;
         private final GLAccountType mappedGLAccountType;
-        private static List<FinancialActivityData> financialActivities;
+        private static List<FinancialActivityData> financialActivities = new ArrayList<>();
 
         private FINANCIAL_ACTIVITY(final Integer value, final String code, final GLAccountType mappedGLAccountType) {
             this.value = value;
@@ -290,13 +290,11 @@ public class AccountingConstants {
         }
 
         public static List<FinancialActivityData> getAllFinancialActivities() {
-            if (financialActivities == null) {
-                financialActivities = new ArrayList<>();
                 for (final FINANCIAL_ACTIVITY type : FINANCIAL_ACTIVITY.values()) {
                     FinancialActivityData financialActivityData = convertToFinancialActivityData(type);
                     financialActivities.add(financialActivityData);
                 }
-            }
+
             return financialActivities;
         }
 

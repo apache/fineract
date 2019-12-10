@@ -26,6 +26,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
 @Table(name = "m_trial_balance")
@@ -103,6 +104,8 @@ public class TrialBalance extends AbstractPersistableCustom<Long> {
                 && trialBalance.getTransactionDate().equals(this.getTransactionDate());
     }
 
-
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(officeId, glAccountId, amount, entryDate, transactionDate, closingBalance);
+    }
 }

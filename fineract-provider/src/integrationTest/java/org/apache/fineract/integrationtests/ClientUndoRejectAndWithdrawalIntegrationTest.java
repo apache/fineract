@@ -18,7 +18,17 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.Assert.assertEquals;
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
+import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.common.Utils;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -26,29 +36,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Random;
 
-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.portfolio.client.api.ClientApiConstants;
-import org.apache.fineract.portfolio.client.domain.Client;
-import org.apache.fineract.portfolio.client.exception.InvalidClientStateTransitionException;
-import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.google.gson.Gson;
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings({ "unused" })
 public class ClientUndoRejectAndWithdrawalIntegrationTest {
@@ -327,7 +316,7 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
 	@Test
 	public void testReopenedDate() {
 		final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
-		final ClientHelper validationErrorHelper = new ClientHelper(this.requestSpec, errorResponse);
+		//final ClientHelper validationErrorHelper = new ClientHelper(this.requestSpec, errorResponse);
 
 		// CREATE CLIENT
 		this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);

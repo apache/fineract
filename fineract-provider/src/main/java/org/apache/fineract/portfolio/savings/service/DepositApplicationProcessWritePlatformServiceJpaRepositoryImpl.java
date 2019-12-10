@@ -18,16 +18,6 @@
  */
 package org.apache.fineract.portfolio.savings.service;
 
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.isCalendarInheritedParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.recurringFrequencyParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.recurringFrequencyTypeParamName;
-import static org.apache.fineract.portfolio.savings.DepositsApiConstants.transferInterestToSavingsParamName;
-
-import java.math.MathContext;
-import java.util.*;
-
-import javax.persistence.PersistenceException;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
@@ -51,11 +41,7 @@ import org.apache.fineract.portfolio.account.domain.AccountAssociationType;
 import org.apache.fineract.portfolio.account.domain.AccountAssociations;
 import org.apache.fineract.portfolio.account.domain.AccountAssociationsRepository;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
-import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
-import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
-import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
-import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
-import org.apache.fineract.portfolio.calendar.domain.CalendarType;
+import org.apache.fineract.portfolio.calendar.domain.*;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.client.domain.AccountNumberGenerator;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -77,17 +63,7 @@ import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.data.DepositAccountDataValidator;
-import org.apache.fineract.portfolio.savings.domain.DepositAccountAssembler;
-import org.apache.fineract.portfolio.savings.domain.FixedDepositAccount;
-import org.apache.fineract.portfolio.savings.domain.FixedDepositAccountRepository;
-import org.apache.fineract.portfolio.savings.domain.RecurringDepositAccount;
-import org.apache.fineract.portfolio.savings.domain.RecurringDepositAccountRepository;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountCharge;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountChargeAssembler;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
-import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
-import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
+import org.apache.fineract.portfolio.savings.domain.*;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
@@ -97,8 +73,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
-import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
+
+import javax.persistence.PersistenceException;
+import java.math.MathContext;
+import java.util.*;
+
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.*;
 
 @Service
 public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl implements DepositApplicationProcessWritePlatformService {
@@ -429,7 +409,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     isModified = true;
                 } else {
                     final SavingsAccount savingsAccount = accountAssociations.linkedSavingsAccount();
-                    if (savingsAccount == null || savingsAccount.getId() != savingsAccountId) {
+                    if (savingsAccount == null || !savingsAccount.getId().equals(savingsAccountId)) {
                         isModified = true;
                     }
                 }
@@ -460,11 +440,11 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     .build();
         } catch (final DataAccessException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
-            return new CommandProcessingResult(Long.valueOf(-1));
+            return new CommandProcessingResult((long) -1);
         }catch (final PersistenceException dve) {
         	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
         	handleDataIntegrityIssues(command, throwable, dve);
-        	return new CommandProcessingResult(Long.valueOf(-1));
+        	return new CommandProcessingResult((long) -1);
         }
     }
 

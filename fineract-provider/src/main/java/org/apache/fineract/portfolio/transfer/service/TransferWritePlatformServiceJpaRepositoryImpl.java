@@ -18,10 +18,9 @@
  */
 package org.apache.fineract.portfolio.transfer.service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
+import com.google.common.collect.Iterables;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -32,17 +31,9 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
-import org.apache.fineract.portfolio.calendar.domain.Calendar;
-import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
-import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
-import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
-import org.apache.fineract.portfolio.calendar.domain.CalendarType;
+import org.apache.fineract.portfolio.calendar.domain.*;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
-import org.apache.fineract.portfolio.client.domain.Client;
-import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
-import org.apache.fineract.portfolio.client.domain.ClientStatus;
-import org.apache.fineract.portfolio.client.domain.ClientTransferDetails;
-import org.apache.fineract.portfolio.client.domain.ClientTransferDetailsRepositoryWrapper;
+import org.apache.fineract.portfolio.client.domain.*;
 import org.apache.fineract.portfolio.client.exception.ClientHasBeenClosedException;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
@@ -66,9 +57,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Iterables;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Service
 public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWritePlatformService {
@@ -132,11 +123,11 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
 
         final List<Client> clients = assembleListOfClients(jsonCommand);
 
-        if (sourceGroupId == destinationGroupId) { throw new TransferNotSupportedException(
+        if (sourceGroupId.equals(destinationGroupId)) { throw new TransferNotSupportedException(
                 TRANSFER_NOT_SUPPORTED_REASON.SOURCE_AND_DESTINATION_GROUP_CANNOT_BE_SAME, sourceGroupId, destinationGroupId); }
 
         /*** Do not allow bulk client transfers across branches ***/
-        if (!(sourceOffice.getId() == destinationGroup.getOffice().getId())) { throw new TransferNotSupportedException(
+        if (!(sourceOffice.getId().equals(destinationGroup.getOffice().getId()))) { throw new TransferNotSupportedException(
                 TRANSFER_NOT_SUPPORTED_REASON.BULK_CLIENT_TRANSFER_ACROSS_BRANCHES, sourceGroupId, destinationGroupId); }
 
         for (final Client client : clients) {

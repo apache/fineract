@@ -18,14 +18,6 @@
  */
 package org.apache.fineract.portfolio.charge.service;
 
-import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.fineract.accounting.common.AccountingDropdownReadPlatformService;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -51,6 +43,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author vishwas
@@ -225,6 +225,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                 sb.append(excludeChargeTimes[i].getValue());
             }
             excludeClause = excludeClause.append(" and c.charge_time_enum not in(" + sb.toString() + ") ");
+            excludeClause.append(" ");
         }
     }
 

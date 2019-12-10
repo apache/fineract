@@ -18,19 +18,18 @@
  */
 package org.apache.fineract.portfolio.loanproduct.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 
+import javax.persistence.*;
+import java.io.Serializable;
+
 @Entity
 @Table(name = "m_product_loan_configurable_attributes")
-public class LoanProductConfigurableAttributes extends AbstractPersistableCustom<Long> {
+public class LoanProductConfigurableAttributes extends AbstractPersistableCustom<Long> implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "loan_product_id", nullable = false)
@@ -209,4 +208,39 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
         this.graceOnArrearsAgeing = graceOnArrearsAgeing;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof LoanProductConfigurableAttributes)) return false;
+
+        LoanProductConfigurableAttributes that = (LoanProductConfigurableAttributes) o;
+
+        return new EqualsBuilder()
+                .append(loanProduct, that.loanProduct)
+                .append(amortizationType, that.amortizationType)
+                .append(interestType, that.interestType)
+                .append(transactionProcessingStrategyId, that.transactionProcessingStrategyId)
+                .append(interestCalculationPeriodType, that.interestCalculationPeriodType)
+                .append(inArrearsTolerance, that.inArrearsTolerance)
+                .append(repaymentEvery, that.repaymentEvery)
+                .append(graceOnPrincipalAndInterestPayment, that.graceOnPrincipalAndInterestPayment)
+                .append(graceOnArrearsAgeing, that.graceOnArrearsAgeing)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(loanProduct)
+                .append(amortizationType)
+                .append(interestType)
+                .append(transactionProcessingStrategyId)
+                .append(interestCalculationPeriodType)
+                .append(inArrearsTolerance)
+                .append(repaymentEvery)
+                .append(graceOnPrincipalAndInterestPayment)
+                .append(graceOnArrearsAgeing)
+                .toHashCode();
+    }
 }

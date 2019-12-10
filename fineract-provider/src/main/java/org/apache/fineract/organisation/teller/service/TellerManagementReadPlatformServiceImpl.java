@@ -18,13 +18,6 @@
  */
 package org.apache.fineract.organisation.teller.service;
 
-import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
@@ -41,13 +34,7 @@ import org.apache.fineract.organisation.office.service.OfficeReadPlatformService
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.exception.StaffNotFoundException;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
-import org.apache.fineract.organisation.teller.data.CashierData;
-import org.apache.fineract.organisation.teller.data.CashierTransactionData;
-import org.apache.fineract.organisation.teller.data.CashierTransactionTypeTotalsData;
-import org.apache.fineract.organisation.teller.data.CashierTransactionsWithSummaryData;
-import org.apache.fineract.organisation.teller.data.TellerData;
-import org.apache.fineract.organisation.teller.data.TellerJournalData;
-import org.apache.fineract.organisation.teller.data.TellerTransactionData;
+import org.apache.fineract.organisation.teller.data.*;
 import org.apache.fineract.organisation.teller.domain.CashierTxnType;
 import org.apache.fineract.organisation.teller.domain.TellerStatus;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -59,6 +46,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
 
 @Service
 public class TellerManagementReadPlatformServiceImpl implements TellerManagementReadPlatformService {
@@ -482,13 +476,13 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         while (itr.hasNext()) {
             CashierTransactionTypeTotalsData total = itr.next();
             if (total != null) {
-                if (total.getCashierTxnType() == CashierTxnType.ALLOCATE.getId()) {
+                if (total.getCashierTxnType().equals(CashierTxnType.ALLOCATE.getId())) {
                     allocAmount = total.getCashTotal();
-                } else if (total.getCashierTxnType() == CashierTxnType.SETTLE.getId()) {
+                } else if (total.getCashierTxnType().equals(CashierTxnType.SETTLE.getId())) {
                     settleAmount = total.getCashTotal();
-                } else if (total.getCashierTxnType() == CashierTxnType.INWARD_CASH_TXN.getId()) {
+                } else if (total.getCashierTxnType().equals(CashierTxnType.INWARD_CASH_TXN.getId())) {
                     cashInAmount = total.getCashTotal();
-                } else if (total.getCashierTxnType() == CashierTxnType.OUTWARD_CASH_TXN.getId()) {
+                } else if (total.getCashierTxnType().equals(CashierTxnType.OUTWARD_CASH_TXN.getId())) {
                     cashOutAmount = total.getCashTotal();
                 }
             }
