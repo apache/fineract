@@ -107,7 +107,7 @@ dependencies {
     implementation 'org.apache.bval:org.apache.bval.bundle'
 
     testCompile 'junit:junit',
-            'junit:junit-dep',
+            //'junit:junit-dep',
             'org.mockito:mockito-core',
             'com.jayway.restassured:rest-assured',
             'com.mockrunner:mockrunner-jms',

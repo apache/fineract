@@ -52,7 +52,7 @@ dependencies {
 
 
 
-            'org.apache.openjpa:openjpa-maven-plugin'
+            'org.apache.openjpa:openjpa-maven-plugin',
             'javax.ws.rs:jsr311-api',
 
             'com.sun.jersey:jersey-servlet',
@@ -107,9 +107,9 @@ dependencies {
     )
 
     testCompile 'junit:junit:4.11',
-            'junit:junit-dep:4.11',
-            'org.mockito:mockito-core:1.9.5',
-            'com.jayway.restassured:rest-assured:2.3.3',
+            //'junit:junit-dep:4.11',
+            'org.mockito:mockito-core',
+            'com.jayway.restassured:rest-assured',
             'com.mockrunner:mockrunner-jms',
             'com.google.code.gson:gson',
             'org.springframework:spring-jms',
@@ -120,7 +120,7 @@ dependencies {
             'org.springframework:spring-context-support',
 
             'com.sun.jersey:jersey-core',
-            'com.mockrunner:mockrunner-jdbc',
+            'com.mockrunner:mockrunner-jdbc'
 
      testCompile ("org.springframework.boot:spring-boot-starter-test") {
          exclude group: 'com.jayway.jsonpath', module: 'json-path'
