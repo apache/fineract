@@ -2226,8 +2226,7 @@ public class ClientSavingsIntegrationTest {
     @Test
     public void testAccountBalanceAfterTransactionReversal() {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        SavingsAccountHelper savingsAccountHelperValidationError = new SavingsAccountHelper(this.requestSpec,
-                new ResponseSpecBuilder().build());
+        //SavingsAccountHelper savingsAccountHelperValidationError = new SavingsAccountHelper(this.requestSpec,new ResponseSpecBuilder().build());
 
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientID);
