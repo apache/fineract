@@ -95,13 +95,13 @@ public class CurrencyData implements Serializable {
         if (this == o) return true;
         if (!(o instanceof CurrencyData)) return false;
         CurrencyData that = (CurrencyData) o;
-        return decimalPlaces == that.decimalPlaces &&
-                code.equals(that.code) &&
-                name.equals(that.name) &&
-                inMultiplesOf.equals(that.inMultiplesOf) &&
-                displaySymbol.equals(that.displaySymbol) &&
-                nameCode.equals(that.nameCode) &&
-                displayLabel.equals(that.displayLabel);
+        return Objects.equals(decimalPlaces, that.decimalPlaces) &&
+                Objects.equals(code, that.code) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(inMultiplesOf, that.inMultiplesOf) &&
+                Objects.equals(displaySymbol, that.displaySymbol) &&
+                Objects.equals(nameCode, that.nameCode) &&
+                Objects.equals(displayLabel, that.displayLabel);
     }
 
     @Override
