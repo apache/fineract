@@ -22,8 +22,8 @@ import java.util.Map;
 
 import org.apache.fineract.integrationtests.common.Utils;
 
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 
 public class ShareAccountTransactionHelper {
 

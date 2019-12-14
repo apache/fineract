@@ -97,7 +97,7 @@ dependencyManagement {
      dependency 'junit:junit:+'
      //dependency 'junit:junit-dep:4.11'
      dependency 'org.mockito:mockito-core:+'
-     dependency 'com.jayway.restassured:rest-assured:2.3.3'
+     dependency 'io.rest-assured:rest-assured:+'
      dependency 'com.mockrunner:mockrunner-jms:2.0.1'
      dependency 'com.mockrunner:mockrunner-jdbc:2.0.1'
 

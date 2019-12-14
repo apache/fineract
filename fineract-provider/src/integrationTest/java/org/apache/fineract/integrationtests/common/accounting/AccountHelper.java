@@ -23,8 +23,8 @@ import java.util.HashMap;
 
 import org.apache.fineract.integrationtests.common.Utils;
 
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 
 @SuppressWarnings("rawtypes")
 public class AccountHelper {

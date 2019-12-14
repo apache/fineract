@@ -18,14 +18,14 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import static com.jayway.restassured.path.json.JsonPath.from;
+import static io.restassured.path.json.JsonPath.from;
 import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 
 import com.google.gson.Gson;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 
 public class CalendarHelper {
 

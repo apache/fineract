@@ -37,7 +37,7 @@ dependencies {
             'org.springframework:spring-context-support',
             'org.springframework.security.oauth:spring-security-oauth2',
             'com.squareup.retrofit:retrofit',
-            'com.sun.jersey:jersey-core',
+            'com.sun.jersey:jersey-core'
     )
 
     implementation(
@@ -105,11 +105,12 @@ dependencies {
             'org.apache.activemq:activemq-broker',
             'javax.validation:validation-api',
     )
+    compile 'io.rest-assured:rest-assured'
 
-    testCompile 'junit:junit:4.11',
+    testCompile 'io.rest-assured:rest-assured',
+            'junit:junit:4.11',
             //'junit:junit-dep:4.11',
             'org.mockito:mockito-core',
-            'com.jayway.restassured:rest-assured',
             'com.mockrunner:mockrunner-jms',
             'com.google.code.gson:gson',
             'org.springframework:spring-jms',
