@@ -87,7 +87,7 @@ dependencies {
             'com.lowagie:itext',
             'com.lowagie:itext-rtf',
 
-            'com.googlecode.flyway:flyway-core',
+            'org.flywaydb:flyway-core',
 
             'com.amazonaws:aws-java-sdk-s3',
             'net.sf.ehcache:ehcache',

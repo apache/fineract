@@ -34,9 +34,9 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableMap;
 
-import com.googlecode.flyway.core.Flyway;
-import com.googlecode.flyway.core.api.FlywayException;
-import com.googlecode.flyway.core.util.jdbc.DriverDataSource;
+import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.FlywayException;
+import org.flywaydb.core.internal.jdbc.DriverDataSource;
 
 /**
  * A service that picks up on tenants that are configured to auto-update their
@@ -66,12 +66,18 @@ public class TenantDatabaseUpgradeService {
         for (final FineractPlatformTenant tenant : tenants) {
             final FineractPlatformTenantConnection connection = tenant.getConnection();
             if (connection.isAutoUpdateEnabled()) {
-                final Flyway flyway = new Flyway();
-                String connectionProtocol = driverConfig.constructProtocol(connection.getSchemaServer(), connection.getSchemaServerPort(), connection.getSchemaName()) ;
-                DriverDataSource source = new DriverDataSource(driverConfig.getDriverClassName(), connectionProtocol, connection.getSchemaUsername(), connection.getSchemaPassword()) ;
-                flyway.setDataSource(source);
-                flyway.setLocations("sql/migrations/core_db");
-                flyway.setOutOfOrder(true);
+                String connectionProtocol = driverConfig.constructProtocol(connection.getSchemaServer(), connection.getSchemaServerPort(), connection.getSchemaName());
+                final Flyway flyway = Flyway
+                        .configure()
+                        .dataSource(connectionProtocol, connection.getSchemaUsername(), connection.getSchemaPassword())
+                        .locations("sql/migrations/core_db")
+                        .outOfOrder(true)
+                        .load();
+
+//                DriverDataSource source = new DriverDataSource(driverConfig.getDriverClassName(), connectionProtocol, connection.getSchemaUsername(), connection.getSchemaPassword()) ;
+//                flyway.setDataSource(source);
+//                flyway.setLocations("sql/migrations/core_db");
+//                flyway.setOutOfOrder(true);
                 try {
                     flyway.migrate();
                 } catch (FlywayException e) {
@@ -88,13 +94,21 @@ public class TenantDatabaseUpgradeService {
      * itself.
      */
     private void upgradeTenantDB() {
-        final Flyway flyway = new Flyway();
-        flyway.setDataSource(tenantDataSource);
-        flyway.setLocations("sql/migrations/list_db");
-        flyway.setOutOfOrder(true);
-        flyway.setPlaceholders(ImmutableMap.of( // FINERACT-773
-            "fineract_default_tenantdb_hostname", System.getProperty("FINERACT_DEFAULT_TENANTDB_HOSTNAME", "localhost"),
-            "fineract_default_tenantdb_port",     System.getProperty("FINERACT_DEFAULT_TENANTDB_PORT", "3306")));
+        final Flyway flyway = Flyway
+                .configure()
+                .dataSource(tenantDataSource)
+                .locations("sql/migrations/list_db")
+                .outOfOrder(true)
+                .placeholders(ImmutableMap.of( // FINERACT-773
+                    "fineract_default_tenantdb_hostname", System.getProperty("FINERACT_DEFAULT_TENANTDB_HOSTNAME", "localhost"),
+                    "fineract_default_tenantdb_port",     System.getProperty("FINERACT_DEFAULT_TENANTDB_PORT", "3306")))
+                .load();
+//        flyway.setDataSource(tenantDataSource);
+//        flyway.setLocations("sql/migrations/list_db");
+//        flyway.setOutOfOrder(true);
+//        flyway.setPlaceholders(ImmutableMap.of( // FINERACT-773
+//            "fineract_default_tenantdb_hostname", System.getProperty("FINERACT_DEFAULT_TENANTDB_HOSTNAME", "localhost"),
+//            "fineract_default_tenantdb_port",     System.getProperty("FINERACT_DEFAULT_TENANTDB_PORT", "3306")));
         flyway.migrate();
 
         tenantDataSourcePortFixService.fixUpTenantsSchemaServerPort();
