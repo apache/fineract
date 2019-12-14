@@ -18,12 +18,13 @@
  */
 package org.apache.fineract.infrastructure.jobs.domain;
 
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.util.Objects;
+
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "job_parameters")
@@ -78,9 +79,9 @@ public class JobParameter extends AbstractPersistableCustom<Long> {
     public boolean equals(Object obj) {
         if (!obj.getClass().equals(getClass())) return false;
         JobParameter jobParameter = (JobParameter) obj;
-        return jobParameter.getJobId().equals(this.getJobId())
-                && jobParameter.getParameterName().equals(this.getParameterName())
-                && jobParameter.getParameterValue().equals(this.getParameterValue());
+        return Objects.equals(jobParameter.getJobId(), this.getJobId())
+                && Objects.equals(jobParameter.getParameterName(), this.getParameterName())
+                && Objects.equals(jobParameter.getParameterValue(), this.getParameterValue());
     }
 
     @Override
