@@ -5084,7 +5084,7 @@ public class ClientLoanIntegrationTest {
         int dayOfMonth = 0;
         if (null != date) {
             dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
-            if (dayOfMonth == 28) {
+            if (dayOfMonth > 28) {
                 dayOfMonth = 28;
             }
         }

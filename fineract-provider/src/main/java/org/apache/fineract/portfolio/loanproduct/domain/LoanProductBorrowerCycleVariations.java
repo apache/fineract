@@ -18,16 +18,11 @@
  */
 package org.apache.fineract.portfolio.loanproduct.domain;
 
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Objects;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_product_loan_variations_borrower_cycle")

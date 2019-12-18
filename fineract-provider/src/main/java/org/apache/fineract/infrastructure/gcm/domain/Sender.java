@@ -28,25 +28,17 @@ import org.apache.fineract.infrastructure.gcm.exception.InvalidRequestException;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.apache.fineract.infrastructure.gcm.GcmConstants.*;
 
-/*import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;*/
-
 /**
  * Helper class to send messages to the GCM service using an API Key.
  */
 public class Sender {
-
-	protected static final String UTF8 = "UTF-8";
 
 	/**
 	 * Initial delay before first retry, without jitter.
@@ -218,7 +210,7 @@ public class Sender {
 								.get(TOKEN_CANONICAL_REG_ID).getAsString();
 					}
 					if(jsonResult.has(JSON_ERROR)){
-						error = (String) jsonResult.get(JSON_ERROR).getAsString();
+						error = jsonResult.get(JSON_ERROR).getAsString();
 					}
 					int success = 0;
 					int failure = 0;
@@ -262,7 +254,7 @@ public class Sender {
 				int failure = getNumber(responseMap, JSON_FAILURE).intValue();
 				List<String> failedIds = null;
 				if (jsonResponse.has("failed_registration_ids")) {
-					JsonArray jFailedIds = (JsonArray) jsonResponse
+					JsonArray jFailedIds = jsonResponse
 							.get("failed_registration_ids").getAsJsonArray();
 					failedIds = new ArrayList<>();
 					for (int i = 0; i < jFailedIds.size(); i++) {
@@ -665,7 +657,7 @@ public class Sender {
 		}
 		logger.fine("Sending POST to " + url);
 		logger.finest("POST body: " + body);
-		byte[] bytes = body.getBytes(UTF8);
+		byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
 		HttpURLConnection conn = getConnection(url);
 		conn.setDoOutput(true);
 		conn.setUseCaches(false);
@@ -745,7 +737,7 @@ public class Sender {
 			return "";
 		}
 		BufferedReader reader = new BufferedReader(
-				new InputStreamReader(stream, Charset.defaultCharset()));
+				new InputStreamReader(stream, StandardCharsets.UTF_8));
 		StringBuilder content = new StringBuilder();
 		String newLine;
 		do {

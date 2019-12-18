@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.accounting.common;
 
+import net.sf.ehcache.util.FindBugsSuppressWarnings;
 import org.apache.fineract.accounting.financialactivityaccount.data.FinancialActivityData;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 
@@ -220,7 +221,7 @@ public class AccountingConstants {
 
         private final String value;
 
-        private SAVINGS_PRODUCT_ACCOUNTING_DATA_PARAMS(final String value) {
+        SAVINGS_PRODUCT_ACCOUNTING_DATA_PARAMS(final String value) {
             this.value = value;
         }
 
@@ -234,7 +235,7 @@ public class AccountingConstants {
         }
     }
 
-    public static enum FINANCIAL_ACTIVITY {
+    public enum FINANCIAL_ACTIVITY {
         ASSET_TRANSFER(100, "assetTransfer", GLAccountType.ASSET), LIABILITY_TRANSFER(200, "liabilityTransfer", GLAccountType.LIABILITY), CASH_AT_MAINVAULT(
                 101, "cashAtMainVault", GLAccountType.ASSET), CASH_AT_TELLER(102, "cashAtTeller", GLAccountType.ASSET), OPENING_BALANCES_TRANSFER_CONTRA(
                 300, "openingBalancesTransferContra", GLAccountType.EQUITY), ASSET_FUND_SOURCE(103, "fundSource", GLAccountType.ASSET), PAYABLE_DIVIDENDS(
@@ -243,9 +244,9 @@ public class AccountingConstants {
         private final Integer value;
         private final String code;
         private final GLAccountType mappedGLAccountType;
-        private static List<FinancialActivityData> financialActivities = new ArrayList<>();
+        private static List<FinancialActivityData> financialActivities;
 
-        private FINANCIAL_ACTIVITY(final Integer value, final String code, final GLAccountType mappedGLAccountType) {
+        FINANCIAL_ACTIVITY(final Integer value, final String code, final GLAccountType mappedGLAccountType) {
             this.value = value;
             this.code = code;
             this.mappedGLAccountType = mappedGLAccountType;
@@ -289,11 +290,15 @@ public class AccountingConstants {
             return convertToFinancialActivityData(type);
         }
 
+        @FindBugsSuppressWarnings("LI_LAZY_INIT_UPDATE_STATIC")
         public static List<FinancialActivityData> getAllFinancialActivities() {
+            if (financialActivities == null) {
+                financialActivities = new ArrayList<>();
                 for (final FINANCIAL_ACTIVITY type : FINANCIAL_ACTIVITY.values()) {
                     FinancialActivityData financialActivityData = convertToFinancialActivityData(type);
                     financialActivities.add(financialActivityData);
                 }
+            }
 
             return financialActivities;
         }

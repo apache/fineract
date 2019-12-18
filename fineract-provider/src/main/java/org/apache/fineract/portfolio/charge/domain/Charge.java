@@ -18,25 +18,13 @@
  */
 package org.apache.fineract.portfolio.charge.domain;
 
-import java.math.BigDecimal;
-import java.util.*;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.api.ChargesApiConstants;
@@ -45,11 +33,13 @@ import org.apache.fineract.portfolio.charge.exception.ChargeDueAtDisbursementCan
 import org.apache.fineract.portfolio.charge.exception.ChargeMustBePenaltyException;
 import org.apache.fineract.portfolio.charge.exception.ChargeParameterUpdateNotSupportedException;
 import org.apache.fineract.portfolio.charge.service.ChargeEnumerations;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.joda.time.MonthDay;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.util.*;
 
 @Entity
 @Table(name = "m_charge", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name") })
@@ -86,13 +76,13 @@ public class Charge extends AbstractPersistableCustom<Long> {
     private Integer feeOnMonth;
 
     @Column(name = "is_penalty", nullable = false)
-    private boolean penalty;
+    private Boolean penalty;
 
     @Column(name = "is_active", nullable = false)
-    private boolean active;
+    private Boolean active;
 
     @Column(name = "is_deleted", nullable = false)
-    private boolean deleted = false;
+    private Boolean deleted = Boolean.FALSE;
 
     @Column(name = "min_cap", scale = 6, precision = 19, nullable = true)
     private BigDecimal minCap;
@@ -606,28 +596,29 @@ public class Charge extends AbstractPersistableCustom<Long> {
         if (this == o) return true;
         if (!(o instanceof Charge)) return false;
         Charge charge = (Charge) o;
-        return penalty == charge.penalty &&
-                active == charge.active &&
-                deleted == charge.deleted &&
-                name.equals(charge.name) &&
-                amount.equals(charge.amount) &&
-                currencyCode.equals(charge.currencyCode) &&
-                chargeAppliesTo.equals(charge.chargeAppliesTo) &&
-                chargeTimeType.equals(charge.chargeTimeType) &&
-                chargeCalculation.equals(charge.chargeCalculation) &&
-                chargePaymentMode.equals(charge.chargePaymentMode) &&
-                feeOnDay.equals(charge.feeOnDay) &&
-                feeInterval.equals(charge.feeInterval) &&
-                feeOnMonth.equals(charge.feeOnMonth) &&
-                minCap.equals(charge.minCap) &&
-                maxCap.equals(charge.maxCap) &&
-                feeFrequency.equals(charge.feeFrequency) &&
-                account.equals(charge.account) &&
-                taxGroup.equals(charge.taxGroup);
+        return Objects.equals(name, charge.name) &&
+                Objects.equals(amount, charge.amount) &&
+                Objects.equals(currencyCode, charge.currencyCode) &&
+                Objects.equals(chargeAppliesTo, charge.chargeAppliesTo) &&
+                Objects.equals(chargeTimeType, charge.chargeTimeType) &&
+                Objects.equals(chargeCalculation, charge.chargeCalculation) &&
+                Objects.equals(chargePaymentMode, charge.chargePaymentMode) &&
+                Objects.equals(feeOnDay, charge.feeOnDay) &&
+                Objects.equals(feeInterval, charge.feeInterval) &&
+                Objects.equals(feeOnMonth, charge.feeOnMonth) &&
+                Objects.equals(penalty, charge.penalty) &&
+                Objects.equals(active, charge.active) &&
+                Objects.equals(deleted, charge.deleted) &&
+                Objects.equals(minCap, charge.minCap) &&
+                Objects.equals(maxCap, charge.maxCap) &&
+                Objects.equals(feeFrequency, charge.feeFrequency) &&
+                Objects.equals(account, charge.account) &&
+                Objects.equals(taxGroup, charge.taxGroup);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculation, chargePaymentMode, feeOnDay, feeInterval, feeOnMonth, penalty, active, deleted, minCap, maxCap, feeFrequency, account, taxGroup);
+        return Objects.hash(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculation,
+                chargePaymentMode, feeOnDay, feeInterval, feeOnMonth, penalty, active, deleted, minCap, maxCap, feeFrequency, account, taxGroup);
     }
 }

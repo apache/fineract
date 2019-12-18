@@ -78,9 +78,9 @@ public class JobParameter extends AbstractPersistableCustom<Long> {
     public boolean equals(Object obj) {
         if (!obj.getClass().equals(getClass())) return false;
         JobParameter jobParameter = (JobParameter) obj;
-        return jobParameter.getJobId().equals(this.getJobId())
-                && jobParameter.getParameterName().equals(this.getParameterName())
-                && jobParameter.getParameterValue().equals(this.getParameterValue());
+        return Objects.equals(jobParameter.getJobId(), this.getJobId())
+                && Objects.equals(jobParameter.getParameterName(), this.getParameterName())
+                && Objects.equals(jobParameter.getParameterValue(), this.getParameterValue());
     }
 
     @Override
