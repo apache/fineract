@@ -18,15 +18,8 @@
  */
 package org.apache.fineract.portfolio.self.loanaccount.data;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.ws.rs.core.UriInfo;
-
+import com.google.gson.JsonElement;
+import net.sf.ehcache.util.FindBugsSuppressWarnings;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -38,7 +31,8 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonElement;
+import javax.ws.rs.core.UriInfo;
+import java.util.*;
 
 @Component
 public class SelfLoansDataValidator {
@@ -82,7 +76,9 @@ public class SelfLoansDataValidator {
 		throwExceptionIfReqd(unsupportedParams);
 
 	}
-	
+
+	@FindBugsSuppressWarnings("EC_UNRELATED_TYPES")
+	//See review here: https://github.com/apache/fineract/pull/670/files/0409af3903d350afe43ef4837e4d915ccbe14285#r357920937
 	public HashMap<String, Object> validateLoanApplication(final String json){
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
@@ -93,7 +89,7 @@ public class SelfLoansDataValidator {
 
         final String loanTypeParameterName = "loanType";
         final String loanTypeStr = this.fromApiJsonHelper.extractStringNamed(loanTypeParameterName, element);
-        baseDataValidator.reset().parameter(loanTypeParameterName).value(loanTypeStr).notNull();
+        baseDataValidator.reset().parameter(loanTypeParameterName).value(loanTypeStr).notNull().equals("individual");
 
         final String clientIdParameterName = "clientId";
         final String clientId = this.fromApiJsonHelper.extractStringNamed(clientIdParameterName, element);
@@ -108,6 +104,8 @@ public class SelfLoansDataValidator {
 
 	}
 
+	@FindBugsSuppressWarnings("EC_UNRELATED_TYPES")
+	//See review here: https://github.com/apache/fineract/pull/670/files/0409af3903d350afe43ef4837e4d915ccbe14285#r357920937
 	public HashMap<String, Object> validateModifyLoanApplication(final String json) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
@@ -117,7 +115,7 @@ public class SelfLoansDataValidator {
         final String loanTypeParameterName = "loanType";
         if(this.fromApiJsonHelper.parameterExists(loanTypeParameterName, element)){
             final String loanTypeStr = this.fromApiJsonHelper.extractStringNamed(loanTypeParameterName, element);
-            baseDataValidator.reset().parameter(loanTypeParameterName).value(loanTypeStr).notNull();
+            baseDataValidator.reset().parameter(loanTypeParameterName).value(loanTypeStr).notNull().equals("individual");
         }
 
         final String clientIdParameterName = "clientId";

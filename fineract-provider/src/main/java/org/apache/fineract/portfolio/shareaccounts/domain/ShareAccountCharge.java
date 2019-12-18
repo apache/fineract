@@ -18,17 +18,6 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.domain;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
@@ -36,6 +25,11 @@ import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
+
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.Objects;
 
 @Entity
 @Table(name = "m_share_account_charge")
@@ -417,50 +411,18 @@ public class ShareAccountCharge extends AbstractPersistableCustom<Long> {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-
-        if (!(o instanceof ShareAccountCharge)) return false;
-
-        ShareAccountCharge that = (ShareAccountCharge) o;
-
-        return new EqualsBuilder()
-                .append(paid, that.paid)
-                .append(waived, that.waived)
-                .append(active, that.active)
-                .append(shareAccount, that.shareAccount)
-                .append(charge, that.charge)
-                .append(chargeTime, that.chargeTime)
-                .append(chargeCalculation, that.chargeCalculation)
-                .append(percentage, that.percentage)
-                .append(amountPercentageAppliedTo, that.amountPercentageAppliedTo)
-                .append(amount, that.amount)
-                .append(amountPaid, that.amountPaid)
-                .append(amountWaived, that.amountWaived)
-                .append(amountWrittenOff, that.amountWrittenOff)
-                .append(amountOutstanding, that.amountOutstanding)
-                .append(amountOrPercentage, that.amountOrPercentage)
-                .isEquals();
+    public boolean equals(Object obj) {
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) { return false; }
+        ShareAccountCharge rhs = (ShareAccountCharge) obj;
+        return Objects.equals(getId(), rhs.getId()) &&
+                Objects.equals(charge.getId(), rhs.charge.getId()) &&
+                Objects.equals(amount, rhs.amount);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(shareAccount)
-                .append(charge)
-                .append(chargeTime)
-                .append(chargeCalculation)
-                .append(percentage)
-                .append(amountPercentageAppliedTo)
-                .append(amount)
-                .append(amountPaid)
-                .append(amountWaived)
-                .append(amountWrittenOff)
-                .append(amountOutstanding)
-                .append(paid)
-                .append(waived)
-                .append(active)
-                .append(amountOrPercentage)
-                .toHashCode();
+        return Objects.hash(getId(), charge.getId(), amount);
     }
 }

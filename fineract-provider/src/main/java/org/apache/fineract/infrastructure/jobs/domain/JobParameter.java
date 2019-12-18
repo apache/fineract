@@ -18,13 +18,12 @@
  */
 package org.apache.fineract.infrastructure.jobs.domain;
 
-import java.util.Objects;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import java.util.Objects;
 
 @Entity
 @Table(name = "job_parameters")

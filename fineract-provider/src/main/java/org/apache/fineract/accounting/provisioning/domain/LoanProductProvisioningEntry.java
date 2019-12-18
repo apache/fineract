@@ -18,20 +18,15 @@
  */
 package org.apache.fineract.accounting.provisioning.domain;
 
-import java.math.BigDecimal;
-import java.util.Objects;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.provisioning.domain.ProvisioningCategory;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
+
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.util.Objects;
 
 @Entity
 @Table(name = "m_loanproduct_provisioning_entry")
@@ -121,14 +116,14 @@ public class LoanProductProvisioningEntry extends AbstractPersistableCustom<Long
     public boolean equals(Object obj) {
         if (!obj.getClass().equals(getClass())) return false;
         LoanProductProvisioningEntry entry = (LoanProductProvisioningEntry) obj;
-        return entry.loanProduct.getId().equals(this.loanProduct.getId())
-                && entry.provisioningCategory.getId().equals(this.provisioningCategory.getId())
-                && entry.office.getId().equals(this.office.getId())
-                && entry.getCurrencyCode().equals(this.getCurrencyCode());
+        return Objects.equals(entry.loanProduct.getId(), this.loanProduct.getId())
+                && Objects.equals(entry.provisioningCategory.getId(), this.provisioningCategory.getId())
+                && Objects.equals(entry.office.getId(), this.office.getId())
+                && Objects.equals(entry.getCurrencyCode(), this.getCurrencyCode());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(entry, criteriaId, office, currencyCode, loanProduct, provisioningCategory, overdueInDays, reservedAmount, liabilityAccount, expenseAccount);
+        return Objects.hash(loanProduct.getId(), provisioningCategory.getId(), office.getId(), getCurrencyCode());
     }
 }

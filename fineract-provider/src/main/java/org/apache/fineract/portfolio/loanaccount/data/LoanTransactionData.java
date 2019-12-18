@@ -319,7 +319,7 @@ public class LoanTransactionData {
     }
 
     public boolean isNotDisbursement() {
-        return Integer.valueOf(1).equals(this.type.id().intValue());
+        return type.id() == 1;
     }
 
     

@@ -38,7 +38,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.util.HashMap;
 
@@ -77,7 +77,7 @@ public class XBRLBuilderTest {
         NodeList nodes = null;
         try {
             nodes =
-                    DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(result.getBytes(Charset.defaultCharset())))
+                    DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(result.getBytes(StandardCharsets.UTF_8)))
                     .getElementsByTagName("Assets");
         } catch (final SAXException e) {
             e.printStackTrace();

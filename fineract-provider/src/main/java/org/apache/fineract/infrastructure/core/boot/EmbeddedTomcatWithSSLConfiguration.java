@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.infrastructure.core.boot;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-
 import org.apache.catalina.connector.Connector;
 import org.apache.commons.io.FileUtils;
 import org.apache.coyote.http11.Http11NioProtocol;
@@ -30,6 +26,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 
 @Configuration
 public class EmbeddedTomcatWithSSLConfiguration {

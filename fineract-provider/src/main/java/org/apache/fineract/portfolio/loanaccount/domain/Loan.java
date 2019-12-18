@@ -22,6 +22,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import net.sf.ehcache.util.FindBugsSuppressWarnings;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -731,12 +732,14 @@ public class Loan extends AbstractPersistableCustom<Long> {
         updateLoanSummaryDerivedFields();
     }
 
+    //See this review: https://github.com/apache/fineract/pull/670/files/0409af3903d350afe43ef4837e4d915ccbe14285#r357920211
+    @FindBugsSuppressWarnings("GC_UNRELATED_TYPES")
     private void removeOrModifyTransactionAssociatedWithLoanChargeIfDueAtDisbursement(final LoanCharge loanCharge) {
         if (loanCharge.isDueAtDisbursement()) {
             LoanTransaction transactionToRemove = null;
             List<LoanTransaction> transactions = getLoanTransactions() ;
             for (final LoanTransaction transaction : transactions) {
-                if (transaction.isRepaymentAtDisbursement()) {
+                if (transaction.isRepaymentAtDisbursement() && transaction.getLoanChargesPaid().contains(loanCharge)) {
 
                         final MonetaryCurrency currency = loanCurrency();
                         final Money chargeAmount = Money.of(currency, loanCharge.amount());
@@ -2713,6 +2716,8 @@ public class Loan extends AbstractPersistableCustom<Long> {
         return chargesPayment;
     }
 
+    //see this review: https://github.com/apache/fineract/pull/670/files/0409af3903d350afe43ef4837e4d915ccbe14285#r357920364
+    @FindBugsSuppressWarnings("EC_UNRELATED_TYPES")
     public Map<String, Object> undoDisbursal(final ScheduleGeneratorDTO scheduleGeneratorDTO, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds, AppUser currentUser) {
 
@@ -2732,8 +2737,10 @@ public class Loan extends AbstractPersistableCustom<Long> {
             final boolean isScheduleRegenerateRequired = isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate);
             this.actualDisbursementDate = null;
             this.disbursedBy = null;
+
+            //see this review: https://github.com/apache/fineract/pull/670/files/0409af3903d350afe43ef4837e4d915ccbe14285#r357920364
             boolean isDisbursedAmountChanged =
-                    !this.approvedPrincipal.equals(this.loanRepaymentScheduleDetail.getPrincipal().getAmount());
+                    !this.approvedPrincipal.equals(this.loanRepaymentScheduleDetail.getPrincipal());
             this.loanRepaymentScheduleDetail.setPrincipal(this.approvedPrincipal);
             if (this.loanProduct.isMultiDisburseLoan()) {
                 for (final LoanDisbursementDetails details : this.disbursementDetails) {

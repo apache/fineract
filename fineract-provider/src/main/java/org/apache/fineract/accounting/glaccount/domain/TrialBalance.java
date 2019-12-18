@@ -22,7 +22,6 @@ package org.apache.fineract.accounting.glaccount.domain;
 
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
-
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -106,6 +105,6 @@ public class TrialBalance extends AbstractPersistableCustom<Long> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(officeId, glAccountId, amount, entryDate, transactionDate, closingBalance);
+        return Objects.hash(officeId, glAccountId, entryDate, transactionDate);
     }
 }

@@ -683,26 +683,26 @@ public class SavingsAccountCharge extends AbstractPersistableCustom<Long> {
         if (this == o) return true;
         if (!(o instanceof SavingsAccountCharge)) return false;
         SavingsAccountCharge that = (SavingsAccountCharge) o;
-        return penaltyCharge == that.penaltyCharge &&
-                paid == that.paid &&
-                waived == that.waived &&
-                status == that.status &&
-                savingsAccount.equals(that.savingsAccount) &&
-                charge.equals(that.charge) &&
-                chargeTime.equals(that.chargeTime) &&
-                dueDate.equals(that.dueDate) &&
-                feeOnMonth.equals(that.feeOnMonth) &&
-                feeOnDay.equals(that.feeOnDay) &&
-                feeInterval.equals(that.feeInterval) &&
-                chargeCalculation.equals(that.chargeCalculation) &&
-                percentage.equals(that.percentage) &&
-                amountPercentageAppliedTo.equals(that.amountPercentageAppliedTo) &&
-                amount.equals(that.amount) &&
-                amountPaid.equals(that.amountPaid) &&
-                amountWaived.equals(that.amountWaived) &&
-                amountWrittenOff.equals(that.amountWrittenOff) &&
-                amountOutstanding.equals(that.amountOutstanding) &&
-                inactivationDate.equals(that.inactivationDate);
+        return Objects.equals(penaltyCharge, that.penaltyCharge) &&
+                Objects.equals(paid, that.paid) &&
+                Objects.equals(waived, that.waived) &&
+                Objects.equals(status, that.status) &&
+                Objects.equals(savingsAccount, that.savingsAccount) &&
+                Objects.equals(charge, that.charge) &&
+                Objects.equals(chargeTime, that.chargeTime) &&
+                Objects.equals(dueDate, that.dueDate) &&
+                Objects.equals(feeOnMonth, that.feeOnMonth) &&
+                Objects.equals(feeOnDay, that.feeOnDay) &&
+                Objects.equals(feeInterval, that.feeInterval) &&
+                Objects.equals(chargeCalculation, that.chargeCalculation) &&
+                Objects.equals(percentage, that.percentage) &&
+                Objects.equals(amountPercentageAppliedTo, that.amountPercentageAppliedTo) &&
+                Objects.equals(amount, that.amount) &&
+                Objects.equals(amountPaid, that.amountPaid) &&
+                Objects.equals(amountWaived, that.amountWaived) &&
+                Objects.equals(amountWrittenOff, that.amountWrittenOff) &&
+                Objects.equals(amountOutstanding, that.amountOutstanding) &&
+                Objects.equals(inactivationDate, that.inactivationDate);
     }
 
     @Override

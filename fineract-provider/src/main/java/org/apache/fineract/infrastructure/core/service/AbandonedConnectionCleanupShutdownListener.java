@@ -18,16 +18,16 @@
  */
 package org.apache.fineract.infrastructure.core.service;
 
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.util.Enumeration;
-
 import org.apache.fineract.infrastructure.jobs.service.JobRegisterServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Service;
+
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.util.Enumeration;
 
 @Service
 public class AbandonedConnectionCleanupShutdownListener implements ApplicationListener<ContextClosedEvent> {
@@ -67,7 +67,7 @@ public class AbandonedConnectionCleanupShutdownListener implements ApplicationLi
         try {
             Thread.sleep(2000L);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception Occcured while trying to sleep.", e);
         }
     }
 }

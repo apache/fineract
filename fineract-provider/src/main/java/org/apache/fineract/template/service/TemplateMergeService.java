@@ -34,7 +34,7 @@ import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.PasswordAuthentication;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -150,7 +150,7 @@ public class TemplateMergeService {
         String line;
         try {
 
-            br = new BufferedReader(new InputStreamReader(is, Charset.defaultCharset()));
+            br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             while ((line = br.readLine()) != null) {
                 sb.append(line);
             }

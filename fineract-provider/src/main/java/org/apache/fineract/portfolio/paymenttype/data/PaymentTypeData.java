@@ -18,10 +18,8 @@
  */
 package org.apache.fineract.portfolio.paymenttype.data;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-
 import java.io.Serializable;
+import java.util.Objects;
 
 public class PaymentTypeData implements Serializable {
 
@@ -67,28 +65,17 @@ public class PaymentTypeData implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-
         if (!(o instanceof PaymentTypeData)) return false;
-
         PaymentTypeData that = (PaymentTypeData) o;
-
-        return new EqualsBuilder()
-                .append(id, that.id)
-                .append(name, that.name)
-                .append(description, that.description)
-                .append(isCashPayment, that.isCashPayment)
-                .append(position, that.position)
-                .isEquals();
+        return Objects.equals(id, that.id) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(isCashPayment, that.isCashPayment) &&
+                Objects.equals(position, that.position);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(id)
-                .append(name)
-                .append(description)
-                .append(isCashPayment)
-                .append(position)
-                .toHashCode();
+        return Objects.hash(id, name, description, isCashPayment, position);
     }
 }
