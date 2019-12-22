@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.shareaccounts.domain;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.CascadeType;

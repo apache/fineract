@@ -19,12 +19,13 @@
 
 package org.apache.fineract.portfolio.client.data;
 
-import java.util.Collection;
-
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.joda.time.LocalDate;
 
-public class ClientFamilyMembersData {
+import java.io.Serializable;
+import java.util.Collection;
+
+public class ClientFamilyMembersData implements Serializable {
 
 	private final Long id;
 

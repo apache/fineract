@@ -18,18 +18,16 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.data;
 
-import java.math.BigDecimal;
-import java.util.Collection;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
-import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
-import org.joda.time.LocalDate;
-import org.joda.time.MonthDay;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Collection;
 
 @SuppressWarnings("unused")
-public class ShareAccountChargeData {
+public class ShareAccountChargeData implements Serializable {
 
     private final Long id;
 

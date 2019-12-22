@@ -28,11 +28,12 @@ import org.apache.fineract.portfolio.products.data.ProductData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
 import org.joda.time.LocalDate;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
 
 @SuppressWarnings("unused")
-public class ShareAccountData implements AccountData {
+public class ShareAccountData implements Serializable, AccountData {
 
     private Long id;
 

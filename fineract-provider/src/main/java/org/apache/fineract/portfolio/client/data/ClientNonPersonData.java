@@ -18,15 +18,16 @@
  */
 package org.apache.fineract.portfolio.client.data;
 
-import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.joda.time.LocalDate;
+
+import java.io.Serializable;
 
 /**
  * Immutable data object representing the ClientNonPerson
  */
 @SuppressWarnings("unused")
-public class ClientNonPersonData {
+public class ClientNonPersonData implements Serializable {
 	
 	private final CodeValueData constitution;
 	private final String incorpNumber;

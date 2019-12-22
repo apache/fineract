@@ -409,20 +409,4 @@ public class ShareAccountCharge extends AbstractPersistableCustom<Long> {
     public void setActive(boolean active) {
         this.active = active ;
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) { return false; }
-        ShareAccountCharge rhs = (ShareAccountCharge) obj;
-        return Objects.equals(getId(), rhs.getId()) &&
-                Objects.equals(charge.getId(), rhs.charge.getId()) &&
-                Objects.equals(amount, rhs.amount);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), charge.getId(), amount);
-    }
 }
