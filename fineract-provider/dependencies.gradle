@@ -105,10 +105,10 @@ dependencies {
     )
 
     implementation 'org.apache.bval:org.apache.bval.bundle'
-    compile 'io.rest-assured:rest-assured'
+    
 
-    testCompile 'io.rest-assured:rest-assured',
-            'junit:junit',
+    testCompile 'junit:junit',
+            'io.rest-assured:rest-assured',
             //'junit:junit-dep',
             'org.mockito:mockito-core',
             'com.mockrunner:mockrunner-jms',
