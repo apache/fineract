@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.integrationtests;
 
-
 import static org.junit.Assert.assertEquals;
 
 import java.sql.Timestamp;
@@ -76,10 +75,9 @@ public class LoanReschedulingWithinCenterTest {
         GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
     public void testCenterReschedulingLoansWithInterestRecalculationEnabled() {
-
         Integer officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
         String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
         String externalId = Utils.randomStringGenerator("ID_", 7, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
@@ -176,7 +174,7 @@ public class LoanReschedulingWithinCenterTest {
         final String startDate = dateFormat.format(today.getTime());
         final String frequency = "2"; // 2:Weekly
         final String interval = "2"; // Every one week
-        final Integer repeatsOnDay = today.get(Calendar.DAY_OF_WEEK) - 1;
+        final Integer repeatsOnDay = today.get(Calendar.DAY_OF_WEEK);
 
         Integer calendarId = CalendarHelper.createMeetingForGroup(this.requestSpec, this.responseSpec, centerId, startDate, frequency,
                 interval, repeatsOnDay.toString());
@@ -184,10 +182,9 @@ public class LoanReschedulingWithinCenterTest {
         return calendarId;
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
     public void testCenterReschedulingMultiTrancheLoansWithInterestRecalculationEnabled() {
-
         Integer officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
         String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
         String externalId = Utils.randomStringGenerator("ID_", 7, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
@@ -405,5 +402,4 @@ public class LoanReschedulingWithinCenterTest {
         date.add(type, addvalue);
         return new ArrayList<>(Arrays.asList(date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, date.get(Calendar.DAY_OF_MONTH)));
     }
-
 }
