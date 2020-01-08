@@ -25,15 +25,16 @@
 	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
 	xsi:schemaLocation="
    http://www.springframework.org/schema/beans
-   http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+   http://www.springframework.org/schema/beans/spring-beans.xsd
    http://www.springframework.org/schema/security/oauth2
    http://www.springframework.org/schema/security/spring-security-oauth2.xsd
    http://www.springframework.org/schema/security
-   http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+   http://www.springframework.org/schema/security/spring-security.xsd">
 
-	<beans:beans profile="basicauth"> 
+	<beans:beans profile="basicauth">
 		<http create-session="stateless" use-expressions="true" pattern="/api/**"
 			entry-point-ref="basicAuthenticationEntryPoint">
+			<csrf disabled="true"/>
 			<intercept-url pattern="/api/*/authentication" access="permitAll"
 				method="POST" requires-channel="https" />
 			<intercept-url pattern="/api/*/self/authentication" access="permitAll"
@@ -59,33 +60,25 @@
 			<intercept-url pattern="/api/**" access="isFullyAuthenticated() and hasAuthority('TWOFACTOR_AUTHENTICATED')"
 				method="HEAD" requires-channel="https" />
 	
-			<custom-filter after="SECURITY_CONTEXT_FILTER"
-				ref="basicAuthenticationProcessingFilter" />
+			<custom-filter after="SECURITY_CONTEXT_FILTER" ref="basicAuthenticationProcessingFilter" />
 			<custom-filter ref="twoFactorAuthFilter" after="BASIC_AUTH_FILTER" />
 		</http>
-	
+
 		<beans:bean id="basicAuthenticationEntryPoint"
 			class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
 			<beans:property name="realmName" value="Fineract Platform API" />
 		</beans:bean>
-	
-		<beans:bean id="passwordEncoder"
-			class="org.springframework.security.authentication.encoding.ShaPasswordEncoder">
-			<beans:constructor-arg value="256" />
-		</beans:bean>
-	
-		<beans:bean id="saltSource"
-			class="org.springframework.security.authentication.dao.ReflectionSaltSource">
-			<beans:property name="userPropertyToUse" value="id" />
-		</beans:bean>
-	
+
+        <beans:bean id="passwordEncoder" class="org.springframework.security.crypto.factory.PasswordEncoderFactories"
+                    factory-method="createDelegatingPasswordEncoder">
+        </beans:bean>
+
 		<beans:bean id="customAuthenticationProvider"
 			class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
 			<beans:property name="userDetailsService" ref="userDetailsService" />
 			<beans:property name="passwordEncoder" ref="passwordEncoder" />
-			<beans:property name="saltSource" ref="saltSource" />
 		</beans:bean>
-	
+
 		<authentication-manager alias="authenticationManager"
 			erase-credentials="false">
 			<authentication-provider ref="customAuthenticationProvider" />
@@ -95,6 +88,7 @@
 		<http create-session="stateless" use-expressions="true" pattern="/api/v1/**"
 			entry-point-ref="oauthAuthenticationEntryPoint"
 			access-decision-manager-ref="accessDecisionManager">
+			<csrf disabled="true"/>
 			<anonymous enabled="false" />
 			<intercept-url pattern="/api//v1/**" method="OPTIONS"
 					access="permitAll" requires-channel="https" />
@@ -120,38 +114,42 @@
 			<custom-filter ref="twoFactorAuthFilter" after="BASIC_AUTH_FILTER" />
 			<access-denied-handler ref="oauthAccessDeniedHandler" />
 		</http>
-	
+
 		<http pattern="/api/oauth/token" create-session="stateless"
 			entry-point-ref="oauthAuthenticationEntryPoint" use-expressions="true"
 			authentication-manager-ref="clientAuthenticationManager">
+            <csrf disabled="true"/>
 			<intercept-url pattern="/api/oauth/token" method="OPTIONS"
 				access="permitAll" requires-channel="https" />
 			<intercept-url pattern="/api/oauth/token" method="POST"
 				access="isFullyAuthenticated()" requires-channel="https" />
 			<anonymous enabled="false" />
-	
+
 			<custom-filter ref="tenantIdentifierProcessingFilter"
 				position="FIRST" />
 			<custom-filter ref="clientCredentialsTokenEndpointFilter"
 				before="BASIC_AUTH_FILTER" />
 			<access-denied-handler ref="oauthAccessDeniedHandler" />
 		</http>
+
+        <beans:bean id="passwordEncoder" class="org.springframework.security.crypto.factory.PasswordEncoderFactories"
+                    factory-method="createDelegatingPasswordEncoder">
+        </beans:bean>
+
 		<beans:bean id="oauthAuthenticationEntryPoint"
 			class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
 			<beans:property name="realmName" value="Fineract Platform API" />
 		</beans:bean>
-	
+
 		<beans:bean id="oauthAccessDeniedHandler"
 			class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
-	
-	
+
 		<beans:bean id="clientCredentialsTokenEndpointFilter"
 			class="org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter">
 			<beans:constructor-arg value="/api/oauth/token" />
 			<beans:property name="authenticationManager" ref="clientAuthenticationManager" />
-	
 		</beans:bean>
-	
+
 		<beans:bean id="accessDecisionManager"
 			class="org.springframework.security.access.vote.UnanimousBased">
 			<beans:constructor-arg>
@@ -168,53 +166,33 @@
 				</beans:list>
 			</beans:constructor-arg>
 		</beans:bean>
-	
-	
-		<authentication-manager id="clientAuthenticationManager">
+
+		<authentication-manager id="clientAuthenticationManager" erase-credentials="false">
 			<authentication-provider user-service-ref="clientDetailsUserService" />
+            <authentication-provider ref="customAuthenticationProvider" />
 		</authentication-manager>
-	
-		<authentication-manager alias="authenticationManager"
-			erase-credentials="false">
-			<authentication-provider ref="customAuthenticationProvider" />
-		</authentication-manager>
-	
+
 		<beans:bean id="clientDetailsUserService"
 			class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService">
 			<beans:constructor-arg ref="clientDetailsService" />
 		</beans:bean>
-	
-	
-		<beans:bean id="passwordEncoder"
-			class="org.springframework.security.authentication.encoding.ShaPasswordEncoder">
-			<beans:constructor-arg value="256" />
-		</beans:bean>
-	
-		<beans:bean id="saltSource"
-			class="org.springframework.security.authentication.dao.ReflectionSaltSource">
-			<beans:property name="userPropertyToUse" value="id" />
-		</beans:bean>
-	
+
 		<beans:bean id="customAuthenticationProvider"
 			class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
 			<beans:property name="userDetailsService" ref="userDetailsService" />
 			<beans:property name="passwordEncoder" ref="passwordEncoder" />
-			<beans:property name="saltSource" ref="saltSource" />
 		</beans:bean>
-	
-	
-	
+
 		<beans:bean id="clientDetailsService"
 			class="org.springframework.security.oauth2.provider.client.JdbcClientDetailsService">
 			<beans:constructor-arg ref="routingDataSource" />
 		</beans:bean>
 	
-	
 		<beans:bean id="tokenStore"
 			class="org.springframework.security.oauth2.provider.token.store.JdbcTokenStore">
 			<beans:constructor-arg ref="routingDataSource" />
 		</beans:bean>
-	
+
 		<beans:bean id="tokenServices"
 			class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
 			<beans:property name="tokenStore" ref="tokenStore" />
@@ -225,19 +203,19 @@
 			<beans:property name="accessTokenValiditySeconds"
 				value="3600" />
 		</beans:bean>
-	
+
 		<beans:bean id="userApprovalHandler"
 			class="org.springframework.security.oauth2.provider.approval.TokenStoreUserApprovalHandler">
 			<beans:property name="tokenStore" ref="tokenStore" />
 			<beans:property name="clientDetailsService" ref="clientDetailsService" />
 			<beans:property name="requestFactory" ref="oAuth2RequestFactory" />
 		</beans:bean>
-	
+
 		<beans:bean id="oAuth2RequestFactory"
 			class="org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory">
 			<beans:constructor-arg ref="clientDetailsService" />
 		</beans:bean>
-	
+
 		<oauth:authorization-server
 			client-details-service-ref="clientDetailsService" token-services-ref="tokenServices"
 			user-approval-handler-ref="userApprovalHandler" token-endpoint-url="/api/oauth/token"
@@ -245,9 +223,8 @@
 			<oauth:refresh-token />
 			<oauth:password />
 		</oauth:authorization-server>
-	
-		<oauth:resource-server id="resourceServerFilter"
+
+		<oauth:resource-server id="resourceServerFilter" stateless="false"
 			token-services-ref="tokenServices" />
 	</beans:beans>
 </beans:beans>
-

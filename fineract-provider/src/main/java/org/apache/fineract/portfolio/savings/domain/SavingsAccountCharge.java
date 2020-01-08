@@ -38,11 +38,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -704,15 +706,18 @@ public class SavingsAccountCharge extends AbstractPersistableCustom<Long> {
                 .isEquals();
     }
 
-    public BigDecimal updateWithdralFeeAmount(final BigDecimal transactionAmount) {
+    public BigDecimal calculateWithdralFeeAmount(@NotNull BigDecimal transactionAmount) {
         BigDecimal amountPaybale = BigDecimal.ZERO;
         if (ChargeCalculationType.fromInt(this.chargeCalculation).isFlat()) {
             amountPaybale = this.amount;
         } else if (ChargeCalculationType.fromInt(this.chargeCalculation).isPercentageOfAmount()) {
-            amountPaybale = transactionAmount.multiply(this.percentage).divide(BigDecimal.valueOf(100l));
+            amountPaybale = transactionAmount.multiply(this.percentage).divide(BigDecimal.valueOf(100L), MoneyHelper.getRoundingMode());
         }
-        this.amountOutstanding = amountPaybale;
         return amountPaybale;
+    }
+
+    public BigDecimal updateWithdralFeeAmount(final BigDecimal transactionAmount) {
+        return amountOutstanding = calculateWithdralFeeAmount(transactionAmount);
     }
 
     public void updateToNextDueDateFrom(final LocalDate startingDate) {

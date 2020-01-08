@@ -97,10 +97,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
     }
 
     @Override
-    public void doFilter(final ServletRequest req, final ServletResponse res, final FilterChain chain) throws IOException, ServletException {
-
-        final HttpServletRequest request = (HttpServletRequest) req;
-        final HttpServletResponse response = (HttpServletResponse) res;
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         final StopWatch task = new StopWatch();
         task.start();
@@ -150,7 +147,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                 }
             }
 
-            super.doFilter(req, res, chain);
+            super.doFilterInternal(request, response, filterChain);
         } catch (final InvalidTenantIdentiferException e) {
             // deal with exception at low level
             SecurityContextHolder.getContext().setAuthentication(null);
@@ -160,7 +157,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
         } finally {
             task.stop();
             final PlatformRequestLog log = PlatformRequestLog.from(task, request);
-            logger.info(this.toApiJsonSerializer.serialize(log));
+            logger.debug(this.toApiJsonSerializer.serialize(log));
         }
     }
     

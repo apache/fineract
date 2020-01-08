@@ -74,11 +74,9 @@ public class CollateralAssembler {
                     if (id == null) {
                         collateralItems.add(LoanCollateral.from(collateralType, value, description));
                     } else {
-                        final LoanCollateral loanCollateralItem = this.loanCollateralRepository.findOne(id);
-                        if (loanCollateralItem == null) { throw new CollateralNotFoundException(id); }
-
+                        final LoanCollateral loanCollateralItem = this.loanCollateralRepository.findById(id)
+                                .orElseThrow(() -> new CollateralNotFoundException(id));
                         loanCollateralItem.assembleFrom(collateralType, value, description);
-
                         collateralItems.add(loanCollateralItem);
                     }
                 }

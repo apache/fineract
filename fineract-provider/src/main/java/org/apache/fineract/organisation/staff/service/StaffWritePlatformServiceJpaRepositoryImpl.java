@@ -93,9 +93,8 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
         try {
             this.fromApiJsonDeserializer.validateForUpdate(command.json(), staffId);
 
-            final Staff staffForUpdate = this.staffRepository.findOne(staffId);
-            if (staffForUpdate == null) { throw new StaffNotFoundException(staffId); }
-
+            final Staff staffForUpdate = this.staffRepository.findById(staffId)
+                    .orElseThrow(() -> new StaffNotFoundException(staffId));
             final Map<String, Object> changesOnly = staffForUpdate.update(command);
 
             if (changesOnly.containsKey("officeId")) {

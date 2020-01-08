@@ -37,7 +37,7 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.MonthDay;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.springframework.format.number.NumberFormatter;
+import org.springframework.format.number.NumberStyleFormatter;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -378,15 +378,25 @@ public class JsonParserHelper {
 
         if (element.isJsonObject()) {
             final JsonObject object = element.getAsJsonObject();
+            value = extractLocalTimeNamed(parameterName, element, extractTimeFormatParameter(object), parametersPassedInCommand);
+        }
+        return value;
+    }
 
-            final String timeFormat = extractTimeFormatParameter(object);
+    public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonElement element, String timeFormat,
+            final Set<String> parametersPassedInCommand) {
+
+        LocalDateTime value = null;
+
+        if (element.isJsonObject()) {
+            final JsonObject object = element.getAsJsonObject();
             final Locale clientApplicationLocale = extractLocaleParameter(object);
             value = extractLocalTimeNamed(parameterName, object, timeFormat, clientApplicationLocale, parametersPassedInCommand);
         }
         return value;
     }
-    
-    public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonObject element, final String timeFormat,
+
+    public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonElement element, final String timeFormat,
             final Locale clientApplicationLocale, final Set<String> parametersPassedInCommand) {
         LocalDateTime value = null;
         String timeValueAsString=null;
@@ -419,7 +429,7 @@ public class JsonParserHelper {
         return value;
     }
 
-    public LocalDate extractLocalDateNamed(final String parameterName, final JsonObject element, final String dateFormat,
+    public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element, final String dateFormat,
             final Locale clientApplicationLocale, final Set<String> parametersPassedInCommand) {
         LocalDate value = null;
         if (element.isJsonObject()) {
@@ -612,7 +622,7 @@ public class JsonParserHelper {
                     source = source.replaceAll(" ", Character.toString('\u00a0'));
                 }
 
-                final NumberFormatter numberFormatter = new NumberFormatter();
+                final NumberStyleFormatter numberFormatter = new NumberStyleFormatter();
                 final Number parsedNumber = numberFormatter.parse(source, clientApplicationLocale);
                 if (parsedNumber instanceof BigDecimal) {
                     number = (BigDecimal) parsedNumber;

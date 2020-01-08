@@ -217,7 +217,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 
         this.context.authenticatedUser();
 
-        this.officeTransactionRepository.delete(transactionId);
+        this.officeTransactionRepository.deleteById(transactionId);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

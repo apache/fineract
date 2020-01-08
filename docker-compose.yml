@@ -1,0 +1,48 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements. See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership. The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License. You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+# NB: Travis CI (dist: trusty) supports only v3.3
+# (unless we'd install a more recent version in .travis.yml)
+version: '3.3'
+services:
+  fineractmysql:
+    image: mysql:5.7
+    volumes:
+      - ./fineract-db/docker:/docker-entrypoint-initdb.d:Z,ro
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
+    ports:
+      - "3306:3306"
+  fineract-server:
+    build:
+      context: .
+      # NB: Target is Docker Compose 3.4+ only (but it works without as well)
+      # target: fineract
+    ports: 
+      - 8443:8443
+    depends_on:
+      - fineractmysql
+    environment:
+      - JAVA_OPTS=-Dfineract_tenants_url=jdbc:mysql:thin://fineractmysql:3306/mifosplatform-tenants -Djava.awt.headless=true -XX:+UseG1GC -Dfile.encoding=UTF-8
+      - FINERACT_DEFAULT_TENANTDB_HOSTNAME=fineractmysql
+      - FINERACT_DEFAULT_TENANTDB_PORT=3306

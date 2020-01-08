@@ -125,8 +125,8 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
             CodeValue documentType = null;
 
             final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-            final ClientIdentifier clientIdentifierForUpdate = this.clientIdentifierRepository.findOne(identifierId);
-            if (clientIdentifierForUpdate == null) { throw new ClientIdentifierNotFoundException(identifierId); }
+            final ClientIdentifier clientIdentifierForUpdate = this.clientIdentifierRepository.findById(identifierId)
+                    .orElseThrow(() -> new ClientIdentifierNotFoundException(identifierId));
 
             final Map<String, Object> changes = clientIdentifierForUpdate.update(command);
 
@@ -177,8 +177,8 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
 
         final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
-        final ClientIdentifier clientIdentifier = this.clientIdentifierRepository.findOne(identifierId);
-        if (clientIdentifier == null) { throw new ClientIdentifierNotFoundException(identifierId); }
+        final ClientIdentifier clientIdentifier = this.clientIdentifierRepository.findById(identifierId)
+                .orElseThrow(() -> new ClientIdentifierNotFoundException(identifierId));
         this.clientIdentifierRepository.delete(clientIdentifier);
 
         return new CommandProcessingResultBuilder() //

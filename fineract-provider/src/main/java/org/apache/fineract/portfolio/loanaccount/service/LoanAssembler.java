@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -171,8 +172,8 @@ public class LoanAssembler {
         final Boolean createStandingInstructionAtDisbursement = this.fromApiJsonHelper.extractBooleanNamed(
                 "createStandingInstructionAtDisbursement", element);
 
-        final LoanProduct loanProduct = this.loanProductRepository.findOne(productId);
-        if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
+        final LoanProduct loanProduct = this.loanProductRepository.findById(productId)
+                .orElseThrow(() -> new LoanProductNotFoundException(productId));
 
         final Fund fund = findFundByIdIfProvided(fundId);
         final Staff loanOfficer = findLoanOfficerByIdIfProvided(loanOfficerId);
@@ -181,7 +182,7 @@ public class LoanAssembler {
         if (loanPurposeId != null) {
             loanPurpose = this.codeValueRepository.findOneWithNotFoundDetection(loanPurposeId);
         }
-        List<LoanDisbursementDetails> disbursementDetails = null;
+        List<LoanDisbursementDetails> disbursementDetails = new ArrayList<>();
         BigDecimal fixedEmiAmount = null;
         if (loanProduct.isMultiDisburseLoan() || loanProduct.canDefineInstallmentAmount()) {
             fixedEmiAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.emiAmountParameterName, element);
@@ -239,8 +240,8 @@ public class LoanAssembler {
         }
 
         if (groupId != null) {
-            group = this.groupRepository.findOne(groupId);
-            if (group == null) { throw new GroupNotFoundException(groupId); }
+            group = this.groupRepository.findById(groupId)
+                    .orElseThrow(() -> new GroupNotFoundException(groupId));
             if (group.isNotActive()) { throw new GroupNotActiveException(groupId); }
         }
 
@@ -314,8 +315,8 @@ public class LoanAssembler {
     public Fund findFundByIdIfProvided(final Long fundId) {
         Fund fund = null;
         if (fundId != null) {
-            fund = this.fundRepository.findOne(fundId);
-            if (fund == null) { throw new FundNotFoundException(fundId); }
+            fund = this.fundRepository.findById(fundId)
+                    .orElseThrow(() -> new FundNotFoundException(fundId));
         }
         return fund;
     }
@@ -323,10 +324,9 @@ public class LoanAssembler {
     public Staff findLoanOfficerByIdIfProvided(final Long loanOfficerId) {
         Staff staff = null;
         if (loanOfficerId != null) {
-            staff = this.staffRepository.findOne(loanOfficerId);
-            if (staff == null) {
-                throw new StaffNotFoundException(loanOfficerId);
-            } else if (staff.isNotLoanOfficer()) { throw new StaffRoleException(loanOfficerId, StaffRoleException.STAFF_ROLE.LOAN_OFFICER); }
+            staff = this.staffRepository.findById(loanOfficerId)
+                    .orElseThrow(() -> new StaffNotFoundException(loanOfficerId));
+            if (staff.isNotLoanOfficer()) { throw new StaffRoleException(loanOfficerId, StaffRoleException.STAFF_ROLE.LOAN_OFFICER); }
         }
         return staff;
     }
@@ -334,8 +334,8 @@ public class LoanAssembler {
     public LoanTransactionProcessingStrategy findStrategyByIdIfProvided(final Long transactionProcessingStrategyId) {
         LoanTransactionProcessingStrategy strategy = null;
         if (transactionProcessingStrategyId != null) {
-            strategy = this.loanTransactionProcessingStrategyRepository.findOne(transactionProcessingStrategyId);
-            if (strategy == null) { throw new LoanTransactionProcessingStrategyNotFoundException(transactionProcessingStrategyId); }
+            strategy = this.loanTransactionProcessingStrategyRepository.findById(transactionProcessingStrategyId)
+                    .orElseThrow(() -> new LoanTransactionProcessingStrategyNotFoundException(transactionProcessingStrategyId));
         }
         return strategy;
     }

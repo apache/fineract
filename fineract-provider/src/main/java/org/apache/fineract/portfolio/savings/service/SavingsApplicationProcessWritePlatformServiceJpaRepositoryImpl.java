@@ -242,8 +242,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 if (changes.containsKey(SavingsApiConstants.groupIdParamName)) {
                     final Long groupId = command.longValueOfParameterNamed(SavingsApiConstants.groupIdParamName);
                     if (groupId != null) {
-                        final Group group = this.groupRepository.findOne(groupId);
-                        if (group == null) { throw new GroupNotFoundException(groupId); }
+                        final Group group = this.groupRepository.findById(groupId)
+                                .orElseThrow(() -> new GroupNotFoundException(groupId));
                         if (group.isNotActive()) {
                             if (group.isCenter()) { throw new CenterNotActiveException(groupId); }
                             throw new GroupNotActiveException(groupId);
@@ -257,9 +257,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
                 if (changes.containsKey(SavingsApiConstants.productIdParamName)) {
                     final Long productId = command.longValueOfParameterNamed(SavingsApiConstants.productIdParamName);
-                    final SavingsProduct product = this.savingsProductRepository.findOne(productId);
-                    if (product == null) { throw new SavingsProductNotFoundException(productId); }
-
+                    final SavingsProduct product = this.savingsProductRepository.findById(productId)
+                            .orElseThrow(() -> new SavingsProductNotFoundException(productId));
                     account.update(product);
                 }
 

@@ -114,7 +114,6 @@ import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -367,12 +366,12 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final LocalDate todaysDate = DateUtils.getLocalDateOfTenant();
         final DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MM yyyy");
         fmt.withZone(DateUtils.getDateTimeZoneOfTenant());
-        
+
 		while (todaysDate.isAfter(savingsAccountCharge.getDueLocalDate())) {
 			this.payCharge(savingsAccountCharge, savingsAccountCharge.getDueLocalDate(), savingsAccountCharge.amount(),
 					fmt, user);
 		}
-        
+
         return new CommandProcessingResultBuilder() //
                 .withEntityId(savingsAccountCharge.getId()) //
                 .withOfficeId(savingsAccountCharge.savingsAccount().officeId()) //
@@ -1551,7 +1550,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 					&& transaction.getTransactionLocalDate().isAfter(new LocalDate(transferDate)))
 					|| transaction.getTransactionLocalDate().isAfter(transferDate)) {
 				throw new GeneralPlatformDomainRuleException(TransferApiConstants.transferClientSavingsException,
-						TransferApiConstants.transferClientSavingsException, new LocalDate(transaction.getCreatedDate()),
+						TransferApiConstants.transferClientSavingsException, new LocalDate(transaction.createdDate()),
 						transferDate);
 			}
 

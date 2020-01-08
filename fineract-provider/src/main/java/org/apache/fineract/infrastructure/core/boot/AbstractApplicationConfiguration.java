@@ -21,13 +21,17 @@ package org.apache.fineract.infrastructure.core.boot;
 import org.apache.fineract.notification.config.MessagingConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
+import org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * Base Spring Configuration with what's common to all Configuration subclasses.
@@ -48,7 +52,11 @@ import org.springframework.context.annotation.PropertySource;
 @EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class,
 		HibernateJpaAutoConfiguration.class,
 		DataSourceTransactionManagerAutoConfiguration.class,
-		FlywayAutoConfiguration.class })
+		FlywayAutoConfiguration.class,
+		GsonAutoConfiguration.class,
+		JdbcTemplateAutoConfiguration.class})
+@EnableWebSecurity
+@EnableTransactionManagement
 public abstract class AbstractApplicationConfiguration {
 
 }
