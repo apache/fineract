@@ -151,8 +151,7 @@ public class LoanReschedulingWithinCenterTest {
 
         // VERIFY THE INTEREST
         Float interestDue = (Float) ((HashMap) loanRepaymnetSchedule.get(2)).get("interestDue");
-        assertEquals(String.valueOf(interestDue), "42.38");
-
+        assertEquals("90.82", String.valueOf(interestDue));
     }
     
     private void associateClientsToGroup(Integer groupId, Integer clientId) {
@@ -176,7 +175,7 @@ public class LoanReschedulingWithinCenterTest {
         final String startDate = dateFormat.format(today.getTime());
         final String frequency = "2"; // 2:Weekly
         final String interval = "2"; // Every one week
-        final Integer repeatsOnDay = today.get(Calendar.DAY_OF_WEEK);
+        final Integer repeatsOnDay = today.get(Calendar.DAY_OF_WEEK) - 1;
 
         Integer calendarId = CalendarHelper.createMeetingForGroup(this.requestSpec, this.responseSpec, centerId, startDate, frequency,
                 interval, repeatsOnDay.toString());
@@ -280,8 +279,7 @@ public class LoanReschedulingWithinCenterTest {
 
         // VERIFY THE INTEREST
         Float interestDue = (Float) ((HashMap) loanRepaymnetSchedule.get(2)).get("interestDue");
-        assertEquals(String.valueOf(interestDue), "19.16");
-
+        assertEquals("41.05", String.valueOf(interestDue));
     }
 
     private Integer createLoanProductWithInterestRecalculation(final String repaymentStrategy,
