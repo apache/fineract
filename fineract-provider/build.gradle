@@ -64,7 +64,6 @@ apply plugin: 'openjpa'
 apply plugin: "com.github.spotbugs"
 
 // apply plugin: 'pmd'
-// apply plugin: 'findbugs'
 
 dependencyManagement {
   imports {
@@ -340,11 +339,6 @@ compileJava{
 }
 /*
 pmd {
-    sourceSets = [sourceSets.main]
-    ignoreFailures = true
-}
-findbugs {
-    ignoreFailures = true
     sourceSets = [sourceSets.main]
 }
 */

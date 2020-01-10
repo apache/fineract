@@ -796,4 +796,6 @@ public class LoanTransaction extends AbstractPersistableCustom<Long> {
                 && !(this.isDisbursement() || this.isAccrual() || this.isRepaymentAtDisbursement() || this.isNonMonetaryTransaction() || this
                         .isIncomePosting());
     }
+
+    // TODO missing hashCode(), equals(Object obj), but probably OK as long as this is never stored in a Collection.
 }
