@@ -26,69 +26,70 @@ import java.util.HashMap;
 
 public class GLAccountBuilder {
 
-    public final String ASSET_ACCOUNT = "1";
-    public final String LIABILITY_ACCOUNT = "2";
-    public final String EQUITY_ACCOUNT = "3";
-    public final String INCOME_ACCOUNT = "4";
-    public final String EXPENSE_ACCOUNT = "5";
+    public static final String ASSET_ACCOUNT = "1";
+    public static final String LIABILITY_ACCOUNT = "2";
+    public static final String EQUITY_ACCOUNT = "3";
+    public static final String INCOME_ACCOUNT = "4";
+    public static final String EXPENSE_ACCOUNT = "5";
 
-    private final String ACCOUNT_USAGE_DETAIL = "1";
-    private final String ACCOUNT_USAGE_HEADER = "2";
-    private final String MANUAL_ENTRIES_ALLOW = "true";
-    private final String MANUAL_ENTRIES_NOT_ALLOW = "false";
+    private static final String ACCOUNT_USAGE_DETAIL = "1";
+    private static final String ACCOUNT_USAGE_HEADER = "2";
+    private static final String MANUAL_ENTRIES_ALLOW = "true";
+    private static final String MANUAL_ENTRIES_NOT_ALLOW = "false";
+
+    private static final String DESCRIPTION = "DEFAULT_DESCRIPTION";
 
     private String name = Utils.randomStringGenerator("ACCOUNT_NAME_", 5);
 
-    private String GLCode = "";
+    private String glCode = "";
     private String accountType = "";
     private String accountUsage = ACCOUNT_USAGE_DETAIL;
     private String manualEntriesAllowed = MANUAL_ENTRIES_ALLOW;
-    private String description = "DEFAULT_DESCRIPTION";
 
     public String build() {
         final HashMap<String, String> map = new HashMap<>();
         map.put("name", name);
-        map.put("glCode", GLCode);
+        map.put("glCode", glCode);
         map.put("manualEntriesAllowed", manualEntriesAllowed);
         map.put("type", accountType);
         map.put("usage", accountUsage);
-        map.put("description", description);
+        map.put("description", DESCRIPTION);
         return new Gson().toJson(map);
     }
 
     public GLAccountBuilder withAccountTypeAsAsset() {
         accountType = ASSET_ACCOUNT;
-        GLCode = Utils.randomStringGenerator("ASSET_", 2);
+        glCode = Utils.randomStringGenerator("ASSET_", 2);
         // Add unique timestamp to avoid random collisions
-        GLCode += Calendar.getInstance().getTimeInMillis() + "";
+        glCode += Calendar.getInstance().getTimeInMillis() + ""; 
         return this;
     }
 
     public GLAccountBuilder withAccountTypeAsLiability() {
         accountType = LIABILITY_ACCOUNT;
-        GLCode = Utils.randomStringGenerator("LIABILITY_", 2);
-        GLCode += Calendar.getInstance().getTimeInMillis() + "";
+        glCode = Utils.randomStringGenerator("LIABILITY_", 2);
+        glCode += Calendar.getInstance().getTimeInMillis() + "";
         return this;
     }
 
     public GLAccountBuilder withAccountTypeAsAsEquity() {
         accountType = EQUITY_ACCOUNT;
-        GLCode = Utils.randomStringGenerator("EQUITY_", 2);
-        GLCode += Calendar.getInstance().getTimeInMillis() + "";
+        glCode = Utils.randomStringGenerator("EQUITY_", 2);
+        glCode += Calendar.getInstance().getTimeInMillis() + "";
         return this;
     }
 
     public GLAccountBuilder withAccountTypeAsIncome() {
         accountType = INCOME_ACCOUNT;
-        GLCode = Utils.randomStringGenerator("INCOME_", 2);
-        GLCode += Calendar.getInstance().getTimeInMillis() + "";
+        glCode = Utils.randomStringGenerator("INCOME_", 2);
+        glCode += Calendar.getInstance().getTimeInMillis() + "";
         return this;
     }
 
     public GLAccountBuilder withAccountTypeAsExpense() {
         accountType = EXPENSE_ACCOUNT;
-        GLCode = Utils.randomStringGenerator("EXPENSE_", 2);
-        GLCode += Calendar.getInstance().getTimeInMillis() + "";
+        glCode = Utils.randomStringGenerator("EXPENSE_", 2);
+        glCode += Calendar.getInstance().getTimeInMillis() + "";
         return this;
     }
 
