@@ -114,9 +114,9 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
             validator.validateForUpdate();
             // TODO check if entity id is valid and within data scope for the
             // user
-            final Document documentForUpdate = this.documentRepository.findOne(documentCommand.getId());
-            if (documentForUpdate == null) { throw new DocumentNotFoundException(documentCommand.getParentEntityType(),
-                    documentCommand.getParentEntityId(), documentCommand.getId()); }
+            final Document documentForUpdate = this.documentRepository.findById(documentCommand.getId())
+                    .orElseThrow(() -> new DocumentNotFoundException(documentCommand.getParentEntityType(),
+                            documentCommand.getParentEntityId(), documentCommand.getId()));
 
             final StorageType documentStoreType = documentForUpdate.storageType();
             oldLocation = documentForUpdate.getLocation();
@@ -153,9 +153,9 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
         validateParentEntityType(documentCommand);
         // TODO: Check document is present under this entity Id
-        final Document document = this.documentRepository.findOne(documentCommand.getId());
-        if (document == null) { throw new DocumentNotFoundException(documentCommand.getParentEntityType(),
-                documentCommand.getParentEntityId(), documentCommand.getId()); }
+        final Document document = this.documentRepository.findById(documentCommand.getId())
+                .orElseThrow(() -> new DocumentNotFoundException(documentCommand.getParentEntityType(),
+                        documentCommand.getParentEntityId(), documentCommand.getId()));
         this.documentRepository.delete(document);
 
         final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(document.storageType());

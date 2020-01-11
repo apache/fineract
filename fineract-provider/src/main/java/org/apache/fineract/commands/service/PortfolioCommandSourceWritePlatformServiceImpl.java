@@ -159,15 +159,15 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         validateMakerCheckerTransaction(makerCheckerId);
         validateIsUpdateAllowed();
 
-        this.commandSourceRepository.delete(makerCheckerId);
+        this.commandSourceRepository.deleteById(makerCheckerId);
 
         return makerCheckerId;
     }
 
     private CommandSource validateMakerCheckerTransaction(final Long makerCheckerId) {
 
-        final CommandSource commandSourceInput = this.commandSourceRepository.findOne(makerCheckerId);
-        if (commandSourceInput == null) { throw new CommandNotFoundException(makerCheckerId); }
+        final CommandSource commandSourceInput = this.commandSourceRepository.findById(makerCheckerId)
+                .orElseThrow(() -> new CommandNotFoundException(makerCheckerId));
         if (!(commandSourceInput.isMarkedAsAwaitingApproval())) { throw new CommandNotAwaitingApprovalException(makerCheckerId); }
 
         this.context.authenticatedUser().validateHasCheckerPermissionTo(commandSourceInput.getPermissionCode());

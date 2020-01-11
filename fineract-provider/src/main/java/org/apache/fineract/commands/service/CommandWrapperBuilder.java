@@ -23,6 +23,7 @@ import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNum
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.paymenttype.api.PaymentTypeApiResourceConstants;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
+import org.apache.fineract.portfolio.self.pockets.api.PocketApiConstants;
 import org.apache.fineract.useradministration.api.PasswordPreferencesApiConstants;
 
 public class CommandWrapperBuilder {
@@ -3130,6 +3131,20 @@ public class CommandWrapperBuilder {
         this.actionName = "UPDATE";
         this.entityName = "TWOFACTOR_CONFIGURATION";
         this.href = "/twofactor/configure";
+        return this;
+    }
+    
+    public CommandWrapperBuilder linkAccountsToPocket() {
+        this.actionName = PocketApiConstants.linkAccountsActionName;
+        this.entityName = PocketApiConstants.pocketEntityName;
+        this.href = "/self/pocket?command="+PocketApiConstants.linkAccountsToPocketCommandParam;
+        return this;
+    }
+    
+    public CommandWrapperBuilder delinkAccountsFromPocket() {
+        this.actionName = PocketApiConstants.delinkAccountsActionName;
+        this.entityName = PocketApiConstants.pocketEntityName;
+        this.href = "/self/pocket?command="+PocketApiConstants.delinkAccountsFromPocketCommandParam;
         return this;
     }
 }

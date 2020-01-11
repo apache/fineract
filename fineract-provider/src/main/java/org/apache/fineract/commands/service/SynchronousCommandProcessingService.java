@@ -76,7 +76,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     public CommandProcessingResult processAndLogCommand(final CommandWrapper wrapper, final JsonCommand command,
             final boolean isApprovedByChecker) {
 
-        final boolean rollbackTransaction = this.configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName());
+         final boolean rollbackTransaction = this.configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName());
 
         final NewCommandSourceHandler handler = findCommandHandler(wrapper);
 
@@ -86,7 +86,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         CommandSource commandSourceResult = null;
         if (command.commandId() != null) {
-            commandSourceResult = this.commandSourceRepository.findOne(command.commandId());
+            commandSourceResult = this.commandSourceRepository.findById(command.commandId()).orElse(null);
             commandSourceResult.markAsChecked(maker, DateTime.now());
         } else {
             commandSourceResult = CommandSource.fullEntryFrom(wrapper, command, maker);

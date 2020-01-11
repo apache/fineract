@@ -27,5 +27,5 @@ import java.util.List;
 public interface LookupTableRepository extends JpaRepository<LookupTable, Long> {
 
     List<LookupTable> findBySurvey(final Survey survey);
-    List<LookupTable> findByKey(final String key);
+    List<LookupTable> findByKey(final String spmKey);
 }

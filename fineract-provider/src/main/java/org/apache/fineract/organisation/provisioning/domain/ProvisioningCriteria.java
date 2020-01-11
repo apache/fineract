@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.organisation.provisioning.domain;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -69,9 +70,9 @@ public class ProvisioningCriteria extends AbstractAuditableCustom<AppUser, Long>
     public ProvisioningCriteria(String criteriaName, AppUser createdBy, DateTime createdDate, AppUser lastModifiedBy, DateTime lastModifiedDate) {
         this.criteriaName = criteriaName;
         setCreatedBy(createdBy) ;
-        setCreatedDate(createdDate) ;
+        setCreatedDate(Instant.ofEpochMilli(createdDate.getMillis()));
         setLastModifiedBy(lastModifiedBy) ;
-        setLastModifiedDate(lastModifiedDate) ;
+        setLastModifiedDate(lastModifiedDate  == null ? null : Instant.ofEpochMilli(lastModifiedDate.getMillis()));
     }
 
     public void setProvisioningCriteriaDefinitions(Set<ProvisioningCriteriaDefinition> provisioningCriteriaDefinition) {

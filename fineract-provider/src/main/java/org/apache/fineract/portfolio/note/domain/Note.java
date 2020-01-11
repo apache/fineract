@@ -184,4 +184,7 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         return !this.client.identifiedBy(clientId);
     }
 
+    public String getNote() {
+        return note;
+    }
 }

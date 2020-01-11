@@ -1,0 +1,16 @@
+//Request URI:
+//POST paymenthub-schema:// payment-hub-domain:payment-hub-port/channel/transactions
+//GET paymenthub-schema:// payment-hub-domain:payment-hub-port/channel/transactions/11436b17-c690-4a30-8505-42a2c4eafb9d
+
+//Response URI:
+//PUT <FSPIOP-Callback>/interoperation/transactions/11436b17-c690-4a30-8505-42a2c4eafb9d
+
+//Header:
+//X-Tenant-Identifier: T111
+
+//Response Body:
+{
+  "clientRefId": "0f4f8eb4-1d83-11e9-ab14-d663bd873d93", // String(1..36)
+  "completedTimestamp": "2017-11-16T04:15:35.513+01:00", // optional, ISO 8601
+  "transferState": "COMMITTED" // mandatory, Enum of String(1..32): RECEIVED, RESERVED, COMMITTED, ABORTED
+}

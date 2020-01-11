@@ -107,7 +107,7 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
     @Column(name = "short_name", nullable = false, unique = true)
     protected String shortName;
 
-    @Column(name = "description", length = 500, nullable = true)
+    @Column(name = "description", length = 500, nullable = false)
     protected String description;
 
     @Embedded
@@ -706,6 +706,10 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
 
     public BigDecimal minBalanceForInterestCalculation() {
         return this.minBalanceForInterestCalculation;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getShortName() {

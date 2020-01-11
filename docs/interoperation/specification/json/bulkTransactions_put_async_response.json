@@ -1,0 +1,28 @@
+//Request URI:
+//POST paymenthub-schema:// payment-hub-domain:payment-hub-port/channel/bulkTransactions
+//GET paymenthub-schema:// payment-hub-domain:payment-hub-port/channel/bulkTransactions/11436b17-c690-4a30-8505-42a2c4eafb9d
+
+//Response URI:
+//PUT <FSPIOP-Callback>/interoperation/bulkTransactions/11436b17-c690-4a30-8505-42a2c4eafb9d
+
+//Header:
+//X-Tenant-Identifier: T111
+
+//Response Body:
+{
+  "clientRefId": "0f4f8eb4-1d83-11e9-ab14-d663bd873d93", // String(1..36)
+  "completedTimestamp": "2017-11-16T04:15:35.513+01:00", // optional, ISO 8601
+  "bulkTransferState": "COMPLETED", // mandatory, Enum of String(1..32): RECEIVED, PENDING, ACCEPTED, PROCESSING, COMPLETED, REJECTED
+  "individualTransferResults": [ // mandatory, (1..1000)
+    {
+      "transferId": "11436b17-c690-4a30-8505-42a2c4eafb9d", // mandatory, UUID String(36) ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$
+      "completedTimestamp": "2017-11-16T04:15:35.513+01:00", // optional, ISO 8601
+      "transferState": "COMMITTED"// mandatory, Enum of String(1..32): RECEIVED, RESERVED, COMMITTED, ABORTED
+    },
+    {
+      "transferId": "11436b17-c690-4a30-8505-42a2c4eafb9d", // mandatory, UUID String(36) ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$
+      "completedTimestamp": "2017-11-16T04:15:35.513+01:00", // optional, ISO 8601
+      "transferState": "COMMITTED"// mandatory, Enum of String(1..32): RECEIVED, RESERVED, COMMITTED, ABORTED
+    }
+  ]
+}

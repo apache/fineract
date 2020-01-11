@@ -38,6 +38,7 @@ import org.apache.fineract.portfolio.accountdetails.data.ShareAccountSummaryData
 import org.apache.fineract.portfolio.accounts.constants.AccountsApiConstants;
 import org.apache.fineract.portfolio.accounts.constants.ShareAccountApiConstants;
 import org.apache.fineract.portfolio.accounts.data.AccountData;
+import org.apache.fineract.portfolio.accounts.exceptions.ShareAccountNotFoundException;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.client.data.ClientData;
@@ -64,6 +65,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -502,4 +504,14 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
             return this.schema;
         }
     }
+
+	@Override
+	public String retrieveAccountNumberByAccountId(Long accountId) {
+		try {
+			final String sql = "select s.account_no from m_share_account s where s.id = ?";
+			return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
+		} catch (final EmptyResultDataAccessException e) {
+			throw new ShareAccountNotFoundException(accountId);
+		}
+	}
 }

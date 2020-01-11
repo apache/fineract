@@ -131,8 +131,8 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
             final Long parentId = command.longValueOfParameterNamed(GLAccountJsonInputParams.PARENT_ID.getValue());
             if (glAccountId.equals(parentId)) { throw new InvalidParentGLAccountHeadException(glAccountId, parentId); }
             // is the glAccount valid
-            final GLAccount glAccount = this.glAccountRepository.findOne(glAccountId);
-            if (glAccount == null) { throw new GLAccountNotFoundException(glAccountId); }
+            final GLAccount glAccount = this.glAccountRepository.findById(glAccountId)
+                    .orElseThrow(() -> new GLAccountNotFoundException(glAccountId));
 
             final Map<String, Object> changesOnly = glAccount.update(command);
 
@@ -191,9 +191,8 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
 	@Transactional
     @Override
     public CommandProcessingResult deleteGLAccount(final Long glAccountId) {
-        final GLAccount glAccount = this.glAccountRepository.findOne(glAccountId);
-
-        if (glAccount == null) { throw new GLAccountNotFoundException(glAccountId); }
+        final GLAccount glAccount = this.glAccountRepository.findById(glAccountId)
+                .orElseThrow(() -> new GLAccountNotFoundException(glAccountId));
 
         // validate this isn't a header account that has children
         if (glAccount.isHeaderAccount() && glAccount.getChildren().size() > 0) { throw new GLAccountInvalidDeleteException(
@@ -215,8 +214,8 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
     private GLAccount validateParentGLAccount(final Long parentAccountId) {
         GLAccount parentGLAccount = null;
         if (parentAccountId != null) {
-            parentGLAccount = this.glAccountRepository.findOne(parentAccountId);
-            if (parentGLAccount == null) { throw new GLAccountNotFoundException(parentAccountId); }
+            parentGLAccount = this.glAccountRepository.findById(parentAccountId)
+                    .orElseThrow(() -> new GLAccountNotFoundException(parentAccountId));
             // ensure parent is not a detail account
             if (parentGLAccount.isDetailAccount()) { throw new GLAccountInvalidParentException(parentAccountId); }
         }

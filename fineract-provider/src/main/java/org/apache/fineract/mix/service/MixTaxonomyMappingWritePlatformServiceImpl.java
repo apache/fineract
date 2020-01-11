@@ -42,7 +42,7 @@ public class MixTaxonomyMappingWritePlatformServiceImpl implements MixTaxonomyMa
     @Override
     public CommandProcessingResult updateMapping(final Long mappingId, final JsonCommand command) {
         try {
-            MixTaxonomyMapping mapping = this.mappingRepository.findOne(mappingId);
+            MixTaxonomyMapping mapping = this.mappingRepository.findById(mappingId).orElse(null);
             if (mapping == null) {
                 mapping = MixTaxonomyMapping.fromJson(command);
             } else {

@@ -37,6 +37,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.ws.rs.core.HttpHeaders;
@@ -59,6 +60,7 @@ public class ClientEntityImportHandlerTest {
     }
 
     @Test
+    @Ignore
     public void testClientImport() throws InterruptedException, IOException, ParseException {
 
         //in order to populate helper sheets

@@ -94,6 +94,7 @@ final class UsersApiResourceSwagger {
         }
         public Collection<OfficeData> allowedOffices;
         public Collection<RoleData> availableRoles;
+        public Collection<RoleData> selfServiceRoles;
     }
 
     @ApiModel(value = "PostUsersRequest")

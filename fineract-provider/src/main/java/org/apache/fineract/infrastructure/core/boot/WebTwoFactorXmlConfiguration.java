@@ -19,7 +19,7 @@
 package org.apache.fineract.infrastructure.core.boot;
 
 import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticationFilter;
-import org.springframework.boot.context.embedded.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

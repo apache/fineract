@@ -118,7 +118,7 @@ public class CommandProcessingResult implements Serializable {
         this.subResourceId = subResourceId;
     }
 
-    private CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId, final Map<String, Object> changesOnly) {
+    protected CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId, final Map<String, Object> changesOnly) {
         if (resourceId != null) {
             this.resourceIdentifier = resourceId.toString();
         } else {

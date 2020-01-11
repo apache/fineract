@@ -37,7 +37,7 @@ public class NotificationGeneratorReadRepositoryWrapperImpl implements Notificat
 
     @Override
     public Notification findById(Long id) {
-        return this.notificationRepository.findOne(id);
+        return this.notificationRepository.findById(id).orElse(null);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class NotificationGeneratorReadRepositoryWrapperImpl implements Notificat
 
     @Override
     public void delete(Long id) {
-       this.notificationRepository.delete(id);
+       this.notificationRepository.deleteById(id);
     }
 
 }

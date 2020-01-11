@@ -98,9 +98,12 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                 final String fileType = tika.detect(tikaInputStream);
                 final String fileExtension = Files.getFileExtension(fileDetail.getFileName()).toLowerCase();
                 ImportFormatType format = ImportFormatType.of(fileExtension);
-                if (!fileType.contains("msoffice")) {
-                    throw new GeneralPlatformDomainRuleException("error.msg.invalid.file.extension",
-                            "Uploaded file extension is not recognized.");
+                if (!fileType.contains("msoffice") && !fileType.contains("application/vnd.ms-excel")) {
+                    // We had a problem where we tried to upload the downloaded file from the import options, it was somehow changed the
+                    // extension we use this fix.
+                        throw new GeneralPlatformDomainRuleException("error.msg.invalid.file.extension",
+                                "Uploaded file extension is not recognized.");
+                    
                 }
                 Workbook workbook = new HSSFWorkbook(clonedInputStreamWorkbook);
                 GlobalEntityType entityType=null;
@@ -193,7 +196,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                 DocumentWritePlatformServiceJpaRepositoryImpl.DOCUMENT_MANAGEMENT_ENTITY.IMPORT.name(),
                 this.securityContext.authenticatedUser().getId(), null, clonedInputStreamWorkbook,
                 URLConnection.guessContentTypeFromName(fileName), fileName, null, fileName);
-        final Document document = this.documentRepository.findOne(documentId);
+        final Document document = this.documentRepository.findById(documentId).orElse(null);
 
         final ImportDocument importDocument = ImportDocument.instance(document,
                 DateUtils.getLocalDateTimeOfTenant(), entityType.getValue(),

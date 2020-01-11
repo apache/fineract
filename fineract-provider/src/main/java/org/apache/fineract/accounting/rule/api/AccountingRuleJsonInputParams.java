@@ -48,7 +48,7 @@ public enum AccountingRuleJsonInputParams {
 
     @Override
     public String toString() {
-        return name().toString().replaceAll("_", " ");
+        return name().toString().replace("_", " ");
     }
 
     public String getValue() {

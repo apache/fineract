@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests.common;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
@@ -56,6 +57,16 @@ public class BatchHelper {
      */
     public static String toJsonString(final List<BatchRequest> batchRequests) {
         return new Gson().toJson(batchRequests);
+    }
+
+    /**
+     * Returns a Map from Json String
+     *
+     * @param jsonBody
+     * @return Map
+     */
+    public static Map generateMapFromJsonString(final String jsonString) {
+        return new Gson().fromJson(jsonString, Map.class);
     }
 
     /**
@@ -157,6 +168,38 @@ public class BatchHelper {
 
     /**
      * Creates and returns a
+     * {@link org.apache.fineract.batch.command.internal.CreateClientCommandStrategy}
+     * Request as one of the request in Batch.
+     *
+     * @param reqId
+     * @param externalId
+     * @return BatchRequest
+     */
+    public static BatchRequest createActiveClientRequest(final Long requestId, final String externalId) {
+
+        final BatchRequest br = new BatchRequest();
+        br.setRequestId(requestId);
+        br.setRelativeUrl("clients");
+        br.setMethod("POST");
+
+        final String extId;
+        if (externalId.equals("")) {
+            extId = "ext" + String.valueOf((10000 * Math.random())) + String.valueOf((10000 * Math.random()));
+        } else {
+            extId = externalId;
+        }
+
+        final String body = "{ \"officeId\": 1, \"firstname\": \"Petra\", \"lastname\": \"Yton\"," + "\"externalId\": \"" + externalId
+                + "\",  \"dateFormat\": \"dd MMMM yyyy\", \"locale\": \"en\"," + "\"active\": true, \"activationDate\": \"04 March 2010\", \"submittedOnDate\": \"04 March 2010\"}";
+
+        br.setBody(body);
+
+        return br;
+    }
+
+
+    /**
+     * Creates and returns a
      * {@link org.apache.fineract.batch.command.internal.UpdateClientCommandStrategy}
      * Request with given requestId and reference.
      * 
@@ -197,7 +240,7 @@ public class BatchHelper {
         br.setReference(reference);
 
         final String body = "{\"dateFormat\": \"dd MMMM yyyy\", \"locale\": \"en_GB\", \"clientId\": \"$.clientId\"," + "\"productId\": "
-                + productId + ", \"principal\": \"10,000.00\", \"loanTermFrequency\": 12,"
+                + productId + ", \"principal\": \"10,000.00\", \"loanTermFrequency\": 10,"
                 + "\"loanTermFrequencyType\": 2, \"loanType\": \"individual\", \"numberOfRepayments\": 10,"
                 + "\"repaymentEvery\": 1, \"repaymentFrequencyType\": 2, \"interestRatePerPeriod\": 10,"
                 + "\"amortizationType\": 1, \"interestType\": 0, \"interestCalculationPeriodType\": 1,"
@@ -344,6 +387,29 @@ public class BatchHelper {
         br.setReference(reference);
         br.setMethod("POST");
         br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", \"actualDisbursementDate\": \"15 September 2013\"}");
+
+        return br;
+    }
+
+    /**
+     * Creates and returns a
+     * {@link org.apache.fineract.batch.command.internal.RepayLoanCommandStrategy}
+     * Request with given requestId.
+     *
+     *
+     * @param requestId
+     * @param reference
+     * @return BatchRequest
+     */
+    public static BatchRequest repayLoanRequest(final Long requestId, final Long reference) {
+        final BatchRequest br = new BatchRequest();
+
+        br.setRequestId(requestId);
+        br.setReference(reference);
+        br.setRelativeUrl("loans/$.loanId/transactions?command=repayment");
+        br.setMethod("POST");
+        br.setBody("{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " +
+                "\"transactionDate\": \"15 September 2013\",  \"transactionAmount\": 500}");
 
         return br;
     }

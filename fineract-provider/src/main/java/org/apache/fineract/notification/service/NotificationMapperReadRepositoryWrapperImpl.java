@@ -37,7 +37,7 @@ public class NotificationMapperReadRepositoryWrapperImpl implements Notification
 
     @Override
     public NotificationMapper findById(Long id) {
-        return this.notificationMapperRepository.findOne(id);
+        return this.notificationMapperRepository.findById(id).orElse(null);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class NotificationMapperReadRepositoryWrapperImpl implements Notification
 
     @Override
     public void delete(Long id) {
-        this.notificationMapperRepository.delete(id);
+        this.notificationMapperRepository.deleteById(id);
     }
 
 }

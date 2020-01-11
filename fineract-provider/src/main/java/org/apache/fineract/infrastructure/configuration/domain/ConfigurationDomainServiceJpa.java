@@ -112,13 +112,13 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
 
     @Override
     public boolean isEhcacheEnabled() {
-        return this.cacheTypeRepository.findOne(Long.valueOf(1)).isEhcacheEnabled();
+        return this.cacheTypeRepository.findById(1L).get().isEhcacheEnabled();
     }
 
     @Transactional
     @Override
     public void updateCache(final CacheType cacheType) {
-        final PlatformCache cache = this.cacheTypeRepository.findOne(Long.valueOf(1));
+        final PlatformCache cache = this.cacheTypeRepository.findById(1L).get();
         cache.update(cacheType);
         this.cacheTypeRepository.save(cache);
     }

@@ -118,8 +118,8 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
             this.context.authenticatedUser();
             this.fromApiJsonDataValidator.validateForRecurringDepositUpdate(command.json());
 
-            final RecurringDepositProduct product = this.recurringDepositProductRepository.findOne(productId);
-            if (product == null) { throw new RecurringDepositProductNotFoundException(productId); }
+            final RecurringDepositProduct product = this.recurringDepositProductRepository.findById(productId)
+                    .orElseThrow(() -> new RecurringDepositProductNotFoundException(productId));
             product.setHelpers(this.chartAssembler);
 
             final Map<String, Object> changes = product.update(command);
@@ -175,8 +175,8 @@ public class RecurringDepositProductWritePlatformServiceJpaRepositoryImpl implem
     public CommandProcessingResult delete(final Long productId) {
 
         this.context.authenticatedUser();
-        final RecurringDepositProduct product = this.recurringDepositProductRepository.findOne(productId);
-        if (product == null) { throw new RecurringDepositProductNotFoundException(productId); }
+        final RecurringDepositProduct product = this.recurringDepositProductRepository.findById(productId)
+                .orElseThrow(() -> new RecurringDepositProductNotFoundException(productId));
 
         this.recurringDepositProductRepository.delete(product);
 

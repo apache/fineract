@@ -894,8 +894,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     loanId);
         }
         checkClientOrGroupActive(loan);
-        final LoanTransaction transactionToAdjust = this.loanTransactionRepository.findOne(transactionId);
-        if (transactionToAdjust == null) { throw new LoanTransactionNotFoundException(transactionId); }
+        final LoanTransaction transactionToAdjust = this.loanTransactionRepository.findById(transactionId)
+                .orElseThrow(() -> new LoanTransactionNotFoundException(transactionId));
         this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.LOAN_ADJUST_TRANSACTION,
                 constructEntityMap(BUSINESS_ENTITY.LOAN_ADJUSTED_TRANSACTION, transactionToAdjust));
         if (this.accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.LOAN)) { throw new PlatformServiceUnavailableException(
@@ -1794,7 +1794,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                             .retrieveInstallmentLoanCharges(chargeData.getId(), true);
                     PortfolioAccountData portfolioAccountData = null;
                     for (final LoanInstallmentChargeData installmentChargeData : chargePerInstallments) {
-                        if (!installmentChargeData.getDueDate().isAfter(new LocalDate())) {
+                        if (!installmentChargeData.getDueDate().isAfter(DateUtils.getLocalDateOfTenant())) {
                             if (portfolioAccountData == null) {
                                 portfolioAccountData = this.accountAssociationsReadPlatformService.retriveLoanLinkedAssociation(chargeData
                                         .getLoanId());
@@ -1810,7 +1810,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                             transferFeeCharge(sb, accountTransferDTO);
                         }
                     }
-                } else if (chargeData.getDueDate() != null && !chargeData.getDueDate().isAfter(new LocalDate())) {
+                } else if (chargeData.getDueDate() != null && !chargeData.getDueDate().isAfter(DateUtils.getLocalDateOfTenant())) {
                     final PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService
                             .retriveLoanLinkedAssociation(chargeData.getLoanId());
                     final SavingsAccount fromSavingsAccount = null;
@@ -1846,8 +1846,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private LoanCharge retrieveLoanChargeBy(final Long loanId, final Long loanChargeId) {
-        final LoanCharge loanCharge = this.loanChargeRepository.findOne(loanChargeId);
-        if (loanCharge == null) { throw new LoanChargeNotFoundException(loanChargeId); }
+        final LoanCharge loanCharge = this.loanChargeRepository.findById(loanChargeId)
+                .orElseThrow(() -> new LoanChargeNotFoundException(loanChargeId));
 
         if (loanCharge.hasNotLoanIdentifiedBy(loanId)) { throw new LoanChargeNotFoundException(loanChargeId, loanId); }
         return loanCharge;
@@ -2490,6 +2490,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
                 final LoanCharge loanCharge = LoanCharge.createNewFromJson(loan, chargeDefinition, command, entry.getValue());
 
+                if (BigDecimal.ZERO.compareTo(loanCharge.amount()) == 0) {
+                    continue;
+                }
                 LoanOverdueInstallmentCharge overdueInstallmentCharge = new LoanOverdueInstallmentCharge(loanCharge, installment,
                         entry.getKey());
                 loanCharge.updateOverdueInstallmentCharge(overdueInstallmentCharge);
