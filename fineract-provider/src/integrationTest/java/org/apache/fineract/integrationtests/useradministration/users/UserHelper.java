@@ -32,19 +32,38 @@ public class UserHelper {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL, getTestCreateUserAsJSON(roleId, staffId), "resourceId");
     }
 
+    public static Object createUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, int roleId, int staffId, String username, String attribute) {
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_USER_URL, getTestCreateUserAsJSON(roleId, staffId, username), attribute);
+    }
+
     public static String getTestCreateUserAsJSON(int roleId, int staffId) {
-        String json = "{ \"username\": \"" + Utils.randomNameGenerator("User_Name_", 3)
+        return "{ \"username\": \"" + Utils.randomNameGenerator("User_Name_", 3)
                 + "\", \"firstname\": \"Test\", \"lastname\": \"User\", \"email\": \"whatever@mifos.org\","
                 + " \"officeId\": \"1\", \"staffId\": " + "\""
-                + Integer.toString(staffId)+"\",\"roles\": [\""
-                + Integer.toString(roleId) + "\"], \"sendPasswordToEmail\": false}";
-        System.out.println(json);
-        return json;
+                + staffId +"\",\"roles\": [\""
+                + roleId + "\"], \"sendPasswordToEmail\": false}";
+    }
 
+    private static String getTestCreateUserAsJSON(int roleId, int staffId, String username) {
+        return "{ \"username\": \"" + username
+            + "\", \"firstname\": \"Test\", \"lastname\": \"User\", \"email\": \"whatever@mifos.org\","
+            + " \"officeId\": \"1\", \"staffId\": " + "\""
+            + staffId +"\",\"roles\": [\""
+            + roleId + "\"], \"sendPasswordToEmail\": false}";
+    }
+
+    private static String getTestUpdateUserAsJSON(String username) {
+        return "{ \"username\": \"" + username
+            + "\", \"firstname\": \"Test\", \"lastname\": \"User\", \"email\": \"whatever@mifos.org\","
+            + " \"officeId\": \"1\"}";
     }
 
     public static Integer deleteUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final Integer userId) {
         return Utils.performServerDelete(requestSpec, responseSpec, createRoleOperationURL(userId), "resourceId");
+    }
+
+    public static Object updateUser(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, int userId, String username, String attribute) {
+        return Utils.performServerPut(requestSpec, responseSpec, createRoleOperationURL(userId), getTestUpdateUserAsJSON(username), attribute);
     }
 
     private static String createRoleOperationURL(final Integer userId) {
