@@ -64,7 +64,7 @@ public class SavingsImportHandlerTest {
     }
 
     @Test
-    public void testSavingsImport() throws InterruptedException, IOException, ParseException {
+    public void testSavingsImport() throws InterruptedException, IOException, ParseException,AssertionError {
 
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
         //in order to populate helper sheets
