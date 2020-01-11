@@ -129,7 +129,7 @@ public class LoanImportHandlerTest {
         firstLoanRow.createCell(LoanConstants.NO_OF_REPAYMENTS_COL).setCellValue(loanProductSheet.getRow(1).getCell(6).getNumericCellValue());
         firstLoanRow.createCell(LoanConstants.REPAID_EVERY_COL).setCellValue(loanProductSheet.getRow(1).getCell(9).getNumericCellValue());
         firstLoanRow.createCell(LoanConstants.REPAID_EVERY_FREQUENCY_COL).setCellValue(loanProductSheet.getRow(1).getCell(10).getStringCellValue());
-        firstLoanRow.createCell(LoanConstants.LOAN_TERM_COL).setCellValue(60);
+        firstLoanRow.createCell(LoanConstants.LOAN_TERM_COL).setCellValue(5);
         firstLoanRow.createCell(LoanConstants.LOAN_TERM_FREQUENCY_COL).setCellValue(loanProductSheet.getRow(1).getCell(10).getStringCellValue());
         firstLoanRow.createCell(LoanConstants.NOMINAL_INTEREST_RATE_COL).setCellValue(loanProductSheet.getRow(1).getCell(11).getNumericCellValue());
         firstLoanRow.createCell(LoanConstants.NOMINAL_INTEREST_RATE_FREQUENCY_COL).setCellValue(loanProductSheet.getRow(1).getCell(14).getStringCellValue());
