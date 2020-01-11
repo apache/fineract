@@ -130,10 +130,13 @@ public class LoanImportHandlerTest {
         firstLoanRow.createCell(LoanConstants.REPAID_EVERY_COL).setCellValue(loanProductSheet.getRow(1).getCell(9).getNumericCellValue());
         firstLoanRow.createCell(LoanConstants.REPAID_EVERY_FREQUENCY_COL).setCellValue(loanProductSheet.getRow(1).getCell(10).getStringCellValue());
 
-        int numberOfRepayments= (int)firstLoanRow.getCell(LoanConstants.NO_OF_REPAYMENTS_COL).getNumericCellValue();;
+        int numberOfRepayments= (int)firstLoanRow.getCell(LoanConstants.NO_OF_REPAYMENTS_COL).getNumericCellValue();
+        int repaidEvery= (int)firstLoanRow.getCell(LoanConstants.REPAID_EVERY_COL).getNumericCellValue();
 
-        //setting a random
-        firstLoanRow.createCell(LoanConstants.LOAN_TERM_COL).setCellValue( (int )(Math.random() * numberOfRepayments +1));
+        System.out.println("Number of repayments : "+numberOfRepayments);
+        System.out.println("Repaid every : "+repaidEvery);
+
+        firstLoanRow.createCell(LoanConstants.LOAN_TERM_COL).setCellValue(4);
         firstLoanRow.createCell(LoanConstants.LOAN_TERM_FREQUENCY_COL).setCellValue(loanProductSheet.getRow(1).getCell(10).getStringCellValue());
         firstLoanRow.createCell(LoanConstants.NOMINAL_INTEREST_RATE_COL).setCellValue(loanProductSheet.getRow(1).getCell(11).getNumericCellValue());
         firstLoanRow.createCell(LoanConstants.NOMINAL_INTEREST_RATE_FREQUENCY_COL).setCellValue(loanProductSheet.getRow(1).getCell(14).getStringCellValue());
