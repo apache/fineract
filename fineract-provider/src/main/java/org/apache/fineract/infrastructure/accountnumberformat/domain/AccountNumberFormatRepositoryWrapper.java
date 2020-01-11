@@ -33,9 +33,8 @@ public class AccountNumberFormatRepositoryWrapper {
     }
 
     public AccountNumberFormat findOneWithNotFoundDetection(final Long id) {
-        final AccountNumberFormat accountNumberFormat = this.repository.findOne(id);
-        if (accountNumberFormat == null) { throw new AccountNumberFormatNotFoundException(id); }
-        return accountNumberFormat;
+        return this.repository.findById(id)
+                .orElseThrow(() -> new AccountNumberFormatNotFoundException(id));
     }
 
     public void save(final AccountNumberFormat accountNumberFormat) {

@@ -22,6 +22,7 @@ import org.junit.Assert;
 
 import static org.junit.Assert.fail;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.fineract.integrationtests.common.HookHelper;
@@ -62,7 +63,8 @@ public class HookIntegrationTest {
         // Subject to https://echo-webhook.herokuapp.com being up
         // See
         // http://www.jamesward.com/2014/06/11/testing-webhooks-was-a-pain-so-i-fixed-the-glitch
-        final String payloadURL = "http://echo-webhook.herokuapp.com:80/Z7RXoCBdLSFMDrpn?";
+        final String uniqueId = UUID.randomUUID().toString();
+        final String payloadURL = "http://echo-webhook.herokuapp.com:80/" + uniqueId + "?";
         this.hookHelper.createHook(payloadURL);
         final Integer createdOfficeID = this.officeHelper.createOffice("01 January 2012");
         try {

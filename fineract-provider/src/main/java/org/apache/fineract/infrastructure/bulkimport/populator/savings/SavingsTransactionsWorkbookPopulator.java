@@ -163,7 +163,7 @@ public class SavingsTransactionsWorkbookPopulator extends AbstractWorkbookPopula
         //Account Number Named  after Clients
         for(int j = 0; j < clientsWithActiveSavings.size(); j++) {
             Name name = savingsTransactionWorkbook.createName();
-            name.setNameName("Account_" + clientsWithActiveSavings.get(j).replaceAll(" ", "_") + "_" + clientIdsWithActiveSavings.get(j) + "_");
+            name.setNameName("Account_" + clientsWithActiveSavings.get(j).replace(" ", "_") + "_" + clientIdsWithActiveSavings.get(j) + "_");
             name.setRefersToFormula(TemplatePopulateImportConstants.SAVINGS_TRANSACTION_SHEET_NAME+"!$Q$" + clientNameToBeginEndIndexes.get(clientsWithActiveSavings.get(j))[0] + ":$Q$" + clientNameToBeginEndIndexes.get(clientsWithActiveSavings.get(j))[1]);
         }
 

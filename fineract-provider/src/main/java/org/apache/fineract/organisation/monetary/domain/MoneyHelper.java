@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.organisation.monetary.domain;
 
+import java.math.MathContext;
 import java.math.RoundingMode;
 
 import javax.annotation.PostConstruct;
@@ -28,10 +29,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MoneyHelper {
-    
+
     private static RoundingMode roundingMode = null;
+    private static MathContext mathContext;
+    private static final int PRECISION = 12;
+
     private static ConfigurationDomainService staticConfigurationDomainService;
-    
+
     @Autowired
     private ConfigurationDomainService configurationDomainService;
 
@@ -48,4 +52,10 @@ public class MoneyHelper {
         return roundingMode;
     }
 
+    public static MathContext getMathContext() {
+        if (mathContext == null) {
+            mathContext = new MathContext(PRECISION, getRoundingMode());
+        }
+        return mathContext;
+    }
 }

@@ -16,6 +16,7 @@
 -- specific language governing permissions and limitations
 -- under the License.
 --
+
 CREATE TABLE `m_trial_balance` (
 	`office_id` BIGINT(20) NOT NULL,
 	`account_id` BIGINT(20) NOT NULL,

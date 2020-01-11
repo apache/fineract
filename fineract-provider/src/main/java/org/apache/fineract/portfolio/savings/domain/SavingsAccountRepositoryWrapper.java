@@ -23,6 +23,8 @@ import java.util.List;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,8 +54,8 @@ public class SavingsAccountRepositoryWrapper {
 
     @Transactional(readOnly=true)
     public SavingsAccount findOneWithNotFoundDetection(final Long savingsId) {
-        final SavingsAccount account = this.repository.findOne(savingsId);
-        if (account == null) { throw new SavingsAccountNotFoundException(savingsId); }
+        final SavingsAccount account = this.repository.findById(savingsId)
+                .orElseThrow(() -> new SavingsAccountNotFoundException(savingsId));
         account.loadLazyCollections();
         return account;
     }
@@ -79,8 +81,15 @@ public class SavingsAccountRepositoryWrapper {
         loadLazyCollections(accounts); 
         return accounts ;
     }
+    
+    @Transactional(readOnly=true)
+	public Page<SavingsAccount> findByStatus(Integer status, Pageable pageable) {
+		Page<SavingsAccount> accounts = this.repository.findByStatus(status, pageable);
+		loadLazyCollections(accounts);
+		return accounts;
+	}
 
-    //Root Entities are enough
+	//Root Entities are enough
     public List<SavingsAccount> findByClientIdAndGroupId(@Param("clientId") Long clientId, @Param("groupId") Long groupId) {
         return this.repository.findByClientIdAndGroupId(clientId, groupId) ;
     }
@@ -118,4 +127,10 @@ public class SavingsAccountRepositoryWrapper {
             }
         }
     }
+    
+    private void loadLazyCollections(Page<SavingsAccount> accounts) {
+		for (SavingsAccount account : accounts) {
+			account.loadLazyCollections();
+		}
+	}
 }

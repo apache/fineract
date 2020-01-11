@@ -150,8 +150,8 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
 
         try {
             this.context.authenticatedUser();
-            final SavingsProduct product = this.savingProductRepository.findOne(productId);
-            if (product == null) { throw new SavingsProductNotFoundException(productId); }
+            final SavingsProduct product = this.savingProductRepository.findById(productId)
+                    .orElseThrow(() -> new SavingsProductNotFoundException(productId));
 
             this.fromApiJsonDataValidator.validateForUpdate(command.json(), product);
 
@@ -208,8 +208,8 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
     public CommandProcessingResult delete(final Long productId) {
 
         this.context.authenticatedUser();
-        final SavingsProduct product = this.savingProductRepository.findOne(productId);
-        if (product == null) { throw new SavingsProductNotFoundException(productId); }
+        final SavingsProduct product = this.savingProductRepository.findById(productId)
+                .orElseThrow(() -> new SavingsProductNotFoundException(productId));
 
         this.savingProductRepository.delete(product);
 

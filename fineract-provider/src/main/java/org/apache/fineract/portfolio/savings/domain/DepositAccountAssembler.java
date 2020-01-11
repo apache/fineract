@@ -162,11 +162,11 @@ public class DepositAccountAssembler {
 
         SavingsProduct product = null;
         if (depositAccountType.isFixedDeposit()) {
-            product = this.fixedDepositProductRepository.findOne(productId);
-            if (product == null) { throw new FixedDepositProductNotFoundException(productId); }
+            product = this.fixedDepositProductRepository.findById(productId)
+                    .orElseThrow(() -> new FixedDepositProductNotFoundException(productId));
         } else if (depositAccountType.isRecurringDeposit()) {
-            product = this.recurringDepositProductRepository.findOne(productId);
-            if (product == null) { throw new RecurringDepositProductNotFoundException(productId); }
+            product = this.recurringDepositProductRepository.findById(productId)
+                    .orElseThrow(() -> new RecurringDepositProductNotFoundException(productId));
         }
 
         if (product == null) { throw new SavingsProductNotFoundException(productId); }

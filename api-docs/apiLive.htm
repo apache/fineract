@@ -122,49 +122,50 @@
 				<div id="toc-menu-client" class="flybar-menu">
 					<div class="tocMatrix">
 						<table class=matrixHeading>
-							<tr class="matrixHeadingBG">
-								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
-										<table>
-											<tr>
-												<td>RESOURCES</td>
-											</tr>
-										</table>
-									</div></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">POST</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>create/complex
-													update</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">GET</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>read</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">PUT</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>update</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">DELETE</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>delete</div></td>
-										</tr>
-									</table></td>
-							</tr>
-							<tr>
+                            <tr class="matrixHeadingBG">
+                                <td colspan=2 valign="top"><div class="matrixHeadingVerbs">
+                                    <table>
+                                        <tr>
+                                            <td>RESOURCES</td>
+                                        </tr>
+                                    </table>
+                                </div></td>
+                                <td><table>
+                                    <tr>
+                                        <td><div class="matrixHeadingVerbs">POST</div></td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class=matrixHeadingCommands>create/complex
+                                            update</div></td>
+                                    </tr>
+                                </table></td>
+                                <td><table>
+                                    <tr>
+                                        <td><div class="matrixHeadingVerbs">GET</div></td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class=matrixHeadingCommands>read</div></td>
+                                    </tr>
+                                </table></td>
+                                <td><table>
+                                    <tr>
+                                        <td><div class="matrixHeadingVerbs">PUT</div></td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class=matrixHeadingCommands>update</div></td>
+                                    </tr>
+                                </table></td>
+                                <td><table>
+                                    <tr>
+                                        <td><div class="matrixHeadingVerbs">DELETE</div></td>
+                                    </tr>
+                                    <tr>
+                                        <td><div class=matrixHeadingCommands>delete</div></td>
+                                    </tr>
+                                </table></td>
+                            </tr>
+
+                            <tr>
 								<td><a href="#clients">Client</a></td>
 								<td>clients</td>
 								<td><a href="#clients_create">Create a Client</a></td>
@@ -319,7 +320,7 @@
                             <tr>
                                 <td><a href="#entity_field_list">Entity Field Configuration</a></td>
                                 <td>fieldconfiguration/{entity}</td>
-                                td></td>
+                                <td></td>
                                 <td><a href="#entity_field_list">List all configuration for a entity</a></td>
                                 <td></td>
                                 <td></td>
@@ -455,7 +456,7 @@
 								<td></td>
 							</tr>
 							<tr>
-								<td><a href="#client_transactions">Client Transactions</td>
+                                <td><a href="#client_transactions">Client Transactions</a></td>
 								<td>clients/{clientId}/transactions</td>
 								<td><a href="#list_clientTransactions">List Client Transactions</a></td>
 								<td></td>
@@ -3864,7 +3865,7 @@
 								<td>self/loans/{loanId}/guarantors</td>
 								<td></td>
 								<td><a href="#self_guarantors_list">Guarantors list</a></td>
-								<td></td>
+                                <td></td>
 								<td></td>
 							</tr>
 							<tr>
@@ -3875,6 +3876,7 @@
 								</td>
 								</td>
 							</tr>
+							
 							<tr>
 								<td><a href="#self_service_user_reports">Run Report</a></td>
 								<td>self/runreports/{reportName}</td>
@@ -3904,6 +3906,30 @@
 								<td>self/surveys/scorecards/clients/{clientId}</td>
 								<td></td>
 								<td><a href="#survey_score">Survey Scorecards</a></td>
+                                <td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#linkaccountstopocket">Link/Delink accounts to pocket</a></td>
+								<td>self/pockets?command=linkAccounts</td>
+								<td><a href="#linkaccountstopocket">Link accounts to pocket</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+							    <td></td>
+								<td>self/pockets?command=delinkAccounts</td>
+								<td><a href="#delinkaccountstopocket">Delink accounts from pocket</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>self/pockets</td>
+								<td></td>
+								<td><a href="#retrievepocketaccounts">Retrieve accounts linked to pocket</a></td>
 								<td></td>
 								<td></td>
 							</tr>
@@ -3971,7 +3997,7 @@
 							href="https://addons.mozilla.org/en-US/firefox/addon/restclient/"
 							target="_blank">RESTClient</a> for FireFox
 					</p>
-					The REST plugins will allow you to
+					The REST plugins will allow you to:
 					<ul>
 						<li class=normalli>Select the "Verb" (e.g. POST)</li>
 						<li class=normalli>Enter the resource name (e.g. offices)</li>
@@ -4267,19 +4293,19 @@ function executeAjaxRequest(url, verbType, jsonData, authKey, successFunction, e
 						one-time passwords(OTP). OTPs are sent via SMS & email.
 					</p>
 					<p>
-						By default, two-factor authentication is disabled by default.
+						Two-factor authentication is disabled by default.
 						More information on how to enable TFA can be found <a href="#authentication_overview">here</a>.
 					</p>
 					<p>
 						Two-factor authentication workflow:
 						<ol class="normalli">
-							<li class="normalli">User authticates via BasicAuth / oAauth</li>
-							<li>Client requests a list of supported OTP delivery methods for the authenticated user(<a href="#twofactor_deliverymethods">Get Delivery Methods</a>)</li>
-							<li>User selects an OTP delivery method and client sends a request for OTP(<a href="#twofactor_request">Request OTP</a>)</li>
-							<li>User receives an OTP and the client sends it for verification(<a href="#twofactor_validate">Validate OTP</a>)</li>
+							<li class="normalli">User authticates via BasicAuth / oAauth.</li>
+							<li>Client requests a list of supported OTP delivery methods for the authenticated user(<a href="#twofactor_deliverymethods">Get Delivery Methods</a>).</li>
+							<li>User selects an OTP delivery method and client sends a request for OTP(<a href="#twofactor_request">Request OTP</a>).</li>
+							<li>User receives an OTP and the client sends it for verification(<a href="#twofactor_validate">Validate OTP</a>).</li>
 							<li>If the OTP is valid, an access token is returned</li>
 							<li>The access token is sent in following requestes to the server as a header <i>Fineract-Platform-TFA-Token</i></li>
-                            <li>On session end, the access token should be invalidated<a href="#twofactor_invalidate">Invalidate Access Token</a>)</li>
+                            <li>On session end, the access token should be invalidated<a href="#twofactor_invalidate">Invalidate Access Token</a>).</li>
 						</ol>
 					</p>
 					<p>
@@ -4296,7 +4322,7 @@ function executeAjaxRequest(url, verbType, jsonData, authKey, successFunction, e
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Get Delivery Methods</h4>
-					<p>Returns a list of possible OTP delivery methods for the current user</p>
+					<p>Returns a list of possible OTP delivery methods for the current user.</p>
 					<p>Requires first-factor authenticated user.</p>
 				</div>
 				<div class="method-example">
@@ -4751,6 +4777,7 @@ Successful transaction response:
 						<li><a href="#clients_activate">Activate a Pending Client</a>
 						<li><a href="#loans_approve">Approve a Pending Loan</a>
 						<li><a href="#loans_disburse">Disburse a Loan</a>
+						<li><a href="#loans_transaction_repayment">Repayment for a Loan</a>
 					</ul>
 				</div>
 			</div>
@@ -4822,7 +4849,7 @@ Successful transaction response:
 					</p>
 
 					<p>
-					While creating an <a href="#users_create">user</a>, user can be tagged as self service user. Also you can associate
+					While creating a <a href="#users_create">user</a>, user can be tagged as self service user. Also you can associate
 					clients that this user has access to. Data scope is restricted to these linked clients.
 					</p>
 					<p>
@@ -5365,12 +5392,12 @@ GET https://DomainName/api/v1/clients/template
 				<div class="method-description">
 					<h4>Create a Client</h4>
 					<p>
-						<b>Note:</b>1. You can enter either:<br>
+						<b>Note:</b><br>1. You can enter either:<br>
 						firstname/middlename/lastname - for a person (middlename is
 						optional) OR<br> fullname - for a business or organisation
 						(or person known by one name).<br>
-                               &nbsp; &nbsp; &nbsp;     2.If address is enable(enable-address=true), then additional field <br>
-                        called address has to be passed
+                               2. If address is enable(enable-address=true), then additional field <br>
+                        called address has to be passed.
 
 					</p>
 					<table class=matrixHeading>
@@ -5874,7 +5901,7 @@ Request Body:
 	        <p>Allows you to withdraw the proposed transfer of a <i>Client</i> to a different <i>Office</i>.</p>
 	        <p>Withdrawal can happen only if the destination Branch (to which the transfer was
 	        <a href="#clients_propose_transfer">proposed</a>) has not already
-	         <a href="#clients_accept_transfer">accepted</a> the transfer proposal </p>
+	         <a href="#clients_accept_transfer">accepted</a> the transfer proposal.</p>
 	    </div>
 		<div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=withdrawTransfer</code>
@@ -5890,7 +5917,6 @@ Request Body:
    "clientId": 2,
    "resourceId": 2
 }
-
 
 	        </code>
 	    </div>
@@ -5928,7 +5954,7 @@ Request Body:
 	        <h4>Accept a Client Transfer</h4>
 	        <p>Allows the Destination Branch to accept the <a href="#clients_propose_transfer">proposed</a> Client Transfer.</p>
 	        <p>The destination branch may also choose to link this client to a group (in which case, any existing active JLG loan of the client is rescheduled to match the meeting frequency of the group) and loan Officer at the time of accepting
-	        the transfer</p>
+	        the transfer.</p>
 	    </div>
 		<div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=acceptTransfer</code>
@@ -6377,7 +6403,7 @@ GET https://DomainName/api/v1/clients/{clientId}/accounts
                     <h3>Entity Field Configuration </h3>
                     <p>Entity Field configuration API is a generic and extensible <br>
                         wherein various entities and subentities can be related.<br>
-                        Also it gives the user an ability to enable/disable fields,<br> add regular expression for validation</p>
+                        It gives the user an ability to enable/disable fields,<br> add regular expression for validation.</p>
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG">
                             <td><div class="fineractHeading2">Field Descriptions</div></td>
@@ -6507,7 +6533,7 @@ GET https://DomainName/api/v1/clients/{clientId}/accounts
                         </tr>
                         <tr>
                             <td class=fielddesc>Address module has the ability to store<br>
-                            multiple types of address of clients.addressTypeId is basically a code whose value<br>
+                            multiple types of address of clients.addressTypeId is basically a code whose<br> value
                             are used to store the different types of addresses.
                                 </br> </td>
                         </tr>
@@ -6687,7 +6713,7 @@ GET https://DomainName/api/v1/clients/{clientId}/accounts
             <div class="method-section">
                 <div class="method-description">
                     <h4>update an address for a Client</h4>
-                    <p>All the address fields can be updated by using update client address API</p>
+                    <p>All the address fields can be updated by using update client address API.</p>
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG">
                             <td><div class="fineractHeading2">Mandatory Fields</div></td>
@@ -6724,7 +6750,7 @@ GET https://DomainName/api/v1/clients/{clientId}/accounts
 				<div class="method-description">
 					<h3>Client Identifiers</h3>
 					<p>Client Identifiers refer to documents that are
-					used to uniquely identify a customer <br/>
+					used to uniquely identify a customer. <br/>
 					Ex: Drivers License, Passport, Ration card etc
 					</p>
 					<table class=matrixHeading>
@@ -6974,17 +7000,17 @@ No Request Body:
 				<div class="method-description">
 					<h3>Images</h3>
 					<p>The current API provides support for the addition of a single
-					image for entities like Client (URL pattern <i>/clients</i>) and Staff (URL pattern <i>/staff</i>)<br/>
-					Allowed formats: JPEG (.jpg or .jpeg), GIF (.gif) and PNG (.png)
+					image for entities like Client (URL pattern <i>/clients</i>) and Staff (URL pattern <i>/staff.</i>)<br/>
+					Allowed formats: JPEG (.jpg or .jpeg), GIF (.gif) and PNG (.png).
 					</p>
-					<p> The API supports two different Approaches for manipulating Images
+					<p> The API supports two different Approaches for manipulating Images.
 					 <ul>
 					 	<li><a href="http://en.wikipedia.org/wiki/Data_URI_scheme" target="_blank"> Data URI's: </a>
 					  For easier manipulation by Javascript clients etc in supported Browsers.
 					 	</li>
 					 	<li><a href="http://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.2">
 						Multi-part form data:</a>
-					  Images can be uploaded using Multi part forms and downloaded as regular binary files
+					  Images can be uploaded using Multi part forms and downloaded as regular binary files.
 					 	</li>
 					 <br/>
 				</div>
@@ -6995,7 +7021,7 @@ No Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Get Entity Image (DATA URI)</h4>
-					<p>Optional arguments are identical to those of <a href="#client_images_retrieve_binary">Get Image associated with an Entity (Binary file)</a></p>
+					<p>Optional arguments are identical to those of <a href="#client_images_retrieve_binary">Get Image associated with an Entity (Binary file).</a></p>
 					<p>Example Requests:</p>
 					<div class=apiClick>clients/1/images</div>
 					<div class=apiClick>staff/1/images</div>
@@ -7021,7 +7047,7 @@ gAEAOg13B6R/SAgAAAAASUVORK5CYII=
 				class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Get Image associated with an Entity (Binary file)</h4>
+					<h4>Get Image associated with an Entity (Binary file).</h4>
 					<h5>Optional Arguments</h5>
 					<dl class="argument-list">
 						<dt>output</dt>
@@ -7110,7 +7136,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC
 						name "file". <br/> <br/>
 						If you are using a HTML form, a snippet like
 						<small> &lt;input type="file" name="file"&gt;&lt;/input&gt; </small>
-						can be used for uploading the image file
+						can be used for uploading the image file.
 					</p>
 				</div>
 				<div class="method-example">
@@ -7178,7 +7204,7 @@ P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC
 						name "file". <br/> <br/>
 						If you are using a HTML form, a snippet like
 						<small> &lt;input type="file" name="file"&gt;&lt;/input&gt; </small>
-						can be used for uploading the image file
+						can be used for uploading the image file.
 					</p>
 				</div>
 				<div class="method-example">
@@ -7941,7 +7967,7 @@ Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Delete a Center</h4>
-					<p>A Center can be deleted if it is in <i>pending</i> state and has no association - groups, loans or savings</p>
+					<p>A Center can be deleted if it is in <i>pending</i> state and has no association - groups, loans or savings.</p>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -37313,6 +37339,20 @@ GET https://DomainName/api/v1/users/template
             "id": 1,
             "name": "Super user",
             "description": "This role provides all application permissions."
+        },
+	{
+            "id": 2,
+            "name": "Self Service User",
+            "description": "self service user role",
+            "disabled": false
+        }
+    ],
+    "selfServiceRoles": [
+        {
+            "id": 2,
+            "name": "Self Service User",
+            "description": "self service user role",
+            "disabled": false
         }
     ]
 }
@@ -43598,7 +43638,7 @@ Request Body:
 				</div>
 			</div>
 
-			<a id="client_transaction" name="client_transaction" class="old-syle-anchor">&nbsp;</a>
+			<a id="client_transactions" name="client_transactions" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h3>Client Transaction</h3>
@@ -50691,6 +50731,102 @@ GET https://DomainName/api/v1/self/runreports/{reportName}
 					</code>
 				</div>
 			</div>
+			
+    <a id="linkaccountstopocket" name="linkaccountstopocket" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Link/delink accounts to/from pocket</h2>
+	        <p>Pockets behave as favourites. An user can link his/her Loan, Savings and Share accounts to pocket for faster access. In a similar way linked accounts can be delinked from the pocket.</p>
+	         <h2>Link accounts to pocket</h2>
+			<p>Example Requests:</p>
+	        <div class=apiClick>self/pockets?command=linkAccounts</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://DomainName/api/v1/self/pockets?command=linkAccounts</code>
+			  <code class="method-request">POST self/pockets?command=linkAccounts
+Content-Type: application/json
+Request Body:
+
+{  
+   "accountsDetail":[  
+      {  
+         "accountId":"11",
+         "accountType":"LOAN"
+      },
+      {  
+         "accountId":"2",
+         "accountType":"SAVINGS"
+      }
+   ]
+}
+			</code>
+			<code class="method-response">
+{
+    "resourceId": 6
+}
+			</code>
+	    </div>
+	</div>
+	
+	 <a id="delinkaccountstopocket" name="delinkaccountstopocket" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Delink accounts from pocket</h2>
+			<p>Example Requests:</p>
+	        <div class=apiClick>self/pockets?command=delinkAccounts</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://DomainName/api/v1/self/pockets?command=delinkAccounts</code>
+			  <code class="method-request">POST self/pockets?command=delinkAccounts
+Content-Type: application/json
+Request Body:
+
+{  "pocketAccountMappingIds" :[8,9]
+}
+			</code>
+			<code class="method-response">
+{
+    "resourceId":10
+}
+			</code>
+	    </div>
+	</div>
+
+	 <a id="retrievepocketaccounts" name="retrievepocketaccounts" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve accounts linked to pocket</h2>
+			<p>All linked loan </p>
+			<p>Example Requests:</p>
+	        <div class=apiClick>self/pockets</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://DomainName/api/v1/self/pockets</code>
+			<code class="method-response">
+{
+    "loanAccounts": [
+        {
+            "pocketId": 6,
+            "accountId": 11,
+            "accountType": 2,
+            "accountNumber": "000000011",
+            "id": 10
+        }
+    ],
+    "savingsAccounts": [
+        {
+            "pocketId": 6,
+            "accountId": 2,
+            "accountType": 3,
+            "accountNumber": "000000002",
+            "id": 11
+        }
+    ],
+    "shareAccounts": []
+}
+			</code>
+	    </div>
+	</div>
 			<!-- end of Customer Self Service APIs-->
         </div>
 		<!-- main-content-wrapper -->

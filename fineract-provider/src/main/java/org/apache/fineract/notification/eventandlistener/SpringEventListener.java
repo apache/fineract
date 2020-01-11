@@ -66,7 +66,7 @@ public class SpringEventListener implements ApplicationListener<SpringEvent> {
         if (notificationData.getOfficeId() != null) {
             List<Long> tempUserIds = new ArrayList<>(userIds);
             for (Long userId : tempUserIds) {
-                AppUser appUser = appUserRepository.findOne(userId);
+                AppUser appUser = appUserRepository.findById(userId).get();
                 if (!Objects.equals(appUser.getOffice().getId(), notificationData.getOfficeId())) {
                     userIds.remove(userId);
                 }

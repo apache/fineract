@@ -120,8 +120,8 @@ public class SavingsAccountAssembler {
         final String externalId = this.fromApiJsonHelper.extractStringNamed(externalIdParamName, element);
         final Long productId = this.fromApiJsonHelper.extractLongNamed(productIdParamName, element);
 
-        final SavingsProduct product = this.savingProductRepository.findOne(productId);
-        if (product == null) { throw new SavingsProductNotFoundException(productId); }
+        final SavingsProduct product = this.savingProductRepository.findById(productId)
+                .orElseThrow(() -> new SavingsProductNotFoundException(productId));
 
         Client client = null;
         Group group = null;
@@ -330,7 +330,7 @@ public class SavingsAccountAssembler {
             if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(client.getId(), group.getId()); }
             accountType = AccountType.JLG;
         }
-        final SavingsProduct product = this.savingProductRepository.findOne(productId) ;
+        final SavingsProduct product = this.savingProductRepository.findById(productId).get();
         final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromSavingsProduct(product);
         final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, null, null, null,
                 accountType, appliedonDate, appliedBy, product.nominalAnnualInterestRate(), product.interestCompoundingPeriodType(),

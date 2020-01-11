@@ -46,7 +46,7 @@ public interface LoanReadPlatformService {
     LoanAccountData retrieveOne(Long loanId);
 
     LoanScheduleData retrieveRepaymentSchedule(Long loanId, RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData,
-            Collection<DisbursementData> disbursementData, boolean isInterestRecalculationEnabled, BigDecimal totalPaidFeeCharges);
+                                               Collection<DisbursementData> disbursementData, boolean isInterestRecalculationEnabled, BigDecimal totalPaidFeeCharges);
 
     Collection<LoanTransactionData> retrieveLoanTransactions(Long loanId);
 
@@ -85,7 +85,7 @@ public interface LoanReadPlatformService {
     /*
      * musoni-specific at present - will find overdue scheduled installments
      * that have a special 'overdue charge' associated with the loan product.
-     * 
+     *
      * The 'overdue-charge' is only ever applied once to an installment and as a
      * result overdue installments with this charge already applied are not
      * returned.
@@ -112,6 +112,8 @@ public interface LoanReadPlatformService {
 
     Collection<Long> fetchLoansForInterestRecalculation();
 
+    List<Long> fetchLoansForInterestRecalculation(Integer pageSize, Long maxLoanIdInList, String officeHierarchy);
+
     LoanTransactionData retrieveLoanPrePaymentTemplate(Long loanId, LocalDate onDate);
 
     Collection<LoanTransactionData> retrieveWaiverLoanTransactions(Long loanId);
@@ -125,12 +127,13 @@ public interface LoanReadPlatformService {
     PaidInAdvanceData retrieveTotalPaidInAdvance(Long loanId);
 
     LoanTransactionData retrieveRefundByCashTemplate(Long loanId);
-    
+
     Collection<InterestRatePeriodData> retrieveLoanInterestRatePeriodData(LoanAccountData loan);
 
     Collection<Long> retrieveLoanIdsWithPendingIncomePostingTransactions();
 
     LoanTransactionData retrieveLoanForeclosureTemplate(final Long loanId, final LocalDate transactionDate);
+
 
 	LoanAccountData retrieveLoanByLoanAccount(String loanAccountNumber);
 	
@@ -138,4 +141,10 @@ public interface LoanReadPlatformService {
 
     List<LoanScheduleAccrualData> retrivePeriodicAccrualData(final LocalDate tillDate, int offsetCounter,
                                                              int maxPageSize, long maxLoanIdInList, final String officeHierarchy);
+	
+	String retrieveAccountNumberByAccountId(Long accountId);
+
+    Integer retrieveNumberOfActiveLoans();
+
+
 }

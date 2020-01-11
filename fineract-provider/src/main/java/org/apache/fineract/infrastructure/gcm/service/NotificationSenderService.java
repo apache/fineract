@@ -126,7 +126,7 @@ public class NotificationSenderService {
 			}
 		}
 
-		this.smsMessageRepository.save(smsList);
+		this.smsMessageRepository.saveAll(smsList);
 
 	}
 

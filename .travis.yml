@@ -1,0 +1,66 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements. See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership. The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License. You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+# https://issues.apache.org/jira/browse/FINERACT-763
+dist: trusty
+
+language: java
+
+jdk:
+  - openjdk8
+
+services:
+  - mysql
+  - docker
+
+addons:
+  apt:
+    packages:
+    # https://httpie.org is used by the docker-compose test below
+    - httpie
+
+before_install:
+  - echo "USE mysql;\nUPDATE user SET password=PASSWORD('mysql') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
+  - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `mifosplatform-tenants`;'
+  - mysql -u root -pmysql -e 'CREATE DATABASE IF NOT EXISTS `mifostenant-default`;'
+# Hardcoding the time zone is a temporary fix for https://issues.apache.org/jira/browse/FINERACT-723
+  - export TZ=Asia/Kolkata
+
+# https://docs.travis-ci.com/user/languages/java/#caching
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.m2
+
+# NOTE: We used to run with --info, which is quite a bit more verbose, but is VERY useful to understand failures on Travis,
+# where you do not have access to any files like build/reports/tests/index.html, only the Console.
+# @see http://mrhaki.blogspot.ch/2013/05/gradle-goodness-show-more-information.html
+# @see http://forums.gradle.org/gradle/topics/whats_new_in_gradle_1_1_test_logging for alternative
+# https://jira.apache.org/jira/browse/FINERACT-732 removed that again, because it made Travis CI fail.
+script:
+  - date
+# using "&&" instead of several "-" means that integrationTest does not run if test fails,
+# and Docker test does not run if integration test fails, which makes PR failure easier to understand.
+# @see https://docs.travis-ci.com/user/job-lifecycle/#customizing-the-build-phase
+  - ./gradlew --console=plain licenseMain licenseTest licenseIntegrationTest test  &&  ./gradlew --console=plain integrationTest  &&  sudo service mysql stop  &&  docker-compose build  &&  docker-compose up -d  &&  sleep 30s  &&  http --verify=no --timeout 240 --check-status get https://localhost:8443/fineract-provider/actuator/health || docker logs fineract_fineract-server_1
+# We stop the mysql system service when running the Docker test to avoid port 3306 conflicts (unless we run the mysql in docker-compose on another port; req. FINERACT-773)
+# The || docker logs lets use see the root cause in case of failures

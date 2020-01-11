@@ -27,6 +27,7 @@ import org.apache.fineract.integrationtests.common.Utils;
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class ChargesHelper {
@@ -87,24 +88,20 @@ public class ChargesHelper {
     }
 
     public static String getSavingsActivationFeeJSON() {
-        final HashMap<String, Object> map = populateDefaultsForSavings();
-        map.put("chargeTimeType", CHARGE_SAVINGS_ACTIVATION_FEE);
-        String chargesCreateJson = new Gson().toJson(map);
-        System.out.println(chargesCreateJson);
-        return chargesCreateJson;
+        return getSavingsJSON(amount, currencyCode, ChargeTimeType.SAVINGS_ACTIVATION);
     }
 
     public static String getSavingsNoActivityFeeJSON() {
-        final HashMap<String, Object> map = populateDefaultsForSavings();
-        map.put("chargeTimeType", CHARGE_SAVINGS_NO_ACTIVITY_FEE);
-        String chargesCreateJson = new Gson().toJson(map);
-        System.out.println(chargesCreateJson);
-        return chargesCreateJson;
+        return getSavingsJSON(amount, currencyCode, ChargeTimeType.SAVINGS_NOACTIVITY_FEE);
     }
 
     public static String getSavingsWithdrawalFeeJSON() {
-        final HashMap<String, Object> map = populateDefaultsForSavings();
-        map.put("chargeTimeType", CHARGE_WITHDRAWAL_FEE);
+        return getSavingsJSON(amount, currencyCode, ChargeTimeType.WITHDRAWAL_FEE);
+    }
+
+    public static String getSavingsJSON(String amount, String currencyCode, ChargeTimeType timeType) {
+        final HashMap<String, Object> map = populateDefaultsForSavings(amount.toString(), currencyCode);
+        map.put("chargeTimeType", timeType.getValue());
         String chargesCreateJson = new Gson().toJson(map);
         System.out.println(chargesCreateJson);
         return chargesCreateJson;
@@ -147,12 +144,16 @@ public class ChargesHelper {
     }
 
     public static HashMap<String, Object> populateDefaultsForSavings() {
+        return populateDefaultsForSavings(amount, currencyCode);
+    }
+
+    public static HashMap<String, Object> populateDefaultsForSavings(String amount, String currencyCode) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("active", ChargesHelper.active);
-        map.put("amount", ChargesHelper.amount);
+        map.put("amount", amount);
         map.put("chargeAppliesTo", ChargesHelper.CHARGE_APPLIES_TO_SAVINGS);
         map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT);
-        map.put("currencyCode", ChargesHelper.currencyCode);
+        map.put("currencyCode", currencyCode);
         map.put("locale", CommonConstants.locale);
         map.put("monthDayFormat", ChargesHelper.monthDayFormat);
         map.put("name", Utils.randomNameGenerator("Charge_Savings_", 6));
@@ -274,10 +275,10 @@ public class ChargesHelper {
         return chargesCreateJson;
     }
     
-    public static String getLoanOverdueFeeJSONWithCalculattionTypePercentage() {
+    public static String getLoanOverdueFeeJSONWithCalculattionTypePercentage(String penaltyPercentageAmount) {
         final HashMap<String, Object> map = populateDefaultsForLoan();
         map.put("penalty", ChargesHelper.penalty);
-        map.put("amount", "10");
+        map.put("amount", penaltyPercentageAmount);
         map.put("chargePaymentMode", ChargesHelper.CHARGE_PAYMENT_MODE_REGULAR);
         map.put("chargeTimeType", CHARGE_OVERDUE_INSTALLMENT_FEE);
         map.put("chargeCalculationType", ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST);

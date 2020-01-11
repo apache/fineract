@@ -46,9 +46,7 @@ public class CodeValueRepositoryWrapper {
     }
 
     public CodeValue findOneWithNotFoundDetection(final Long id) {
-        final CodeValue codeValue = this.repository.findOne(id);
-        if (codeValue == null) { throw new CodeValueNotFoundException(id); }
-        return codeValue;
+        return this.repository.findById(id).orElseThrow(() -> new CodeValueNotFoundException(id));
     }
 
     public CodeValue findOneByCodeNameAndIdWithNotFoundDetection(final String codeName, final Long id) {

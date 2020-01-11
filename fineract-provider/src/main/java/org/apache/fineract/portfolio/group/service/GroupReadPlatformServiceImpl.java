@@ -221,8 +221,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             String sqlSearch = searchCriteria.getSqlSearch();
             if (sqlSearch != null) {
                 SQLInjectionValidator.validateSQLInput(sqlSearch);
-                sqlSearch = sqlSearch.replaceAll(" display_name ", " g.display_name ");
-                sqlSearch = sqlSearch.replaceAll("display_name ", "g.display_name ");
+                sqlSearch = sqlSearch.replace(" display_name ", " g.display_name ");
+                sqlSearch = sqlSearch.replace("display_name ", "g.display_name ");
                 extraCriteria.append(" and ( ").append(sqlSearch).append(") ");
                 this.columnValidator.validateSqlInjection(schemaSql, sqlSearch);
             }

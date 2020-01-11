@@ -63,7 +63,6 @@ public class BatchApiServiceImpl implements BatchApiService {
     private final CommandStrategyProvider strategyProvider;
     private final ResolutionHelper resolutionHelper;
     private final TransactionTemplate transactionTemplate;
-    private List<BatchResponse> checkList = new ArrayList<>();
 
     /**
      * Constructs a 'BatchApiServiceImpl' with an argument of
@@ -95,7 +94,6 @@ public class BatchApiServiceImpl implements BatchApiService {
         final List<BatchResponse> responseList = new ArrayList<>(requestList.size());
 
         final List<BatchRequestNode> batchRequestNodes = this.resolutionHelper.getDependingRequests(requestList);
-        checkList.clear();
         if(batchRequestNodes.isEmpty()) {
         	 final BatchResponse response = new BatchResponse();
         	 ErrorInfo ex = ErrorHandler.handler(new ClientDetailsNotFoundException());
@@ -122,7 +120,6 @@ public class BatchApiServiceImpl implements BatchApiService {
             }
         });
 
-        checkList = responseList;
         return responseList;
 
     }
@@ -183,14 +180,15 @@ public class BatchApiServiceImpl implements BatchApiService {
 
     @Override
     public List<BatchResponse> handleBatchRequestsWithEnclosingTransaction(final List<BatchRequest> requestList, final UriInfo uriInfo) {
-
+        List<BatchResponse> responseList = new ArrayList<>();
         try {
             return this.transactionTemplate.execute(new TransactionCallback<List<BatchResponse>>() {
 
                 @Override
                 public List<BatchResponse> doInTransaction(TransactionStatus status) {
                     try {
-                        return handleBatchRequests(requestList, uriInfo);
+                        responseList.addAll(handleBatchRequests(requestList, uriInfo));
+                        return responseList;
                     } catch (RuntimeException ex) {
 
                         ErrorInfo e = ErrorHandler.handler(ex);
@@ -212,14 +210,13 @@ public class BatchApiServiceImpl implements BatchApiService {
             BatchResponse errResponse = new BatchResponse();
             errResponse.setStatusCode(e.getStatusCode());
 
-            for (BatchResponse res : checkList) {
+            for (BatchResponse res : responseList) {
                 if (!res.getStatusCode().equals(200)) {
                     errResponse.setBody("Transaction is being rolled back. First erroneous request: \n" + new Gson().toJson(res));
                     break;
                 }
             }
 
-            checkList.clear();
             List<BatchResponse> errResponseList = new ArrayList<>();
             errResponseList.add(errResponse);
 
@@ -229,13 +226,12 @@ public class BatchApiServiceImpl implements BatchApiService {
              BatchResponse errResponse = new BatchResponse();
              errResponse.setStatusCode(e.getStatusCode());
 
-             for (BatchResponse res : checkList) {
+             for (BatchResponse res : responseList) {
                  if (!res.getStatusCode().equals(200)) {
                      errResponse.setBody("Transaction is being rolled back. First erroneous request: \n" + new Gson().toJson(res));
                      break;
                  }
              }
-             checkList.clear();
              List<BatchResponse> errResponseList = new ArrayList<>();
              errResponseList.add(errResponse);
 

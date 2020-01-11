@@ -46,9 +46,8 @@ public class InterestRateChartSlabRepositoryWrapper {
     }
 
     public InterestRateChartSlab findOneWithNotFoundDetection(final Long chartSlabId) {
-        final InterestRateChartSlab chartSlab = this.repository.findOne(chartSlabId);
-        if (chartSlab == null) { throw new InterestRateChartSlabNotFoundException(chartSlabId); }
-        return chartSlab;
+        return this.repository.findById(chartSlabId)
+                .orElseThrow(() -> new InterestRateChartSlabNotFoundException(chartSlabId));
     }
 
     public void save(final InterestRateChartSlab chartSlab) {

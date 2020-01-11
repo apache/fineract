@@ -2,5 +2,15 @@
 *.jar
 *.war
 *.ear
+.classpath
+.project
+.settings
 .gradle
 build
+*.iml
+*.ipr
+*.iws
+*.DS_Store
+.idea
+gradle
+catalina.base_IS_UNDEFINED/

@@ -74,8 +74,8 @@ public class SmsMessageAssembler {
         boolean isNotification = false;
         if (this.fromApiJsonHelper.parameterExists(SmsApiConstants.campaignIdParamName, element)) {
             final Long campaignId = this.fromApiJsonHelper.extractLongNamed(SmsApiConstants.campaignIdParamName, element);
-            smsCampaign = this.smsCampaignRepository.findOne(campaignId);
-            if (smsCampaign == null) { throw new SmsCampaignNotFound(campaignId); }
+            smsCampaign = this.smsCampaignRepository.findById(campaignId)
+                    .orElseThrow(() -> new SmsCampaignNotFound(campaignId));
             isNotification = smsCampaign.isNotification();
         }
 
@@ -99,8 +99,7 @@ public class SmsMessageAssembler {
     }
 
     public SmsMessage assembleFromResourceId(final Long resourceId) {
-        final SmsMessage sms = this.smsMessageRepository.findOne(resourceId);
-        if (sms == null) { throw new SmsNotFoundException(resourceId); }
-        return sms;
+        return this.smsMessageRepository.findById(resourceId)
+                .orElseThrow(() -> new SmsNotFoundException(resourceId));
     }
 }

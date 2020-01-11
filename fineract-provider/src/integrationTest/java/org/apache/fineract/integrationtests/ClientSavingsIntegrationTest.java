@@ -44,6 +44,7 @@ import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
+import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -1634,9 +1635,10 @@ public class ClientSavingsIntegrationTest {
         final String INTEREST_POSTING_DATE = dateFormat.format(interestPostingDate.getTime());
         final String TODYS_POSTING_DATE = dateFormat.format(todysDate.getTime());
         String withdrawBalance = "true";
+        
 
         if (TODYS_POSTING_DATE.equalsIgnoreCase(INTEREST_POSTING_DATE)) {
-            final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
+            final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, responseSpec);
             validationErrorHelper.closeSavingsAccountPostInterestAndGetBackRequiredField(savingsId, withdrawBalance,
                     CommonConstants.RESPONSE_ERROR, CLOSEDON_DATE);
         } else {
@@ -2230,6 +2232,76 @@ public class ClientSavingsIntegrationTest {
         withdrawTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, withdrawTransactionId);
         balance -= new Float("300");
         assertEquals("Verifying Withdrawal Amount", new Float("300"), withdrawTransaction.get("amount"));
+
+    }
+
+    /**
+     * incorrect savings account balance when charge transaction is
+     * reversed during an overdraft recalculate Daily Balances
+     */
+
+    @Test
+    public void testAccountBalanceAfterTransactionReversal() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        SavingsAccountHelper savingsAccountHelperValidationError = new SavingsAccountHelper(this.requestSpec,
+                new ResponseSpecBuilder().build());
+
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        Assert.assertNotNull(clientID);
+        final String minBalanceForInterestCalculation = null;
+        final String minRequiredBalance = "500";
+        final String enforceMinRequiredBalance = "false";
+        final boolean allowOverdraft = true;
+        final String MINIMUM_OPENING_BALANCE = "0";
+
+        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+                minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
+        Assert.assertNotNull(savingsProductID);
+
+
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL);
+        Assert.assertNotNull(savingsId);
+
+
+        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+
+        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
+        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+
+
+        Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "500",
+                SavingsAccountHelper.TRANSACTION_DATE, CommonConstants.RESPONSE_RESOURCE_ID);
+
+
+        String chargeAmount = "300";
+        String chargeCurrency = "USD";
+
+        final Integer savingsChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+                ChargesHelper.getSavingsJSON(chargeAmount, chargeCurrency, ChargeTimeType.SPECIFIED_DUE_DATE));
+
+        Assert.assertNotNull(savingsChargeId);
+
+        Integer amount = 300;
+
+
+        final Integer chargeId = this.savingsAccountHelper.addChargesForSavingsWithDueDate(savingsId, savingsChargeId, SavingsAccountHelper.TRANSACTION_DATE,
+                amount);
+
+        Assert.assertNotNull(chargeId);
+
+        final Integer payChargeId = this.savingsAccountHelper.payCharge(chargeId, savingsId, chargeAmount, SavingsAccountHelper.TRANSACTION_DATE);
+
+
+        final Integer undoSavingsTransaction = this.savingsAccountHelper.undoSavingsAccountTransaction(savingsId, depositTransactionId);
+        HashMap reversedDepositTransaction = this.savingsAccountHelper.getSavingsTransaction(savingsId, depositTransactionId);
+        Assert.assertTrue((Boolean) reversedDepositTransaction.get("reversed"));
+
+        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
+
+        Float balance = new Float("-300");
+
+        assertEquals("Verifying opening Balance is -300", balance, summary.get("accountBalance"));
 
     }
 }

@@ -1248,4 +1248,14 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
      * return SavingsAccountAnnualFeeData.instance(id, accountNo,
      * annualFeeNextDueDate); } }
      */
+
+	@Override
+	public String retrieveAccountNumberByAccountId(Long accountId) {
+		try {
+			final String sql = "select s.account_no from m_savings_account s where s.id = ?";
+			return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
+		} catch (final EmptyResultDataAccessException e) {
+			throw new SavingsAccountNotFoundException(accountId);
+		}
+	}
 }

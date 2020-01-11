@@ -32,6 +32,7 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -59,6 +60,12 @@ public class SkipRepaymentOnMonthFirstTest {
 		this.requestSpec.header("Authorization",
 				"Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
 		this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+	}
+
+	@After
+	public void tearDown() {
+		GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+		GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
 	}
 
 	@Test

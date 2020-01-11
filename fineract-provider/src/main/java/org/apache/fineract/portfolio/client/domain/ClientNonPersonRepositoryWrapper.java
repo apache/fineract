@@ -44,9 +44,8 @@ public class ClientNonPersonRepositoryWrapper {
     }
 
     public ClientNonPerson findOneWithNotFoundDetection(final Long id) {
-        final ClientNonPerson clientNonPerson = this.repository.findOne(id);
-        if (clientNonPerson == null) { throw new ClientNonPersonNotFoundException(id); }
-        return clientNonPerson;
+        return this.repository.findById(id)
+                .orElseThrow(() -> new ClientNonPersonNotFoundException(id));
     }
     
     public ClientNonPerson findOneByClientId(final Long clientId) {

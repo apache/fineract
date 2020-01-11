@@ -56,11 +56,8 @@ public class JpaTemplateDomainService implements TemplateDomainService {
 
     @Override
     public Template findOneById(final Long id) {
-        final Template template = this.templateRepository.findOne(id);
-        if (template == null) {
-            throw new TemplateNotFoundException(id);
-        }
-        return template;
+        return this.templateRepository.findById(id)
+                .orElseThrow(() -> new TemplateNotFoundException(id));
     }
 
     @Transactional

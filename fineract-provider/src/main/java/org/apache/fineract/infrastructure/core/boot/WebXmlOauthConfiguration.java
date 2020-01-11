@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.core.boot;
 import javax.servlet.Filter;
 import javax.servlet.Servlet;
 
-import org.springframework.boot.context.embedded.ServletRegistrationBean;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -39,12 +39,6 @@ import com.sun.jersey.spi.spring.container.servlet.SpringServlet;
 @Configuration
 @Profile("oauth")
 public class WebXmlOauthConfiguration {
-
-
-    @Bean
-    public Filter springSecurityFilterChain() {
-        return new DelegatingFilterProxy();
-    }
 
     @Bean
     public ServletRegistrationBean jersey() {

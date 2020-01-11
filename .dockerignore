@@ -1,5 +1,3 @@
-#!/bin/bash
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements. See the NOTICE file
 # distributed with this work for additional information
@@ -17,11 +15,15 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+build/*
+.gradle/*
 
-set -e
+# Incremental "docker build" is faster if we can modify the Dockerfile
+# without "COPY ." re-transferring everything into the builder container.
+Dockerfile
 
-# https://developer.cloudbees.com/bin/view/DEV/Node+Builds
-curl -s -o use-node https://repository-cloudbees.forge.cloudbees.com/distributions/ci-addons/node/use-node
-NODE_VERSION=0.11.12 . ./use-node
-
-./build.sh
+# https://github.com/containers/buildah/issues/1582
+.git/*
+.git/*/*
+.git/*/*/*
+.git/*/*/*/*

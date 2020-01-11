@@ -92,8 +92,8 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
-            final Fund fund = this.fundRepository.findOne(fundId);
-            if (fund == null) { throw new FundNotFoundException(fundId); }
+            final Fund fund = this.fundRepository.findById(fundId)
+                    .orElseThrow(() -> new FundNotFoundException(fundId));
 
             final Map<String, Object> changes = fund.update(command);
             if (!changes.isEmpty()) {

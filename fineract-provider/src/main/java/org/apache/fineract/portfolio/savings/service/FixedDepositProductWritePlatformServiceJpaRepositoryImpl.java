@@ -118,8 +118,8 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
             this.context.authenticatedUser();
             this.fromApiJsonDataValidator.validateForFixedDepositUpdate(command.json());
 
-            final FixedDepositProduct product = this.fixedDepositProductRepository.findOne(productId);
-            if (product == null) { throw new FixedDepositProductNotFoundException(productId); }
+            final FixedDepositProduct product = this.fixedDepositProductRepository.findById(productId)
+                    .orElseThrow(() -> new FixedDepositProductNotFoundException(productId));
             product.setHelpers(this.chartAssembler);
 
             final Map<String, Object> changes = product.update(command);
@@ -175,8 +175,8 @@ public class FixedDepositProductWritePlatformServiceJpaRepositoryImpl implements
     public CommandProcessingResult delete(final Long productId) {
 
         this.context.authenticatedUser();
-        final FixedDepositProduct product = this.fixedDepositProductRepository.findOne(productId);
-        if (product == null) { throw new FixedDepositProductNotFoundException(productId); }
+        final FixedDepositProduct product = this.fixedDepositProductRepository.findById(productId)
+                .orElseThrow(() -> new FixedDepositProductNotFoundException(productId));
 
         this.fixedDepositProductRepository.delete(product);
 

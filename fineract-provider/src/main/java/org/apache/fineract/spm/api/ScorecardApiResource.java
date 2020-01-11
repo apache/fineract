@@ -86,7 +86,7 @@ public class ScorecardApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Transactional
-    @ApiOperation(value = "Create a Scorecard entry", notes = "Add a new netry to a survey.\n" + "\n" + "Mandatory Fields\n" + "clientId, createdOn, questionId, responseId, staffId")
+    @ApiOperation(value = "Create a Scorecard entry", notes = "Add a new entry to a survey.\n" + "\n" + "Mandatory Fields\n" + "clientId, createdOn, questionId, responseId, staffId")
     @ApiResponses({@ApiResponse(code = 200, message = "OK")})
     public void createScorecard(@PathParam("surveyId") @ApiParam(value = "Enter surveyId") final Long surveyId, @ApiParam(format = "body", type = "body") final ScorecardData scorecardData) {
         final AppUser appUser = this.securityContext.authenticatedUser();
