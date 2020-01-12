@@ -117,8 +117,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
     /**
      * LoanRescheduleRequestWritePlatformServiceImpl constructor
-     * 
-     * 
+     *
+     *
      **/
     @Autowired
     public LoanRescheduleRequestWritePlatformServiceImpl(final CodeValueRepositoryWrapper codeValueRepositoryWrapper,
@@ -159,7 +159,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
     /**
      * create a new instance of the LoanRescheduleRequest object from the
      * JsonCommand object and persist
-     * 
+     *
      * @return CommandProcessingResult object
      **/
     @Override
@@ -321,7 +321,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             LoanTermVariations parent = null;
             parent = createLoanTermVariations(termType, loan, rescheduleFromDate, dueDate, loanRescheduleRequestToTermVariationMappings,
                     isActive, isSpecificToInstallment, BigDecimal.valueOf(graceOnPrincipal), parent);
-            
+
             BigDecimal extraTermsBasedOnGracePeriods = BigDecimal.valueOf(graceOnPrincipal);
             createLoanTermVariations(LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getValue(), loan, rescheduleFromDate, dueDate,
                     loanRescheduleRequestToTermVariationMappings, isActive, isSpecificToInstallment, extraTermsBasedOnGracePeriods, parent);
@@ -472,7 +472,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
             // update the loan object
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
-            
+
             if (changedTransactionDetail != null) {
                 for (final Map.Entry<Long, LoanTransaction> mapEntry : changedTransactionDetail.getNewTransactionMappings().entrySet()) {
                     this.loanTransactionRepository.save(mapEntry.getValue());
@@ -483,7 +483,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
                 }
             }
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
-            
+
             this.loanAccountDomainService.recalculateAccruals(loan, true);
 
             return new CommandProcessingResultBuilder().withCommandId(jsonCommand.commandId()).withEntityId(loanRescheduleRequestId)
@@ -583,7 +583,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
      *
      * @param dve
      *            data integrity violation exception
-     * 
+     *
      **/
     private void handleDataIntegrityViolation(final DataIntegrityViolationException dve) {
 

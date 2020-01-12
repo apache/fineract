@@ -35,9 +35,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DataSourceConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(DataSourceConfiguration.class);
-    
+
     @Autowired JDBCDriverConfig config ;
-    
+
     @Bean
     public DataSourceProperties dataSourceProperties() {
     return new DataSourceProperties(config.getDriverClassName(), config.getProtocol(), config.getSubProtocol(), config.getPort());

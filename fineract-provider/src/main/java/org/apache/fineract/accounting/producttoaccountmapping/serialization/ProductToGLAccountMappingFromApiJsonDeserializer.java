@@ -48,27 +48,27 @@ import com.google.gson.JsonElement;
 
 /**
  * TODO Vishwas find a better approach for validation
- * 
+ *
  * Currently, validation of the passed in JSON is done before calling save or
  * update method on the target resource (in our case the loan Product)
- * 
+ *
  * However, in the case of a loan product it would be difficult to validate the
  * passed in JSON for valid {@link LoanProduct} to {@link GLAccount} mappings
  * during update because of the following scenario
- * 
+ *
  * The accounting rule type may be changed in the update command, so we would
  * have to validate if all required account heads for a particular account type
  * have been passed in (would be different for CASH and Accrual based). However,
  * till we have access to the domain object it would not be possible to detect
  * if an accounting rule has actually been changed
- * 
+ *
  * Hence, method {@link #validateForLoanProductCreate(String)} from this class
  * is called separately for validation only if an accounting rule change is
  * detected by {@link ProductToGLAccountMappingWritePlatformService}
- * 
+ *
  * Also, the class is probably named wrong (*FromApiJsonDeserializer) should
  * probably be named as (*Validator) instead
- * 
+ *
  */
 @Component
 public final class ProductToGLAccountMappingFromApiJsonDeserializer {
@@ -207,7 +207,7 @@ public final class ProductToGLAccountMappingFromApiJsonDeserializer {
                     SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), element);
             baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue())
                     .value(incomeFromPenaltyId).notNull().integerGreaterThanZero();
-            
+
             final Boolean isDormancyTrackingActive = this.fromApiJsonHelper.extractBooleanNamed(isDormancyTrackingActiveParamName, element);
             if(null != isDormancyTrackingActive && isDormancyTrackingActive){
                 final Long escheatLiabilityId = this.fromApiJsonHelper.extractLongNamed(
@@ -258,17 +258,17 @@ public final class ProductToGLAccountMappingFromApiJsonDeserializer {
                     SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_REFERENCE.getValue(), element);
             baseDataValidator.reset().parameter(SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_REFERENCE.getValue())
                     .value(shareReferenceId).notNull().integerGreaterThanZero();
-            
+
             final Long shareSuspenseId = this.fromApiJsonHelper.extractLongNamed(
                     SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_SUSPENSE.getValue(), element);
             baseDataValidator.reset().parameter(SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_SUSPENSE.getValue())
                     .value(shareSuspenseId).notNull().integerGreaterThanZero();
-            
+
             final Long incomeFromFeeAccountId = this.fromApiJsonHelper.extractLongNamed(
                     SHARES_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), element);
             baseDataValidator.reset().parameter(SHARES_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue())
                     .value(incomeFromFeeAccountId).notNull().integerGreaterThanZero();
-            
+
             final Long shareEquityId = this.fromApiJsonHelper.extractLongNamed(
                     SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_EQUITY.getValue(), element);
             baseDataValidator.reset().parameter(SHARES_PRODUCT_ACCOUNTING_PARAMS.SHARES_EQUITY.getValue())

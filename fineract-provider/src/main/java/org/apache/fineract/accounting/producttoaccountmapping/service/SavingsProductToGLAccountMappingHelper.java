@@ -103,7 +103,7 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
         createOrmergeProductToAccountMappingChanges(element, paramName, productId, accountTypeId, changes,
                 GLAccountType.LIABILITY, PortfolioProductType.SAVING);
     }
-    
+
     /*** Abstractions for payments channel related to savings products ***/
 
     public void savePaymentChannelToFundSourceMappings(final JsonCommand command, final JsonElement element, final Long productId,
@@ -179,7 +179,7 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
     /**
      * Examines and updates each account mapping for given loan product with
      * changes passed in from the Json element
-     * 
+     *
      * @param savingsProductId
      * @param changes
      * @param element

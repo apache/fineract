@@ -63,10 +63,10 @@ public class SmsCampaign extends AbstractPersistableCustom<Long> {
 
     @Column(name = "campaign_type", nullable = false)
     private Integer campaignType ; //defines email or sms, etc..
-    
+
     @Column(name = "campaign_trigger_type", nullable = false)
     private Integer triggerType; //defines direct, scheduled, transaction
-    
+
     @Column(name = "provider_id", nullable = true)//null for notifications
     private Long providerId; // defined provider details
 
@@ -124,13 +124,13 @@ public class SmsCampaign extends AbstractPersistableCustom<Long> {
 
     @Column(name = "is_visible", nullable = true)
     private boolean isVisible;
-    
+
     @Column(name = "is_notification", nullable = true)
     private boolean isNotification;
 
     public SmsCampaign() {}
 
-    private SmsCampaign(final String campaignName, final Integer campaignType, 
+    private SmsCampaign(final String campaignName, final Integer campaignType,
             final Integer triggerType, final Report businessRuleId, final Long providerId, final String paramValue,
             final String message, final LocalDate submittedOnDate, final AppUser submittedBy, final String recurrence,
             final LocalDateTime localDateTime, final boolean isNotification) {
@@ -168,7 +168,7 @@ public class SmsCampaign extends AbstractPersistableCustom<Long> {
         if(!isNotification){
             providerId = command.longValueOfParameterNamed(SmsCampaignValidator.providerId);
         }
-        
+
         final String paramValue = command.jsonFragment(SmsCampaignValidator.paramValue);
 
         final String message = command.stringValueOfParameterNamed(SmsCampaignValidator.message);
@@ -177,7 +177,7 @@ public class SmsCampaign extends AbstractPersistableCustom<Long> {
             submittedOnDate = command.localDateValueOfParameterNamed(SmsCampaignValidator.submittedOnDateParamName);
         }
         String recurrence = null;
-        
+
 
         LocalDateTime recurrenceStartDate = new LocalDateTime();
         if (SmsCampaignTriggerType.fromInt(triggerType.intValue()).isSchedule()) {
@@ -584,6 +584,6 @@ public class SmsCampaign extends AbstractPersistableCustom<Long> {
     public void setNotification(boolean isNotification) {
         this.isNotification = isNotification;
     }
-    
-    
+
+
 }

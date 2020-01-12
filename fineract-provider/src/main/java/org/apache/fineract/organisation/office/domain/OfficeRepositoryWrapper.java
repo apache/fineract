@@ -50,7 +50,7 @@ public class OfficeRepositoryWrapper {
                 .orElseThrow(() -> new OfficeNotFoundException(id));
         office.loadLazyCollections();
         return office ;
-        
+
     }
     public Office save(final Office entity) {
         return this.repository.save(entity);

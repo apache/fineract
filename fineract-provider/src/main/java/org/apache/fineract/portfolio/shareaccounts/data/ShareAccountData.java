@@ -48,7 +48,7 @@ public class ShareAccountData implements Serializable, AccountData {
     private String clientName;
 
     private Long defaultShares ;
-    
+
     private Long productId;
 
     private String productName;
@@ -149,7 +149,7 @@ public class ShareAccountData implements Serializable, AccountData {
     public Integer getRowIndex() {
         return rowIndex;
     }
-    
+
     // Data for template
     private Collection<ProductData> productOptions;
     private Collection<ChargeData> chargeOptions;
@@ -309,7 +309,7 @@ public class ShareAccountData implements Serializable, AccountData {
     public void setCurrentMarketPrice(final BigDecimal currentMarketPrice) {
         this.currentMarketPrice = currentMarketPrice;
     }
-    
+
     public void setDividends(Collection<ShareAccountDividendData> dividends) {
         this.dividends = dividends ;
     }

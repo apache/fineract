@@ -32,7 +32,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 /**
  * Entity for capturing interest recalculation settings
- * 
+ *
  * @author conflux
  */
 
@@ -345,7 +345,7 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
                     this.compoundingFrequencyNthDay = null;
                     this.compoundingFrequencyWeekday = null;
                 }
-                
+
                 if (compoundingfrequencyType.isWeekly()) {
                     this.compoundingFrequencyNthDay = null;
                     this.compoundingFrequencyOnDay = null;
@@ -396,7 +396,7 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
             actualChanges.put(LoanProductConstants.preClosureInterestCalculationStrategyParamName, newValue);
             this.preClosureInterestCalculationStrategy = newValue;
         }
-        
+
         if (command.isChangeInBooleanParameterNamed(LoanProductConstants.isCompoundingToBePostedAsTransactionParamName,
                 this.isCompoundingToBePostedAsTransaction)) {
             final boolean newValue = command

@@ -45,9 +45,9 @@ public class AbandonedConnectionCleanupShutdownListener implements ApplicationLi
 
     private void shutDowncleanUpThreadAndDeregisterJDBCDriver() {
         /*try {
-            
+
             AbandonedConnectionCleanupThread.shutdown(); tomcat memoroy leak with mysql connector. With Drizzle not required
-            logger.info("Shut-down of AbandonedConnectionCleanupThread successful"); 
+            logger.info("Shut-down of AbandonedConnectionCleanupThread successful");
         } catch (Throwable t) {
             logger.error("Exception occurred while shut-down of AbandonedConnectionCleanupThread", t);
         }*/

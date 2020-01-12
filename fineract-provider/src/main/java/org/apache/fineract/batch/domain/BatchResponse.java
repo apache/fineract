@@ -25,9 +25,9 @@ import java.util.Set;
  * Batch API. It contains all the information about a particular HTTP response
  * in the Batch Response. Getter and Setter functions are also included to
  * access response data fields.
- * 
+ *
  * @author Rishabh Shukla
- * 
+ *
  * @see org.apache.fineract.batch.api.BatchApiResource
  * @see org.apache.fineract.batch.service.BatchApiService
  * @see Header
@@ -42,7 +42,7 @@ public class BatchResponse {
     /**
      * Constructs a 'BatchResponse' with requestId, statusCode, headers and body
      * of the HTTP requests.
-     * 
+     *
      * @param requestId
      * @param statusCode
      * @param headers
@@ -65,7 +65,7 @@ public class BatchResponse {
 
     /**
      * Returns the 'requestId' of an object of this class.
-     * 
+     *
      * @return requestId of the HTTP request.
      */
     public Long getRequestId() {
@@ -74,7 +74,7 @@ public class BatchResponse {
 
     /**
      * Sets the value of 'requestId' of an object of this class.
-     * 
+     *
      * @param requestId
      */
     public void setRequestId(Long requestId) {
@@ -83,7 +83,7 @@ public class BatchResponse {
 
     /**
      * Returns the 'statusCode' of an object of this class.
-     * 
+     *
      * @return statusCode of the HTTP request.
      */
     public Integer getStatusCode() {
@@ -92,7 +92,7 @@ public class BatchResponse {
 
     /**
      * Sets the value of 'statusCode' of an object of this class.
-     * 
+     *
      * @param statusCode
      */
     public void setStatusCode(Integer statusCode) {
@@ -101,7 +101,7 @@ public class BatchResponse {
 
     /**
      * Returns the 'headers' of {@link Header} type of an object of this class.
-     * 
+     *
      * @return headers of the HTTP request.
      * @see Header
      */
@@ -112,7 +112,7 @@ public class BatchResponse {
     /**
      * Sets the value of 'headers' of {@link Header} type of an object of this
      * class.
-     * 
+     *
      * @param headers
      *            of {@link Header} Type
      * @see Header
@@ -123,7 +123,7 @@ public class BatchResponse {
 
     /**
      * Returns the 'body' of an object of this class.
-     * 
+     *
      * @return body of the HTTP request.
      */
     public String getBody() {
@@ -132,7 +132,7 @@ public class BatchResponse {
 
     /**
      * Sets the value of 'body' of an object of this class.
-     * 
+     *
      * @param body
      */
     public void setBody(String body) {

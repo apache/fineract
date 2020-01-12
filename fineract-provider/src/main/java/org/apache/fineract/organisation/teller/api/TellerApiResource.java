@@ -316,7 +316,7 @@ public class TellerApiResource {
 
         final Date fromDate = null;
         final Date toDate = null;
-        
+
         final SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
 
         final CashierTransactionsWithSummaryData cashierTxnWithSummary = this.readPlatformService.retrieveCashierTransactionsWithSummary(

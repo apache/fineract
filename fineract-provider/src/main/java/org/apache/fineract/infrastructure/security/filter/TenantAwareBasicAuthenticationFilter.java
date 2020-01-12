@@ -54,16 +54,16 @@ import org.springframework.stereotype.Service;
 
 /**
  * A customised version of spring security's {@link BasicAuthenticationFilter}.
- * 
+ *
  * This filter is responsible for extracting multi-tenant and basic auth
  * credentials from the request and checking that the details provided are
  * valid.
- * 
+ *
  * If multi-tenant and basic auth credentials are valid, the details of the
  * tenant are stored in {@link FineractPlatformTenant} and stored in a
  * {@link ThreadLocal} variable for this request using
  * {@link ThreadLocalContextUtil}.
- * 
+ *
  * If multi-tenant and basic auth credentials are invalid, a http error response
  * is returned.
  */
@@ -160,7 +160,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
             logger.debug(this.toApiJsonSerializer.serialize(log));
         }
     }
-    
+
     @Override
     protected void onSuccessfulAuthentication(HttpServletRequest request,
             HttpServletResponse response, Authentication authResult)
@@ -173,13 +173,13 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
         } else {
             response.addHeader("X-Notification-Refresh", "false");
         }
-        
+
         String pathURL = request.getRequestURI();
         boolean isSelfServiceRequest = (pathURL != null && pathURL.contains("/self/"));
 
         boolean notAllowed = ((isSelfServiceRequest && !user.isSelfServiceUser())
                 ||(!isSelfServiceRequest && user.isSelfServiceUser()));
-        
+
         if(notAllowed){
             throw new BadCredentialsException("User not authorised to use the requested resource.");
         }

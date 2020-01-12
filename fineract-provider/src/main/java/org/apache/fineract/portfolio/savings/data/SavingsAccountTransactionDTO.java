@@ -51,7 +51,7 @@ public class SavingsAccountTransactionDTO {
 
     /**
      * This constructor is used for bulk deposit transactions
-     * 
+     *
      * @param formatter
      * @param transactionDate
      * @param transactionAmount
@@ -102,6 +102,6 @@ public class SavingsAccountTransactionDTO {
     public Integer getAccountType() {
         return this.depositAccountType;
     }
-    
-    
+
+
 }

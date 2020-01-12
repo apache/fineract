@@ -47,7 +47,7 @@ public interface ReadReportingService {
     ReportData retrieveReport(final Long id);
 
     Collection<String> getAllowedReportTypes();
-    
+
   //needed for smsCampaign and emailCampaign jobs where securityContext is null
     GenericResultsetData retrieveGenericResultSetForSmsEmailCampaign(String name, String type, Map<String, String> extractedQueryParams);
 

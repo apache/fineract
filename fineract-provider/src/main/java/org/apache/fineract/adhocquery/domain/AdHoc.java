@@ -40,17 +40,17 @@ public class AdHoc extends AbstractAuditableCustom<AppUser, Long> {
 
       @Column(name = "name", length = 100)
     private  String name;
-    
+
     @Column(name = "query", length = 2000)
     private  String query;
-       
+
     @Column(name = "table_name", length = 100)
     private  String tableName;
-    
-    
+
+
     @Column(name = "table_fields", length = 2000)
     private  String tableFields;
-       
+
     @Column(name = "email", length = 500)
     private  String email;
 
@@ -62,7 +62,7 @@ public class AdHoc extends AbstractAuditableCustom<AppUser, Long> {
 
     @Column(name = "IsActive", nullable = false)
     private boolean isActive = false;
-       
+
     private AdHoc(final String name, final String query,final String tableName,final String tableFields ,final String email, final Long reportRunFrequency, final Long reportRunEvery, final boolean isActive) {
         this.name = StringUtils.defaultIfEmpty(name, null);
         this.query=StringUtils.defaultIfEmpty(query,null);
@@ -72,13 +72,13 @@ public class AdHoc extends AbstractAuditableCustom<AppUser, Long> {
         this.reportRunFrequency = reportRunFrequency;
         this.reportRunEvery = reportRunEvery;
         this.isActive = BooleanUtils.toBooleanDefaultIfNull(isActive, false);
-       
+
     }
     public static AdHoc fromJson(final JsonCommand command) {
         final String name = command.stringValueOfParameterNamed(AdHocJsonInputParams.NAME.getValue());
-        
+
         String commandQuery=command.stringValueOfParameterNamed(AdHocJsonInputParams.QUERY.getValue());
-        
+
         SQLInjectionValidator.validateAdhocQuery(commandQuery);
         final String query = commandQuery;
         final String tableName = command.stringValueOfParameterNamed(AdHocJsonInputParams.TABLENAME.getValue());
@@ -89,7 +89,7 @@ public class AdHoc extends AbstractAuditableCustom<AppUser, Long> {
         final boolean isActive = command.booleanPrimitiveValueOfParameterNamed(AdHocJsonInputParams.ISACTIVE.getValue());
         return new AdHoc(name,query,tableName,tableFields, email, reportRunFrequency, reportRunEvery, isActive);
     }
-    
+
     public Map<String, Object> update(final JsonCommand command) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
@@ -145,7 +145,7 @@ public class AdHoc extends AbstractAuditableCustom<AppUser, Long> {
         }
         return actualChanges;
     }
-    
+
     public String getName() {
         return name;
     }

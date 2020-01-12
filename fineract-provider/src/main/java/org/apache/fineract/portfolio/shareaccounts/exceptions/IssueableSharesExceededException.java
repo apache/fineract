@@ -21,7 +21,7 @@ package org.apache.fineract.portfolio.shareaccounts.exceptions;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} 
+ * A {@link RuntimeException}
  */
 public class IssueableSharesExceededException extends AbstractPlatformResourceNotFoundException {
 

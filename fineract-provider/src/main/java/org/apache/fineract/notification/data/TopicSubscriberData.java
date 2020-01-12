@@ -21,12 +21,12 @@ package org.apache.fineract.notification.data;
 import org.joda.time.LocalDate;
 
 public class TopicSubscriberData {
-    
+
     private final Long id;
     private final Long topicId;
     private final Long userId;
     private final LocalDate subscriptionDate;
-    
+
     public TopicSubscriberData(Long id, Long topicId, Long userId, LocalDate subscriptionDate) {
         this.id = id;
         this.topicId = topicId;
@@ -56,5 +56,5 @@ public class TopicSubscriberData {
     public LocalDate getSubscriptionDate() {
         return this.subscriptionDate;
     }
-    
+
 }

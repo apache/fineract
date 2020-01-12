@@ -31,7 +31,7 @@ import org.junit.Test;
 
 /**
  * This is an integration test for the Spring Boot launch stuff.
- * 
+ *
  * @see ServerApplication
  */
 public class SpringBootServerLoginTest extends AbstractSpringBootWithMariaDB4jIntegrationTest {

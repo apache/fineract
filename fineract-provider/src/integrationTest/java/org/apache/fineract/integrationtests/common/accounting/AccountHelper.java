@@ -67,13 +67,13 @@ public class AccountHelper {
                 liabilityAccountJSON, this.GL_ACCOUNT_ID_RESPONSE);
         return new Account(accountID, Account.AccountType.LIABILITY);
     }
-    
+
     public ArrayList getAccountingWithRunningBalances() {
         final String GET_RUNNING_BALANCE_URL = "/fineract-provider/api/v1/glaccounts?fetchRunningBalance=true";
         final ArrayList<HashMap> accountRunningBalance = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_RUNNING_BALANCE_URL, "");
         return accountRunningBalance;
     }
-    
+
     public HashMap getAccountingWithRunningBalanceById(final String accountId) {
         final String GET_RUNNING_BALANCE_URL = "/fineract-provider/api/v1/glaccounts/" + accountId + "?fetchRunningBalance=true";
         final HashMap accountRunningBalance = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_RUNNING_BALANCE_URL, "");

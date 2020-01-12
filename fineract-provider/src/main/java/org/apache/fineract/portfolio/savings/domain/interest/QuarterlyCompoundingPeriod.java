@@ -68,7 +68,7 @@ public class QuarterlyCompoundingPeriod implements CompoundingPeriod {
     }
 
     private BigDecimal calculateUsingAverageDailyBalanceMethod(final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction,
-            final long daysInYear, final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction, 
+            final long daysInYear, final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
             final BigDecimal minOverdraftForInterestCalculation) {
 
         BigDecimal cumulativeBalance = BigDecimal.ZERO;
@@ -111,7 +111,7 @@ public class QuarterlyCompoundingPeriod implements CompoundingPeriod {
 
     private BigDecimal calculateUsingDailyBalanceMethod(final SavingsCompoundingInterestPeriodType compoundingInterestPeriodType,
             final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction, final long daysInYear,
-            final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction, 
+            final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
             final BigDecimal minOverdraftForInterestCalculation) {
 
         BigDecimal interestEarned = BigDecimal.ZERO;

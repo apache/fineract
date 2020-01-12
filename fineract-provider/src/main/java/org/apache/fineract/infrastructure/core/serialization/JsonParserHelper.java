@@ -197,7 +197,7 @@ public class JsonParserHelper {
         }
         return value;
     }
-    
+
     public String extractTimeFormatParameter(final JsonObject element) {
         String value = null;
         if (element.isJsonObject()) {
@@ -370,7 +370,7 @@ public class JsonParserHelper {
         }
         return value;
     }
-    
+
     public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonElement element,
             final Set<String> parametersPassedInCommand) {
 
@@ -404,14 +404,14 @@ public class JsonParserHelper {
             final JsonObject object = element.getAsJsonObject();
             if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
                 parametersPassedInCommand.add(parameterName);
-                
+
                 try{
                     DateTimeFormatter timeFormtter = DateTimeFormat.forPattern(timeFormat);
                     final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
                      timeValueAsString = primitive.getAsString();
                     if (StringUtils.isNotBlank(timeValueAsString)) {
                         value = LocalDateTime.parse(timeValueAsString, timeFormtter);
-                    }    
+                    }
                 }
                 catch(IllegalArgumentException e ){
                     final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -423,7 +423,7 @@ public class JsonParserHelper {
                     throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                             dataValidationErrors);
                 }
-                
+
             }
         }
         return value;

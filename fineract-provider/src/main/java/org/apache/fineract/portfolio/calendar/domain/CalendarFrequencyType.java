@@ -106,7 +106,7 @@ public enum CalendarFrequencyType {
     /**
      * To convert from period frequency type tp calendar frequency type. This
      * method requires code refactoring.
-     * 
+     *
      * @param periodFrequencyType periodFrequencyType
      * @return CalendarFrequencyType
      */
@@ -128,7 +128,7 @@ public enum CalendarFrequencyType {
     /**
      * To convert from period frequency type tp calendar frequency type. This
      * method requires code refactoring.
-     * 
+     *
      * @param frequencyType
      * @return
      */

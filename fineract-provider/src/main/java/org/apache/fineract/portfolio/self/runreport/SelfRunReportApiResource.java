@@ -55,7 +55,7 @@ public class SelfRunReportApiResource {
 
     private final PlatformSecurityContext context;
     private final RunreportsApiResource runreportsApiResource;
-    
+
     @Autowired
     public SelfRunReportApiResource(final PlatformSecurityContext context, final RunreportsApiResource runreportsApiResource) {
         this.context = context;

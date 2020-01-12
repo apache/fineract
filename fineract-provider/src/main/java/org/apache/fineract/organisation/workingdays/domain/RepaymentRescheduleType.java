@@ -44,7 +44,7 @@ public enum RepaymentRescheduleType {
     public String getCode() {
         return this.code;
     }
-    
+
     public boolean isMoveToNextRepaymentDay() {
         return this.value.equals(RepaymentRescheduleType.MOVE_TO_NEXT_REPAYMENT_MEETING_DAY.getValue());
     }

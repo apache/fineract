@@ -22,28 +22,28 @@ import java.util.List;
 
 import com.google.gson.Gson;
 
-/** 
+/**
  * Immutable data object representing the API request body sent in the POST request to
- * the "/report" resource 
+ * the "/report" resource
  **/
 public class SmsMessageApiReportResourceData {
     private List<Long> externalIds;
     private String mifosTenantIdentifier;
-    
-    /** 
-     * SmsMessageApiReportResourceData constructor 
+
+    /**
+     * SmsMessageApiReportResourceData constructor
      **/
     private SmsMessageApiReportResourceData(List<Long> externalIds, String mifosTenantIdentifier) {
         this.externalIds = externalIds;
         this.mifosTenantIdentifier = mifosTenantIdentifier;
     }
-    
-    /** 
-     * SmsMessageApiReportResourceData constructor 
+
+    /**
+     * SmsMessageApiReportResourceData constructor
      **/
     protected SmsMessageApiReportResourceData() {}
-    
-    /** 
+
+    /**
      * @return new instance of the SmsMessageApiReportResourceData class
      **/
     public static final SmsMessageApiReportResourceData instance(List<Long> externalIds, String mifosTenantIdentifier) {
@@ -63,13 +63,13 @@ public class SmsMessageApiReportResourceData {
     public String getMifosTenantIdentifier() {
         return mifosTenantIdentifier;
     }
-    
-    /** 
-     * @return JSON representation of the object 
+
+    /**
+     * @return JSON representation of the object
      **/
     public String toJsonString() {
         Gson gson = new Gson();
-        
+
         return gson.toJson(this);
     }
 }

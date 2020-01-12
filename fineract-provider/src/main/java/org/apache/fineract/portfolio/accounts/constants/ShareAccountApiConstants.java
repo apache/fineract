@@ -41,9 +41,9 @@ public interface ShareAccountApiConstants {
 
     //
     String locale_paramname = "locale" ;
-    
+
     String dateformat_paramname = "dateFormat" ;
-    
+
     String id_paramname = "id";
 
     String clientid_paramname = "clientId";
@@ -55,7 +55,7 @@ public interface ShareAccountApiConstants {
     String approveddate_paramname = "approvedDate";
 
     String activatedate_paramname = "activatedDate" ;
-    
+
     String fieldofferid_paramname = "fieldOfficerId";
 
     String externalid_paramname = "externalId";
@@ -89,17 +89,17 @@ public interface ShareAccountApiConstants {
     String numberofshares_paramname = "numberOfShares";
 
     String purchasedprice_paramname = "unitPrice";
-    
+
     String note_paramname = "note" ;
-    
+
     String requesteddate_paramname = "requestedDate" ;
-    
+
     String additionalshares_paramname = "additionalshares" ;
-    
+
     String closeddate_paramname = "closedDate";
 
     String shareEntityType = "share";
-    
+
     Set<String> supportedParameters = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(locale_paramname,
                     dateformat_paramname,  id_paramname,clientid_paramname, productid_paramname,
                     submitteddate_paramname,approveddate_paramname, externalid_paramname, currency_paramname,

@@ -28,7 +28,7 @@ import java.io.Serializable;
  */
 @SuppressWarnings("unused")
 public class ClientNonPersonData implements Serializable {
-    
+
     private final CodeValueData constitution;
     private final String incorpNumber;
     private final LocalDate incorpValidityTillDate;
@@ -59,7 +59,7 @@ public class ClientNonPersonData implements Serializable {
         this.constitution = null;
         this.mainBusinessLine = null;
     }
-    
+
     public ClientNonPersonData(CodeValueData constitution, String incorpNo, LocalDate incorpValidityTillDate,
             CodeValueData mainBusinessLine, String remarks) {
         super();
@@ -69,5 +69,5 @@ public class ClientNonPersonData implements Serializable {
         this.mainBusinessLine = mainBusinessLine;
         this.remarks = remarks;
     }
-        
+
 }

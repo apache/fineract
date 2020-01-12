@@ -25,7 +25,7 @@ public class FineractEntityAccessData {
     private FineractEntity firstEntity;
     private FineractEntityAccessType accessType;
     private FineractEntity secondEntity;
-    
+
     public FineractEntityAccessData (
             FineractEntity firstEntity,
             FineractEntityAccessType accessType,
@@ -35,15 +35,15 @@ public class FineractEntityAccessData {
         this.accessType = accessType;
         this.secondEntity = secondEntity;
     }
-    
+
     public FineractEntity getFirstEntity() {
         return this.firstEntity;
     }
-    
+
     public FineractEntityAccessType getAccessType() {
         return this.accessType;
     }
-    
+
     public FineractEntity getSecondEntity() {
         return this.secondEntity;
     }

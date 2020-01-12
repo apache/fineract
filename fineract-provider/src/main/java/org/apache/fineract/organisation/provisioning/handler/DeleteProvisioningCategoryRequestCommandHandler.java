@@ -30,9 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = "PROVISIONCATEGORY", action = "DELETE")
 public class DeleteProvisioningCategoryRequestCommandHandler implements NewCommandSourceHandler {
-    
+
     private final ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService;
-    
+
     @Autowired
     public DeleteProvisioningCategoryRequestCommandHandler(
             ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService) {

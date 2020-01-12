@@ -504,7 +504,7 @@ public class RecurringDepositAccountHelper {
         this.interestPostingPeriodType = interestPostingPeriodTypeId;
         return this;
     }
-    
+
     public RecurringDepositAccountHelper withDepositPeriod(final String depositPeriod) {
         this.depositPeriod = depositPeriod;
         return this;

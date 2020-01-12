@@ -29,7 +29,7 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
 public class SmsCampaignEnumerations {
 
-    
+
     public static EnumOptionData smscampaignTriggerType(final SmsCampaignTriggerType type) {
         EnumOptionData optionData = new EnumOptionData(SmsCampaignTriggerType.INVALID.getValue().longValue(),
                 SmsCampaignTriggerType.INVALID.getCode(), "Invalid");
@@ -89,7 +89,7 @@ public class SmsCampaignEnumerations {
             if(!periodFrequencyType.getValue().equals(PeriodFrequencyType.INVALID.getValue())) {
                 final EnumOptionData optionData = new EnumOptionData(periodFrequencyType.getValue().longValue(), periodFrequencyType.getCode(),
                         periodFrequencyType.toString());
-                optionDatas.add(optionData);    
+                optionDatas.add(optionData);
             }
         }
         return optionDatas;

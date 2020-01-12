@@ -44,13 +44,13 @@ public class SelfServiceUserAccessVote implements AccessDecisionVoter<FilterInvo
             @SuppressWarnings("unused") final Collection<ConfigAttribute> attributes) {
         if(!"OPTIONS".equalsIgnoreCase(fi.getHttpRequest().getMethod())){
             AppUser user = (AppUser) authentication.getPrincipal();
-            
+
             String pathURL = fi.getRequestUrl();
             boolean isSelfServiceRequest = (pathURL != null && pathURL.contains("/self/"));
 
             boolean notAllowed = ((isSelfServiceRequest && !user.isSelfServiceUser())
                     ||(!isSelfServiceRequest && user.isSelfServiceUser()));
-            
+
             if(notAllowed){
                 return ACCESS_DENIED;
             }

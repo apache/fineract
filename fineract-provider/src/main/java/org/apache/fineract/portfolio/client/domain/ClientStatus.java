@@ -31,7 +31,7 @@ public enum ClientStatus {
     CLOSED(600, "clientStatusType.closed"),
     REJECTED(700,"clientStatusType.rejected"),
     WITHDRAWN(800,"clientStatusType.withdraw");
-    
+
 
     private final Integer value;
     private final String code;
@@ -61,7 +61,7 @@ public enum ClientStatus {
             case 800:
                 enumeration = ClientStatus.WITHDRAWN;
             break;
-           
+
         }
         return enumeration;
     }
@@ -90,7 +90,7 @@ public enum ClientStatus {
     public boolean isActive() {
         return this.value.equals(ClientStatus.ACTIVE.getValue());
     }
-  
+
     public boolean isClosed() {
         return this.value.equals(ClientStatus.CLOSED.getValue());
     }

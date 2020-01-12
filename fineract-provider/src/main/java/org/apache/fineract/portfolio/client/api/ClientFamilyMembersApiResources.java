@@ -53,7 +53,7 @@ import org.springframework.stereotype.Component;
 @Path("/clients/{clientId}/familymembers")
 @Component
 @Scope("singleton")
-public class ClientFamilyMembersApiResources 
+public class ClientFamilyMembersApiResources
 {
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id","clientId","firstName","middleName","lastName","qualification",
             "relationship","maritalStatus","gender","dateOfBirth","profession","clientFamilyMemberId"));
@@ -63,7 +63,7 @@ public class ClientFamilyMembersApiResources
     private final ToApiJsonSerializer<ClientFamilyMembersData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    
+
     @Autowired
     public ClientFamilyMembersApiResources(final PlatformSecurityContext context,final ClientFamilyMembersReadPlatformService readPlatformService,
             final ToApiJsonSerializer<ClientFamilyMembersData> toApiJsonSerializer,final ApiRequestParameterHelper apiRequestParameterHelper,
@@ -73,47 +73,47 @@ public class ClientFamilyMembersApiResources
         this.readPlatformService=readPlatformService;
         this.toApiJsonSerializer=toApiJsonSerializer;
         this.apiRequestParameterHelper=apiRequestParameterHelper;
-        this.commandsSourceWritePlatformService=commandsSourceWritePlatformService; 
-        
+        this.commandsSourceWritePlatformService=commandsSourceWritePlatformService;
+
     }
-    
+
     @GET
     @Path("/{familyMemberId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String getFamilyMember(@Context final UriInfo uriInfo,@PathParam("familyMemberId") final Long familyMemberId) {
-        
+
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-            
+
         final ClientFamilyMembersData familyMembers =this.readPlatformService.getClientFamilyMember(familyMemberId);
-    
+
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, familyMembers, this.RESPONSE_DATA_PARAMETERS);
 
     }
-    
-    
-    
+
+
+
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String getFamilyMembers(@Context final UriInfo uriInfo,@PathParam("clientId") final long clientId) {
-        
+
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-            
+
         final Collection<ClientFamilyMembersData> familyMembers = this.readPlatformService.getClientFamilyMembers(clientId);
-        
+
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, familyMembers, this.RESPONSE_DATA_PARAMETERS);
 
     }
-    
+
     @GET
     @Path("/template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String getTemplate(@Context final UriInfo uriInfo,@PathParam("clientId") final long clientId) {
-        
+
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         final ClientFamilyMembersData options = this.readPlatformService.retrieveTemplate();
@@ -122,8 +122,8 @@ public class ClientFamilyMembersApiResources
         return this.toApiJsonSerializer.serialize(settings, options, this.RESPONSE_DATA_PARAMETERS);
 
     }
-    
-    
+
+
     @PUT
     @Path("/{familyMemberId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -137,8 +137,8 @@ public class ClientFamilyMembersApiResources
 
         return this.toApiJsonSerializer.serialize(result);
     }
-    
-    
+
+
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -151,8 +151,8 @@ public class ClientFamilyMembersApiResources
 
         return this.toApiJsonSerializer.serialize(result);
     }
-    
-    
+
+
     @DELETE
     @Path("/{familyMemberId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -166,7 +166,7 @@ public class ClientFamilyMembersApiResources
 
         return this.toApiJsonSerializer.serialize(result);
     }
-    
-    
-    
+
+
+
 }

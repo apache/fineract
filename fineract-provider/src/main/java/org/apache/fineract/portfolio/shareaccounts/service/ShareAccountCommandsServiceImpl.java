@@ -33,9 +33,9 @@ import com.google.gson.JsonElement;
 public class ShareAccountCommandsServiceImpl implements AccountsCommandsService {
 
     private final FromJsonHelper fromApiJsonHelper;
-    
+
     private final ShareAccountDataSerializer shareAccountDataSerializer ;
-    
+
     @Autowired
     public ShareAccountCommandsServiceImpl(final FromJsonHelper fromApiJsonHelper,
             final ShareAccountDataSerializer shareAccountDataSerializer) {
@@ -59,7 +59,7 @@ public class ShareAccountCommandsServiceImpl implements AccountsCommandsService 
         }else if(ShareAccountApiConstants.REJECT_ADDITIONSHARES_COMMAND.equals(command)) {
             return rejectAdditionalShares(accountId, jsonCommand) ;
         }
-        
+
         return CommandProcessingResult.empty();
     }
 

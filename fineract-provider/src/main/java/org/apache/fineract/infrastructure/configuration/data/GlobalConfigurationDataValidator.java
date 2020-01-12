@@ -80,7 +80,7 @@ public class GlobalConfigurationDataValidator {
             baseDataValidator.reset().parameter(GlobalConfigurationApiConstant.ENABLED).value(valueStr)
                     .zeroOrPositiveAmount();
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists(GlobalConfigurationApiConstant.DATE_VALUE, element)) {
             final LocalDate dateValue = this.fromApiJsonHelper
                     .extractLocalDateNamed(GlobalConfigurationApiConstant.DATE_VALUE, element);

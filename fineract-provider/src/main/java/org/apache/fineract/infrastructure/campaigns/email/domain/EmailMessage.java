@@ -79,7 +79,7 @@ public class EmailMessage extends AbstractPersistableCustom<Long> {
                                         final String emailAddress, final String campaignName) {
         return new EmailMessage(group, client, staff,emailCampaign,EmailMessageStatusType.PENDING, emailSubject, message, emailAddress,campaignName);
     }
-    
+
     public static EmailMessage instance(final Group group, final Client client, final Staff staff, final EmailCampaign emailCampaign, final EmailMessageStatusType statusType,
                                       final String emailSubject, final String message, final String sourceAddress, final String emailAddress, final String campaignName) {
         return new EmailMessage(group, client, staff,emailCampaign, statusType, emailSubject, message, emailAddress, campaignName);
@@ -115,20 +115,20 @@ public class EmailMessage extends AbstractPersistableCustom<Long> {
 
         return actualChanges;
     }
-    
+
 
     public Group getGroup() {
         return group;
     }
-    
+
     public Client getClient() {
         return client;
     }
-    
+
     public Staff getStaff() {
         return staff;
     }
-    
+
     public Integer getStatusType() {
         return statusType;
     }
@@ -137,11 +137,11 @@ public class EmailMessage extends AbstractPersistableCustom<Long> {
     public String getEmailAddress() {return this.emailAddress;}
 
     public String getEmailSubject() {return emailSubject; }
-    
+
     public String getMessage() {
         return message;
     }
-    
+
 
     public void setStatusType(final Integer statusType) {
         this.statusType = statusType;

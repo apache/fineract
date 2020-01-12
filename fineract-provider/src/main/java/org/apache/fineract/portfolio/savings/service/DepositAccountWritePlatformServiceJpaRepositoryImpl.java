@@ -211,8 +211,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         Money activationChargeAmount = getActivationCharge(account);
         if (!changes.isEmpty()) {
             final Locale locale = command.extractLocale();
-            final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);            
-            Money amountForDeposit = account.activateWithBalance().plus(activationChargeAmount);            
+            final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+            Money amountForDeposit = account.activateWithBalance().plus(activationChargeAmount);
             if (amountForDeposit.isGreaterThanZero()) {
                 final PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService
                         .retriveSavingsLinkedAssociation(savingsId);
@@ -236,7 +236,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 final LocalDate postInterestOnDate = null;
                 if(activationChargeAmount.isGreaterThanZero()){
                     payActivationCharge(account, user);
-                }                
+                }
                 if (account.isBeforeLastPostingPeriod(account.getActivationLocalDate())) {
                     final LocalDate today = DateUtils.getLocalDateOfTenant();
                     account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd,
@@ -261,7 +261,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             account.validateAccountBalanceDoesNotBecomeNegative(SavingsAccountTransactionType.PAY_CHARGE.name(),
                     depositAccountOnHoldTransactions);
             this.savingAccountRepositoryWrapper.saveAndFlush(account);
-        }     
+        }
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
 
         return new CommandProcessingResultBuilder() //
@@ -283,7 +283,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         }
         return activationChargeAmount;
     }
-    
+
     private void payActivationCharge(final FixedDepositAccount account, AppUser user){
         for (SavingsAccountCharge savingsAccountCharge : account.charges()) {
             if (savingsAccountCharge.isSavingsActivation()) {
@@ -453,7 +453,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
         final SavingsAccountTransaction deposit = this.depositAccountDomainService.handleRDDeposit(account, fmt, transactionDate,
                 transactionAmount, paymentDetail, isRegularTransaction);
-        
+
         return new CommandProcessingResultBuilder() //
                 .withEntityId(deposit.getId()) //
                 .withOfficeId(account.officeId()) //
@@ -1374,7 +1374,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 existingTransactionIds, existingReversedTransactionIds, isAccountTransfer);
         this.journalEntryWritePlatformService.createJournalEntriesForSavings(accountingBridgeData);
     }
-    
+
     @Transactional
     @Override
     public SavingsAccountTransaction mandatorySavingsAccountDeposit(final SavingsAccountTransactionDTO accountTransactionDTO) {
@@ -1397,11 +1397,11 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         } else {
             account = this.depositAccountAssembler.assembleFrom(accountTransactionDTO.getSavingsAccountId(),
                     DepositAccountType.CURRENT_DEPOSIT);
-        }       
+        }
         return this.depositAccountDomainService.handleSavingDeposit(account, accountTransactionDTO.getFormatter(),
                 accountTransactionDTO.getTransactionDate(), accountTransactionDTO.getTransactionAmount(), paymentDetail,
                 isRegularTransaction);
-        
+
     }
 
 

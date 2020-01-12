@@ -94,11 +94,11 @@ public enum SavingsAccountSubStatusEnum {
     public boolean isSubStatusEscheat() {
         return this.value.equals(SavingsAccountSubStatusEnum.ESCHEAT.getValue());
     }
-    
+
     public boolean isSubStatusAccountBlocked() {
         return this.value.equals(SavingsAccountSubStatusEnum.BLOCK.getValue());
     }
-    
+
     public boolean isSubStatusCreditBlocked() {
         return this.value.equals(SavingsAccountSubStatusEnum.BLOCK_CREDIT.getValue());
     }

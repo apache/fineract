@@ -30,9 +30,9 @@ public interface DepositsDropdownReadPlatformService {
 
     /*
      * Collection<EnumOptionData> retrieveDepositTermTypeOptions();
-     * 
+     *
      * Collection<EnumOptionData> retrieveInMultiplesOfDepositTermTypeOptions();
-     * 
+     *
      * Collection<EnumOptionData> retrieveDepositPeriodFrequencyOptions();
      */
 

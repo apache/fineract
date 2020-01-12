@@ -52,7 +52,7 @@ public class ShareAccountDividendData implements Serializable {
         this.savingsTransactionId = savingsTransactionId;
         this.postedDate = null ;
     }
-    
+
     public ShareAccountDividendData(final Long id, final Date postedDate, final ShareAccountData accountData, final BigDecimal amount,
             final EnumOptionData status, final Long savingsTransactionId) {
         this.id = id;

@@ -150,7 +150,7 @@ public class SavingsAccountTransactionDataValidator {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
                     "amount.is.on.hold.release.the.amount.to.continue", account.getId());
         }
-                      
+
         validatePaymentTypeDetails(baseDataValidator, element);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -176,7 +176,7 @@ public class SavingsAccountTransactionDataValidator {
         }
 
     }
-    
+
     public SavingsAccountTransaction validateHoldAndAssembleForm(final String json, final SavingsAccount account, final AppUser createdUser) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
@@ -194,7 +194,7 @@ public class SavingsAccountTransactionDataValidator {
         final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
         baseDataValidator.reset().parameter(transactionDateParamName).value(transactionDate).notNull();
         boolean isActive = account.isActive();
-        
+
         if (!isActive) {
             baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
                     .failWithCodeNoParameterAddedToErrorCode(SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
@@ -213,7 +213,7 @@ public class SavingsAccountTransactionDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
         final PaymentDetail paymentDetails = null;
         Date createdDate = new Date();
-        
+
         SavingsAccountTransaction transaction = SavingsAccountTransaction.holdAmount(account, account.office(), paymentDetails,
                 transactionDate, Money.of(account.getCurrency(), amount), createdDate, createdUser);
         return transaction;

@@ -67,7 +67,7 @@ public class DepositAccountRecurringDetail extends AbstractPersistableCustom<Lon
     private SavingsAccount account;
 
     /**
-     * 
+     *
      */
     public DepositAccountRecurringDetail() {
         this.noOfOverdueInstallments = 0;

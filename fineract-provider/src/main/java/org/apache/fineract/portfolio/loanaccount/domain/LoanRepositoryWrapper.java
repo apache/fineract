@@ -59,7 +59,7 @@ public class LoanRepositoryWrapper {
         }
         return loan;
     }
-    
+
     //Root Entities are enough
     public Collection<Loan> findActiveLoansByLoanIdAndGroupId(Long clientId, Long groupId) {
         final Collection<Integer> loanStatuses = new ArrayList<>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
@@ -71,19 +71,19 @@ public class LoanRepositoryWrapper {
     public Loan saveAndFlush(final Loan loan) {
         return this.repository.saveAndFlush(loan) ;
     }
-    
+
     @Transactional
     public Loan save(final Loan loan) {
         return this.repository.save(loan) ;
     }
-    
+
     public List<Loan> save(List<Loan> loans) {
         return this.repository.saveAll(loans) ;
     }
     public void flush() {
-        this.repository.flush(); 
+        this.repository.flush();
     }
-    
+
     public void delete(final Long loanId) {
         this.repository.deleteById(loanId);
     }
@@ -130,7 +130,7 @@ public class LoanRepositoryWrapper {
             @Param("groupId") Long groupId, @Param("groupLoanType") Integer groupLoanType) {
         return this.repository.getGroupLoansToUpdateLoanProductCounter(loanProductCounter, groupId, groupLoanType) ;
     }
-    
+
     //Only root entities are enough
     public List<Loan> getClientLoansToUpdateLoanProductCounter(@Param("loanProductCounter") Integer loanProductCounter,
             @Param("clientId") Long clientId) {
@@ -193,7 +193,7 @@ public class LoanRepositoryWrapper {
                 loan.initializeRepaymentSchedule();
             }
         }
-        return loans ; 
+        return loans ;
     }
 
   //Repayments Schedule
@@ -205,7 +205,7 @@ public class LoanRepositoryWrapper {
                 loan.initializeRepaymentSchedule();
             }
         }
-        return loans ; 
+        return loans ;
     }
 
     public List<Long> findActiveLoansLoanProductIdsByClient(@Param("clientId") Long clientId, @Param("loanStatus") Integer loanStatus) {
@@ -219,11 +219,11 @@ public class LoanRepositoryWrapper {
     public boolean doNonClosedLoanAccountsExistForClient(@Param("clientId") Long clientId) {
         return this.repository.doNonClosedLoanAccountsExistForClient(clientId) ;
     }
-    
+
     public boolean doNonClosedLoanAccountsExistForProduct(@Param("productId") Long productId) {
         return this.repository.doNonClosedLoanAccountsExistForProduct(productId) ;
     }
-    
+
     public Loan findNonClosedLoanByAccountNumber(@Param("accountNumber") String accountNumber) {
         return this.repository.findNonClosedLoanByAccountNumber(accountNumber) ;
     }

@@ -37,6 +37,6 @@ public interface StaffReadPlatformService {
     Collection<StaffData> retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(Long officeId, boolean loanOfficersOnly);
 
     Collection<StaffData> retrieveAllStaff(String sqlSearch, Long officeId, boolean loanOfficersOnly, String status);
-    
+
     Object[] hasAssociatedItems(final Long staffId);
 }

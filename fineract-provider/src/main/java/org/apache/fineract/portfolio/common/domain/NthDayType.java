@@ -19,7 +19,7 @@
 package org.apache.fineract.portfolio.common.domain;
 
 public enum NthDayType {
-    
+
     ONE(1,"nthDayType.one"),
     TWO(2,"nthDayType.two"),
     THREE(3,"nthDayType.three"),
@@ -28,10 +28,10 @@ public enum NthDayType {
     LAST(-1,"nthDayType.last"),
     ONDAY(-2,"nthDayType.onday"),
     INVALID(0,"nthDayType.invalid");
-    
+
     private final Integer value;
     private final String code;
-    
+
     private NthDayType(Integer value, String code) {
         this.value = value;
         this.code = code;
@@ -44,7 +44,7 @@ public enum NthDayType {
     public String getCode() {
         return this.code;
     }
-    
+
     public static NthDayType fromInt(final Integer frequency) {
         NthDayType repaymentFrequencyNthDayType = NthDayType.INVALID;
         if (frequency != null) {
@@ -76,7 +76,7 @@ public enum NthDayType {
         }
         return repaymentFrequencyNthDayType;
     }
-   
+
     public boolean isInvalid() {
         return this.value.equals(NthDayType.INVALID.value);
     }

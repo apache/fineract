@@ -33,14 +33,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TopicReadPlatformServiceImpl implements TopicReadPlatformService {
-    
+
     private final JdbcTemplate jdbcTemplate;
-    
+
     @Autowired
     public TopicReadPlatformServiceImpl(final RoutingDataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
-    
+
     private static final class TopicMapper implements RowMapper<TopicData> {
 
         private final String schema;
@@ -68,7 +68,7 @@ public class TopicReadPlatformServiceImpl implements TopicReadPlatformService {
 
             return new TopicData(id, title, enabled, entityId, entityType, memberType);
         }
-        
+
     }
 
     @Override
@@ -94,5 +94,5 @@ public class TopicReadPlatformServiceImpl implements TopicReadPlatformService {
         } catch (final EmptyResultDataAccessException e) {
             throw new TopicNotFoundException(topicId);
         }
-    }    
+    }
 }

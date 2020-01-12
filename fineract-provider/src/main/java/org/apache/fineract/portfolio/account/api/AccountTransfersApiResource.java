@@ -140,7 +140,7 @@ public class AccountTransfersApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, transfer, AccountTransfersApiConstants.RESPONSE_DATA_PARAMETERS);
     }
-    
+
     @GET
     @Path("templateRefundByTransfer")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -161,7 +161,7 @@ public class AccountTransfersApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, transferData, AccountTransfersApiConstants.RESPONSE_DATA_PARAMETERS);
     }
-    
+
     @POST
     @Path("refundByTransfer")
     @Consumes({ MediaType.APPLICATION_JSON })

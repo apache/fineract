@@ -33,7 +33,7 @@ public class ApproveShareAccountCommandHandler implements NewCommandSourceHandle
 
 
     private final ShareAccountWritePlatformService shareAccountWritePlatformService ;
-    
+
     @Autowired
     public ApproveShareAccountCommandHandler(final ShareAccountWritePlatformService shareAccountWritePlatformService) {
         this.shareAccountWritePlatformService = shareAccountWritePlatformService ;

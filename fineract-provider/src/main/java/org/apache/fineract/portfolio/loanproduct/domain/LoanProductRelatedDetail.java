@@ -127,7 +127,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
     @Column(name = "interest_recalculation_enabled")
     private boolean isInterestRecalculationEnabled;
-    
+
     @Column(name = "is_equal_amortization", nullable = false)
     private boolean isEqualAmortization = false;
 
@@ -228,7 +228,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     public Integer recurringMoratoriumOnPrincipalPeriods() {
         return this.recurringMoratoriumOnPrincipalPeriods;
     }
-    
+
     @Override
     public Money getInArrearsTolerance() {
         return Money.of(this.currency, this.inArrearsTolerance);
@@ -444,7 +444,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             actualChanges.put("locale", localeAsInput);
             this.graceOnPrincipalPayment = newValue;
         }
-        
+
         final String recurringMoratoriumOnPrincipalPeriodsParamName = "recurringMoratoriumOnPrincipalPeriods";
         if (command.isChangeInIntegerParameterNamed(recurringMoratoriumOnPrincipalPeriodsParamName, this.recurringMoratoriumOnPrincipalPeriods)) {
             final Integer newValue = command.integerValueOfParameterNamed(recurringMoratoriumOnPrincipalPeriodsParamName);
@@ -497,7 +497,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             actualChanges.put(LoanProductConstants.isInterestRecalculationEnabledParameterName, newValue);
             this.isInterestRecalculationEnabled = newValue;
         }
-        
+
         if (command.isChangeInBooleanParameterNamed(LoanProductConstants.isEqualAmortizationParam, this.isEqualAmortization)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.isEqualAmortizationParam);
             actualChanges.put(LoanProductConstants.isEqualAmortizationParam, newValue);
@@ -512,7 +512,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     public void updateCurrency(final MonetaryCurrency currency) {
         this.currency = currency ;
     }
-    
+
     public void validateRepaymentPeriodWithGraceSettings() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loanproduct");
@@ -531,7 +531,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             baseDataValidator.reset().parameter("graceOnInterestCharged").value(this.graceOnInterestCharged)
                     .failWithCode(".mustBeLessThan.numberOfRepayments");
         }
-        
+
         int graceOnPrincipal = 0;
         if (this.getGraceOnPrincipalPayment() != null) {
             graceOnPrincipal = this.getGraceOnPrincipalPayment().intValue();
@@ -540,8 +540,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         if (this.recurringMoratoriumOnPrincipalPeriods() != null) {
             recurMoratoriumOnPrincipal = this.recurringMoratoriumOnPrincipalPeriods().intValue();
         }
-        
-        if (  ( recurMoratoriumOnPrincipal > 0 ) 
+
+        if (  ( recurMoratoriumOnPrincipal > 0 )
             && ( (this.numberOfRepayments - graceOnPrincipal) % ( recurMoratoriumOnPrincipal + 1) != 1) ) {
             baseDataValidator.reset().parameter("graceOnPrincipalPayments.and.recurringMoratoriumOnPrincipalPeriods")
                     .value(graceOnPrincipal)
@@ -659,7 +659,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     public boolean isAllowPartialPeriodInterestCalcualtion() {
         return this.allowPartialPeriodInterestCalcualtion;
     }
-    
+
     public boolean isEqualAmortization() {
         return isEqualAmortization;
     }

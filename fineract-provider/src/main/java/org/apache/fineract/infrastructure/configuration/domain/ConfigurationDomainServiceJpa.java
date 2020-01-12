@@ -78,7 +78,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.apache.fineract.infrastructure.configuration.domain.
      * ConfigurationDomainService#isHolidaysEnabled()
      */
@@ -238,7 +238,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         return property.isEnabled();
     }
-    
+
     @Override
     public boolean isSkippingMeetingOnFirstDayOfMonthEnabled() {
         return getGlobalConfigurationPropertyData("skip-repayment-on-first-day-of-month").isEnabled();
@@ -258,7 +258,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
         return property.isEnabled();
     }
-    
+
     @Override
     public boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled() {
         final String propertyName = "change-emi-if-repaymentdate-same-as-disbursementdate";

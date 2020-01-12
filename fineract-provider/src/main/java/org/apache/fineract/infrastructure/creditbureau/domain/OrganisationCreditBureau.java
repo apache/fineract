@@ -95,6 +95,6 @@ public class OrganisationCreditBureau extends AbstractPersistableCustom<Long> {
         this.creditBureauLoanProductMapping = creditBureauLoanProductMapping;
     }
 
-    
+
 
 }

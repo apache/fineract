@@ -259,7 +259,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
             }
             final Cashier cashier = Cashier.fromJson(tellerOffice, teller, staff, startTime, endTime, command);
             this.cashierTransactionDataValidator.validateCashierAllowedDateAndTime(cashier, teller);
-            
+
             this.cashierRepository.save(cashier);
 
             return new CommandProcessingResultBuilder() //
@@ -364,9 +364,9 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 
     @Override
     public CommandProcessingResult settleCashFromCashier(final Long cashierId, JsonCommand command) {
-        
+
         this.cashierTransactionDataValidator.validateSettleCashAndCashOutTransactions(cashierId, command);
-        
+
         return doTransactionForCashier(cashierId, CashierTxnType.SETTLE, command); // For
                                                                                    // fund
                                                                                    // settlement
@@ -438,8 +438,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 
             final JournalEntry debitJournalEntry = JournalEntry.createNew(cashierOffice, null, // payment
                                                                                                // detail
-                    debitAccount, cashierTxn.getCurrencyCode(), 
-                                         
+                    debitAccount, cashierTxn.getCurrencyCode(),
+
                     transactionId, false, // manual entry
                     cashierTxn.getTxnDate(), JournalEntryType.DEBIT, cashierTxn.getTxnAmount(), cashierTxn.getTxnNote(), // Description
                     null, null, null, // entity Type, entityId, reference number
@@ -447,8 +447,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
 
             final JournalEntry creditJournalEntry = JournalEntry.createNew(cashierOffice, null, // payment
                                                                                                 // detail
-                    creditAccount, cashierTxn.getCurrencyCode(), 
-                                          
+                    creditAccount, cashierTxn.getCurrencyCode(),
+
                     transactionId, false, // manual entry
                     cashierTxn.getTxnDate(), JournalEntryType.CREDIT, cashierTxn.getTxnAmount(), cashierTxn.getTxnNote(), // Description
                     null, null, null, // entity Type, entityId, reference number

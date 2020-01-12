@@ -127,7 +127,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         final Long staffId = null;
         final String staffName = null;
         final Collection<ClientData> clientOptions = null;
-        
+
         return GroupGeneralData.template(defaultOfficeId, centerId, accountNo, centerName, staffId, staffName, centerOptions, officeOptions,
                 staffOptions, clientOptions, availableRoles);
     }

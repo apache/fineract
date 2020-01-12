@@ -48,7 +48,7 @@ public class HookConfiguration extends AbstractPersistableCustom<Long> {
             final String fieldValue) {
         return new HookConfiguration(null, fieldType, fieldName, fieldValue);
     }
-    
+
     public static HookConfiguration createNew(final Hook hook, final String fieldType,
             final String fieldName, final String fieldValue) {
         return new HookConfiguration(hook, fieldType, fieldName, fieldValue);

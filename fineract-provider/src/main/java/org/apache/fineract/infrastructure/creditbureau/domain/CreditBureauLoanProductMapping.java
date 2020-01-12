@@ -32,13 +32,13 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Entity
 @Table(name = "m_creditbureau_loanproduct_mapping")
 public class CreditBureauLoanProductMapping extends AbstractPersistableCustom<Long> {
-    
+
     @Column(name = "is_CreditCheck_Mandatory")
     private boolean isCreditCheckMandatory;
-    
+
     @Column(name = "skip_CreditCheck_in_Failure")
     private boolean skipCreditCheckInFailure;
-    
+
     @Column(name = "stale_Period")
     private int stalePeriod;
 
@@ -50,7 +50,7 @@ public class CreditBureauLoanProductMapping extends AbstractPersistableCustom<Lo
     @OneToOne
     @JoinColumn(name="loan_product_id")
     private LoanProduct loanProduct;
-    
+
     public CreditBureauLoanProductMapping() {
 
     }
@@ -73,24 +73,24 @@ public class CreditBureauLoanProductMapping extends AbstractPersistableCustom<Lo
          Boolean is_active=false;
          if((Boolean)command.booleanPrimitiveValueOfParameterNamed("isCreditcheckMandatory")!=null)
          {
-             isCreditCheckMandatory = command.booleanPrimitiveValueOfParameterNamed("isCreditcheckMandatory");     
+             isCreditCheckMandatory = command.booleanPrimitiveValueOfParameterNamed("isCreditcheckMandatory");
          }
-        
+
          if((Boolean)command.booleanPrimitiveValueOfParameterNamed("skipCreditcheckInFailure")!=null)
          {
-             skipCreditCheckInFailure = command.booleanPrimitiveValueOfParameterNamed("skipCreditcheckInFailure");     
+             skipCreditCheckInFailure = command.booleanPrimitiveValueOfParameterNamed("skipCreditcheckInFailure");
          }
-         
+
          if((Integer)command.integerValueOfParameterNamed("stalePeriod")!=null)
          {
-             stalePeriod = command.integerValueOfParameterNamed("stalePeriod");     
+             stalePeriod = command.integerValueOfParameterNamed("stalePeriod");
          }
-        
+
          if((Boolean) command.booleanPrimitiveValueOfParameterNamed("is_active"))
          {
-             is_active = command.booleanPrimitiveValueOfParameterNamed("is_active");     
+             is_active = command.booleanPrimitiveValueOfParameterNamed("is_active");
          }
-    
+
 
         return new CreditBureauLoanProductMapping(isCreditCheckMandatory, skipCreditCheckInFailure, stalePeriod, is_active,
                 organisation_creditbureau, loanProduct);
@@ -145,6 +145,6 @@ public class CreditBureauLoanProductMapping extends AbstractPersistableCustom<Lo
         this.loanProduct = loanProduct;
     }
 
-    
+
 
 }

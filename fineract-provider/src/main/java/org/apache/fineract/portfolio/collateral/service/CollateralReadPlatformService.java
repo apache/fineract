@@ -26,7 +26,7 @@ public interface CollateralReadPlatformService {
 
     /**
      * Validates the passed in loanId before retrieving Collaterals for the same
-     * 
+     *
      * @param loanId
      * @return
      */

@@ -45,14 +45,14 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
     private final static Logger logger = LoggerFactory.getLogger(AdHocScheduledJobRunnerServiceImpl.class);
     private final AdHocReadPlatformService adHocReadPlatformService;
     private final JdbcTemplate jdbcTemplate;
-    
+
     @Autowired
     public AdHocScheduledJobRunnerServiceImpl(final RoutingDataSource dataSource,
             final AdHocReadPlatformService adHocReadPlatformService
             ) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.adHocReadPlatformService = adHocReadPlatformService;
-       
+
     }
 
     @Transactional
@@ -113,13 +113,13 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
                 } else {
                     logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Skipping execution of " + adhoc.getName() + ", scheduled for execution on " + next);
                 }
-            });    
+            });
         }else{
             logger.info(ThreadLocalContextUtil.getTenant().getName() + "Nothing to update ");
         }
-        
-        
-   
+
+
+
     }
 
 }

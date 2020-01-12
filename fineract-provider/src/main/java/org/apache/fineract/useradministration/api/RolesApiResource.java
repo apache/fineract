@@ -154,7 +154,7 @@ public class RolesApiResource {
 
     /**
      * Roles enable or disable
-     * 
+     *
      * @param roleId
      * @param commandParam
      * @param apiRequestBodyAsJson
@@ -242,7 +242,7 @@ public class RolesApiResource {
 
     /**
      * Delete Role
-     * 
+     *
      * @param roleId
      * @return
      */

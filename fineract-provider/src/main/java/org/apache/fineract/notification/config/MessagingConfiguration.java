@@ -36,10 +36,10 @@ import org.springframework.jms.listener.DefaultMessageListenerContainer;
 
 @Configuration
 public class MessagingConfiguration {
-    
+
     @Autowired
     private Environment env;
-    
+
     @Autowired
     private NotificationEventListener notificationEventListener;
 
@@ -47,7 +47,7 @@ public class MessagingConfiguration {
       public Logger loggerBean() { return LoggerFactory.getLogger(TenantDataSourcePortFixService.class); }
 
     private static final String DEFAULT_BROKER_URL = "tcp://localhost:61616";
-    
+
     @Bean
     public ActiveMQConnectionFactory amqConnectionFactory(){
         ActiveMQConnectionFactory amqConnectionFactory = new ActiveMQConnectionFactory();
@@ -58,13 +58,13 @@ public class MessagingConfiguration {
         }
         return amqConnectionFactory;
     }
-    
+
     @Bean
     public CachingConnectionFactory connectionFactory() {
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory(amqConnectionFactory());
         return connectionFactory;
     }
-    
+
     @Bean
     public JmsTemplate jmsTemplate(){
         JmsTemplate jmsTemplate ;
@@ -72,10 +72,10 @@ public class MessagingConfiguration {
             jmsTemplate.setConnectionFactory(connectionFactory());
             return jmsTemplate;
     }
-    
+
     @Bean
-    public DefaultMessageListenerContainer messageListenerContainer() { 
-        
+    public DefaultMessageListenerContainer messageListenerContainer() {
+
         DefaultMessageListenerContainer messageListenerContainer = new DefaultMessageListenerContainer();
         messageListenerContainer.setConnectionFactory(connectionFactory());
         messageListenerContainer.setDestinationName("NotificationQueue");
@@ -86,9 +86,9 @@ public class MessagingConfiguration {
             {
                 loggerBean().error("Network Error: ActiveMQ Broker Unavailable.");
                 messageListenerContainer.shutdown();
-            } 
+            }
         });
         return messageListenerContainer;
     }
-    
+
 }

@@ -98,7 +98,7 @@ public class ShareAccountChargeData implements Serializable {
         this.percentage = percentage;
         this.amountPercentageAppliedTo = amountPercentageAppliedTo;
         this.currency = currency;
-        this.amount = amount;  
+        this.amount = amount;
         this.amountPaid = amountPaid;
         this.amountWaived = amountWaived;
         this.amountWrittenOff = amountWrittenOff;
@@ -108,7 +108,7 @@ public class ShareAccountChargeData implements Serializable {
         this.isActive = isActive;
     }
 
-    
+
     private BigDecimal getAmountOrPercentage() {
         return (this.chargeCalculationType != null) && (this.chargeCalculationType.getId().intValue() > 1) ? this.percentage : this.amount;
     }

@@ -25,7 +25,7 @@ import java.util.Collection;
 public class WorkingDaysData {
 
     private final Long id;
-    
+
     private final String recurrence;
 
     private final EnumOptionData repaymentRescheduleType;
@@ -56,7 +56,7 @@ public class WorkingDaysData {
         this.extendTermForDailyRepayments = extendTermForDailyRepayments;
         this.extendTermForRepaymentsOnHolidays = extendTermForRepaymentsOnHolidays;
     }
-    
+
     public WorkingDaysData(WorkingDaysData data, Collection<EnumOptionData> repaymentRescheduleOptions) {
         this.id = data.id;
         this.recurrence = data.recurrence;

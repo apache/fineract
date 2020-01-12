@@ -99,7 +99,7 @@ public class InterestRateChartReadPlatformServiceImpl implements InterestRateCha
         sql.append("WHEN !isPrimaryGroupingByAmount then ircd.amount_range_from ");
         sql.append("WHEN !isPrimaryGroupingByAmount then ircd.amount_range_to ");
         sql.append("END");
-        
+
         return this.jdbcTemplate.query(sql.toString(), this.chartExtractor, new Object[] { productId });
     }
 

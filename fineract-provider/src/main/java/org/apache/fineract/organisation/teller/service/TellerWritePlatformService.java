@@ -61,7 +61,7 @@ public interface TellerWritePlatformService {
      * @throws org.apache.fineract.infrastructure.core.exception.InvalidJsonException
      */
     public CommandProcessingResult deleteTeller(Long tellerId);
-    
+
     /**
      * Allocates a cashier to an existing teller. The allocation can be for a duration
      * from a date to a date
@@ -77,7 +77,7 @@ public interface TellerWritePlatformService {
     CommandProcessingResult updateCashierAllocation(Long tellerId, Long cashierId,
             JsonCommand command);
 
-    CommandProcessingResult deleteCashierAllocation(final Long tellerId, Long cashierId, 
+    CommandProcessingResult deleteCashierAllocation(final Long tellerId, Long cashierId,
             JsonCommand command);
 
     CommandProcessingResult allocateCashToCashier(Long cashierId,

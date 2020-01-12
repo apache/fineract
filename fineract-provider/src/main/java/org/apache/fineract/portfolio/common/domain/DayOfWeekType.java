@@ -30,10 +30,10 @@ public enum DayOfWeekType {
     SATURDAY(DateTimeConstants.SATURDAY, "weekDayType.saturday"),
     SUNDAY(DateTimeConstants.SUNDAY, "weekDayType.sunday"),
     INVALID(0, "weekDayType.invalid");
-    
+
     private final Integer value;
     private final String code;
-    
+
     private DayOfWeekType(Integer value, String code) {
         this.value = value;
         this.code = code;
@@ -46,7 +46,7 @@ public enum DayOfWeekType {
     public String getCode() {
         return this.code;
     }
-    
+
     public static DayOfWeekType fromInt(final Integer dayOfWeek) {
         DayOfWeekType weekDayType = INVALID;
         if (dayOfWeek != null) {
@@ -78,5 +78,5 @@ public enum DayOfWeekType {
         }
         return weekDayType;
     }
-    
+
 }

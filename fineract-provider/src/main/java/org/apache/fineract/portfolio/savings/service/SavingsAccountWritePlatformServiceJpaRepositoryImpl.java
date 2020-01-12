@@ -294,7 +294,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final Note note = Note.savingsTransactionNote(account, deposit, noteText);
             this.noteRepository.save(note) ;
         }
-        
+
         return new CommandProcessingResultBuilder() //
                 .withEntityId(deposit.getId()) //
                 .withOfficeId(account.officeId()) //
@@ -303,7 +303,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withSavingsId(savingsId) //
                 .with(changes) //
                 .build();
-       
+
     }
 
     private Long saveTransactionToGenerateTransactionId(final SavingsAccountTransaction transaction) {
@@ -343,7 +343,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final Note note = Note.savingsTransactionNote(account, withdrawal, noteText);
             this.noteRepository.save(note) ;
         }
-        
+
         return new CommandProcessingResultBuilder() //
                 .withEntityId(withdrawal.getId()) //
                 .withOfficeId(account.officeId()) //
@@ -762,9 +762,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
-        
+
         validateTransactionsForTransfer(savingsAccount, transferDate);
-        
+
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
         this.savingAccountAssembler.setHelpers(savingsAccount);
         final Set<Long> existingTransactionIds = new HashSet<>();
@@ -1379,10 +1379,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     /**
      * Disable all standing instructions linked to the savings account if the
      * status is "closed"
-     * 
+     *
      * @param savingsAccount
      *            -- the savings account object
-     * 
+     *
      **/
     @Transactional
     private void disableStandingInstructionsLinkedToClosedSavings(final SavingsAccount savingsAccount) {
@@ -1542,7 +1542,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         return new CommandProcessingResultBuilder().withEntityId(savingsId).withOfficeId(account.officeId())
                 .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(savingsId).with(changes).build();
     }
-    
+
     private void validateTransactionsForTransfer(final SavingsAccount savingsAccount, final LocalDate transferDate) {
 
         for (SavingsAccountTransaction transaction : savingsAccount.getTransactions()) {

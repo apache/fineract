@@ -195,7 +195,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
     public String getHierarchy() {
         return this.hierarchy;
     }
-    
+
     public String getAccountNo(){
         return this.accountNo;
     }

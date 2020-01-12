@@ -243,7 +243,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
          * till periodEndDate recurring dates will be generated.
          */
         final LocalDate periodEndDate = this.getPeriodEndDate(calendarData.getEndDate(), tillDate);
-         
+
         Integer numberOfDays = 0;
         boolean isSkipRepaymentOnFirstMonthEnabled = this.configurationDomainService
                 .isSkippingMeetingOnFirstDayOfMonthEnabled();
@@ -323,15 +323,15 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
          * application calendar for that time period. e.g. If the previous
          * calendar details has weekly meeting starting from 1st of Oct 2013 on
          * every Tuesday, then meeting dates for collection are 1,8,15,22,29..
-         * 
+         *
          * If meeting schedule has changed from Tuesday to Friday with effective
          * from 15th of Oct (calendar update has made on 2nd of Oct) , then
          * application should allow to generate collection sheet on 8th of Oct
          * which is still on Tuesday and next collection sheet date should be on
          * 18th of Oct as per current calendar
          */
-        
-       
+
+
         Integer numberOfDays = 0;
         boolean isSkipRepaymentOnFirstMonthEnabled = configurationDomainService
                 .isSkippingMeetingOnFirstDayOfMonthEnabled();
@@ -509,6 +509,6 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
                     lastUpdatedByUserId, lastUpdatedByUserName, meetingTime, monthOnDay);
         }
     }
-    
-    
+
+
 }

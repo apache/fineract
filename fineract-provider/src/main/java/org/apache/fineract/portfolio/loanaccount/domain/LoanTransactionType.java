@@ -172,7 +172,7 @@ public enum LoanTransactionType {
     public boolean isChargePayment() {
         return this.value.equals(LoanTransactionType.CHARGE_PAYMENT.getValue());
     }
-    
+
     public boolean isRefundForActiveLoan() {
         return this.value.equals(LoanTransactionType.REFUND_FOR_ACTIVE_LOAN.getValue());
     }

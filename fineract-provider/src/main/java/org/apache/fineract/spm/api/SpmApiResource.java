@@ -145,9 +145,9 @@ public class SpmApiResource {
         }else{
             throw new UnrecognizedQueryParamException("command", command);
         }
-        
+
     }
-    
+
     private String getResponse(Long id) {
         Gson gson = new Gson();
         HashMap<String, Object> response = new HashMap<>();

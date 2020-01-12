@@ -87,7 +87,7 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
 
     @Column(name = "totalsubscribed_shares", nullable = true)
     private Long totalSubscribedShares;
-    
+
     @Column(name = "unit_price", nullable = false)
     private BigDecimal unitPrice;
 
@@ -416,30 +416,30 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
         }
         return marketValue;
     }
-    
+
     public void addSubscribedShares(final Long subscribedShares) {
         if(this.totalSubscribedShares == null) {
             this.totalSubscribedShares = new Long(0) ;
         }
         this.totalSubscribedShares += subscribedShares ;
     }
-    
+
     public void removeSubscribedShares(final Long subscribedShares) {
         this.totalSubscribedShares -= subscribedShares ;
     }
-    
+
     public Long getSubscribedShares() {
         return this.totalSubscribedShares ;
     }
- 
+
     public Long getMinimumClientShares() {
         return this.minimumShares ;
     }
-    
+
     public Long getMaximumClientShares() {
         return this.maximumShares ;
     }
-    
+
     public Long getDefaultClientShares() {
         return this.nominalShares ;
     }

@@ -381,7 +381,7 @@ public class StandingInstructionData {
         return this.toClient;
     }
 
-    
+
     public Long getId() {
         return this.id;
     }

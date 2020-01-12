@@ -121,10 +121,10 @@ public final class LoanScheduleModel {
         return this.totalPenaltyChargesCharged;
     }
 
-    
+
     public BigDecimal getTotalInterestCharged() {
         return this.totalInterestCharged;
     }
-    
-    
+
+
 }

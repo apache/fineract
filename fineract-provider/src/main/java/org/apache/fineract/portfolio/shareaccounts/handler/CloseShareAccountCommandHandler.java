@@ -33,7 +33,7 @@ public class CloseShareAccountCommandHandler implements NewCommandSourceHandler{
 
 
     private final ShareAccountWritePlatformService shareAccountWritePlatformService ;
-    
+
     @Autowired
     public CloseShareAccountCommandHandler(final ShareAccountWritePlatformService shareAccountWritePlatformService) {
         this.shareAccountWritePlatformService = shareAccountWritePlatformService ;

@@ -35,7 +35,7 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 public class PostingPeriod {
-    
+
     private final LocalDateInterval periodInterval;
     private final MonetaryCurrency currency;
     private final SavingsCompoundingInterestPeriodType interestCompoundingType;
@@ -61,7 +61,7 @@ public class PostingPeriod {
     private final Money minBalanceForInterestCalculation;
     private BigDecimal overdraftInterestRateAsFraction;
     private Money minOverdraftForInterestCalculation;
- 
+
     private Integer financialYearBeginningMonth;
 
     public static PostingPeriod createFrom(final LocalDateInterval periodInterval, final Money periodStartingBalance,
@@ -73,11 +73,11 @@ public class PostingPeriod {
 
         final BigDecimal overdraftInterestRateAsFraction = BigDecimal.ZERO;
         final Money minOverdraftForInterestCalculation = Money.zero(currency);
-        
-        return createFrom(periodInterval, periodStartingBalance, orderedListOfTransactions, currency, 
-                interestCompoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYear, 
-                upToInterestCalculationDate, interestPostTransactions, isInterestTransfer, 
-                minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd, 
+
+        return createFrom(periodInterval, periodStartingBalance, orderedListOfTransactions, currency,
+                interestCompoundingPeriodType, interestCalculationType, interestRateAsFraction, daysInYear,
+                upToInterestCalculationDate, interestPostTransactions, isInterestTransfer,
+                minBalanceForInterestCalculation, isSavingsInterestPostingAtCurrentPeriodEnd,
                 overdraftInterestRateAsFraction, minOverdraftForInterestCalculation, isUserPosting, financialYearBeginningMonth);
     }
 
@@ -158,7 +158,7 @@ public class PostingPeriod {
             final Money closingBalance, final SavingsCompoundingInterestPeriodType interestCompoundingType,
             final SavingsInterestCalculationType interestCalculationType, final BigDecimal interestRateAsFraction, final long daysInYear,
             final List<CompoundingPeriod> compoundingPeriods, boolean interestTransfered, final Money minBalanceForInterestCalculation,
-            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final BigDecimal overdraftInterestRateAsFraction, 
+            final boolean isSavingsInterestPostingAtCurrentPeriodEnd, final BigDecimal overdraftInterestRateAsFraction,
             final Money minOverdraftForInterestCalculation, boolean isUserPosting, Integer financialYearBeginningMonth) {
         this.periodInterval = periodInterval;
         this.currency = currency;
@@ -394,10 +394,10 @@ public class PostingPeriod {
                 periodsInMonth = 4;
                 periodEndDate = getPeriodEndDate(periodEndDate, previousMonth, periodsInMonth, periodStartDate);
             break;
-            case BI_ANNUAL:                
+            case BI_ANNUAL:
                 periodsInMonth = 2;
                 periodEndDate = getPeriodEndDate(periodEndDate, previousMonth, periodsInMonth, periodStartDate);
-                
+
             break;
             case ANNUAL:
                 periodEndDate = periodStartDate.withMonthOfYear(previousMonth);
@@ -436,7 +436,7 @@ public class PostingPeriod {
          * if start date fall in month of oct,nov or dec then month will be 10, 11 or 12
          * so period end date should be taken from next year for march month
          */
-        
+
         for (Integer month : monthSet) {
             if(monthofYear<=month.intValue()){
                 periodEndDate = new DateTime().withDate(year, month, DateUtils.getLocalDateOfTenant().withMonthOfYear(month).dayOfMonth().withMaximumValue().getDayOfMonth()).toLocalDate();
@@ -457,15 +457,15 @@ public class PostingPeriod {
     public LocalDateInterval getPeriodInterval() {
         return this.periodInterval;
     }
-    
+
     public boolean isUserPosting() {
         return this.isUserPosting;
     }
 
-    
+
     public Integer getFinancialYearBeginningMonth() {
         return this.financialYearBeginningMonth;
     }
-    
-    
+
+
 }

@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PaymentTypeRepositoryWrapper {
-    
+
     private final PaymentTypeRepository repository;
 
     @Autowired

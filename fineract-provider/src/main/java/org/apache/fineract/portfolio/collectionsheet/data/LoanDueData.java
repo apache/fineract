@@ -112,7 +112,7 @@ public class LoanDueData {
     public BigDecimal getChargesDue() {
         return this.chargesDue;
     }
-    
+
     public BigDecimal getFeeDue() {
         return this.feeDue;
     }

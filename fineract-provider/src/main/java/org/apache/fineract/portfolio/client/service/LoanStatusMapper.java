@@ -49,7 +49,7 @@ public class LoanStatusMapper {
     public boolean isClosed() {
         return Integer.valueOf(600).equals(this.statusId) || isWithdrawnByClient() || isRejected();
     }
-    
+
     public boolean isOverpaid() {
         return Integer.valueOf(700).equals(this.statusId);
     }

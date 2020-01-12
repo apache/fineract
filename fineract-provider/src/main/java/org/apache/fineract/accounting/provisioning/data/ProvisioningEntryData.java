@@ -26,23 +26,23 @@ import java.util.Date;
 public class ProvisioningEntryData {
 
     private Long id ;
-    
+
     private Boolean journalEntry ;
-    
+
     private Long createdById ;
-    
+
     private String createdUser ;
 
     Date createdDate ;
-    
+
     Long modifiedById ;
-    
+
     private String modifiedUser ;
 
     private BigDecimal reservedAmount ;
-    
+
     private Collection<LoanProductProvisioningEntryData> provisioningEntries ;
-    
+
     public ProvisioningEntryData(final Long id, final Collection<LoanProductProvisioningEntryData> provisioningEntries) {
         this.provisioningEntries = provisioningEntries ;
         this.id = id ;
@@ -59,7 +59,7 @@ public class ProvisioningEntryData {
         this.createdDate = createdDate ;
         this.reservedAmount = totalReservedAmount ;
     }
-    
+
     public void setEntries(Collection<LoanProductProvisioningEntryData> provisioningEntries) {
         this.provisioningEntries = provisioningEntries ;
     }
@@ -67,7 +67,7 @@ public class ProvisioningEntryData {
     public Long getId() {
         return this.id ;
     }
-    
+
     public Date getCreatedDate() {
         return this.createdDate ;
     }

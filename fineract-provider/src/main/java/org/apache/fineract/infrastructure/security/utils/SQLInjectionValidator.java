@@ -52,7 +52,7 @@ public class SQLInjectionValidator {
             }
         }
 
-        //Removing the space before and after '=' operator 
+        //Removing the space before and after '=' operator
         //String s = "          \"              OR 1    =    1"; For the cases like this
         boolean injectionFound = false;
         String inputSqlString = lowerCaseSQL;
@@ -107,7 +107,7 @@ public class SQLInjectionValidator {
         if (injectionFound) {
             throw new SQLInjectionException();
         }
-        
+
         Pattern pattern = Pattern.compile(SQL_PATTERN);
         Matcher matcher = pattern.matcher(sqlSearch);
         if (!matcher.matches()) {
@@ -122,14 +122,14 @@ public class SQLInjectionValidator {
             }
         }
 
-        
+
         for (String comments : COMMENTS) {
             if (lowerCaseSQL.contains(comments)) {
                 throw new SQLInjectionException();
             }
         }
 
-        //Removing the space before and after '=' operator 
+        //Removing the space before and after '=' operator
         //String s = "          \"              OR 1    =    1"; For the cases like this
         boolean injectionFound = false;
         String inputSqlString = lowerCaseSQL;
@@ -184,7 +184,7 @@ public class SQLInjectionValidator {
         if (injectionFound) {
             throw new SQLInjectionException();
         }
-        
+
         Pattern pattern = Pattern.compile(SQL_PATTERN);
         Matcher matcher = pattern.matcher(sqlSearch);
         if (!matcher.matches()) {

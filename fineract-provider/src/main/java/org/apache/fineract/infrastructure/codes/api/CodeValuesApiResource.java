@@ -65,9 +65,9 @@ public class CodeValuesApiResource {
      * The set of parameters that are supported in response for {@link CodeData}
      */
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(CODEVALUE_JSON_INPUT_PARAMS.CODEVALUE_ID.getValue(), 
-                    CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue(), CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(), 
-                    CODEVALUE_JSON_INPUT_PARAMS.IS_MANDATORY.getValue(), 
+            Arrays.asList(CODEVALUE_JSON_INPUT_PARAMS.CODEVALUE_ID.getValue(),
+                    CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue(), CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(),
+                    CODEVALUE_JSON_INPUT_PARAMS.IS_MANDATORY.getValue(),
                     CODEVALUE_JSON_INPUT_PARAMS.DESCRIPTION.getValue()));
     private final String resourceNameForPermissions = "CODEVALUE";
 

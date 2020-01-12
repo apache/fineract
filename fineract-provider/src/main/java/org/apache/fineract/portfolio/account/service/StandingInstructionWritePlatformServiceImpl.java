@@ -180,7 +180,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
         AccountTransferStandingInstruction standingInstructionsForUpdate = this.standingInstructionRepository.findById(id).get();
         // update the "deleted" and "name" properties of the standing instruction
         standingInstructionsForUpdate.delete();
-        
+
         final Map<String, Object> actualChanges = new HashMap<>();
         actualChanges.put(statusParamName, StandingInstructionStatus.DELETED.getValue());
         return new CommandProcessingResultBuilder() //

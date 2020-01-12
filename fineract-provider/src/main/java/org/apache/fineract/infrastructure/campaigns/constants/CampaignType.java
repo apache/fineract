@@ -54,7 +54,7 @@ public enum CampaignType {
         }
         return type;
     }
-    
+
     public static EnumOptionData campaignType(final Integer campaignTypeId) {
         return campaignType(CampaignType.fromInt(campaignTypeId));
     }

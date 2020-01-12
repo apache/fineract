@@ -84,7 +84,7 @@ public class ChargeEnumerations {
             case SHAREACCOUNT_ACTIVATION:
                 optionData = new EnumOptionData(ChargeTimeType.SHAREACCOUNT_ACTIVATION.getValue().longValue(), ChargeTimeType.SHAREACCOUNT_ACTIVATION.getCode(), "Share Account Activate") ;
             break ;
-            
+
             case SHARE_PURCHASE:
                 optionData = new EnumOptionData(ChargeTimeType.SHARE_PURCHASE.getValue().longValue(), ChargeTimeType.SHARE_PURCHASE.getCode(), "Share Purchase") ;
             break ;
@@ -92,7 +92,7 @@ public class ChargeEnumerations {
                 optionData = new EnumOptionData(ChargeTimeType.SHARE_REDEEM.getValue().longValue(), ChargeTimeType.SHARE_REDEEM.getCode(), "Share Redeem") ;
             break ;
             case SAVINGS_NOACTIVITY_FEE:
-                optionData = new EnumOptionData(ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getValue().longValue(), ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getCode(), 
+                optionData = new EnumOptionData(ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getValue().longValue(), ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getCode(),
                         "Saving No Activity Fee");
             break;
             default:
@@ -183,5 +183,5 @@ public class ChargeEnumerations {
         }
         return optionData;
     }
-    
+
 }

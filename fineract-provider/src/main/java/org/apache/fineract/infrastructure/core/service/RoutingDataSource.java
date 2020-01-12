@@ -32,9 +32,9 @@ import org.springframework.stereotype.Service;
  * Based on springs {@link AbstractRoutingDataSource} idea, this is a
  * {@link DataSource} that routes or delegates to another data source depending
  * on the tenant details passed in the request.
- * 
+ *
  * The tenant details are process earlier and stored in a {@link ThreadLocal}.
- * 
+ *
  * The {@link RoutingDataSourceService} is responsible for returning the
  * appropriate {@link DataSource} for the tenant of this request.
  */

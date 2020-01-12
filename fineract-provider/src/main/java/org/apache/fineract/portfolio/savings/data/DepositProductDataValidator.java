@@ -335,7 +335,7 @@ public class DepositProductDataValidator {
             validatePaymentChannelFundSourceMappings(fromApiJsonHelper, baseDataValidator, element);
             validateChargeToIncomeAccountMappings(fromApiJsonHelper, baseDataValidator, element);
         }
-        
+
         validateTaxWithHoldingParams(baseDataValidator, element, true);
     }
 
@@ -783,7 +783,7 @@ public class DepositProductDataValidator {
             }
         }
     }
-    
+
     private void validateTaxWithHoldingParams(final DataValidatorBuilder baseDataValidator, final JsonElement element,
             final boolean isCreate) {
         if (this.fromApiJsonHelper.parameterExists(withHoldTaxParamName, element)) {

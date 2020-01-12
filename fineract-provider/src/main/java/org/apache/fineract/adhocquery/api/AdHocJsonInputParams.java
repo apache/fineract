@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /***
- * Enum of all parameters passed in while creating/updating a AdHocQuery 
+ * Enum of all parameters passed in while creating/updating a AdHocQuery
  ***/
 public enum AdHocJsonInputParams {
     ID("id"), NAME("name"),QUERY("query"),TABLENAME("tableName"), TABLEFIELDS("tableFields"), ISACTIVE("isActive"),

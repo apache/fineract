@@ -37,7 +37,7 @@ public class ProvisioningCriteriaDefinition extends AbstractPersistableCustom<Lo
     @ManyToOne(optional = false)
     @JoinColumn(name = "criteria_id", referencedColumnName = "id", nullable = false)
     private ProvisioningCriteria criteria;
-    
+
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private ProvisioningCategory provisioningCategory;
@@ -60,9 +60,9 @@ public class ProvisioningCriteriaDefinition extends AbstractPersistableCustom<Lo
     private GLAccount expenseAccount;
 
     protected ProvisioningCriteriaDefinition() {
-        
+
     }
-    
+
     private ProvisioningCriteriaDefinition(ProvisioningCriteria criteria, ProvisioningCategory provisioningCategory, Long minimumAge,
             Long maximumAge, BigDecimal provisioningPercentage, GLAccount liabilityAccount, GLAccount expenseAccount) {
         this.criteria = criteria;
@@ -81,7 +81,7 @@ public class ProvisioningCriteriaDefinition extends AbstractPersistableCustom<Lo
         return new ProvisioningCriteriaDefinition(criteria, provisioningCategory, minimumAge, maximumAge, provisioningPercentage,
                 liabilityAccount, expenseAccount);
     }
-    
+
     public void update(Long minAge, Long maxAge, BigDecimal percentage, GLAccount lia, GLAccount exp) {
         this.minimumAge = minAge ;
         this.maximumAge = maxAge ;
@@ -89,8 +89,8 @@ public class ProvisioningCriteriaDefinition extends AbstractPersistableCustom<Lo
         this.liabilityAccount = lia ;
         this.expenseAccount = exp ;
     }
-    
-    
+
+
     public boolean isOverlapping(ProvisioningCriteriaDefinition def) {
         return this.minimumAge <= def.maximumAge && def.minimumAge <= this.maximumAge;
     }

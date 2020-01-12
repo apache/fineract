@@ -30,11 +30,11 @@ public class AccountSummaryCollectionData {
     private final Collection<SavingsAccountSummaryData> savingsAccounts;
     private final Collection<ShareAccountSummaryData> shareAccounts ;
     private final Collection<GuarantorAccountSummaryData> guarantorAccounts;
-    
+
     private final Collection<LoanAccountSummaryData> memberLoanAccounts;
     private final Collection<SavingsAccountSummaryData> memberSavingsAccounts;
     private final Collection<GuarantorAccountSummaryData> memberGuarantorAccounts;
-    
+
     public AccountSummaryCollectionData(final Collection<LoanAccountSummaryData> loanAccounts,
             final Collection<SavingsAccountSummaryData> savingsAccounts, final Collection<ShareAccountSummaryData> shareAccounts,
             final Collection<GuarantorAccountSummaryData> guarantorAccounts) {
@@ -46,7 +46,7 @@ public class AccountSummaryCollectionData {
         this.memberSavingsAccounts = null;
         this.memberGuarantorAccounts = null;
     }
-    
+
     public AccountSummaryCollectionData(final Collection<LoanAccountSummaryData> loanAccounts,
             final Collection<SavingsAccountSummaryData> savingsAccounts, final Collection<GuarantorAccountSummaryData> guarantorAccounts, final Collection<LoanAccountSummaryData> memberLoanAccounts,
             final Collection<SavingsAccountSummaryData> memberSavingsAccounts, final Collection<GuarantorAccountSummaryData> memberGuarantorAccounts) {
@@ -74,7 +74,7 @@ public class AccountSummaryCollectionData {
         }
         return returnCollection;
     }
-    
+
     private Collection<ShareAccountSummaryData> defaultShareAccountsIfEmpty(final Collection<ShareAccountSummaryData> collection) {
         Collection<ShareAccountSummaryData> returnCollection = null;
         if (collection != null && !collection.isEmpty()) {

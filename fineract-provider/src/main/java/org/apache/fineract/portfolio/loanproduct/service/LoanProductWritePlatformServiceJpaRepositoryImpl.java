@@ -147,15 +147,15 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             // check if the office specific products are enabled. If yes, then save this savings product against a specific office
             // i.e. this savings product is specific for this office.
             fineractEntityAccessUtil.checkConfigurationAndAddProductResrictionsForUserOffice(
-                    FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS, 
+                    FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS,
                     loanproduct.getId());
 
             this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_PRODUCT_CREATE,
                     constructEntityMap(BUSINESS_ENTITY.LOAN_PRODUCT, loanproduct));
-            
+
             this.businessEventNotifierService.notifyBusinessEventWasExecuted(BUSINESS_EVENTS.LOAN_PRODUCT_CREATE,
                     constructEntityMap(BUSINESS_ENTITY.LOAN_PRODUCT, loanproduct));
-            
+
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withEntityId(loanproduct.getId()) //
@@ -203,11 +203,11 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             this.fromApiJsonDeserializer.validateForUpdate(command.json(), product);
             validateInputDates(command);
 
-            if(anyChangeInCriticalFloatingRateLinkedParams(command, product) 
+            if(anyChangeInCriticalFloatingRateLinkedParams(command, product)
                     && this.loanRepositoryWrapper.doNonClosedLoanAccountsExistForProduct(product.getId())){
                 throw new LoanProductCannotBeModifiedDueToNonClosedLoansException(product.getId());
             }
-            
+
             FloatingRate floatingRate = null;
             if(command.parameterExists("floatingRatesId")){
                 floatingRate = this.floatingRateRepository

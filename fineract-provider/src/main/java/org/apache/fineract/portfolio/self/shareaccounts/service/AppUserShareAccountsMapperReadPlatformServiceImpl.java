@@ -36,7 +36,7 @@ public class AppUserShareAccountsMapperReadPlatformServiceImpl
             final RoutingDataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
-    
+
     @Override
     public Boolean isShareAccountsMappedToUser(Long accountId, Long appUserId) {
         return this.jdbcTemplate

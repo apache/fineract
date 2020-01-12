@@ -30,9 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = "RESCHEDULELOAN", action = "CREATE")
 public class CreateLoanRescheduleRequestCommandHandler implements NewCommandSourceHandler {
-    
+
     private final LoanRescheduleRequestWritePlatformService loanRescheduleRequestWritePlatformService;
-    
+
     @Autowired
     public CreateLoanRescheduleRequestCommandHandler(
             LoanRescheduleRequestWritePlatformService loanRescheduleRequestWritePlatformService) {

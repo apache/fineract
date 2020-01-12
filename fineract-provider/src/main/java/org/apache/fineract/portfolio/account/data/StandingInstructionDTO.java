@@ -77,7 +77,7 @@ public class StandingInstructionDTO {
         return this.startDateRange;
     }
 
-    
+
     public Date endDateRange() {
         return this.endDateRange;
     }

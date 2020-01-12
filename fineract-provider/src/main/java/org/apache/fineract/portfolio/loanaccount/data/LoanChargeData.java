@@ -81,7 +81,7 @@ public class LoanChargeData {
     private BigDecimal amountAccrued;
 
     private BigDecimal amountUnrecognized;
-    
+
 
     public static LoanChargeData template(final Collection<ChargeData> chargeOptions) {
         return new LoanChargeData(null, null, null, null, null, null, null, null, chargeOptions, false, null, false, false, null, null,

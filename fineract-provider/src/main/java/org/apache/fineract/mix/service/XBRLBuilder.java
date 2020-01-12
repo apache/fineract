@@ -165,7 +165,7 @@ public class XBRLBuilder {
 
     /**
      * Adds the currency unit to the document
-     * 
+     *
      * @param currencyCode
      */
     public void addCurrencyUnit(final String currencyCode) {

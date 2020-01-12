@@ -173,7 +173,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
                 }
             }
 
-           
+
 
             return new GuarantorData(id, loanId, clientRelationshipType, entityId, guarantorType, firstname, lastname, dob, addressLine1,
                     addressLine2, city, state, zip, country, mobileNumber, housePhoneNumber, comment, null, null, null, status,

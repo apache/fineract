@@ -43,10 +43,10 @@ public class ProvisioningEntry extends AbstractPersistableCustom<Long> {
 
     @Column(name = "journal_entry_created")
     private Boolean isJournalEntryCreated;
-    
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch=FetchType.EAGER)
     private Set<LoanProductProvisioningEntry> provisioningEntries = new HashSet<>();
-    
+
     @OneToOne
     @JoinColumn(name = "createdby_id")
     private AppUser createdBy;
@@ -64,9 +64,9 @@ public class ProvisioningEntry extends AbstractPersistableCustom<Long> {
     private Date lastModifiedDate;
 
     protected ProvisioningEntry() {
-        
+
     }
-    
+
     public ProvisioningEntry(AppUser createdBy, Date createdDate, AppUser lastModifiedBy, Date lastModifiedDate, Set<LoanProductProvisioningEntry> provisioningEntries ) {
         this.provisioningEntries = provisioningEntries ;
         this.createdBy = createdBy ;
@@ -74,22 +74,22 @@ public class ProvisioningEntry extends AbstractPersistableCustom<Long> {
         this.lastModifiedBy = lastModifiedBy ;
         this.lastModifiedDate = lastModifiedDate ;
     }
-    
+
     public void setProvisioningEntries(Collection<LoanProductProvisioningEntry> provisioningEntries) {
-        if(this.provisioningEntries == null) this.provisioningEntries = new HashSet<>(); 
+        if(this.provisioningEntries == null) this.provisioningEntries = new HashSet<>();
         this.provisioningEntries.addAll(provisioningEntries) ;
     }
-    
+
     public Collection<LoanProductProvisioningEntry> getLoanProductProvisioningEntries() {
         return this.provisioningEntries ;
     }
-    
+
     public void setJournalEntryCreated(Boolean bool) {
         this.isJournalEntryCreated = bool ;
     }
-    
+
     public Date getCreatedDate() {
         return this.createdDate ;
     }
-    
+
 }

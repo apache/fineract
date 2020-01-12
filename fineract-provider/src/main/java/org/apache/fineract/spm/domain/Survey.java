@@ -80,7 +80,7 @@ public class Survey extends AbstractPersistableCustom<Long> {
         }else{
             this.questions = new ArrayList<>();
         }
-        
+
         this.questions.addAll(questions);
     }
 

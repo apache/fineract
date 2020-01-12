@@ -105,7 +105,7 @@ public class SavingsOfficerAssignmentHistory extends AbstractAuditableCustom<App
 
     /**
      * If endDate is null then return false.
-     * 
+     *
      * @param compareDate
      * @return
      */

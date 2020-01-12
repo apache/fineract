@@ -79,8 +79,8 @@ public class Meeting extends AbstractPersistableCustom<Long> {
 
     public static Meeting createNew(final CalendarInstance calendarInstance, final Date meetingDate, Boolean isTransactionDateOnNonMeetingDate,
             final boolean isSkipRepaymentOnFirstMonth, final int numberOfDays) {
-        
-        if (!isTransactionDateOnNonMeetingDate && !isValidMeetingDate(calendarInstance, meetingDate,isSkipRepaymentOnFirstMonth, numberOfDays)) 
+
+        if (!isTransactionDateOnNonMeetingDate && !isValidMeetingDate(calendarInstance, meetingDate,isSkipRepaymentOnFirstMonth, numberOfDays))
         { throw new NotValidRecurringDateException("meeting", "The date '"
                 + meetingDate + "' is not a valid meeting date.", meetingDate); }
         return new Meeting(calendarInstance, meetingDate);

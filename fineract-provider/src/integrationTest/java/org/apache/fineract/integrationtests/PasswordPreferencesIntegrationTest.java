@@ -65,11 +65,11 @@ public class PasswordPreferencesIntegrationTest {
         System.out.println("---------------------------------PASSWORD PREFERENCE VALIDATED SUCCESSFULLY-----------------------------------------");
 
     }
-    
+
     @Test
     public void updateWithInvalidPolicyId() {
         String invalidValidationPolicyId = "2000";
-        final List<HashMap> error = (List) PasswordPreferencesHelper.updateWithInvalidValidationPolicyId(requestSpec, generalResponseSpec, invalidValidationPolicyId, 
+        final List<HashMap> error = (List) PasswordPreferencesHelper.updateWithInvalidValidationPolicyId(requestSpec, generalResponseSpec, invalidValidationPolicyId,
                 CommonConstants.RESPONSE_ERROR);
         assertEquals("Password Validation Policy with identifier 2000 does not exist", "error.msg.password.validation.policy.id.invalid",
                 error.get(0).get("userMessageGlobalisationCode"));

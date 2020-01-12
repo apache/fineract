@@ -25,8 +25,8 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 public interface ProvisioningCategoryWritePlatformService {
 
     CommandProcessingResult createProvisioningCateogry(JsonCommand command);
-    
+
     CommandProcessingResult updateProvisioningCategory(final Long categoryId, JsonCommand command) ;
-    
+
     CommandProcessingResult deleteProvisioningCateogry(JsonCommand command) ;
 }

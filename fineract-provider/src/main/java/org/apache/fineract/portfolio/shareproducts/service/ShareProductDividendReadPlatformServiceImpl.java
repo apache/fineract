@@ -73,7 +73,7 @@ public class ShareProductDividendReadPlatformServiceImpl implements ShareProduct
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
-            
+
             if (searchParameters.isSortOrderProvided()) {
                 sqlBuilder.append(' ').append(searchParameters.getSortOrder());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());

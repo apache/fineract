@@ -322,7 +322,7 @@ public final class GroupingTypesDataValidator {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.staffIdParamName, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.staffIdParamName).value(staffId).integerGreaterThanZero();
         }
-        
+
         LocalDate submittedOnDate = this.groupRepositoryWrapper.retrieveSubmittedOndate(centerId);
 
         final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(GroupingTypesApiConstants.activeParamName,
@@ -371,9 +371,9 @@ public final class GroupingTypesDataValidator {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.staffIdParamName, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.staffIdParamName).value(staffId).integerGreaterThanZero();
         }
-        
+
         LocalDate submittedOnDate = this.groupRepositoryWrapper.retrieveSubmittedOndate(groupId);
-        
+
         if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.submittedOnDateParamName, element)) {
             submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed(
                     GroupingTypesApiConstants.submittedOnDateParamName, element);

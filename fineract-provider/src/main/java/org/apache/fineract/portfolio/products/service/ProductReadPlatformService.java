@@ -33,6 +33,6 @@ public interface ProductReadPlatformService {
     public ProductData retrieveTemplate();
 
     public Set<String> getResponseDataParams();
-    
+
     public Collection<ProductData> retrieveAllForLookup() ;
 }

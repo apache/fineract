@@ -54,7 +54,7 @@ public class SavingsAccountTransactionData implements Serializable {
     private final boolean interestedPostedAsOn;
     private final String submittedByUsername;
     private final String note ;
-    
+
     // templates
     final Collection<PaymentTypeData> paymentTypeOptions;
 
@@ -170,7 +170,7 @@ public class SavingsAccountTransactionData implements Serializable {
                 savingsAccountTransactionData.paymentDetailData, savingsAccountTransactionData.accountId,
                 savingsAccountTransactionData.accountNo, savingsAccountTransactionData.date, savingsAccountTransactionData.currency,
                 savingsAccountTransactionData.amount,savingsAccountTransactionData.outstandingChargeAmount, savingsAccountTransactionData.runningBalance, savingsAccountTransactionData.reversed,
-                savingsAccountTransactionData.transfer, paymentTypeOptions, savingsAccountTransactionData.interestedPostedAsOn, 
+                savingsAccountTransactionData.transfer, paymentTypeOptions, savingsAccountTransactionData.interestedPostedAsOn,
                 savingsAccountTransactionData.submittedByUsername, savingsAccountTransactionData.note);
     }
 

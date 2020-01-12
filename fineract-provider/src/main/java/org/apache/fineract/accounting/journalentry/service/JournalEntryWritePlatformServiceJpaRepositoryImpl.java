@@ -323,7 +323,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         final boolean useDefaultComment = StringUtils.isBlank(reversalComment);
 
         validateCommentForReversal(reversalComment);
-        
+
         //Before reversal validate accounting closure is done for that branch or not.
         final Date journalEntriesTransactionDate = journalEntries.get(0).getTransactionDate();
         final GLClosure latestGLClosureByBranch = this.glClosureRepository.getLatestGLClosureByBranch(officeId);
@@ -563,7 +563,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             }
         }
     }
-    
+
     private void validateBusinessRulesForJournalEntries(final JournalEntryCommand command) {
         /** check if date of Journal entry is valid ***/
         final LocalDate entryLocalDate = command.getTransactionDate();

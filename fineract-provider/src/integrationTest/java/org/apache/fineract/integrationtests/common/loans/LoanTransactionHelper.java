@@ -190,7 +190,7 @@ public class LoanTransactionHelper {
     public HashMap disburseLoan(final String date, final Integer loanID) {
         return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID), getDisburseLoanAsJSON(date, null));
     }
-    
+
     public HashMap disburseLoanWithRepaymentReschedule(final String date, final Integer loanID, String adjustRepaymentDate) {
         return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID), getDisburseLoanWithRepaymentRescheduleAsJSON(date,
                 null, adjustRepaymentDate));
@@ -203,7 +203,7 @@ public class LoanTransactionHelper {
     public Object disburseLoan(final String date, final Integer loanID, ResponseSpecification responseValidationError) {
         return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID), getDisburseLoanAsJSON(date, null),  responseValidationError);
     }
-    
+
     public HashMap disburseLoanToSavings(final String date, final Integer loanID) {
         return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_TO_SAVINGS_COMMAND, loanID), getDisburseLoanAsJSON(date, null));
     }
@@ -215,7 +215,7 @@ public class LoanTransactionHelper {
         System.out.println("IN DISBURSE LOAN URL " + url);
         return performLoanTransaction(createLoanOperationURL(UNDO_DISBURSE_LOAN_COMMAND, loanID), undoDisburseJson);
     }
-    
+
     public Float undoLastDisbursal(final Integer loanID) {
         final String undoLastDisburseJson = "{'note' : 'UNDO LAST DISBURSAL'}";
         final String url = createLoanOperationURL(UNDO_LAST_DISBURSE_LOAN_COMMAND, loanID);
@@ -267,7 +267,7 @@ public class LoanTransactionHelper {
         final String ADD_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(this.requestSpec, responseSpecification, ADD_CHARGES_URL, request, "");
     }
-    
+
     public Integer updateChargesForLoan(final Integer loanId, final Integer loanchargeId, final String request) {
         System.out.println("--------------------------------- ADD CHARGES FOR LOAN --------------------------------");
         final String UPDATE_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + loanchargeId + "?"
@@ -312,7 +312,7 @@ public class LoanTransactionHelper {
         System.out.println("Loan Application disburse request : " + map);
         return new Gson().toJson(map);
     }
-    
+
     private String getDisburseLoanWithRepaymentRescheduleAsJSON(final String actualDisbursementDate, final String transactionAmount, final String adjustRepaymentDate) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
@@ -509,7 +509,7 @@ public class LoanTransactionHelper {
                 "changes");
         return (HashMap) response.get("status");
     }
-    
+
     private Float performUndoLastLoanDisbursementTransaction(final String postURLForLoanTransaction, final String jsonToBeSent) {
 
         final HashMap response = Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForLoanTransaction, jsonToBeSent,
@@ -520,10 +520,10 @@ public class LoanTransactionHelper {
     private Object performLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent, final String responseAttribute) {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForLoanTransaction, jsonToBeSent, responseAttribute);
     }
-    
+
     private Object performLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent, ResponseSpecification responseValidationError) {
-        
-        return  Utils.performServerPost(this.requestSpec, responseValidationError, postURLForLoanTransaction, jsonToBeSent, CommonConstants.RESPONSE_ERROR);               
+
+        return  Utils.performServerPost(this.requestSpec, responseValidationError, postURLForLoanTransaction, jsonToBeSent, CommonConstants.RESPONSE_ERROR);
    }
 
     public Object adjustLoanTransaction(final Integer loanId, final Integer transactionId, final String date,
@@ -635,7 +635,7 @@ public class LoanTransactionHelper {
         map.put("locale", "en");
         return new Gson().toJson(map);
     }
-    
+
     public HashMap createTrancheDetail(final String id, final String date, final String amount) {
         HashMap<String, Object> detail = new HashMap<>();
         if(id != null){
@@ -646,30 +646,30 @@ public class LoanTransactionHelper {
 
         return detail;
     }
-    
-    public Object editDisbursementDetail(final Integer loanID, final Integer disbursementId, final String approvalAmount, final String expectedDisbursementDate, 
+
+    public Object editDisbursementDetail(final Integer loanID, final Integer disbursementId, final String approvalAmount, final String expectedDisbursementDate,
             final String updatedExpectedDisbursementDate, final String updatedPrincipal, final String jsonAttributeToGetBack) {
-        
-        return Utils.performServerPut(this.requestSpec, this.responseSpec, createEditDisbursementURL(loanID, disbursementId), getEditDisbursementsAsJSON(approvalAmount, expectedDisbursementDate, 
+
+        return Utils.performServerPut(this.requestSpec, this.responseSpec, createEditDisbursementURL(loanID, disbursementId), getEditDisbursementsAsJSON(approvalAmount, expectedDisbursementDate,
                 updatedExpectedDisbursementDate, updatedPrincipal), jsonAttributeToGetBack);
     }
-    
+
     public Object addAndDeleteDisbursementDetail(final Integer loanID, final String approvalAmount, final String expectedDisbursementDate
             , List<HashMap> disbursementData, final String jsonAttributeToGetBack) {
-        
-        return Utils.performServerPut(this.requestSpec, this.responseSpec, createAddAndDeleteDisbursementURL(loanID), 
+
+        return Utils.performServerPut(this.requestSpec, this.responseSpec, createAddAndDeleteDisbursementURL(loanID),
                 getAddAndDeleteDisbursementsAsJSON(approvalAmount, expectedDisbursementDate, disbursementData), jsonAttributeToGetBack);
     }
-    
+
     private String createEditDisbursementURL(Integer loanID, Integer disbursementId) {
         return "/fineract-provider/api/v1/loans/" + loanID + "/disbursements/" + disbursementId + "?" + Utils.TENANT_IDENTIFIER;
     }
-    
+
     private String createAddAndDeleteDisbursementURL(Integer loanID) {
         return "/fineract-provider/api/v1/loans/" + loanID + "/disbursements/editDisbursements?" +  Utils.TENANT_IDENTIFIER;
     }
-    
-    public static String getEditDisbursementsAsJSON(final String approvalAmount, final String expectedDisbursementDate, 
+
+    public static String getEditDisbursementsAsJSON(final String approvalAmount, final String expectedDisbursementDate,
             final String updatedExpectedDisbursementDate, final String updatedPrincipal) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
@@ -682,8 +682,8 @@ public class LoanTransactionHelper {
         System.out.println(json);
         return json;
     }
-    
-    public static String getAddAndDeleteDisbursementsAsJSON(final String approvalAmount, final String expectedDisbursementDate, 
+
+    public static String getAddAndDeleteDisbursementsAsJSON(final String approvalAmount, final String expectedDisbursementDate,
             final List<HashMap> disbursementData) {
         final HashMap map = new HashMap<>();
         map.put("locale", "en");

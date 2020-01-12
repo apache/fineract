@@ -45,27 +45,27 @@ public class TopicTest {
 
     @Mock
     private OfficeRepository officeRepository;
-    
+
     @Mock
     private RoleRepository roleRepository;
-    
+
     @Mock
     private TopicWritePlatformService topicWritePltfService;
-    
+
     @Mock
     private TopicRepository topicRepository;
-    
+
     @Mock
     private TopicSubscriberWritePlatformService topicSubscriberWritePltfService;
-    
+
     @Mock
     private AppUserRepository appUserRepository;
-    
+
     @Test
     public void testTopicStorage() {
         Office office = officeRepository.getOne(1L);
         Role role = new Role("New Member_Type", "Testing topic creation");
-        
+
         String title = role.getName() + " of " + office.getName();
         Long entityId = office.getId();
         String entityType = "";
@@ -79,32 +79,32 @@ public class TopicTest {
         when(this.officeRepository.getOne(1L)).thenReturn(office);
         when(this.roleRepository.save(role)).thenReturn(role);
         when(this.topicWritePltfService.create(refEq(topic))).thenReturn(1L);
-        
+
         this.roleRepository.save(role);
         Long topicId = this.topicWritePltfService.create(topic);
-        
+
         verify(this.roleRepository, times(1)).save(role);
         verify(this.topicWritePltfService, times(1)).create(refEq(topic));
         assertEquals(topicId, new Long(1));
-    
+
     }
-    
+
     @Test
     public void testTopicSubscriberStorage() {
         AppUser user = appUserRepository.findById(1L).get();
         Topic topic = topicRepository.findById(1L).get();
-        
+
         TopicSubscriber topicSubscriber = new TopicSubscriber(topic, user, new Date());
-        
+
         when(this.appUserRepository.getOne(1L)).thenReturn(user);
         when(this.topicRepository.getOne(1L)).thenReturn(topic);
         when(this.topicSubscriberWritePltfService.create(refEq(topicSubscriber))).thenReturn(1L);
-        
+
         Long subscriberId = this.topicSubscriberWritePltfService.create(topicSubscriber);
-        
+
         verify(this.topicSubscriberWritePltfService, times(1)).create(refEq(topicSubscriber));
         assertEquals(subscriberId, new Long(1));
-        
+
     }
-    
+
 }

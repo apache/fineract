@@ -59,11 +59,11 @@ public class SavingsDueData {
         this.dueAmount = dueAmount;
         this.depositAccountType = depositAccountType;
     }
-    
+
     public String productName() {
         return this.productName;
     }
-    
+
     public Long productId() {
         return this.productId;
     }
@@ -71,5 +71,5 @@ public class SavingsDueData {
     public String getDepositAccountType() {
         return depositAccountType;
     }
-    
+
 }

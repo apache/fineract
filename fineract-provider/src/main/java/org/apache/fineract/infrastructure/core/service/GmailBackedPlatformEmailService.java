@@ -30,9 +30,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GmailBackedPlatformEmailService implements PlatformEmailService {
-    
+
     private final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService;
-    
+
     @Autowired
     public GmailBackedPlatformEmailService(final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService){
         this.externalServicesReadPlatformService = externalServicesReadPlatformService;

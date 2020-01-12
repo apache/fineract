@@ -126,7 +126,7 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
         }catch(EmptyResultDataAccessException e){
             return isJobPresent;
         }
-        
+
     }
 
     private static final class JobDetailMapper implements RowMapper<JobDetailData> {

@@ -298,7 +298,7 @@ public class FixedDepositAccount extends SavingsAccount {
         final SavingsInterestCalculationDaysInYearType daysInYearType = SavingsInterestCalculationDaysInYearType
                 .fromInt(this.interestCalculationDaysInYearType);
         List<LocalDate> postedAsOnTransactionDates= getManualPostingDates();
-        
+
         final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(
                 accountSubmittedOrActivationDate(), maturityDate, postingPeriodType, financialYearBeginningMonth,
                 postedAsOnTransactionDates);
@@ -826,7 +826,7 @@ public class FixedDepositAccount extends SavingsAccount {
     public BigDecimal minBalanceForInterestCalculation() {
         return null;
     }
-    
+
     @Override
     public void loadLazyCollections() {
         super.loadLazyCollections();

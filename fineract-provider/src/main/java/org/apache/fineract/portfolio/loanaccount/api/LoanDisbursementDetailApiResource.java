@@ -79,7 +79,7 @@ public class LoanDisbursementDetailApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateDisbursementDate(@PathParam("loanId") final Long loanId, @PathParam("disbursementId") final Long disbursementId,
             final String apiRequestBodyAsJson) {
-        
+
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateDisbusementDate(loanId, disbursementId)
                     .withJson(apiRequestBodyAsJson).build();
 
@@ -87,7 +87,7 @@ public class LoanDisbursementDetailApiResource {
 
         return this.toApiJsonSerializer.serialize(result);
     }
-   
+
     @PUT
     @Path("editDisbursements")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -101,7 +101,7 @@ public class LoanDisbursementDetailApiResource {
 
         return this.toApiJsonSerializer.serialize(result);
     }
-    
+
     @GET
     @Path("{disbursementId}")
     @Consumes({ MediaType.APPLICATION_JSON })

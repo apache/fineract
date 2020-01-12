@@ -62,9 +62,9 @@ public class AdHocApiResource {
 
     /**
      * The set of parameters that are supported in response for {@link AdhocData}
-     */ 
+     */
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "query", "tableName","tableField","isActive","createdBy","createdOn","createdById","updatedById","updatedOn","email"));
-    
+
     private final PlatformSecurityContext context;
     private final AdHocReadPlatformService adHocReadPlatformService;
     private final DefaultToApiJsonSerializer<AdHocData> toApiJsonSerializer;
@@ -87,7 +87,7 @@ public class AdHocApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAll(@Context final UriInfo uriInfo) {
-        
+
         this.context.authenticatedUser();
         final Collection<AdHocData> adhocs = this.adHocReadPlatformService.retrieveAllAdHocQuery();
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -149,7 +149,7 @@ public class AdHocApiResource {
     }
      /**
      * Delete AdHocQuery
-     * 
+     *
      * @param adHocId
      * @return
      */

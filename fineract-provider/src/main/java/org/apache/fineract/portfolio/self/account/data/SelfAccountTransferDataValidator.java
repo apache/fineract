@@ -156,13 +156,13 @@ public class SelfAccountTransferDataValidator {
 
         validateUserAccounts(fromAccount, toAccount, baseDataValidator, type);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
-        
+
         Map<String, Object> ret = new HashMap<>();
         ret.put("fromAccount", fromAccount);
         ret.put("toAccount", toAccount);
         ret.put("transactionDate", transactionDate);
         ret.put("transactionAmount", transactionAmount);
-        
+
         return ret;
 
     }

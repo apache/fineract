@@ -89,5 +89,5 @@ public class FineractEntityToEntityMappingData implements Serializable {
         return fromEntity;
     }
 
-    
+
 }

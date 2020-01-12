@@ -35,13 +35,13 @@ public class SmsProviderData {
     private String smsProvider;
     private String smsProviderAccountId;
     private String smsProviderToken;
-    
+
     private String tenantId;
     private String mifosToken;
     private String endpoint;
-    
+
     public SmsProviderData(final Set<HookConfiguration> config) {
-        
+
         for (final HookConfiguration conf : config) {
             final String fieldName = conf.getFieldName();
             if (fieldName.equals(payloadURLName)) {
@@ -65,7 +65,7 @@ public class SmsProviderData {
     public String getUrl() {
         return url;
     }
-    
+
     public void setUrl(String url) {
         this.url = url;
     }

@@ -221,7 +221,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         }
 
     }
-    
+
     @Override
     @Transactional
     public void reverseTransfersWithFromAccountTransactions(final Collection<Long> fromTransactionIds, final PortfolioAccountType accountTypeId) {
@@ -473,7 +473,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     private boolean isSavingsToSavingsAccountTransfer(final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType) {
         return fromAccountType.isSavingsAccount() && toAccountType.isSavingsAccount();
     }
-    
+
     @Override
     @Transactional
     public CommandProcessingResult refundByTransfer(JsonCommand command) {
@@ -486,7 +486,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
 
-        final PaymentDetail paymentDetail = null; 
+        final PaymentDetail paymentDetail = null;
         Long transferTransactionId = null;
 
         final Long fromLoanAccountId = command.longValueOfParameterNamed(fromAccountIdParamName);

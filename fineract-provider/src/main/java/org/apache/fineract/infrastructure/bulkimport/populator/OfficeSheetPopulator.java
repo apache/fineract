@@ -70,7 +70,7 @@ public class OfficeSheetPopulator extends AbstractWorkbookPopulator {
   public List<OfficeData> getOffices() {
     return offices;
   }
-  
+
   public List<String> getOfficeNames() {
          List<String> officeNames=new ArrayList<>();
          for (OfficeData office : offices) {
@@ -78,5 +78,5 @@ public class OfficeSheetPopulator extends AbstractWorkbookPopulator {
         }
          return officeNames;
   }
-  
+
 }

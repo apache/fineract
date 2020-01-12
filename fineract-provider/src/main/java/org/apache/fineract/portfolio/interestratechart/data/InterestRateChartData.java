@@ -199,7 +199,7 @@ public class InterestRateChartData {
         return this.clientClassificationOptions;
     }
 
-    
+
     public boolean isPrimaryGroupingByAmount() {
         return this.isPrimaryGroupingByAmount;
     }

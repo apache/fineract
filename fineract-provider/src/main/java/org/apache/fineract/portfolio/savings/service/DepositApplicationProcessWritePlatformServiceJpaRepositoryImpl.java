@@ -344,7 +344,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             final Integer repeatsOnDay = calendarStartDate.getDayOfWeek();
             final String title = "recurring_savings_" + account.getId();
-            
+
             final Calendar calendar = Calendar.createRepeatingCalendar(title, calendarStartDate, CalendarType.COLLECTION.getValue(),
                     CalendarFrequencyType.from(periodFrequencyType), frequency, repeatsOnDay, null);
             calendarInstance = CalendarInstance.from(calendar, account.getId(), CalendarEntityType.SAVINGS.getValue());

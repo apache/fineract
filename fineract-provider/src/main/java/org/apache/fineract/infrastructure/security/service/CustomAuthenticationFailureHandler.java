@@ -101,7 +101,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
 
     /**
      * The URL which will be used as the failure destination.
-     * 
+     *
      * @param defaultFailureUrl
      *            the failure URL, for example "/loginFailed.jsp".
      */

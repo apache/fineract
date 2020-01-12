@@ -25,7 +25,7 @@ public enum ChargeAppliesTo {
     SAVINGS(2, "chargeAppliesTo.savings"), //
     CLIENT(3, "chargeAppliesTo.client"),
     SHARES(4, "chargeAppliesTo.shares");
-    
+
     private final Integer value;
     private final String code;
 

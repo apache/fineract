@@ -53,7 +53,7 @@ public class AppUserData {
     private final Collection<RoleData> selectedRoles;
     private final StaffData staff;
     private final Boolean isSelfServiceUser;
-    
+
     @SuppressWarnings("unused")
     private Set<ClientData> clients;
 
@@ -158,11 +158,11 @@ public class AppUserData {
     public int hashCode() {
         return id != null ? id.hashCode() : 0;
     }
-    
+
     public void setClients(Set<ClientData> clients){
         this.clients = clients;
     }
-    
+
     public boolean isSelfServiceUser() {
         return this.isSelfServiceUser==null?false:this.isSelfServiceUser;
     }

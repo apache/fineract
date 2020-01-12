@@ -159,10 +159,10 @@ public class ClientsApiResource {
             @QueryParam("orderBy") @ApiParam(value = "orderBy") final String orderBy, @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder,
             @QueryParam("orphansOnly") @ApiParam(value = "orphansOnly") final Boolean orphansOnly) {
 
-        return this.retrieveAll(uriInfo, sqlSearch, officeId, externalId, displayName, firstname, 
+        return this.retrieveAll(uriInfo, sqlSearch, officeId, externalId, displayName, firstname,
                 lastname, hierarchy, offset, limit, orderBy, sortOrder, orphansOnly, false);
     }
-    
+
     public String retrieveAll(final UriInfo uriInfo, final String sqlSearch,
             final Long officeId, final String externalId,
             final String displayName, final String firstname,

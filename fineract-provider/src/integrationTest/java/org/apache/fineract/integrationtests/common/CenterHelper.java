@@ -97,7 +97,7 @@ public class CenterHelper {
             hm.put("dateFormat", "dd MMM yyyy");
             hm.put("activationDate", activationDate);
         }
-        
+
         System.out.println("------------------------CREATING CENTER-------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CENTER_URL, new Gson().toJson(hm), "resourceId");
     }
@@ -183,7 +183,7 @@ public class CenterHelper {
     }
 
     public static String getTestCenterWithStaffAsJSON(final boolean active, final String activationDate, final Integer staffId) {
-       
+
         Integer id = null;
         Integer statusid = null;
         String statuscode = null;
@@ -201,7 +201,7 @@ public class CenterHelper {
     }
 
     public static String getTestCenterAsJSON(final boolean active, final String activationDate) {
-      
+
         Integer id = null;
         Integer statusid = null;
         String statuscode = null;
@@ -217,7 +217,7 @@ public class CenterHelper {
 
         return CenterDomain.jsonRequestToCreateCenter(id, statusid, statuscode, statusvalue, active, activationDate,submittedDate,name,
                 externalId, staffId, officeID, officeName, hierarchy, groupMembers);
-        
+
     }
 
     public static String assignStaffAsJSON(final Long staffId) {

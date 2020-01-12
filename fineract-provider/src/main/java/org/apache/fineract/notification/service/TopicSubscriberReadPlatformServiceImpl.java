@@ -34,12 +34,12 @@ import org.springframework.stereotype.Service;
 public class TopicSubscriberReadPlatformServiceImpl implements TopicSubscriberReadPlatformService{
 
     private final JdbcTemplate jdbcTemplate;
-    
+
     @Autowired
     public TopicSubscriberReadPlatformServiceImpl(final RoutingDataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
-    
+
     private static final class TopicSubscriberMapper implements RowMapper<TopicSubscriberData> {
 
         private final String schema;

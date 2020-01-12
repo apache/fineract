@@ -86,7 +86,7 @@ public class AccountNumberPreferencesTest {
     private Integer groupID;
     private Integer centerId;
     private String groupAccountNo;
-    
+
     @Before
     public void setup() {
         Utils.initializeRESTAssured();
@@ -191,17 +191,17 @@ public class AccountNumberPreferencesTest {
         this.savingsAccountNumberPreferenceId = (Integer) this.accountNumberPreferencesHelper.createSavingsAccountNumberPreference(
                 this.responseSpec, "resourceId");
         System.out.println("Successfully created account number preferences for Savings (ID: " + this.savingsAccountNumberPreferenceId);
-        
+
         this.groupsAccountNumberPreferenceId = (Integer) this.accountNumberPreferencesHelper.createGroupsAccountNumberPreference(
                 this.responseSpec, "resourceId");
         System.out.println("Successfully created account number preferences for Groups (ID: " + this.groupsAccountNumberPreferenceId);
-        
+
         this.centerAccountNumberPreferenceId = (Integer) this.accountNumberPreferencesHelper.createCenterAccountNumberPreference(
                 this.responseSpec, "resourceId");
         System.out.println("Successfully created account number preferences for Center (ID: " + this.centerAccountNumberPreferenceId);
 
         this.accountNumberPreferencesHelper.verifyCreationOfAccountNumberPreferences(this.clientAccountNumberPreferenceId,
-                this.loanAccountNumberPreferenceId, this.savingsAccountNumberPreferenceId, this.groupsAccountNumberPreferenceId, 
+                this.loanAccountNumberPreferenceId, this.savingsAccountNumberPreferenceId, this.groupsAccountNumberPreferenceId,
                 this.centerAccountNumberPreferenceId, this.responseSpec, this.requestSpec);
 
         this.createAccountNumberPreferenceInvalidData("1000", "1001");
@@ -278,7 +278,7 @@ public class AccountNumberPreferencesTest {
             this.createAndValidateClientWithoutAccountPreference();
         }
     }
-    
+
     private void createAndValidateGroup(Boolean isAccountPreferenceSetUp) {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec);
@@ -286,25 +286,25 @@ public class AccountNumberPreferencesTest {
 
         this.groupID = GroupHelper.activateGroup(this.requestSpec, this.responseSpec, groupID.toString());
         GroupHelper.verifyGroupActivatedOnServer(this.requestSpec, this.responseSpec, groupID, true);
-        
+
         final String GROUP_URL = "/fineract-provider/api/v1/groups/" + this.groupID + "?" + Utils.TENANT_IDENTIFIER;
         this.groupAccountNo = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "accountNo");
-        
+
         if (isAccountPreferenceSetUp) {
             String groupsPrefixName = (String) this.accountNumberPreferencesHelper.getAccountNumberPreference(
                     this.groupsAccountNumberPreferenceId, "prefixType.value");
-            
+
             if (groupsPrefixName.equals(this.officeName)) {
-                
+
                 final String groupOfficeName = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "officeName");
-                
+
                 this.validateAccountNumberLengthAndStartsWithPrefix(this.groupAccountNo, groupOfficeName);
             }
         } else {
             validateAccountNumberLengthAndStartsWithPrefix(this.groupAccountNo, null);
         }
     }
-    
+
     private void createAndValidateCenter(Boolean isAccountPreferenceSetUp) {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         Integer officeId = new OfficeHelper(requestSpec, responseSpec).createOffice("01 July 2007");
@@ -314,21 +314,21 @@ public class AccountNumberPreferencesTest {
         CenterDomain center = CenterHelper.retrieveByID(centerId, requestSpec, responseSpec);
         Assert.assertNotNull(center);
         Assert.assertTrue(center.getName().equals(name));
-        
+
         if (isAccountPreferenceSetUp) {
             String centerPrefixName = (String) this.accountNumberPreferencesHelper.getAccountNumberPreference(
                     this.centerAccountNumberPreferenceId, "prefixType.value");
             final String CENTER_URL = "/fineract-provider/api/v1/centers/" + this.centerId + "?" + Utils.TENANT_IDENTIFIER;
-            
+
             if (centerPrefixName.equals(this.officeName)) {
-                final String centerOfficeName = Utils.performServerGet(requestSpec, responseSpec, CENTER_URL, "officeName");  
+                final String centerOfficeName = Utils.performServerGet(requestSpec, responseSpec, CENTER_URL, "officeName");
                 this.validateAccountNumberLengthAndStartsWithPrefix(center.getAccountNo(), centerOfficeName);
             }
-        } else {    
+        } else {
             validateAccountNumberLengthAndStartsWithPrefix(center.getAccountNo(), null);
         }
     }
-    
+
 
     private void createAndValidateClientWithoutAccountPreference() {
         this.clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);

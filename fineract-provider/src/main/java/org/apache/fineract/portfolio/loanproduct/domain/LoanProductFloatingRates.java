@@ -62,12 +62,12 @@ public class LoanProductFloatingRates extends AbstractPersistableCustom<Long> {
 
     @Column(name = "is_floating_interest_rate_calculation_allowed", nullable = false)
     private boolean isFloatingInterestRateCalculationAllowed;
-    
+
     public LoanProductFloatingRates(){
-        
+
     }
-    public LoanProductFloatingRates(FloatingRate floatingRate, LoanProduct loanProduct, BigDecimal interestRateDifferential, 
-            BigDecimal minDifferentialLendingRate, BigDecimal maxDifferentialLendingRate, BigDecimal defaultDifferentialLendingRate, 
+    public LoanProductFloatingRates(FloatingRate floatingRate, LoanProduct loanProduct, BigDecimal interestRateDifferential,
+            BigDecimal minDifferentialLendingRate, BigDecimal maxDifferentialLendingRate, BigDecimal defaultDifferentialLendingRate,
             boolean isFloatingInterestRateCalculationAllowed){
         this.floatingRate = floatingRate;
         this.loanProduct = loanProduct;

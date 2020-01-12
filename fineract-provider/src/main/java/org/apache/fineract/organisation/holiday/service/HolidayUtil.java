@@ -57,7 +57,7 @@ public class HolidayUtil {
 
         return false;
     }
-    
+
     public static Holiday getApplicableHoliday(final LocalDate repaymentDate, final List<Holiday> holidays) {
         Holiday referedHoliday = null;
         for (final Holiday holiday : holidays) {

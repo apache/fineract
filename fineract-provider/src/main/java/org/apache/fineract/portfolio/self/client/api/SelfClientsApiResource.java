@@ -247,7 +247,7 @@ public class SelfClientsApiResource {
             throw new ClientNotFoundException(clientId);
         }
     }
-    
+
     @POST
     @Path("{clientId}/images")
     @Consumes({ MediaType.MULTIPART_FORM_DATA })
@@ -262,7 +262,7 @@ public class SelfClientsApiResource {
                 inputStream, fileDetails, bodyPart);
 
     }
-    
+
     @POST
     @Path("{clientId}/images")
     @Consumes({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON })
@@ -279,7 +279,7 @@ public class SelfClientsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteClientImage(@PathParam("clientId") final Long clientId) {
-        
+
         validateAppuserClientsMapping(clientId);
         return this.imagesApiResource.deleteClientImage(ClientApiConstants.clientEntityName, clientId);
 

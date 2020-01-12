@@ -25,21 +25,21 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.Role;
 
 public interface TopicDomainService {
-    
+
     public void createTopic( Office newOffice );
-    
+
     public void createTopic( Role newRole );
-    
+
     public void updateTopic( Office updatedOffice, Map<String, Object> changes );
-    
+
     public void updateTopic( String previousRolename, Role updatedRole, Map<String, Object> changes );
-    
+
     public void deleteTopic( Role role );
-    
+
     public void subscribeUserToTopic( AppUser newUser );
-    
+
     public void updateUserSubscription( AppUser userToUpdate, Map<String, Object> changes );
-    
+
     public void unsubcribeUserFromTopic( AppUser user );
-    
+
 }

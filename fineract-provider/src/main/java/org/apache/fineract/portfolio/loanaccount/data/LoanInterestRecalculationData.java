@@ -83,7 +83,7 @@ public class LoanInterestRecalculationData {
                 recalculationData.recalculationRestFrequencyOnDay, compoundingCalendarData,
                 recalculationData.recalculationCompoundingFrequencyType, recalculationData.recalculationCompoundingFrequencyInterval,
                 recalculationData.recalculationCompoundingFrequencyNthDay, recalculationData.recalculationCompoundingFrequencyWeekday,
-                recalculationData.recalculationCompoundingFrequencyOnDay, recalculationData.isCompoundingToBePostedAsTransaction, 
+                recalculationData.recalculationCompoundingFrequencyOnDay, recalculationData.isCompoundingToBePostedAsTransaction,
                 recalculationData.allowCompoundingOnEod);
     }
 

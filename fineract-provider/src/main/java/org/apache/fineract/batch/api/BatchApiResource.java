@@ -50,9 +50,9 @@ import org.springframework.stereotype.Component;
  * forwarded to BatchApiService which finally returns a list of
  * {@link org.apache.fineract.batch.domain.BatchResponse} type which is then
  * serialized into JSON response by this Resource class.
- * 
+ *
  * @author Rishabh Shukla
- * 
+ *
  * @see org.apache.fineract.batch.service.BatchApiService
  * @see org.apache.fineract.batch.domain.BatchRequest
  * @see org.apache.fineract.batch.domain.BatchResponse
@@ -70,11 +70,11 @@ public class BatchApiResource {
     private final ToApiJsonSerializer<BatchResponse> toApiJsonSerializer;
     private final BatchApiService service;
     private final BatchRequestJsonHelper batchRequestJsonHelper;
-    
+
     /**
      * Constructs a 'BatchApiService' with context, toApiJsonSerializer, service
      * and batchRequestJsonHelper.
-     * 
+     *
      * @param context
      * @param toApiJsonSerializer
      * @param service
@@ -93,7 +93,7 @@ public class BatchApiResource {
     /**
      * Rest assured POST method to get {@link BatchRequest} and returns back the
      * consolidated {@link BatchResponse}
-     * 
+     *
      * @param jsonRequestString
      * @param enclosingTransaction
      * @param uriInfo

@@ -113,7 +113,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
     private final DeviceRegistrationRepositoryWrapper deviceRegistrationRepository;
 
     private final SmsMessageScheduledJobService smsMessageScheduledJobService;
-    
+
     @Autowired
     public SmsCampaignWritePlatformServiceJpaImpl(final PlatformSecurityContext context, final SmsCampaignRepository smsCampaignRepository,
             final SmsCampaignValidator smsCampaignValidator, final ReportRepository reportRepository,
@@ -260,7 +260,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
             HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsCampaign.getParamValue(),
                     new TypeReference<HashMap<String, String>>() {});
             campaignParams.put("loanId", loan.getId().toString());
-            
+
             HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(smsCampaign.getParamValue(),
                     new TypeReference<HashMap<String, String>>() {});
             queryParamForRunReport.put("loanId", loan.getId().toString());
@@ -277,7 +277,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
             for (Client client : clientSet) {
                 campaignParams.put("clientId", client.getId().toString());
                 queryParamForRunReport.put("clientId", client.getId().toString());
-                
+
                 List<HashMap<String, Object>> runReportObject = this.getRunReportByServiceImpl(campaignParams.get("reportName"),
                         queryParamForRunReport);
 
@@ -285,7 +285,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                     for (HashMap<String, Object> entry : runReportObject) {
                         String textMessage = this.compileSmsTemplate(smsCampaign.getMessage(), smsCampaign.getCampaignName(), entry);
                         Object mobileNo = entry.get("mobileNo");
-                        
+
                         if (this.smsCampaignValidator.isValidNotificationOrSms(client, smsCampaign, mobileNo)) {
                             String mobileNumber = null;
                             if(mobileNo != null){
@@ -319,10 +319,10 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
             campaignParams.put("clientId", client.getId().toString());
             HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(smsCampaign.getParamValue(),
                     new TypeReference<HashMap<String, String>>() {});
-            
+
             campaignParams.put("clientId", client.getId().toString());
             queryParamForRunReport.put("clientId", client.getId().toString());
-            
+
             List<HashMap<String, Object>> runReportObject = this
                     .getRunReportByServiceImpl(campaignParams.get("reportName"), queryParamForRunReport);
 
@@ -355,7 +355,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
             logger.error(e.getMessage()) ;
         }
     }
-    
+
     @Override
     public void insertDirectCampaignIntoSmsOutboundTable(final SavingsAccount savingsAccount, final SmsCampaign smsCampaign) {
         try {
@@ -365,7 +365,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
             HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(smsCampaign.getParamValue(),
                     new TypeReference<HashMap<String, String>>() {});
             queryParamForRunReport.put("savingsId", savingsAccount.getId().toString());
-            
+
             Client client = savingsAccount.getClient() ;
             List<HashMap<String, Object>> runReportObject = this
                     .getRunReportByServiceImpl(campaignParams.get("reportName"), queryParamForRunReport);
@@ -399,7 +399,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
             logger.error(e.getMessage()) ;
         }
     }
-    
+
     private void updateTriggerDates(Long campaignId) {
         final SmsCampaign smsCampaign = this.smsCampaignRepository.findById(campaignId)
                 .orElseThrow(() -> new SmsCampaignNotFound(campaignId));
@@ -687,7 +687,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         }
         return today;
     }
-    
+
 //    private String formatDestinationPhoneNumber(String phoneNumber, String countryCallingCode) {
 //        StringBuilder formatedPhoneNumber = new StringBuilder("+");
 //

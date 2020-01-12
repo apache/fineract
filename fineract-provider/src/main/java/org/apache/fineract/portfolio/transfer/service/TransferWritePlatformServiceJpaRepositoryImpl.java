@@ -101,7 +101,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.clientTransferDetailsRepositoryWrapper = clientTransferDetailsRepositoryWrapper;
         this.context = context;
-        
+
     }
 
     @Override
@@ -250,7 +250,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     /**
      * This API is meant for transferring clients between branches mainly by
      * Organizations following an Individual lending Model <br>
-     * 
+     *
      * @param clientId
      * @param jsonCommand
      * @return
@@ -281,7 +281,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
      * If the Client is linked to any Groups, we can optionally choose to have
      * all the linkages broken and all JLG Loans are converted into Individual
      * Loans
-     * 
+     *
      * @param clientId
      * @param jsonCommand
      * @return
@@ -314,7 +314,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
      * If the Client is linked to any Groups, we can optionally choose to have
      * all the linkages broken and all JLG Loans are converted into Individual
      * Loans
-     * 
+     *
      * @param clientId
      * @param jsonCommand
      * @return

@@ -30,9 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = "PROVISIONCATEGORY", action = "CREATE")
 public class CreateProvisioningCategoryRequestCommandHandler implements NewCommandSourceHandler {
-    
+
     private final ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService;
-    
+
     @Autowired
     public CreateProvisioningCategoryRequestCommandHandler(
             ProvisioningCategoryWritePlatformService provisioningCategoryWritePlatformService) {

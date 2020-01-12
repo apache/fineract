@@ -913,7 +913,7 @@ public class RecurringDepositAccount extends SavingsAccount {
     /**
      * This method is responsible for checking if the current transaction is 'an
      * advance/early payment' based on the details passed through.
-     * 
+     *
      * Default implementation is check transaction date is before installment
      * due date.
      */
@@ -1012,7 +1012,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         /*
          * //final boolean recurringFrequencyBeforeDepositPeriod =
          * recurringFrequencyBeforeDepositPeriod();
-         * 
+         *
          * if (!recurringFrequencyBeforeDepositPeriod) {
          * baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
          * "recurring.frequency.not.before.deposit.period"); }
@@ -1055,7 +1055,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         /**
          * final boolean recurringFrequencyBeforeDepositPeriod =
          * recurringFrequencyBeforeDepositPeriod();
-         * 
+         *
          * if (!recurringFrequencyBeforeDepositPeriod) {
          * baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
          * "recurring.frequency.not.before.deposit.period"); }
@@ -1129,7 +1129,7 @@ public class RecurringDepositAccount extends SavingsAccount {
 
         this.activatedOnDate = now.toDate();
     }
-    
+
     public void setClosedOnDate(final LocalDate closedOnDate) {
         this.closedOnDate = closedOnDate.toDate();
     }
@@ -1178,7 +1178,7 @@ public class RecurringDepositAccount extends SavingsAccount {
     private void addDepositScheduleInstallment(final RecurringDepositScheduleInstallment installment) {
         this.depositScheduleInstallments.add(installment) ;
     }
-    
+
     public boolean isCalendarInherited() {
         return this.recurringDetail.isCalendarInherited();
     }
@@ -1218,7 +1218,7 @@ public class RecurringDepositAccount extends SavingsAccount {
     public DepositAccountRecurringDetail getRecurringDetail() {
         return this.recurringDetail;
     }
-    
+
     class RecurringDepositScheduleInstallmentComparator implements Comparator<RecurringDepositScheduleInstallment> {
 
         @Override
@@ -1227,7 +1227,7 @@ public class RecurringDepositAccount extends SavingsAccount {
            return comparsion ;
         }
     }
-    
+
     @Override
     public void loadLazyCollections() {
         this.depositScheduleInstallments.size() ;

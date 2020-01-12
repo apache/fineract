@@ -64,7 +64,7 @@ public class HolidayHelper {
         System.out.println(HolidayCreateJson);
         return HolidayCreateJson;
     }
-    
+
     public static String getActivateHolidayDataAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
         String activateHoliday = new Gson().toJson(map);
@@ -75,12 +75,12 @@ public class HolidayHelper {
     public static Integer createHolidays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_HOLIDAY_URL, getCreateHolidayDataAsJSON(), "resourceId");
     }
-    
+
     public static Integer activateHolidays(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String holidayID) {
-        final String ACTIVATE_HOLIDAY_URL = HOLIDAYS_URL + "/" + holidayID + "?command=activate&" + Utils.TENANT_IDENTIFIER; 
+        final String ACTIVATE_HOLIDAY_URL = HOLIDAYS_URL + "/" + holidayID + "?command=activate&" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, ACTIVATE_HOLIDAY_URL, getActivateHolidayDataAsJSON(), "resourceId");
     }
-    
+
     public static HashMap getHolidayById(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String holidayID) {
         final String GET_HOLIDAY_BY_ID_URL = HOLIDAYS_URL + "/" + holidayID + "?" + Utils.TENANT_IDENTIFIER;

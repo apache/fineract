@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
  * <code>findByCodeNameAndId</code> repository methods and throwing an
  * appropriate not found exception.
  * </p>
- * 
+ *
  * <p>
  * This is to avoid need for checking and throwing in multiple areas of code
  * base where {@link CodeValueRepository} is required.
@@ -54,11 +54,11 @@ public class CodeValueRepositoryWrapper {
         if (codeValue == null) { throw new CodeValueNotFoundException(codeName, id); }
         return codeValue;
     }
-    
+
     public CodeValue findOneByCodeNameAndLabelWithNotFoundDetection(final String codeName, final String label) {
         final CodeValue codeValue = this.repository.findByCodeNameAndLabel(codeName, label);
         if (codeValue == null) { throw new CodeValueNotFoundException(codeName, label); }
         return codeValue;
     }
-    
+
 }

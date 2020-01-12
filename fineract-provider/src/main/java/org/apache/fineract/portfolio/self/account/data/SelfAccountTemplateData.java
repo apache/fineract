@@ -111,5 +111,5 @@ public class SelfAccountTemplateData implements
         return this.accountType.getId().intValue();
     }
 
-    
+
 }

@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 public class TopicWritePlatformServiceJpaRepositoryImpl implements TopicWritePlatformService {
 
     private final TopicRepository topicRepository;
-    
+
     @Autowired
     public TopicWritePlatformServiceJpaRepositoryImpl(TopicRepository topicRepository) {
         this.topicRepository = topicRepository;

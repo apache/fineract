@@ -32,7 +32,7 @@ public interface InterestIncentiveApiConstants {
     public static final String incentiveTypeparamName = "incentiveType";
     public static final String amountParamName = "amount";
     public static final String deleteParamName = "delete";
-    
+
     public static final String INCENTIVE_RESOURCE_NAME = "interest.rate.incentives";
 
     public static final Set<String> INTERESTRATE_INCENTIVE_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,

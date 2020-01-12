@@ -23,7 +23,7 @@ package org.apache.fineract.organisation.teller.domain;
  */
 
 public enum TellerStatus {
-    
+
     INVALID(0, "tellerStatusType.invalid"),
     PENDING(100, "tellerStatusType.pending"),
     ACTIVE(300, "tellerStatusType.active"),
@@ -85,5 +85,5 @@ public enum TellerStatus {
     public boolean isInactive() {
         return this.value.equals(TellerStatus.INACTIVE.getValue());
     }
-    
+
 }

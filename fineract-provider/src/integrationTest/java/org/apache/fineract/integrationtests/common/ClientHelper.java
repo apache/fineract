@@ -85,9 +85,9 @@ public class ClientHelper {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestClientAsJSON(activationDate, officeId),
                 "clientId");
     }
-    
-    
-    
+
+
+
     public static Integer createClientPending(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return createClientPending(requestSpec, responseSpec, "04 March 2014");
     }
@@ -128,12 +128,12 @@ public class ClientHelper {
 
     public static Integer createClientAsPerson(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String activationDate, final String officeId) {
-        
+
         System.out.println("---------------------------------CREATING A CLIENT NON PERSON(ORGANISATION)---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestPersonClientAsJSON(activationDate, officeId),
                 "clientId");
     }
-    
+
     public static Integer createClientAsEntity(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return createClientAsEntity(requestSpec, responseSpec, "04 March 2011");
     }
@@ -145,10 +145,10 @@ public class ClientHelper {
 
     public static Integer createClientAsEntity(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String activationDate, final String officeId) {
-        
+
         Integer constitutionCodeId = (Integer) CodeHelper.getCodeByName(requestSpec, responseSpec, "Constitution").get("id");
         Integer soleProprietorCodeValueId = (Integer) CodeHelper.retrieveOrCreateCodeValue(constitutionCodeId, requestSpec, responseSpec).get("id");
-        
+
         System.out.println("---------------------------------CREATING A CLIENT NON PERSON(ORGANISATION)---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestEntityClientAsJSON(activationDate, officeId, soleProprietorCodeValueId),
                 "clientId");
@@ -191,7 +191,7 @@ public class ClientHelper {
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }
-    
+
     public static String getTestClientAsJSONPending(final String submittedOnDate, final String officeId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("officeId", officeId);
@@ -248,11 +248,11 @@ public class ClientHelper {
         map.put("active", "true");
         map.put("activationDate", dateOfJoining);
         map.put("legalFormId", 1);
-        
+
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }
-    
+
     public static String getTestEntityClientAsJSON(final String dateOfJoining, final String officeId, final Integer soleProprietorCodeValueId) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("officeId", officeId);
@@ -263,11 +263,11 @@ public class ClientHelper {
         map.put("active", "true");
         map.put("activationDate", dateOfJoining);
         map.put("legalFormId", 2);
-        
+
         final HashMap<String, Object> clientNonPersonMap = new HashMap<>();
         clientNonPersonMap.put("constitutionId", soleProprietorCodeValueId);
         map.put("clientNonPersonDetails", clientNonPersonMap);
-        
+
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }
@@ -408,8 +408,8 @@ public class ClientHelper {
         System.out.println(clientJson);
         return clientJson;
     }
-    
-    
+
+
 
     private String getWithdrawClientAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
@@ -539,7 +539,7 @@ public class ClientHelper {
         return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForClient, jsonToBeSent,
                 jsonAttributeToGetBack);
     }
-    
+
     private HashMap<String, Object> performClientActions(final String postURLForClient, final String jsonToBeSent, final Integer clientId) {
         Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForClient, jsonToBeSent, CommonConstants.RESPONSE_STATUS);
         HashMap<String, Object> response = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));

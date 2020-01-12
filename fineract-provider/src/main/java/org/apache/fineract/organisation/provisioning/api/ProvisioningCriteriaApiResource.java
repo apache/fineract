@@ -101,7 +101,7 @@ public class ProvisioningCriteriaApiResource {
         ProvisioningCriteriaData data = this.provisioningCriteriaReadPlatformService.retrievePrivisiongCriteriaTemplate();
         return this.toApiJsonSerializer.serialize(settings, data, PROVISIONING_CRITERIA_TEMPLATE_PARAMETER);
     }
-    
+
     @GET
     @Path("{criteriaId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -113,11 +113,11 @@ public class ProvisioningCriteriaApiResource {
         ProvisioningCriteriaData criteria = this.provisioningCriteriaReadPlatformService.retrieveProvisioningCriteria(criteriaId) ;
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if(settings.isTemplate()) {
-            criteria = this.provisioningCriteriaReadPlatformService.retrievePrivisiongCriteriaTemplate(criteria);   
+            criteria = this.provisioningCriteriaReadPlatformService.retrievePrivisiongCriteriaTemplate(criteria);
         }
         return this.toApiJsonSerializer.serialize(settings, criteria, PROVISIONING_CRITERIA_PARAMETERS);
     }
-        
+
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -129,7 +129,7 @@ public class ProvisioningCriteriaApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, data, ALL_PROVISIONING_CRITERIA_PARAMETERS);
     }
-    
+
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -143,7 +143,7 @@ public class ProvisioningCriteriaApiResource {
         final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
         return this.toApiJsonSerializer.serialize(commandProcessingResult);
     }
-    
+
     @PUT
     @Path("{criteriaId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -158,7 +158,7 @@ public class ProvisioningCriteriaApiResource {
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         return this.toApiJsonSerializer.serialize(result);
     }
-    
+
     @DELETE
     @Path("{criteriaId}")
     @Consumes({ MediaType.APPLICATION_JSON })

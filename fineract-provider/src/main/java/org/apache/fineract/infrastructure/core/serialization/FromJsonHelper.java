@@ -199,7 +199,7 @@ public class FromJsonHelper {
     public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element) {
         return this.helperDelegator.extractLocalDateNamed(parameterName, element, new HashSet<>());
     }
-    
+
     public LocalDateTime extractLocalTimeNamed(final String parameterName, final JsonElement element) {
         return this.helperDelegator.extractLocalTimeNamed(parameterName, element, new HashSet<>());
     }

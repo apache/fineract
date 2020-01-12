@@ -24,7 +24,7 @@ import java.math.BigDecimal;
 import org.apache.fineract.infrastructure.core.service.Page;
 
 public final class CashierTransactionsWithSummaryData implements Serializable {
-    
+
     private final BigDecimal sumCashAllocation;
     private final BigDecimal sumInwardCash;
     private final BigDecimal sumOutwardCash;
@@ -39,7 +39,7 @@ public final class CashierTransactionsWithSummaryData implements Serializable {
     private final Page<CashierTransactionData> cashierTransactions;
 
     private CashierTransactionsWithSummaryData(
-            final Page<CashierTransactionData> cashierTransactions, 
+            final Page<CashierTransactionData> cashierTransactions,
             final BigDecimal sumCashAllocation,
             final BigDecimal sumInwardCash,
             final BigDecimal sumOutwardCash,
@@ -65,7 +65,7 @@ public final class CashierTransactionsWithSummaryData implements Serializable {
     }
 
     public static CashierTransactionsWithSummaryData instance(
-            final Page<CashierTransactionData> cashierTransactions, 
+            final Page<CashierTransactionData> cashierTransactions,
             final BigDecimal sumCashAllocation,
             final BigDecimal sumInwardCash,
             final BigDecimal sumOutwardCash,
@@ -76,13 +76,13 @@ public final class CashierTransactionsWithSummaryData implements Serializable {
             final Long cashierId,
             final String cashierName
             ) {
-        
-        final BigDecimal netCash = 
+
+        final BigDecimal netCash =
                 sumCashAllocation.add(sumInwardCash).
                     subtract(sumOutwardCash).
-                    subtract(sumCashSettlement); 
+                    subtract(sumCashSettlement);
         return new CashierTransactionsWithSummaryData(
-                cashierTransactions, 
+                cashierTransactions,
                 sumCashAllocation,
                 sumInwardCash,
                 sumOutwardCash,
@@ -109,15 +109,15 @@ public final class CashierTransactionsWithSummaryData implements Serializable {
     public BigDecimal getNetCash() {
         return netCash;
     }
-    
+
     public String getOfficeName() {
         return officeName;
     }
-    
+
     public Long getTellerId() {
         return tellerId;
     }
-    
+
     public String getTellerName() {
         return tellerName;
     }
@@ -125,12 +125,12 @@ public final class CashierTransactionsWithSummaryData implements Serializable {
     public Long getCashierId() {
         return cashierId;
     }
-    
+
     public String getCashierName() {
         return cashierName;
     }
     public Page<CashierTransactionData> getCashierTransactions() {
         return cashierTransactions;
     }
-    
+
 }

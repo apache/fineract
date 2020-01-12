@@ -119,7 +119,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final String loanTypeParameterName = "loanType";
         final String loanTypeStr = this.fromApiJsonHelper.extractStringNamed(loanTypeParameterName, element);
         baseDataValidator.reset().parameter(loanTypeParameterName).value(loanTypeStr).notNull();
-        
+
         if (!StringUtils.isBlank(loanTypeStr)) {
             final AccountType loanType = AccountType.fromName(loanTypeStr);
             baseDataValidator.reset().parameter(loanTypeParameterName).value(loanType.getValue()).inMinMaxRange(1, 3);
@@ -160,7 +160,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             }
 
         }
-        
+
         boolean isEqualAmortization = false;
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.isEqualAmortizationParam, element)) {
             isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isEqualAmortizationParam, element);
@@ -543,7 +543,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             final String accountNo = this.fromApiJsonHelper.extractStringNamed(accountNoParameterName, element);
             baseDataValidator.reset().parameter(accountNoParameterName).value(accountNo).notBlank().notExceedingLengthOf(20);
         }
-        
+
         boolean isEqualAmortization = existingLoanApplication.getLoanProductRelatedDetail().isEqualAmortization();
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.isEqualAmortizationParam, element)) {
             isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.isEqualAmortizationParam, element);
@@ -551,7 +551,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     .validateForBooleanValue();
             if (isEqualAmortization && loanProduct.isInterestRecalculationEnabled()) { throw new EqualAmortizationUnsupportedFeatureException(
                     "interest.recalculation", "interest recalculation"); }
-        }     
+        }
 
         final String externalIdParameterName = "externalId";
         if (this.fromApiJsonHelper.parameterExists(externalIdParameterName, element)) {
@@ -1100,7 +1100,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.disbursementDataParameterName, element) && expectedDisbursement != null
                 && totalPrincipal != null) {
-            
+
             BigDecimal tatalDisbursement = BigDecimal.ZERO;
             final JsonArray variationArray = this.fromApiJsonHelper.extractJsonArrayNamed(LoanApiConstants.disbursementDataParameterName,
                     element);
@@ -1127,7 +1127,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                             baseDataValidator.reset().parameter(LoanApiConstants.disbursementDataParameterName)
                             .failWithCode(LoanApiConstants.DISBURSEMENT_DATE_BEFORE_ERROR);
                         }
-                        
+
                         if (expectedDisbursementDate != null && expectedDisbursementDates.contains(expectedDisbursementDate)) {
                             baseDataValidator.reset().parameter(LoanApiConstants.disbursementDateParameterName)
                                     .failWithCode(LoanApiConstants.DISBURSEMENT_DATE_UNIQUE_ERROR);

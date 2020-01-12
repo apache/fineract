@@ -56,7 +56,7 @@ public class S3ContentRepository implements ContentRepository {
 
     public S3ContentRepository(final String bucketName, final String secretKey, final String accessKey) {
         this.s3BucketName = bucketName;
-        //On some AWS regions by default V4 signature is enabled. Setting this property. 
+        //On some AWS regions by default V4 signature is enabled. Setting this property.
         System.setProperty(SDKGlobalConfiguration.ENABLE_S3_SIGV4_SYSTEM_PROPERTY, "true");
         this.s3Client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey));
     }
@@ -140,7 +140,7 @@ public class S3ContentRepository implements ContentRepository {
     public ImageData fetchImage(final ImageData imageData) {
         try {
             final S3Object s3object = this.s3Client.getObject(new GetObjectRequest(this.s3BucketName, imageData.location()));
-            imageData.updateContent(s3object.getObjectContent());    
+            imageData.updateContent(s3object.getObjectContent());
         }catch(AmazonS3Exception e) {
             logger.error(e.getMessage());
         }

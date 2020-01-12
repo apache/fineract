@@ -31,7 +31,7 @@ public class ShareAccountRepositoryWrapper {
     public ShareAccountRepositoryWrapper(final ShareAccountRepository shareAccountRepository) {
         this.shareAccountRepository = shareAccountRepository ;
     }
-    
+
     public ShareAccount findOneWithNotFoundDetection(final Long accountId) {
         return this.shareAccountRepository.findById(accountId)
                 .orElseThrow(() -> new ShareAccountNotFoundException(accountId));
@@ -39,7 +39,7 @@ public class ShareAccountRepositoryWrapper {
     public void save(final ShareAccount shareAccount) {
         this.shareAccountRepository.save(shareAccount) ;
     }
-    
+
     public void saveAndFlush(final ShareAccount shareAccount) {
         this.shareAccountRepository.saveAndFlush(shareAccount) ;
     }

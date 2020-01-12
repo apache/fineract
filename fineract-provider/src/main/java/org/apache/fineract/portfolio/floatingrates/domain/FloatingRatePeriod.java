@@ -151,11 +151,11 @@ public class FloatingRatePeriod extends AbstractPersistableCustom<Long> {
             interest = interest.add(floatingRateDTO
                     .fetchBaseRate(fetchFromDate()));
         }
-        
+
         final LocalDate fromDate = new LocalDateTime(getFromDate()).toLocalDate();
         final LocalDate createdOn = new LocalDateTime(getCreatedOn()).toLocalDate();
         final LocalDate modidiedOn = new LocalDateTime(getModifiedOn()).toLocalDate();
-        
+
         return new FloatingRatePeriodData(getId(), fromDate, interest,
                 isDifferentialToBaseLendingRate(), isActive(), getCreatedBy()
                         .getUsername(), createdOn, getModifiedBy()

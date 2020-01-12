@@ -65,11 +65,11 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
     private final FromJsonHelper fromApiJsonHelper;
 
     private final GLJournalEntryMapper entryMapper = new GLJournalEntryMapper();
-    
-    // if a limit is not added to the running balance select statements below and the resultset is more than 400,000, 
+
+    // if a limit is not added to the running balance select statements below and the resultset is more than 400,000,
     // the script will eat up all of the server memory
     private final String selectRunningBalanceSqlLimit = "limit 0, 10000";
-    
+
     private final String officeRunningBalanceSql = "select je.office_running_balance as runningBalance,je.account_id as accountId from acc_gl_journal_entry je "
             + "inner join (select max(id) as id from acc_gl_journal_entry where office_id=?  and entry_date < ? group by account_id,entry_date) je2 "
             + "inner join (select max(entry_date) as date from acc_gl_journal_entry where office_id=? and entry_date < ? group by account_id) je3 "

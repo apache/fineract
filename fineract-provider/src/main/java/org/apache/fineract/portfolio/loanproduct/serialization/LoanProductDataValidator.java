@@ -148,7 +148,7 @@ public final class LoanProductDataValidator {
             final Long fundId = this.fromApiJsonHelper.extractLongNamed("fundId", element);
             baseDataValidator.reset().parameter("fundId").value(fundId).ignoreIfNull().integerGreaterThanZero();
         }
-        
+
         boolean isEqualAmortization = false;
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.isEqualAmortizationParam, element)) {
             isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.isEqualAmortizationParam, element);
@@ -331,7 +331,7 @@ public final class LoanProductDataValidator {
         if (this.fromApiJsonHelper.parameterExists("isLinkedToFloatingInterestRates", element)
                 && this.fromApiJsonHelper.extractBooleanNamed("isLinkedToFloatingInterestRates", element) == true) {
             if (isEqualAmortization) { throw new EqualAmortizationUnsupportedFeatureException("floating.interest.rate",
-                    "floating interest rate"); }          
+                    "floating interest rate"); }
             if (this.fromApiJsonHelper.parameterExists("interestRatePerPeriod", element)) {
                 baseDataValidator
                         .reset()
@@ -652,7 +652,7 @@ public final class LoanProductDataValidator {
     private void validateVariableInstallmentSettings(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.allowVariableInstallmentsParamName, element)
                 && this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.allowVariableInstallmentsParamName, element)) {
-            
+
             boolean isEqualAmortization = false;
             if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.isEqualAmortizationParam, element)) {
                 isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.isEqualAmortizationParam, element);
@@ -739,7 +739,7 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(LoanProductConstants.multiDisburseLoanParameterName).value(multiDisburseLoan)
                     .ignoreIfNull().validateForBooleanValue();
         }
-        
+
         boolean isEqualAmortization = false;
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.isEqualAmortizationParam, element)) {
             isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.isEqualAmortizationParam, element);
@@ -1139,7 +1139,7 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(LoanProductConstants.accountMovesOutOfNPAOnlyOnArrearsCompletionParamName)
                     .value(npaChangeConfig).notNull().isOneOfTheseValues(true, false);
         }
-        
+
         boolean isEqualAmortization = loanProduct.isEqualAmortization();
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.isEqualAmortizationParam, element)) {
             isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.isEqualAmortizationParam, element);

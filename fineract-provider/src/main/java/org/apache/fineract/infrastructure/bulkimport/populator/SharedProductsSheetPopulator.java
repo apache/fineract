@@ -53,7 +53,7 @@ public class SharedProductsSheetPopulator extends AbstractWorkbookPopulator {
     public SharedProductsSheetPopulator(List<ShareProductData> shareProductDataList,List<ChargeData> chargesForShares) {
         this.sharedProductDataList=shareProductDataList;
         this.chargesForSharedProducts=chargesForShares;
-        
+
     }
 
     @Override

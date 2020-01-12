@@ -20,11 +20,11 @@ package org.apache.fineract.infrastructure.core.serialization;
 
 /**
  * Service for serializing commands into another format.
- * 
+ *
  * <p>
  * Known implementations:
  * </p>
- * 
+ *
  * @see CommandSerializerDefaultToJson
  */
 public interface CommandSerializer {

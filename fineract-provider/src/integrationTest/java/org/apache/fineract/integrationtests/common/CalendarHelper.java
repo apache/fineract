@@ -88,7 +88,7 @@ public class CalendarHelper {
         final Integer responseCalendarId = from(responseCalendarDetailsinJSON).get("id");
         assertEquals("ERROR IN CREATING THE CALENDAR", generatedCalendarId, responseCalendarId);
     }
-    
+
     public static Integer createMeetingForGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
     final Integer groupId, final String startDate, final String frequency, final String interval, final String repeatsOnDay) {
 

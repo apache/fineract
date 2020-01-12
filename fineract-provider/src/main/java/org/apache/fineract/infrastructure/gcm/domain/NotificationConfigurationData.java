@@ -19,7 +19,7 @@
 package org.apache.fineract.infrastructure.gcm.domain;
 
 public class NotificationConfigurationData {
-    
+
     private final Long id;
     private final String serverKey;
     private final String gcmEndPoint;
@@ -36,14 +36,14 @@ public class NotificationConfigurationData {
     public String getServerKey() {
         return serverKey;
     }
-    
+
     public String getGcmEndPoint() {
         return gcmEndPoint;
     }
     public String getFcmEndPoint() {
         return fcmEndPoint;
     }
-    
-    
+
+
 
 }

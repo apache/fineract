@@ -63,7 +63,7 @@ public class CreditBureauLoanProductMappingWritePlatformServiceImpl implements C
     @Override
     public CommandProcessingResult addCreditBureauLoanProductMapping(Long creditBureau_id, JsonCommand command) {
         this.context.authenticatedUser();
-        
+
         this.fromApiJsonDeserializer.validateForCreate(command.json(), creditBureau_id);
 
         final long lpid = command.longValueOfParameterNamed("loanProductId");
@@ -83,7 +83,7 @@ public class CreditBureauLoanProductMappingWritePlatformServiceImpl implements C
 
     @Override
     public CommandProcessingResult updateCreditBureauLoanProductMapping(JsonCommand command) {
-        
+
         this.context.authenticatedUser();
         this.fromApiJsonDeserializer.validateForUpdate(command.json());
 

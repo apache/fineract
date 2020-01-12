@@ -44,7 +44,7 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom<Long>
 
     @Column(name = "value", nullable = true)
     private Long value;
-    
+
     @Column(name = "date_value", nullable = true)
     private Date dateValue;
 
@@ -80,7 +80,7 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom<Long>
     public Long getValue() {
         return this.value;
     }
-    
+
     public Date getDateValue(){
         return this.dateValue;
     }
@@ -106,7 +106,7 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom<Long>
             actualChanges.put(valueParamName, newValue);
             this.value = newValue;
         }
-        
+
         final String dateValueParamName = "dateValue";
         if(command.isChangeInDateParameterNamed(dateValueParamName, this.dateValue)){
             final Date newDateValue = command.DateValueOfParameterNamed(dateValueParamName);
@@ -127,12 +127,12 @@ public class GlobalConfigurationProperty extends AbstractPersistableCustom<Long>
     public static GlobalConfigurationProperty newSurveyConfiguration(final String name) {
         return new GlobalConfigurationProperty(name, false, null, null, null, false);
     }
-    
+
     public GlobalConfigurationPropertyData toData() {
         return new GlobalConfigurationPropertyData(getName(), isEnabled(), getValue(), getDateValue(), this.getId(), this.description,
                 this.isTrapDoor);
     }
-    
+
     public String getName() {
         return this.name;
     }

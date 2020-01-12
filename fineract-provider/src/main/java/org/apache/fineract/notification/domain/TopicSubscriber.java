@@ -36,11 +36,11 @@ public class TopicSubscriber extends AbstractPersistableCustom<Long> {
     @ManyToOne
     @JoinColumn(name = "topic_id")
     private Topic topic;
-    
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private AppUser subscriber;
-    
+
     @Column(name = "subscription_date")
     private Date subscriptionDate;
 
@@ -76,5 +76,5 @@ public class TopicSubscriber extends AbstractPersistableCustom<Long> {
     public void setSubscriptionDate(Date subscriptionDate) {
         this.subscriptionDate = subscriptionDate;
     }
-    
+
 }

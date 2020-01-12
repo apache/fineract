@@ -109,19 +109,19 @@ public enum LoanTermVariationType {
     public boolean isDeleteInstallment() {
         return this.value.equals(LoanTermVariationType.DELETE_INSTALLMENT.getValue());
     }
-    
+
     public boolean isGraceOnInterest() {
         return this.value.equals(LoanTermVariationType.GRACE_ON_INTEREST.getValue());
     }
-    
+
     public boolean isGraceOnPrincipal() {
         return this.value.equals(LoanTermVariationType.GRACE_ON_PRINCIPAL.getValue());
     }
-    
+
     public boolean isExtendRepaymentPeriod() {
         return this.value.equals(LoanTermVariationType.EXTEND_REPAYMENT_PERIOD.getValue());
     }
-    
+
     public boolean isInterestRateFromInstallment() {
         return this.value.equals(LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getValue());
     }

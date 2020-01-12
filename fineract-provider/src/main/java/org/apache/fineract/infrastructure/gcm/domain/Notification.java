@@ -30,16 +30,16 @@ import java.util.List;
  * {@link Builder}. Examples:
  *
  * <strong>Simplest notification:</strong>
- * 
+ *
  * <pre>
  * <code>
  * Notification notification = new Notification.Builder("myicon").build();
  * </pre>
- * 
+ *
  * </code>
  *
  * <strong>Notification with optional attributes:</strong>
- * 
+ *
  * <pre>
  * <code>
  * Notification notification = new Notification.Builder("myicon")
@@ -47,7 +47,7 @@ import java.util.List;
  *    .body("Here is a more detailed description")
  *    .build();
  * </pre>
- * 
+ *
  * </code>
  */
 public final class Notification implements Serializable {

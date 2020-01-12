@@ -28,7 +28,7 @@ public class UserNotFoundException extends AbstractPlatformResourceNotFoundExcep
     public UserNotFoundException(final Long id) {
         super("error.msg.user.id.invalid", "User with identifier " + id + " does not exist", id);
     }
-    
+
     public UserNotFoundException(final String userName) {
         super("error.msg.user.name.not.found", "User with identifier " + userName + " does not exist");
     }

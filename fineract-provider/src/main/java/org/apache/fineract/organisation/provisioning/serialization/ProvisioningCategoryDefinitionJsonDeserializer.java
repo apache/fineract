@@ -61,7 +61,7 @@ public class ProvisioningCategoryDefinitionJsonDeserializer {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("provisioningcategories");
         final JsonElement element = this.fromApiJsonHelper.parse(json);
-        
+
         final String name = this.fromApiJsonHelper.extractStringNamed("categoryname", element);
         baseDataValidator.reset().parameter("categoryname").value(name).notBlank().notExceedingLengthOf(100);
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
@@ -75,12 +75,12 @@ public class ProvisioningCategoryDefinitionJsonDeserializer {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("provisioningcategories");
         final JsonElement element = this.fromApiJsonHelper.parse(json);
-        
+
         if (this.fromApiJsonHelper.parameterExists("categoryname", element)) {
             final String categoryName = this.fromApiJsonHelper.extractStringNamed("categoryname", element);
             baseDataValidator.reset().parameter("categoryname").value(categoryName).notBlank().notExceedingLengthOf(100);
         }
-        
+
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 

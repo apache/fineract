@@ -33,7 +33,7 @@ public class CodeValueNotFoundException extends AbstractPlatformResourceNotFound
         super("error.msg.codevalue.codename.id.combination.invalid", "Code value with identifier " + id
                 + " does not exist for a code with name " + codeName, id, codeName);
     }
-    
+
     public CodeValueNotFoundException(final String codeName, final String label) {
         super("error.msg.codevalue.codename.id.combination.invalid", "Code value with label " + label
                 + " does not exist for a code with name " + codeName, label, codeName);

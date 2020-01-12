@@ -107,7 +107,7 @@ public class CodeHelper {
             codeValueId = (Integer) CodeHelper.createCodeValue(requestSpec,
                     responseSpec, codeId, codeValue, codeValuePosition,
                     "subResourceId");
-            
+
         } else {
             return codeValuesList.get(0);
         }
@@ -115,7 +115,7 @@ public class CodeHelper {
                 CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "/"
                         + codeValueId.toString() + "?"
                         + Utils.TENANT_IDENTIFIER, "");
-        
+
     }
 
     public static ArrayList<HashMap<String, Object>> getAllCodes(
@@ -201,7 +201,7 @@ public class CodeHelper {
         return Utils.performServerGet(requestSpec, responseSpec,
                 CODE_VALUE_URL.replace("[codeId]", codeId.toString()) + "?"
                         + Utils.TENANT_IDENTIFIER, jsonAttributeToGetback);
-        
+
     }
 
     public static Object getCodeValueById(

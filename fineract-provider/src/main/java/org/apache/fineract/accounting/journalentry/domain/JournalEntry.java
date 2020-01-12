@@ -220,7 +220,7 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
         return this.entityType;
     }
 
-    
+
     public Long getShareTransactionId() {
         return this.shareTransactionId;
     }

@@ -133,7 +133,7 @@ public class Role extends AbstractPersistableCustom<Long> implements Serializabl
     public String getName() {
         return this.name;
     }
-    
+
     public void disableRole() {
         this.disabled = true;
     }

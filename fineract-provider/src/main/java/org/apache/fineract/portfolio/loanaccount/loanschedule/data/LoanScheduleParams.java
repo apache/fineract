@@ -74,7 +74,7 @@ public class LoanScheduleParams {
     private Money unCompoundedAmount;
     private Money compoundedInLastInstallment;
 
-    
+
     public Money getCompoundedInLastInstallment() {
         return this.compoundedInLastInstallment;
     }

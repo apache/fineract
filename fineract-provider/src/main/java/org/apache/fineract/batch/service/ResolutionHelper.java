@@ -37,7 +37,7 @@ import com.jayway.jsonpath.JsonModel;
  * Provides methods to create dependency map among the various batchRequests. It
  * also provides method that takes care of dependency resolution among related
  * requests.
- * 
+ *
  * @author Rishabh Shukla
  * @see BatchApiServiceImpl
  */
@@ -46,9 +46,9 @@ public class ResolutionHelper {
 
     /**
      * Provides a Node like object for the request tree.
-     * 
+     *
      * @author Rishabh shukla
-     * 
+     *
      */
     public class BatchRequestNode {
 
@@ -89,7 +89,7 @@ public class ResolutionHelper {
      * dependency relations among them. Each different list is identified with a
      * "Key" which is the "requestId" of the request at topmost level in
      * dependency hierarchy of that particular list.
-     * 
+     *
      * @param batchRequests
      * @return List&lt;ArrayList&lt;BatchRequestNode&gt;&gt;
      */
@@ -126,7 +126,7 @@ public class ResolutionHelper {
      * and the response of the request it is dependent upon as its arguments and
      * change the body or relativeUrl of the request according to parent
      * Request.
-     * 
+     *
      * @param request
      * @param parentResponse
      * @return BatchRequest
@@ -164,9 +164,9 @@ public class ResolutionHelper {
                 queryParams = relativeUrl.substring(relativeUrl.indexOf("?"));
                 relativeUrl = relativeUrl.substring(0, relativeUrl.indexOf("?"));
             }
-            
+
             final String[] parameters = relativeUrl.split("/");
-            
+
             for (String parameter : parameters) {
                 if (parameter.contains("$.")) {
                     final String resParamValue = responseJsonModel.get(parameter).toString();

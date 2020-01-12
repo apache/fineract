@@ -170,7 +170,7 @@ public class DepositAccountAssembler {
         }
 
         if (product == null) { throw new SavingsProductNotFoundException(productId); }
-        
+
 
         Client client = null;
         Group group = null;
@@ -292,7 +292,7 @@ public class DepositAccountAssembler {
         if (productChart != null) {
             accountChart = DepositAccountInterestRateChart.from(productChart);
         }
-        
+
         boolean withHoldTax = product.withHoldTax();
         if (command.parameterExists(withHoldTaxParamName)) {
             withHoldTax = command.booleanPrimitiveValueOfParameterNamed(withHoldTaxParamName);

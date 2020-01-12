@@ -110,7 +110,7 @@ public class InterestRateChartDataValidator {
             toDate = this.fromApiJsonHelper.extractLocalDateNamed(endDateParamName, element);
             baseDataValidator.reset().parameter(endDateParamName).value(toDate).notNull();
         }
-        
+
         Boolean isPrimaryGroupingByAmount = this.fromApiJsonHelper.extractBooleanNamed(isPrimaryGroupingByAmountParamName, element);
         if (isPrimaryGroupingByAmount == null) {
             isPrimaryGroupingByAmount = false;
@@ -168,7 +168,7 @@ public class InterestRateChartDataValidator {
             toDate = this.fromApiJsonHelper.extractLocalDateNamed(endDateParamName, element);
             baseDataValidator.reset().parameter(endDateParamName).value(toDate).notNull();
         }
-        
+
         Boolean isPrimaryGroupingByAmount = this.fromApiJsonHelper.extractBooleanNamed(isPrimaryGroupingByAmountParamName, element);
         if (isPrimaryGroupingByAmount == null) {
             isPrimaryGroupingByAmount = false;

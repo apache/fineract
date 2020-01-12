@@ -326,7 +326,7 @@ public class CalendarData implements Serializable {
             final LocalDate lastUpdatedDate, final Long createdByUserId, final String createdByUsername, final Long lastUpdatedByUserId,
             final String lastUpdatedByUsername, final Integer repeatsOnDayOfMonth, final List<EnumOptionData> entityTypeOptions,
             final List<EnumOptionData> calendarTypeOptions, final List<EnumOptionData> remindByOptions,
-            final List<EnumOptionData> repeatsOptions, final List<EnumOptionData> repeatsOnDayOptions,final LocalTime meetingTime, 
+            final List<EnumOptionData> repeatsOptions, final List<EnumOptionData> repeatsOnDayOptions,final LocalTime meetingTime,
             final List<EnumOptionData> frequencyNthDayTypeOptions) {
         this.id = id;
         this.calendarInstanceId = calendarInstanceId;
@@ -478,11 +478,11 @@ public class CalendarData implements Serializable {
                 compareDate, isSkipMeetingOnFirstDay, numberOfDays); }
         return false;
     }
-    
+
     public Integer interval(){
         return this.interval;
     }
-    
+
     public EnumOptionData frequencyType(){
         return this.frequency;
     }

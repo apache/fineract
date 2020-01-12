@@ -27,7 +27,7 @@ import java.util.Date;
 
 @SuppressWarnings("unused")
 public class AddressData implements Serializable {
-    
+
     private final Long client_id;
 
     private final String addressType;

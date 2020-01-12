@@ -287,12 +287,12 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
     public void updateLatsRunDate(Date latsRunDate) {
         this.latsRunDate = latsRunDate;
     }
-    
+
     public void updateStatus(Integer status){
         this.status = status;
     }
-    
-    /** 
+
+    /**
      * delete the standing instruction by setting the status to 3 and appending "_deleted_" and the id to the name
      **/
      public void delete() {

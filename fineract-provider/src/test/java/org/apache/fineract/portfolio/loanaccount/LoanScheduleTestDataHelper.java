@@ -32,9 +32,9 @@ public class LoanScheduleTestDataHelper {
 
     /**
      * Creates brand new three installment loan:
-     * 
+     *
      * For example: with firstDueDate = 02 July 2011
-     * 
+     *
      * Date Principal Interest Interest Waived
      * ==================================
      * ================================================ 02 July 2011 1,000 200 0
@@ -56,9 +56,9 @@ public class LoanScheduleTestDataHelper {
 
     /**
      * Creates three installment loan with first installment fully completed:
-     * 
+     *
      * For example: with firstDueDate = 02 July 2011
-     * 
+     *
      * Date Principal Interest Interest Waived Completed
      * ========================
      * ==================================================

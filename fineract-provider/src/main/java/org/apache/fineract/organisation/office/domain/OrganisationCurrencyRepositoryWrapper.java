@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
  * {@link OrganisationCurrency} is returned when using <code>findOne</code>
  * repository method and throwing an appropriate not found exception.
  * </p>
- * 
+ *
  * <p>
  * This is to avoid need for checking and throwing in multiple areas of code
  * base where {@link OrganisationCurrency} is required.

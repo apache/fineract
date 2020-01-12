@@ -76,7 +76,7 @@ public class ProductsApiResource {
             ProductReadPlatformService service = (ProductReadPlatformService) this.applicationContext.getBean(serviceName);
             ProductData data = service.retrieveTemplate();
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());    
+            return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());
         }catch(BeansException e) {
             throw new ResourceNotFoundException() ;
         }
@@ -113,7 +113,7 @@ public class ProductsApiResource {
             ProductReadPlatformService service = (ProductReadPlatformService) this.applicationContext.getBean(serviceName);
             Page<ProductData> data = service.retrieveAllProducts(offset, limit);
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());    
+            return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());
         }catch(BeansException e) {
             throw new ResourceNotFoundException();
         }

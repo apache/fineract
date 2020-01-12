@@ -109,7 +109,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
             final CodeValueRepositoryWrapper codeValueRepository, final CommandProcessingService commandProcessingService,
             final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
-            final LoanRepositoryWrapper loanRepositoryWrapper, 
+            final LoanRepositoryWrapper loanRepositoryWrapper,
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final AccountNumberGenerator accountNumberGenerator,
             final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
             final BusinessEventNotifierService businessEventNotifierService) {
@@ -260,7 +260,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                         .findByAccountType(entityAccountType);
                 newGroup.updateAccountNo(this.accountNumberGenerator.generateGroupAccountNumber(newGroup, accountNumberFormat));
             }
-            
+
         }
     }
     @Transactional
