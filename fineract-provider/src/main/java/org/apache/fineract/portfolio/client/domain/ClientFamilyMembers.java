@@ -33,61 +33,61 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Entity
 @Table(name = "m_family_members")
 public class ClientFamilyMembers extends AbstractPersistableCustom<Long> {
-    
+
     @ManyToOne
     @JoinColumn(name="client_id")
     private Client client;
-    
+
     @Column(name="firstname")
     private String firstName;
-    
+
     @Column(name="middleName")
     private String middleName;
-    
+
     @Column(name="lastName")
     private String lastName;
-    
+
     @Column(name="qualification")
     private String qualification;
-    
+
     @Column(name="mobile_number")
     private String mobileNumber;
-    
+
     @Column(name="age")
     private Long age;
-    
+
     @Column(name="is_dependent")
     private Boolean isDependent;
-    
-    
+
+
     @ManyToOne
     @JoinColumn(name = "relationship_cv_id")
     private CodeValue relationship;
-    
+
     @ManyToOne
     @JoinColumn(name = "marital_status_cv_id")
     private CodeValue maritalStatus;
-    
-    
+
+
     @ManyToOne
     @JoinColumn(name = "gender_cv_id")
     private CodeValue gender;
-    
+
     @ManyToOne
     @JoinColumn(name = "profession_cv_id")
     private CodeValue profession;
-    
+
      @Column(name = "date_of_birth", nullable = true)
      @Temporal(TemporalType.DATE)
      private Date dateOfBirth;
-    
+
         private ClientFamilyMembers(final Client client,final String firstName,
                 final String middleName,final String lastName,final String qualification,
                 final String mobileNumber,final Long age,final Boolean isDependent,
                 final CodeValue relationship,final CodeValue maritalStatus,final CodeValue gender,
                 final Date dateOfBirth,final CodeValue profession)
         {
-            
+
             this.client=client;
             this.firstName=firstName;
             this.middleName=middleName;
@@ -102,13 +102,13 @@ public class ClientFamilyMembers extends AbstractPersistableCustom<Long> {
             this.dateOfBirth=dateOfBirth;
             this.profession=profession;
         }
-        
-        
+
+
         public ClientFamilyMembers()
         {
-            
+
         }
-        
+
         public static ClientFamilyMembers fromJson(final Client client,final String firstName,
                 final String middleName,final String lastName,final String qualification,
                 final String mobileNumber,final Long age,final Boolean isDependent,
@@ -229,10 +229,10 @@ public class ClientFamilyMembers extends AbstractPersistableCustom<Long> {
         public void setIsDependent(Boolean isDependent) {
             this.isDependent = isDependent;
         }
-        
-        
-    
-    
-    
+
+
+
+
+
 
 }

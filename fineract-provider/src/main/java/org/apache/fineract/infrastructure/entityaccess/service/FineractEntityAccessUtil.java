@@ -45,7 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class FineractEntityAccessUtil {
-    
+
     private final PlatformSecurityContext context;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
@@ -75,26 +75,26 @@ public class FineractEntityAccessUtil {
         this.fineractEntityToEntityMappingRepository = fineractEntityToEntityMappingRepository;
     }
 
-    
+
     @Transactional
     public void checkConfigurationAndAddProductResrictionsForUserOffice (
             final FineractEntityAccessType fineractEntityAccessType,
             final Long productOrChargeId) {
-        
+
         AppUser thisUser = this.context.authenticatedUser();
-        
+
         // check if the office specific products are enabled. If yes, then save this product or charge against a specific office
         // i.e. this product or charge is specific for this office.
-        
+
         final GlobalConfigurationProperty property = this.globalConfigurationRepository
                 .findOneByNameWithNotFoundDetection(
                         FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_OFFICE_SPECIFIC_PRODUCTS);
         if (property.isEnabled() ) {
-            // If this property is enabled, then Fineract need to restrict access to this loan product to only the office of the current user                
+            // If this property is enabled, then Fineract need to restrict access to this loan product to only the office of the current user
             final GlobalConfigurationProperty restrictToUserOfficeProperty = this.globalConfigurationRepository
                     .findOneByNameWithNotFoundDetection(
                             FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_RESTRICT_PRODUCTS_TO_USER_OFFICE);
-            
+
             if (restrictToUserOfficeProperty.isEnabled() ) {
                 final Long officeId = thisUser.getOffice().getId();
                                 Date startDateFormapping = null;
@@ -109,17 +109,17 @@ public class FineractEntityAccessUtil {
                                 this.fineractEntityToEntityMappingRepository.save(newMap);
                             }
         }
-        
+
     }
-    
+
     public String getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled (
             FineractEntityType fineractEntityType) {
         String inClause = "";
-        
+
         final GlobalConfigurationProperty property = this.globalConfigurationRepository
                 .findOneByNameWithNotFoundDetection(
                         FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_OFFICE_SPECIFIC_PRODUCTS);
-        
+
         if (property.isEnabled() ) {
             // Get 'SQL In Clause' for fetching only products/charges that are relevant for current user's office
             if (fineractEntityType.equals(FineractEntityType.SAVINGS_PRODUCT)) {
@@ -138,5 +138,5 @@ public class FineractEntityAccessUtil {
         }
         return inClause;
     }
-    
+
 }

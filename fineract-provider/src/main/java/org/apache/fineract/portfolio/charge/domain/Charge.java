@@ -495,7 +495,7 @@ public class Charge extends AbstractPersistableCustom<Long> {
     /**
      * Delete is a <i>soft delete</i>. Updates flag on charge so it wont appear
      * in query/report results.
-     * 
+     *
      * Any fields with unique constraints and prepended with id of record.
      */
     public void delete() {
@@ -624,7 +624,7 @@ public class Charge extends AbstractPersistableCustom<Long> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculation, 
+        return Objects.hash(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculation,
           chargePaymentMode, feeOnDay, feeInterval, feeOnMonth, penalty, active, deleted, minCap, maxCap, feeFrequency, account, taxGroup);
     }
 }

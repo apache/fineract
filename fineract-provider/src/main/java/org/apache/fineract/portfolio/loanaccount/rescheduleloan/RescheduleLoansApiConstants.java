@@ -28,7 +28,7 @@ public class RescheduleLoansApiConstants {
     public final static String ENTITY_NAME = "RESCHEDULELOAN";
 
     public static final String LOAN_RESCHEDULE_REASON = "LoanRescheduleReason";
-    
+
     // general
     public static final String localeParamName = "locale";
     public static final String dateFormatParamName = "dateFormat";
@@ -52,7 +52,7 @@ public class RescheduleLoansApiConstants {
     public static final String approveCommandParamName = "approve";
     public static final String pendingCommandParamName = "pending";
     public static final String rejectCommandParamName = "reject";
-    
+
     // reject action request parameters
     public static final String rejectedOnDateParam = "rejectedOnDate";
 
@@ -62,7 +62,7 @@ public class RescheduleLoansApiConstants {
     public static final Set<String> APPROVE_REQUEST_DATA_PARAMETERS =
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(localeParamName, dateFormatParamName,
             approvedOnDateParam)));
-    
+
     public static final Set<String> commandParams =
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(allCommandParamName, approveCommandParamName,
                     pendingCommandParamName, rejectCommandParamName)));

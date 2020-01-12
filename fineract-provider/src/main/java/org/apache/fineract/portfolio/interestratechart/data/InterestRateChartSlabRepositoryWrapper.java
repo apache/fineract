@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
  * if {@link InterestRateChartSlab} is returned when using <code>findOne</code>
  * repository method and throwing an appropriate not found exception.
  * </p>
- * 
+ *
  * <p>
  * This is to avoid need for checking and throwing in multiple areas of code
  * base where {@link InterestRateChartSlabRepository} is required.
@@ -61,5 +61,5 @@ public class InterestRateChartSlabRepositoryWrapper {
     public void saveAndFlush(final InterestRateChartSlab chartSlab) {
         this.repository.saveAndFlush(chartSlab);
     }
-    
+
 }

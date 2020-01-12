@@ -34,7 +34,7 @@ import java.util.ArrayList;
 
 
 public class JournalEntriesWorkbookPopulator extends AbstractWorkbookPopulator {
-    
+
     private OfficeSheetPopulator officeSheetPopulator;
     private GlAccountSheetPopulator glAccountSheetPopulator;
     private ExtrasSheetPopulator extrasSheetPopulator;
@@ -56,7 +56,7 @@ public class JournalEntriesWorkbookPopulator extends AbstractWorkbookPopulator {
         setDefaults(addJournalEntriesSheet);
         setLayout(addJournalEntriesSheet);
     }
-    
+
     private void setLayout(Sheet worksheet) {
         Row rowHeader = worksheet.createRow(TemplatePopulateImportConstants.ROWHEADER_INDEX);
         rowHeader.setHeight(TemplatePopulateImportConstants.ROW_HEADER_HEIGHT);
@@ -95,9 +95,9 @@ public class JournalEntriesWorkbookPopulator extends AbstractWorkbookPopulator {
         // TODO Auto-generated method stub
 
     }
-    
+
     private void setRules(Sheet worksheet) {
-    
+
             CellRangeAddressList officeNameRange = new CellRangeAddressList(1,
                     SpreadsheetVersion.EXCEL97.getLastRowIndex(),
                     JournalEntryConstants.OFFICE_NAME_COL,JournalEntryConstants. OFFICE_NAME_COL);
@@ -152,7 +152,7 @@ public class JournalEntriesWorkbookPopulator extends AbstractWorkbookPopulator {
             worksheet.addValidationData(glaccountCreditValidation);
             worksheet.addValidationData(glaccountDebitValidation);
         }
-    
+
     private void setNames(Sheet worksheet) {
         Workbook addJournalEntriesWorkbook = worksheet.getWorkbook();
         ArrayList<String> officeNames = new ArrayList<>(officeSheetPopulator.getOfficeNames());
@@ -178,7 +178,7 @@ public class JournalEntriesWorkbookPopulator extends AbstractWorkbookPopulator {
         glaccountGroup.setRefersToFormula(TemplatePopulateImportConstants.GL_ACCOUNTS_SHEET_NAME+"!$B$2:$B$"
                 + (glAccountSheetPopulator.getGlAccountNamesSize() + 1));
     }
-    
+
     private void setDefaults(Sheet worksheet) {
         for (Integer rowNo = 1; rowNo < 1000; rowNo++) {
             Row row = worksheet.createRow(rowNo);
@@ -186,6 +186,6 @@ public class JournalEntriesWorkbookPopulator extends AbstractWorkbookPopulator {
 
     }
 
-    
-    
+
+
 }

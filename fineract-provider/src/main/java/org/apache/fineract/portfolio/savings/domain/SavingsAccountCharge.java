@@ -43,7 +43,7 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.*;
 
 /**
  * @author dv6
- * 
+ *
  */
 @Entity
 @Table(name = "m_savings_account_charge")
@@ -644,7 +644,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom<Long> {
     public boolean isSavingsActivation() {
         return ChargeTimeType.fromInt(this.chargeTime).isSavingsActivation();
     }
-    
+
     public boolean isSavingsNoActivity(){
         return ChargeTimeType.fromInt(this.chargeTime).isSavingsNoActivityFee();
     }
@@ -850,7 +850,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom<Long> {
      * savings account with account balance of 1000, still these charges can be
      * collected as these charges are initiated by system and it can bring down
      * the balance below the enforced minimum balance).
-     * 
+     *
      */
     public boolean canOverriteSavingAccountRules() {
         return !(this.isSavingsActivation() || this.isWithdrawalFee());

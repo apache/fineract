@@ -33,16 +33,16 @@ import org.apache.fineract.infrastructure.gcm.GcmConstants;
  * {@link Builder}. Examples:
  *
  * <strong>Simplest message:</strong>
- * 
+ *
  * <pre>
  * <code>
  * Message message = new Message.Builder().build();
  * </pre>
- * 
+ *
  * </code>
  *
  * <strong>Message with optional attributes:</strong>
- * 
+ *
  * <pre>
  * <code>
  * Message message = new Message.Builder()
@@ -53,11 +53,11 @@ import org.apache.fineract.infrastructure.gcm.GcmConstants;
  *    .restrictedPackageName(restrictedPackageName)
  *    .build();
  * </pre>
- * 
+ *
  * </code>
  *
  * <strong>Message with optional attributes and payload data:</strong>
- * 
+ *
  * <pre>
  * <code>
  * Message message = new Message.Builder()
@@ -71,7 +71,7 @@ import org.apache.fineract.infrastructure.gcm.GcmConstants;
  *    .addData("key2", "value2")
  *    .build();
  * </pre>
- * 
+ *
  * </code>
  */
 public final class Message implements Serializable {

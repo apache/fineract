@@ -82,12 +82,12 @@ public class HolidayDataValidator {
 
         final LocalDate toDate = this.fromApiJsonHelper.extractLocalDateNamed(HolidayApiConstants.toDateParamName, element);
         baseDataValidator.reset().parameter(HolidayApiConstants.toDateParamName).value(toDate).notNull();
-        
+
         Integer reschedulingType = null;
         if(this.fromApiJsonHelper.parameterExists(HolidayApiConstants.reschedulingType, element)){
             reschedulingType = this.fromApiJsonHelper.extractIntegerNamed(HolidayApiConstants.reschedulingType, element, Locale.ENGLISH);
         }
-       
+
         LocalDate repaymentsRescheduledTo = null;
         if(reschedulingType == null || reschedulingType.equals(RescheduleType.RESCHEDULETOSPECIFICDATE.getValue())){
             repaymentsRescheduledTo = this.fromApiJsonHelper.extractLocalDateNamed(

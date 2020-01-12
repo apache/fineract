@@ -47,5 +47,5 @@ public class SelfServiceApiConstants {
                     authenticationTokenParamName)));
     public static final Object[] SUPPORTED_AUTHENTICATION_MODE_PARAMETERS = new Object[] {emailModeParamName, mobileModeParamName};
     public static final String SELF_SERVICE_USER_ROLE = "Self Service User";
-    
+
 }

@@ -130,7 +130,7 @@ public class FileSystemContentRepository implements ContentRepository {
 
     /**
      * Generate the directory path for storing the new document
-     * 
+     *
      * @param entityType
      * @param entityId
      * @return

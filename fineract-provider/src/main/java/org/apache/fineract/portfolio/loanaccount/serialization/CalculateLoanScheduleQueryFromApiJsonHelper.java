@@ -157,7 +157,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
                                             "loanTermFrequency", loanTermFrequency, numberOfRepayments, repaymentEvery);
                             dataValidationErrors.add(error);
                         }
-                    
+
                 }
             }
         }

@@ -31,7 +31,7 @@ import java.util.List;
 public class LoanProductSheetPopulator extends AbstractWorkbookPopulator {
 
     private List<LoanProductData> products;
-    
+
     private static final int ID_COL = 0;
     private static final int NAME_COL = 1;
     private static final int FUND_NAME_COL = 2;
@@ -58,8 +58,8 @@ public class LoanProductSheetPopulator extends AbstractWorkbookPopulator {
     private static final int START_DATE_COL = 23;
     private static final int CLOSE_DATE_COL = 24;
 
-    
-    
+
+
     public LoanProductSheetPopulator(List<LoanProductData> products) {
         this.products = products;
     }
@@ -191,7 +191,7 @@ public class LoanProductSheetPopulator extends AbstractWorkbookPopulator {
     }
     public List<LoanProductData> getProducts(){
         return products;
-        
+
     }
     public Integer getProductsSize() {
         return products.size();

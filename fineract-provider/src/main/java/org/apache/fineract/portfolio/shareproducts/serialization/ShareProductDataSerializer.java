@@ -118,7 +118,7 @@ public class ShareProductDataSerializer {
         final String shortName = this.fromApiJsonHelper.extractStringNamed(ShareProductApiConstants.shortname_paramname, element);
         baseDataValidator.reset().parameter(ShareProductApiConstants.shortname_paramname).value(shortName).notBlank()
                 .notExceedingLengthOf(4);
-        
+
         final String description = this.fromApiJsonHelper
                 .extractStringNamed(ShareProductApiConstants.description_paramname, element);
         baseDataValidator.reset().parameter(ShareProductApiConstants.description_paramname).value(description)
@@ -141,7 +141,7 @@ public class ShareProductDataSerializer {
         final Integer inMultiplesOf = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(
                 ShareProductApiConstants.inmultiplesof_paramname, element);
         final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal, inMultiplesOf);
-      
+
         final BigDecimal unitPrice = this.fromApiJsonHelper.extractBigDecimalNamed(ShareProductApiConstants.unitprice_paramname, element,
                 locale);
         baseDataValidator.reset().parameter(ShareProductApiConstants.unitprice_paramname).value(unitPrice).notNull().positiveAmount();
@@ -199,7 +199,7 @@ public class ShareProductDataSerializer {
                 sharesIssued, unitPrice, shareCapitalValue, minimumClientShares, nominalClientShares, maximumClientShares, marketPriceSet,
                 charges, allowdividendsForInactiveClients, lockinPeriod, lockPeriodType, minimumActivePeriod, minimumActivePeriodType,
                 createdBy, createdDate, modifiedBy, modifiedOn, accountingRuleType);
-       
+
         for (ShareProductMarketPrice data : marketPriceSet) {
             data.setShareProduct(product);
         }
@@ -330,13 +330,13 @@ public class ShareProductDataSerializer {
         }else {
             product.setTotalIssuedShares(sharesIssued) ;
         }
-        
+
         if(sharesIssued != null && product.getSubscribedShares() != null && sharesIssued < product.getSubscribedShares()) {
             baseDataValidator.reset().parameter(ShareProductApiConstants.totalsharesissued_paramname).value(sharesIssued)
             .failWithCodeNoParameterAddedToErrorCode("sharesissued.can.not.be.lessthan.accounts.subscribed.shares");
         }
-        
-        
+
+
         if (this.fromApiJsonHelper.parameterExists(ShareProductApiConstants.currency_paramname, element)
                 && this.fromApiJsonHelper.parameterExists(ShareProductApiConstants.digitsafterdecimal_paramname, element)
                 && this.fromApiJsonHelper.parameterExists(ShareProductApiConstants.inmultiplesof_paramname, element)) {
@@ -458,7 +458,7 @@ public class ShareProductDataSerializer {
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-        
+
         BigDecimal shareCapitalValue;
         if (sharesIssued != null || unitPrice != null) {
             if (sharesIssued == null) sharesIssued = product.getTotalShares();

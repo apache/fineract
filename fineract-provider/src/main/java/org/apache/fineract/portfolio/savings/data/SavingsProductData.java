@@ -158,14 +158,14 @@ public class SavingsProductData implements Serializable {
                 product.feeToIncomeAccountMappings, product.penaltyToIncomeAccountMappings, product.allowOverdraft, product.overdraftLimit,
                 product.minRequiredBalance, product.enforceMinRequiredBalance, product.minBalanceForInterestCalculation,
                 product.nominalAnnualInterestRateOverdraft, product.minOverdraftForInterestCalculation, product.withHoldTax,
-                product.taxGroup, product.taxGroupOptions, product.isDormancyTrackingActive, product.daysToInactive, 
+                product.taxGroup, product.taxGroupOptions, product.isDormancyTrackingActive, product.daysToInactive,
                 product.daysToDormancy, product.daysToEscheat);
     }
 
     /**
      * Returns a {@link SavingsProductData} that contains and exist
      * {@link SavingsProductData} data with further template data for dropdowns.
-     * 
+     *
      * @param taxGroupOptions
      *            TODO
      */
@@ -192,7 +192,7 @@ public class SavingsProductData implements Serializable {
                 existingProduct.feeToIncomeAccountMappings, existingProduct.penaltyToIncomeAccountMappings, existingProduct.allowOverdraft,
                 existingProduct.overdraftLimit, existingProduct.minRequiredBalance, existingProduct.enforceMinRequiredBalance,
                 existingProduct.minBalanceForInterestCalculation, existingProduct.nominalAnnualInterestRateOverdraft,
-                existingProduct.minOverdraftForInterestCalculation, existingProduct.withHoldTax, existingProduct.taxGroup, taxGroupOptions, 
+                existingProduct.minOverdraftForInterestCalculation, existingProduct.withHoldTax, existingProduct.taxGroup, taxGroupOptions,
                 existingProduct.isDormancyTrackingActive, existingProduct.daysToInactive, existingProduct.daysToDormancy, existingProduct.daysToEscheat);
     }
 
@@ -229,7 +229,7 @@ public class SavingsProductData implements Serializable {
                 existingProduct.minRequiredBalance, existingProduct.enforceMinRequiredBalance,
                 existingProduct.minBalanceForInterestCalculation, existingProduct.nominalAnnualInterestRateOverdraft,
                 existingProduct.minOverdraftForInterestCalculation, existingProduct.withHoldTax, existingProduct.taxGroup,
-                existingProduct.taxGroupOptions, existingProduct.isDormancyTrackingActive, existingProduct.daysToInactive, 
+                existingProduct.taxGroupOptions, existingProduct.isDormancyTrackingActive, existingProduct.daysToInactive,
                 existingProduct.daysToDormancy, existingProduct.daysToEscheat);
     }
 
@@ -241,7 +241,7 @@ public class SavingsProductData implements Serializable {
             final EnumOptionData accountingType, final boolean allowOverdraft, final BigDecimal overdraftLimit,
             final BigDecimal minRequiredBalance, final boolean enforceMinRequiredBalance,
             final BigDecimal minBalanceForInterestCalculation, final BigDecimal nominalAnnualInterestRateOverdraft,
-            final BigDecimal minOverdraftForInterestCalculation, final boolean withHoldTax, final TaxGroupData taxGroup, 
+            final BigDecimal minOverdraftForInterestCalculation, final boolean withHoldTax, final TaxGroupData taxGroup,
             final Boolean isDormancyTrackingActive, final Long daysToInactive, final Long daysToDormancy, final Long daysToEscheat) {
 
         final Map<String, Object> accountingMappings = null;
@@ -356,7 +356,7 @@ public class SavingsProductData implements Serializable {
             final BigDecimal overdraftLimit, final BigDecimal minRequiredBalance, final boolean enforceMinRequiredBalance,
             final BigDecimal minBalanceForInterestCalculation, final BigDecimal nominalAnnualInterestRateOverdraft,
             final BigDecimal minOverdraftForInterestCalculation, final boolean withHoldTax, final TaxGroupData taxGroup,
-            final Collection<TaxGroupData> taxGroupOptions, final Boolean isDormancyTrackingActive, final Long daysToInactive, 
+            final Collection<TaxGroupData> taxGroupOptions, final Boolean isDormancyTrackingActive, final Long daysToInactive,
             final Long daysToDormancy, final Long daysToEscheat) {
         this.id = id;
         this.name = name;

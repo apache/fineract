@@ -88,7 +88,7 @@ public class SearchConditions {
     public Boolean isSavingSeach() {
         return this.savingSeach;
     }
-    
+
     public Boolean isShareSeach() {
         return this.shareSeach;
     }

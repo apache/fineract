@@ -30,9 +30,9 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 
 /**
  * Encapsulates all the summary details of a {@link Loan}.
- * 
+ *
  * {@link LoanSummary} fields are updated through a scheduled job. see -
- * 
+ *
  */
 @Embeddable
 public final class LoanSummary {
@@ -230,13 +230,13 @@ public final class LoanSummary {
 
         Money totalFeeChargesRepaidAtDisbursement = summaryWrapper.calculateTotalChargesRepaidAtDisbursement(charges,currency);
         this.totalFeeChargesRepaid = totalFeeChargesRepaidAtDisbursement.getAmount();
-        
+
         if(charges != null) {
-            this.totalFeeChargesWaived = summaryWrapper.calculateTotalFeeChargesWaived(charges, currency).getAmount();    
+            this.totalFeeChargesWaived = summaryWrapper.calculateTotalFeeChargesWaived(charges, currency).getAmount();
         }else {
             this.totalFeeChargesWaived = BigDecimal.ZERO;
         }
-        
+
         this.totalFeeChargesWrittenOff = summaryWrapper.calculateTotalFeeChargesWrittenOff(repaymentScheduleInstallments, currency)
                 .getAmount();
 
@@ -336,7 +336,7 @@ public final class LoanSummary {
         return this.totalPenaltyChargesWaived;
     }
 
-    
+
     public BigDecimal getTotalExpectedRepayment() {
         return this.totalExpectedRepayment;
     }

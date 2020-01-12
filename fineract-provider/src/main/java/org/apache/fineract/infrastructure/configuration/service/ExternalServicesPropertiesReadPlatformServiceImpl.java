@@ -199,7 +199,7 @@ public class ExternalServicesPropertiesReadPlatformServiceImpl implements Extern
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 
     }
-    
+
     private static final class NotificationDataExtractor implements ResultSetExtractor<NotificationConfigurationData> {
 
         @Override

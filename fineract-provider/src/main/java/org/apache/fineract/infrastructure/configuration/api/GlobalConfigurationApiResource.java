@@ -92,7 +92,7 @@ public class GlobalConfigurationApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, configurationData, this.RESPONSE_DATA_PARAMETERS);
     }
-    
+
     @GET
     @Path("{configId}")
     @Consumes({ MediaType.APPLICATION_JSON })

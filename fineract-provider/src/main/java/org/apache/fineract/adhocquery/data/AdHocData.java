@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 /**
  * Immutable data object represent note or case information AdHocData
- * 
+ *
  */
 public class AdHocData {
 
@@ -53,12 +53,12 @@ public class AdHocData {
     @SuppressWarnings("unused")
     private final Long createdById;
     @SuppressWarnings("unused")
-    private final Long updatedById;   
+    private final Long updatedById;
     @SuppressWarnings("unused")
     private final DateTime updatedOn;
     @SuppressWarnings("unused")
     private final String createdBy;
-    
+
     private final List<EnumOptionData> reportRunFrequencies;
 
     private final Long reportRunFrequency;

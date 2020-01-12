@@ -33,7 +33,7 @@ public class RedeemSharesCommandHandler implements NewCommandSourceHandler{
 
 
     private final ShareAccountWritePlatformService shareAccountWritePlatformService ;
-    
+
     @Autowired
     public RedeemSharesCommandHandler(final ShareAccountWritePlatformService shareAccountWritePlatformService) {
         this.shareAccountWritePlatformService = shareAccountWritePlatformService ;

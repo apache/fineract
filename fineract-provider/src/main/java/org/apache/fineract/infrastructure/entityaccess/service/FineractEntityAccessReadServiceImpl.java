@@ -63,7 +63,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.apache.fineract.infrastructure.entityaccess.service.
      * FineractEntityAccessReadService#getSQLQueryWithListOfIDsForEntityAccess
      * (Long,
@@ -72,23 +72,23 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
      * FineractEntityAccessType,
      * org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType,
      * boolean)
-     * 
+     *
      * This method returns the list of entity IDs as a comma separated list Or
      * null if there is no entity restrictions or if there
      */
     @Override
     public String getSQLQueryInClause_WithListOfIDsForEntityAccess( FineractEntityType firstEntityType,
                        final Long relId, final Long fromEntityId, boolean includeAllOffices) {
-                    Collection<FineractEntityToEntityMappingData> accesslist = retrieveEntityAccessFor(firstEntityType, relId, fromEntityId, 
+                    Collection<FineractEntityToEntityMappingData> accesslist = retrieveEntityAccessFor(firstEntityType, relId, fromEntityId,
                             includeAllOffices);
         String returnIdListStr = null;
         StringBuffer accessListCSVStrBuf = null;
         if ((accesslist != null) && (accesslist.size() > 0)) {
             for(FineractEntityToEntityMappingData accessData: accesslist){
-                                if (accessData == null) {  
+                                if (accessData == null) {
                                     throw new FineractEntityMappingConfigurationException();
                                  }
-                              
+
                                 if(accessListCSVStrBuf == null){
                                     accessListCSVStrBuf = new StringBuffer() ;
                                 }else{
@@ -96,13 +96,13 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
                                 }
                                 accessListCSVStrBuf.append(accessData.getToId());
                                 if(accessData.getToId() == 0){
-                                    accessListCSVStrBuf =null; 
+                                    accessListCSVStrBuf =null;
                                     break;
                                 }
                 }
 
         } else {
-           
+
             accessListCSVStrBuf = new StringBuffer();
             accessListCSVStrBuf.append("false"); // Append false so that no rows
                                                  // will be returned
@@ -127,7 +127,7 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
             hierarchySearchString = hierarchy + "%";
         }
         String sql = getSQLForRetriveEntityAccessFor();
-        
+
         Collection<FineractEntityToEntityMappingData> entityAccessData = null;
         GetOneEntityMapper mapper = new GetOneEntityMapper();
 

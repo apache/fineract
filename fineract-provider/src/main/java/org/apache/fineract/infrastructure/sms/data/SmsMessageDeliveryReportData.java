@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.infrastructure.sms.data;
 
-/** 
- * Immutable data object representing an outbound SMS message delivery report data 
+/**
+ * Immutable data object representing an outbound SMS message delivery report data
  **/
 public class SmsMessageDeliveryReportData {
     private Long id;
@@ -29,13 +29,13 @@ public class SmsMessageDeliveryReportData {
     private Integer deliveryStatus;
     private Boolean hasError;
     private String errorMessage;
-    
-    /** 
+
+    /**
      * SmsMessageDeliveryReportData constructor
-     * 
-     *  
+     *
+     *
      **/
-    private SmsMessageDeliveryReportData(Long id, String externalId, String addedOnDate, String deliveredOnDate, 
+    private SmsMessageDeliveryReportData(Long id, String externalId, String addedOnDate, String deliveredOnDate,
             Integer deliveryStatus, Boolean hasError, String errorMessage) {
         this.id = id;
         this.externalId = externalId;
@@ -45,20 +45,20 @@ public class SmsMessageDeliveryReportData {
         this.hasError = hasError;
         this.errorMessage = errorMessage;
     }
-    
-    /** 
-     * Default SmsMessageDeliveryReportData constructor 
-     * 
-     * 
+
+    /**
+     * Default SmsMessageDeliveryReportData constructor
+     *
+     *
      **/
     protected SmsMessageDeliveryReportData() {}
-    
-    /** 
+
+    /**
      * @return an instance of the SmsMessageDeliveryReportData class
      **/
-    public static SmsMessageDeliveryReportData getInstance(Long id, String externalId, String addedOnDate, String deliveredOnDate, 
+    public static SmsMessageDeliveryReportData getInstance(Long id, String externalId, String addedOnDate, String deliveredOnDate,
             Integer deliveryStatus, Boolean hasError, String errorMessage) {
-        
+
         return new SmsMessageDeliveryReportData(id, externalId, addedOnDate, deliveredOnDate, deliveryStatus, hasError, errorMessage);
     }
 

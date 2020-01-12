@@ -30,7 +30,7 @@ import java.util.List;
 
 /**
  * Immutable object representing a General Ledger Account
- * 
+ *
  * Note: no getter/setters required as google-gson will produce json from fields
  * of object.
  */

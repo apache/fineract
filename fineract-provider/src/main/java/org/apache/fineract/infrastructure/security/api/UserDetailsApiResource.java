@@ -48,7 +48,7 @@ import org.springframework.security.oauth2.provider.token.ResourceServerTokenSer
 import org.springframework.stereotype.Component;
 
 /*
- * Implementation of Oauth2 authentication APIs, loaded only when "oauth" profile is enabled. 
+ * Implementation of Oauth2 authentication APIs, loaded only when "oauth" profile is enabled.
  */
 @Path("/userdetails")
 @Component

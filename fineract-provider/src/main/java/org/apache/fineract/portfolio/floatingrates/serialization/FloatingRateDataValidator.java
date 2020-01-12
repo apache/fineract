@@ -185,7 +185,7 @@ public class FloatingRateDataValidator {
                                                 "no.baselending.rate.defined",
                                                 "Base Lending Rate doesn't exists");
                             }
-                            
+
                             if(isBaseLendingRate){
                                 baseDataValidator
                                 .reset()
@@ -275,17 +275,17 @@ public class FloatingRateDataValidator {
         if(isBaseLendingRate == null){
             isBaseLendingRate = floatingRateForUpdate.isBaseLendingRate();
         }
-        
+
         if(isActive == null){
             isActive = floatingRateForUpdate.isActive();
         }
-        
+
         if(baseLendingRate != null && baseLendingRate.getId().equals(floatingRateForUpdate.getId())){
             if(!isBaseLendingRate || !isActive){
                 isBLRModifiedAsNonBLR = true;
             }
         }
-        
+
         if(isBLRModifiedAsNonBLR){
             Collection<FloatingRate> floatingRates = this.floatingRateRepository.retrieveFloatingRatesLinkedToBLR();
             if(floatingRates != null && floatingRates.size() > 0){

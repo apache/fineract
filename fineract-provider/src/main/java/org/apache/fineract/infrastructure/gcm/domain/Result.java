@@ -35,10 +35,10 @@ import java.util.List;
  * created, but GCM has a canonical registration id for that device. In this
  * case, the server should update the registration id to avoid rejected requests
  * in the future.
- * 
+ *
  * <p>
  * In a nutshell, the workflow to handle a result is:
- * 
+ *
  * <pre>
  *   - Call {@link #getMessageId()}:
  *     - {@literal null} means error, call {@link #getErrorCodeName()}
@@ -93,7 +93,7 @@ public final class Result implements Serializable {
             failure = value;
             return this;
         }
-        
+
         public Builder status(int value) {
             status = value;
             return this;
@@ -181,7 +181,7 @@ public final class Result implements Serializable {
     public int getStatus() {
         return this.status;
     }
-    
-    
+
+
 
 }

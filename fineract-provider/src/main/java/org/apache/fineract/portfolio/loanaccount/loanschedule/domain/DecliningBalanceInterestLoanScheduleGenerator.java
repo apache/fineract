@@ -40,14 +40,14 @@ import org.joda.time.LocalDate;
  * <li>Equal installment payments</li>
  * </ol>
  * <p></p>
- * 
+ *
  * <p>
  * When amortized using <i>equal principal payments</i>, the <b>principal
  * component</b> of each installment is fixed and <b>interest due</b> is
  * calculated from the <b>outstanding principal balance</b> resulting in a
  * different <b>total payment due</b> for each installment.
  * </p>
- * 
+ *
  * <p>
  * When amortized using <i>equal installments</i>, the <b>total payment due</b>
  * for each installment is fixed and is calculated using the excel like
@@ -73,7 +73,7 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
         Money balanceForInterestCalculation = outstandingBalance;
         Money cumulatingInterestDueToGrace = cumulatingInterestPaymentDueToGrace;
         Map<LocalDate, BigDecimal> interestRates = new HashMap<>(termVariations.size());
-        
+
         for (LoanTermVariationsData loanTermVariation : termVariations) {
             if (loanTermVariation.getTermVariationType().isInterestRateVariation()
                     && loanTermVariation.isApplicable(periodStartDate, periodEndDate)) {
@@ -123,12 +123,12 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
                 }
             }
         }
-        
+
 
         final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
                 interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestDueToGrace,
                 balanceForInterestCalculation, interestStartDate, periodEndDate);
-        
+
         interestForThisInstallment = interestForThisInstallment.plus(result.interest());
         cumulatingInterestDueToGrace = result.interestPaymentDueToGrace();
 

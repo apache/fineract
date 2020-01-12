@@ -43,7 +43,7 @@ import com.google.gson.JsonElement;
 
 @Component
 public class SelfSavingsDataValidator {
-    
+
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -99,7 +99,7 @@ public class SelfSavingsDataValidator {
             unsupportedParams.add("template");
         }
     }
-    
+
     public HashMap<String, Object> validateSavingsApplication(final String json) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();

@@ -25,7 +25,7 @@ public class UndoLastTrancheDisbursementException extends AbstractPlatformDomain
     public UndoLastTrancheDisbursementException(final Object... defaultUserMessageArgs) {
         super("error.msg.cannot.undo.last.disbursal.after.repayments or waivers"," Cannot undo last disbursement after repayments or waivers.",
                 defaultUserMessageArgs);
-        
+
     }
 
 }

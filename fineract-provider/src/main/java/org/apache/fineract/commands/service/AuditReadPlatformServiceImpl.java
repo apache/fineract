@@ -207,7 +207,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
         String updatedExtraCriteria = "";
         if (StringUtils.isNotBlank(extraCriteria)) {
-            updatedExtraCriteria = " where (" + extraCriteria + ")";            
+            updatedExtraCriteria = " where (" + extraCriteria + ")";
         }
 
         final AuditMapper rm = new AuditMapper();
@@ -259,7 +259,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
         final AuditMapper rm = new AuditMapper();
         String sql = "select " + rm.schema(includeJson, hierarchy);
-        
+
         Boolean isLimitedChecker = false;
         if (useType.equals("makerchecker")) {
             if (currentUser.hasNotPermissionForAnyOf("ALL_FUNCTIONS", "CHECKER_SUPER_USER")) {
@@ -275,7 +275,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         sql += extraCriteria;
         if(isExtraCritereaIncluded){
             this.columnValidator.validateSqlInjection(sql, extraCriteria);
-        }        
+        }
         logger.info("sql: " + sql);
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});

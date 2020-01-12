@@ -143,9 +143,9 @@ public class ClientTransaction extends AbstractPersistableCustom<Long> {
     /**
      * Converts the content of this Client Transaction to a map which can be
      * passed to the accounting module
-     * 
-     * 
-     * 
+     *
+     *
+     *
      */
     public Map<String, Object> toMapData() {
         final Map<String, Object> thisTransactionData = new LinkedHashMap<>();
@@ -208,7 +208,7 @@ public class ClientTransaction extends AbstractPersistableCustom<Long> {
     public Client getClient() {
         return this.client ;
     }
-    
+
     public Money getAmount() {
         return Money.of(getCurrency(), this.amount);
     }

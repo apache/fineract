@@ -99,7 +99,7 @@ public class LoanReschedulingWithinCenterTest {
         Integer clientId = createClient(officeId);
 
         associateClientsToGroup(groupId, clientId);
-        
+
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
         Calendar today = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -114,7 +114,7 @@ public class LoanReschedulingWithinCenterTest {
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
                 LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "0", recalculationRestFrequencyDate,
-                LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, null, isMultiTrancheLoan, 
+                LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, null, isMultiTrancheLoan,
                 null, null);
 
         // APPLY FOR TRANCHE LOAN WITH INTEREST RECALCULATION
@@ -153,7 +153,7 @@ public class LoanReschedulingWithinCenterTest {
         Float interestDue = (Float) ((HashMap) loanRepaymnetSchedule.get(2)).get("interestDue");
         assertEquals("90.82", String.valueOf(interestDue));
     }
-    
+
     private void associateClientsToGroup(Integer groupId, Integer clientId) {
         // Associate client to the group
         GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupId.toString(), clientId.toString());
@@ -225,13 +225,13 @@ public class LoanReschedulingWithinCenterTest {
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
                 LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "0", recalculationRestFrequencyDate,
-                LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, null, isMultiTrancheLoan, 
+                LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, null, isMultiTrancheLoan,
                 null, null);
 
         Calendar seondTrancheDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         seondTrancheDate.add(Calendar.MONTH, 1);
         String secondDisbursement = dateFormat.format(seondTrancheDate.getTime()) ;
-        
+
         // CREATE TRANCHES
         List<HashMap> createTranches = new ArrayList<>();
         createTranches.add(this.loanApplicationApprovalTest.createTrancheDetail(disbursementDate, "5000"));
@@ -295,8 +295,8 @@ public class LoanReschedulingWithinCenterTest {
         return createLoanProductWithInterestRecalculation(repaymentStrategy, interestRecalculationCompoundingMethod,
                 rescheduleStrategyMethod, recalculationRestFrequencyType, recalculationRestFrequencyInterval,
                 recalculationRestFrequencyDate, recalculationCompoundingFrequencyType, recalculationCompoundingFrequencyInterval,
-                recalculationCompoundingFrequencyDate, preCloseInterestCalculationStrategy, accounts, null, false, isMultiTrancheLoan, 
-                recalculationCompoundingFrequencyOnDayType, recalculationCompoundingFrequencyDayOfWeekType, recalculationRestFrequencyOnDayType, 
+                recalculationCompoundingFrequencyDate, preCloseInterestCalculationStrategy, accounts, null, false, isMultiTrancheLoan,
+                recalculationCompoundingFrequencyOnDayType, recalculationCompoundingFrequencyDayOfWeekType, recalculationRestFrequencyOnDayType,
                 recalculationRestFrequencyDayOfWeekType);
     }
 
@@ -306,7 +306,7 @@ public class LoanReschedulingWithinCenterTest {
             final String recalculationRestFrequencyDate, final String recalculationCompoundingFrequencyType,
             final String recalculationCompoundingFrequencyInterval, final String recalculationCompoundingFrequencyDate,
             final String preCloseInterestCalculationStrategy, final Account[] accounts, final String chargeId,
-            boolean isArrearsBasedOnOriginalSchedule, final boolean isMultiTrancheLoan, 
+            boolean isArrearsBasedOnOriginalSchedule, final boolean isMultiTrancheLoan,
             final Integer recalculationCompoundingFrequencyOnDayType,
             final Integer recalculationCompoundingFrequencyDayOfWeekType, final Integer recalculationRestFrequencyOnDayType,
             final Integer recalculationRestFrequencyDayOfWeekType) {

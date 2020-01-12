@@ -34,15 +34,15 @@ public class LoanProductProvisionCriteria extends AbstractPersistableCustom<Long
     @ManyToOne(optional = false)
     @JoinColumn(name = "criteria_id", referencedColumnName = "id", nullable = false)
     private ProvisioningCriteria criteria;
-    
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "product_id", referencedColumnName = "id", nullable = false)
     private LoanProduct loanProduct;
-    
+
     protected LoanProductProvisionCriteria() {
-        
+
     }
-    
+
     public LoanProductProvisionCriteria(ProvisioningCriteria criteria, LoanProduct loanProduct) {
         this.criteria = criteria ;
         this.loanProduct = loanProduct ;

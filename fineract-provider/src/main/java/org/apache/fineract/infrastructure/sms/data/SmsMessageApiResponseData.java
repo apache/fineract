@@ -20,31 +20,31 @@ package org.apache.fineract.infrastructure.sms.data;
 
 import java.util.List;
 
-/** 
- * Immutable data object representing an outbound SMS message API response data 
+/**
+ * Immutable data object representing an outbound SMS message API response data
  **/
 public class SmsMessageApiResponseData {
     private Integer httpStatusCode;
     private List<SmsMessageDeliveryReportData> data;
-    
-    /** 
+
+    /**
      * SmsMessageApiResponseData constructor
-     * 
-     *  
+     *
+     *
      **/
     private SmsMessageApiResponseData(Integer httpStatusCode, List<SmsMessageDeliveryReportData> data) {
         this.httpStatusCode = httpStatusCode;
         this.data = data;
     }
-    
-    /** 
-     * Default SmsMessageApiResponseData constructor 
-     * 
-     * 
+
+    /**
+     * Default SmsMessageApiResponseData constructor
+     *
+     *
      **/
     protected SmsMessageApiResponseData() {}
-    
-    /** 
+
+    /**
      * @return an instance of the SmsMessageApiResponseData class
      **/
     public static SmsMessageApiResponseData getInstance(Integer httpStatusCode, List<SmsMessageDeliveryReportData> data) {

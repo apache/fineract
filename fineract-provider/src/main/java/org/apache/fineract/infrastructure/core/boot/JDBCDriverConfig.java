@@ -32,14 +32,14 @@ public class JDBCDriverConfig {
     private final static String PROTOCOL_PROPERTYNAME = "PROTOCOL" ;
     private final static String SUBPROTOCOL_PROPERTYNAME = "SUB_PROTOCOL" ;
     private final static String PORT_PROPERTYNAME = "PORT" ;
-    
+
     private String driverClassName ;
     private String protocol ;
     private String subProtocol ;
     private Integer port ;
-    
+
     @Autowired ApplicationContext context ;
-    
+
     @PostConstruct
     protected void init() {
         Environment environment = context.getEnvironment() ;
@@ -48,11 +48,11 @@ public class JDBCDriverConfig {
         subProtocol = (String) environment.getProperty(SUBPROTOCOL_PROPERTYNAME) ;
         port = Integer.parseInt((String) environment.getProperty(PORT_PROPERTYNAME)) ;
     }
-    
+
     public String getDriverClassName() {
         return this.driverClassName ;
     }
-    
+
     public String getProtocol() {
         return this.protocol ;
     }
@@ -60,11 +60,11 @@ public class JDBCDriverConfig {
     public String getSubProtocol() {
         return this.subProtocol ;
     }
-    
+
     public Integer getPort() {
         return this.port ;
     }
-    
+
     public String constructProtocol(String schemaServer, String schemaServerPort, String schemaName) {
         final String url = new StringBuilder(protocol).append(":").append(subProtocol).append("://").append(schemaServer).append(':').append(schemaServerPort)
                 .append('/').append(schemaName).toString();

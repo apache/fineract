@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 /**
  * An {@link ExceptionMapper} to map {@link PlatformDataIntegrityException}
  * thrown by platform into a HTTP API friendly format.
- * 
+ *
  * The {@link PlatformDataIntegrityException} is thrown when modifying api call
  * result in data integrity checks to be fired.
  */

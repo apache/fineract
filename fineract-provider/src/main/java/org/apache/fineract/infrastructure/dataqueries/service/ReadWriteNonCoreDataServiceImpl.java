@@ -247,13 +247,13 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         validateAppTable(applicationTableName);
         validateDatatableName(dataTableName);
         assertDataTableExists(dataTableName);
-       
+
         Map<String, Object> paramMap = new HashMap<>(3);
         final String registerDatatableSql = "insert into x_registered_table (registered_table_name, application_table_name,category) values ( :dataTableName, :applicationTableName, :category)";
         paramMap.put("dataTableName", dataTableName);
         paramMap.put("applicationTableName", applicationTableName);
         paramMap.put("category", category);
-        
+
         try {
             this.namedParameterJdbcTemplate.update(registerDatatableSql, paramMap);
             this.jdbcTemplate.update(permissionsSql);
@@ -271,7 +271,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             // show duplicate datatable error msg
             if (realCause.getMessage()
                     .contains("Duplicate entry") || cause.getMessage()
-                    .contains("Duplicate entry")) { 
+                    .contains("Duplicate entry")) {
                 throw new PlatformDataIntegrityException("error.msg.datatable.registered",
                             "Datatable `" + dataTableName + "` is already registered against an application table.", "dataTableName",
                             dataTableName); }
@@ -281,7 +281,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }catch (final PersistenceException dve) {
             final Throwable cause = dve.getCause() ;
             if (cause.getMessage()
-                    .contains("Duplicate entry")) { 
+                    .contains("Duplicate entry")) {
                 throw new PlatformDataIntegrityException("error.msg.datatable.registered",
                             "Datatable `" + dataTableName + "` is already registered against an application table.", "dataTableName",
                             dataTableName); }
@@ -557,7 +557,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             /***
              * In cases of tables storing hierarchical entities (like m_group),
              * different entities would end up being stored in the same table.
-             * 
+             *
              * Ex: Centers are a specific type of group, add abstractions for
              * the same
              ***/
@@ -835,7 +835,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     /**
      * Update data table, set column value to empty string where current value
      * is NULL. Run update SQL only if the "mandatory" property is set to true
-     * 
+     *
      * @param datatableName
      *            Name of data table
      * @param column
@@ -1073,7 +1073,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         if (rowCount != 0) { throw new GeneralPlatformDomainRuleException("error.msg.non.empty.datatable.cannot.be.deleted",
                 "Non-empty datatable cannot be deleted."); }
     }
-    
+
     private int getRowCount(final String datatableName){
         final String sql = "select count(*) from `" + datatableName + "`";
         return this.jdbcTemplate.queryForObject(sql, Integer.class);
@@ -1431,7 +1431,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     /**
      * This method is used special for ppi cases Where the score need to be
      * computed
-     * 
+     *
      * @param columnHeaders
      * @param datatable
      * @param fkName

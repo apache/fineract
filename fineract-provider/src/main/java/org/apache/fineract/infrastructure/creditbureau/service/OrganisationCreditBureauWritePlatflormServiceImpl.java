@@ -76,7 +76,7 @@ public class OrganisationCreditBureauWritePlatflormServiceImpl
         this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
         final long creditbureauID = command.longValueOfParameterNamed("creditBureauId");
-        
+
         final boolean is_active = command.booleanPrimitiveValueOfParameterNamed("is_active");
 
         final OrganisationCreditBureau orgcb = organisationCreditBureauRepository.getOne(creditbureauID);

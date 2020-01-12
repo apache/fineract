@@ -136,7 +136,7 @@ public class DepositAccountDataValidator {
         validateRecurringDetailForSubmit(element, baseDataValidator);
         validateSavingsCharges(element, baseDataValidator);
         validateWithHoldTax(element, baseDataValidator);
-        
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -690,7 +690,7 @@ public class DepositAccountDataValidator {
             }
         }
     }
-    
+
     private void validateWithHoldTax(final JsonElement element, final DataValidatorBuilder baseDataValidator){
         if (this.fromApiJsonHelper.parameterExists(withHoldTaxParamName, element)) {
             final String withHoldTax = this.fromApiJsonHelper.extractStringNamed(withHoldTaxParamName, element);

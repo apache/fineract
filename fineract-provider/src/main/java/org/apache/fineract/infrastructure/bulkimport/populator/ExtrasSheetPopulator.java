@@ -41,7 +41,7 @@ public class ExtrasSheetPopulator extends AbstractWorkbookPopulator {
     private static final int CURRENCY_CODE_COL = 4;
     private static final int CURRENCY_NAME_COL = 5;
 
-    
+
     public ExtrasSheetPopulator(List<FundData> funds, List<PaymentTypeData> paymentTypes,
             List<CurrencyData> currencies) {
         this.funds = funds;
@@ -111,6 +111,6 @@ public class ExtrasSheetPopulator extends AbstractWorkbookPopulator {
         return currencies.size();
     }
 
-    
-    
+
+
 }

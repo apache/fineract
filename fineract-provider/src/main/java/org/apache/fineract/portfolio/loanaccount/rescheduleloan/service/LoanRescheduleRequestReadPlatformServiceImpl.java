@@ -94,7 +94,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             sqlBuilder.append("rbu.username as rejectedByUsername, ");
             sqlBuilder.append("rbu.firstname as rejectedByFirstname, ");
             sqlBuilder.append("rbu.lastname as rejectedByLastname, ");
-            
+
             sqlBuilder.append("tv.id as termId,");
             sqlBuilder.append("tv.term_type as termType,");
             sqlBuilder.append("tv.applicable_date as variationApplicableFrom, ");
@@ -159,9 +159,9 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
             final LoanRescheduleRequestTimelineData timeline = new LoanRescheduleRequestTimelineData(submittedOnDate, submittedByUsername,
                     submittedByFirstname, submittedByLastname, approvedOnDate, approvedByUsername, approvedByFirstname, approvedByLastname,
                     rejectedOnDate, rejectedByUsername, rejectedByFirstname, rejectedByLastname);
-            
+
             Collection<LoanTermVariationsData> loanTermVariations = new ArrayList<>();
-            
+
             do {
                 Long tempId = rs.getLong("id");
                 if (id.equals(tempId)) {
@@ -176,7 +176,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
                     rescheduleReasonCodeValue, rescheduleReasonComment, timeline, clientName, loanAccountNumber, clientId,
                     recalculateInterest, rescheduleReasons, loanTermVariations);
         }
-        
+
         private LoanTermVariationsData fetchLoanTermVariation(final ResultSet rs) throws SQLException {
             final Long id = rs.getLong("termId");
             final LocalDate variationApplicableFrom = JdbcSupport.getLocalDate(rs, "variationApplicableFrom");
@@ -192,7 +192,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
         }
 
     }
-    
+
     private static final class LoanRescheduleRequestRowMapperForBulkApproval implements RowMapper<LoanRescheduleRequestData> {
 
         public String schema() {
@@ -226,7 +226,7 @@ public class LoanRescheduleRequestReadPlatformServiceImpl implements LoanResched
                     rescheduleReasonCodeValue);
         }
     }
-    
+
     @Override
     public List<LoanRescheduleRequestData> readLoanRescheduleRequests(Long loanId) {
         this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);

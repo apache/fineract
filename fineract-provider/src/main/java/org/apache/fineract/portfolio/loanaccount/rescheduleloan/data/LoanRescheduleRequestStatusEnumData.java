@@ -34,7 +34,7 @@ public class LoanRescheduleRequestStatusEnumData {
 
     /**
      * LoanRescheduleRequestStatusEnumData constructor
-     * 
+     *
      * Note: Same status types/states for loan accounts are used in here
      **/
     public LoanRescheduleRequestStatusEnumData(Long id, String code, String value) {

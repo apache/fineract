@@ -267,7 +267,7 @@ public class LoanAccountData {
                 transactionProcessingStrategyId, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                 interestChargedFromDate, repaymentsStartingFromDate, rowIndex, externalId, null, null, linkAccountId,locale,dateFormat);
     }
-    
+
     private LoanAccountData(EnumOptionData loanType,Long clientId,Long productId,Long loanOfficerId,LocalDate submittedOnDate,
             Long fundId,BigDecimal principal, Integer numberOfRepayments,Integer repaymentEvery,
             EnumOptionData repaymentFrequencyType, Integer loanTermFrequency,EnumOptionData loanTermFrequencyType,
@@ -1589,7 +1589,7 @@ public class LoanAccountData {
         this.expectedFirstRepaymentOnDate = expectedFirstRepaymentOnDate;
         this.graceOnPrincipalPayment = graceOnPrincipalPayment;
         this.recurringMoratoriumOnPrincipalPeriods = recurringMoratoriumOnPrincipalPeriods;
-        
+
         this.graceOnInterestPayment = graceOnInterestPayment;
         this.graceOnInterestCharged = graceOnInterestCharged;
         this.interestChargedFromDate = interestChargedFromDate;
@@ -1840,29 +1840,29 @@ public class LoanAccountData {
 
     /**
      * Used to produce a {@link LoanAccountData} with only collateral options for now.
-     * 
+     *
      * @return {@link LoanAccountData} object
      */
     public static LoanAccountData emptyTemplate() {
         final Collection<CodeValueData> loanCollateralOptions = null;
-        
+
         return LoanAccountData.collateralTemplate(loanCollateralOptions);
     }
-    
+
     public boolean isLoanProductLinkedToFloatingRate() {
         return this.isLoanProductLinkedToFloatingRate;
     }
-    
+
     public LocalDate getDisbursementDate(){
         return this.timeline.getDisbursementDate();
     }
 
-    
+
     public boolean isFloatingInterestRate() {
         return this.isFloatingInterestRate;
     }
 
-    
+
     public BigDecimal getInterestRateDifferential() {
         return this.interestRateDifferential;
     }

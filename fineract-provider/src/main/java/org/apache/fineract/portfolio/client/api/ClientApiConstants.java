@@ -62,10 +62,10 @@ public class ClientApiConstants {
     public static final String GENDER = "Gender";
     public static final String CLIENT_TYPE = "ClientType";
     public static final String CLIENT_CLASSIFICATION = "ClientClassification";
-    
+
     public static final String CLIENT_NON_PERSON_CONSTITUTION = "Constitution";
     public static final String CLIENT_NON_PERSON_MAIN_BUSINESS_LINE = "Main Business Line";
-    
+
     // general
     public static final String localeParamName = "locale";
     public static final String dateFormatParamName = "dateFormat";
@@ -73,9 +73,9 @@ public class ClientApiConstants {
     public static final String familyMembers = "familyMembers";
     public static final String MARITALSTATUS="MARITALSTATUS";
     public static final String maritalStatusIdParamName="maritalStatusId";
-    
-    
-    
+
+
+
     public static final String CLIENT_TYPE_INDIVIDUAL = "Individual";
 
     // request parameters
@@ -126,7 +126,7 @@ public class ClientApiConstants {
     public static final String routingCodeParamName = "routingCode";
     public static final String receiptNumberParamName = "receiptNumber";
     public static final String bankNumberParamName = "bankNumber";
-    
+
     //request parameters for client non person
     public static final String clientNonPersonDetailsParamName = "clientNonPersonDetails";
     public static final String incorpNumberParamName = "incorpNumber";
@@ -134,7 +134,7 @@ public class ClientApiConstants {
     public static final String incorpValidityTillParamName = "incorpValidityTillDate";
     public static final String constitutionIdParamName = "constitutionId";
     public static final String mainBusinessLineIdParamName = "mainBusinessLineId";
-    
+
 
     // response parameters
     public static final String statusParamName = "status";
@@ -201,7 +201,7 @@ public class ClientApiConstants {
             lastnameParamName, fullnameParamName, displayNameParamName, mobileNoParamName, emailAddressParamName, officeIdParamName, officeNameParamName,
             transferToOfficeIdParamName, transferToOfficeNameParamName, hierarchyParamName, imageIdParamName, imagePresentParamName,
             staffIdParamName, staffNameParamName, timelineParamName, groupsParamName, officeOptionsParamName, staffOptionsParamName,
-            dateOfBirthParamName, genderParamName, clientTypeParamName, clientClassificationParamName, legalFormParamName, 
+            dateOfBirthParamName, genderParamName, clientTypeParamName, clientClassificationParamName, legalFormParamName,
             clientNonPersonDetailsParamName, isStaffParamName));
 
     protected static final Set<String> CLIENT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList

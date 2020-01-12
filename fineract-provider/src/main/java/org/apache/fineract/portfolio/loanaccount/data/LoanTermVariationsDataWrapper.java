@@ -74,7 +74,7 @@ public class LoanTermVariationsDataWrapper {
     public LoanTermVariationsData nextDueDateVariation() {
         return this.dueDateIterator.next();
     }
-    
+
     public LoanTermVariationsData previousDueDateVariation() {
         return this.dueDateIterator.previous();
     }
@@ -90,7 +90,7 @@ public class LoanTermVariationsDataWrapper {
     public List<LoanTermVariationsData> getExceptionData() {
         return this.exceptionData;
     }
-    
+
     public void setExceptionData(final List<LoanTermVariationsData> exceptionData) {
         clearTerms();
         this.exceptionData.addAll(exceptionData);
@@ -103,7 +103,7 @@ public class LoanTermVariationsDataWrapper {
         this.dueDateVariation.clear();
         this.interestRateFromInstallment.clear();
     }
-    
+
     public List<LoanTermVariationsData> getInterestRateFromInstallment() {
         return this.interestRateFromInstallment;
     }
@@ -119,7 +119,7 @@ public class LoanTermVariationsDataWrapper {
         }
         return repaymetsForAdjust;
     }
-    
+
     public LoanTermVariationsData fetchLoanTermDueDateVariationsData(final LocalDate onDate) {
         LoanTermVariationsData data = null;
         for (LoanTermVariationsData termVariationsData : this.dueDateVariation) {
@@ -142,7 +142,7 @@ public class LoanTermVariationsDataWrapper {
             deriveLoanTermVariations();
         }
     }
-    
+
     private void deriveLoanTermVariations() {
         Collections.sort(this.exceptionData);
         for (LoanTermVariationsData loanTermVariationsData : this.exceptionData) {
@@ -161,9 +161,9 @@ public class LoanTermVariationsDataWrapper {
         this.iterator = this.exceptionData.listIterator();
         this.dueDateIterator = this.dueDateVariation.listIterator();
     }
-    
+
     public void resetVariations(){
-        
+
         for (LoanTermVariationsData loanTermVariationsData : this.exceptionData) {
             loanTermVariationsData.setProcessed(false);
         }

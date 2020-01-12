@@ -66,14 +66,14 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
     private final TopicSubscriberReadPlatformService topicSubscriberReadPlatformService;
     private final NotificationEventService notificationEvent;
     private final SpringEventPublisher springEventPublisher;
-    
+
     @Autowired
     public NotificationDomainServiceImpl(final BusinessEventNotifierService businessEventNotifierService,
             final PlatformSecurityContext context, final RoleRepository roleRepository,
             final TopicSubscriberReadPlatformService topicSubscriberReadPlatformService,
             final OfficeRepository officeRepository, final NotificationEventService notificationEvent,
             final SpringEventPublisher springEventPublisher) {
-        
+
         this.businessEventNotifierService = businessEventNotifierService;
         this.context = context;
         this.roleRepository = roleRepository;
@@ -82,7 +82,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
         this.notificationEvent = notificationEvent;
         this.springEventPublisher = springEventPublisher;
     }
-    
+
     @PostConstruct
     public void addListeners() {
         businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.CLIENTS_CREATE,
@@ -124,13 +124,13 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
          businessEventNotifierService.addBusinessEventPostListners(BUSINESS_EVENTS.SHARE_ACCOUNT_APPROVE,
                  new ShareAccountApprovedListener());
     }
-    
+
     private abstract class NotificationBusinessEventAdapter implements BusinessEventListner {
         @Override
         public void businessEventToBeExecuted(Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> businessEventEntity) {
         }
     }
-    
+
     private class ClientCreatedListener extends  NotificationBusinessEventAdapter {
 
         @Override
@@ -149,11 +149,11 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
                         client.getOffice().getId()
                 );
             }
-        }    
+        }
     }
-    
+
     private class CenterCreatedListener extends NotificationBusinessEventAdapter {
-        
+
         @Override
         public void businessEventWasExecuted(Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> businessEventEntity) {
             CommandProcessingResult commandProcessingResult;
@@ -172,9 +172,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             }
         }
     }
-    
+
     private class GroupCreatedListener extends  NotificationBusinessEventAdapter {
-        
+
         @Override
         public void businessEventWasExecuted(Map<BusinessEventNotificationConstants.BUSINESS_ENTITY, Object> businessEventEntity) {
             CommandProcessingResult commandProcessingResult;
@@ -193,9 +193,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             }
         }
     }
-    
+
     private class SavingsAccountDepositListener extends  NotificationBusinessEventAdapter {
-        
+
         @Override
         public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
             SavingsAccountTransaction savingsAccountTransaction;
@@ -214,9 +214,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             }
         }
     }
-    
+
     private class ShareProductDividendCreatedListener extends NotificationBusinessEventAdapter {
-        
+
         @Override
         public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
             Long shareProductId;
@@ -235,9 +235,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             }
         }
     }
-    
+
     private class FixedDepositAccountCreatedListener extends NotificationBusinessEventAdapter {
-        
+
         @Override
         public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
             FixedDepositAccount fixedDepositAccount;
@@ -256,9 +256,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             }
         }
     }
-    
+
     private class RecurringDepositAccountCreatedListener extends NotificationBusinessEventAdapter {
-        
+
         @Override
         public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
             RecurringDepositAccount recurringDepositAccount;
@@ -277,9 +277,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             }
         }
     }
-    
+
     private class SavingsAccountApprovedListener extends NotificationBusinessEventAdapter {
-        
+
         @Override
         public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
             SavingsAccount  savingsAccount;
@@ -287,7 +287,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             if (entity != null) {
                 savingsAccount = (SavingsAccount) entity;
                 if (savingsAccount.depositAccountType().equals(DepositAccountType.FIXED_DEPOSIT)) {
-                    
+
                     buildNotification(
                             "ACTIVATE_FIXEDDEPOSITACCOUNT",
                             "fixedDeposit",
@@ -296,9 +296,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
                             "approved",
                             context.authenticatedUser().getId(),
                             savingsAccount.officeId()
-                    );                    
+                    );
                 } else if (savingsAccount.depositAccountType().equals(DepositAccountType.RECURRING_DEPOSIT)) {
-                    
+
                     buildNotification(
                             "ACTIVATE_RECURRINGDEPOSITACCOUNT",
                             "recurringDepositAccount",
@@ -309,7 +309,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
                             savingsAccount.officeId()
                     );
                 } else if (savingsAccount.depositAccountType().equals(DepositAccountType.SAVINGS_DEPOSIT)) {
-                    
+
                     buildNotification(
                             "ACTIVATE_SAVINGSACCOUNT",
                             "savingsAccount",
@@ -323,9 +323,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             }
         }
     }
-    
+
     private class SavingsPostInterestListener extends NotificationBusinessEventAdapter {
-        
+
         @Override
         public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
             SavingsAccount savingsAccount;
@@ -344,9 +344,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             }
         }
     }
-    
+
     private class LoanCreatedListener extends NotificationBusinessEventAdapter {
-        
+
         @Override
         public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
             Loan loan;
@@ -363,12 +363,12 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
                         loan.getOfficeId()
                 );
             }
-            
+
         }
     }
-    
+
     private class LoanApprovedListener extends NotificationBusinessEventAdapter {
-        
+
         @Override
         public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
             Loan loan;
@@ -387,12 +387,12 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             }
         }
     }
-    
+
     private class LoanClosedListener extends NotificationBusinessEventAdapter {
-        
+
         @Override
         public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
-            
+
             Loan loan;
             Object entity = businessEventEntity.get(BUSINESS_ENTITY.LOAN);
             if (entity != null) {
@@ -409,9 +409,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             }
         }
     }
-        
+
     private class LoanCloseAsRescheduledListener extends NotificationBusinessEventAdapter {
-        
+
         @Override
         public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
             Loan loan;
@@ -430,9 +430,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             }
         }
     }
-        
+
     private class LoanMakeRepaymentListener extends NotificationBusinessEventAdapter {
-            
+
         @Override
         public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
             Loan loan;
@@ -451,12 +451,12 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             }
         }
     }
-    
+
     private class LoanProductCreatedListener extends NotificationBusinessEventAdapter {
-        
+
         @Override
         public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
-            
+
             LoanProduct loanProduct;
             Object entity = businessEventEntity.get(BUSINESS_ENTITY.LOAN_PRODUCT);
             if (entity != null) {
@@ -473,9 +473,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             }
         }
     }
-    
+
     private class SavingsAccountCreatedListener extends NotificationBusinessEventAdapter {
-        
+
         @Override
         public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
             SavingsAccount  savingsAccount;
@@ -494,9 +494,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             }
         }
     }
-    
+
     private class SavingsAccountClosedListener extends NotificationBusinessEventAdapter {
-        
+
         @Override
         public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
             SavingsAccount  savingsAccount;
@@ -515,9 +515,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             }
         }
     }
-    
+
     private class ShareAccountCreatedListener extends NotificationBusinessEventAdapter {
-        
+
         @Override
         public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
             ShareAccount shareAccount;
@@ -536,9 +536,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             }
         }
     }
-    
+
     private class ShareAccountApprovedListener extends NotificationBusinessEventAdapter {
-        
+
         @Override
         public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
             ShareAccount shareAccount;
@@ -557,10 +557,10 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             }
         }
     }
-    
-    private void buildNotification(String permission, String objectType, Long objectIdentifier, 
+
+    private void buildNotification(String permission, String objectType, Long objectIdentifier,
             String notificationContent, String eventType,  Long appUserId, Long officeId) {
-        
+
         String tenantIdentifier = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
         Queue queue = new ActiveMQQueue("NotificationQueue");
         List<Long> userIds = retrieveSubscribers(officeId, permission);
@@ -582,9 +582,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
             this.springEventPublisher.broadcastNotification(notificationData);
         }
     }
-    
+
     private List<Long> retrieveSubscribers(Long officeId, String permission) {
-        
+
         Set<TopicSubscriberData> topicSubscribers = new HashSet<>();
         List<Long> subscriberIds = new ArrayList<>();
         Long entityId = officeId;
@@ -601,7 +601,7 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
                 topicSubscribers.addAll(topicSubscriberReadPlatformService.getSubscribers(entityId, entityType, memberType));
             }
         }
-        
+
         for (TopicSubscriberData topicSubscriber : topicSubscribers) {
             subscriberIds.add(topicSubscriber.getUserId());
          }

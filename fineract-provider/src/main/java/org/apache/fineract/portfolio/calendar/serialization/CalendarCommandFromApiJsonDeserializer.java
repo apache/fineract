@@ -207,7 +207,7 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
                     element);
             baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue()).value(meetingTime).ignoreIfNull();
         }
-                          
+
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
@@ -350,9 +350,9 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
                     element);
             baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue()).value(startDate).ignoreIfNull();
         }
-       
+
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
     }
-        
+
 }

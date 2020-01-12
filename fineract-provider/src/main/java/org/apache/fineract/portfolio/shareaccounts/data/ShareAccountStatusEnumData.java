@@ -27,7 +27,7 @@ import java.io.Serializable;
 public class ShareAccountStatusEnumData implements Serializable {
 
     private final Long id;
-   
+
     private final String code;
     private final String value;
     private final boolean submittedAndPendingApproval;

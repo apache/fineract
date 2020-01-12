@@ -116,7 +116,7 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
                 row = groupSheet.createRow(rowIndex);
             writeInt(GroupConstants.LOOKUP_REPEAT_MONTHLY_COL, row, rowIndex);
         }
-        for(rowIndex = 1; rowIndex <= 3; rowIndex++) 
+        for(rowIndex = 1; rowIndex <= 3; rowIndex++)
             writeInt(GroupConstants.LOOKUP_REPEAT_NORMAL_COL, groupSheet.getRow(rowIndex), rowIndex);
         String[] days = new String[]{
                 TemplatePopulateImportConstants.MONDAY,
@@ -126,10 +126,10 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
                 TemplatePopulateImportConstants.FRIDAY,
                 TemplatePopulateImportConstants.SATURDAY,
                 TemplatePopulateImportConstants.SUNDAY};
-        for(rowIndex = 1; rowIndex <= 7; rowIndex++) 
+        for(rowIndex = 1; rowIndex <= 7; rowIndex++)
             writeString(GroupConstants.LOOKUP_IF_REPEAT_WEEKLY_COL, groupSheet.getRow(rowIndex), days[rowIndex-1]);
     }
-    
+
     private void setRules(Sheet worksheet,String dateFormat){
         CellRangeAddressList officeNameRange = new  CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
                 GroupConstants.OFFICE_NAME_COL, GroupConstants.OFFICE_NAME_COL);
@@ -153,11 +153,11 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
                 GroupConstants.INTERVAL_COL,GroupConstants. INTERVAL_COL);
         CellRangeAddressList repeatsOnRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
                 GroupConstants.REPEATS_ON_DAY_COL, GroupConstants.REPEATS_ON_DAY_COL);
-        
+
         DataValidationHelper validationHelper = new HSSFDataValidationHelper((HSSFSheet)worksheet);
         List<OfficeData> offices = officeSheetPopulator.getOffices();
         setNames(worksheet, offices);
-        
+
         DataValidationConstraint centerNameConstraint = validationHelper.createFormulaListConstraint("INDIRECT(CONCATENATE(\"Center_\",$B1))");
         DataValidationConstraint officeNameConstraint = validationHelper.createFormulaListConstraint("Office");
         DataValidationConstraint staffNameConstraint = validationHelper.createFormulaListConstraint("INDIRECT(CONCATENATE(\"Staff_\",$B1))");
@@ -178,7 +178,7 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
                 TemplatePopulateImportConstants.FREQUENCY_YEARLY});
         DataValidationConstraint repeatsEveryConstraint = validationHelper.createFormulaListConstraint("INDIRECT($K1)");
         DataValidationConstraint repeatsOnConstraint = validationHelper.createFormulaListConstraint("INDIRECT(CONCATENATE($K1,\"_DAYS\"))");
-        
+
         DataValidation centerValidation=validationHelper.createValidation(centerNameConstraint, centerNameRange);
         DataValidation officeValidation = validationHelper.createValidation(officeNameConstraint, officeNameRange);
         DataValidation staffValidation = validationHelper.createValidation(staffNameConstraint, staffNameRange);
@@ -190,7 +190,7 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
         DataValidation repeatsValidation = validationHelper.createValidation(repeatsConstraint, repeatsRange);
         DataValidation repeatsEveryValidation = validationHelper.createValidation(repeatsEveryConstraint, repeatsEveryRange);
         DataValidation repeatsOnValidation = validationHelper.createValidation(repeatsOnConstraint, repeatsOnRange);
-        
+
         worksheet.addValidationData(centerValidation);
         worksheet.addValidationData(activeValidation);
         worksheet.addValidationData(officeValidation);
@@ -203,14 +203,14 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
         worksheet.addValidationData(repeatsEveryValidation);
         worksheet.addValidationData(repeatsOnValidation);
     }
-    
+
     private void setNames(Sheet worksheet, List<OfficeData> offices) {
         Workbook centerWorkbook = worksheet.getWorkbook();
         Name officeCenter = centerWorkbook.createName();
         officeCenter.setNameName("Office");
         officeCenter.setRefersToFormula(TemplatePopulateImportConstants.OFFICE_SHEET_NAME+"!$B$2:$B$" + (offices.size() + 1));
-        
-        
+
+
         //Repeat constraint names
         Name repeatsDaily = centerWorkbook.createName();
         repeatsDaily.setNameName("Daily");
@@ -227,11 +227,11 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
         Name repeatsOnWeekly = centerWorkbook.createName();
         repeatsOnWeekly.setNameName("Weekly_Days");
         repeatsOnWeekly.setRefersToFormula(TemplatePopulateImportConstants.GROUP_SHEET_NAME+"!$IV$2:$IV$8");
-        
-        
-        //Staff Names for each office & center Names for each office 
+
+
+        //Staff Names for each office & center Names for each office
         for(Integer i = 0; i < offices.size(); i++) {
-            Integer[] officeNameToBeginEndIndexesOfCenters =centerSheetPopulator.getOfficeNameToBeginEndIndexesOfCenters().get(i);          
+            Integer[] officeNameToBeginEndIndexesOfCenters =centerSheetPopulator.getOfficeNameToBeginEndIndexesOfCenters().get(i);
             Integer[] officeNameToBeginEndIndexesOfStaff = personnelSheetPopulator.getOfficeNameToBeginEndIndexesOfStaff().get(i);
 
             Name loanOfficerName = centerWorkbook.createName();
@@ -248,7 +248,7 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
                          "!$B$" + officeNameToBeginEndIndexesOfCenters[0] + ":$B$" + officeNameToBeginEndIndexesOfCenters[1]);
             }
         }
-        
+
     }
-    
+
 }

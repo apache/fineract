@@ -84,7 +84,7 @@ public class AccountNumberPreferencesHelper {
                 requestJSON, jsonAttributeToGetBack);
 
     }
-    
+
     public Object createGroupsAccountNumberPreference(
             ResponseSpecification responseSpec, String jsonAttributeToGetBack) {
         System.out
@@ -99,7 +99,7 @@ public class AccountNumberPreferencesHelper {
                 requestJSON, jsonAttributeToGetBack);
 
     }
-    
+
     public Object createCenterAccountNumberPreference(
             ResponseSpecification responseSpec, String jsonAttributeToGetBack) {
         System.out
@@ -200,13 +200,13 @@ public class AccountNumberPreferencesHelper {
                 + Utils.TENANT_IDENTIFIER;
 
         Utils.performServerGet(requestSpec, responseSpec, savingsURL, "id");
-        
+
         final String groupsURL = ACCOUNT_NUMBER_FORMATS_REQUEST_URL + "/"
                 + groupsAccountNumberPreferenceId + "?"
                 + Utils.TENANT_IDENTIFIER;
 
         Utils.performServerGet(requestSpec, responseSpec, groupsURL, "id");
-        
+
         final String centerURL = ACCOUNT_NUMBER_FORMATS_REQUEST_URL + "/"
                 + centerAccountNumberPreferenceId + "?"
                 + Utils.TENANT_IDENTIFIER;

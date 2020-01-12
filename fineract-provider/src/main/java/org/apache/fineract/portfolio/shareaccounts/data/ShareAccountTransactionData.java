@@ -42,11 +42,11 @@ public class ShareAccountTransactionData implements Serializable {
     private final EnumOptionData type;
 
     private final BigDecimal amount ;
-    
+
     private final BigDecimal chargeAmount ;
-    
+
     private final BigDecimal amountPaid ;
-    
+
     public ShareAccountTransactionData(final Long id, final Long accountId, final LocalDate purchasedDate, final Long numberOfShares,
             final BigDecimal purchasedPrice, final EnumOptionData status, final EnumOptionData type, final BigDecimal amount, final BigDecimal chargeAmount,
             final BigDecimal amountPaid) {

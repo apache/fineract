@@ -74,7 +74,7 @@ public class OverdueLoanScheduleData {
     public Integer getPeriodNumber() {
         return this.periodNumber;
     }
-    
+
     @Override
     public String toString() {
         return "{" + "chargeId:" + this.chargeId + ", locale:'" + this.locale + '\'' + ", amount:" + this.amount + ", dateFormat:'"

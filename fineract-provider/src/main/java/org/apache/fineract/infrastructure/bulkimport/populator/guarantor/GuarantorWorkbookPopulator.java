@@ -113,7 +113,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
             writeString(GuarantorConstants.LOOKUP_ACCOUNT_NO_COL, rowHeader, "Lookup Loan Account");
             writeString(GuarantorConstants.LOOKUP_SAVINGS_CLIENT_NAME_COL, rowHeader, "Savings Lookup Client");
             writeString(GuarantorConstants.LOOKUP_SAVINGS_ACCOUNT_NO_COL, rowHeader, "Savings Lookup Account");
-    
+
     }
     private void populateSavingsTable(Sheet addGuarantorSheet,String dateFormat) {
         Workbook workbook = addGuarantorSheet.getWorkbook();
@@ -189,11 +189,11 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
                     GuarantorConstants.GUARANTO_TYPE_COL, GuarantorConstants.GUARANTO_TYPE_COL);
             CellRangeAddressList guranterRelationshipTypeRange = new  CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
                 GuarantorConstants.CLIENT_RELATIONSHIP_TYPE_COL, GuarantorConstants.CLIENT_RELATIONSHIP_TYPE_COL);
-            
+
             DataValidationHelper validationHelper = new HSSFDataValidationHelper((HSSFSheet)worksheet);
-            
+
             setNames(worksheet);
-            
+
             DataValidationConstraint officeNameConstraint = validationHelper.createFormulaListConstraint("Office");
             DataValidationConstraint clientNameConstraint = validationHelper.createFormulaListConstraint("INDIRECT(CONCATENATE(\"Client_\",$A1))");
             DataValidationConstraint accountNumberConstraint = validationHelper.createFormulaListConstraint("INDIRECT(CONCATENATE(\"Account_\",SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($B1,\" \",\"_\"),\"(\",\"_\"),\")\",\"_\")))");
@@ -204,7 +204,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
             DataValidationConstraint guarantorRelationshipConstraint = validationHelper.createFormulaListConstraint("GuarantorRelationship");
             DataValidationConstraint entityofficeNameConstraint = validationHelper.createFormulaListConstraint("Office");
             DataValidationConstraint entityclientNameConstraint = validationHelper.createFormulaListConstraint("INDIRECT(CONCATENATE(\"Client_\",$F1))");
-        
+
             DataValidation officeValidation = validationHelper.createValidation(officeNameConstraint, officeNameRange);
             DataValidation clientValidation = validationHelper.createValidation(clientNameConstraint, clientNameRange);
             DataValidation accountNumberValidation = validationHelper.createValidation(accountNumberConstraint, accountNumberRange);
@@ -213,8 +213,8 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
             DataValidation guarantorRelationshipValidation=validationHelper.createValidation(guarantorRelationshipConstraint,guranterRelationshipTypeRange);
             DataValidation entityofficeValidation = validationHelper.createValidation(entityofficeNameConstraint, entityofficeNameRange);
             DataValidation entityclientValidation = validationHelper.createValidation(entityclientNameConstraint, entityclientNameRange);
-        
-            
+
+
             worksheet.addValidationData(officeValidation);
             worksheet.addValidationData(clientValidation);
             worksheet.addValidationData(accountNumberValidation);
@@ -223,12 +223,12 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
             worksheet.addValidationData(entityofficeValidation);
             worksheet.addValidationData(entityclientValidation);
             worksheet.addValidationData(savingsaccountNumberValidation);
-        
+
     }
     private void setNames(Sheet worksheet) {
         Workbook addGurarantorWorkbook = worksheet.getWorkbook();
         ArrayList<String> officeNames = new ArrayList<String>(officeSheetPopulator.getOfficeNames());
-        
+
         //Office Names
         Name officeGroup = addGurarantorWorkbook.createName();
         officeGroup.setNameName("Office");
@@ -238,7 +238,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
         Name guarantorRelationshipsGroup = addGurarantorWorkbook.createName();
         guarantorRelationshipsGroup.setNameName("GuarantorRelationship");
         guarantorRelationshipsGroup.setRefersToFormula(TemplatePopulateImportConstants.GUARANTOR_SHEET_NAME+"!$CH$2:$CH$" + (guarantorRelationshipTypes.size() + 1));
-        
+
         //Clients Named after Offices
         for(Integer i = 0; i < officeNames.size(); i++) {
             Integer[] officeNameToBeginEndIndexesOfClients = clientSheetPopulator.getOfficeNameToBeginEndIndexesOfClients().get(i);
@@ -249,7 +249,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
                        ":$B$" + officeNameToBeginEndIndexesOfClients[1]);
             }
         }
-        
+
         //Counting clients with active loans and starting and end addresses of cells
         HashMap<String, Integer[]> clientNameToBeginEndIndexes = new HashMap<String, Integer[]>();
         ArrayList<String> clientsWithActiveLoans = new ArrayList<String>();
@@ -272,7 +272,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
                 clientNameToBeginEndIndexes.put(clientName, new Integer[]{startIndex, endIndex});
             }
         }
-        
+
         //Account Number Named  after Clients
         for(int j = 0; j < clientsWithActiveLoans.size(); j++) {
             Name name = addGurarantorWorkbook.createName();
@@ -308,7 +308,7 @@ public class GuarantorWorkbookPopulator extends AbstractWorkbookPopulator {
             name.setRefersToFormula(TemplatePopulateImportConstants.GUARANTOR_SHEET_NAME+"!$CG$" + clientNameToBeginEndIndexes.get(clientsWithActiveSavings.get(j))[0] +
                     ":$CG$" + clientNameToBeginEndIndexes.get(clientsWithActiveSavings.get(j))[1]);
         }
-      
+
     }
 
 }

@@ -44,16 +44,16 @@ public final class TellerData implements Serializable {
     private final Long debitAccountId;
     private final Long creditAccountId;
     private final String name;
-    
+
     private final String description;
     private final LocalDate startDate;
     private final LocalDate endDate;
     private final TellerStatus status;
     private final Boolean hasTransactions;
     private final Boolean hasMappedCashiers;
-    
+
     private String officeName;
-    
+
     private final Collection<OfficeData> officeOptions;
     private final Collection<StaffData> staffOptions;
 
@@ -105,7 +105,7 @@ public final class TellerData implements Serializable {
         tellerData.officeName = officeName;
         return tellerData;
     }
-    
+
     public static TellerData lookup(final Long id, final String name) {
         return new TellerData(id, null, null, null, name, null, null, null, null, null, null);
     }
@@ -129,7 +129,7 @@ public final class TellerData implements Serializable {
     public String getName() {
         return this.name;
     }
-    
+
     public String getOfficeName() {
         return this.officeName;
     }

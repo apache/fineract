@@ -34,15 +34,15 @@ public class LoanTrancheCharge extends AbstractPersistableCustom<Long> {
     @ManyToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "loan_id", nullable = false)
     private Loan loan;
-    
+
     @ManyToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "charge_id", nullable = false)
     private Charge charge;
-    
+
     LoanTrancheCharge() {
 
     }
-    
+
     LoanTrancheCharge(Charge chargeDefinition) {
         this.charge = chargeDefinition ;
     }
@@ -50,14 +50,14 @@ public class LoanTrancheCharge extends AbstractPersistableCustom<Long> {
         this.charge = charge;
         this.loan = loan ;
     }
-    
+
     public static LoanTrancheCharge createLoanTrancheCharge(Charge chargeDefinition) {
         return new LoanTrancheCharge(chargeDefinition) ;
     }
     public static LoanTrancheCharge createLoanTrancheChargeWithLoan(Charge chargeDefinition, Loan loan) {
         return new LoanTrancheCharge(chargeDefinition, loan) ;
     }
-    
+
     public Charge getCharge() {
         return charge ;
     }

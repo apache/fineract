@@ -58,7 +58,7 @@ public class CentersWorkbookPopulator extends AbstractWorkbookPopulator {
         setLookupTable(centerSheet,dateFormat);
         setRules(centerSheet,dateFormat);
     }
-    
+
 
     private void setLayout(Sheet worksheet) {
         Row rowHeader = worksheet.createRow(0);
@@ -113,7 +113,7 @@ public class CentersWorkbookPopulator extends AbstractWorkbookPopulator {
                 row = centerSheet.createRow(rowIndex);
             writeInt(CenterConstants.LOOKUP_REPEAT_MONTHLY_COL, row, rowIndex);
         }
-        for(rowIndex = 1; rowIndex <= 3; rowIndex++) 
+        for(rowIndex = 1; rowIndex <= 3; rowIndex++)
             writeInt(CenterConstants.LOOKUP_REPEAT_NORMAL_COL, centerSheet.getRow(rowIndex), rowIndex);
 
         String[] days = new String[]{
@@ -127,7 +127,7 @@ public class CentersWorkbookPopulator extends AbstractWorkbookPopulator {
 
         for(rowIndex = 1; rowIndex <= 7; rowIndex++)
             writeString(CenterConstants.LOOKUP_IF_REPEAT_WEEKLY_COL, centerSheet.getRow(rowIndex), days[rowIndex-1]);
-        
+
     }
     private void setRules(Sheet worksheet,String dateFormat) {
         CellRangeAddressList officeNameRange = new  CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), CenterConstants.OFFICE_NAME_COL,CenterConstants. OFFICE_NAME_COL);
@@ -140,12 +140,12 @@ public class CentersWorkbookPopulator extends AbstractWorkbookPopulator {
         CellRangeAddressList repeatsRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), CenterConstants.FREQUENCY_COL, CenterConstants.FREQUENCY_COL);
         CellRangeAddressList repeatsEveryRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), CenterConstants.INTERVAL_COL,CenterConstants. INTERVAL_COL);
         CellRangeAddressList repeatsOnRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(), CenterConstants.REPEATS_ON_DAY_COL,CenterConstants. REPEATS_ON_DAY_COL);
-        
-        
+
+
         DataValidationHelper validationHelper = new HSSFDataValidationHelper((HSSFSheet)worksheet);
         List<OfficeData> offices = officeSheetPopulator.getOffices();
         setNames(worksheet, offices);
-        
+
 
         DataValidationConstraint officeNameConstraint = validationHelper.createFormulaListConstraint("Office");
         DataValidationConstraint staffNameConstraint = validationHelper.
@@ -180,7 +180,7 @@ public class CentersWorkbookPopulator extends AbstractWorkbookPopulator {
         DataValidation repeatsValidation = validationHelper.createValidation(repeatsConstraint, repeatsRange);
         DataValidation repeatsEveryValidation = validationHelper.createValidation(repeatsEveryConstraint, repeatsEveryRange);
         DataValidation repeatsOnValidation = validationHelper.createValidation(repeatsOnConstraint, repeatsOnRange);
-        
+
 
         worksheet.addValidationData(activeValidation);
         worksheet.addValidationData(officeValidation);
@@ -193,14 +193,14 @@ public class CentersWorkbookPopulator extends AbstractWorkbookPopulator {
         worksheet.addValidationData(repeatsEveryValidation);
         worksheet.addValidationData(repeatsOnValidation);
     }
-    
+
     private void setNames(Sheet worksheet, List<OfficeData> offices) {
         Workbook centerWorkbook = worksheet.getWorkbook();
         Name officeCenter = centerWorkbook.createName();
         officeCenter.setNameName("Office");
         officeCenter.setRefersToFormula(TemplatePopulateImportConstants.OFFICE_SHEET_NAME +"!$B$2:$B$" + (offices.size() + 1));
-        
-        
+
+
         //Repeat constraint names
         Name repeatsDaily = centerWorkbook.createName();
         repeatsDaily.setNameName("Daily");
@@ -217,8 +217,8 @@ public class CentersWorkbookPopulator extends AbstractWorkbookPopulator {
         Name repeatsOnWeekly = centerWorkbook.createName();
         repeatsOnWeekly.setNameName("Weekly_Days");
         repeatsOnWeekly.setRefersToFormula(TemplatePopulateImportConstants.CENTER_SHEET_NAME+"!$IV$2:$IV$8");
-        
-        
+
+
         //Staff Names for each office
         for(Integer i = 0; i < offices.size(); i++) {
             Integer[] officeNameToBeginEndIndexesOfStaff = personnelSheetPopulator.getOfficeNameToBeginEndIndexesOfStaff().get(i);
@@ -228,8 +228,8 @@ public class CentersWorkbookPopulator extends AbstractWorkbookPopulator {
                 loanOfficerName.setRefersToFormula(TemplatePopulateImportConstants.STAFF_SHEET_NAME+"!$B$" + officeNameToBeginEndIndexesOfStaff[0] + ":$B$" + officeNameToBeginEndIndexesOfStaff[1]);
              }
         }
-        
+
     }
-    
-    
+
+
 }

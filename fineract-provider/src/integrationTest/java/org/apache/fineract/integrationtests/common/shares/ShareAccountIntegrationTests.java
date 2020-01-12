@@ -156,7 +156,7 @@ public class ShareAccountIntegrationTests {
         Map<String, Object> shareAccountData = ShareAccountTransactionHelper
                 .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         Assert.assertNotNull(shareAccountData);
-        
+
      // Approve share Account
         Map<String, Object> approveMap = new HashMap<>();
         approveMap.put("note", "Share Account Approval Note");
@@ -205,7 +205,7 @@ public class ShareAccountIntegrationTests {
         Assert.assertEquals("25", String.valueOf(summaryMap.get("totalApprovedShares")));
         Assert.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
     }
-    
+
     @Test
     @SuppressWarnings("unchecked")
     public void rejectShareAccount() {
@@ -231,7 +231,7 @@ public class ShareAccountIntegrationTests {
         Map<String, Object> shareAccountData = ShareAccountTransactionHelper
                 .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         Assert.assertNotNull(shareAccountData);
-        
+
         // Reject share Account
         Map<String, Object> rejectMap = new HashMap<>();
         rejectMap.put("note", "Share Account Rejection Note");
@@ -249,7 +249,7 @@ public class ShareAccountIntegrationTests {
         Date rejectedDate = cal.getTime();
         Date currentTenantDate = DateUtils.getDateOfTenant() ;
         Assert.assertEquals(simple.format(currentTenantDate), simple.format(rejectedDate));
-        
+
         List<Map<String, Object>> transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
         Assert.assertNotNull(transactions);
         Assert.assertEquals(2, transactions.size());
@@ -280,7 +280,7 @@ public class ShareAccountIntegrationTests {
         Assert.assertEquals("0", String.valueOf(summaryMap.get("totalApprovedShares")));
         Assert.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
     }
-    
+
     @Test
     @SuppressWarnings("unchecked")
     public void testShareAccountUndoApproval() {
@@ -307,7 +307,7 @@ public class ShareAccountIntegrationTests {
         Map<String, Object> shareAccountData = ShareAccountTransactionHelper
                 .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
         Assert.assertNotNull(shareAccountData);
-        
+
      // Approve share Account
         Map<String, Object> approveMap = new HashMap<>();
         approveMap.put("note", "Share Account Approval Note");
@@ -326,18 +326,18 @@ public class ShareAccountIntegrationTests {
         cal.set(dateList.get(0), dateList.get(1) - 1, dateList.get(2));
         Date approvedDate = cal.getTime();
         Assert.assertEquals("01 Jan 2016", simple.format(approvedDate));
-        
+
         // Undo Approval share Account
         Map<String, Object> undoApprovalMap = new HashMap<>();
         String undoApprovalJson = new Gson().toJson(undoApprovalMap);
         ShareAccountTransactionHelper.postCommand("undoapproval", shareAccountId, undoApprovalJson, requestSpec, responseSpec);
-        
+
         shareAccountData = ShareAccountTransactionHelper
                 .retrieveShareAccount(shareAccountId, requestSpec, responseSpec);
-        
+
         statusMap = (Map<String, Object>) shareAccountData.get("status");
         Assert.assertEquals("shareAccountStatusType.submitted.and.pending.approval", String.valueOf(statusMap.get("code")));
-        
+
         List<Map<String, Object>> transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
         Assert.assertNotNull(transactions);
         Assert.assertEquals(2, transactions.size());
@@ -368,7 +368,7 @@ public class ShareAccountIntegrationTests {
         Assert.assertEquals("0", String.valueOf(summaryMap.get("totalApprovedShares")));
         Assert.assertEquals("25", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
     }
-    
+
     @SuppressWarnings("unchecked")
     @Test
     public void testCreateShareAccountWithCharges() {
@@ -453,7 +453,7 @@ public class ShareAccountIntegrationTests {
                 Assert.fail("Other Charge defintion found");
             }
         }
-        
+
         // Approve share Account
         Map<String, Object> approveMap = new HashMap<>();
         approveMap.put("note", "Share Account Approval Note");
@@ -495,7 +495,7 @@ public class ShareAccountIntegrationTests {
                 Assert.fail("Other Charge defintion found");
             }
         }
-        
+
         Map<String, Object> activateMap = new HashMap<>();
         activateMap.put("dateFormat", "dd MMMM yyyy");
         activateMap.put("activatedDate", "01 Jan 2016");
@@ -560,7 +560,7 @@ public class ShareAccountIntegrationTests {
                 Assert.fail("Other Charge defintion found");
             }
         }
-        
+
         Map<String, Object> summaryMap = (Map<String, Object>) shareAccountData.get("summary");
         Assert.assertEquals("30", String.valueOf(summaryMap.get("totalApprovedShares")));
         Assert.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
@@ -634,7 +634,7 @@ public class ShareAccountIntegrationTests {
                 Assert.fail("Other Charge defintion found");
             }
         }
-        
+
         summaryMap = (Map<String, Object>) shareAccountData.get("summary");
         Assert.assertEquals("30", String.valueOf(summaryMap.get("totalApprovedShares")));
         Assert.assertEquals("15", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
@@ -708,7 +708,7 @@ public class ShareAccountIntegrationTests {
                 Assert.fail("Other Charge defintion found");
             }
         }
-        
+
         summaryMap = (Map<String, Object>) shareAccountData.get("summary");
         Assert.assertEquals("45", String.valueOf(summaryMap.get("totalApprovedShares")));
         Assert.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
@@ -770,7 +770,7 @@ public class ShareAccountIntegrationTests {
                 Assert.fail("Other Charge defintion found");
             }
         }
-        
+
         summaryMap = (Map<String, Object>) shareAccountData.get("summary");
         Assert.assertEquals("45", String.valueOf(summaryMap.get("totalApprovedShares")));
         Assert.assertEquals("20", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
@@ -832,7 +832,7 @@ public class ShareAccountIntegrationTests {
                 Assert.fail("Other Charge defintion found");
             }
         }
-        
+
         summaryMap = (Map<String, Object>) shareAccountData.get("summary");
         Assert.assertEquals("45", String.valueOf(summaryMap.get("totalApprovedShares")));
         Assert.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
@@ -912,7 +912,7 @@ public class ShareAccountIntegrationTests {
         summaryMap = (Map<String, Object>) shareAccountData.get("summary");
         Assert.assertEquals("30", String.valueOf(summaryMap.get("totalApprovedShares")));
         Assert.assertEquals("0", String.valueOf(summaryMap.get("totalPendingForApprovalShares")));
-        
+
         //Close Share Account
         Map<String, Object> closeAccountMap = new HashMap<>();
         closeAccountMap.put("note", "Share Account Close Note");

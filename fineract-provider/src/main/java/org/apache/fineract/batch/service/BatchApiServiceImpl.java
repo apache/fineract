@@ -50,9 +50,9 @@ import com.google.gson.Gson;
  * Implementation for {@link BatchApiService} to iterate through all the
  * incoming requests and obtain the appropriate CommandStrategy from
  * CommandStrategyProvider.
- * 
+ *
  * @author Rishabh Shukla
- * 
+ *
  * @see org.apache.fineract.batch.domain.BatchRequest
  * @see org.apache.fineract.batch.domain.BatchResponse
  * @see org.apache.fineract.batch.command.CommandStrategyProvider
@@ -67,7 +67,7 @@ public class BatchApiServiceImpl implements BatchApiService {
     /**
      * Constructs a 'BatchApiServiceImpl' with an argument of
      * {@link org.apache.fineract.batch.command.CommandStrategyProvider} type.
-     * 
+     *
      * @param strategyProvider
      * @param resolutionHelper
      * @param transactionTemplate
@@ -84,7 +84,7 @@ public class BatchApiServiceImpl implements BatchApiService {
      * Returns the response list by getting a proper
      * {@link org.apache.fineract.batch.command.CommandStrategy}. execute() method
      * of acquired commandStrategy is then provided with the separate Request.
-     * 
+     *
      * @param requestList
      * @param uriInfo
      * @return List<BatchResponse>

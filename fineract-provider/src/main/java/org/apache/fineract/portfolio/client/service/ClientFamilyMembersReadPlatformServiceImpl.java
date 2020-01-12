@@ -43,7 +43,7 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
-    
+
 
     @Autowired
     public ClientFamilyMembersReadPlatformServiceImpl(final PlatformSecurityContext context,
@@ -51,7 +51,7 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.codeValueReadPlatformService=codeValueReadPlatformService;
-        
+
     }
 
     private static final class ClientFamilyMembersMapper implements RowMapper<ClientFamilyMembersData> {
@@ -88,16 +88,16 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
             final LocalDate dateOfBirth = JdbcSupport.getLocalDate(rs, "dateOfBirth");
             final String profession = rs.getString("profession");
             final long professionId = rs.getLong("professionId");
-                    
+
             return ClientFamilyMembersData.instance(id, clientId, firstName, middleName, lastName,
                     qualification,mobileNumber,age,isDependent,relationship,relationshipId,maritalStatus,maritalStatusId,gender,genderId,dateOfBirth,profession,professionId);
-            
-            
+
+
 
         }
     }
-    
-    
+
+
     @Override
     public Collection<ClientFamilyMembersData> getClientFamilyMembers(long clientId) {
 
@@ -108,8 +108,8 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { clientId });
     }
-    
-    
+
+
     @Override
     public ClientFamilyMembersData getClientFamilyMember(long id) {
 
@@ -120,10 +120,10 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
 
         return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { id });
     }
-    
+
     @Override
     public ClientFamilyMembersData retrieveTemplate() {
-        
+
         final List<CodeValueData> maritalStatusOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode("MARITAL STATUS"));
 
@@ -131,11 +131,11 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
 
         final List<CodeValueData> relationshipOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode("RELATIONSHIP"));
-        
+
         final List<CodeValueData> professionOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode("PROFESSION"));
 
-        return ClientFamilyMembersData.templateInstance(relationshipOptions,genderOptions, 
+        return ClientFamilyMembersData.templateInstance(relationshipOptions,genderOptions,
                 maritalStatusOptions, professionOptions);
     }
 

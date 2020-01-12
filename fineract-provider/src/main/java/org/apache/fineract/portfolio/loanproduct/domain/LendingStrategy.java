@@ -28,7 +28,7 @@ import java.util.Map;
  * within a group. LINKED_LOAN: Loan is given to group, then later loan amount
  * is split into individual loans. Loan is tracked at both individual and group
  * level
- * 
+ *
  */
 public enum LendingStrategy {
 

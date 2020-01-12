@@ -64,10 +64,10 @@ public class LoanTermVariations extends AbstractPersistableCustom<Long> {
 
     @Column(name = "applied_on_loan_status", nullable = false)
     private Integer onLoanStatus;
-    
+
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
-    
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private LoanTermVariations parent;
@@ -84,7 +84,7 @@ public class LoanTermVariations extends AbstractPersistableCustom<Long> {
         this.isActive = true;
         this.parent = null;
     }
-    
+
     public LoanTermVariations(final Integer termType, final Date termApplicableFrom, final BigDecimal decimalValue, final Date dateValue,
             final boolean isSpecificToInstallment, final Loan loan, final Integer loanStatus) {
         this.loan = loan;
@@ -97,7 +97,7 @@ public class LoanTermVariations extends AbstractPersistableCustom<Long> {
         this.isActive = true;
         this.parent = null;
     }
-    
+
     public LoanTermVariations(final Integer termType, final Date termApplicableFrom, final BigDecimal decimalValue, final Date dateValue,
             final boolean isSpecificToInstallment, final Loan loan, final Integer loanStatus, final Boolean isActive, final LoanTermVariations parent) {
         this.loan = loan;
@@ -157,11 +157,11 @@ public class LoanTermVariations extends AbstractPersistableCustom<Long> {
         this.decimalValue = decimalValue;
     }
 
-    
+
     public Integer getOnLoanStatus() {
         return this.onLoanStatus;
     }
-    
+
     public Boolean isActive() {
         return this.isActive;
     }
@@ -169,11 +169,11 @@ public class LoanTermVariations extends AbstractPersistableCustom<Long> {
     public LoanTermVariations parent() {
         return this.parent;
     }
-    
+
     public void updateIsActive(final Boolean isActive){
         this.isActive = isActive;
     }
-    
+
     public void markAsInactive() {
         this.isActive = false;
     }

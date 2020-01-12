@@ -53,7 +53,7 @@ public class CodeValue extends AbstractPersistableCustom<Long> {
 
     @Column(name = "is_active")
     private boolean isActive;
-    
+
     @Column(name = "is_mandatory")
     private boolean mandatory;
 
@@ -66,7 +66,7 @@ public class CodeValue extends AbstractPersistableCustom<Long> {
         //
     }
 
-    private CodeValue(final Code code, final String label, final int position, final String description, 
+    private CodeValue(final Code code, final String label, final int position, final String description,
             final boolean isActive, final boolean mandatory) {
         this.code = code;
         this.label = StringUtils.defaultIfEmpty(label, null);
@@ -97,15 +97,15 @@ public class CodeValue extends AbstractPersistableCustom<Long> {
         if (position == null) {
             position = new Integer(0);
         }
-        
+
         Boolean mandatory = command.booleanPrimitiveValueOfParameterNamed(
                 CODEVALUE_JSON_INPUT_PARAMS.IS_MANDATORY.getValue());
-        
+
         // if the "mandatory" Boolean object is null, then set it to false by default
         if (mandatory == null) {
             mandatory = false;
         }
-        
+
         return new CodeValue(code, label, position.intValue(), description, isActive, mandatory);
     }
 

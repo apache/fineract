@@ -159,15 +159,15 @@ public class SkipRepaymentOnMonthFirstTest {
         assertEquals("Checking for Repayment Date for 1st Month", new ArrayList<>(Arrays.asList(2011, 10, 15)),
                 loanSchedule.get(1).get("dueDate"));
         System.out.println("Repayment Date for 1st Month--" + loanSchedule.get(1).get("dueDate"));
-        
+
         assertEquals("Checking for Repayment Date for 2nd Month", new ArrayList<>(Arrays.asList(2011, 11, 15)),
                 loanSchedule.get(2).get("dueDate"));
         System.out.println("Repayment Date for 2nd Month--" + loanSchedule.get(2).get("dueDate"));
-        
+
         assertEquals("Checking for  Repayment Date for 3rd Month", new ArrayList<>(Arrays.asList(2011, 12, 15)),
                 loanSchedule.get(3).get("dueDate"));
         System.out.println("Repayment Date for 3rd Month--" + loanSchedule.get(3).get("dueDate"));
-        
+
         assertEquals("Checking for  Repayment Date for 4th Month", new ArrayList<>(Arrays.asList(2012, 1, 15)),
                 loanSchedule.get(4).get("dueDate"));
         System.out.println("Repayment Date for 4th Month--" + loanSchedule.get(4).get("dueDate"));

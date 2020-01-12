@@ -134,7 +134,7 @@ public class ShareAccountChargeReadPlatformServiceImpl implements
                     .chargeCalculationType(chargeCalculation);
             final Boolean isActive = rs.getBoolean("isActive");
             final BigDecimal chargeamountorpercentage = rs.getBigDecimal("charge_amount_or_percentage") ;
-            
+
             final Collection<ChargeData> chargeOptions = null;
             return new ShareAccountChargeData(id, chargeId, accountId, name,
                     currency, amount, amountPaid, amountWaived,

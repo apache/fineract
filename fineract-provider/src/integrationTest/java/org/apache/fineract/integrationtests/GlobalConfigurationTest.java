@@ -144,7 +144,7 @@ public class GlobalConfigurationTest {
             Assert.assertEquals("Verifying Is Cache Enabled Global Config after Updation", cacheTypeId, changes.get("cacheType"));
         }
     }
-    
+
     @Test
     public void testGlobalConfigForcePasswordResetDays() {
 

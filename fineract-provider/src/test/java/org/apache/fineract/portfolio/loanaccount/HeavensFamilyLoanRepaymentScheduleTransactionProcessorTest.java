@@ -58,7 +58,7 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessorTest {
     /**
      * Scenario 1: Single transaction which is less than the interest component
      * of the first installment.
-     * 
+     *
      * Expectation: - First installment shows interest completed equal to that
      * of transactions, zero principal completed. (payment order interest,
      * principal) - transaction has interest portion equal to transaction

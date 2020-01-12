@@ -45,10 +45,10 @@ import java.util.*;
 /**
  * Loan products allow for categorisation of an organisations loans into
  * something meaningful to them.
- * 
+ *
  * They provide a means of simplifying creation/maintenance of loans. They can
  * also allow for product comparison to take place when reporting.
- * 
+ *
  * They allow for constraints to be added at product level.
  */
 @Entity
@@ -151,14 +151,14 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loanProduct", optional = true, orphanRemoval = true, fetch=FetchType.EAGER)
     private LoanProductVariableInstallmentConfig variableInstallmentConfig;
-    
+
     @Column(name = "sync_expected_with_disbursement_date")
     private boolean syncExpectedWithDisbursementDate;
 
 
     @Column(name = "can_use_for_topup", nullable = false)
     private boolean canUseForTopup = false;
-    
+
     @Column(name = "is_equal_amortization", nullable = false)
     private boolean isEqualAmortization = false;
 
@@ -307,12 +307,12 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
                 .integerValueOfParameterNamed(LoanProductConstants.installmentAmountInMultiplesOfParamName);
 
         final boolean syncExpectedWithDisbursementDate = command.booleanPrimitiveValueOfParameterNamed("syncExpectedWithDisbursementDate");
-        
-        
+
+
         final boolean canUseForTopup = command.parameterExists(LoanProductConstants.canUseForTopup)
                 ? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.canUseForTopup)
                 : false;
-                
+
         final boolean isEqualAmortization = command.parameterExists(LoanProductConstants.isEqualAmortizationParam) ? command
                 .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.isEqualAmortizationParam) : false;
 
@@ -633,7 +633,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         this.accountMovesOutOfNPAOnlyOnArrearsCompletion = accountMovesOutOfNPAOnlyOnArrearsCompletion;
         this.canDefineInstallmentAmount = canDefineEmiAmount;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
-        this.syncExpectedWithDisbursementDate = 
+        this.syncExpectedWithDisbursementDate =
                 syncExpectedWithDisbursementDate;
         this.canUseForTopup = canUseForTopup;
         this.isEqualAmortization = isEqualAmortization;
@@ -859,7 +859,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
             actualChanges.put("locale", localeAsInput);
             this.minimumDaysBetweenDisbursalAndFirstRepayment = newValue;
         }
-        
+
         if(command.isChangeInBooleanParameterNamed("syncExpectedWithDisbursementDate"
                 , this.syncExpectedWithDisbursementDate)){
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed("syncExpectedWithDisbursementDate");
@@ -1168,7 +1168,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         }
         return borrowerCycleVariation;
     }
-    
+
     public boolean syncExpectedWithDisbursementDate() {
         return syncExpectedWithDisbursementDate;
     }

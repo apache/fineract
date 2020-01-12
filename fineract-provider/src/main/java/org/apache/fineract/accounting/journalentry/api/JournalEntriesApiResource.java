@@ -221,7 +221,7 @@ public class JournalEntriesApiResource {
         return this.apiJsonSerializerService.serialize(settings, entries, RESPONSE_DATA_PARAMETERS);
     }
 
-    
+
     @GET
     @Path("openingbalance")
     @Consumes({ MediaType.APPLICATION_JSON })

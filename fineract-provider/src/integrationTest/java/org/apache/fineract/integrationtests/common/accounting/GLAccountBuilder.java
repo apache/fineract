@@ -61,7 +61,7 @@ public class GLAccountBuilder {
         accountType = ASSET_ACCOUNT;
         glCode = Utils.randomStringGenerator("ASSET_", 2);
         // Add unique timestamp to avoid random collisions
-        glCode += Calendar.getInstance().getTimeInMillis() + ""; 
+        glCode += Calendar.getInstance().getTimeInMillis() + "";
         return this;
     }
 

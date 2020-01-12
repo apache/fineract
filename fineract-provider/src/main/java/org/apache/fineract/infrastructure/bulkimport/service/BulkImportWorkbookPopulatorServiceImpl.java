@@ -116,7 +116,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
   private final ChargeReadPlatformService chargeReadPlatformService;
   private final DepositProductReadPlatformService depositProductReadPlatformService;
   private final RoleReadPlatformService roleReadPlatformService;
-  
+
   @Autowired
   public BulkImportWorkbookPopulatorServiceImpl(final PlatformSecurityContext context,
       final OfficeReadPlatformService officeReadPlatformService,
@@ -324,7 +324,7 @@ private WorkbookPopulator populateCenterWorkbook(Long officeId,Long staffId){
             SearchParameters searchParameters = SearchParameters.from(null, officeId, null, null, null);
             centers = (List<CenterData>)centerReadPlatformService.retrieveAll(searchParameters,null);
         }
-        
+
         return centers;
     }
     private List<ClientData> fetchClients(Long officeId) {

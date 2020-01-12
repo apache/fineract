@@ -133,7 +133,7 @@ public final class TransfersDataValidator {
                 .extractLongNamed(TransferApiConstants.destinationOfficeIdParamName, element);
         baseDataValidator.reset().parameter(TransferApiConstants.destinationOfficeIdParamName).value(destinationOfficeId).notNull()
                 .integerGreaterThanZero();
-        
+
         validateNote(baseDataValidator, element);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

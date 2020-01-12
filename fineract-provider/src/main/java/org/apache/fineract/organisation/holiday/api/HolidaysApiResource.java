@@ -200,7 +200,7 @@ public class HolidaysApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, holidays, HOLIDAY_RESPONSE_DATA_PARAMETERS);
     }
-    
+
     @GET
     @Path("/template")
     @Consumes({MediaType.APPLICATION_JSON})

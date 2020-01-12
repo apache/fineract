@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 /**
  * An {@link ExceptionMapper} to map {@link NoAuthorizationException} thrown by
  * platform into a HTTP API friendly format.
- * 
+ *
  * The {@link NoAuthorizationException} is thrown on platform when an attempt is
  * made to use functionality for which the user does have sufficient privileges.
  */

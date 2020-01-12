@@ -292,7 +292,7 @@ public class GroupGeneralData implements Serializable {
     public Long getId() {
         return this.id;
     }
-    
+
     public String getAccountNo(){
         return this.accountNo;
     }

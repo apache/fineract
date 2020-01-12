@@ -46,9 +46,9 @@ import org.joda.time.LocalDate;
 /**
  * Abstract implementation of {@link LoanRepaymentScheduleTransactionProcessor}
  * which is more convenient for concrete implementations to extend.
- * 
+ *
  * @see InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor
- * 
+ *
  * @see HeavensFamilyLoanRepaymentScheduleTransactionProcessor
  * @see CreocoreLoanRepaymentScheduleTransactionProcessor
  */
@@ -418,7 +418,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     /**
      * This method is responsible for checking if the current transaction is 'an
      * advance/early payment' based on the details passed through.
-     * 
+     *
      * Default implementation simply processes transactions as 'Late' if the
      * transaction date is after the installment due date.
      */
@@ -432,7 +432,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
     /**
      * For late repayments, how should components of installment be paid off
-     * 
+     *
      * @param transactionMappings
      *            TODO
      */
@@ -443,7 +443,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     /**
      * This method is responsible for checking if the current transaction is 'an
      * advance/early payment' based on the details passed through.
-     * 
+     *
      * Default implementation is check transaction date is before installment
      * due date.
      */
@@ -458,7 +458,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
     /**
      * For early/'in advance' repayments.
-     * 
+     *
      * @param transactionMappings
      *            TODO
      */
@@ -469,7 +469,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
     /**
      * For normal on-time repayments.
-     * 
+     *
      * @param transactionMappings
      *            TODO
      */
@@ -479,7 +479,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
     /**
      * Invoked when a transaction results in an over-payment of the full loan.
-     * 
+     *
      * transaction amount is greater than the total expected principal and
      * interest of the loan.
      */
@@ -559,13 +559,13 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     /**
      * Invoked when a there is a refund of an active loan or undo of an active
      * loan
-     * 
+     *
      * Undoes principal, interest, fees and charges of this transaction based on
      * the repayment strategy
-     * 
+     *
      * @param transactionMappings
      *            TODO
-     * 
+     *
      */
     protected abstract Money handleRefundTransactionPaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
             final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed,

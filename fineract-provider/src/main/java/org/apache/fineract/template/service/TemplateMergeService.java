@@ -45,7 +45,7 @@ import java.util.Map.Entry;
 @Service
 public class TemplateMergeService {
     private final static Logger logger = LoggerFactory.getLogger(TemplateMergeService.class);
-    
+
 
     // private final FromJsonHelper fromApiJsonHelper;
     private Map<String, Object> scopes;
@@ -55,12 +55,12 @@ public class TemplateMergeService {
     public void setAuthToken(final String authToken) {
         this.authToken =  authToken;
     }
-    
+
 
     public String compile(final Template template, final Map<String, Object> scopes) throws IOException {
         this.scopes = scopes;
         this.scopes.put("static", new TemplateFunctions());
-        
+
         final MustacheFactory mf = new DefaultMustacheFactory();
         final Mustache mustache = mf.compile(new StringReader(template.getText()), template.getName());
 
@@ -169,7 +169,7 @@ public class TemplateMergeService {
 
         return sb.toString();
     }
-    
+
     @SuppressWarnings("unchecked")
     private void expandMapArrays(Object value) {
         if (value instanceof Map) {
@@ -188,14 +188,14 @@ public class TemplateMergeService {
                         valueAsMap_second.put(valueAsMapEntryKey + "#" + i, object);
                         ++i;
                         expandMapArrays(object);
-                        
+
                     }
                 }
 
             }
             valueAsMap.putAll(valueAsMap_second);
 
-        }        
+        }
     }
 
 }

@@ -25,7 +25,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
  * Immutable data object to represent aspects of a loan schedule such as:
- * 
+ *
  * <ul>
  * <li>Totals information - the totals for each part of repayment schedule
  * monitored.</li>

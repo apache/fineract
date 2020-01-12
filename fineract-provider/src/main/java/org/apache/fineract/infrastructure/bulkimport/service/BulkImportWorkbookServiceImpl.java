@@ -103,7 +103,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                     // extension we use this fix.
                         throw new GeneralPlatformDomainRuleException("error.msg.invalid.file.extension",
                                 "Uploaded file extension is not recognized.");
-                    
+
                 }
                 Workbook workbook = new HSSFWorkbook(clonedInputStreamWorkbook);
                 GlobalEntityType entityType=null;

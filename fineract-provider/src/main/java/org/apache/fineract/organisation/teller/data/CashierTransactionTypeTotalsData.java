@@ -26,7 +26,7 @@ public final class CashierTransactionTypeTotalsData implements Serializable {
     private final BigDecimal cashTotal;
 
     private CashierTransactionTypeTotalsData (
-            final Integer cashierTxnType, 
+            final Integer cashierTxnType,
             final BigDecimal cashTotal
             ) {
         this.cashierTxnType = cashierTxnType;
@@ -34,7 +34,7 @@ public final class CashierTransactionTypeTotalsData implements Serializable {
     }
 
     public static CashierTransactionTypeTotalsData instance(
-            final Integer cashierTxnType, 
+            final Integer cashierTxnType,
             final BigDecimal cashTotal
             ) {
            return new CashierTransactionTypeTotalsData(
@@ -44,7 +44,7 @@ public final class CashierTransactionTypeTotalsData implements Serializable {
     public Integer getCashierTxnType() {
         return cashierTxnType;
     }
-    
+
     public BigDecimal getCashTotal() {
         return cashTotal;
     }

@@ -52,12 +52,12 @@ public class ShareAccountSummaryData implements Serializable {
         if(approvedShares == null) {
             this.totalApprovedShares = new Long(0) ;
         }else {
-            this.totalApprovedShares = approvedShares;    
+            this.totalApprovedShares = approvedShares;
         }
         if(pendingForApprovalShares == null) {
             this.totalPendingForApprovalShares = new Long(0) ;
         }else {
-            this.totalPendingForApprovalShares = pendingForApprovalShares;    
+            this.totalPendingForApprovalShares = pendingForApprovalShares;
         }
         this.productId = productId;
         this.productName = productName;
@@ -67,7 +67,7 @@ public class ShareAccountSummaryData implements Serializable {
         this.timeline = timeline;
     }
 
-    
+
     public String getAccountNo() {
         return this.accountNo;
     }

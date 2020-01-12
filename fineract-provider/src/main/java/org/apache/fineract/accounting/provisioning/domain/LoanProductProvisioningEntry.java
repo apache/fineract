@@ -100,7 +100,7 @@ public class LoanProductProvisioningEntry extends AbstractPersistableCustom<Long
     public void addReservedAmount(BigDecimal value) {
   this.reservedAmount = this.reservedAmount.add(value);
     }
-    
+
     public Office getOffice() {
   return this.office;
  }

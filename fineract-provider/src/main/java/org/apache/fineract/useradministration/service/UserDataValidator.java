@@ -115,7 +115,7 @@ public final class UserDataValidator {
                     .extractBooleanNamed(AppUserConstants.PASSWORD_NEVER_EXPIRES, element);
             baseDataValidator.reset().parameter("passwordNeverExpire").value(passwordNeverExpire).validateForBooleanValue();
         }
-        
+
         Boolean isSelfServiceUser = null;
         if(this.fromApiJsonHelper.parameterExists(AppUserConstants.IS_SELF_SERVICE_USER, element)){
             isSelfServiceUser = this.fromApiJsonHelper.extractBooleanNamed(AppUserConstants.IS_SELF_SERVICE_USER, element);
@@ -123,7 +123,7 @@ public final class UserDataValidator {
                 baseDataValidator.reset().parameter(AppUserConstants.IS_SELF_SERVICE_USER).trueOrFalseRequired(false);
             }
         }
-        
+
         if(this.fromApiJsonHelper.parameterExists(AppUserConstants.CLIENTS, element)){
             if(isSelfServiceUser == null || !isSelfServiceUser){
                 baseDataValidator.reset().parameter(AppUserConstants.CLIENTS).failWithCode("not.supported.when.isSelfServiceUser.is.false",
@@ -213,7 +213,7 @@ public final class UserDataValidator {
             final boolean passwordNeverExpire = this.fromApiJsonHelper.extractBooleanNamed("passwordNeverExpire", element);
             baseDataValidator.reset().parameter("passwordNeverExpire").value(passwordNeverExpire).validateForBooleanValue();
         }
-        
+
         Boolean isSelfServiceUser = null;
         if(this.fromApiJsonHelper.parameterExists(AppUserConstants.IS_SELF_SERVICE_USER, element)){
             isSelfServiceUser = this.fromApiJsonHelper.extractBooleanNamed(AppUserConstants.IS_SELF_SERVICE_USER, element);
@@ -221,7 +221,7 @@ public final class UserDataValidator {
                 baseDataValidator.reset().parameter(AppUserConstants.IS_SELF_SERVICE_USER).trueOrFalseRequired(false);
             }
         }
-        
+
         if(this.fromApiJsonHelper.parameterExists(AppUserConstants.CLIENTS, element)){
             if(isSelfServiceUser != null && !isSelfServiceUser){
                 baseDataValidator.reset().parameter(AppUserConstants.CLIENTS).failWithCode("not.supported.when.isSelfServiceUser.is.false",

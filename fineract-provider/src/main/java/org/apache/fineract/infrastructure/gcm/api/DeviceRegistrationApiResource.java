@@ -144,13 +144,13 @@ public class DeviceRegistrationApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String delete(@PathParam("id") final Long id) {
-        
+
         this.context.authenticatedUser();
         this.deviceRegistrationWritePlatformService.deleteDeviceRegistration(id);
         return responseMap(id);
-        
+
     }
-    
+
     public String responseMap(Long id){
         HashMap<String, Object> responseMap = new HashMap<>();
         responseMap.put("resource", id);

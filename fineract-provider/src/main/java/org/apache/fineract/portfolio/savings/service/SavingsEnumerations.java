@@ -196,11 +196,11 @@ public class SavingsEnumerations {
             case AMOUNT_HOLD:
                 optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.AMOUNT_HOLD.getValue().longValue(),
                         SavingsAccountTransactionType.AMOUNT_HOLD.getCode(), "Amount on hold");
-                break;    
+                break;
             case AMOUNT_RELEASE:
                 optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.AMOUNT_RELEASE.getValue().longValue(),
                         SavingsAccountTransactionType.AMOUNT_RELEASE.getCode(), "Release Amount");
-                break; 
+                break;
         }
         return optionData;
     }

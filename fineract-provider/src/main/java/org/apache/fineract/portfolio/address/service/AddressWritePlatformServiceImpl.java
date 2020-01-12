@@ -115,7 +115,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
         long countryId;
         ClientAddress clientAddressobj = new ClientAddress();
         final JsonArray addressArray = command.arrayOfParameterNamed("address");
-        
+
         if(addressArray != null){
             for (int i = 0; i < addressArray.size(); i++) {
                 final JsonObject jsonObject = addressArray.get(i).getAsJsonObject();
@@ -147,7 +147,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
                 {
                     isActive= jsonObject.get("isActive").getAsBoolean();
                 }
-                
+
 
                 clientAddressobj = ClientAddress.fromJson(isActive, client, addobj, addressTypeIdObj);
                 this.clientAddressRepository.save(clientAddressobj);

@@ -22,19 +22,19 @@ package org.apache.fineract.infrastructure.gcm;
  * Constants used on GCM service communication.
  */
 public final class GcmConstants {
-    
-    
+
+
     /**
      * Title for notification
-     */    
+     */
     public static final String title = "Hello !";
-    
+
     /**
      * icon for notification.
      */
     public static final String defaultIcon = "default";
 
-    
+
     /**
      * Parameter for to field.
      */
@@ -97,7 +97,7 @@ public final class GcmConstants {
      * Value used to set message priority to high.
      */
     public static final String MESSAGE_PRIORITY_HIGH = "high";
-    
+
     /**
      * A particular message could not be sent because the GCM servers were not
      * available. Used only on JSON requests, as in plain text requests
@@ -237,6 +237,6 @@ public final class GcmConstants {
     private GcmConstants() {
         throw new UnsupportedOperationException();
     }
-    
+
     public static final Integer TIME_TO_LIVE = 30;
 }

@@ -100,7 +100,7 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
                     + " r.report_run_frequency_code, r.report_run_every, r.last_run, "
                     + " r.created_date as createdDate, r.createdby_id as createdById,cb.username as createdBy,r.lastmodifiedby_id as updatedById ,r.lastmodified_date as updatedOn "
                     + " from m_adhoc r left join m_appuser cb on cb.id=r.createdby_id left join m_appuser mb on mb.id=r.lastmodifiedby_id";
-                            
+
         }
     }
 
@@ -109,5 +109,5 @@ public class AdHocReadPlatformServiceImpl implements AdHocReadPlatformService {
          return AdHocData.template();
     }
 
-   
+
 }

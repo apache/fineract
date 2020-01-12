@@ -141,18 +141,18 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         AppUserData retUser = AppUserData.instance(user.getId(), user.getUsername(), user.getEmail(), user.getOffice().getId(),
                 user.getOffice().getName(), user.getFirstname(), user.getLastname(), availableRoles, null, selectedUserRoles, linkedStaff,
                 user.getPasswordNeverExpires(), user.isSelfServiceUser());
-        
+
         if(retUser.isSelfServiceUser()){
             Set<ClientData> clients = new HashSet<>();
             for(AppUserClientMapping clientMap : user.getAppUserClientMappings()){
                 Client client = clientMap.getClient();
-                clients.add(ClientData.lookup(client.getId(), client.getDisplayName(), 
+                clients.add(ClientData.lookup(client.getId(), client.getDisplayName(),
                         client.getOffice().getId(), client.getOffice().getName()));
             }
             retUser.setClients(clients);
         }
-        
-        return retUser; 
+
+        return retUser;
     }
 
     private static final class AppUserMapper implements RowMapper<AppUserData> {

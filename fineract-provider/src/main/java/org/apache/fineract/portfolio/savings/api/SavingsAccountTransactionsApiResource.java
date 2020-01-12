@@ -91,8 +91,8 @@ public class SavingsAccountTransactionsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveTemplate(@PathParam("savingsId") final Long savingsId,
     // @QueryParam("command") final String commandParam,
-            @Context final UriInfo uriInfo) {   
-        
+            @Context final UriInfo uriInfo) {
+
         this.context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         // FIXME - KW - for now just send back generic default information for

@@ -64,7 +64,7 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
     private final FromJsonHelper fromApiJsonHelper;
     private final GLAccountRepository glAccountRepository;
     private final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService ;
-    
+
     @Autowired
     public ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl(final ProvisioningCriteriaDefinitionJsonDeserializer fromApiJsonDeserializer,
             final ProvisioningCriteriaAssembler provisioningCriteriaAssembler, final ProvisioningCriteriaRepository provisioningCriteriaRepository,
@@ -75,7 +75,7 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
         this.provisioningCriteriaAssembler = provisioningCriteriaAssembler;
         this.provisioningCriteriaRepository = provisioningCriteriaRepository;
         this.fromApiJsonHelper = fromApiJsonHelper ;
-        this.glAccountRepository = glAccountRepository ; 
+        this.glAccountRepository = glAccountRepository ;
         this.provisioningEntriesReadPlatformService = provisioningEntriesReadPlatformService ;
     }
 
@@ -119,9 +119,9 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             final Map<String, Object> changes = provisioningCriteria.update(command, products) ;
             if(!changes.isEmpty()) {
                 updateProvisioningCriteriaDefinitions(provisioningCriteria, command) ;
-                provisioningCriteriaRepository.saveAndFlush(provisioningCriteria) ;    
+                provisioningCriteriaRepository.saveAndFlush(provisioningCriteria) ;
             }
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCriteria.getId()).build();    
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCriteria.getId()).build();
         } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
@@ -151,13 +151,13 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             String categoryName = null ;
             String liabilityAccountName = null ;
             String expenseAccountName = null ;
-            ProvisioningCriteriaDefinitionData data = new ProvisioningCriteriaDefinitionData(id, categoryId, 
-                    categoryName, minimumAge, maximumAge, provisioningpercentage, 
+            ProvisioningCriteriaDefinitionData data = new ProvisioningCriteriaDefinitionData(id, categoryId,
+                    categoryName, minimumAge, maximumAge, provisioningpercentage,
                     liabilityAccount.getId(), liabilityAccount.getGlCode(), liabilityAccountName, expenseAccount.getId(), expenseAccount.getGlCode(), expenseAccountName) ;
             provisioningCriteria.update(data, liabilityAccount, expenseAccount) ;
         }
     }
-    
+
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.

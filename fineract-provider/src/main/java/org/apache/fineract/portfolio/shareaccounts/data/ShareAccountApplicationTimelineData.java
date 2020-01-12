@@ -29,12 +29,12 @@ public class ShareAccountApplicationTimelineData implements Serializable {
     private final String submittedByUsername;
     private final String submittedByFirstname;
     private final String submittedByLastname;
-    
+
     private final LocalDate rejectedDate;
     private final String rejectedByUsername;
     private final String rejectedByFirstname;
     private final String rejectedByLastname;
-    
+
     private final LocalDate approvedDate;
     private final String approvedByUsername;
     private final String approvedByFirstname;
@@ -44,7 +44,7 @@ public class ShareAccountApplicationTimelineData implements Serializable {
     private final String activatedByUsername;
     private final String activatedByFirstname;
     private final String activatedByLastname;
-    
+
     private final LocalDate closedDate;
     private final String closedByUsername;
     private final String closedByFirstname;
@@ -74,8 +74,8 @@ public class ShareAccountApplicationTimelineData implements Serializable {
         final String closedByLastname = null;
 
         return new ShareAccountApplicationTimelineData(submittedOnDate, submittedByUsername, submittedByFirstname, submittedByLastname,
-                rejectedOnDate, rejectedByUsername, rejectedByFirstname, rejectedByLastname, approvedOnDate, approvedByUsername, 
-                approvedByFirstname, approvedByLastname, activatedOnDate, activatedByUsername, activatedByFirstname, activatedByLastname, 
+                rejectedOnDate, rejectedByUsername, rejectedByFirstname, rejectedByLastname, approvedOnDate, approvedByUsername,
+                approvedByFirstname, approvedByLastname, activatedOnDate, activatedByUsername, activatedByFirstname, activatedByLastname,
                 closedOnDate, closedByUsername, closedByFirstname, closedByLastname);
     }
 

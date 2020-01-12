@@ -124,10 +124,10 @@ public class Address extends AbstractPersistableCustom<Long> {
         //this.createdOn = createdOn;
         this.updatedBy = updatedBy;
         //this.updatedOn = updatedOn;
-        
+
          if (createdOn != null) {
                 this.createdOn = createdOn.toDate();
-                        
+
             }
 
             if (updatedOn != null) {
@@ -169,8 +169,8 @@ public class Address extends AbstractPersistableCustom<Long> {
         final String updatedBy = command.stringValueOfParameterNamed("updatedBy");
 
         final LocalDate updatedOn = command.localDateValueOfParameterNamed("updatedOn");
-        
-        
+
+
 
         return new Address(street, addressLine1, addressLine2, addressLine3, townVillage, city, countyDistrict,
                 stateProvince, country, postalCode, latitude, longitude, createdBy, createdOn, updatedBy, updatedOn);

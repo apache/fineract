@@ -83,7 +83,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
             final Role entity = Role.fromJson(command);
             this.roleRepository.save(entity);
-            
+
             this.topicDomainService.createTopic(entity);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(entity.getId()).build();
@@ -227,9 +227,9 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
              */
             final Integer count = this.roleRepository.getCountOfRolesAssociatedWithUsers(roleId);
             if (count > 0) { throw new RoleAssociatedException("error.msg.role.associated.with.users.deleted", roleId); }
-            
+
             this.topicDomainService.deleteTopic(role);
-            
+
             this.roleRepository.delete(role);
             return new CommandProcessingResultBuilder().withEntityId(roleId).build();
         } catch (final DataIntegrityViolationException e) {
@@ -250,13 +250,13 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
              */
             final Role role = this.roleRepository.findById(roleId).orElseThrow(() -> new RoleNotFoundException(roleId));
             //if(role.isDisabled()){throw new RoleNotFoundException(roleId);}
-            
+
             /**
              * Roles associated with users can't be disable
              */
             final Integer count = this.roleRepository.getCountOfRolesAssociatedWithUsers(roleId);
             if (count > 0) { throw new RoleAssociatedException("error.msg.role.associated.with.users.disabled", roleId); }
-            
+
             /**
              * Disabling the role
              */
@@ -283,7 +283,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             final Role role = this.roleRepository.findById(roleId)
                     .orElseThrow(() -> new RoleNotFoundException(roleId));
             //if(!role.isEnabled()){throw new RoleNotFoundException(roleId);}
-            
+
             role.enableRole();
             this.roleRepository.save(role);
             return new CommandProcessingResultBuilder().withEntityId(roleId).build();

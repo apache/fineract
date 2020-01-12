@@ -478,7 +478,7 @@ public class RecurringDepositTest {
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.recurringDepositAccountHelper = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec);
-        
+
 
         /***
          * Create GL Accounts for product account mapping
@@ -611,7 +611,7 @@ public class RecurringDepositTest {
         Integer transactionIdForPostInterest = this.recurringDepositAccountHelper
                 .postInterestForRecurringDeposit(recurringDepositAccountId);
         Assert.assertNotNull(transactionIdForPostInterest);
-        
+
 
         HashMap accountSummary = this.recurringDepositAccountHelper.getRecurringDepositSummary(recurringDepositAccountId);
         Float totalInterestPosted = (Float) accountSummary.get("totalInterestPosted");
@@ -694,7 +694,7 @@ public class RecurringDepositTest {
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.recurringDepositAccountHelper = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec);
-        
+
 
         /***
          * Create GL Accounts for product account mapping
@@ -810,7 +810,7 @@ public class RecurringDepositTest {
          */
         todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -20);
-        
+
         for (int i = 0; i < 14; i++) {
             Integer depositTransactionId = this.recurringDepositAccountHelper.depositToRecurringDepositAccount(recurringDepositAccountId,
                     depositAmount, dateFormat.format(todaysDate.getTime()));
@@ -826,20 +826,20 @@ public class RecurringDepositTest {
         /***
          * FD account verify whether account is matured
          */
-        
+
         SchedulerJobHelper schedulerJobHelper =  new SchedulerJobHelper(requestSpec, responseSpec);
         String JobName = "Update Deposit Accounts Maturity details";
         schedulerJobHelper.executeJob(JobName);
-        
+
         HashMap accountDetails = this.recurringDepositAccountHelper.getRecurringDepositAccountById(this.requestSpec, this.responseSpec,
                 recurringDepositAccountId);
-        
+
         HashMap summary = (HashMap) accountDetails.get("summary");
         Assert.assertNotNull(summary.get("totalWithholdTax"));
         Float withHoldTax = (Float) summary.get("totalWithholdTax");
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(liabilityAccountForTax, CLOSED_ON_DATE, new JournalEntry(withHoldTax,
                 JournalEntry.TransactionType.CREDIT));
-        
+
 
         recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker.getStatusOfRecurringDepositAccount(this.requestSpec,
                 this.responseSpec, recurringDepositAccountId.toString());
@@ -849,7 +849,7 @@ public class RecurringDepositTest {
     }
 
 
-    
+
     /***
      * Test case for Recurring Deposit Account premature closure with
      * transaction type ReInvest and Cash Based accounting enabled
@@ -2882,7 +2882,7 @@ public class RecurringDepositTest {
         final Float interestRate = new Float(6.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testRecurringDepositAccountWithPeriodInterestRateChart_AMOUNT_VARIATION() {
         final String chartToUse = "period";
@@ -2891,7 +2891,7 @@ public class RecurringDepositTest {
         final Float interestRate = new Float(6.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testRecurringDepositAccountWithPeriodInterestRateChart_PERIOD_VARIATION() {
         final String chartToUse = "period";
@@ -2900,7 +2900,7 @@ public class RecurringDepositTest {
         final Float interestRate = new Float(7.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testRecurringDepositAccountWithAmountInterestRateChart() {
         final String chartToUse = "amount";
@@ -2909,7 +2909,7 @@ public class RecurringDepositTest {
         final Float interestRate = new Float(8.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testRecurringDepositAccountWithAmountInterestRateChart_AMOUNT_VARIATION() {
         final String chartToUse = "amount";
@@ -2918,7 +2918,7 @@ public class RecurringDepositTest {
         final Float interestRate = new Float(7.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testRecurringDepositAccountWithAmountInterestRateChart_PERIOD_VARIATION() {
         final String chartToUse = "amount";
@@ -2927,7 +2927,7 @@ public class RecurringDepositTest {
         final Float interestRate = new Float(5.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testRecurringDepositAccountWithPeriodAndAmountInterestRateChart() {
         final String chartToUse = "period_amount";
@@ -2936,7 +2936,7 @@ public class RecurringDepositTest {
         final Float interestRate = new Float(7.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testRecurringDepositAccountWithPeriodAndAmountInterestRateChart_AMOUNT_VARIATION() {
         final String chartToUse = "period_amount";
@@ -2945,7 +2945,7 @@ public class RecurringDepositTest {
         final Float interestRate = new Float(6.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testRecurringDepositAccountWithPeriodAndAmountInterestRateChart_PERIOD_VARIATION() {
         final String chartToUse = "period_amount";
@@ -2954,7 +2954,7 @@ public class RecurringDepositTest {
         final Float interestRate = new Float(8.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testRecurringDepositAccountWithAmountAndPeriodInterestRateChart() {
         final String chartToUse = "amount_period";
@@ -2963,7 +2963,7 @@ public class RecurringDepositTest {
         final Float interestRate = new Float(8.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testRecurringDepositAccountWithAmountAndPeriodInterestRateChart_AMOUNT_VARIATION() {
         final String chartToUse = "amount_period";
@@ -2972,7 +2972,7 @@ public class RecurringDepositTest {
         final Float interestRate = new Float(6.0);
         testFixedDepositAccountForInterestRate(chartToUse, depositAmount, depositPeriod, interestRate);
     }
-    
+
     @Test
     public void testRecurringDepositAccountWithAmountAndPeriodInterestRateChart_PERIOD_VARIATION() {
         final String chartToUse = "amount_period";
@@ -3049,7 +3049,7 @@ public class RecurringDepositTest {
         final String recurringDepositProductJSON = recurringDepositProductHelper.withPeriodRangeChart().build(validFrom, validTo);
         return RecurringDepositProductHelper.createRecurringDepositProduct(recurringDepositProductJSON, requestSpec, responseSpec);
     }
-    
+
     private Integer createRecurringDepositProductWithWithHoldTax(final String validFrom, final String validTo,final String taxGroupId, final String accountingRule,
             Account... accounts) {
         System.out.println("------------------------------CREATING NEW RECURRING DEPOSIT PRODUCT ---------------------------------------");
@@ -3186,7 +3186,7 @@ public class RecurringDepositTest {
         Assert.assertEquals(financialActivityId, ((HashMap) mappingDetails.get("financialActivityData")).get("id"));
         Assert.assertEquals(glAccount.getAccountID(), ((HashMap) mappingDetails.get("glAccountData")).get("id"));
     }
-    
+
     private Integer createTaxGroup(final String percentage, final Account liabilityAccountForTax){
         final Integer liabilityAccountId = liabilityAccountForTax.getAccountID();
         final Integer taxComponentId = TaxComponentHelper.createTaxComponent(this.requestSpec, this.responseSpec, percentage, liabilityAccountId);

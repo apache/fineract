@@ -45,23 +45,23 @@ public class TopicDomainServiceImpl implements TopicDomainService {
     private final TopicRepository topicRepository;
     private final OfficeRepository officeRepository;
     private final TopicSubscriberRepository topicSubscriberRepository;
-    
+
     @Autowired
     public TopicDomainServiceImpl(RoleRepository roleRepository, TopicRepository topicRepository,
             OfficeRepository officeRepository, TopicSubscriberRepository topicSubscriberRepository) {
-        
+
         this.roleRepository = roleRepository;
         this.topicRepository = topicRepository;
         this.officeRepository = officeRepository;
         this.topicSubscriberRepository = topicSubscriberRepository;
     }
-    
+
     @Override
     public void createTopic( Office newOffice ) {
-        
+
         Long entityId = newOffice.getId();
         String entityType = this.getEntityType(newOffice);
-        
+
         List<Role> allRoles = roleRepository.findAll();
         for(Role role : allRoles) {
             String memberType = role.getName().toUpperCase();
@@ -70,12 +70,12 @@ public class TopicDomainServiceImpl implements TopicDomainService {
             topicRepository.save(newTopic);
         }
     }
-    
+
     @Override
     public void createTopic( Role newRole ) {
-        
+
         List<Office> offices = officeRepository.findAll();
-        
+
         for (Office office : offices){
             String entityType = this.getEntityType(office);
             String title = newRole.getName() + " of " + office.getName();
@@ -83,14 +83,14 @@ public class TopicDomainServiceImpl implements TopicDomainService {
             topicRepository.save(newTopic);
         }
     }
-    
+
     @Override
     public void updateTopic( Office updatedOffice, Map<String, Object> changes ) {
-        
+
         List<Topic> entityTopics = topicRepository.findByEntityId(updatedOffice.getId());
-        
+
         if (changes.containsKey("parentId")) {
-            
+
             String entityType = this.getEntityType(updatedOffice);
             for (Topic topic : entityTopics) {
                 topic.setEntityType(entityType);
@@ -98,7 +98,7 @@ public class TopicDomainServiceImpl implements TopicDomainService {
             }
         }
         if (changes.containsKey("name")) {
-            
+
             for (Topic topic: entityTopics) {
                 Role role = roleRepository.getRoleByName(topic.getMemberType());
                 String title = role.getName() + " of " + updatedOffice.getName();
@@ -107,7 +107,7 @@ public class TopicDomainServiceImpl implements TopicDomainService {
             }
         }
     }
-    
+
     @Override
     public void updateTopic( String previousRolename, Role updatedRole, Map<String, Object> changes ) {
 
@@ -122,21 +122,21 @@ public class TopicDomainServiceImpl implements TopicDomainService {
             }
         }
     }
-    
+
     @Override
     public void deleteTopic( Role role ) {
-        
+
         List<Topic> topics = topicRepository.findByMemberType(role.getName().toUpperCase());
         for (Topic topic : topics) {
             topicRepository.delete(topic);
         }
     }
-    
+
     @Override
     public void subscribeUserToTopic( AppUser newUser ) {
-        
+
         List<Topic> possibleTopics = topicRepository.findByEntityId(newUser.getOffice().getId());
-        
+
         if (!possibleTopics.isEmpty()) {
             Set<Role> userRoles = newUser.getRoles();
             for (Role role : userRoles) {
@@ -149,17 +149,17 @@ public class TopicDomainServiceImpl implements TopicDomainService {
             }
         }
     }
-    
+
     @Override
     public void updateUserSubscription( AppUser userToUpdate, Map<String, Object> changes ) {
-        
+
         List<TopicSubscriber> oldSubscriptions = topicSubscriberRepository.findBySubscriber(userToUpdate);
         if (changes.containsKey("officeId")) {
             final Long oldOfficeId = userToUpdate.getOffice().getId();
             final Long newOfficeId = (Long) changes.get("officeId");
             List<Topic> oldTopics = topicRepository.findByEntityId(oldOfficeId);
             List<Topic> newTopics = topicRepository.findByEntityId(newOfficeId);
-            
+
             for (TopicSubscriber subscriber : oldSubscriptions) {
                 for (Topic topic : oldTopics) {
                     if (subscriber.getTopic().getId().equals(topic.getId())) {
@@ -167,7 +167,7 @@ public class TopicDomainServiceImpl implements TopicDomainService {
                     }
                 }
             }
-            
+
             Set<Role> userRoles = userToUpdate.getRoles();
             for (Role role : userRoles) {
                 for (Topic topic : newTopics) {
@@ -178,16 +178,16 @@ public class TopicDomainServiceImpl implements TopicDomainService {
                 }
             }
         }
-        
+
         if (changes.containsKey("roles")) {
-            
+
             final Set<Role> oldRoles = userToUpdate.getRoles() ;
             final Set<Role> tempOldRoles = new HashSet<>(oldRoles);
-            
+
             final String[] roleIds = (String[]) changes.get("roles");
             final Set<Role> updatedRoles = assembleSetOfRoles(roleIds);
             final Set<Role> tempUpdatedRoles = new HashSet<>(updatedRoles);
-            
+
             tempOldRoles.removeAll(updatedRoles);
             for (TopicSubscriber subscriber : oldSubscriptions) {
                 Topic topic = subscriber.getTopic();
@@ -197,7 +197,7 @@ public class TopicDomainServiceImpl implements TopicDomainService {
                     }
                 }
             }
-            
+
             tempUpdatedRoles.removeAll(oldRoles);
             List<Topic> newTopics = topicRepository.findByEntityId(userToUpdate.getOffice().getId());
             for (Topic topic : newTopics) {
@@ -210,26 +210,26 @@ public class TopicDomainServiceImpl implements TopicDomainService {
             }
         }
     }
-    
+
     @Override
     public void unsubcribeUserFromTopic( AppUser user ) {
-        
+
         List<TopicSubscriber> subscriptions = topicSubscriberRepository.findBySubscriber(user);
         for (TopicSubscriber subscription : subscriptions) {
             topicSubscriberRepository.delete(subscription);
         }
     }
-    
+
 
     private String getEntityType( Office office ) {
-        
+
         if (office.getParent() == null) {
             return "OFFICE";
         } else {
             return "BRANCH";
         }
     }
-    
+
     private Set<Role> assembleSetOfRoles(final String[] rolesArray) {
 
         final Set<Role> allRoles = new HashSet<>();
@@ -245,5 +245,5 @@ public class TopicDomainServiceImpl implements TopicDomainService {
 
         return allRoles;
     }
-    
+
 }

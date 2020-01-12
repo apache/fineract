@@ -55,7 +55,7 @@ public class CashBasedAccountingProcessorForClientTransactions implements Accoun
     /**
      * Create a single debit to fund source and multiple credits for the income
      * account mapped with each charge this payment pays off
-     * 
+     *
      * In case the loan transaction is a reversal, all debits are turned into
      * credits and vice versa
      */

@@ -395,7 +395,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy(),
                     searchParameters.getSortOrder());
-            
+
         }
 
         if (searchParameters.isLimited()) {
@@ -601,8 +601,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
                         flag = false;
                         if (staffCenterData.getStaffId().equals(centerData.staffId())) {
                             staffCenterData.getMeetingFallCenters().add(centerData);
-                 
-                            
+
+
                             flag = true;
                             break;
                         }

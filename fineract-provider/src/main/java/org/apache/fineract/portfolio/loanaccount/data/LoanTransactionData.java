@@ -62,7 +62,7 @@ public class LoanTransactionData {
 
     // templates
     final Collection<PaymentTypeData> paymentTypeOptions;
-    
+
     private  Collection<CodeValueData> writeOffReasonOptions = null;
 
     //import fields
@@ -197,7 +197,7 @@ public class LoanTransactionData {
                 feeChargesPortion, penaltyChargesPortion, overpaymentPortion, unrecognizedIncomePortion, null, externalId, transfer,
                 fixedEmiAmount, outstandingLoanBalance,manuallyReversed);
     }
- 
+
     public LoanTransactionData(final Long id, final Long officeId, final String officeName, final LoanTransactionEnumData transactionType,
             final PaymentDetailData paymentDetailData, final CurrencyData currency, final LocalDate date, final BigDecimal amount,
             final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
@@ -257,8 +257,8 @@ public class LoanTransactionData {
                 penaltyChargesPortion, overPaymentPortion, unrecognizedIncomePortion, null, null, null, null, outstandingLoanBalance, null,
                 manuallyReversed);
     }
-    
-    public static LoanTransactionData LoanTransactionDataForDisbursalTemplate(final LoanTransactionEnumData transactionType, final LocalDate expectedDisbursedOnLocalDateForTemplate, 
+
+    public static LoanTransactionData LoanTransactionDataForDisbursalTemplate(final LoanTransactionEnumData transactionType, final LocalDate expectedDisbursedOnLocalDateForTemplate,
             final BigDecimal disburseAmountForTemplate,    final Collection<PaymentTypeData> paymentOptions,
             final BigDecimal retriveLastEmiAmount, final LocalDate possibleNextRepaymentDate) {
             final Long id = null;
@@ -278,15 +278,15 @@ public class LoanTransactionData {
             final LocalDate submittedOnDate = null;
             final boolean manuallyReversed = false;
             return new LoanTransactionData(id, officeId, officeName, transactionType, paymentDetailData, currency, expectedDisbursedOnLocalDateForTemplate,
-                    disburseAmountForTemplate, principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion, overpaymentPortion,    unrecognizedIncomePortion, 
+                    disburseAmountForTemplate, principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion, overpaymentPortion,    unrecognizedIncomePortion,
                     paymentOptions, transfer, externalId, retriveLastEmiAmount, outstandingLoanBalance, submittedOnDate, manuallyReversed, possibleNextRepaymentDate);
-        
+
     }
 
     private LoanTransactionData(Long id , final Long officeId, final String officeName, LoanTransactionEnumData transactionType, final PaymentDetailData paymentDetailData,
-            final CurrencyData currency, final LocalDate date,    BigDecimal amount, final BigDecimal principalPortion, final BigDecimal interestPortion, 
+            final CurrencyData currency, final LocalDate date,    BigDecimal amount, final BigDecimal principalPortion, final BigDecimal interestPortion,
             final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion, final BigDecimal overpaymentPortion, BigDecimal unrecognizedIncomePortion,    Collection<PaymentTypeData> paymentOptions,
-            final AccountTransferData transfer, final String externalId, final BigDecimal fixedEmiAmount, BigDecimal outstandingLoanBalance, 
+            final AccountTransferData transfer, final String externalId, final BigDecimal fixedEmiAmount, BigDecimal outstandingLoanBalance,
             final LocalDate submittedOnDate, final boolean manuallyReversed, final LocalDate possibleNextRepaymentDate) {
          this.id = id;
          this.officeId = officeId;
@@ -312,7 +312,7 @@ public class LoanTransactionData {
          this.possibleNextRepaymentDate = possibleNextRepaymentDate;
     }
 
-    
+
 
     public LocalDate dateOf() {
         return this.date;
@@ -322,21 +322,21 @@ public class LoanTransactionData {
         return type.id() == 1;
     }
 
-    
+
     public BigDecimal getAmount() {
         return this.amount;
     }
 
-    
+
     public BigDecimal getUnrecognizedIncomePortion() {
         return this.unrecognizedIncomePortion;
     }
 
-    
+
     public BigDecimal getInterestPortion() {
         return this.interestPortion;
     }
-    
+
     public void setWriteOffReasonOptions(Collection<CodeValueData> writeOffReasonOptions){
         this.writeOffReasonOptions =writeOffReasonOptions;
     }

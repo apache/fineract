@@ -101,12 +101,12 @@ final public class ClientData implements Comparable<ClientData>, Serializable {
     private final ClientFamilyMembersData familyMemberOptions;
 
     private final ClientNonPersonData clientNonPersonDetails;
-    
+
     private final Collection<AddressData> address;
 
     private final Boolean isAddressEnabled;
 
-    
+
     private final List<DatatableData> datatables;
 
     //import fields

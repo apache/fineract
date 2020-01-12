@@ -209,7 +209,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         // (typically used to return report lists containing only reports
         // permitted to be run by the user
         sql = this.genericDataService.replace(sql, "${currentUserId}", currentUser.getId().toString());
-        
+
         sql = this.genericDataService.replace(sql, "${isSelfServiceUser}",
                 Integer.toString(isSelfServiceUserReport ? 1 : 0));
 
@@ -223,7 +223,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         final String inputSql = "select " + type + "_sql as the_sql from stretchy_" + type + " where " + type + "_name = '" + name + "'";
         validateReportName(name);
-        
+
         final String inputSqlWrapped = this.genericDataService.wrapSQL(inputSql);
 
         // the return statement contains the exact sql required
@@ -239,7 +239,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final String sql = "SELECT ifnull(report_type,'') as report_type FROM `stretchy_report` where report_name = '" + reportName + "' and self_service_user_report = ?";
         validateReportName(reportName);
         this.columnValidator.validateSqlInjection(sql, reportName);
-        
+
         final String sqlWrapped = this.genericDataService.wrapSQL(sql);
 
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sqlWrapped, new Object [] {isSelfServiceUserReport});
@@ -519,7 +519,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         logger.info("FINISHING Report/Request Name: " + name + " - " + type + "     Elapsed Time: " + elapsed);
         return result;
     }
-    
+
     @Override
     public String sqlToRunForSmsEmailCampaign(final String name, final String type, final Map<String, String> queryParams) {
         String sql = getSql(name, type);
@@ -567,7 +567,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             res = manager.createDirectly(reportPath, MasterReport.class);
             final MasterReport masterReport = (MasterReport) res.getResource();
             final DefaultReportEnvironment reportEnvironment = (DefaultReportEnvironment) masterReport.getReportEnvironment();
-            
+
             if (locale != null) {
                 reportEnvironment.setLocale(locale);
             }
@@ -594,7 +594,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                 HtmlReportUtil.createStreamHTML(masterReport, baos);
                 return baos;
             }
-            
+
         } catch (final ResourceException e) {
             errorLog.append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw a Pentaho ResourceException "
                     + "exception: " + e.getMessage() + " ---------- ");
@@ -612,11 +612,11 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         errorLog.append("ReadReportingServiceImpl.generatePentahoReportAsOutputStream method threw a PlatformDataIntegrityException "
                 + "exception: No matching Output Type: " + outputType + " ---------- ");
         throw new PlatformDataIntegrityException("error.msg.invalid.outputType", "No matching Output Type: " + outputType);
-        
+
     */
         return null ;
     }
-    
+
     private void validateReportName(final String name) {
 
         if (!StringUtils.isBlank(name) && !name.matches(REPORT_NAME_REGEX_PATTERN)) {

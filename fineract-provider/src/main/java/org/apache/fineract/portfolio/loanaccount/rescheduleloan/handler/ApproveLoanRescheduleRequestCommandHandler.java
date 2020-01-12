@@ -31,13 +31,13 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "RESCHEDULELOAN", action = "APPROVE")
 public class ApproveLoanRescheduleRequestCommandHandler implements NewCommandSourceHandler {
     private final LoanRescheduleRequestWritePlatformService loanRescheduleRequestWritePlatformService;
-    
+
     @Autowired
     public ApproveLoanRescheduleRequestCommandHandler(
             LoanRescheduleRequestWritePlatformService loanRescheduleRequestWritePlatformService) {
         this.loanRescheduleRequestWritePlatformService = loanRescheduleRequestWritePlatformService;
     }
-    
+
     @Transactional
     @Override
     public CommandProcessingResult processCommand(JsonCommand jsonCommand) {

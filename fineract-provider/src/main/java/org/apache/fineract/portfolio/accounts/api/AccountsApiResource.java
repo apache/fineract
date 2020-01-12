@@ -76,7 +76,7 @@ public class AccountsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
-    
+
     @Autowired
     public AccountsApiResource(final ApplicationContext applicationContext,
             final ApiRequestParameterHelper apiRequestParameterHelper,
@@ -88,12 +88,12 @@ public class AccountsApiResource {
         this.applicationContext = applicationContext ;
         this.apiRequestParameterHelper = apiRequestParameterHelper ;
         this.toApiJsonSerializer = toApiJsonSerializer ;
-        this.platformSecurityContext = platformSecurityContext ; 
+        this.platformSecurityContext = platformSecurityContext ;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService ;
         this.bulkImportWorkbookService=bulkImportWorkbookService;
         this.bulkImportWorkbookPopulatorService=bulkImportWorkbookPopulatorService;
     }
-    
+
     @GET
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -109,12 +109,12 @@ public class AccountsApiResource {
             AccountReadPlatformService service = (AccountReadPlatformService) this.applicationContext.getBean(serviceName) ;
             final AccountData accountData = service.retrieveTemplate(clientId, productId);
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.toApiJsonSerializer.serialize(settings, accountData, service.getResponseDataParams());    
+            return this.toApiJsonSerializer.serialize(settings, accountData, service.getResponseDataParams());
         }catch(BeansException e) {
             throw new ResourceNotFoundException();
         }
     }
-    
+
     @GET
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -128,12 +128,12 @@ public class AccountsApiResource {
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
             AccountReadPlatformService service = (AccountReadPlatformService) this.applicationContext.getBean(serviceName) ;
             AccountData data = service.retrieveOne(accountId, settings.isTemplate()) ;
-            return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());    
+            return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());
         }catch(BeansException e) {
             throw new ResourceNotFoundException();
         }
     }
-    
+
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -145,12 +145,12 @@ public class AccountsApiResource {
             AccountReadPlatformService service = (AccountReadPlatformService) this.applicationContext.getBean(serviceName) ;
             Page<AccountData> data = service.retrieveAll(offset, limit) ;
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());    
+            return this.toApiJsonSerializer.serialize(settings, data, service.getResponseDataParams());
         }catch(BeansException e) {
             throw new ResourceNotFoundException();
         }
     }
-    
+
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -164,7 +164,7 @@ public class AccountsApiResource {
         final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
         return this.toApiJsonSerializer.serialize(commandProcessingResult);
     }
-    
+
     @POST
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -180,7 +180,7 @@ public class AccountsApiResource {
         final CommandProcessingResult commandProcessingResult = this.commandsSourceWritePlatformService.logCommandSource(commandWrapper);
         return this.toApiJsonSerializer.serialize(commandProcessingResult);
     }
-    
+
     @PUT
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })

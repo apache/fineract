@@ -116,7 +116,7 @@ public class LoanProductTestBuilder {
     private String graceOnInterestPayment = "1";
     private JsonObject allowAttributeOverrides = null;
     private Boolean allowPartialPeriodInterestCalcualtion = false;
-    
+
     private Boolean allowVariableInstallments = Boolean.FALSE;
     private Integer minimumGap;
     private Integer maximumGap;
@@ -212,7 +212,7 @@ public class LoanProductTestBuilder {
             map.put("minimumGap", minimumGap) ;
             map.put("maximumGap", maximumGap) ;
         }
-        map.put("syncExpectedWithDisbursementDate", 
+        map.put("syncExpectedWithDisbursementDate",
                 this.syncExpectedWithDisbursementDate);
         return new Gson().toJson(map);
     }
@@ -494,16 +494,16 @@ public class LoanProductTestBuilder {
         this.allowAttributeOverrides = loanProductConfigurableAttributes;
         return this;
     }
-    
+
     public LoanProductTestBuilder withVariableInstallmentsConfig(Boolean allowVariableInstallments, Integer minimumGap, Integer maximumGap) {
         this.allowVariableInstallments = allowVariableInstallments ;
         this.minimumGap = minimumGap;
         this.maximumGap = maximumGap;
         return this ;
     }
-    
+
     public LoanProductTestBuilder withSyncExpectedWithDisbursementDate(Boolean syncExpectedWithDisbursementDate) {
-        this.syncExpectedWithDisbursementDate = 
+        this.syncExpectedWithDisbursementDate =
                 syncExpectedWithDisbursementDate ;
         return this ;
     }

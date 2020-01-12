@@ -34,10 +34,10 @@ public class PostInterestAsOnDateException extends AbstractPlatformDomainRuleExc
                 return "Post Interest Date must be after the Activation date";
             } else if (name().toString().equalsIgnoreCase("LAST_TRANSACTION_DATE")) {
                 return "Cannot Post Interest before last transaction date";
-            } 
+            }
                 return name().toString();
             }
-    
+
             public String errorCode() {
                 if (name().toString().equalsIgnoreCase("FUTURE_DATE")) {
                     return "error.msg.futureDate";
@@ -47,15 +47,15 @@ public class PostInterestAsOnDateException extends AbstractPlatformDomainRuleExc
                 return "error.msg.before activation date";
             } else if (name().toString().equalsIgnoreCase("LAST_TRANSACTION_DATE")) {
                 return "error.msg.countInterest";
-            } 
+            }
             return name().toString();
         }
     }
-    
-    
+
+
     public PostInterestAsOnDateException(final PostInterestAsOnException_TYPE reason) {
         super(reason.errorCode(), reason.errorMessage());
     }
 
-  
+
 }

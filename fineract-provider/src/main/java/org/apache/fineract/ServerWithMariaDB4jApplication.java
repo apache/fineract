@@ -82,14 +82,14 @@ public class ServerWithMariaDB4jApplication {
             if (distResource.exists()) {
                 openWebBrowser(distURI);
             } else if (devResource.exists()) {
-                openWebBrowser(devURI);                
+                openWebBrowser(devURI);
             } else {
                 logger.error("Cannot open Fineract UI in browser; not found: " + distResource.toString());
             }
         }
-        
+
         // TODO Tray Icon stuff; dig out my very own old @see https://github.com/mifos/head/tree/hudsonBuild-MIFOS-5157_Launch4j-EXE_NewDist-squash1/server-jetty/src/main/java/org/mifos/server/tray
-        
+
         ApplicationExitUtil.waitForKeyPressToCleanlyExit(ctx);
     }
 

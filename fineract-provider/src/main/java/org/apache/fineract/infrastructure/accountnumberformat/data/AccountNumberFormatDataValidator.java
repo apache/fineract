@@ -125,7 +125,7 @@ public class AccountNumberFormatDataValidator {
         case CENTER:
             validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForCenters;
             break;
-            
+
         case GROUP:
             validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForGroups;
             break;

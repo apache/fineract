@@ -67,9 +67,9 @@ import org.springframework.stereotype.Service;
 public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
 
     private static final Logger logger = LoggerFactory.getLogger(SmsCampaignDomainServiceImpl.class);
-    
+
     //private final static int POOL_SIZE = 5 ;
-    
+
     private final SmsCampaignRepository smsCampaignRepository;
     private final SmsMessageRepository smsMessageRepository;
     private final OfficeRepository officeRepository;
@@ -77,9 +77,9 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
     private final SmsCampaignWritePlatformService smsCampaignWritePlatformCommandHandler;
     private final GroupRepository groupRepository;
 
-    private final SmsMessageScheduledJobService smsMessageScheduledJobService; 
+    private final SmsMessageScheduledJobService smsMessageScheduledJobService;
     private final SmsCampaignValidator smsCampaignValidator;
-    
+
     @Autowired
     public SmsCampaignDomainServiceImpl(final SmsCampaignRepository smsCampaignRepository, final SmsMessageRepository smsMessageRepository,
                                         final BusinessEventNotifierService businessEventNotifierService, final OfficeRepository officeRepository,
@@ -138,9 +138,9 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
                  this.smsCampaignWritePlatformCommandHandler.insertDirectCampaignIntoSmsOutboundTable(client, campaign);
              }
          }
-         
+
     }
-    
+
     private void notifyClientRejected(final Client client) {
         List<SmsCampaign> smsCampaigns = retrieveSmsCampaigns("Client Rejected");
         if(smsCampaigns.size()>0){
@@ -148,9 +148,9 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
                 this.smsCampaignWritePlatformCommandHandler.insertDirectCampaignIntoSmsOutboundTable(client, campaign);
             }
         }
-        
+
    }
-    
+
     private void notifySavingsAccountActivated(final SavingsAccount savingsAccount) {
         List<SmsCampaign> smsCampaigns = retrieveSmsCampaigns("Savings Activated");
         if (smsCampaigns.size() > 0) {
@@ -172,7 +172,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         }
 
     }
-    
+
     private void sendSmsForLoanRepayment(LoanTransaction loanTransaction) {
         List<SmsCampaign> smsCampaigns = retrieveSmsCampaigns("Loan Repayment");
         if (smsCampaigns.size() > 0) {
@@ -302,7 +302,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
             }
         }
     }
-    
+
     private List<SmsCampaign> retrieveSmsCampaigns(String paramValue){
         List<SmsCampaign> smsCampaigns = smsCampaignRepository.findActiveSmsCampaigns("%"+paramValue+"%", SmsCampaignTriggerType.TRIGGERED.getValue());
         return smsCampaigns;
@@ -335,21 +335,21 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         smsParams.put("loanId",loan.getId());
         smsParams.put("LoanAccountId", loan.getAccountNumber());
         smsParams.put("officeId", client.getOffice().getId());
-        
+
         if(client.getStaff() != null) {
             smsParams.put("loanOfficerId", client.getStaff().getId());
         }else {
               smsParams.put("loanOfficerId", -1);
         }
-        
+
         smsParams.put("repaymentAmount", loanTransaction.getAmount(loan.getCurrency()));
         smsParams.put("RepaymentDate", loanTransaction.getCreatedDateTime().toLocalDate().toString(dateFormatter));
         smsParams.put("RepaymentTime", loanTransaction.getCreatedDateTime().toLocalTime().toString(timeFormatter));
-        
+
         if(loanTransaction.getPaymentDetail() != null) {
             smsParams.put("receiptNumber", loanTransaction.getPaymentDetail().getReceiptNumber());
         }else {
-            smsParams.put("receiptNumber", -1);    
+            smsParams.put("receiptNumber", -1);
         }
         return smsParams;
     }
@@ -357,7 +357,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
     private HashMap<String, Object> processSavingsTransactionDataForSms(final SavingsAccountTransaction savingsAccountTransaction, Client client){
 
         // {{savingsId}} {{id}} {{firstname}} {{middlename}} {{lastname}} {{FullName}} {{mobileNo}} {{savingsAccountId}} {{depositAmount}} {{balance}}
-        
+
         //transactionDate
         HashMap<String, Object> smsParams = new HashMap<String, Object>();
         SavingsAccount savingsAccount = savingsAccountTransaction.getSavingsAccount() ;
@@ -376,21 +376,21 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
         smsParams.put("officeId", client.getOffice().getId());
         smsParams.put("transactionDate", savingsAccountTransaction.getTransactionLocalDate().toString(dateFormatter)) ;
         smsParams.put("savingsTransactionId", savingsAccountTransaction.getId()) ;
-        
+
         if(client.getStaff() != null) {
             smsParams.put("loanOfficerId", client.getStaff().getId());
         }else {
               smsParams.put("loanOfficerId", -1);
         }
-        
+
         if(savingsAccountTransaction.getPaymentDetail() != null) {
             smsParams.put("receiptNumber", savingsAccountTransaction.getPaymentDetail().getReceiptNumber());
         }else {
-            smsParams.put("receiptNumber", -1);    
+            smsParams.put("receiptNumber", -1);
         }
         return smsParams;
     }
-    
+
     private abstract class SmsBusinessEventAdapter implements BusinessEventListner {
 
         @Override
@@ -398,7 +398,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
             //Nothing to do
         }
     }
-    
+
     private class SendSmsOnLoanApproved extends SmsBusinessEventAdapter{
 
         @Override
@@ -434,18 +434,18 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
             }
         }
     }
-    
+
     private class ClientActivatedListener extends SmsBusinessEventAdapter {
 
         @Override
         public void businessEventWasExecuted(Map<BUSINESS_ENTITY, Object> businessEventEntity) {
             Object entity = businessEventEntity.get(BusinessEventNotificationConstants.BUSINESS_ENTITY.CLIENT);
             if(entity instanceof Client) {
-                notifyClientActivated((Client)entity);    
+                notifyClientActivated((Client)entity);
             }
         }
     }
-    
+
     private class ClientRejectedListener extends SmsBusinessEventAdapter {
 
         @Override
@@ -454,10 +454,10 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
             if(entity instanceof Client) {
                 notifyClientRejected((Client)entity);
             }
-            
+
         }
     }
-    
+
     private class SavingsAccountActivatedListener extends SmsBusinessEventAdapter{
 
         @Override
@@ -466,10 +466,10 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
             if(entity instanceof SavingsAccount) {
                 notifySavingsAccountActivated((SavingsAccount)entity);
             }
-            
+
         }
     }
-    
+
     private class SavingsAccountRejectedListener extends SmsBusinessEventAdapter {
 
         @Override
@@ -480,11 +480,11 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
             }
         }
     }
-    
+
     private class SavingsAccountTransactionListener extends SmsBusinessEventAdapter {
 
         final boolean isDeposit ;
-        
+
         public SavingsAccountTransactionListener(final boolean isDeposit) {
             this.isDeposit = isDeposit ;
         }
@@ -497,15 +497,15 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
             }
         }
     }
-    
+
     /*private abstract class Task implements Runnable {
-        
+
         protected final FineractPlatformTenant tenant;
-        
+
         protected final String reportName ;
-        
+
         private final Object entity ;
-        
+
         public Task(final FineractPlatformTenant tenant, final String reportName, final Object entity) {
             this.tenant = tenant;
             this.reportName = reportName ;

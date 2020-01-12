@@ -166,7 +166,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
     @Override
     public Collection<StaffData> retrieveAllStaffForDropdown(final Long officeId) {
-        
+
         //adding the Authorization criteria so that a user cannot see an employee who does not belong to his office or     a sub office for his office.
         final String hierarchy = this.context.authenticatedUser().getOffice().getHierarchy()+"%";
 
@@ -187,10 +187,10 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
     @Override
     public StaffData retrieveStaff(final Long staffId) {
-        
+
         //adding the Authorization criteria so that a user cannot see an employee who does not belong to his office or     a sub office for his office.
         final String hierarchy = this.context.authenticatedUser().getOffice().getHierarchy()+ "%";
-         
+
 
         try {
             final StaffMapper rm = new StaffMapper();
@@ -210,17 +210,17 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     }
 
     private Collection<StaffData> retrieveAllStaff(final String extraCriteria, Long officeId) {
-        
+
         final StaffMapper rm = new StaffMapper();
         String sql = "select " + rm.schema();
         final String hierarchy = this.context.authenticatedUser().getOffice().getHierarchy()+"%";
         if (StringUtils.isNotBlank(extraCriteria)){
-            sql += " where " + extraCriteria;            
+            sql += " where " + extraCriteria;
         }
         sql = sql + " order by s.lastname";
         if(officeId==null){
             return this.jdbcTemplate.query(sql, rm, new Object[] {hierarchy });
-        }        
+        }
         return this.jdbcTemplate.query(sql, rm, new Object[] {officeId, hierarchy });
     }
 
@@ -252,13 +252,13 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             }
         }
         //adding the Authorization criteria so that a user cannot see an employee who does not belong to his office or     a sub office for his office.
-        
+
         extraCriteria.append(" and o.hierarchy like ? ");
 
         if (StringUtils.isNotBlank(extraCriteria.toString())) {
             extraCriteria.delete(0, 4);
         }
-        
+
         // remove begin four letter including a space from the string.
         return extraCriteria.toString();
     }
@@ -270,21 +270,21 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         sql = sql + " order by s.lastname";
         return this.jdbcTemplate.query(sql, this.staffInOfficeHierarchyMapper, new Object[] { officeId });
     }
-    
+
     @Override
     public Object[] hasAssociatedItems(final Long staffId){
-        ArrayList<String> params = new ArrayList<String>();        
-                
+        ArrayList<String> params = new ArrayList<String>();
+
         String sql =  "select c.display_name as client, g.display_name as grp,l.loan_officer_id as loan, s.field_officer_id as sav"+
                       " from m_staff staff "+
                       " left outer join m_client c on staff.id = c.staff_id  AND c.status_enum < ? "+
                       " left outer join m_group g on staff.id = g.staff_id " +
                       " left outer join m_loan l on staff.id = l.loan_officer_id and l.loan_status_id < ? " +
-                      " left outer join m_savings_account s on c.staff_id = s.field_officer_id and s.status_enum < ? "+ 
+                      " left outer join m_savings_account s on c.staff_id = s.field_officer_id and s.status_enum < ? "+
                       " where  staff.id  = ? "+
                       " group by staff.id, client, grp, loan, sav";
-        
-       
+
+
         List<Map<String, Object>> result = this.jdbcTemplate.queryForList(
                 sql,
                 new Object[] {
@@ -306,9 +306,9 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
                    if (map.get("sav")  != null) {
                        params.add("savings account");
                    }
-               }        
+               }
         }
         return params.toArray();
-        
+
     }
 }

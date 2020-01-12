@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
  * if {@link SavingsAccount} is returned when using <code>findOne</code>
  * repository method and throwing an appropriate not found exception.
  * </p>
- * 
+ *
  * <p>
  * This is to avoid need for checking and throwing in multiple areas of code
  * base where {@link SavingsAccountRepository} is required.
@@ -44,7 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SavingsAccountRepositoryWrapper {
 
-    
+
     private final SavingsAccountRepository repository;
 
     @Autowired
@@ -71,17 +71,17 @@ public class SavingsAccountRepositoryWrapper {
     @Transactional(readOnly=true)
     public List<SavingsAccount> findSavingAccountByClientId(@Param("clientId") Long clientId) {
         List<SavingsAccount> accounts = this.repository.findSavingAccountByClientId(clientId) ;
-        loadLazyCollections(accounts); 
+        loadLazyCollections(accounts);
         return accounts ;
     }
 
     @Transactional(readOnly=true)
     public List<SavingsAccount> findSavingAccountByStatus(@Param("status") Integer status) {
         List<SavingsAccount> accounts = this.repository.findSavingAccountByStatus(status) ;
-        loadLazyCollections(accounts); 
+        loadLazyCollections(accounts);
         return accounts ;
     }
-    
+
     @Transactional(readOnly=true)
     public Page<SavingsAccount> findByStatus(Integer status, Pageable pageable) {
         Page<SavingsAccount> accounts = this.repository.findByStatus(status, pageable);
@@ -107,7 +107,7 @@ public class SavingsAccountRepositoryWrapper {
     public SavingsAccount findNonClosedAccountByAccountNumber(@Param("accountNumber") String accountNumber) {
         return this.repository.findNonClosedAccountByAccountNumber(accountNumber) ;
     }
-    
+
     public SavingsAccount save(final SavingsAccount account) {
         return this.repository.save(account);
     }
@@ -119,7 +119,7 @@ public class SavingsAccountRepositoryWrapper {
     public SavingsAccount saveAndFlush(final SavingsAccount account) {
         return this.repository.saveAndFlush(account);
     }
-    
+
     private void loadLazyCollections(final List<SavingsAccount> accounts) {
         if(accounts != null && accounts.size() >0) {
             for(SavingsAccount account: accounts) {
@@ -127,7 +127,7 @@ public class SavingsAccountRepositoryWrapper {
             }
         }
     }
-    
+
     private void loadLazyCollections(Page<SavingsAccount> accounts) {
         for (SavingsAccount account : accounts) {
             account.loadLazyCollections();

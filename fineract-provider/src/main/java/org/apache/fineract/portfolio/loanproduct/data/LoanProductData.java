@@ -471,7 +471,7 @@ public class LoanProductData implements Serializable {
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization);
 
     }
-    
+
     public static LoanProductData loanProductWithFloatingRates(final Long id, final String name,
             final boolean isLinkedToFloatingInterestRates, final Integer floatingRateId, final String floatingRateName,
             final BigDecimal interestRateDifferential, final BigDecimal minDifferentialLendingRate,
@@ -576,7 +576,7 @@ public class LoanProductData implements Serializable {
         productData.penaltyToIncomeAccountMappings = penaltyToGLAccountMappings;
         return productData;
     }
-    
+
     public LoanProductData(final Long id, final String name, final String shortName, final String description, final CurrencyData currency,
             final BigDecimal principal, final BigDecimal minPrincipal, final BigDecimal maxPrincipal, final BigDecimal tolerance,
             final Integer numberOfRepayments, final Integer minNumberOfRepayments, final Integer maxNumberOfRepayments,
@@ -600,7 +600,7 @@ public class LoanProductData implements Serializable {
             boolean isLinkedToFloatingInterestRates, Integer floatingRateId, String floatingRateName, BigDecimal interestRateDifferential,
             BigDecimal minDifferentialLendingRate, BigDecimal defaultDifferentialLendingRate, BigDecimal maxDifferentialLendingRate,
             boolean isFloatingInterestRateCalculationAllowed, final boolean isVariableInstallmentsAllowed,
-            final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments, 
+            final Integer minimumGapBetweenInstallments, final Integer maximumGapBetweenInstallments,
             final boolean syncExpectedWithDisbursementDate, final boolean canUseForTopup, final boolean isEqualAmortization) {
         this.id = id;
         this.name = name;
@@ -940,7 +940,7 @@ public class LoanProductData implements Serializable {
     public Integer getGraceOnPrincipalPayment() {
         return this.graceOnPrincipalPayment;
     }
-    
+
     public Integer getRecurringMoratoriumOnPrincipalPeriods() {
         return this.recurringMoratoriumOnPrincipalPeriods;
     }
@@ -1191,7 +1191,7 @@ public class LoanProductData implements Serializable {
         return this.maximumGap;
     }
 
-    
+
     public Boolean getAllowPartialPeriodInterestCalcualtion() {
         return this.allowPartialPeriodInterestCalcualtion;
     }
@@ -1199,11 +1199,11 @@ public class LoanProductData implements Serializable {
     public boolean syncExpectedWithDisbursementDate() {
         return syncExpectedWithDisbursementDate;
     }
-    
+
         public boolean canUseForTopup() {
             return this.canUseForTopup;
         }
-        
+
     public BigDecimal getInterestRateDifferential() {
         return this.interestRateDifferential;
     }

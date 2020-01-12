@@ -77,7 +77,7 @@ public class ShareAccountTransactionEnumData implements Serializable {
         return this.isRedeemed;
     }
 
-    
+
     public boolean isChargePayment() {
         return this.isChargePayment;
     }

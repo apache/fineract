@@ -104,7 +104,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
             office.generateHierarchy();
 
             this.officeRepositoryWrapper.save(office);
-            
+
             this.topicDomainService.createTopic(office);
 
             return new CommandProcessingResultBuilder() //
@@ -151,7 +151,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 
             if (!changes.isEmpty()) {
                 this.officeRepositoryWrapper.saveAndFlush(office);
-                
+
                 this.topicDomainService.updateTopic(office, changes);
             }
 

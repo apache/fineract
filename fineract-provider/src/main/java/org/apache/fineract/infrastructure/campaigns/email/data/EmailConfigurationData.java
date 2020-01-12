@@ -24,19 +24,19 @@ package org.apache.fineract.infrastructure.campaigns.email.data;
 public class EmailConfigurationData {
     @SuppressWarnings("unused")
     private final Long id;
-    
+
     private final String name;
-    
+
     private final String value;
-    
-    /** 
+
+    /**
      * @return an instance of the EmailConfigurationData class
      **/
     public static EmailConfigurationData instance(Long id, String name, String value) {
         return new EmailConfigurationData(id, name, value);
     }
-    
-    /** 
+
+    /**
      * EmailConfigurationData constructor
      **/
     private EmailConfigurationData(Long id, String name, String value) {

@@ -199,7 +199,7 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
                 }
             }
         }
-        
+
         return new LoanCharge(loan, chargeDefinition, amountPercentageAppliedTo, amount, chargeTime, chargeCalculation, dueDate,
                 chargePaymentMode, null, loanCharge);
     }
@@ -583,7 +583,7 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
         }
         return dueDate;
     }
-    
+
     public Date getDueDate() {
         return this.dueDate;
     }
@@ -668,7 +668,7 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
     public BigDecimal amountOutstanding() {
         return this.amountOutstanding;
     }
-    
+
     public Money getAmountOutstanding(final MonetaryCurrency currency) {
         return Money.of(currency, this.amountOutstanding);
     }
@@ -702,7 +702,7 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
     public boolean isNotFullyPaid() {
         return !isPaid();
     }
-    
+
     public boolean isChargePending(){
         return isNotFullyPaid() && !isWaived();
     }
@@ -747,13 +747,13 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
 
     /**
      * @param incrementBy
-     * 
+     *
      * @param installmentNumber
-     * 
+     *
      * @param feeAmount
      *            TODO
-     * 
-     * 
+     *
+     *
      * @return Actual amount paid on this charge
      */
     public Money updatePaidAmountBy(final Money incrementBy, final Integer installmentNumber, final Money feeAmount) {
@@ -821,11 +821,11 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
     @Override
     public int hashCode() {
         return 1;
-        
+
          * return new HashCodeBuilder(3, 5) // .append(getId()) //
          * .append(this.charge.getId()) //
          * .append(this.amount).append(getDueLocalDate()) // .toHashCode();
-         
+
     }*/
 
     public ChargePaymentMode getChargePaymentMode() {
@@ -1027,15 +1027,15 @@ public class LoanCharge extends AbstractPersistableCustom<Long> {
     public Loan getLoan() {
         return this.loan;
     }
-    
+
     public boolean isDisbursementCharge() {
         return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.DISBURSEMENT);
     }
-    
+
     public boolean isTrancheDisbursementCharge() {
         return ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.TRANCHE_DISBURSEMENT);
     }
-    
+
     public boolean isDueDateCharge() {
         return this.dueDate != null;
     }

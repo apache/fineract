@@ -243,7 +243,7 @@ public class CenterData implements Serializable {
     public Long getId() {
         return this.id;
     }
-    
+
     public String getAccountNo(){
         return this.accountNo;
     }

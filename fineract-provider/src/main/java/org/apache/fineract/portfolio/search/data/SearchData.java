@@ -75,7 +75,7 @@ public class SearchData {
     public String getParentName() {
         return this.parentName;
     }
-    
+
     public String getParentType() {
         return this.parentType;
     }

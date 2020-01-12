@@ -21,7 +21,7 @@ package org.apache.fineract.accounting.glaccount.exception;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
- * 
+ *
  * when gl account is attached with any product(loan/saving) then we can not
  * disable the gl account
  */

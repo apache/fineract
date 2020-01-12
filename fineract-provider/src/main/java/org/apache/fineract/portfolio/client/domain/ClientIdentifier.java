@@ -50,7 +50,7 @@ public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
 
     @Column(name = "document_key", length = 1000)
     private String documentKey;
-    
+
     @Column(name = "status", nullable = false)
     private Integer status;
 
@@ -59,7 +59,7 @@ public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
 
     @Column(name = "active")
     private Integer active;
-    
+
     public static ClientIdentifier fromJson(final Client client, final CodeValue documentType, final JsonCommand command) {
         final String documentKey = command.stringValueOfParameterNamed("documentKey");
         final String description = command.stringValueOfParameterNamed("description");
@@ -77,7 +77,7 @@ public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
         this.documentKey = StringUtils.defaultIfEmpty(documentKey, null);
         this.description = StringUtils.defaultIfEmpty(description, null);
         ClientIdentifierStatus statusEnum = ClientIdentifierStatus.valueOf(statusName.toUpperCase());
-        this.active = null;      
+        this.active = null;
         if(statusEnum.isActive()){
             this.active = statusEnum.getValue();
         }
@@ -111,7 +111,7 @@ public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
             actualChanges.put(descriptionParamName, newValue);
             this.description = StringUtils.defaultIfEmpty(newValue, null);
         }
-        
+
         final String statusParamName = "status";
         if(command.isChangeInStringParameterNamed(statusParamName, ClientIdentifierStatus.fromInt(this.status).getCode())){
             final String newValue = command.stringValueOfParameterNamed(descriptionParamName);

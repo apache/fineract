@@ -50,7 +50,7 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
 
     private final ProvisioningCategoryDefinitionJsonDeserializer fromApiJsonDeserializer;
     private final JdbcTemplate jdbcTemplate;
-    
+
     @Autowired
     public ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl(final ProvisioningCategoryRepository provisioningCategoryRepository,
             final ProvisioningCategoryDefinitionJsonDeserializer fromApiJsonDeserializer, final RoutingDataSource dataSource) {

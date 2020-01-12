@@ -26,7 +26,7 @@ import java.util.Objects;
 /**
  * Immutable data object represent the important time-line events of a
  * group/center.
- * 
+ *
  */
 @SuppressWarnings("unused")
 public class GroupTimelineData implements Serializable {

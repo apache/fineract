@@ -33,16 +33,16 @@ import org.springframework.stereotype.Service;
 public class UpdateClientFamilyMemberCommandHandler implements NewCommandSourceHandler {
 
     private final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService;
-    
+
     @Autowired
     public UpdateClientFamilyMemberCommandHandler(final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService)
     {
         this.clientFamilyMembersWritePlatformService=clientFamilyMembersWritePlatformService;
     }
-    
+
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
-    
+
         return this.clientFamilyMembersWritePlatformService.updateFamilyMember(command.entityId(), command);
     }
 

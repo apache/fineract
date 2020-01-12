@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = "CLIENT", action = "REJECT")
 public class RejectClientCommandHandler implements NewCommandSourceHandler {
-    
+
         private final ClientWritePlatformService clientWritePlatformService;
 
     @Autowired
@@ -45,4 +45,4 @@ public class RejectClientCommandHandler implements NewCommandSourceHandler {
 
 }
 
-    
+

@@ -129,7 +129,7 @@ public class ProductToGLAccountMappingHelper {
     /**
      * Saves the payment type to Fund source mappings for a particular
      * product/product type (also populates the changes array if passed in)
-     * 
+     *
      * @param command
      * @param element
      * @param productId
@@ -156,7 +156,7 @@ public class ProductToGLAccountMappingHelper {
     /**
      * Saves the Charge to Income / Liability account mappings for a particular
      * product/product type (also populates the changes array if passed in)
-     * 
+     *
      * @param command
      * @param element
      * @param productId
@@ -242,7 +242,7 @@ public class ProductToGLAccountMappingHelper {
              * as a part of Jsoncommand)<br/>
              * Create new mappings for charges that are passed in as a part of
              * the Jsoncommand but not already present
-             * 
+             *
              **/
             else {
                 for (final ProductToGLAccountMapping chargeToIncomeAccountMapping : existingChargeToIncomeAccountMappings) {
@@ -328,7 +328,7 @@ public class ProductToGLAccountMappingHelper {
              * as a part of Jsoncommand)<br/>
              * Create new mappings for payment types that are passed in as a
              * part of the Jsoncommand but not already present
-             * 
+             *
              **/
             else {
                 for (final ProductToGLAccountMapping existingPaymentChannelToFundSourceMapping : existingPaymentChannelToFundSourceMappings) {
@@ -417,7 +417,7 @@ public class ProductToGLAccountMappingHelper {
     /**
      * Fetches account with a particular Id and throws and Exception it is not
      * of the expected Account Category ('ASSET','liability' etc)
-     * 
+     *
      * @param paramName
      * @param expectedAccountType
      * @param accountId

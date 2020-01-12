@@ -26,7 +26,7 @@ public interface AdHocWritePlatformService {
     CommandProcessingResult createAdHocQuery(JsonCommand command);
 
     CommandProcessingResult updateAdHocQuery(Long adHocId, JsonCommand command);
- 
+
     CommandProcessingResult deleteAdHocQuery(Long adHocId);
 
     CommandProcessingResult disableAdHocQuery(Long adHocId);

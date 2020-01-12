@@ -169,11 +169,11 @@ public class DataValidatorBuilder {
         }
         return this;
     }
-    
-    
+
+
     public DataValidatorBuilder trueOrFalseRequired(final Object trueOfFalseField)
     {
-        
+
         if(trueOfFalseField!=null)
         {
             if((!trueOfFalseField.toString().equalsIgnoreCase("true")) && (!trueOfFalseField.toString().equalsIgnoreCase("false")) )
@@ -184,10 +184,10 @@ public class DataValidatorBuilder {
                             " must be set as true or false.");
                     final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
                             defaultEnglishMessage.toString(), this.parameter);
-                    this.dataValidationErrors.add(error);    
+                    this.dataValidationErrors.add(error);
             }
         }
-        
+
           return this;
     }
 
@@ -235,7 +235,7 @@ public class DataValidatorBuilder {
         }
         return this;
     }
-   
+
     public DataValidatorBuilder notExceedingLengthOf(final Integer maxLength) {
         if (this.value == null && this.ignoreNullValue) { return this; }
 
@@ -565,7 +565,7 @@ public class DataValidatorBuilder {
         }
         return this;
     }
-    
+
     public DataValidatorBuilder longGreaterThanNumber(String paramName, Long number, int index) {
         if (this.value == null && this.ignoreNullValue) { return this; }
 
@@ -583,7 +583,7 @@ public class DataValidatorBuilder {
         }
         return this;
     }
-    
+
     public DataValidatorBuilder arrayNotEmpty() {
         if (this.value == null && this.ignoreNullValue) { return this; }
 

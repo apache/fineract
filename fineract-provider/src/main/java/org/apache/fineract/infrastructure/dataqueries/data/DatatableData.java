@@ -60,5 +60,5 @@ public class DatatableData implements Serializable {
     public String getRegisteredTableName(){
         return registeredTableName;
     }
-    
+
 }

@@ -292,7 +292,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
             extraCriteria.append(" and (").append(sqlSearch).append(")");
             final CashierMapper cm = new CashierMapper();
             this.columnValidator.validateSqlInjection(cm.schema(), sqlSearch);
-            
+
         }
         if (tellerId != null) {
             extraCriteria.append(" and teller_id = ").append(tellerId).append(" ");
@@ -515,8 +515,8 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
         }
 
         final CashierTransactionMapper ctm = new CashierTransactionMapper();
-        
-        
+
+
 
         String sql = "select * from (select " + ctm.cashierTxnSchema()
                 + " where txn.cashier_id = ? and txn.currency_code = ? and o.hierarchy like ? "
@@ -543,7 +543,7 @@ public class TellerManagementReadPlatformServiceImpl implements TellerManagement
                 + " and renum.enum_value in ('PAY_CHARGE', 'WAIVE_CHARGE') "
                 + " and (cli_txn.payment_detail_id IS NULL OR payType.is_cash_payment = 1) ) "
                 + " order by created_date ";
-        
+
         if (searchParameters.isLimited()) {
             sql = sql + " limit " + searchParameters.getLimit();
             if (searchParameters.isOffset()) {

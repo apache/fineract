@@ -56,11 +56,11 @@ public class ClientFamilyMembersData implements Serializable {
     private final Long professionId;
 
     private final String profession;
-    
+
     private final String mobileNumber;
-    
+
     private final Long age;
-    
+
     private final Boolean isDependent;
 
     // template holder
@@ -97,7 +97,7 @@ public class ClientFamilyMembersData implements Serializable {
         this.genderIdOptions=genderIdOptions;
         this.maritalStatusIdOptions=maritalStatusIdOptions;
         this.professionIdOptions=professionIdOptions;
-        
+
     }
 
     public static ClientFamilyMembersData instance(final Long id, final Long clientId, final String firstName,
@@ -109,13 +109,13 @@ public class ClientFamilyMembersData implements Serializable {
                 relationshipId, maritalStatus, maritalStatusId, gender, genderId, dateOfBirth, profession,
                 professionId,null,null,null,null);
     }
-    
-    
+
+
     public static ClientFamilyMembersData templateInstance(final Collection<CodeValueData> relationshipIdOptions,
             final Collection<CodeValueData> genderIdOptions,final Collection<CodeValueData> maritalStatusIdOptions,
             final Collection<CodeValueData> professionIdOptions) {
-        
-        
+
+
         return new ClientFamilyMembersData(null, null, null, null, null, null,null,
                 null, null, null, null, null, null, null,
                 null,null,null,null,relationshipIdOptions,genderIdOptions,maritalStatusIdOptions,professionIdOptions);
@@ -192,7 +192,7 @@ public class ClientFamilyMembersData implements Serializable {
     public Boolean getIsDependent() {
         return this.isDependent;
     }
-    
-    
+
+
 
 }

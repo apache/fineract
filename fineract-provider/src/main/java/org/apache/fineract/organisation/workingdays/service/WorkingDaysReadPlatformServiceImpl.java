@@ -96,7 +96,7 @@ public class WorkingDaysReadPlatformServiceImpl implements WorkingDaysReadPlatfo
         Collection<EnumOptionData> repaymentRescheduleOptions = repaymentRescheduleTypeOptions();
         return new WorkingDaysData(null, null, null, repaymentRescheduleOptions, null, null);
     }
-    
+
     private Collection<EnumOptionData> repaymentRescheduleTypeOptions() {
          return Arrays.asList(
                  WorkingDaysEnumerations.repaymentRescheduleType(RepaymentRescheduleType.SAME_DAY),

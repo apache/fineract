@@ -26,7 +26,7 @@ import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.B
  * The interface to be implemented by classes that want to be informed when a
  * Business Event executes. example: on completion of loan approval event need
  * to block guarantor funds
- * 
+ *
  */
 public interface BusinessEventListner {
 

@@ -25,10 +25,10 @@ public class RollbackTransactionAsCommandIsNotApprovedByCheckerException extends
     /**
      * When maker-checker is configured globally and also for the current
      * transaction.
-     * 
+     *
      * An initial save determines if there are any integrity rule or data
      * problems.
-     * 
+     *
      * If there isn't... and the transaction is from a maker... then this roll
      * back is issued and the commandSourceResult is used to write the audit
      * entry.

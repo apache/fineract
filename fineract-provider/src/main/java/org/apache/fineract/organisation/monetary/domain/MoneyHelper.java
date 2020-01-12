@@ -46,7 +46,7 @@ public class MoneyHelper {
         staticConfigurationDomainService = configurationDomainService;
     }
 
-    
+
     public static RoundingMode getRoundingMode() {
         if (roundingMode == null) {
             roundingMode = RoundingMode.valueOf(staticConfigurationDomainService.getRoundingMode());

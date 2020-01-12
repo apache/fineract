@@ -34,7 +34,7 @@ import java.util.Map;
 public class GroupSheetPopulator extends AbstractWorkbookPopulator {
     private List<GroupGeneralData> groups;
     private List<OfficeData> offices;
-    
+
     private Map<String, ArrayList<String>> officeToGroups;
     private Map<Integer, Integer[]> officeNameToBeginEndIndexesOfGroups;
     private Map<String,Long> groupNameToGroupId;
@@ -91,10 +91,10 @@ public class GroupSheetPopulator extends AbstractWorkbookPopulator {
             startIndex = rowIndex+1;
                writeString(OFFICE_NAME_COL, row, office.name());
                ArrayList<String> groupsList = new ArrayList<>();
-               
+
                if(officeToGroups.containsKey(office.name().trim().replaceAll("[ )(]", "_")))
                    groupsList = officeToGroups.get(office.name().trim().replaceAll("[ )(]", "_"));
-               
+
             if(!groupsList.isEmpty()) {
                 for(String groupName : groupsList) {
                     writeString(GROUP_NAME_COL, row, groupName);

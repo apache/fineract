@@ -45,7 +45,7 @@ public class AllocateCashierToTellerCommandHandler implements NewCommandSourceHa
 
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        
+
         return this.writePlatformService.allocateCashierToTeller(
                         command.entityId(), command);
     }

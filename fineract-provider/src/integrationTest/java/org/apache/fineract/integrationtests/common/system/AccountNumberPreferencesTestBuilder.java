@@ -57,7 +57,7 @@ public class AccountNumberPreferencesTestBuilder {
 
         return new Gson().toJson(map);
     }
-    
+
     public String groupsBuild() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("accountType", groupsAccountType);
@@ -73,7 +73,7 @@ public class AccountNumberPreferencesTestBuilder {
 
         return new Gson().toJson(map);
     }
-    
+
     public String invalidDataBuild(String accountType, String prefixType) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("accountType", accountType);

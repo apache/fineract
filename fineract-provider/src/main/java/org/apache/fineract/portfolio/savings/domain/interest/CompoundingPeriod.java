@@ -28,7 +28,7 @@ public interface CompoundingPeriod {
 
     BigDecimal calculateInterest(SavingsCompoundingInterestPeriodType compoundingInterestPeriodType,
             SavingsInterestCalculationType interestCalculationType, BigDecimal interestFromPreviousPostingPeriod,
-            BigDecimal interestRateAsFraction, long daysInYear, BigDecimal minBalanceForInterestCalculation, 
+            BigDecimal interestRateAsFraction, long daysInYear, BigDecimal minBalanceForInterestCalculation,
             BigDecimal overdraftInterestRateAsFraction, BigDecimal minOverdraftForInterestCalculation);
     LocalDateInterval getPeriodInterval();
 }

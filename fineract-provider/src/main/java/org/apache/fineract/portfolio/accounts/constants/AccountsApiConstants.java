@@ -22,6 +22,6 @@ package org.apache.fineract.portfolio.accounts.constants;
 public interface AccountsApiConstants {
 
     public final String READPLATFORM_NAME = "AccountReadPlatformService" ;
-    
+
     public final String ACCOUNT_COMMANDSERVICE = "ACCOUNT_COMMANDSERVICE" ;
 }

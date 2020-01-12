@@ -504,7 +504,7 @@ public class GuarantorTest {
         Float externalBalance = new Float(10000);
         Float selfguarantee = new Float(6000);
         Float externalguarantee = new Float(7000);
-        
+
         final Integer selfSavigsId = SavingsAccountHelper.openSavingsAccount(this.requestSpec, this.responseSpec, clientID,
                 String.valueOf(selfBalance));
         final Integer externalSavigsId_1 = SavingsAccountHelper.openSavingsAccount(this.requestSpec, this.responseSpec, clientID_external,
@@ -562,7 +562,7 @@ public class GuarantorTest {
 
     }
 
-    
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testGuarantor_WRITE_OFF_LOAN() {

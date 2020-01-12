@@ -225,12 +225,12 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
         sqlBuilder.append(mapper.getSchema());
         sqlBuilder.append(" order by entry.created_date");
         if(limit != null ) {
-            sqlBuilder.append(" limit ").append(limit);    
+            sqlBuilder.append(" limit ").append(limit);
         }
         if(offset != null) {
-            sqlBuilder.append(" offset ").append(offset);    
+            sqlBuilder.append(" offset ").append(offset);
         }
-        
+
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         Object[] whereClauseItemsitems = new Object[] {};
         return this.provisioningEntryDataPaginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),

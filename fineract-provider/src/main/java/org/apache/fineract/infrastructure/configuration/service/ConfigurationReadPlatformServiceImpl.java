@@ -59,16 +59,16 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
             sql += " JOIN x_registered_table on x_registered_table.registered_table_name = c.name ";
             sql += " WHERE x_registered_table.category =" + DataTableApiConstant.CATEGORY_PPI;
 
-        } 
+        }
 
         sql += "  order by c.id";
         final List<GlobalConfigurationPropertyData> globalConfiguration = this.jdbcTemplate.query(sql, this.rm, new Object[] {});
 
         return new GlobalConfigurationData(globalConfiguration);
     }
-    
-  
-    
+
+
+
     @Override
     public GlobalConfigurationPropertyData retrieveGlobalConfiguration(String name) {
 
@@ -95,7 +95,7 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
         return globalConfiguration;
     }
 
-  
+
     private static final class GlobalConfigurationRowMapper implements RowMapper<GlobalConfigurationPropertyData> {
 
         @Override

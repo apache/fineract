@@ -113,7 +113,7 @@ public class LoanTermVariationsData implements Comparable<LoanTermVariationsData
         }
         return comparsion;
     }
-    
+
     public void setApplicableFromDate(final LocalDate applicableFromDate) {
         this.termVariationApplicableFrom = applicableFromDate;
     }

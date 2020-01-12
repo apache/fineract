@@ -25,8 +25,8 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 public interface ProvisioningCriteriaWritePlatformService {
 
     CommandProcessingResult createProvisioningCriteria(JsonCommand command);
-    
+
     CommandProcessingResult updateProvisioningCriteria(final Long categoryId, JsonCommand command) ;
-    
+
     CommandProcessingResult deleteProvisioningCriteria(Long entryId) ;
 }

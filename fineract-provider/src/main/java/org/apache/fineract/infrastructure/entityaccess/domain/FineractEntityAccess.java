@@ -35,20 +35,20 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Entity
 @Table(name = "m_entity_to_entity_access")
 public class FineractEntityAccess extends AbstractPersistableCustom<Long> {
-    
+
     @Column(name = "entity_type", length = 50)
     private String entityType;
-    
+
     @Column(name = "entity_id")
     private Long entityId;
-    
+
     @ManyToOne
     @JoinColumn(name = "access_type_code_value_id", nullable = false)
     private CodeValue accessType;
 
     @Column(name = "second_entity_type", length = 50)
     private String secondEntityType;
-    
+
     @Column(name = "second_entity_id")
     private Long secondEntityId;
 
@@ -82,7 +82,7 @@ public class FineractEntityAccess extends AbstractPersistableCustom<Long> {
                 FineractEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.SECOND_ENTITY_ID.getValue());
         final Long secondEntityId = command.longValueOfParameterNamed(
                 FineractEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.SECOND_ENTITY_ID.getValue());
-        
+
         return new FineractEntityAccess (entityType, entityId, accessType,
                 secondEntityType, secondEntityId);
 
@@ -101,18 +101,18 @@ public class FineractEntityAccess extends AbstractPersistableCustom<Long> {
             this.entityType = newValue;
         }
 
-        paramName = FineractEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.ENTITY_ID.getValue(); 
+        paramName = FineractEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.ENTITY_ID.getValue();
         if (command.isChangeInLongParameterNamed(paramName, getEntityId())) {
             this.entityId = command.longValueOfParameterNamed(paramName);
             actualChanges.put(paramName, this.entityId);
         }
-        
+
         Long existingAccessTypeId = null;
         if (this.accessType != null) {
             existingAccessTypeId = this.accessType.getId();
         }
-        
-        paramName = FineractEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.ENTITY_ACCESS_TYPE_ID.getValue(); 
+
+        paramName = FineractEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.ENTITY_ACCESS_TYPE_ID.getValue();
         if (command.isChangeInLongParameterNamed(paramName, existingAccessTypeId)) {
             final Long newValue = command.longValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
@@ -125,12 +125,12 @@ public class FineractEntityAccess extends AbstractPersistableCustom<Long> {
             this.secondEntityType = newValue;
         }
 
-        paramName = FineractEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.SECOND_ENTITY_ID.getValue(); 
+        paramName = FineractEntityAccessConstants.ENTITY_ACCESS_JSON_INPUT_PARAMS.SECOND_ENTITY_ID.getValue();
         if (command.isChangeInLongParameterNamed(paramName, getSecondEntityId())) {
             this.secondEntityId = command.longValueOfParameterNamed(paramName);
             actualChanges.put(paramName, this.secondEntityId);
         }
-        
+
         return actualChanges;
     }
 
@@ -149,7 +149,7 @@ public class FineractEntityAccess extends AbstractPersistableCustom<Long> {
     public void updateAccessType(final CodeValue accessType) {
         this.accessType = accessType;
     }
-    
+
     public String getSecondEntityType() {
         return this.secondEntityType;
     }

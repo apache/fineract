@@ -39,7 +39,7 @@ public class GlobalConfigurationPropertyData {
     @SuppressWarnings("unused")
     private final boolean trapDoor;
 
-    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value, final Date dateValue, final String description, 
+    public GlobalConfigurationPropertyData(final String name, final boolean enabled, final Long value, final Date dateValue, final String description,
             final boolean trapDoor) {
         this.name = name;
         this.enabled = enabled;
@@ -88,6 +88,6 @@ public class GlobalConfigurationPropertyData {
     public boolean isTrapDoor() {
         return this.trapDoor;
     }
-    
-    
+
+
 }

@@ -60,11 +60,11 @@ public class GuarantorConstants {
             return this.value;
         }
     }
-    
+
     public static final String GUARANTOR_SELF_GUARANTEE_ERROR = "min.self.guarantee.required";
     public static final String GUARANTOR_EXTERNAL_GUARANTEE_ERROR = "min.external.guarantee.required";
     public static final String GUARANTOR_MANDATORY_GUARANTEE_ERROR = "mandated.guarantee.required";
     public static final String GUARANTOR_INSUFFICIENT_BALANCE_ERROR = "insufficient.balance";
     public static final String GUARANTOR_NOT_ACTIVE_ERROR = "not.active";
-    
+
 }

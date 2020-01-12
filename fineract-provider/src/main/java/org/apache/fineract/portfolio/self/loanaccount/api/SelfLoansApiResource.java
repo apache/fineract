@@ -157,15 +157,15 @@ public class SelfLoansApiResource {
             @QueryParam("productId") @ApiParam(value = "productId") final Long productId,
             @QueryParam("templateType") @ApiParam(value = "templateType") final String templateType,
             @Context final UriInfo uriInfo) {
-        
+
         if(clientId != null){
             validateAppuserClientsMapping(clientId);
         }
-        
+
         if (templateType == null) {
             final String errorMsg = "Loan template type must be provided";
             throw new LoanTemplateTypeRequiredException(errorMsg);
-        } else if (!(templateType.equalsIgnoreCase("individual") 
+        } else if (!(templateType.equalsIgnoreCase("individual")
                 || templateType.equalsIgnoreCase("collateral"))){
             final String errorMsg = "Loan template type '" + templateType + "' is not supported";
             throw new NotSupportedLoanTemplateTypeException(errorMsg, templateType);
@@ -173,11 +173,11 @@ public class SelfLoansApiResource {
         final Long groupId = null;
         final boolean staffInSelectedOfficeOnly = false;
         final boolean onlyActive = true;
-        return this.loansApiResource.template(clientId, groupId, productId, 
+        return this.loansApiResource.template(clientId, groupId, productId,
                 templateType, staffInSelectedOfficeOnly, onlyActive, uriInfo);
 
     }
-    
+
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -186,15 +186,15 @@ public class SelfLoansApiResource {
     @ApiResponses({@ApiResponse(code = 200, message = "OK", response = SelfLoansApiResourceSwagger.PostSelfLoansResponse.class)})
     public String calculateLoanScheduleOrSubmitLoanApplication(@QueryParam("command") @ApiParam(value = "command") final String commandParam,
             @Context final UriInfo uriInfo, @ApiParam(hidden = true) final String apiRequestBodyAsJson) {
-        
+
         HashMap<String, Object> attr = this.dataValidator.validateLoanApplication(apiRequestBodyAsJson);
         final Long clientId = (Long) attr.get("clientId");
         validateAppuserClientsMapping(clientId);
 
-        return this.loansApiResource.calculateLoanScheduleOrSubmitLoanApplication(commandParam, 
+        return this.loansApiResource.calculateLoanScheduleOrSubmitLoanApplication(commandParam,
                 uriInfo, apiRequestBodyAsJson);
     }
-    
+
     @PUT
     @Path("{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -213,7 +213,7 @@ public class SelfLoansApiResource {
 
         return this.loansApiResource.modifyLoanApplication(loanId, apiRequestBodyAsJson);
     }
-    
+
     @POST
     @Path("{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -229,7 +229,7 @@ public class SelfLoansApiResource {
         validateAppuserLoanMapping(loanId);
         return this.loansApiResource.stateTransitions(loanId, commandParam, apiRequestBodyAsJson);
     }
-    
+
     private void validateAppuserLoanMapping(final Long loanId) {
         AppUser user = this.context.authenticatedUser();
         final boolean isLoanMappedToUser = this.appuserLoansMapperReadService
@@ -238,7 +238,7 @@ public class SelfLoansApiResource {
             throw new LoanNotFoundException(loanId);
         }
     }
-    
+
     private void validateAppuserClientsMapping(final Long clientId) {
         AppUser user = this.context.authenticatedUser();
         final boolean mappedClientId = this.appUserClientMapperReadService
@@ -251,7 +251,7 @@ public class SelfLoansApiResource {
     private boolean is(final String commandParam, final String commandValue) {
         return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
-    
+
     @GET
     @Path("{loanId}/guarantors")
     @Consumes({ MediaType.APPLICATION_JSON })

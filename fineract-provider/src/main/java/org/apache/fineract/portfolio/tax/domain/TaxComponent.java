@@ -199,22 +199,22 @@ public class TaxComponent extends AbstractAuditableCustom<AppUser, Long> {
         return dates;
     }
 
-    
+
     public Integer getDebitAccountType() {
         return this.debitAccountType;
     }
 
-    
+
     public GLAccount getDebitAcount() {
         return this.debitAcount;
     }
 
-    
+
     public Integer getCreditAccountType() {
         return this.creditAccountType;
     }
 
-    
+
     public GLAccount getCreditAcount() {
         return this.creditAcount;
     }

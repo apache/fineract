@@ -64,7 +64,7 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
 
     @Autowired
     public SmsCampaignReadPlatformServiceImpl(final RoutingDataSource dataSource,
-            SmsCampaignDropdownReadPlatformService smsCampaignDropdownReadPlatformService, 
+            SmsCampaignDropdownReadPlatformService smsCampaignDropdownReadPlatformService,
             final CalendarDropdownReadPlatformService calendarDropdownReadPlatformService) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         businessRuleMapper = new BusinessRuleMapper();
@@ -193,7 +193,7 @@ public class SmsCampaignReadPlatformServiceImpl implements SmsCampaignReadPlatfo
             return smsBusinessRulesDataList;
         }
     }
-    
+
     private static final class SmsCampaignMapper implements RowMapper<SmsCampaignData> {
 
         final String schema;

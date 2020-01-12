@@ -30,22 +30,22 @@ public class Topic extends AbstractPersistableCustom<Long> {
 
     @Column(name = "title", unique = true, nullable = false, length = 100)
     private String title;
-    
+
     @Column(name = "enabled", nullable = false)
     private Boolean enabled;
-    
+
     @Column(name = "entity_id", nullable = false)
     private Long entityId;
-    
+
     @Column(name = "entity_type")
     private String entityType;
-    
+
     @Column(name = "member_type")
     private String memberType;
-    
+
     public Topic() {
     }
-    
+
     public Topic(String title, Boolean enabled, Long entityId, String entityType, String memberType) {
         this.title = title.trim();
         this.enabled = enabled;
@@ -60,7 +60,7 @@ public class Topic extends AbstractPersistableCustom<Long> {
         Long entityId = 0L;
         String entityType = "";
         String memberType = "";
-        
+
         if (command.hasParameter("title")) {
             title = command.stringValueOfParameterNamed("title");
         }
@@ -118,5 +118,5 @@ public class Topic extends AbstractPersistableCustom<Long> {
     public void setMemberType(String memberType) {
         this.memberType = memberType;
     }
-    
+
 }

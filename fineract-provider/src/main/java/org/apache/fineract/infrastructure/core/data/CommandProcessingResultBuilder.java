@@ -65,7 +65,7 @@ public class CommandProcessingResultBuilder {
         this.entityId = withEntityId;
         return this;
     }
-    
+
     public CommandProcessingResultBuilder withSubEntityId(final Long withSubEntityId) {
         this.subEntityId = withSubEntityId;
         return this;
@@ -105,7 +105,7 @@ public class CommandProcessingResultBuilder {
         this.productId = productId;
         return this;
     }
-    
+
     public CommandProcessingResultBuilder setRollbackTransaction(final boolean rollbackTransaction) {
         this.rollbackTransaction = this.rollbackTransaction || rollbackTransaction;
         return this;

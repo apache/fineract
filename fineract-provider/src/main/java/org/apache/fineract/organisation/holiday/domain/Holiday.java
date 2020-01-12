@@ -76,7 +76,7 @@ public class Holiday extends AbstractPersistableCustom<Long> {
     @Column(name = "repayments_rescheduled_to", nullable = true)
     @Temporal(TemporalType.DATE)
     private Date repaymentsRescheduledTo;
-    
+
     @Column(name = "rescheduling_type", nullable = false)
     private int reschedulingType;
 
@@ -110,7 +110,7 @@ public class Holiday extends AbstractPersistableCustom<Long> {
         final boolean processed = false;// default it to false. Only batch job
                                         // should update this field.
         final String description = command.stringValueOfParameterNamed(HolidayApiConstants.descriptionParamName);
-        
+
         return new Holiday(name, fromDate, toDate, repaymentsRescheduledTo, status, processed, description, offices, reschedulingType);
     }
 
@@ -136,8 +136,8 @@ public class Holiday extends AbstractPersistableCustom<Long> {
             actualChanges.put(descriptionParamName, newValue);
             this.description = StringUtils.defaultIfEmpty(newValue, null);
         }
-        
-        
+
+
         if (command.isChangeInIntegerParameterNamed(HolidayApiConstants.reschedulingType,this.reschedulingType)) {
             final Integer newValue =command.integerValueOfParameterNamed(HolidayApiConstants.reschedulingType);
             actualChanges.put(HolidayApiConstants.reschedulingType, newValue);
@@ -145,7 +145,7 @@ public class Holiday extends AbstractPersistableCustom<Long> {
             if(newValue.equals(RescheduleType.RESCHEDULETONEXTREPAYMENTDATE.getValue())){
                 this.repaymentsRescheduledTo = null;
             }
-        } 
+        }
 
         if (currentStatus.isPendingActivation()) {
             if (command.isChangeInLocalDateParameterNamed(fromDateParamName, getFromDateLocalDate())) {
@@ -320,7 +320,7 @@ public class Holiday extends AbstractPersistableCustom<Long> {
         }
         this.status = HolidayStatusType.DELETED.getValue();
     }
-    
+
     public RescheduleType getReScheduleType() {
         return RescheduleType.fromInt(this.reschedulingType);
     }

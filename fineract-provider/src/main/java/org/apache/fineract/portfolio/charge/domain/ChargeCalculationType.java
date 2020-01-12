@@ -56,15 +56,15 @@ public enum ChargeCalculationType {
     public static Object[] validValuesForShares() {
         return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_AMOUNT.getValue() };
     }
-    
+
     public static Object[] validValuesForClients() {
         return new Integer[] { ChargeCalculationType.FLAT.getValue() };
     }
-    
+
     public static Object[] validValuesForShareAccountActivation() {
         return new Integer[] { ChargeCalculationType.FLAT.getValue() };
     }
-    
+
     public static Object[] validValuesForTrancheDisbursement(){
         return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue()};
     }
@@ -118,7 +118,7 @@ public enum ChargeCalculationType {
     public boolean isPercentageBased() {
         return isPercentageOfAmount() || isPercentageOfAmountAndInterest() || isPercentageOfInterest() || isPercentageOfDisbursementAmount();
     }
-    
+
     public boolean isPercentageOfDisbursementAmount(){
         return this.value.equals(ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue());
     }

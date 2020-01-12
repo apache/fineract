@@ -78,10 +78,10 @@ public class LoanRescheduleRequestDataValidator {
 
     /**
      * Validates the request to create a new loan reschedule entry
-     * 
+     *
      * @param jsonCommand
      *            the JSON command object (instance of the JsonCommand class)
-     * 
+     *
      **/
     public void validateForCreateAction(final JsonCommand jsonCommand, final Loan loan) {
 
@@ -185,7 +185,7 @@ public class LoanRescheduleRequestDataValidator {
             dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(RescheduleLoansApiConstants.resheduleForMultiDisbursementNotSupportedErrorCode,
                     "Loan rescheduling is not supported for multidisbursement loans");
         }
-        
+
         if(loan.isInterestRecalculationEnabledForProduct()) {
             dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(RescheduleLoansApiConstants.resheduleWithInterestRecalculationNotSupportedErrorCode,
                     "Loan rescheduling is not supported for the loan product with interest recalculation enabled");
@@ -193,8 +193,8 @@ public class LoanRescheduleRequestDataValidator {
         validateForOverdueCharges(dataValidatorBuilder, loan, installment);
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
-    
-    
+
+
     private void validateForOverdueCharges(DataValidatorBuilder dataValidatorBuilder, final Loan loan,
             final LoanRepaymentScheduleInstallment installment) {
         if (installment != null) {
@@ -211,10 +211,10 @@ public class LoanRescheduleRequestDataValidator {
 
     /**
      * Validates a user request to approve a loan reschedule request
-     * 
+     *
      * @param jsonCommand
      *            the JSON command object (instance of the JsonCommand class)
-     * 
+     *
      **/
     public void validateForApproveAction(final JsonCommand jsonCommand, LoanRescheduleRequest loanRescheduleRequest) {
         final String jsonString = jsonCommand.json();
@@ -272,7 +272,7 @@ public class LoanRescheduleRequestDataValidator {
                 }
             }
         }
-        
+
         validateForOverdueCharges(dataValidatorBuilder, loan, installment);
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
@@ -280,10 +280,10 @@ public class LoanRescheduleRequestDataValidator {
 
     /**
      * Validates a user request to reject a loan reschedule request
-     * 
+     *
      * @param jsonCommand
      *            the JSON command object (instance of the JsonCommand class)
-     * 
+     *
      **/
     public void validateForRejectAction(final JsonCommand jsonCommand, LoanRescheduleRequest loanRescheduleRequest) {
         final String jsonString = jsonCommand.json();

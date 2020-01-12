@@ -214,21 +214,21 @@ public class SavingsProductDataValidator {
          * if
          * (this.fromApiJsonHelper.parameterExists(withdrawalFeeAmountParamName,
          * element)) {
-         * 
+         *
          * final BigDecimal withdrawalFeeAmount =
          * this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed
          * (withdrawalFeeAmountParamName, element);
          * baseDataValidator.reset().parameter
          * (withdrawalFeeAmountParamName).value
          * (withdrawalFeeAmount).zeroOrPositiveAmount();
-         * 
+         *
          * if (withdrawalFeeAmount != null) { final Integer withdrawalFeeType =
          * this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
          * withdrawalFeeTypeParamName, element);
          * baseDataValidator.reset().parameter
          * (withdrawalFeeTypeParamName).value(withdrawalFeeType)
          * .isOneOfTheseValues(SavingsWithdrawalFeesType.integerValues()); } }
-         * 
+         *
          * if
          * (this.fromApiJsonHelper.parameterExists(withdrawalFeeTypeParamName,
          * element)) { final Integer withdrawalFeeType =
@@ -237,7 +237,7 @@ public class SavingsProductDataValidator {
          * baseDataValidator.reset().parameter
          * (withdrawalFeeTypeParamName).value(withdrawalFeeType).ignoreIfNull()
          * .isOneOfTheseValues(1, 2);
-         * 
+         *
          * if (withdrawalFeeType != null) { final BigDecimal withdrawalFeeAmount
          * = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(
          * withdrawalFeeAmountParamName, element);
@@ -270,10 +270,10 @@ public class SavingsProductDataValidator {
                 baseDataValidator.reset().parameter(feeAmountParamName).value(annualFeeAmount).notNull().zeroOrPositiveAmount();
             }
         }
-        
+
         //dormancy
         final Boolean isDormancyActive = this.fromApiJsonHelper.extractBooleanNamed(isDormancyTrackingActiveParamName, element);
-        
+
         if(null != isDormancyActive && isDormancyActive){
             final Long daysToInact = this.fromApiJsonHelper.extractLongNamed(daysToInactiveParamName, element);
             baseDataValidator.reset().parameter(daysToInactiveParamName).value(daysToInact).notNull().longGreaterThanZero();
@@ -342,7 +342,7 @@ public class SavingsProductDataValidator {
                     SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), element);
             baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue()).value(writtenoff)
                     .notNull().integerGreaterThanZero();
-            
+
             if(null != isDormancyActive && isDormancyActive){
                 final Long escheatLiabilityAccountId = this.fromApiJsonHelper.extractLongNamed(
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.ESCHEAT_LIABILITY.getValue(), element);
@@ -523,7 +523,7 @@ public class SavingsProductDataValidator {
         final Boolean isDormancyActive = this.fromApiJsonHelper.parameterExists(isDormancyTrackingActiveParamName, element)?
                 this.fromApiJsonHelper.extractBooleanNamed(isDormancyTrackingActiveParamName, element):
                     product.isDormancyTrackingActive();
-        
+
         if(null != isDormancyActive && isDormancyActive){
             final Long daysToInact = this.fromApiJsonHelper.parameterExists(daysToInactiveParamName, element)?
                     this.fromApiJsonHelper.extractLongNamed(daysToInactiveParamName, element):

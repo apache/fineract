@@ -140,7 +140,7 @@ public enum SavingsAccountTransactionType {
     public boolean isOverDraftInterestPosting() {
         return this.value.equals(SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue());
     }
-    
+
     public boolean isWithHoldTax() {
         return this.value.equals(SavingsAccountTransactionType.WITHHOLD_TAX.getValue());
     }
@@ -196,7 +196,7 @@ public enum SavingsAccountTransactionType {
     public boolean isEscheat() {
         return this.value.equals(SavingsAccountTransactionType.ESCHEAT.getValue());
     }
-    
+
     public boolean isAmountOnHold() {
         return this.value.equals(SavingsAccountTransactionType.AMOUNT_HOLD.getValue());
     }

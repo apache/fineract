@@ -48,23 +48,23 @@ import org.springframework.stereotype.Component;
         @Tag(name = "List Report Mailing Job History", description = "")
 })
 public class ReportMailingJobRunHistoryApiResource {
-    
+
     private final PlatformSecurityContext platformSecurityContext;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final DefaultToApiJsonSerializer<ReportMailingJobRunHistoryData> reportMailingToApiJsonSerializer;
     private final ReportMailingJobRunHistoryReadPlatformService reportMailingJobRunHistoryReadPlatformService;
-    
+
     @Autowired
-    public ReportMailingJobRunHistoryApiResource(final PlatformSecurityContext platformSecurityContext, 
-            final ApiRequestParameterHelper apiRequestParameterHelper, 
-            final DefaultToApiJsonSerializer<ReportMailingJobRunHistoryData> reportMailingToApiJsonSerializer, 
+    public ReportMailingJobRunHistoryApiResource(final PlatformSecurityContext platformSecurityContext,
+            final ApiRequestParameterHelper apiRequestParameterHelper,
+            final DefaultToApiJsonSerializer<ReportMailingJobRunHistoryData> reportMailingToApiJsonSerializer,
             final ReportMailingJobRunHistoryReadPlatformService reportMailingJobRunHistoryReadPlatformService) {
         this.platformSecurityContext = platformSecurityContext;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.reportMailingToApiJsonSerializer = reportMailingToApiJsonSerializer;
         this.reportMailingJobRunHistoryReadPlatformService = reportMailingJobRunHistoryReadPlatformService;
     }
-    
+
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -78,11 +78,11 @@ public class ReportMailingJobRunHistoryApiResource {
                                                   @QueryParam("sortOrder") @ApiParam(value = "sortOrder") final String sortOrder) {
         this.platformSecurityContext.authenticatedUser().validateHasReadPermission(ReportMailingJobConstants.REPORT_MAILING_JOB_ENTITY_NAME);
         final SearchParameters searchParameters = SearchParameters.fromReportMailingJobRunHistory(offset, limit, orderBy, sortOrder);
-        
+
         final Page<ReportMailingJobRunHistoryData> reportMailingJobRunHistoryData = this.reportMailingJobRunHistoryReadPlatformService.
                 retrieveRunHistoryByJobId(reportMailingJobId, searchParameters);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        
+
         return this.reportMailingToApiJsonSerializer.serialize(settings, reportMailingJobRunHistoryData);
     }
 }

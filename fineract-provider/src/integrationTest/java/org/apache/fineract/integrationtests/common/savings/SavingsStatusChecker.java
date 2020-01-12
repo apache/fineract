@@ -29,7 +29,7 @@ import com.jayway.restassured.specification.ResponseSpecification;
 
 @SuppressWarnings("rawtypes")
 public class SavingsStatusChecker {
-    
+
     private static final String SAVINGS_ACCOUNT_URL = "/fineract-provider/api/v1/savingsaccounts";
 
     public static void verifySavingsIsApproved(final HashMap savingsStatusHashMap) {
@@ -49,19 +49,19 @@ public class SavingsStatusChecker {
         assertTrue("ERROR IN ACTIVATING THE SAVINGS APPLICATION", getStatus(savingsStatusHashMap, "active"));
         System.out.println("Savings Application Status:" + savingsStatusHashMap + "\n");
     }
-    
+
     public static void verifySavingsIsRejected(final HashMap savingsStatusHashMap) {
         System.out.println("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS REJECTED ------------------------------------");
         assertTrue("ERROR IN REJECTING THE SAVINGS APPLICATION", getStatus(savingsStatusHashMap, "rejected"));
         System.out.println("Savings Application Status:" + savingsStatusHashMap + "\n");
     }
-    
+
     public static void verifySavingsIsWithdrawn(final HashMap savingsStatusHashMap) {
         System.out.println("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS WITHDRAWN ------------------------------------");
         assertTrue("ERROR IN WITHDRAW  THE SAVINGS APPLICATION", getStatus(savingsStatusHashMap, "withdrawnByApplicant"));
         System.out.println("Savings Application Status:" + savingsStatusHashMap + "\n");
     }
-    
+
     public static void verifySavingsAccountIsClosed(final HashMap savingsStatusHashMap) {
         System.out.println("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS CLOSED ------------------------------------");
         assertTrue("ERROR IN CLOSING THE SAVINGS APPLICATION", getStatus(savingsStatusHashMap, "closed"));
@@ -95,13 +95,13 @@ public class SavingsStatusChecker {
         assertTrue("UNEXPECTED SAVINGS ACCOUNT SUB STATUS", getStatus(savingsStatusHashMap, "inactive"));
         System.out.println("Savings Application Sub Status:" + savingsStatusHashMap + "\n");
     }
-    
+
     public static void verifySavingsSubStatusDormant(HashMap savingsStatusHashMap) {
         System.out.println("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS ACTIVE ------------------------------------");
         assertTrue("UNEXPECTED SAVINGS ACCOUNT SUB STATUS", getStatus(savingsStatusHashMap, "dormant"));
         System.out.println("Savings Application Sub Status:" + savingsStatusHashMap + "\n");
     }
-    
+
     public static void verifySavingsSubStatusEscheat(HashMap savingsStatusHashMap) {
         System.out.println("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS ACTIVE ------------------------------------");
         assertTrue("UNEXPECTED SAVINGS ACCOUNT SUB STATUS", getStatus(savingsStatusHashMap, "escheat"));
@@ -113,7 +113,7 @@ public class SavingsStatusChecker {
         assertTrue("UNEXPECTED SAVINGS ACCOUNT SUB STATUS", getStatus(savingsStatusHashMap, "none"));
         System.out.println("Savings Application Sub Status:" + savingsStatusHashMap + "\n");
     }
-    
+
     public static void verifySavingsSubStatusblock(HashMap savingsStatusHashMap) {
         System.out.println(
                 "\n-------------------------------------- VERIFYING SAVINGS ACCOUNT IS BLOCKED ------------------------------------");

@@ -25,6 +25,6 @@ import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 public interface ShareProductDropdownReadPlatformService {
 
     Collection<EnumOptionData> retrieveLockinPeriodFrequencyTypeOptions();
-    
+
     Collection<EnumOptionData> retrieveMinimumActivePeriodFrequencyTypeOptions() ;
 }

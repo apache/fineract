@@ -362,7 +362,7 @@ public class GlobalConfigurationHelper {
         return Utils.performServerPut(requestSpec, responseSpec, IS_CACHE_GLOBAL_CONFIG_UPDATE_URL,
                 updateIsCacheEnabledGlobalConfigUpdateAsJSON(cacheType), "changes");
     }
-    
+
     public static Object updatePasswordResetDaysForGlobalConfiguration(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final Integer configId, final String value, final String enabled, final String jsonAttributeToGetBack) {
         final String UPDATE_URL = "/fineract-provider/api/v1/configurations/" + configId + "?" + Utils.TENANT_IDENTIFIER;
@@ -377,7 +377,7 @@ public class GlobalConfigurationHelper {
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }
-    
+
     public static String updatePasswordResetDaysGlobalConfigAsJSON(final String value, final String enabled) {
         final HashMap<String, String> map = new HashMap<>();
         if(value != null){

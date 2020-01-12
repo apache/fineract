@@ -23,7 +23,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.HashMap;
 
 public class LoanDisbursementTestBuilder {
-    
+
     String dueDate = null;
     Float totalOriginalDueForPeriod = null;
     Float totalOutstandingForPeriod = null;
@@ -32,8 +32,8 @@ public class LoanDisbursementTestBuilder {
     Float principalLoanBalanceOutstanding = null;
     Float principalDue = null;
     Float principalOriginalDue = null;
-    String fromDate = null; 
-    
+    String fromDate = null;
+
     public LoanDisbursementTestBuilder(String dueDate,Float totalOriginalDueForPeriod,Float totalOutstandingForPeriod,
             Float interestOutstanding, Float principalOutstanding, Float principalLoanBalanceOutstanding, Float principalDue,
             Float principalOriginalDue, String fromDate) {
@@ -45,7 +45,7 @@ public class LoanDisbursementTestBuilder {
         this.principalLoanBalanceOutstanding = principalLoanBalanceOutstanding;
         this.principalDue = principalDue;
         this.principalOriginalDue = principalOriginalDue;
-        this.fromDate = fromDate; 
+        this.fromDate = fromDate;
     }
 
     public String getDueDate() {
@@ -83,7 +83,7 @@ public class LoanDisbursementTestBuilder {
     public String getFromDate() {
         return this.fromDate;
     }
-    
+
     /*public HashMap<String, String> build(String dueDate,String totalOriginalDueForPeriod,String totalOutstandingForPeriod,
             String interestOutstanding, String principalOutstanding, String principalLoanBalanceOutstanding, String principalDue,
             String principalOriginalDue, String fromDate) {
@@ -102,7 +102,7 @@ public class LoanDisbursementTestBuilder {
         expectedRepaymentSchedule.put("principalOriginalDue",
                 principalOriginalDue);
         expectedRepaymentSchedule.put("fromDate", fromDate);
-        
+
         return expectedRepaymentSchedule;
     }*/
 }

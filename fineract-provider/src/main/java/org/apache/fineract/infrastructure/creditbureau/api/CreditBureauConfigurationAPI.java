@@ -162,8 +162,8 @@ public class CreditBureauConfigurationAPI {
 
         return this.toApiJsonSerializerReport.serialize(configurationData);
     }
-    
-    
+
+
     @GET
     @Path("/loanProduct")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -235,6 +235,6 @@ public class CreditBureauConfigurationAPI {
         return this.toApiJsonSerializer.serialize(result);
     }
 
-    
+
 
 }

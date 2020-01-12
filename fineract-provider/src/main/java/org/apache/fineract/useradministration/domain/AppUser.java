@@ -119,12 +119,12 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
 
     @Column(name = "is_self_service_user", nullable = false)
     private boolean isSelfServiceUser;
-    
+
     @OneToMany(cascade = CascadeType.ALL,  orphanRemoval = true, fetch=FetchType.EAGER)
     @JoinColumn(name = "appuser_id", referencedColumnName= "id", nullable = false)
     private Set<AppUserClientMapping> appUserClientMappings = new HashSet<>();
 
-    public static AppUser fromJson(final Office userOffice, final Staff linkedStaff, final Set<Role> allRoles, 
+    public static AppUser fromJson(final Office userOffice, final Staff linkedStaff, final Set<Role> allRoles,
             final Collection<Client> clients, final JsonCommand command) {
 
         final String username = command.stringValueOfParameterNamed("username");
@@ -155,7 +155,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
         final String email = command.stringValueOfParameterNamed("email");
         final String firstname = command.stringValueOfParameterNamed("firstname");
         final String lastname = command.stringValueOfParameterNamed("lastname");
-        
+
         final boolean isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
 
         return new AppUser(userOffice, user, allRoles, email, firstname, lastname, linkedStaff, passwordNeverExpire,
@@ -169,7 +169,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
     }
 
     public AppUser(final Office office, final User user, final Set<Role> roles, final String email, final String firstname,
-            final String lastname, final Staff staff, final boolean passwordNeverExpire, 
+            final String lastname, final Staff staff, final boolean passwordNeverExpire,
             final boolean isSelfServiceUser, final Collection<Client> clients) {
         this.office = office;
         this.email = email.trim();
@@ -301,7 +301,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
                 this.passwordNeverExpires = newValue;
             }
         }
-        
+
         if(command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)){
             if (command.isChangeInBooleanParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER, this.isSelfServiceUser)){
                 final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
@@ -309,10 +309,10 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
                 this.isSelfServiceUser = newValue;
             }
         }
-        
+
         if(this.isSelfServiceUser && command.hasParameter(AppUserConstants.CLIENTS)){
                 actualChanges.put(AppUserConstants.CLIENTS, command.arrayValueOfParameterNamed(AppUserConstants.CLIENTS));
-                Set<AppUserClientMapping> newClients = createAppUserClientMappings(clients); 
+                Set<AppUserClientMapping> newClients = createAppUserClientMappings(clients);
                 if(this.appUserClientMappings == null){
                     this.appUserClientMappings = new HashSet<>();
                 }else{
@@ -342,7 +342,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
     /**
      * Delete is a <i>soft delete</i>. Updates flag so it wont appear in
      * query/report results.
-     * 
+     *
      * Any fields with unique constraints and prepended with id of record.
      */
     public void delete() {
@@ -649,7 +649,7 @@ public class AppUser extends AbstractPersistableCustom<Long> implements Platform
     public boolean isSelfServiceUser() {
         return this.isSelfServiceUser;
     }
-    
+
     public Set<AppUserClientMapping> getAppUserClientMappings() {
         return this.appUserClientMappings;
     }

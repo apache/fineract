@@ -53,17 +53,17 @@ public class WorkingDaysUtil {
     public static boolean isWorkingDay(final WorkingDays workingDays, final LocalDate date) {
         return CalendarUtils.isValidRedurringDate(workingDays.getRecurrence(), date, date);
     }
-    
+
     public static boolean isNonWorkingDay(final WorkingDays workingDays, final LocalDate date) {
         return !isWorkingDay(workingDays, date);
     }
-    
+
     public static void updateWorkingDayIfRepaymentDateIsNonWorkingDay(final AdjustedDateDetailsDTO adjustedDateDetailsDTO, final WorkingDays workingDays) {
         final LocalDate changedScheduleDate = getOffSetDateIfNonWorkingDay(adjustedDateDetailsDTO.getChangedScheduleDate(),
                 adjustedDateDetailsDTO.getNextRepaymentPeriodDueDate(), workingDays);
         adjustedDateDetailsDTO.setChangedScheduleDate(changedScheduleDate);
     }
-    
+
     public static RepaymentRescheduleType getRepaymentRescheduleType(final WorkingDays workingDays, final LocalDate date) {
         RepaymentRescheduleType rescheduleType = RepaymentRescheduleType.fromInt(workingDays.getRepaymentReschedulingType());
         return rescheduleType;

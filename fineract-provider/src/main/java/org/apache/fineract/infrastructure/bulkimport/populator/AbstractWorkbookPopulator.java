@@ -86,11 +86,11 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
       throw new IllegalArgumentException("ParseException");
     }
   }
-  
+
   protected void writeBigDecimal(int colIndex, Row row, BigDecimal value) {
         row.createCell(colIndex).setCellValue(((value != null) ? value.doubleValue() : 0));
     }
- 
+
   protected void setOfficeDateLookupTable(Sheet sheet, List<OfficeData> offices, int officeNameCol,
       int activationDateCol,String dateFormat) {
       if(offices!=null){
@@ -152,7 +152,7 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
                     if (group.getActivationDate() != null) {
                         date = inputFormat.parse(group.getActivationDate().toString());
                         writeDate(activationDateCol, row, outputFormat.format(date), dateCellStyle, dateFormat);
-                    } 
+                    }
 
                 }
             }

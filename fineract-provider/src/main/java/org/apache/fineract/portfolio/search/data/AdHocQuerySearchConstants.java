@@ -56,7 +56,7 @@ public interface AdHocQuerySearchConstants {
     public static final String arrearsLoanStatusOption= "arrears";
     public static final String closedLoanStatusOption= "closed";
     public static final String writeoffLoanStatusOption= "writeoff";
-    
+
     public static final Object[] entityTypeOptions = { "clients", "groups", "loans", "clientIdentifiers" };
 
 }

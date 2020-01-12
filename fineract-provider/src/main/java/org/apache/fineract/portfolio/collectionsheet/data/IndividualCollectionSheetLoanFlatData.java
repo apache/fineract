@@ -133,7 +133,7 @@ public class IndividualCollectionSheetLoanFlatData {
     public IndividualClientData getClientData() {
         return IndividualClientData.instance(this.clientId, this.clientName);
     }
-    
+
     public BigDecimal getFeeDue() {
         return this.feeDue;
     }

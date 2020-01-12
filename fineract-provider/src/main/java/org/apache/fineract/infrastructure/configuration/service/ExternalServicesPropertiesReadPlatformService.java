@@ -35,7 +35,7 @@ public interface ExternalServicesPropertiesReadPlatformService {
     MessageGatewayConfigurationData getSMSGateway();
 
     Collection<ExternalServicesPropertiesData> retrieveOne(String serviceName);
-    
+
     NotificationConfigurationData getNotificationConfiguration();
 
 }

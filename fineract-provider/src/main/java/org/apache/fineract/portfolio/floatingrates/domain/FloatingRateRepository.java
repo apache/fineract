@@ -30,7 +30,7 @@ public interface FloatingRateRepository extends
 
     @Query("select floatingRate from FloatingRate floatingRate where floatingRate.isBaseLendingRate = true and floatingRate.isActive = true")
     FloatingRate retrieveBaseLendingRate();
-    
+
     @Query("select floatingRate from FloatingRate floatingRate " +
             " inner join floatingRate.floatingRatePeriods as periods" +
             " where floatingRate.isActive = true " +

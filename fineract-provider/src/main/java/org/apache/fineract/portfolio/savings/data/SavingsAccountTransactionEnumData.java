@@ -137,15 +137,15 @@ public class SavingsAccountTransactionEnumData implements Serializable {
     public boolean isWithholdTax() {
         return this.withholdTax;
     }
-    
+
     public boolean isDividendPayout() {
         return this.dividendPayout;
     }
-    
+
     public boolean isEscheat() {
         return this.escheat;
     }
-    
+
     public boolean isAmountOnHold() {
         return this.amountHold;
     }

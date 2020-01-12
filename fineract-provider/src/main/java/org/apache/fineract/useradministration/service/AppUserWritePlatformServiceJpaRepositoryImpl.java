@@ -136,7 +136,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             if (staffId != null) {
                 linkedStaff = this.staffRepositoryWrapper.findByOfficeWithNotFoundDetection(staffId, userOffice.getId());
             }
-            
+
             Collection<Client> clients = null;
             if(command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)
                     && command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER)
@@ -153,7 +153,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
             final Boolean sendPasswordToEmail = command.booleanObjectValueOfParameterNamed("sendPasswordToEmail");
             this.userDomainService.create(appUser, sendPasswordToEmail);
-            
+
             this.topicDomainService.subscribeUserToTopic(appUser);
 
             return new CommandProcessingResultBuilder() //
@@ -198,13 +198,13 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                     .orElseThrow(() -> new UserNotFoundException(userId));
 
             final AppUserPreviousPassword currentPasswordToSaveAsPreview = getCurrentPasswordToSaveAsPreview(userToUpdate, command);
-            
+
             Collection<Client> clients = null;
             boolean isSelfServiceUser = userToUpdate.isSelfServiceUser();
             if(command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)){
-                isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER); 
+                isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
             }
-            
+
             if(isSelfServiceUser
                     && command.hasParameter(AppUserConstants.CLIENTS)){
                 JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
@@ -269,7 +269,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     /**
      * encode the new submitted password retrieve the last n used password check
      * if the current submitted password, match with one of them
-     * 
+     *
      * @param user
      * @param command
      * @return

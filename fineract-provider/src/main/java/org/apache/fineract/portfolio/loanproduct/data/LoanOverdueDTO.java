@@ -48,7 +48,7 @@ public class LoanOverdueDTO {
         return this.recalculateFrom;
     }
 
-    
+
     public LocalDate getLastChargeAppliedDate() {
         return this.lastChargeAppliedDate;
     }

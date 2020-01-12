@@ -125,7 +125,7 @@ public class NotificationData implements Serializable {
     public void setContent(String content) {
         this.content = content;
     }
-    
+
     public boolean isRead() {
         return this.isRead;
     }

@@ -60,7 +60,7 @@ public class Sender {
 
     private int connectTimeout;
     private int readTimeout;
-    
+
     /**
      * Full options constructor.
      *
@@ -441,7 +441,7 @@ public class Sender {
         if (responseBody == null) {
             return null;
         }
-        
+
         JsonParser parser = new JsonParser();
         JsonObject jsonResponse;
         try {
@@ -512,7 +512,7 @@ public class Sender {
         Map<String , Object> map = new HashMap<>();
         map.put("responseBody", responseBody);
         map.put("status", status);
-        
+
         return map;
     }
 

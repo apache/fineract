@@ -29,7 +29,7 @@ public class FineractEntityAccessConfigurationException extends AbstractPlatform
             final FineractEntityAccessType accessType,
             final FineractEntityType entityType2) {
         super("error.msg.entityaccess.config",
-                "Error while getting entity access configuration for " + entityType1.getType() + ":" + firstEntityId + 
+                "Error while getting entity access configuration for " + entityType1.getType() + ":" + firstEntityId +
                 " with type " + accessType.toStr() + " against " + entityType2.getType());
     }
 

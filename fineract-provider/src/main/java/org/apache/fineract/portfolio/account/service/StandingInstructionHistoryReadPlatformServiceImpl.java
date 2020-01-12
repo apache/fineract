@@ -129,7 +129,7 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
             paramObj.add(df.format(standingInstructionDTO.startDateRange()));
             addAndCaluse = true;
         }
-        
+
         if (standingInstructionDTO.endDateRange() != null) {
             if (addAndCaluse) {
                 sqlBuilder.append(" and ");

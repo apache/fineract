@@ -146,5 +146,5 @@ public class CalendarHistory extends AbstractPersistableCustom<Long> {
     public Calendar getCalendar() {
         return this.calendar;
     }
-        
+
 }

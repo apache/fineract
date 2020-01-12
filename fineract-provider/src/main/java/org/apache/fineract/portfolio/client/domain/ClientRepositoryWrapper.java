@@ -59,7 +59,7 @@ public class ClientRepositoryWrapper {
         }
         return client;
     }
-    
+
     public List<Client> findAll(final Collection<Long> clientIds) {
         return this.repository.findAllById(clientIds) ;
     }
@@ -74,7 +74,7 @@ public class ClientRepositoryWrapper {
     public void delete(final Client client) {
         this.repository.delete(client);
     }
-    
+
     public void flush() {
         this.repository.flush();
     }
@@ -85,7 +85,7 @@ public class ClientRepositoryWrapper {
         this.context.validateAccessRights(client.getOffice().getHierarchy());
         return client;
     }
-    
+
     public Client getClientByAccountNumber(String accountNumber){
         Client client = this.repository.getClientByAccountNumber(accountNumber);
         if(client==null){

@@ -88,19 +88,19 @@ public class EndOfDayBalance {
 
     /**
      * Future Value (FV) = PV x (1+r)^n
-     * 
+     *
      * Interest = FV - PV PV = Principal or the Account Balance r = rate per
      * compounding period (so for daily, r = nominalInterestRateAsFraction x
      * 1/365 n = number of periods rate is compounded
      */
     public BigDecimal calculateInterestOnBalanceAndInterest(final BigDecimal interestToCompound, final BigDecimal interestRateAsFraction,
-            final long daysInYear, final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction, 
+            final long daysInYear, final BigDecimal minBalanceForInterestCalculation, final BigDecimal overdraftInterestRateAsFraction,
             final BigDecimal minOverdraftForInterestCalculation) {
         final BigDecimal multiplicand = BigDecimal.ONE.divide(BigDecimal.valueOf(daysInYear), MathContext.DECIMAL64);
 
         final BigDecimal presentValue = this.endOfDayBalance.getAmount().add(interestToCompound);
         BigDecimal futureValue = presentValue.setScale(9, MoneyHelper.getRoundingMode());
-        
+
         if(presentValue.compareTo(BigDecimal.ZERO) >= 0){
             if (presentValue.compareTo(minBalanceForInterestCalculation) >= 0) {
                 final BigDecimal r = interestRateAsFraction.multiply(multiplicand);

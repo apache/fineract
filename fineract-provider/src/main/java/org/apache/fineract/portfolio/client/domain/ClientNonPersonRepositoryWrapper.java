@@ -33,10 +33,10 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ClientNonPersonRepositoryWrapper {
-    
+
     private final ClientNonPersonRepository repository;
     private final PlatformSecurityContext context;
-    
+
     @Autowired
     public ClientNonPersonRepositoryWrapper(final ClientNonPersonRepository repository, final PlatformSecurityContext context) {
         this.repository = repository;
@@ -47,11 +47,11 @@ public class ClientNonPersonRepositoryWrapper {
         return this.repository.findById(id)
                 .orElseThrow(() -> new ClientNonPersonNotFoundException(id));
     }
-    
+
     public ClientNonPerson findOneByClientId(final Long clientId) {
         return this.repository.findByClientId(clientId);
     }
-    
+
     public ClientNonPerson findOneByClientIdWithNotFoundDetection(final Long clientId) {
         final ClientNonPerson clientNonPerson = this.repository.findByClientId(clientId);
         if (clientNonPerson == null) { throw new ClientNonPersonNotFoundByClientIdException(clientId); }

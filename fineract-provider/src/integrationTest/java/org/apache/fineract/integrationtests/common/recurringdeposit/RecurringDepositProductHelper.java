@@ -190,7 +190,7 @@ public class RecurringDepositProductHelper {
         this.chartSlabs = constructChartSlabWithAmountAndPeriodRange();
         return this;
     }
-    
+
     public RecurringDepositProductHelper withWithHoldTax(final String taxGroupId) {
         if (taxGroupId != null) {
             this.withHoldTax = true;

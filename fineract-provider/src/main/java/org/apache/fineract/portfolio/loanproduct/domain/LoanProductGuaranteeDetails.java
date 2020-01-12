@@ -33,7 +33,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 /**
  * Entity for capturing interest recalculation settings
- * 
+ *
  * @author conflux
  */
 

@@ -47,7 +47,7 @@ public class AppuserClientMapperReadServiceImpl implements
                                 + " from m_selfservice_user_client_mapping where client_id = ? and appuser_id = ?",
                         new Object[] { clientId, appUserId }, Boolean.class);
     }
-    
+
     @Override
     public void validateAppuserClientsMapping(final Long clientId) {
         AppUser user = this.context.authenticatedUser();

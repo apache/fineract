@@ -144,7 +144,7 @@ public class LoanChargeAssembler {
                                             LoanApiConstants.disbursementDateParameterName, disbursementDataElement, dateFormat, locale);
                                 }
                             }
-                            
+
                             if ( ChargeTimeType.DISBURSEMENT.getValue().equals(chargeDefinition.getChargeTimeType())) {
                                 for (LoanDisbursementDetails disbursementDetail : disbursementDetails) {
                                     LoanTrancheDisbursementCharge loanTrancheDisbursementCharge = null;

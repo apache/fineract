@@ -81,7 +81,7 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
         public String schema() {
             return this.schema;
         }
-        
+
         public String tableName() {
             return "scheduled_email_messages_outbound";
         }
@@ -128,7 +128,7 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
             throw new EmailNotFoundException(resourceId);
         }
     }
-    
+
     @Override
     public Collection<EmailData> retrieveAllPending(final SearchParameters searchParameters) {
         final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " limit 0, " + searchParameters.getLimit() : "";
@@ -152,7 +152,7 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
         final String sqlPlusLimit = (limit > 0) ? " limit 0, " + limit : "";
         final String sql = "select external_id from " + this.emailRowMapper.tableName() + " where status_enum = "
                 + EmailMessageStatusType.SENT.getValue() + sqlPlusLimit;
-        
+
         return this.jdbcTemplate.queryForList(sql, Long.class);
     }
 

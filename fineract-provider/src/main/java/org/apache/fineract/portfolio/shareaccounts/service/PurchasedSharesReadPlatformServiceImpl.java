@@ -38,7 +38,7 @@ public class PurchasedSharesReadPlatformServiceImpl implements
         PurchasedSharesReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-    
+
     @Autowired
     public PurchasedSharesReadPlatformServiceImpl(final RoutingDataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource) ;
@@ -54,7 +54,7 @@ public class PurchasedSharesReadPlatformServiceImpl implements
     private final static class PurchasedSharesDataRowMapper implements RowMapper<ShareAccountTransactionData> {
 
         private final String schema ;
-        
+
         public PurchasedSharesDataRowMapper() {
             StringBuffer buff = new StringBuffer()
             .append("saps.id, saps.account_id, saps.transaction_date, saps.total_shares, saps.unit_price, ")
@@ -78,10 +78,10 @@ public class PurchasedSharesReadPlatformServiceImpl implements
             final BigDecimal amount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amount") ;
             final BigDecimal chargeAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "chargeamount") ;
             final BigDecimal amountPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountPaid") ;
-            
+
             return new ShareAccountTransactionData(id,accountId, purchasedDate, numberOfShares, purchasedPrice, statusEnum, typeEnum, amount, chargeAmount, amountPaid);
         }
-        
+
         public String schema() {
             return this.schema ;
         }

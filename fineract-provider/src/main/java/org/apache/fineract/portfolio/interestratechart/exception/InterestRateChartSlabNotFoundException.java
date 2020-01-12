@@ -25,7 +25,7 @@ public class InterestRateChartSlabNotFoundException extends AbstractPlatformReso
     public InterestRateChartSlabNotFoundException(final Long id) {
         super("error.msg.interest.rate.chart.slab.id.invalid", "Interest rate chart slab with identifier " + id + " does not exist", id);
     }
-    
+
     public InterestRateChartSlabNotFoundException(final Long id, final Long chartId) {
         super("error.msg.interest.rate.chart.slab.id.invalid", "Interest rate chart slab with identifier " + id + " does not exist in interest chart with identifier " + chartId , id, chartId);
     }

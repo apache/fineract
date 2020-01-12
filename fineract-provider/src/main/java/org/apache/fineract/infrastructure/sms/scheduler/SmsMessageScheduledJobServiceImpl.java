@@ -78,8 +78,8 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
     private ExecutorService triggeredExecutorService ;
     private final SmsConfigUtils smsConfigUtils ;
     private final NotificationSenderService notificationSenderService;
-    
-    
+
+
     /**
      * SmsMessageScheduledJobServiceImpl constructor
      **/
@@ -138,7 +138,7 @@ public class SmsMessageScheduledJobServiceImpl implements SmsMessageScheduledJob
                         this.smsMessageRepository.saveAll(toSaveMessages);
                         this.smsMessageRepository.flush();
                         this.genericExecutorService.execute(new SmsTask(ThreadLocalContextUtil.getTenant(), apiQueueResourceDatas));
-                    }                    
+                    }
                     if(!toSendNotificationMessages.isEmpty()){
                         this.notificationSenderService.sendNotification(toSendNotificationMessages);
                     }

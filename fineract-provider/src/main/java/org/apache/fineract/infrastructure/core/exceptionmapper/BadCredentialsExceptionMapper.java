@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 /**
  * An {@link ExceptionMapper} to map {@link BadCredentialsException} thrown by
  * platform during authentication into a HTTP API friendly format.
- * 
+ *
  * The {@link BadCredentialsException} is thrown by spring security on platform
  * when an attempt is made to authenticate using invalid username/password
  * credentials.

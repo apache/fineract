@@ -332,8 +332,8 @@ public class SavingsAccountData implements Serializable {
             final BigDecimal overdraftLimit, final BigDecimal minRequiredBalance,
             final boolean enforceMinRequiredBalance, final BigDecimal minBalanceForInterestCalculation,
             final BigDecimal onHoldFunds, final BigDecimal nominalAnnualInterestRateOverdraft,
-            final BigDecimal minOverdraftForInterestCalculation, final boolean withHoldTax, final TaxGroupData taxGroup, 
-            final LocalDate lastActiveTransactionDate, final boolean isDormancyTrackingActive, final Integer daysToInactive, 
+            final BigDecimal minOverdraftForInterestCalculation, final boolean withHoldTax, final TaxGroupData taxGroup,
+            final LocalDate lastActiveTransactionDate, final boolean isDormancyTrackingActive, final Integer daysToInactive,
             final Integer daysToDormancy, final Integer daysToEscheat, final BigDecimal savingsAmountOnHold) {
 
         final Collection<SavingsProductData> productOptions = null;
@@ -357,7 +357,7 @@ public class SavingsAccountData implements Serializable {
                 interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
                 lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, charges, chargeOptions, allowOverdraft, overdraftLimit,
                 minRequiredBalance, enforceMinRequiredBalance, minBalanceForInterestCalculation, onHoldFunds,
-                nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroup, 
+                nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroup,
                 lastActiveTransactionDate, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat, savingsAmountOnHold);
     }
 
@@ -430,7 +430,7 @@ public class SavingsAccountData implements Serializable {
                 interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
                 lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, charges, chargeOptions, allowOverdraft, overdraftLimit,
                 minRequiredBalance, enforceMinRequiredBalance, minBalanceForInterestCalculation, onHoldFunds,
-                nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroup, 
+                nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroup,
                 lastActiveTransactionDate, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat, savingsAmountOnHold);
     }
 
@@ -501,7 +501,7 @@ public class SavingsAccountData implements Serializable {
                 interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
                 lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, charges, chargeOptions, allowOverdraft, overdraftLimit,
                 minRequiredBalance, enforceMinRequiredBalance, minBalanceForInterestCalculation, onHoldFunds,
-                nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroup, 
+                nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroup,
                 lastActiveTransactionDate, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat, savingsAmountOnHold);
     }
 
@@ -536,8 +536,8 @@ public class SavingsAccountData implements Serializable {
                 template.lockinPeriodFrequencyTypeOptions, template.withdrawalFeeTypeOptions, charges, template.chargeOptions, account.allowOverdraft,
                 account.overdraftLimit, account.minRequiredBalance, account.enforceMinRequiredBalance,
                 account.minBalanceForInterestCalculation, account.onHoldFunds, account.nominalAnnualInterestRateOverdraft,
-                account.minOverdraftForInterestCalculation, account.withHoldTax, account.taxGroup, 
-                account.lastActiveTransactionDate, account.isDormancyTrackingActive, account.daysToInactive, 
+                account.minOverdraftForInterestCalculation, account.withHoldTax, account.taxGroup,
+                account.lastActiveTransactionDate, account.isDormancyTrackingActive, account.daysToInactive,
                 account.daysToDormancy, account.daysToEscheat, account.savingsAmountOnHold);
     }
 
@@ -562,7 +562,7 @@ public class SavingsAccountData implements Serializable {
                 lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, charges, chargeOptions, account.allowOverdraft,
                 account.overdraftLimit, account.minRequiredBalance, account.enforceMinRequiredBalance,
                 account.minBalanceForInterestCalculation, account.onHoldFunds, account.nominalAnnualInterestRateOverdraft,
-                account.minOverdraftForInterestCalculation, account.withHoldTax, account.taxGroup, account.lastActiveTransactionDate, 
+                account.minOverdraftForInterestCalculation, account.withHoldTax, account.taxGroup, account.lastActiveTransactionDate,
                 account.isDormancyTrackingActive, account.daysToInactive, account.daysToDormancy, account.daysToEscheat, account.savingsAmountOnHold);
     }
 
@@ -635,7 +635,7 @@ public class SavingsAccountData implements Serializable {
                 interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
                 lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, charges, chargeOptions, allowOverdraft, overdraftLimit,
                 minRequiredBalance, enforceMinRequiredBalance, minBalanceForInterestCalculation, onHoldFunds,
-                nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroup, 
+                nominalAnnualInterestRateOverdraft, minOverdraftForInterestCalculation, withHoldTax, taxGroup,
                 lastActiveTransactionDate, isDormancyTrackingActive, daysToInactive, daysToDormancy, daysToEscheat, savingsAmountOnHold);
     }
 
@@ -658,8 +658,8 @@ public class SavingsAccountData implements Serializable {
             final boolean allowOverdraft, final BigDecimal overdraftLimit, final BigDecimal minRequiredBalance,
             final boolean enforceMinRequiredBalance, final BigDecimal minBalanceForInterestCalculation,
             final BigDecimal onHoldFunds, final BigDecimal nominalAnnualInterestRateOverdraft,
-            final BigDecimal minOverdraftForInterestCalculation, final boolean withHoldTax, final TaxGroupData taxGroup, 
-            final LocalDate lastActiveTransactionDate, final boolean isDormancyTrackingActive, final Integer daysToInactive, 
+            final BigDecimal minOverdraftForInterestCalculation, final boolean withHoldTax, final TaxGroupData taxGroup,
+            final LocalDate lastActiveTransactionDate, final boolean isDormancyTrackingActive, final Integer daysToInactive,
             final Integer daysToDormancy, final Integer daysToEscheat, final BigDecimal savingsAmountOnHold) {
         this.id = id;
         this.accountNo = accountNo;

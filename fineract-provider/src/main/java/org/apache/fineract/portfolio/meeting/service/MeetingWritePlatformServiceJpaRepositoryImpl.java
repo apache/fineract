@@ -105,7 +105,7 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
         boolean isSkipRepaymentOnFirstMonthEnabled = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
         if(isSkipRepaymentOnFirstMonthEnabled){
             isSkipRepaymentOnFirstMonth = isLoanRepaymentsSyncWithMeeting(loan.group(), calendar);
-            if(isSkipRepaymentOnFirstMonth) { numberOfDays = configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue(); } 
+            if(isSkipRepaymentOnFirstMonth) { numberOfDays = configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue(); }
         }*/
 
         try {
@@ -116,7 +116,7 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
             boolean isSkipRepaymentOnFirstMonthEnabled = configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
             if(isSkipRepaymentOnFirstMonthEnabled){
                 if(calendarInstance != null){isSkipRepaymentOnFirstMonth = true;}
-                if(isSkipRepaymentOnFirstMonth) { numberOfDays = configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue(); } 
+                if(isSkipRepaymentOnFirstMonth) { numberOfDays = configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue(); }
             }
             final Meeting newMeeting = Meeting.createNew(calendarInstance, meetingDate, isTransactionDateOnNonMeetingDate, isSkipRepaymentOnFirstMonth, numberOfDays);
 
@@ -232,12 +232,12 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
     @Override
     public CommandProcessingResult updateMeeting(final JsonCommand command) {
         this.meetingDataValidator.validateForUpdate(command);
-        
+
         final CalendarInstance calendarInstance = getCalendarInstance(command);
-        
+
         // create new meeting
         Boolean isSkipRepaymentOnFirstMonth = false;
-        
+
         Integer numberOfDays = 0;
         boolean isSkipRepaymentOnFirstMonthEnabled = configurationDomainService
                 .isSkippingMeetingOnFirstDayOfMonthEnabled();
@@ -312,7 +312,7 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
 
         try {
             final CalendarInstance calendarInstance = getCalendarInstance(command);
-            
+
             final Meeting meeting = this.meetingRepository
                     .findByCalendarInstanceIdAndMeetingDate(calendarInstance.getId(), meetingDate);
             Boolean isSkipRepaymentOnFirstMonth = false;
