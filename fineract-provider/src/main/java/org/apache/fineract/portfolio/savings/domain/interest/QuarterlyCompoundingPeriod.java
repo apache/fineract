@@ -178,8 +178,8 @@ public class QuarterlyCompoundingPeriod implements CompoundingPeriod {
         this.endOfDayBalances = endOfDayBalances;
     }
 
-	@Override
-	public LocalDateInterval getPeriodInterval() {
-		return this.periodInterval;
-	}
+    @Override
+    public LocalDateInterval getPeriodInterval() {
+        return this.periodInterval;
+    }
 }

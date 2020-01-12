@@ -57,40 +57,40 @@ public class GenericDataServiceImpl implements GenericDataService {
 
     @Override
     public GenericResultsetData fillGenericResultSet(final String sql) {
-    	try{
-    		 final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+        try{
+             final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
 
-    	        final List<ResultsetColumnHeaderData> columnHeaders = new ArrayList<>();
-    	        final List<ResultsetRowData> resultsetDataRows = new ArrayList<>();
+                final List<ResultsetColumnHeaderData> columnHeaders = new ArrayList<>();
+                final List<ResultsetRowData> resultsetDataRows = new ArrayList<>();
 
-    	        final SqlRowSetMetaData rsmd = rs.getMetaData();
+                final SqlRowSetMetaData rsmd = rs.getMetaData();
 
-    	        for (int i = 0; i < rsmd.getColumnCount(); i++) {
+                for (int i = 0; i < rsmd.getColumnCount(); i++) {
 
-    	            final String columnName = rsmd.getColumnName(i + 1);
-    	            final String columnType = rsmd.getColumnTypeName(i + 1);
+                    final String columnName = rsmd.getColumnName(i + 1);
+                    final String columnType = rsmd.getColumnTypeName(i + 1);
 
-    	            final ResultsetColumnHeaderData columnHeader = ResultsetColumnHeaderData.basic(columnName, columnType);
-    	            columnHeaders.add(columnHeader);
-    	        }
+                    final ResultsetColumnHeaderData columnHeader = ResultsetColumnHeaderData.basic(columnName, columnType);
+                    columnHeaders.add(columnHeader);
+                }
 
-    	        while (rs.next()) {
-    	            final List<String> columnValues = new ArrayList<>();
-    	            for (int i = 0; i < rsmd.getColumnCount(); i++) {
-    	                final String columnName = rsmd.getColumnName(i + 1);
-    	                final String columnValue = rs.getString(columnName);
-    	                columnValues.add(columnValue);
-    	            }
+                while (rs.next()) {
+                    final List<String> columnValues = new ArrayList<>();
+                    for (int i = 0; i < rsmd.getColumnCount(); i++) {
+                        final String columnName = rsmd.getColumnName(i + 1);
+                        final String columnValue = rs.getString(columnName);
+                        columnValues.add(columnValue);
+                    }
 
-    	            final ResultsetRowData resultsetDataRow = ResultsetRowData.create(columnValues);
-    	            resultsetDataRows.add(resultsetDataRow);
-    	        }
+                    final ResultsetRowData resultsetDataRow = ResultsetRowData.create(columnValues);
+                    resultsetDataRows.add(resultsetDataRow);
+                }
 
-			return new GenericResultsetData(columnHeaders, resultsetDataRows);
-		} catch (DataAccessException e) {
-			throw new PlatformDataIntegrityException("error.msg.report.unknown.data.integrity.issue", e.getClass().getName());
-		}
-	}
+            return new GenericResultsetData(columnHeaders, resultsetDataRows);
+        } catch (DataAccessException e) {
+            throw new PlatformDataIntegrityException("error.msg.report.unknown.data.integrity.issue", e.getClass().getName());
+        }
+    }
 
     @Override
     public String replace(final String str, final String pattern, final String replace) {

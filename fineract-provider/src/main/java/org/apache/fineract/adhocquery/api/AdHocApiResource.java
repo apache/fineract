@@ -87,7 +87,7 @@ public class AdHocApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAll(@Context final UriInfo uriInfo) {
-    	
+        
         this.context.authenticatedUser();
         final Collection<AdHocData> adhocs = this.adHocReadPlatformService.retrieveAllAdHocQuery();
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());

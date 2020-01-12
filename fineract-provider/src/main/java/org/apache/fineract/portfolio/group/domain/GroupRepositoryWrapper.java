@@ -69,11 +69,11 @@ public class GroupRepositoryWrapper {
         this.repository.flush();
     }
     
-	public LocalDate retrieveSubmittedOndate(final Long groupId) {
-		Date submittedOnDate = this.repository.retrieveGroupTypeSubmitteOndDate(groupId);
-		if (submittedOnDate != null) {
-			return new LocalDate(submittedOnDate);
-		}
-		return null;
-	}
+    public LocalDate retrieveSubmittedOndate(final Long groupId) {
+        Date submittedOnDate = this.repository.retrieveGroupTypeSubmitteOndDate(groupId);
+        if (submittedOnDate != null) {
+            return new LocalDate(submittedOnDate);
+        }
+        return null;
+    }
 }

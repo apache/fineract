@@ -24,8 +24,8 @@ import org.apache.fineract.portfolio.self.pockets.api.PocketApiConstants;
 @SuppressWarnings("serial")
 public class MappingIdNotLinkedToPocketException extends AbstractPlatformDomainRuleException {
 
-	public MappingIdNotLinkedToPocketException(final Long id) {
-		super(PocketApiConstants.mappingIdNotLinkedToPocketException,
-				PocketApiConstants.mappingIdNotLinkedToPocketErrorMessage, id);
-	}
+    public MappingIdNotLinkedToPocketException(final Long id) {
+        super(PocketApiConstants.mappingIdNotLinkedToPocketException,
+                PocketApiConstants.mappingIdNotLinkedToPocketErrorMessage, id);
+    }
 }

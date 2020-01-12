@@ -76,7 +76,7 @@ public class PasswordValidationPolicyReadPlatformServiceImpl implements Password
 
         public String schema() {
             return " pvp.id as id, pvp.active as active, pvp.description as description, pvp.`key` as `key`"
-            		+ " from m_password_validation_policy pvp";
+                    + " from m_password_validation_policy pvp";
         }
     }
 

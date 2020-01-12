@@ -46,7 +46,7 @@ import com.jayway.restassured.specification.ResponseSpecification;
 @SuppressWarnings("rawtypes")
 public class LoanRepaymentRescheduleAtDisbursementTest {
 
-	private ResponseSpecification responseSpec;
+    private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
     private LoanApplicationApprovalTest loanApplicationApprovalTest;
@@ -63,10 +63,10 @@ public class LoanRepaymentRescheduleAtDisbursementTest {
         this.generalResponseSpec = new ResponseSpecBuilder().build();
     }
     
-	@SuppressWarnings("unchecked")
-	@Test
+    @SuppressWarnings("unchecked")
+    @Test
     public void testLoanRepaymentRescheduleAtDisbursement(){
-    	
+        
         final String approvalAmount = "10000";
         final String approveDate = "01 March 2015";
         final String expectedDisbursementDate = "01 March 2015";
@@ -74,7 +74,7 @@ public class LoanRepaymentRescheduleAtDisbursementTest {
         final String adjustRepaymentDate = "16 March 2015";
          
         // CREATE CLIENT
-    	final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
+        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
         System.out.println("---------------------------------CLIENT CREATED WITH ID---------------------------------------------------"
                 + clientID);
 
@@ -89,7 +89,7 @@ public class LoanRepaymentRescheduleAtDisbursementTest {
         List<HashMap> createTranches = new ArrayList<>();
         createTranches.add(this.loanApplicationApprovalTest.createTrancheDetail("01 March 2015", "5000"));
         createTranches.add(this.loanApplicationApprovalTest.createTrancheDetail("01 May 2015", "5000"));
-    	
+        
         // APPROVE TRANCHES
         List<HashMap> approveTranches = new ArrayList<>();
         approveTranches.add(this.loanApplicationApprovalTest.createTrancheDetail("01 March 2015", "5000"));
@@ -132,15 +132,15 @@ public class LoanRepaymentRescheduleAtDisbursementTest {
         verifyLoanRepaymentSchedule(firstInstallement, expectedvalues);
         
     }
-	
-	private void verifyLoanRepaymentSchedule(final HashMap firstInstallement, final Map<String, Object> expectedvalues) {
+    
+    private void verifyLoanRepaymentSchedule(final HashMap firstInstallement, final Map<String, Object> expectedvalues) {
        
-		assertEquals(expectedvalues.get("dueDate"), firstInstallement.get("dueDate"));
-		assertEquals(String.valueOf(expectedvalues.get("principalDue")), String.valueOf(firstInstallement.get("principalDue")));
-		assertEquals(String.valueOf(expectedvalues.get("interestDue")), String.valueOf(firstInstallement.get("interestDue")));
-		assertEquals(String.valueOf(expectedvalues.get("feeChargesDue")), String.valueOf(firstInstallement.get("feeChargesDue")));
-		assertEquals(String.valueOf(expectedvalues.get("penaltyChargesDue")), String.valueOf(firstInstallement.get("penaltyChargesDue")));
-		assertEquals(String.valueOf(expectedvalues.get("totalDueForPeriod")), String.valueOf(firstInstallement.get("totalDueForPeriod")));
+        assertEquals(expectedvalues.get("dueDate"), firstInstallement.get("dueDate"));
+        assertEquals(String.valueOf(expectedvalues.get("principalDue")), String.valueOf(firstInstallement.get("principalDue")));
+        assertEquals(String.valueOf(expectedvalues.get("interestDue")), String.valueOf(firstInstallement.get("interestDue")));
+        assertEquals(String.valueOf(expectedvalues.get("feeChargesDue")), String.valueOf(firstInstallement.get("feeChargesDue")));
+        assertEquals(String.valueOf(expectedvalues.get("penaltyChargesDue")), String.valueOf(firstInstallement.get("penaltyChargesDue")));
+        assertEquals(String.valueOf(expectedvalues.get("totalDueForPeriod")), String.valueOf(firstInstallement.get("totalDueForPeriod")));
 
     }
     
@@ -237,8 +237,8 @@ public class LoanRepaymentRescheduleAtDisbursementTest {
     }
 
     private List getDateAsArray(Calendar date, int addvalue, int type) {
-    	date.add(type, addvalue);
+        date.add(type, addvalue);
         return new ArrayList<>(Arrays.asList(date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1,
-        		date.get(Calendar.DAY_OF_MONTH)));
+                date.get(Calendar.DAY_OF_MONTH)));
     }
 }

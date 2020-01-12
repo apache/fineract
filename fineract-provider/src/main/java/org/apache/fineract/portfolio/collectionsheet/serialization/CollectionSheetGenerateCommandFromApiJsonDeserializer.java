@@ -52,11 +52,11 @@ public class CollectionSheetGenerateCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-	final Set<String> supportedParameters = new HashSet<>(
-			Arrays.asList(transactionDateParamName, localeParamName, dateFormatParamName, calendarIdParamName));
+    final Set<String> supportedParameters = new HashSet<>(
+            Arrays.asList(transactionDateParamName, localeParamName, dateFormatParamName, calendarIdParamName));
 
-	private static final Set<String> INDIVIDUAL_COLLECTIONSHEET_SUPPORTED_PARAMS = new HashSet<>(Arrays.asList(
-			transactionDateParamName, localeParamName, dateFormatParamName, officeIdParamName, staffIdParamName));
+    private static final Set<String> INDIVIDUAL_COLLECTIONSHEET_SUPPORTED_PARAMS = new HashSet<>(Arrays.asList(
+            transactionDateParamName, localeParamName, dateFormatParamName, officeIdParamName, staffIdParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
 

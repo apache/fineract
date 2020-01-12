@@ -95,13 +95,13 @@ public class LoanDisbursalDateValidationTest {
         List<HashMap> disbursalError = (List<HashMap>) this.loanTransactionHelper.disburseLoan(disbursalDate, loanID, this.responseForbiddenError);
         
         Assert.assertEquals("error.msg.actual.disbursement.date.does.not.match.with.expected.disbursal.date",
-        	disbursalError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));     
+            disbursalError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));     
        
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, final String proposedAmount) {
         final String loanApplication = new LoanApplicationTestBuilder()
-        		.withPrincipal(proposedAmount).withLoanTermFrequency("5")
+                .withPrincipal(proposedAmount).withLoanTermFrequency("5")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("5")
                 .withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths()

@@ -55,10 +55,10 @@ public final class CashierTransactionData implements Serializable {
      * Creates a new cashier.
      */
     private CashierTransactionData(final Long id, final Long cashierId, CashierTxnType txnType, 
-    		final BigDecimal txnAmount, final Date txnDate, String txnNote, 
-    		String entityType, Long entityId, Date createdDate, 
-    		Long officeId, String officeName, Long tellerId, String tellerName, String cashierName,
-    		CashierData cashierData, Date startDate, Date endDate, final Collection<CurrencyData> currencyOptions) {
+            final BigDecimal txnAmount, final Date txnDate, String txnNote, 
+            String entityType, Long entityId, Date createdDate, 
+            Long officeId, String officeName, Long tellerId, String tellerName, String cashierName,
+            CashierData cashierData, Date startDate, Date endDate, final Collection<CurrencyData> currencyOptions) {
         this.id = id;
         this.cashierId = cashierId;
         this.txnType = txnType;
@@ -83,23 +83,23 @@ public final class CashierTransactionData implements Serializable {
     }
 
     public static CashierTransactionData instance(final Long id, final Long cashierId, CashierTxnType txnType,
-    		final BigDecimal txnAmount, final Date txnDate, final String txnNote,
-    		final String entityType, final Long entityId, final Date createdDate,
-    		final Long officeId, final String officeName, final Long tellerId,
-    		final String tellerName, final String cashierName, final CashierData cashierData,
-    		Date startDate, Date endDate) {
+            final BigDecimal txnAmount, final Date txnDate, final String txnNote,
+            final String entityType, final Long entityId, final Date createdDate,
+            final Long officeId, final String officeName, final Long tellerId,
+            final String tellerName, final String cashierName, final CashierData cashierData,
+            Date startDate, Date endDate) {
         return new CashierTransactionData(id, cashierId, txnType, txnAmount, txnDate, txnNote, entityType, 
-        		entityId, createdDate, officeId, officeName, tellerId,
-        		tellerName, cashierName, cashierData, startDate, endDate, null);
+                entityId, createdDate, officeId, officeName, tellerId,
+                tellerName, cashierName, cashierData, startDate, endDate, null);
     }
     
     public static CashierTransactionData template (final Long cashierId,  
-    		final Long tellerId, final String tellerName,
-    		final Long officeId, final String officeName, final String cashierName,
-    		final CashierData cashierData, Date startDate, Date endDate, final Collection<CurrencyData> currencyOptions) {
+            final Long tellerId, final String tellerName,
+            final Long officeId, final String officeName, final String cashierName,
+            final CashierData cashierData, Date startDate, Date endDate, final Collection<CurrencyData> currencyOptions) {
         return new CashierTransactionData(null, cashierId, null, null, null, null, null, 
-        		null, null, officeId, officeName, tellerId, tellerName, cashierName, cashierData,
-        		startDate, endDate, currencyOptions);
+                null, null, officeId, officeName, tellerId, tellerName, cashierName, cashierData,
+                startDate, endDate, currencyOptions);
     }
 
     public Long getId() {
@@ -111,31 +111,31 @@ public final class CashierTransactionData implements Serializable {
     }
     
     public CashierTxnType getTxnType() {
-    	return txnType;
+        return txnType;
     }
     
     public BigDecimal getTxnAmount() {
-    	return txnAmount;
+        return txnAmount;
     }
     
     public Date getTxnDate() {
-    	return txnDate;
+        return txnDate;
     }
     
     public String getTxnNote() {
-    	return txnNote;
+        return txnNote;
     }
     
     public String getEntityType() {
-    	return entityType;
+        return entityType;
     }
     
     public Long getEntityId() {
-    	return entityId;
+        return entityId;
     }
 
     public Date getCreatedDate() {
-    	return createdDate;
+        return createdDate;
     }
 
     public Long getOfficeId() {
@@ -143,7 +143,7 @@ public final class CashierTransactionData implements Serializable {
     }
     
     public String getOfficeName() {
-    	return officeName;
+        return officeName;
     }
 
     public Long getTellerId() {
@@ -151,23 +151,23 @@ public final class CashierTransactionData implements Serializable {
     }
     
     public String getTellerName() {
-    	return tellerName;
+        return tellerName;
     }
 
     public String getCashierName() {
-    	return cashierName;
+        return cashierName;
     }
     
     public Date getStartDate() {
-    	return startDate;
+        return startDate;
     }
     
     public Date getEndDate() {
-    	return endDate;
+        return endDate;
     }
 
     public CashierData getCashierData() {
-    	return cashierData;
+        return cashierData;
     }
 
 }

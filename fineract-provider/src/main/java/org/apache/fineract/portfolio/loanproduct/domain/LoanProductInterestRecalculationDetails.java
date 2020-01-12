@@ -275,19 +275,19 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
             }
 
             if (frequencyType.isWeekly()) {
-            	this.restFrequencyNthDay = null;
-            	this.restFrequencyOnDay = null;
+                this.restFrequencyNthDay = null;
+                this.restFrequencyOnDay = null;
             } else if (frequencyType.isMonthly()) {
-            	if(command.integerValueOfParameterNamed(LoanProductConstants.recalculationRestFrequencyOnDayParamName) != null) {
-            		this.restFrequencyNthDay = null;
-            		this.restFrequencyWeekday = null;
-            	} else {
-            		this.restFrequencyOnDay = null;
-            	}
+                if(command.integerValueOfParameterNamed(LoanProductConstants.recalculationRestFrequencyOnDayParamName) != null) {
+                    this.restFrequencyNthDay = null;
+                    this.restFrequencyWeekday = null;
+                } else {
+                    this.restFrequencyOnDay = null;
+                }
             } else if (frequencyType.isDaily()) {
-            	this.restFrequencyNthDay = null;
-        		this.restFrequencyWeekday = null;
-        		this.restFrequencyOnDay = null;
+                this.restFrequencyNthDay = null;
+                this.restFrequencyWeekday = null;
+                this.restFrequencyOnDay = null;
             }
         }
 
@@ -347,19 +347,19 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
                 }
                 
                 if (compoundingfrequencyType.isWeekly()) {
-                	this.compoundingFrequencyNthDay = null;
-                	this.compoundingFrequencyOnDay = null;
+                    this.compoundingFrequencyNthDay = null;
+                    this.compoundingFrequencyOnDay = null;
                 } else if (compoundingfrequencyType.isMonthly()) {
-                	if(command.integerValueOfParameterNamed(LoanProductConstants.recalculationCompoundingFrequencyOnDayParamName) != null) {
-                		this.compoundingFrequencyNthDay = null;
-                		this.compoundingFrequencyWeekday = null;
-                	} else {
-                		this.compoundingFrequencyOnDay = null;
-                	}
+                    if(command.integerValueOfParameterNamed(LoanProductConstants.recalculationCompoundingFrequencyOnDayParamName) != null) {
+                        this.compoundingFrequencyNthDay = null;
+                        this.compoundingFrequencyWeekday = null;
+                    } else {
+                        this.compoundingFrequencyOnDay = null;
+                    }
                 } else if (compoundingfrequencyType.isDaily()) {
-                	this.compoundingFrequencyNthDay = null;
-            		this.compoundingFrequencyWeekday = null;
-            		this.compoundingFrequencyOnDay = null;
+                    this.compoundingFrequencyNthDay = null;
+                    this.compoundingFrequencyWeekday = null;
+                    this.compoundingFrequencyOnDay = null;
                 }
             }
             if (!compoundingfrequencyType.isDaily()) {
@@ -375,8 +375,8 @@ public class LoanProductInterestRecalculationDetails extends AbstractPersistable
             this.compoundingFrequencyType = null;
             this.compoundingInterval = null;
             this.compoundingFrequencyNthDay = null;
-    		this.compoundingFrequencyWeekday = null;
-    		this.compoundingFrequencyOnDay = null;
+            this.compoundingFrequencyWeekday = null;
+            this.compoundingFrequencyOnDay = null;
         }
 
         if (command.isChangeInBooleanParameterNamed(LoanProductConstants.isArrearsBasedOnOriginalScheduleParamName,

@@ -66,9 +66,9 @@ import com.google.gson.reflect.TypeToken;
 public class SavingsAccountTransactionDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
-	private static final Set<String> SAVINGS_ACCOUNT_HOLD_AMOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(transactionDateParamName, SavingsApiConstants.dateFormatParamName,
-					SavingsApiConstants.localeParamName, transactionAmountParamName));
+    private static final Set<String> SAVINGS_ACCOUNT_HOLD_AMOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(transactionDateParamName, SavingsApiConstants.dateFormatParamName,
+                    SavingsApiConstants.localeParamName, transactionAmountParamName));
 
     @Autowired
     public SavingsAccountTransactionDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -146,10 +146,10 @@ public class SavingsAccountTransactionDataValidator {
             baseDataValidator.reset().parameter(withdrawBalanceParamName).value(withdrawBalance).isOneOfTheseValues(true, false);
         }
 
-		if (account.getSavingsHoldAmount().compareTo(BigDecimal.ZERO) == 1) {
-			baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
-					"amount.is.on.hold.release.the.amount.to.continue", account.getId());
-		}
+        if (account.getSavingsHoldAmount().compareTo(BigDecimal.ZERO) == 1) {
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode(
+                    "amount.is.on.hold.release.the.amount.to.continue", account.getId());
+        }
                       
         validatePaymentTypeDetails(baseDataValidator, element);
 
@@ -224,21 +224,21 @@ public class SavingsAccountTransactionDataValidator {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
 
-		if (holdTransaction == null) {
-			baseDataValidator.failWithCode("validation.msg.validation.errors.exist", "Transaction not found");
-		} else if (holdTransaction.getReleaseIdOfHoldAmountTransaction() != null) {
-			baseDataValidator.parameter(SavingsApiConstants.amountParamName).value(holdTransaction.getAmount())
-					.failWithCode("validation.msg.amount.is.not.on.hold", "Transaction amount is not on hold");
-		}
+        if (holdTransaction == null) {
+            baseDataValidator.failWithCode("validation.msg.validation.errors.exist", "Transaction not found");
+        } else if (holdTransaction.getReleaseIdOfHoldAmountTransaction() != null) {
+            baseDataValidator.parameter(SavingsApiConstants.amountParamName).value(holdTransaction.getAmount())
+                    .failWithCode("validation.msg.amount.is.not.on.hold", "Transaction amount is not on hold");
+        }
 
-		if (holdTransaction != null) {
-			boolean isActive = holdTransaction.getSavingsAccount().isActive();
-			if (!isActive) {
-				baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
-						.failWithCodeNoParameterAddedToErrorCode(
-								SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
-			}
-		}
+        if (holdTransaction != null) {
+            boolean isActive = holdTransaction.getSavingsAccount().isActive();
+            if (!isActive) {
+                baseDataValidator.reset().parameter(SavingsApiConstants.statusParamName)
+                        .failWithCodeNoParameterAddedToErrorCode(
+                                SavingsApiConstants.ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE);
+            }
+        }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
         Date createdDate = new Date();

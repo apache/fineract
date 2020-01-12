@@ -36,63 +36,63 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CreditBureauLoanProductMappingWritePlatformServiceImpl implements CreditBureauLoanProductMappingWritePlatformService {
 
-	private final PlatformSecurityContext context;
+    private final PlatformSecurityContext context;
 
-	private final CreditBureauLoanProductMappingRepository creditBureauLoanProductMappingRepository;
+    private final CreditBureauLoanProductMappingRepository creditBureauLoanProductMappingRepository;
 
-	private final OrganisationCreditBureauRepository organisationCreditBureauRepository;
+    private final OrganisationCreditBureauRepository organisationCreditBureauRepository;
 
-	private final LoanProductRepository loanProductRepository;
+    private final LoanProductRepository loanProductRepository;
 
-	private final CreditBureauLoanProductCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final CreditBureauLoanProductCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
-	@Autowired
-	public CreditBureauLoanProductMappingWritePlatformServiceImpl(final PlatformSecurityContext context,
-			final CreditBureauLoanProductMappingRepository creditbureauLoanProductMappingRepository,
-			final OrganisationCreditBureauRepository organisationCreditBureauRepository, LoanProductRepository loanProductRepository,
-			final CreditBureauLoanProductCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
-		this.context = context;
-		this.creditBureauLoanProductMappingRepository = creditbureauLoanProductMappingRepository;
-		this.organisationCreditBureauRepository = organisationCreditBureauRepository;
-		this.loanProductRepository = loanProductRepository;
-		this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+    @Autowired
+    public CreditBureauLoanProductMappingWritePlatformServiceImpl(final PlatformSecurityContext context,
+            final CreditBureauLoanProductMappingRepository creditbureauLoanProductMappingRepository,
+            final OrganisationCreditBureauRepository organisationCreditBureauRepository, LoanProductRepository loanProductRepository,
+            final CreditBureauLoanProductCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+        this.context = context;
+        this.creditBureauLoanProductMappingRepository = creditbureauLoanProductMappingRepository;
+        this.organisationCreditBureauRepository = organisationCreditBureauRepository;
+        this.loanProductRepository = loanProductRepository;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
 
-	}
+    }
 
-	@Transactional
-	@Override
-	public CommandProcessingResult addCreditBureauLoanProductMapping(Long creditBureau_id, JsonCommand command) {
-		this.context.authenticatedUser();
-		
-		this.fromApiJsonDeserializer.validateForCreate(command.json(), creditBureau_id);
+    @Transactional
+    @Override
+    public CommandProcessingResult addCreditBureauLoanProductMapping(Long creditBureau_id, JsonCommand command) {
+        this.context.authenticatedUser();
+        
+        this.fromApiJsonDeserializer.validateForCreate(command.json(), creditBureau_id);
 
-		final long lpid = command.longValueOfParameterNamed("loanProductId");
+        final long lpid = command.longValueOfParameterNamed("loanProductId");
 
-		final OrganisationCreditBureau orgcb = this.organisationCreditBureauRepository.getOne(creditBureau_id);
+        final OrganisationCreditBureau orgcb = this.organisationCreditBureauRepository.getOne(creditBureau_id);
 
-		final LoanProduct lp = this.loanProductRepository.getOne(lpid);
+        final LoanProduct lp = this.loanProductRepository.getOne(lpid);
 
-		final CreditBureauLoanProductMapping cb_lp = CreditBureauLoanProductMapping.fromJson(command, orgcb, lp);
+        final CreditBureauLoanProductMapping cb_lp = CreditBureauLoanProductMapping.fromJson(command, orgcb, lp);
 
-		this.creditBureauLoanProductMappingRepository.save(cb_lp);
+        this.creditBureauLoanProductMappingRepository.save(cb_lp);
 
-		return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(cb_lp.getId())
-				.build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(cb_lp.getId())
+                .build();
 
-	}
+    }
 
-	@Override
-	public CommandProcessingResult updateCreditBureauLoanProductMapping(JsonCommand command) {
-		
-		this.context.authenticatedUser();
-		this.fromApiJsonDeserializer.validateForUpdate(command.json());
+    @Override
+    public CommandProcessingResult updateCreditBureauLoanProductMapping(JsonCommand command) {
+        
+        this.context.authenticatedUser();
+        this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
-		final Long mappingid = command.longValueOfParameterNamed("creditbureauLoanProductMappingId");
-		final boolean is_active = command.booleanPrimitiveValueOfParameterNamed("is_active");
-		final CreditBureauLoanProductMapping cblpmapping = this.creditBureauLoanProductMappingRepository.getOne(mappingid);
-		cblpmapping.setIs_active(is_active);
-		this.creditBureauLoanProductMappingRepository.saveAndFlush(cblpmapping);
-		return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(cblpmapping.getId())
-				.build();
-	}
+        final Long mappingid = command.longValueOfParameterNamed("creditbureauLoanProductMappingId");
+        final boolean is_active = command.booleanPrimitiveValueOfParameterNamed("is_active");
+        final CreditBureauLoanProductMapping cblpmapping = this.creditBureauLoanProductMappingRepository.getOne(mappingid);
+        cblpmapping.setIs_active(is_active);
+        this.creditBureauLoanProductMappingRepository.saveAndFlush(cblpmapping);
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(cblpmapping.getId())
+                .build();
+    }
 }

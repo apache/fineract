@@ -102,13 +102,13 @@ public final class StaffCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter("joiningDate").value(joiningDate).notNull();
        
         if (this.fromApiJsonHelper.parameterExists("dateFormat", element)) {
-        	final String dateFormat = this.fromApiJsonHelper.extractStringNamed("dateFormat", element);
-        	baseDataValidator.reset().parameter("dateFormat").value(dateFormat).notBlank();
+            final String dateFormat = this.fromApiJsonHelper.extractStringNamed("dateFormat", element);
+            baseDataValidator.reset().parameter("dateFormat").value(dateFormat).notBlank();
         }
         
         if (this.fromApiJsonHelper.parameterExists("locale", element)) {
-        	final String locale = this.fromApiJsonHelper.extractStringNamed("locale", element);
-        	baseDataValidator.reset().parameter("locale").value(locale).notBlank();
+            final String locale = this.fromApiJsonHelper.extractStringNamed("locale", element);
+            baseDataValidator.reset().parameter("locale").value(locale).notBlank();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -159,12 +159,12 @@ public final class StaffCommandFromApiJsonDeserializer {
             final Boolean forceStatus = this.fromApiJsonHelper.extractBooleanNamed("forceStatus", element);
             if ((!activeFlag && forceStatus == null) || 
                 (!activeFlag && forceStatus)) {           
-            	 Object[] result = staffReadPlatformService.hasAssociatedItems(staffId);
-            	
-            	if (result != null && result.length > 0) {
-            		baseDataValidator.reset().parameter("isactive").failWithCode("staff.is.assigned",result);
-            	}
-            	
+                 Object[] result = staffReadPlatformService.hasAssociatedItems(staffId);
+                
+                if (result != null && result.length > 0) {
+                    baseDataValidator.reset().parameter("isactive").failWithCode("staff.is.assigned",result);
+                }
+                
             }
             baseDataValidator.reset().parameter("isActive").value(activeFlag).notNull();
         }
@@ -175,13 +175,13 @@ public final class StaffCommandFromApiJsonDeserializer {
         }
 
         if (this.fromApiJsonHelper.parameterExists("dateFormat", element)) {
-        	final String dateFormat = this.fromApiJsonHelper.extractStringNamed("dateFormat", element);
-        	baseDataValidator.reset().parameter("dateFormat").value(dateFormat).notBlank();
+            final String dateFormat = this.fromApiJsonHelper.extractStringNamed("dateFormat", element);
+            baseDataValidator.reset().parameter("dateFormat").value(dateFormat).notBlank();
         }
         
         if (this.fromApiJsonHelper.parameterExists("locale", element)) {
-        	final String locale = this.fromApiJsonHelper.extractStringNamed("locale", element);
-        	baseDataValidator.reset().parameter("locale").value(locale).notBlank();
+            final String locale = this.fromApiJsonHelper.extractStringNamed("locale", element);
+            baseDataValidator.reset().parameter("locale").value(locale).notBlank();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

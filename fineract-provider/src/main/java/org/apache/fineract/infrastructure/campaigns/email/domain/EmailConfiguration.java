@@ -27,34 +27,34 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "scheduled_email_configuration")
 public class EmailConfiguration extends AbstractPersistableCustom<Long> {
-	@Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
-	
-	@Column(name = "value", nullable = false)
+    
+    @Column(name = "value", nullable = false)
     private String value;
-	
-	/** 
-	 * EmailConfiguration constructor
-	 **/
-	protected EmailConfiguration() {}
-	
-	/** 
-	 * EmailConfiguration constructor
-	 **/
-	public EmailConfiguration(String name, String value) {
-		this.name = name;
-		this.value = value;
-	}
-	
-	public void setValue(String value) {
-		this.value = value;
-	}
+    
+    /** 
+     * EmailConfiguration constructor
+     **/
+    protected EmailConfiguration() {}
+    
+    /** 
+     * EmailConfiguration constructor
+     **/
+    public EmailConfiguration(String name, String value) {
+        this.name = name;
+        this.value = value;
+    }
+    
+    public void setValue(String value) {
+        this.value = value;
+    }
 
-	public String getName() {
-		return this.name;
-	}
+    public String getName() {
+        return this.name;
+    }
 
-	public String getValue() {
-		return this.value;
-	}
+    public String getValue() {
+        return this.value;
+    }
 }

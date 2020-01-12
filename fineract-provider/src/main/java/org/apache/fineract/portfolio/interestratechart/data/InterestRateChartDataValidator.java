@@ -58,15 +58,15 @@ public class InterestRateChartDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final InterestRateChartSlabDataValidator chartSlabDataValidator;
-	private static final Set<String> INTERESTRATE_CHART_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-			InterestRateChartApiConstants.localeParamName, InterestRateChartApiConstants.dateFormatParamName,
-			nameParamName, descriptionParamName, fromDateParamName, endDateParamName, productIdParamName, chartSlabs,
-			isPrimaryGroupingByAmountParamName));
+    private static final Set<String> INTERESTRATE_CHART_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            InterestRateChartApiConstants.localeParamName, InterestRateChartApiConstants.dateFormatParamName,
+            nameParamName, descriptionParamName, fromDateParamName, endDateParamName, productIdParamName, chartSlabs,
+            isPrimaryGroupingByAmountParamName));
 
-	private static final Set<String> INTERESTRATE_CHART_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-			InterestRateChartApiConstants.localeParamName, InterestRateChartApiConstants.dateFormatParamName,
-			idParamName, nameParamName, descriptionParamName, fromDateParamName, endDateParamName, chartSlabs,
-			InterestRateChartApiConstants.deleteParamName, isPrimaryGroupingByAmountParamName));
+    private static final Set<String> INTERESTRATE_CHART_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            InterestRateChartApiConstants.localeParamName, InterestRateChartApiConstants.dateFormatParamName,
+            idParamName, nameParamName, descriptionParamName, fromDateParamName, endDateParamName, chartSlabs,
+            InterestRateChartApiConstants.deleteParamName, isPrimaryGroupingByAmountParamName));
 
     @Autowired
     public InterestRateChartDataValidator(final FromJsonHelper fromApiJsonHelper,

@@ -22,11 +22,11 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 @SuppressWarnings("serial")
 public class CashierDateRangeOutOfTellerDateRangeException extends
-		AbstractPlatformDomainRuleException {
+        AbstractPlatformDomainRuleException {
 
-	public CashierDateRangeOutOfTellerDateRangeException() {
-		super("cashier.date.range.out.of.teller.date.range.exception",
-				"Cashier date range should be in teller date range.");
-	}
+    public CashierDateRangeOutOfTellerDateRangeException() {
+        super("cashier.date.range.out.of.teller.date.range.exception",
+                "Cashier date range should be in teller date range.");
+    }
 
 }

@@ -41,8 +41,8 @@ import com.google.gson.reflect.TypeToken;
 public class DataTableValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
-	private final Set<String> REGISTER_PARAMS = new HashSet<>(
-			Arrays.asList(DataTableApiConstant.categoryParamName, DataTableApiConstant.localParamName));
+    private final Set<String> REGISTER_PARAMS = new HashSet<>(
+            Arrays.asList(DataTableApiConstant.categoryParamName, DataTableApiConstant.localParamName));
 
     @Autowired
     public DataTableValidator(final FromJsonHelper fromApiJsonHelper) {

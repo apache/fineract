@@ -352,7 +352,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             this.repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(newValue);
         }
             if (this.repaymentPeriodFrequencyType == PeriodFrequencyType.MONTHS) {
-        	Integer newValue = null;
+            Integer newValue = null;
                 final String repaymentFrequencyNthDayTypeParamName = "repaymentFrequencyNthDayType";
                 newValue = command.integerValueOfParameterNamed(repaymentFrequencyNthDayTypeParamName);
                 actualChanges.put(repaymentFrequencyNthDayTypeParamName, newValue);
@@ -510,7 +510,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     }
 
     public void updateCurrency(final MonetaryCurrency currency) {
-    	this.currency = currency ;
+        this.currency = currency ;
     }
     
     public void validateRepaymentPeriodWithGraceSettings() {
@@ -534,19 +534,19 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         
         int graceOnPrincipal = 0;
         if (this.getGraceOnPrincipalPayment() != null) {
-        	graceOnPrincipal = this.getGraceOnPrincipalPayment().intValue();
+            graceOnPrincipal = this.getGraceOnPrincipalPayment().intValue();
         }
         int recurMoratoriumOnPrincipal = 0;
         if (this.recurringMoratoriumOnPrincipalPeriods() != null) {
-        	recurMoratoriumOnPrincipal = this.recurringMoratoriumOnPrincipalPeriods().intValue();
+            recurMoratoriumOnPrincipal = this.recurringMoratoriumOnPrincipalPeriods().intValue();
         }
         
         if (  ( recurMoratoriumOnPrincipal > 0 ) 
-        	&& ( (this.numberOfRepayments - graceOnPrincipal) % ( recurMoratoriumOnPrincipal + 1) != 1) ) {
+            && ( (this.numberOfRepayments - graceOnPrincipal) % ( recurMoratoriumOnPrincipal + 1) != 1) ) {
             baseDataValidator.reset().parameter("graceOnPrincipalPayments.and.recurringMoratoriumOnPrincipalPeriods")
-	            	.value(graceOnPrincipal)
-	            	.value(recurMoratoriumOnPrincipal)
-	                .failWithCode("causes.principal.moratorium.for.last.installment");
+                    .value(graceOnPrincipal)
+                    .value(recurMoratoriumOnPrincipal)
+                    .failWithCode("causes.principal.moratorium.for.last.installment");
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }

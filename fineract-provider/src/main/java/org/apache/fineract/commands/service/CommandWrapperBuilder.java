@@ -2836,31 +2836,31 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-	public CommandWrapperBuilder addSelfServiceBeneficiaryTPT() {
+    public CommandWrapperBuilder addSelfServiceBeneficiaryTPT() {
         this.actionName = "CREATE";
         this.entityName = "SSBENEFICIARYTPT";
         this.entityId = null;
         this.href = "/self/beneficiaries/tpt";
         return this;
-	}
+    }
 
-	public CommandWrapperBuilder updateSelfServiceBeneficiaryTPT(final Long beneficiaryId) {
+    public CommandWrapperBuilder updateSelfServiceBeneficiaryTPT(final Long beneficiaryId) {
         this.actionName = "UPDATE";
         this.entityName = "SSBENEFICIARYTPT";
         this.entityId = beneficiaryId;
         this.href = "/self/beneficiaries/tpt/"+beneficiaryId;
         return this;
-	}
+    }
 
-	public CommandWrapperBuilder deleteSelfServiceBeneficiaryTPT(final Long beneficiaryId) {
+    public CommandWrapperBuilder deleteSelfServiceBeneficiaryTPT(final Long beneficiaryId) {
         this.actionName = "DELETE";
         this.entityName = "SSBENEFICIARYTPT";
         this.entityId = beneficiaryId;
         this.href = "/self/beneficiaries/tpt/"+beneficiaryId;
         return this;
-	}
+    }
 
-	public CommandWrapperBuilder createReportMailingJob(final String entityName) {
+    public CommandWrapperBuilder createReportMailingJob(final String entityName) {
         this.actionName = "CREATE";
         this.entityName = entityName;
         this.entityId = null;
@@ -3003,7 +3003,7 @@ public class CommandWrapperBuilder {
         this.href = "/savingsaccounts/" + accountId + "?command=unblock";
         return this;
     }
-	public CommandWrapperBuilder disableAdHoc(Long adHocId) {
+    public CommandWrapperBuilder disableAdHoc(Long adHocId) {
         this.actionName = "DISABLE";
         this.entityName = "ADHOC";
         this.entityId = adHocId;

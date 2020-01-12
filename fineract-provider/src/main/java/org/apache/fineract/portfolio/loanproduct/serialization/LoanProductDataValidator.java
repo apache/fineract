@@ -331,8 +331,8 @@ public final class LoanProductDataValidator {
         if (this.fromApiJsonHelper.parameterExists("isLinkedToFloatingInterestRates", element)
                 && this.fromApiJsonHelper.extractBooleanNamed("isLinkedToFloatingInterestRates", element) == true) {
             if (isEqualAmortization) { throw new EqualAmortizationUnsupportedFeatureException("floating.interest.rate",
-                    "floating interest rate"); }      	
-        	if (this.fromApiJsonHelper.parameterExists("interestRatePerPeriod", element)) {
+                    "floating interest rate"); }          
+            if (this.fromApiJsonHelper.parameterExists("interestRatePerPeriod", element)) {
                 baseDataValidator
                         .reset()
                         .parameter("interestRatePerPeriod")
@@ -652,7 +652,7 @@ public final class LoanProductDataValidator {
     private void validateVariableInstallmentSettings(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.allowVariableInstallmentsParamName, element)
                 && this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.allowVariableInstallmentsParamName, element)) {
-        	
+            
             boolean isEqualAmortization = false;
             if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.isEqualAmortizationParam, element)) {
                 isEqualAmortization = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.isEqualAmortizationParam, element);
@@ -1170,8 +1170,8 @@ public final class LoanProductDataValidator {
             isLinkedToFloatingInterestRates = this.fromApiJsonHelper.extractBooleanNamed("isLinkedToFloatingInterestRates", element);
         }
         if (isLinkedToFloatingInterestRates) {
-        	if(isEqualAmortization){
-            	throw new EqualAmortizationUnsupportedFeatureException("floating.interest.rate", "floating interest rate");
+            if(isEqualAmortization){
+                throw new EqualAmortizationUnsupportedFeatureException("floating.interest.rate", "floating interest rate");
             }
             if (this.fromApiJsonHelper.parameterExists("interestRatePerPeriod", element)) {
                 baseDataValidator

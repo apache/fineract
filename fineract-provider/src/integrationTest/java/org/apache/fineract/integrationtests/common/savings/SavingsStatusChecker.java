@@ -90,38 +90,38 @@ public class SavingsStatusChecker {
         return (Boolean) savingsStatusMap.get(nameOfSavingsStatusString);
     }
 
-	public static void verifySavingsSubStatusInactive(HashMap savingsStatusHashMap) {
+    public static void verifySavingsSubStatusInactive(HashMap savingsStatusHashMap) {
         System.out.println("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS ACTIVE ------------------------------------");
         assertTrue("UNEXPECTED SAVINGS ACCOUNT SUB STATUS", getStatus(savingsStatusHashMap, "inactive"));
         System.out.println("Savings Application Sub Status:" + savingsStatusHashMap + "\n");
-	}
-	
-	public static void verifySavingsSubStatusDormant(HashMap savingsStatusHashMap) {
+    }
+    
+    public static void verifySavingsSubStatusDormant(HashMap savingsStatusHashMap) {
         System.out.println("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS ACTIVE ------------------------------------");
         assertTrue("UNEXPECTED SAVINGS ACCOUNT SUB STATUS", getStatus(savingsStatusHashMap, "dormant"));
         System.out.println("Savings Application Sub Status:" + savingsStatusHashMap + "\n");
-	}
-	
-	public static void verifySavingsSubStatusEscheat(HashMap savingsStatusHashMap) {
+    }
+    
+    public static void verifySavingsSubStatusEscheat(HashMap savingsStatusHashMap) {
         System.out.println("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS ACTIVE ------------------------------------");
         assertTrue("UNEXPECTED SAVINGS ACCOUNT SUB STATUS", getStatus(savingsStatusHashMap, "escheat"));
         System.out.println("Savings Application Sub Status:" + savingsStatusHashMap + "\n");
-	}
+    }
 
-	public static void verifySavingsSubStatusNone(HashMap savingsStatusHashMap) {
+    public static void verifySavingsSubStatusNone(HashMap savingsStatusHashMap) {
         System.out.println("\n-------------------------------------- VERIFYING SAVINGS APPLICATION IS ACTIVE ------------------------------------");
         assertTrue("UNEXPECTED SAVINGS ACCOUNT SUB STATUS", getStatus(savingsStatusHashMap, "none"));
         System.out.println("Savings Application Sub Status:" + savingsStatusHashMap + "\n");
-	}
-	
-	public static void verifySavingsSubStatusblock(HashMap savingsStatusHashMap) {
+    }
+    
+    public static void verifySavingsSubStatusblock(HashMap savingsStatusHashMap) {
         System.out.println(
                 "\n-------------------------------------- VERIFYING SAVINGS ACCOUNT IS BLOCKED ------------------------------------");
         assertTrue("block", getStatus(savingsStatusHashMap, "block"));
         System.out.println("Savings Application Sub Status:" + savingsStatusHashMap + "\n");
     }
 
-	public static void verifySavingsSubStatusIsNone(HashMap savingsStatusHashMap) {
+    public static void verifySavingsSubStatusIsNone(HashMap savingsStatusHashMap) {
         System.out.println("\n------------------------- VERIFYING SAVINGS ACCOUNT IS NOT BLOCKED FOR ANY TYPE OF TRANSACTIONS ---------------------------");
         assertTrue("none", getStatus(savingsStatusHashMap, "none"));
         System.out.println("Savings Application Sub Status:" + savingsStatusHashMap + "\n");

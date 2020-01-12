@@ -29,17 +29,17 @@ import org.springframework.stereotype.Service;
 @Service
 @CommandType(entity = "ADDRESS", action = "CREATE")
 public class AddClientAddressCommandHandler implements NewCommandSourceHandler {
-	private final AddressWritePlatformService writePlatformService;
+    private final AddressWritePlatformService writePlatformService;
 
-	@Autowired
-	public AddClientAddressCommandHandler(final AddressWritePlatformService writePlatformService) {
-		this.writePlatformService = writePlatformService;
-	}
+    @Autowired
+    public AddClientAddressCommandHandler(final AddressWritePlatformService writePlatformService) {
+        this.writePlatformService = writePlatformService;
+    }
 
-	@Override
-	public CommandProcessingResult processCommand(final JsonCommand command) {
-		return this.writePlatformService.addClientAddress(command.getClientId(), command.entityId(), command);
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
+        return this.writePlatformService.addClientAddress(command.getClientId(), command.entityId(), command);
 
-	}
+    }
 
 }

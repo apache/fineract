@@ -143,7 +143,7 @@ public class SavingsAccountTransactionEnumData implements Serializable {
     }
     
     public boolean isEscheat() {
-    	return this.escheat;
+        return this.escheat;
     }
     
     public boolean isAmountOnHold() {

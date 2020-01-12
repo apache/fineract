@@ -24,16 +24,16 @@ import java.util.Set;
 
 public interface SelfBeneficiariesTPTApiConstants {
 
-	public static final String BENEFICIARY_ENTITY_NAME = "SSBENEFICIARYTPT";
-	public static final String RESOURCE_NAME = "beneficiary";
-	public static final String LOCALE = "locale";
-	public static final String NAME_PARAM_NAME = "name";
-	public static final String OFFICE_NAME_PARAM_NAME = "officeName";
-	public static final String ACCOUNT_TYPE_PARAM_NAME = "accountType";
-	public static final String ACCOUNT_NUMBER_PARAM_NAME = "accountNumber";
-	public static final String TRANSFER_LIMIT_PARAM_NAME = "transferLimit";
+    public static final String BENEFICIARY_ENTITY_NAME = "SSBENEFICIARYTPT";
+    public static final String RESOURCE_NAME = "beneficiary";
+    public static final String LOCALE = "locale";
+    public static final String NAME_PARAM_NAME = "name";
+    public static final String OFFICE_NAME_PARAM_NAME = "officeName";
+    public static final String ACCOUNT_TYPE_PARAM_NAME = "accountType";
+    public static final String ACCOUNT_NUMBER_PARAM_NAME = "accountNumber";
+    public static final String TRANSFER_LIMIT_PARAM_NAME = "transferLimit";
 
-	public static final String ID_PARAM_NAME = "id";
-	public static final String CLIENT_NAME_PARAM_NAME = "clientName";
-	public static final String ACCOUNT_TYPE_OPTIONS_PARAM_NAME = "accountTypeOptions";
+    public static final String ID_PARAM_NAME = "id";
+    public static final String CLIENT_NAME_PARAM_NAME = "clientName";
+    public static final String ACCOUNT_TYPE_OPTIONS_PARAM_NAME = "accountTypeOptions";
 }

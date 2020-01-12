@@ -30,19 +30,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = "FLOATINGRATE", action = "CREATE")
 public class CreateFloatingRateCommandHandler implements
-		NewCommandSourceHandler {
+        NewCommandSourceHandler {
 
-	private final FloatingRateWritePlatformService writePlatformService;
+    private final FloatingRateWritePlatformService writePlatformService;
 
-	@Autowired
-	public CreateFloatingRateCommandHandler(
-			final FloatingRateWritePlatformService writePlatformService) {
-		this.writePlatformService = writePlatformService;
-	}
+    @Autowired
+    public CreateFloatingRateCommandHandler(
+            final FloatingRateWritePlatformService writePlatformService) {
+        this.writePlatformService = writePlatformService;
+    }
 
-	@Transactional
-	@Override
-	public CommandProcessingResult processCommand(final JsonCommand command) {
-		return this.writePlatformService.createFloatingRate(command);
-	}
+    @Transactional
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
+        return this.writePlatformService.createFloatingRate(command);
+    }
 }

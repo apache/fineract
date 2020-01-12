@@ -307,20 +307,20 @@ public class SavingsEnumerations {
         final boolean blockDebit = type.isSubStatusDebitBlocked();
 
         SavingsAccountSubStatusEnumData optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.NONE.getValue().longValue(),
-        		SavingsAccountSubStatusEnum.NONE.getCode(), "None", true, inactive, dormant, escheat, block, blockCredit, blockDebit);
+                SavingsAccountSubStatusEnum.NONE.getCode(), "None", true, inactive, dormant, escheat, block, blockCredit, blockDebit);
 
         switch (type) {
             case INACTIVE:
                 optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.INACTIVE.getValue().longValue(),
-                		SavingsAccountSubStatusEnum.INACTIVE.getCode(), "Inactive", none, inactive, dormant, escheat, block, blockCredit, blockDebit);
+                        SavingsAccountSubStatusEnum.INACTIVE.getCode(), "Inactive", none, inactive, dormant, escheat, block, blockCredit, blockDebit);
             break;
             case DORMANT:
                 optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.DORMANT.getValue().longValue(),
-                		SavingsAccountSubStatusEnum.DORMANT.getCode(), "Dormant", none, inactive, dormant, escheat, block, blockCredit, blockDebit);
+                        SavingsAccountSubStatusEnum.DORMANT.getCode(), "Dormant", none, inactive, dormant, escheat, block, blockCredit, blockDebit);
             break;
             case ESCHEAT:
                 optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.ESCHEAT.getValue().longValue(),
-                		SavingsAccountSubStatusEnum.ESCHEAT.getCode(), "Escheat", none, inactive, dormant, escheat, block, blockCredit, blockDebit);
+                        SavingsAccountSubStatusEnum.ESCHEAT.getCode(), "Escheat", none, inactive, dormant, escheat, block, blockCredit, blockDebit);
             break;
             case BLOCK:
                 optionData = new SavingsAccountSubStatusEnumData(SavingsAccountSubStatusEnum.BLOCK.getValue().longValue(),

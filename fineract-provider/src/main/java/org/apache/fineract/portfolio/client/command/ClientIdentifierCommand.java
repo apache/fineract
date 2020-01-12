@@ -34,7 +34,7 @@ public class ClientIdentifierCommand {
     private final Long documentTypeId;
     private final String documentKey;
     private final String description;
-	private final String status;
+    private final String status;
 
     public ClientIdentifierCommand(final Long documentTypeId, final String documentKey, final String statusString, final String description) {
         this.documentTypeId = documentTypeId;

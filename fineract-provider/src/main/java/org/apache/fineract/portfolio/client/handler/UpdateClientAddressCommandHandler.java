@@ -30,22 +30,22 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "ADDRESS", action = "UPDATE")
 public class UpdateClientAddressCommandHandler implements NewCommandSourceHandler {
 
-	private final AddressWritePlatformService writePlatformService;
+    private final AddressWritePlatformService writePlatformService;
 
-	@Autowired
-	public UpdateClientAddressCommandHandler(final AddressWritePlatformService writePlatformService) {
-		this.writePlatformService = writePlatformService;
-	}
+    @Autowired
+    public UpdateClientAddressCommandHandler(final AddressWritePlatformService writePlatformService) {
+        this.writePlatformService = writePlatformService;
+    }
 
-	@Override
-	public CommandProcessingResult processCommand(final JsonCommand command) {
-		/*
-		 * return
-		 * this.writePlatformService.updateClientAddress(command.getClientId(),
-		 * command.entityId(), command.getStatus(), command);
-		 */
-		return this.writePlatformService.updateClientAddress(command.getClientId(), command);
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
+        /*
+         * return
+         * this.writePlatformService.updateClientAddress(command.getClientId(),
+         * command.entityId(), command.getStatus(), command);
+         */
+        return this.writePlatformService.updateClientAddress(command.getClientId(), command);
 
-	}
+    }
 
 }

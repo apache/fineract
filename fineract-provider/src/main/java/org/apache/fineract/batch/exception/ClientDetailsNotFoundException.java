@@ -22,8 +22,8 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class ClientDetailsNotFoundException extends AbstractPlatformDomainRuleException{
 
-	public ClientDetailsNotFoundException() {
-		super("validation.msg.batch.jlg.no.clients.defined", "No Client details found", "");
-	}
+    public ClientDetailsNotFoundException() {
+        super("validation.msg.batch.jlg.no.clients.defined", "No Client details found", "");
+    }
 
 }

@@ -29,8 +29,8 @@ import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
 public class HookHelper {
-	
-	private final RequestSpecification requestSpec;
+    
+    private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
 
     private static final String CREATE_HOOK_URL = "/fineract-provider/api/v1/hooks?" + Utils.TENANT_IDENTIFIER;
@@ -47,9 +47,9 @@ public class HookHelper {
     }
     
     public String getTestHookAsJson(final String payloadURL) {
-    	final HashMap<String, Object> map = new HashMap<>();
-    	map.put("name", "Web");
-    	map.put("displayName", Utils.randomNameGenerator("Hook_DisplayName_", 5));
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("name", "Web");
+        map.put("displayName", Utils.randomNameGenerator("Hook_DisplayName_", 5));
         map.put("isActive", "true");
         final HashMap<String, String> config = new HashMap<>();
         config.put("Content Type", "json");
@@ -97,7 +97,7 @@ public class HookHelper {
         final String GET_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
         ResponseSpecification responseSpec404 = new ResponseSpecBuilder().expectStatusCode(404).build();
         ArrayList array = Utils.performServerGet(this.requestSpec, responseSpec404, GET_URL, "errors");
-		HashMap<String, String> map = (HashMap<String, String>)array.get(0);
+        HashMap<String, String> map = (HashMap<String, String>)array.get(0);
         assertEquals("error.msg.hook.identifier.not.found",map.get("userMessageGlobalisationCode"));
     }
 }

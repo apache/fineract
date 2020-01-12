@@ -53,6 +53,6 @@ public interface ReadReportingService {
 
     String  sqlToRunForSmsEmailCampaign(String name, String type, Map<String, String> queryParams);
 
-	ByteArrayOutputStream generatePentahoReportAsOutputStream(String reportName, String outputTypeParam,
+    ByteArrayOutputStream generatePentahoReportAsOutputStream(String reportName, String outputTypeParam,
             Map<String, String> queryParams, Locale locale, AppUser runReportAsUser, StringBuilder errorLog);
 }

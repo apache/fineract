@@ -30,9 +30,9 @@ public interface GroupRepository extends JpaRepository<Group, Long>, JpaSpecific
 
     Collection<Group> findByParentId(Long parentId);
     
-	public static final String RETRIEVE_SUBMITTED_ON_DATE = "select g.submittedOnDate from Group g where g.id = :groupId";
+    public static final String RETRIEVE_SUBMITTED_ON_DATE = "select g.submittedOnDate from Group g where g.id = :groupId";
 
-	@Query(RETRIEVE_SUBMITTED_ON_DATE)
-	Date retrieveGroupTypeSubmitteOndDate(@Param("groupId") Long groupId);
+    @Query(RETRIEVE_SUBMITTED_ON_DATE)
+    Date retrieveGroupTypeSubmitteOndDate(@Param("groupId") Long groupId);
 
 }

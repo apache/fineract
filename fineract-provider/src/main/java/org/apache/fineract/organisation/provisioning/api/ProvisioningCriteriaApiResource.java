@@ -66,17 +66,17 @@ public class ProvisioningCriteriaApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final DefaultToApiJsonSerializer<ProvisioningCriteriaData> toApiJsonSerializer;
 
-	private static final Set<String> PROVISIONING_CRITERIA_TEMPLATE_PARAMETER = new HashSet<>(
-			Arrays.asList(ProvisioningCriteriaConstants.DEFINITIONS_PARAM,
-					ProvisioningCriteriaConstants.LOANPRODUCTS_PARAM, ProvisioningCriteriaConstants.GLACCOUNTS_PARAM));
+    private static final Set<String> PROVISIONING_CRITERIA_TEMPLATE_PARAMETER = new HashSet<>(
+            Arrays.asList(ProvisioningCriteriaConstants.DEFINITIONS_PARAM,
+                    ProvisioningCriteriaConstants.LOANPRODUCTS_PARAM, ProvisioningCriteriaConstants.GLACCOUNTS_PARAM));
 
-	private static final Set<String> PROVISIONING_CRITERIA_PARAMETERS = new HashSet<>(
-			Arrays.asList(ProvisioningCriteriaConstants.CRITERIA_PARAM,
-					ProvisioningCriteriaConstants.LOANPRODUCTS_PARAM, ProvisioningCriteriaConstants.DEFINITIONS_PARAM));
+    private static final Set<String> PROVISIONING_CRITERIA_PARAMETERS = new HashSet<>(
+            Arrays.asList(ProvisioningCriteriaConstants.CRITERIA_PARAM,
+                    ProvisioningCriteriaConstants.LOANPRODUCTS_PARAM, ProvisioningCriteriaConstants.DEFINITIONS_PARAM));
 
-	private static final Set<String> ALL_PROVISIONING_CRITERIA_PARAMETERS = new HashSet<>(
-			Arrays.asList(ProvisioningCriteriaConstants.CRITERIA_ID_PARAM,
-					ProvisioningCriteriaConstants.CRITERIA_NAME_PARAM, ProvisioningCriteriaConstants.CREATED_BY_PARAM));
+    private static final Set<String> ALL_PROVISIONING_CRITERIA_PARAMETERS = new HashSet<>(
+            Arrays.asList(ProvisioningCriteriaConstants.CRITERIA_ID_PARAM,
+                    ProvisioningCriteriaConstants.CRITERIA_NAME_PARAM, ProvisioningCriteriaConstants.CREATED_BY_PARAM));
 
     @Autowired
     public ProvisioningCriteriaApiResource(final PlatformSecurityContext platformSecurityContext,

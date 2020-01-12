@@ -95,8 +95,8 @@ public class BatchApiServiceImpl implements BatchApiService {
 
         final List<BatchRequestNode> batchRequestNodes = this.resolutionHelper.getDependingRequests(requestList);
         if(batchRequestNodes.isEmpty()) {
-        	 final BatchResponse response = new BatchResponse();
-        	 ErrorInfo ex = ErrorHandler.handler(new ClientDetailsNotFoundException());
+             final BatchResponse response = new BatchResponse();
+             ErrorInfo ex = ErrorHandler.handler(new ClientDetailsNotFoundException());
              response.setStatusCode(500);
              response.setBody(ex.getMessage());
              responseList.add(response) ;
@@ -222,7 +222,7 @@ public class BatchApiServiceImpl implements BatchApiService {
 
             return errResponseList;
         }catch (final NonTransientDataAccessException ex) {
-        	 ErrorInfo e = ErrorHandler.handler(ex);
+             ErrorInfo e = ErrorHandler.handler(ex);
              BatchResponse errResponse = new BatchResponse();
              errResponse.setStatusCode(e.getStatusCode());
 

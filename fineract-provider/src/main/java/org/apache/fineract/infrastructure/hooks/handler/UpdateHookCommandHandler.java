@@ -31,20 +31,20 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "HOOK", action = "UPDATE")
 public class UpdateHookCommandHandler implements NewCommandSourceHandler {
 
-	private final HookWritePlatformService writePlatformService;
+    private final HookWritePlatformService writePlatformService;
 
-	@Autowired
-	public UpdateHookCommandHandler(
-			final HookWritePlatformService writePlatformService) {
-		this.writePlatformService = writePlatformService;
-	}
+    @Autowired
+    public UpdateHookCommandHandler(
+            final HookWritePlatformService writePlatformService) {
+        this.writePlatformService = writePlatformService;
+    }
 
-	@Transactional
-	@Override
-	public CommandProcessingResult processCommand(final JsonCommand command) {
+    @Transactional
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
 
-		return this.writePlatformService
-				.updateHook(command.entityId(), command);
-	}
+        return this.writePlatformService
+                .updateHook(command.entityId(), command);
+    }
 
 }

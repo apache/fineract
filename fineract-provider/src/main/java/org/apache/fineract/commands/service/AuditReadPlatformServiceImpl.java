@@ -274,7 +274,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         }
         sql += extraCriteria;
         if(isExtraCritereaIncluded){
-        	this.columnValidator.validateSqlInjection(sql, extraCriteria);
+            this.columnValidator.validateSqlInjection(sql, extraCriteria);
         }        
         logger.info("sql: " + sql);
 

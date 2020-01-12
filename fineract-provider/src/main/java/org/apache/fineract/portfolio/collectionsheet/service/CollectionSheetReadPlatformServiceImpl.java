@@ -343,9 +343,9 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         
         Long entityId = null;
         if(group.isChildGroup()){
-        	entityId = group.getParentId();
+            entityId = group.getParentId();
         }else{
-        	entityId = group.getId();
+            entityId = group.getId();
         }
 
         Boolean isSkipMeetingOnFirstDay = false;
@@ -354,7 +354,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         if(isSkipRepaymentOnFirstMonthEnabled){
             numberOfDays = this.configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
             isSkipMeetingOnFirstDay = this.calendarReadPlatformService.isCalendarAssociatedWithEntity(entityId, calendar.getId(), 
-            		entityType.getValue().longValue());
+                    entityType.getValue().longValue());
         }
 
         if (!calendar.isValidRecurringDate(transactionDate, isSkipMeetingOnFirstDay, numberOfDays)) { throw new NotValidRecurringDateException("collectionsheet", "The date '"

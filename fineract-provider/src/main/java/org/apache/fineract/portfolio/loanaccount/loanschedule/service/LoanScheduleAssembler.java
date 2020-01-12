@@ -532,7 +532,7 @@ public class LoanScheduleAssembler {
     }
 
     private void validateRepaymentsStartDateWithMeetingDates(final LocalDate repaymentsStartingFromDate, final Calendar calendar,
-		boolean isSkipRepaymentOnFirstDayOfMonth, final Integer numberOfDays) {
+        boolean isSkipRepaymentOnFirstDayOfMonth, final Integer numberOfDays) {
         if (repaymentsStartingFromDate != null
                 && !CalendarUtils.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(),
                         repaymentsStartingFromDate, isSkipRepaymentOnFirstDayOfMonth, numberOfDays)) {

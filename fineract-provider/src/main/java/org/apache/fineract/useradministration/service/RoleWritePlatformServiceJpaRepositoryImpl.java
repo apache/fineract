@@ -93,8 +93,8 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
                     .withCommandId(command.commandId()) //
                     .build();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(command, throwable, dve);
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .build();
@@ -139,7 +139,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             if (!changes.isEmpty()) {
                 this.roleRepository.saveAndFlush(role);
                 if (changes.containsKey("name")) {
-                	this.topicDomainService.updateTopic( previousRoleName, role, changes);
+                    this.topicDomainService.updateTopic( previousRoleName, role, changes);
                 }
             }
 
@@ -154,8 +154,8 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
                     .withCommandId(command.commandId()) //
                     .build();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(command, throwable, dve);
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .build();

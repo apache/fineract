@@ -24,5 +24,5 @@ import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountChargeData;
 
 public interface ShareAccountChargeReadPlatformService {
 
-	Collection<ShareAccountChargeData> retrieveAccountCharges(final Long accountId, final String status) ;
+    Collection<ShareAccountChargeData> retrieveAccountCharges(final Long accountId, final String status) ;
 }

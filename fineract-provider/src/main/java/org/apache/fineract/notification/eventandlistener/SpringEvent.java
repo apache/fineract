@@ -24,8 +24,8 @@ import org.springframework.context.ApplicationEvent;
 @SuppressWarnings("serial")
 public class SpringEvent extends ApplicationEvent {
 
-	private NotificationData notificationData;
-	 
+    private NotificationData notificationData;
+     
     public SpringEvent(Object source, NotificationData notificationData) {
         super(source);
         this.notificationData = notificationData;
@@ -34,5 +34,5 @@ public class SpringEvent extends ApplicationEvent {
     public NotificationData getNotificationData() {
         return notificationData;
     }
-	
+    
 }

@@ -98,60 +98,60 @@ public class DataSourceProperties extends PoolProperties {
 
     @Override
     public void setUrl(@SuppressWarnings("unused") String url) {
-	throw new UnsupportedOperationException("Use setHost/Port/DB() instead of setURL()");
+    throw new UnsupportedOperationException("Use setHost/Port/DB() instead of setURL()");
     }
 
-	@Override
-	public String getUrl() {
-		String url = super.getUrl();
-		if (StringUtils.hasText(url)) {
-			throw new IllegalStateException();
-		}
-		return jdbcProtocol + ":" + jdbcSubprotocol + "://" + getHost() + ":" + getPort() + "/" + getDBName();
-	}
+    @Override
+    public String getUrl() {
+        String url = super.getUrl();
+        if (StringUtils.hasText(url)) {
+            throw new IllegalStateException();
+        }
+        return jdbcProtocol + ":" + jdbcSubprotocol + "://" + getHost() + ":" + getPort() + "/" + getDBName();
+    }
 
-	public String getHost() {
-		return hostname;
-	}
+    public String getHost() {
+        return hostname;
+    }
 
-	public int getPort() {
-		return port;
-	}
+    public int getPort() {
+        return port;
+    }
 
-	public String getDBName() {
-		return dbName;
-	}
+    public String getDBName() {
+        return dbName;
+    }
 
-	public void setPort(int port) {
-		this.port = port;
-	}
+    public void setPort(int port) {
+        this.port = port;
+    }
 
-	public void setHost(String hostname) {
-		this.hostname = hostname;
-	}
+    public void setHost(String hostname) {
+        this.hostname = hostname;
+    }
 
-	public void setDBName(String dbName) {
-		this.dbName = dbName;
-	}
+    public void setDBName(String dbName) {
+        this.dbName = dbName;
+    }
 
-	@Override
-	public String getUsername() {
-		return this.username;
-	}
+    @Override
+    public String getUsername() {
+        return this.username;
+    }
 
-	@Override
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    @Override
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-	@Override
-	public String getPassword() {
-		return this.password;
-	}
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
 
-	@Override
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    @Override
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
 }

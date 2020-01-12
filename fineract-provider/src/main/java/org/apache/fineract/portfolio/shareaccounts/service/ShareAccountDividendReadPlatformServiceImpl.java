@@ -50,7 +50,7 @@ public class ShareAccountDividendReadPlatformServiceImpl implements ShareAccount
 
     @Autowired
     public ShareAccountDividendReadPlatformServiceImpl(final RoutingDataSource dataSource,
-    		final ColumnValidator columnValidator) {
+            final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.columnValidator = columnValidator;
     }

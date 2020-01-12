@@ -92,11 +92,11 @@ public enum EntityAccountType {
     }
     
     public Boolean isCenterAccount(){
-    	return this.value.equals(EntityAccountType.CENTER.getValue());
+        return this.value.equals(EntityAccountType.CENTER.getValue());
     }
     
     public Boolean isGroupAccount(){
-    	return this.value.equals(EntityAccountType.GROUP.getValue());
+        return this.value.equals(EntityAccountType.GROUP.getValue());
     }
 
 }

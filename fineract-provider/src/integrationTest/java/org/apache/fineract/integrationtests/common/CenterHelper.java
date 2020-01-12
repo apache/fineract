@@ -43,7 +43,7 @@ public class CenterHelper {
         final String GET_CENTER_BY_ID_URL = CENTERS_URL + "/" + id + "?associations=groupMembers&" + Utils.TENANT_IDENTIFIER;
         System.out.println("------------------------ RETRIEVING CENTER AT " + id + "-------------------------");
         Object get = Utils.performServerGet(requestSpec, responseSpec, GET_CENTER_BY_ID_URL, "");
-		final String jsonData = new Gson().toJson(get);
+        final String jsonData = new Gson().toJson(get);
         return new Gson().fromJson(jsonData, new TypeToken<CenterDomain>() {}.getType());
     }
 

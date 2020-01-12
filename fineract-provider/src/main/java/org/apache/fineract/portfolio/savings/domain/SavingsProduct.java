@@ -195,17 +195,17 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
     @JoinColumn(name = "tax_group_id")
     private TaxGroup taxGroup;
 
-	@Column(name = "is_dormancy_tracking_active")
-	private Boolean isDormancyTrackingActive;
+    @Column(name = "is_dormancy_tracking_active")
+    private Boolean isDormancyTrackingActive;
 
     @Column(name = "days_to_inactive")
-	private Long daysToInactive;
+    private Long daysToInactive;
 
     @Column(name = "days_to_dormancy")
-	private Long daysToDormancy;
+    private Long daysToDormancy;
 
     @Column(name = "days_to_escheat")
-	private Long daysToEscheat;
+    private Long daysToEscheat;
 
     public static SavingsProduct createNew(final String name, final String shortName, final String description,
             final MonetaryCurrency currency, final BigDecimal interestRate,
@@ -596,9 +596,9 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
         }
         
         if(this.isDormancyTrackingActive == null || !this.isDormancyTrackingActive){
-        	this.daysToInactive = null;
-        	this.daysToDormancy = null;
-        	this.daysToEscheat = null;
+            this.daysToInactive = null;
+            this.daysToDormancy = null;
+            this.daysToEscheat = null;
         }
 
         validateLockinDetails();
@@ -740,19 +740,19 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
     }
 
     public boolean isDormancyTrackingActive() {
-		return null == this.isDormancyTrackingActive? false: this.isDormancyTrackingActive;
-	}
+        return null == this.isDormancyTrackingActive? false: this.isDormancyTrackingActive;
+    }
 
-	public Long getDaysToInactive() {
-		return this.daysToInactive;
-	}
+    public Long getDaysToInactive() {
+        return this.daysToInactive;
+    }
 
-	public Long getDaysToDormancy() {
-		return this.daysToDormancy;
-	}
+    public Long getDaysToDormancy() {
+        return this.daysToDormancy;
+    }
 
-	public Long getDaysToEscheat() {
-		return this.daysToEscheat;
-	}
+    public Long getDaysToEscheat() {
+        return this.daysToEscheat;
+    }
 
 }

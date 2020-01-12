@@ -28,32 +28,32 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "m_field_configuration")
 public class FieldConfiguration extends AbstractPersistableCustom<Long> {
 
-	private String entity;
+    private String entity;
 
-	private String table;
+    private String table;
 
-	private String field;
+    private String field;
 
-	private boolean is_enabled;
+    private boolean is_enabled;
 
-	public FieldConfiguration() {
+    public FieldConfiguration() {
 
-	}
+    }
 
-	private FieldConfiguration(final String entity, final String table, final String field, final boolean is_enabled) {
-		this.entity = entity;
-		this.table = table;
-		this.field = field;
-		this.is_enabled = is_enabled;
+    private FieldConfiguration(final String entity, final String table, final String field, final boolean is_enabled) {
+        this.entity = entity;
+        this.table = table;
+        this.field = field;
+        this.is_enabled = is_enabled;
 
-	}
+    }
 
-	private static FieldConfiguration fromJson(final JsonCommand command) {
-		final String entity = command.stringValueOfParameterNamed("entity");
-		final String table = command.stringValueOfParameterNamed("table");
-		final String field = command.stringValueOfParameterNamed("field");
-		final boolean is_enabled = command.booleanPrimitiveValueOfParameterNamed("implementationKey");
+    private static FieldConfiguration fromJson(final JsonCommand command) {
+        final String entity = command.stringValueOfParameterNamed("entity");
+        final String table = command.stringValueOfParameterNamed("table");
+        final String field = command.stringValueOfParameterNamed("field");
+        final boolean is_enabled = command.booleanPrimitiveValueOfParameterNamed("implementationKey");
 
-		return new FieldConfiguration(entity, table, field, is_enabled);
-	}
+        return new FieldConfiguration(entity, table, field, is_enabled);
+    }
 }

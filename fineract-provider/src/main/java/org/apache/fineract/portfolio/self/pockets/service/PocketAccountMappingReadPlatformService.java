@@ -22,8 +22,8 @@ import org.apache.fineract.portfolio.self.pockets.data.PocketAccountMappingData;
 
 public interface PocketAccountMappingReadPlatformService {
 
-	PocketAccountMappingData retrieveAll();
+    PocketAccountMappingData retrieveAll();
 
-	boolean validatePocketAndAccountMapping(Long pocketId, Long accountId, Integer accountType);
+    boolean validatePocketAndAccountMapping(Long pocketId, Long accountId, Integer accountType);
 
 }

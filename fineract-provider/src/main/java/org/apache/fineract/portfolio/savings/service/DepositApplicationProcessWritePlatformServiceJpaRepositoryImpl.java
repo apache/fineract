@@ -212,7 +212,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             final Long savingsId = account.getId();
             this.businessEventNotifierService.notifyBusinessEventWasExecuted( BUSINESS_EVENTS.FIXED_DEPOSIT_ACCOUNT_CREATE,
-            		constructEntityMap(BUSINESS_ENTITY.DEPOSIT_ACCOUNT, account));
+                    constructEntityMap(BUSINESS_ENTITY.DEPOSIT_ACCOUNT, account));
 
             this.businessEventNotifierService.notifyBusinessEventWasExecuted( BUSINESS_EVENTS.FIXED_DEPOSIT_ACCOUNT_CREATE,
                     constructEntityMap(BUSINESS_ENTITY.DEPOSIT_ACCOUNT, account));
@@ -229,8 +229,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(command, throwable, dve);
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -275,7 +275,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             account.validateApplicableInterestRate();
             this.savingAccountRepository.save(account);
             this.businessEventNotifierService.notifyBusinessEventWasExecuted( BUSINESS_EVENTS.RECURRING_DEPOSIT_ACCOUNT_CREATE,
-            		constructEntityMap(BUSINESS_ENTITY.DEPOSIT_ACCOUNT, account));
+                    constructEntityMap(BUSINESS_ENTITY.DEPOSIT_ACCOUNT, account));
 
             this.businessEventNotifierService.notifyBusinessEventWasExecuted( BUSINESS_EVENTS.RECURRING_DEPOSIT_ACCOUNT_CREATE,
                     constructEntityMap(BUSINESS_ENTITY.DEPOSIT_ACCOUNT, account));
@@ -292,8 +292,8 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(command, throwable, dve);
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -328,7 +328,7 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 CalendarInstance parentCalendarInstance = this.calendarInstanceRepository.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
                         groupId, entityType, CalendarType.COLLECTION.getValue());
                 if(parentCalendarInstance == null){
-                	final String defaultUserMessage = "Meeting frequency is not attached to the Group/Center to which the client belongs to.";
+                    final String defaultUserMessage = "Meeting frequency is not attached to the Group/Center to which the client belongs to.";
                     throw new GeneralPlatformDomainRuleException(
                             "error.msg.meeting.frequency.not.attached.to.group.to.which.client.belongs.to",
                             defaultUserMessage, account.clientId());
@@ -442,9 +442,9 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return new CommandProcessingResult((long) -1);
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(command, throwable, dve);
-        	return new CommandProcessingResult((long) -1);
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
+            return new CommandProcessingResult((long) -1);
         }
     }
 
@@ -513,9 +513,9 @@ public class DepositApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return new CommandProcessingResult(Long.valueOf(-1));
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(command, throwable, dve);
-        	return new CommandProcessingResult(Long.valueOf(-1));
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
+            return new CommandProcessingResult(Long.valueOf(-1));
         }
     }
 

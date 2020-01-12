@@ -20,34 +20,34 @@ package org.apache.fineract.infrastructure.creditbureau.data;
 
 public class CreditBureauProduct {
 
-	private final long creditBureauProductId;
+    private final long creditBureauProductId;
 
-	private final String creditBureauProductName;
+    private final String creditBureauProductName;
 
-	private final long creditBureauMasterId;
+    private final long creditBureauMasterId;
 
-	private CreditBureauProduct(final long creditBureauProductId, final String creditBureauProductName,
-			final long creditBureauMasterId) {
-		this.creditBureauProductId = creditBureauProductId;
-		this.creditBureauProductName = creditBureauProductName;
-		this.creditBureauMasterId = creditBureauMasterId;
-	}
+    private CreditBureauProduct(final long creditBureauProductId, final String creditBureauProductName,
+            final long creditBureauMasterId) {
+        this.creditBureauProductId = creditBureauProductId;
+        this.creditBureauProductName = creditBureauProductName;
+        this.creditBureauMasterId = creditBureauMasterId;
+    }
 
-	public static CreditBureauProduct instance(final long creditBureauProductId, final String creditBureauProductName,
-			final long creditBureauMasterId) {
-		return new CreditBureauProduct(creditBureauProductId, creditBureauProductName, creditBureauMasterId);
-	}
+    public static CreditBureauProduct instance(final long creditBureauProductId, final String creditBureauProductName,
+            final long creditBureauMasterId) {
+        return new CreditBureauProduct(creditBureauProductId, creditBureauProductName, creditBureauMasterId);
+    }
 
-	public long getCreditBureauProductId() {
-		return this.creditBureauProductId;
-	}
+    public long getCreditBureauProductId() {
+        return this.creditBureauProductId;
+    }
 
-	public String getCreditBureauProductName() {
-		return this.creditBureauProductName;
-	}
+    public String getCreditBureauProductName() {
+        return this.creditBureauProductName;
+    }
 
-	public long getCreditBureauMasterId() {
-		return this.creditBureauMasterId;
-	}
+    public long getCreditBureauMasterId() {
+        return this.creditBureauMasterId;
+    }
 
 }

@@ -249,9 +249,9 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                     }
                 }
             }
-			if (credits.length != validCredits.length) {
-				throw new JournalEntryRuntimeException("error.msg.glJournalEntry.invalid.credits", "Invalid Credits.");
-			}
+            if (credits.length != validCredits.length) {
+                throw new JournalEntryRuntimeException("error.msg.glJournalEntry.invalid.credits", "Invalid Credits.");
+            }
         }
 
         if (debits != null && debits.length > 0) {
@@ -264,11 +264,11 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                         validDebits[i] = debit;
                     }
                 }
-			}
-			if (debits.length != validDebits.length) {
-				throw new JournalEntryRuntimeException("error.msg.glJournalEntry.invalid.debits","Invalid Debits");
-			}
-		}
+            }
+            if (debits.length != validDebits.length) {
+                throw new JournalEntryRuntimeException("error.msg.glJournalEntry.invalid.debits","Invalid Debits");
+            }
+        }
     }
 
     private void checkDebitAndCreditAmounts(final SingleDebitOrCreditEntryCommand[] credits, final SingleDebitOrCreditEntryCommand[] debits) {

@@ -64,7 +64,7 @@ public class ShareAccountCommandsServiceImpl implements AccountsCommandsService 
     }
 
     public Object approveShareAccount(Long accountId, JsonCommand jsonCommand) {
-    	return null ;
+        return null ;
     }
 
     public Object rejectShareAccount(Long accountId, JsonCommand jsonCommand) {

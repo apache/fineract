@@ -52,7 +52,7 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
     
     @Autowired
     public ReportMailingJobReadPlatformServiceImpl(final RoutingDataSource dataSource,
-    		final ColumnValidator columnValidator) {
+            final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.columnValidator = columnValidator;
     }

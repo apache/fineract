@@ -115,9 +115,9 @@ public class EmailCampaignValidator {
         final Long businessRuleId = this.fromApiJsonHelper.extractLongNamed(EmailCampaignValidator.businessRuleId,element);
         baseDataValidator.reset().parameter(EmailCampaignValidator.businessRuleId).value(businessRuleId).notNull().integerGreaterThanZero();
 
-		final String emailSubject = this.fromApiJsonHelper.extractStringNamed(EmailCampaignValidator.emailSubject, element);
+        final String emailSubject = this.fromApiJsonHelper.extractStringNamed(EmailCampaignValidator.emailSubject, element);
         baseDataValidator.reset().parameter(EmailCampaignValidator.emailSubject).value(emailSubject).notBlank().notExceedingLengthOf(50);
-		
+        
         final String emailMessage = this.fromApiJsonHelper.extractStringNamed(EmailCampaignValidator.emailMessage, element);
         baseDataValidator.reset().parameter(EmailCampaignValidator.emailMessage).value(emailMessage).notBlank().notExceedingLengthOf(480);
 

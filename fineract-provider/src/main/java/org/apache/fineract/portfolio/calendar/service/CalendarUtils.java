@@ -469,9 +469,9 @@ public class CalendarUtils {
         final Recur recur = CalendarUtils.getICalRecur(recurringRule);
         NumberList monthDays = null;
         if(recur.getDayList().isEmpty())
-        	monthDays = recur.getMonthDayList();
+            monthDays = recur.getMonthDayList();
         else
-        	monthDays = recur.getSetPosList();
+            monthDays = recur.getSetPosList();
         if (monthDays.isEmpty()) return NthDayType.INVALID;
         if (!recur.getMonthDayList().isEmpty() && recur.getSetPosList().isEmpty()) return NthDayType.ONDAY;
         Integer monthDay = (Integer) monthDays.get(0);

@@ -117,13 +117,13 @@ public class ChargeDropdownReadPlatformServiceImpl implements ChargeDropdownRead
     
     @Override
     public List<EnumOptionData> retrieveSharesCalculationTypes() {
-    	return Arrays.asList(chargeCalculationType(ChargeCalculationType.FLAT),
+        return Arrays.asList(chargeCalculationType(ChargeCalculationType.FLAT),
                 chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT));
     }
     
     @Override
     public List<EnumOptionData> retrieveSharesCollectionTimeTypes() {
-    	return Arrays.asList(chargeTimeType(ChargeTimeType.SHAREACCOUNT_ACTIVATION), 
-    	        chargeTimeType(ChargeTimeType.SHARE_PURCHASE), chargeTimeType(ChargeTimeType.SHARE_REDEEM));
+        return Arrays.asList(chargeTimeType(ChargeTimeType.SHAREACCOUNT_ACTIVATION), 
+                chargeTimeType(ChargeTimeType.SHARE_PURCHASE), chargeTimeType(ChargeTimeType.SHARE_REDEEM));
     }
 }

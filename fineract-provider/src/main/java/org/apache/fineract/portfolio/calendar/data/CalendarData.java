@@ -486,12 +486,12 @@ public class CalendarData implements Serializable {
     public EnumOptionData frequencyType(){
         return this.frequency;
     }
-	public EnumOptionData getRepeatsOnDay() {
-		return this.repeatsOnDay;
-	}
-	public EnumOptionData getRepeatsOnNthDayOfMonth() {
-		return this.repeatsOnNthDayOfMonth;
-	}
+    public EnumOptionData getRepeatsOnDay() {
+        return this.repeatsOnDay;
+    }
+    public EnumOptionData getRepeatsOnNthDayOfMonth() {
+        return this.repeatsOnNthDayOfMonth;
+    }
 
     @Override
     public boolean equals(Object o) {

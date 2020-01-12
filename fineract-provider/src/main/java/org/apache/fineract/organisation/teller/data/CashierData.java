@@ -57,9 +57,9 @@ public final class CashierData implements Serializable {
      * Creates a new cashier.
      */
     private CashierData(final Long id, final Long officeId, String officeName, 
-    		final Long staffId, final String staffName, final Long tellerId, final String tellerName,
-    		final String description,
-    		final Date startDate, final Date endDate, final Boolean isFullDay,
+            final Long staffId, final String staffName, final Long tellerId, final String tellerName,
+            final String description,
+            final Date startDate, final Date endDate, final Boolean isFullDay,
             final String startTime, final String endTime, Collection<StaffData> staffOptions) {
         this.id = id;
         this.officeId = officeId;
@@ -104,20 +104,20 @@ public final class CashierData implements Serializable {
      * @return
      */
     public static CashierData instance(final Long id, final Long officeId, String officeName, 
-    		final Long staffId, final String staffName, final Long tellerId, final String tellerName,
-    		final String description, final Date startDate, final Date endDate,
-    		final Boolean isFullDay, final String startTime, final String endTime) {
+            final Long staffId, final String staffName, final Long tellerId, final String tellerName,
+            final String description, final Date startDate, final Date endDate,
+            final Boolean isFullDay, final String startTime, final String endTime) {
         return new CashierData(id, officeId, officeName, staffId, staffName, tellerId, tellerName, 
-        		description, startDate, endDate, isFullDay, startTime, endTime, null);
+                description, startDate, endDate, isFullDay, startTime, endTime, null);
     }
     
     /*
      * Creates a new cashier.
      */
     public static CashierData template (final Long officeId, final String officeName, 
-    		final Long tellerId, final String tellerName, final Collection<StaffData> staffOptions) {
+            final Long tellerId, final String tellerName, final Collection<StaffData> staffOptions) {
         return new CashierData(null, officeId, officeName, null, null, tellerId, tellerName, 
-        		null, null, null, null, null, null, staffOptions);
+                null, null, null, null, null, null, staffOptions);
     }
 
     /**
@@ -222,15 +222,15 @@ public final class CashierData implements Serializable {
         return endTime;
     }
 
-	public String getOfficeName() {
-		return officeName;
-	}
+    public String getOfficeName() {
+        return officeName;
+    }
 
-	public String getTellerName() {
-		return tellerName;
-	}
-	
-	public String getStaffName() {
-		return staffName;
-	}
+    public String getTellerName() {
+        return tellerName;
+    }
+    
+    public String getStaffName() {
+        return staffName;
+    }
 }

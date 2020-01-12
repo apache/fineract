@@ -162,11 +162,11 @@ public class SmsCampaign extends AbstractPersistableCustom<Long> {
         final Long triggerType = command.longValueOfParameterNamed(SmsCampaignValidator.triggerType);
         boolean isNotification = false;
         if(command.parameterExists(SmsCampaignValidator.isNotificationParamName)){
-        	isNotification = command.booleanPrimitiveValueOfParameterNamed(SmsCampaignValidator.isNotificationParamName);
+            isNotification = command.booleanPrimitiveValueOfParameterNamed(SmsCampaignValidator.isNotificationParamName);
         }
         Long providerId = null;
         if(!isNotification){
-        	providerId = command.longValueOfParameterNamed(SmsCampaignValidator.providerId);
+            providerId = command.longValueOfParameterNamed(SmsCampaignValidator.providerId);
         }
         
         final String paramValue = command.jsonFragment(SmsCampaignValidator.paramValue);
@@ -577,13 +577,13 @@ public class SmsCampaign extends AbstractPersistableCustom<Long> {
         return recurrenceBuilder.toString();
     }
 
-	public boolean isNotification() {
-		return this.isNotification;
-	}
+    public boolean isNotification() {
+        return this.isNotification;
+    }
 
-	public void setNotification(boolean isNotification) {
-		this.isNotification = isNotification;
-	}
+    public void setNotification(boolean isNotification) {
+        this.isNotification = isNotification;
+    }
     
     
 }

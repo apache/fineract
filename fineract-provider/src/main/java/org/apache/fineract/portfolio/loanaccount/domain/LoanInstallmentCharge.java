@@ -293,12 +293,12 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> imple
         return amountToDeductOnThisCharge;
     }
 
-	public LoanCharge getLoancharge() {
-		return this.loancharge;
-	}
-	public LoanRepaymentScheduleInstallment getInstallment() {
-		return this.installment;
-	}
+    public LoanCharge getLoancharge() {
+        return this.loancharge;
+    }
+    public LoanRepaymentScheduleInstallment getInstallment() {
+        return this.installment;
+    }
 
     
 }

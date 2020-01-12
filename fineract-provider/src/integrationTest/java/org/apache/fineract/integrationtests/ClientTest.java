@@ -81,8 +81,8 @@ public class ClientTest {
     
     @Test
     public void testClientAsPersonStatus() {
-    	
-    	this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        
+        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClientAsPerson(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
 
@@ -114,8 +114,8 @@ public class ClientTest {
     
     @Test
     public void testClientAsEntityStatus() {
-    	
-    	this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        
+        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         final Integer clientId = ClientHelper.createClientAsEntity(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(clientId);
 

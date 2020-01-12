@@ -193,7 +193,7 @@ public class LoanTransactionHelper {
     
     public HashMap disburseLoanWithRepaymentReschedule(final String date, final Integer loanID, String adjustRepaymentDate) {
         return performLoanTransaction(createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID), getDisburseLoanWithRepaymentRescheduleAsJSON(date,
-        		null, adjustRepaymentDate));
+                null, adjustRepaymentDate));
     }
 
     public HashMap disburseLoan(final String date, final Integer loanID, final String disburseAmt) {
@@ -522,8 +522,8 @@ public class LoanTransactionHelper {
     }
     
     private Object performLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent, ResponseSpecification responseValidationError) {
-    	
-        return  Utils.performServerPost(this.requestSpec, responseValidationError, postURLForLoanTransaction, jsonToBeSent, CommonConstants.RESPONSE_ERROR);    	       
+        
+        return  Utils.performServerPost(this.requestSpec, responseValidationError, postURLForLoanTransaction, jsonToBeSent, CommonConstants.RESPONSE_ERROR);               
    }
 
     public Object adjustLoanTransaction(final Integer loanId, final Integer transactionId, final String date,
@@ -648,17 +648,17 @@ public class LoanTransactionHelper {
     }
     
     public Object editDisbursementDetail(final Integer loanID, final Integer disbursementId, final String approvalAmount, final String expectedDisbursementDate, 
-    		final String updatedExpectedDisbursementDate, final String updatedPrincipal, final String jsonAttributeToGetBack) {
-    	
-    	return Utils.performServerPut(this.requestSpec, this.responseSpec, createEditDisbursementURL(loanID, disbursementId), getEditDisbursementsAsJSON(approvalAmount, expectedDisbursementDate, 
-    			updatedExpectedDisbursementDate, updatedPrincipal), jsonAttributeToGetBack);
+            final String updatedExpectedDisbursementDate, final String updatedPrincipal, final String jsonAttributeToGetBack) {
+        
+        return Utils.performServerPut(this.requestSpec, this.responseSpec, createEditDisbursementURL(loanID, disbursementId), getEditDisbursementsAsJSON(approvalAmount, expectedDisbursementDate, 
+                updatedExpectedDisbursementDate, updatedPrincipal), jsonAttributeToGetBack);
     }
     
     public Object addAndDeleteDisbursementDetail(final Integer loanID, final String approvalAmount, final String expectedDisbursementDate
-    		, List<HashMap> disbursementData, final String jsonAttributeToGetBack) {
-    	
-    	return Utils.performServerPut(this.requestSpec, this.responseSpec, createAddAndDeleteDisbursementURL(loanID), 
-    			getAddAndDeleteDisbursementsAsJSON(approvalAmount, expectedDisbursementDate, disbursementData), jsonAttributeToGetBack);
+            , List<HashMap> disbursementData, final String jsonAttributeToGetBack) {
+        
+        return Utils.performServerPut(this.requestSpec, this.responseSpec, createAddAndDeleteDisbursementURL(loanID), 
+                getAddAndDeleteDisbursementsAsJSON(approvalAmount, expectedDisbursementDate, disbursementData), jsonAttributeToGetBack);
     }
     
     private String createEditDisbursementURL(Integer loanID, Integer disbursementId) {
@@ -670,7 +670,7 @@ public class LoanTransactionHelper {
     }
     
     public static String getEditDisbursementsAsJSON(final String approvalAmount, final String expectedDisbursementDate, 
-    		final String updatedExpectedDisbursementDate, final String updatedPrincipal) {
+            final String updatedExpectedDisbursementDate, final String updatedPrincipal) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
@@ -684,7 +684,7 @@ public class LoanTransactionHelper {
     }
     
     public static String getAddAndDeleteDisbursementsAsJSON(final String approvalAmount, final String expectedDisbursementDate, 
-    		final List<HashMap> disbursementData) {
+            final List<HashMap> disbursementData) {
         final HashMap map = new HashMap<>();
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");

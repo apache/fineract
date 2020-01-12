@@ -246,7 +246,7 @@ public class AccountingConstants {
 
         private static List<FinancialActivityData> financialActivities;
         static {
-		financialActivities = new ArrayList<>();
+  financialActivities = new ArrayList<>();
             for (final FINANCIAL_ACTIVITY type : FINANCIAL_ACTIVITY.values()) {
                 FinancialActivityData financialActivityData = convertToFinancialActivityData(type);
                 financialActivities.add(financialActivityData);

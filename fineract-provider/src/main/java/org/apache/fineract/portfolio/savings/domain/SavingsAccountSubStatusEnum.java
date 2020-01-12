@@ -36,29 +36,29 @@ public enum SavingsAccountSubStatusEnum {
 
     public static SavingsAccountSubStatusEnum fromInt(final Integer type) {
 
-    	SavingsAccountSubStatusEnum enumeration = SavingsAccountSubStatusEnum.NONE;
-    	if(null != type){
+        SavingsAccountSubStatusEnum enumeration = SavingsAccountSubStatusEnum.NONE;
+        if(null != type){
             switch (type) {
-	            case 100:
-	                enumeration = SavingsAccountSubStatusEnum.INACTIVE;
-	            break;
-	            case 200:
-	                enumeration = SavingsAccountSubStatusEnum.DORMANT;
-	            break;
-	            case 300:
-	                enumeration = SavingsAccountSubStatusEnum.ESCHEAT;
-	            break;
-	            case 400:
-	                enumeration = SavingsAccountSubStatusEnum.BLOCK;
-	            break;
-	            case 500:
+                case 100:
+                    enumeration = SavingsAccountSubStatusEnum.INACTIVE;
+                break;
+                case 200:
+                    enumeration = SavingsAccountSubStatusEnum.DORMANT;
+                break;
+                case 300:
+                    enumeration = SavingsAccountSubStatusEnum.ESCHEAT;
+                break;
+                case 400:
+                    enumeration = SavingsAccountSubStatusEnum.BLOCK;
+                break;
+                case 500:
                     enumeration = SavingsAccountSubStatusEnum.BLOCK_CREDIT;
                 break;
-	            case 600:
+                case 600:
                     enumeration = SavingsAccountSubStatusEnum.BLOCK_DEBIT;
                 break;
-	        }
-    	}
+            }
+        }
         return enumeration;
     }
 

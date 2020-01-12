@@ -371,7 +371,7 @@ public class ShareAccount extends AbstractPersistableCustom<Long> {
     }
 
     public void updateRequestedShares(ShareAccountTransaction purchased) {
-    	for(ShareAccountTransaction transaction: this.shareAccountTransactions) {
+        for(ShareAccountTransaction transaction: this.shareAccountTransactions) {
             if(!transaction.isChargeTransaction() && transaction.getId().equals(purchased.getId())) {
                 transaction.update(purchased.getPurchasedDate(), purchased.getTotalShares(), purchased.getPurchasePrice());    
             }

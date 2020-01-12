@@ -68,8 +68,8 @@ public class SavingsDueData {
         return this.productId;
     }
 
-	public String getDepositAccountType() {
-		return depositAccountType;
-	}
+    public String getDepositAccountType() {
+        return depositAccountType;
+    }
     
 }

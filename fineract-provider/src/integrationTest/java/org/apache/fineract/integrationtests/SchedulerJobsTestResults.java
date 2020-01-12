@@ -142,14 +142,14 @@ public class SchedulerJobsTestResults {
 
         Float chargeAmount = (Float) chargeData.get("amount");
 
-		final HashMap savingsDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
-		final HashMap annualFeeDetails = (HashMap) savingsDetails.get("annualFee");
-		ArrayList<Integer> annualFeeDueDateAsArrayList = (ArrayList<Integer>) annualFeeDetails.get("dueDate");
-		LocalDate nextDueDateForAnnualFee = LocalDate.of(annualFeeDueDateAsArrayList.get(0), annualFeeDueDateAsArrayList.get(1), annualFeeDueDateAsArrayList.get(2));
-		LocalDate todaysDate = LocalDate.now(ZoneId.of("Asia/Kolkata"));
+        final HashMap savingsDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
+        final HashMap annualFeeDetails = (HashMap) savingsDetails.get("annualFee");
+        ArrayList<Integer> annualFeeDueDateAsArrayList = (ArrayList<Integer>) annualFeeDetails.get("dueDate");
+        LocalDate nextDueDateForAnnualFee = LocalDate.of(annualFeeDueDateAsArrayList.get(0), annualFeeDueDateAsArrayList.get(1), annualFeeDueDateAsArrayList.get(2));
+        LocalDate todaysDate = LocalDate.now(ZoneId.of("Asia/Kolkata"));
 
-		Assert.assertTrue("Verifying that all due Annual Fees have been paid ",
-				nextDueDateForAnnualFee.isAfter(todaysDate));
+        Assert.assertTrue("Verifying that all due Annual Fees have been paid ",
+                nextDueDateForAnnualFee.isAfter(todaysDate));
 
     }
 

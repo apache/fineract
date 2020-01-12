@@ -52,7 +52,7 @@ public class ScheduleGeneratorDTO {
             final Calendar calendar, final CalendarHistoryDataWrapper calendarHistoryDataWrapper, 
             final Boolean isInterestChargedFromDateAsDisbursementDateEnabled, final Integer numberOfdays, final boolean isSkipRepaymentOnFirstDayofMonth,
             final Boolean isChangeEmiIfRepaymentDateSameAsDisbursementDateEnabled) {
-    	
+        
         this.loanScheduleFactory = loanScheduleFactory;
         this.applicationCurrency = applicationCurrency;
         this.calculatedRepaymentsStartingFromDate = calculatedRepaymentsStartingFromDate;
@@ -119,7 +119,7 @@ public class ScheduleGeneratorDTO {
     }
     
     public Calendar getCalendar(){
-    	return this.calendar;
+        return this.calendar;
     }
     
     public CalendarHistoryDataWrapper getCalendarHistoryDataWrapper(){

@@ -42,8 +42,8 @@ public interface GuarantorReadPlatformService {
      */
     List<GuarantorData> retrieveGuarantorsForLoan(Long loanId);
 
-	GuarantorData retrieveGuarantor(Long loanId, Long guarantorId);
+    GuarantorData retrieveGuarantor(Long loanId, Long guarantorId);
 
-	List<ObligeeData> retrieveObligeeDetails(Long clientId);
+    List<ObligeeData> retrieveObligeeDetails(Long clientId);
 
 }

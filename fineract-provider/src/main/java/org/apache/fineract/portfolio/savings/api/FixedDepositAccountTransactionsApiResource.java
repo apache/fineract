@@ -65,13 +65,13 @@ public class FixedDepositAccountTransactionsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
-	private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
-	private static final Set<String> FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(DepositsApiConstants.idParamName, DepositsApiConstants.accountIdParamName,
-					DepositsApiConstants.accountNoParamName, DepositsApiConstants.currencyParamName,
-					DepositsApiConstants.amountParamName, DepositsApiConstants.dateParamName,
-					DepositsApiConstants.paymentDetailDataParamName, DepositsApiConstants.runningBalanceParamName,
-					DepositsApiConstants.reversedParamName));
+    private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
+    private static final Set<String> FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(DepositsApiConstants.idParamName, DepositsApiConstants.accountIdParamName,
+                    DepositsApiConstants.accountNoParamName, DepositsApiConstants.currencyParamName,
+                    DepositsApiConstants.amountParamName, DepositsApiConstants.dateParamName,
+                    DepositsApiConstants.paymentDetailDataParamName, DepositsApiConstants.runningBalanceParamName,
+                    DepositsApiConstants.reversedParamName));
 
     @Autowired
     public FixedDepositAccountTransactionsApiResource(final PlatformSecurityContext context,
@@ -129,8 +129,8 @@ public class FixedDepositAccountTransactionsApiResource {
             transactionData = SavingsAccountTransactionData.templateOnTop(transactionData, paymentTypeOptions);
         }
 
-		return this.toApiJsonSerializer.serialize(settings, transactionData,
-				FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, transactionData,
+                FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS);
     }
 
     @POST

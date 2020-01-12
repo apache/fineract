@@ -64,17 +64,17 @@ public class CollectionSheetTransactionDataValidator {
             PaymentDetailConstants.routingCodeParamName, PaymentDetailConstants.receiptNumberParamName,
             PaymentDetailConstants.bankNumberParamName, CollectionSheetConstants.isTransactionDateOnNonMeetingDateParamName));
 
-	private static final Set<String> INDIVIDUAL_COLLECTIONSHEET_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-			CollectionSheetConstants.localeParamName, CollectionSheetConstants.dateFormatParamName,
-			CollectionSheetConstants.transactionDateParamName, CollectionSheetConstants.actualDisbursementDateParamName,
-			CollectionSheetConstants.bulkRepaymentTransactionsParamName,
-			CollectionSheetConstants.bulkDisbursementTransactionsParamName, CollectionSheetConstants.noteParamName,
-			CollectionSheetConstants.bulkSavingsDueTransactionsParamName));
+    private static final Set<String> INDIVIDUAL_COLLECTIONSHEET_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            CollectionSheetConstants.localeParamName, CollectionSheetConstants.dateFormatParamName,
+            CollectionSheetConstants.transactionDateParamName, CollectionSheetConstants.actualDisbursementDateParamName,
+            CollectionSheetConstants.bulkRepaymentTransactionsParamName,
+            CollectionSheetConstants.bulkDisbursementTransactionsParamName, CollectionSheetConstants.noteParamName,
+            CollectionSheetConstants.bulkSavingsDueTransactionsParamName));
 
-	private static final Set<String> PAYMENT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(PaymentDetailConstants.accountNumberParamName, PaymentDetailConstants.checkNumberParamName,
-					PaymentDetailConstants.routingCodeParamName, PaymentDetailConstants.receiptNumberParamName,
-					PaymentDetailConstants.bankNumberParamName));
+    private static final Set<String> PAYMENT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(PaymentDetailConstants.accountNumberParamName, PaymentDetailConstants.checkNumberParamName,
+                    PaymentDetailConstants.routingCodeParamName, PaymentDetailConstants.receiptNumberParamName,
+                    PaymentDetailConstants.bankNumberParamName));
 
     @Autowired
     public CollectionSheetTransactionDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -127,8 +127,8 @@ public class CollectionSheetTransactionDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-				INDIVIDUAL_COLLECTIONSHEET_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                INDIVIDUAL_COLLECTIONSHEET_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)

@@ -90,9 +90,9 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(command, throwable, dve);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -109,8 +109,8 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
 
     @Override
     public CommandProcessingResult updateProvisioningCriteria(final Long criteriaId, JsonCommand command) {
-    	try {
-    		this.fromApiJsonDeserializer.validateForUpdate(command.json());
+        try {
+            this.fromApiJsonDeserializer.validateForUpdate(command.json());
             ProvisioningCriteria provisioningCriteria = provisioningCriteriaRepository.findById(criteriaId).orElse(null);
             if(provisioningCriteria == null) {
                 throw new ProvisioningCategoryNotFoundException(criteriaId) ;
@@ -121,14 +121,14 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
                 updateProvisioningCriteriaDefinitions(provisioningCriteria, command) ;
                 provisioningCriteriaRepository.saveAndFlush(provisioningCriteria) ;    
             }
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCriteria.getId()).build();	
-    	} catch (final DataIntegrityViolationException dve) {
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCriteria.getId()).build();    
+        } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(command, throwable, dve);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -168,10 +168,10 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             throw new PlatformDataIntegrityException("error.msg.provisioning.duplicate.criterianame", "Provisioning Criteria with name `"
                     + name + "` already exists", "category name", name);
         }else if (realCause.getMessage().contains("product_id")) {
-			throw new PlatformDataIntegrityException(
-					"error.msg.provisioning.product.id(s).already.associated.existing.criteria",
-					"The selected products already associated with another Provisioning Criteria");
-		}
+            throw new PlatformDataIntegrityException(
+                    "error.msg.provisioning.product.id(s).already.associated.existing.criteria",
+                    "The selected products already associated with another Provisioning Criteria");
+        }
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.provisioning.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());

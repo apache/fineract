@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface FloatingRateWritePlatformService {
 
-	public CommandProcessingResult createFloatingRate(JsonCommand command);
+    public CommandProcessingResult createFloatingRate(JsonCommand command);
 
-	public CommandProcessingResult updateFloatingRate(JsonCommand command);
+    public CommandProcessingResult updateFloatingRate(JsonCommand command);
 }

@@ -60,13 +60,13 @@ public class InterestIncentiveDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
 
-	private static final Set<String> INTERESTRATE_INCENTIVE_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(InterestIncentiveApiConstants.idParamName, entityTypeParamName, attributeNameParamName,
-					conditionTypeParamName, attributeValueParamName, incentiveTypeparamName, amountParamName));
+    private static final Set<String> INTERESTRATE_INCENTIVE_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(InterestIncentiveApiConstants.idParamName, entityTypeParamName, attributeNameParamName,
+                    conditionTypeParamName, attributeValueParamName, incentiveTypeparamName, amountParamName));
 
-	private static final Set<String> INTERESTRATE_INCENTIVE_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(InterestIncentiveApiConstants.idParamName, entityTypeParamName, attributeNameParamName,
-					conditionTypeParamName, attributeValueParamName, incentiveTypeparamName, amountParamName));
+    private static final Set<String> INTERESTRATE_INCENTIVE_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(InterestIncentiveApiConstants.idParamName, entityTypeParamName, attributeNameParamName,
+                    conditionTypeParamName, attributeValueParamName, incentiveTypeparamName, amountParamName));
 
     @Autowired
     public InterestIncentiveDataValidator(final FromJsonHelper fromApiJsonHelper) {

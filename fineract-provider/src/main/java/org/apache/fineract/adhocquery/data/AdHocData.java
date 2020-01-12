@@ -34,31 +34,31 @@ public class AdHocData {
 
 
 
-	@SuppressWarnings("unused")
+    @SuppressWarnings("unused")
     private final Long id;
     @SuppressWarnings("unused")
     private final String name;
-	@SuppressWarnings("unused")
+    @SuppressWarnings("unused")
     private final String query;
-	@SuppressWarnings("unused")
+    @SuppressWarnings("unused")
     private final String tableName;
-	@SuppressWarnings("unused")
+    @SuppressWarnings("unused")
     private final String tableFields;
-	@SuppressWarnings("unused")
-	private final String email;
-	@SuppressWarnings("unused")
+    @SuppressWarnings("unused")
+    private final String email;
+    @SuppressWarnings("unused")
     private final boolean isActive;
-	@SuppressWarnings("unused")
+    @SuppressWarnings("unused")
     private final DateTime createdOn;
-	@SuppressWarnings("unused")
-	private final Long createdById;
-	@SuppressWarnings("unused")
+    @SuppressWarnings("unused")
+    private final Long createdById;
+    @SuppressWarnings("unused")
     private final Long updatedById;   
-	@SuppressWarnings("unused")
+    @SuppressWarnings("unused")
     private final DateTime updatedOn;
-	@SuppressWarnings("unused")
-	private final String createdBy;
-	
+    @SuppressWarnings("unused")
+    private final String createdBy;
+    
     private final List<EnumOptionData> reportRunFrequencies;
 
     private final Long reportRunFrequency;
@@ -84,65 +84,65 @@ public class AdHocData {
         this.updatedOn=updatedOn;
         this.createdBy=createdBy;
         this.email=email;
-	    this.reportRunFrequencies = reportRunFrequencies;
-	    this.reportRunFrequency = reportRunFrequency;
-	    this.reportRunEvery = reportRunEvery;
-	    this.lastRun = lastRun;
+        this.reportRunFrequencies = reportRunFrequencies;
+        this.reportRunFrequency = reportRunFrequency;
+        this.reportRunEvery = reportRunEvery;
+        this.lastRun = lastRun;
     }
     public static AdHocData template() {
-	    List<EnumOptionData> reportRunFrequencies = Arrays.stream(ReportRunFrequency.values()).map(rrf -> new EnumOptionData(
-		    (long) rrf.getValue(), rrf.getCode(), rrf.getCode()
-	    )).collect(Collectors.toList());
+        List<EnumOptionData> reportRunFrequencies = Arrays.stream(ReportRunFrequency.values()).map(rrf -> new EnumOptionData(
+            (long) rrf.getValue(), rrf.getCode(), rrf.getCode()
+        )).collect(Collectors.toList());
 
-	    AdHocData adHocData = new AdHocData(null,null,null,null,null,false,null,null,null,null,null,null, reportRunFrequencies, null, null, null);
-		return adHocData;
+        AdHocData adHocData = new AdHocData(null,null,null,null,null,false,null,null,null,null,null,null, reportRunFrequencies, null, null, null);
+        return adHocData;
     }
     public Long getId() {
-		return this.id;
-	}
-	public String getName() {
-		return this.name;
-	}
-	public String getQuery() {
-		return this.query;
-	}
-	public String getTableName() {
-		return this.tableName;
-	}
-	public String getTableFields() {
-		return this.tableFields;
-	}
-	public String getEmail() {
-		return this.email;
-	}
-	public boolean isActive() {
-		return this.isActive;
-	}
-	public DateTime getCreatedOn() {
-		return this.createdOn;
-	}
-	public Long getCreatedById() {
-		return this.createdById;
-	}
-	public Long getUpdatedById() {
-		return this.updatedById;
-	}
-	public DateTime getUpdatedOn() {
-		return this.updatedOn;
-	}
-	public String getCreatedBy() {
-		return this.createdBy;
-	}
-	public List<EnumOptionData> getReportRunFrequencies() {
-		return this.reportRunFrequencies;
-	}
-	public Long getReportRunFrequency() {
-		return this.reportRunFrequency;
-	}
-	public Long getReportRunEvery() {
-		return this.reportRunEvery;
-	}
-	public DateTime getLastRun() {
-		return this.lastRun;
-	}
+        return this.id;
+    }
+    public String getName() {
+        return this.name;
+    }
+    public String getQuery() {
+        return this.query;
+    }
+    public String getTableName() {
+        return this.tableName;
+    }
+    public String getTableFields() {
+        return this.tableFields;
+    }
+    public String getEmail() {
+        return this.email;
+    }
+    public boolean isActive() {
+        return this.isActive;
+    }
+    public DateTime getCreatedOn() {
+        return this.createdOn;
+    }
+    public Long getCreatedById() {
+        return this.createdById;
+    }
+    public Long getUpdatedById() {
+        return this.updatedById;
+    }
+    public DateTime getUpdatedOn() {
+        return this.updatedOn;
+    }
+    public String getCreatedBy() {
+        return this.createdBy;
+    }
+    public List<EnumOptionData> getReportRunFrequencies() {
+        return this.reportRunFrequencies;
+    }
+    public Long getReportRunFrequency() {
+        return this.reportRunFrequency;
+    }
+    public Long getReportRunEvery() {
+        return this.reportRunEvery;
+    }
+    public DateTime getLastRun() {
+        return this.lastRun;
+    }
 }

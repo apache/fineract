@@ -291,15 +291,15 @@ public class DepositsApiConstants {
      * Depost Account parameters
      */
 
-	private static final Set<String> DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(localeParamName, dateFormatParamName, monthDayFormatParamName, accountNoParamName,
-					externalIdParamName, clientIdParamName, groupIdParamName, productIdParamName,
-					fieldOfficerIdParamName, submittedOnDateParamName, nominalAnnualInterestRateParamName,
-					interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName,
-					interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
-					lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, chargesParamName,
-					chartsParamName, depositAmountParamName, depositPeriodParamName, depositPeriodFrequencyIdParamName,
-					savingsAccounts, expectedFirstDepositOnDateParamName, SavingsApiConstants.withHoldTaxParamName));
+    private static final Set<String> DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(localeParamName, dateFormatParamName, monthDayFormatParamName, accountNoParamName,
+                    externalIdParamName, clientIdParamName, groupIdParamName, productIdParamName,
+                    fieldOfficerIdParamName, submittedOnDateParamName, nominalAnnualInterestRateParamName,
+                    interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName,
+                    interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
+                    lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, chargesParamName,
+                    chartsParamName, depositAmountParamName, depositPeriodParamName, depositPeriodFrequencyIdParamName,
+                    savingsAccounts, expectedFirstDepositOnDateParamName, SavingsApiConstants.withHoldTaxParamName));
 
     public static final Set<String> FIXED_DEPOSIT_ACCOUNT_REQUEST_DATA_PARAMETERS = fixedDepositAccountRequestData();
     public static final Set<String> FIXED_DEPOSIT_ACCOUNT_RESPONSE_DATA_PARAMETERS = fixedDepositAccountResponseData();
@@ -345,9 +345,9 @@ public class DepositsApiConstants {
         return recurringDepositResponseData;
     }
 
-	private static final Set<String> RECURRING_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(idParamName, "accountId", accountNoParamName, "currency", "amount", dateParamName,
-					paymentDetailDataParamName, runningBalanceParamName, reversedParamName));
+    private static final Set<String> RECURRING_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(idParamName, "accountId", accountNoParamName, "currency", "amount", dateParamName,
+                    paymentDetailDataParamName, runningBalanceParamName, reversedParamName));
 
     private static final Set<String> SAVINGS_ACCOUNT_ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList
             (localeParamName,

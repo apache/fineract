@@ -50,26 +50,26 @@ import com.google.gson.reflect.TypeToken;
 public class LoanRescheduleRequestDataValidator {
 
     private final FromJsonHelper fromJsonHelper;
-	private static final Set<String> CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-			RescheduleLoansApiConstants.localeParamName, RescheduleLoansApiConstants.dateFormatParamName,
-			RescheduleLoansApiConstants.graceOnPrincipalParamName,
-			RescheduleLoansApiConstants.recurringMoratoriumOnPrincipalPeriodsParamName,
-			RescheduleLoansApiConstants.graceOnInterestParamName, RescheduleLoansApiConstants.extraTermsParamName,
-			RescheduleLoansApiConstants.rescheduleFromDateParamName,
-			RescheduleLoansApiConstants.newInterestRateParamName,
-			RescheduleLoansApiConstants.rescheduleReasonIdParamName,
-			RescheduleLoansApiConstants.rescheduleReasonCommentParamName,
-			RescheduleLoansApiConstants.submittedOnDateParamName, RescheduleLoansApiConstants.loanIdParamName,
-			RescheduleLoansApiConstants.adjustedDueDateParamName,
-			RescheduleLoansApiConstants.recalculateInterestParamName));
+    private static final Set<String> CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            RescheduleLoansApiConstants.localeParamName, RescheduleLoansApiConstants.dateFormatParamName,
+            RescheduleLoansApiConstants.graceOnPrincipalParamName,
+            RescheduleLoansApiConstants.recurringMoratoriumOnPrincipalPeriodsParamName,
+            RescheduleLoansApiConstants.graceOnInterestParamName, RescheduleLoansApiConstants.extraTermsParamName,
+            RescheduleLoansApiConstants.rescheduleFromDateParamName,
+            RescheduleLoansApiConstants.newInterestRateParamName,
+            RescheduleLoansApiConstants.rescheduleReasonIdParamName,
+            RescheduleLoansApiConstants.rescheduleReasonCommentParamName,
+            RescheduleLoansApiConstants.submittedOnDateParamName, RescheduleLoansApiConstants.loanIdParamName,
+            RescheduleLoansApiConstants.adjustedDueDateParamName,
+            RescheduleLoansApiConstants.recalculateInterestParamName));
 
-	private static final Set<String> REJECT_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(RescheduleLoansApiConstants.localeParamName, RescheduleLoansApiConstants.dateFormatParamName,
-					RescheduleLoansApiConstants.rejectedOnDateParam));
+    private static final Set<String> REJECT_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(RescheduleLoansApiConstants.localeParamName, RescheduleLoansApiConstants.dateFormatParamName,
+                    RescheduleLoansApiConstants.rejectedOnDateParam));
 
-	private static final Set<String> APPROVE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(RescheduleLoansApiConstants.localeParamName, RescheduleLoansApiConstants.dateFormatParamName,
-					RescheduleLoansApiConstants.approvedOnDateParam));
+    private static final Set<String> APPROVE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(RescheduleLoansApiConstants.localeParamName, RescheduleLoansApiConstants.dateFormatParamName,
+                    RescheduleLoansApiConstants.approvedOnDateParam));
 
     @Autowired
     public LoanRescheduleRequestDataValidator(FromJsonHelper fromJsonHelper) {

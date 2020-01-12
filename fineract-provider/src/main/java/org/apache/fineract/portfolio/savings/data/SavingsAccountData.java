@@ -491,7 +491,7 @@ public class SavingsAccountData implements Serializable {
         final Integer daysToInactive = null;
         final Integer daysToDormancy = null;
         final Integer daysToEscheat = null;
-		final BigDecimal savingsAmountOnHold = null;
+        final BigDecimal savingsAmountOnHold = null;
 
         return new SavingsAccountData(accountId, accountNo, depositType, externalId, groupId, groupName, clientId, clientName, productId,
                 productName, fieldOfficerId, fieldOfficerName, status, subStatus, timeline, currency, nominalAnnualInterestRate,
@@ -625,7 +625,7 @@ public class SavingsAccountData implements Serializable {
         final Integer daysToInactive = null;
         final Integer daysToDormancy = null;
         final Integer daysToEscheat = null;
-		final BigDecimal savingsAmountOnHold = null;
+        final BigDecimal savingsAmountOnHold = null;
 
         return new SavingsAccountData(id, accountNo, depositType, externalId, groupId, groupName, clientId, clientName, productId,
                 productName, fieldOfficerId, fieldOfficerName, status, subStatus, timeline, currency, nominalAnnualInterestRate,

@@ -44,8 +44,8 @@ import java.util.Map.Entry;
 
 @Service
 public class TemplateMergeService {
-	private final static Logger logger = LoggerFactory.getLogger(TemplateMergeService.class);
-	
+    private final static Logger logger = LoggerFactory.getLogger(TemplateMergeService.class);
+    
 
     // private final FromJsonHelper fromApiJsonHelper;
     private Map<String, Object> scopes;
@@ -53,7 +53,7 @@ public class TemplateMergeService {
 
 
     public void setAuthToken(final String authToken) {
-    	this.authToken =  authToken;
+        this.authToken =  authToken;
     }
     
 
@@ -75,7 +75,7 @@ public class TemplateMergeService {
         return stringWriter.toString();
     }
 
-	private Map<String, Object> getCompiledMapFromMappers(final Map<String, String> data) {
+    private Map<String, Object> getCompiledMapFromMappers(final Map<String, String> data) {
         final MustacheFactory mf = new DefaultMustacheFactory();
 
         if (data != null) {
@@ -91,7 +91,7 @@ public class TemplateMergeService {
                 try {
                     this.scopes.put(entry.getKey(), getMapFromUrl(url));
                 } catch (final IOException e) {
-                	logger.error("getCompiledMapFromMappers() failed", e);
+                    logger.error("getCompiledMapFromMappers() failed", e);
                 }
             }
         }
@@ -136,7 +136,7 @@ public class TemplateMergeService {
             connection.setDoInput(true);
 
         } catch (IOException | KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
-        	logger.error("getConnection() failed, return null", e);
+            logger.error("getConnection() failed, return null", e);
         }
 
         return connection;
@@ -156,7 +156,7 @@ public class TemplateMergeService {
             }
 
         } catch (final IOException e) {
-        	logger.error("getStringFromInputStream() failed", e);
+            logger.error("getStringFromInputStream() failed", e);
         } finally {
             if (br != null) {
                 try {
@@ -170,32 +170,32 @@ public class TemplateMergeService {
         return sb.toString();
     }
     
-	@SuppressWarnings("unchecked")
-	private void expandMapArrays(Object value) {
-		if (value instanceof Map) {
-			Map<String, Object> valueAsMap = (Map<String, Object>) value;
-			//Map<String, Object> newValue = null;
-			Map<String,Object> valueAsMap_second = new HashMap<>();
-			for (Entry<String, Object> valueAsMapEntry : valueAsMap.entrySet()) {
-				Object valueAsMapEntryValue = valueAsMapEntry.getValue();
-				if (valueAsMapEntryValue instanceof Map) { // JSON Object
-					expandMapArrays(valueAsMapEntryValue);
-				} else if (valueAsMapEntryValue instanceof Iterable) { // JSON Array
-					Iterable<Object> valueAsMapEntryValueIterable = (Iterable<Object>) valueAsMapEntryValue;
-					String valueAsMapEntryKey = valueAsMapEntry.getKey();
-					int i = 0;
-					for (Object object : valueAsMapEntryValueIterable) {
-						valueAsMap_second.put(valueAsMapEntryKey + "#" + i, object);
-						++i;
-						expandMapArrays(object);
-						
-					}
-				}
+    @SuppressWarnings("unchecked")
+    private void expandMapArrays(Object value) {
+        if (value instanceof Map) {
+            Map<String, Object> valueAsMap = (Map<String, Object>) value;
+            //Map<String, Object> newValue = null;
+            Map<String,Object> valueAsMap_second = new HashMap<>();
+            for (Entry<String, Object> valueAsMapEntry : valueAsMap.entrySet()) {
+                Object valueAsMapEntryValue = valueAsMapEntry.getValue();
+                if (valueAsMapEntryValue instanceof Map) { // JSON Object
+                    expandMapArrays(valueAsMapEntryValue);
+                } else if (valueAsMapEntryValue instanceof Iterable) { // JSON Array
+                    Iterable<Object> valueAsMapEntryValueIterable = (Iterable<Object>) valueAsMapEntryValue;
+                    String valueAsMapEntryKey = valueAsMapEntry.getKey();
+                    int i = 0;
+                    for (Object object : valueAsMapEntryValueIterable) {
+                        valueAsMap_second.put(valueAsMapEntryKey + "#" + i, object);
+                        ++i;
+                        expandMapArrays(object);
+                        
+                    }
+                }
 
-			}
-			valueAsMap.putAll(valueAsMap_second);
+            }
+            valueAsMap.putAll(valueAsMap_second);
 
-		}		
-	}
+        }        
+    }
 
 }

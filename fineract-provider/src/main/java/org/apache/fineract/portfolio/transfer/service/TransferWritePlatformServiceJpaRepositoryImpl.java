@@ -76,7 +76,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     private final NoteWritePlatformService noteWritePlatformService;
     private final StaffRepositoryWrapper staffRepositoryWrapper;
     private final ClientTransferDetailsRepositoryWrapper clientTransferDetailsRepositoryWrapper;
- 	private final PlatformSecurityContext context;
+     private final PlatformSecurityContext context;
 
     @Autowired
     public TransferWritePlatformServiceJpaRepositoryImpl(final ClientRepositoryWrapper clientRepositoryWrapper,
@@ -85,9 +85,9 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
             final LoanRepositoryWrapper loanRepositoryWrapper, final TransfersDataValidator transfersDataValidator,
             final NoteWritePlatformService noteWritePlatformService, final StaffRepositoryWrapper staffRepositoryWrapper,
             final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
-			final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
-			final ClientTransferDetailsRepositoryWrapper clientTransferDetailsRepositoryWrapper,
-			final PlatformSecurityContext context) {
+            final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
+            final ClientTransferDetailsRepositoryWrapper clientTransferDetailsRepositoryWrapper,
+            final PlatformSecurityContext context) {
         this.clientRepositoryWrapper = clientRepositoryWrapper;
         this.officeRepository = officeRepository;
         this.calendarInstanceRepository = calendarInstanceRepository;
@@ -100,7 +100,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         this.savingsAccountRepositoryWrapper = savingsAccountRepositoryWrapper;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.clientTransferDetailsRepositoryWrapper = clientTransferDetailsRepositoryWrapper;
-    	this.context = context;
+        this.context = context;
         
     }
 
@@ -295,13 +295,13 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         final Long destinationOfficeId = jsonCommand.longValueOfParameterNamed(TransferApiConstants.destinationOfficeIdParamName);
         final Office office = this.officeRepository.findOneWithNotFoundDetection(destinationOfficeId);
         final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
-		if (client.getOffice().getId().equals(destinationOfficeId)) {
-			throw new GeneralPlatformDomainRuleException(TransferApiConstants.transferClientToSameOfficeException,
-					TransferApiConstants.transferClientToSameOfficeExceptionMessage, office.getName());
+        if (client.getOffice().getId().equals(destinationOfficeId)) {
+            throw new GeneralPlatformDomainRuleException(TransferApiConstants.transferClientToSameOfficeException,
+                    TransferApiConstants.transferClientToSameOfficeExceptionMessage, office.getName());
 
-		}
-		handleClientTransferLifecycleEvent(client, office, TransferEventType.PROPOSAL, jsonCommand);
-		this.clientRepositoryWrapper.save(client);
+        }
+        handleClientTransferLifecycleEvent(client, office, TransferEventType.PROPOSAL, jsonCommand);
+        this.clientRepositoryWrapper.save(client);
         return new CommandProcessingResultBuilder() //
                 .withClientId(clientId) //
                 .withEntityId(clientId) //
@@ -417,18 +417,18 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                     switch (transferEventType) {
                         case ACCEPTANCE:
                             this.savingsAccountWritePlatformService.acceptSavingsTransfer(savingsAccount,
-                            		savingsAccount.retrieveLastTransactionDate(), destinationOffice, staff);
+                                    savingsAccount.retrieveLastTransactionDate(), destinationOffice, staff);
                         break;
                         case PROPOSAL:
                             this.savingsAccountWritePlatformService.initiateSavingsTransfer(savingsAccount,
-                            		transferDate);
+                                    transferDate);
                         break;
                         case REJECTION:
                             this.savingsAccountWritePlatformService.rejectSavingsTransfer(savingsAccount);
                         break;
                         case WITHDRAWAL:
                             this.savingsAccountWritePlatformService.withdrawSavingsTransfer(savingsAccount,
-                            		savingsAccount.retrieveLastTransactionDate());
+                                    savingsAccount.retrieveLastTransactionDate());
                     }
                 }
             }
@@ -473,13 +473,13 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                 client.updateProposedTransferDate(null);
         }
 
-		this.noteWritePlatformService.createAndPersistClientNote(client, jsonCommand);
-		Date proposedTransferDate = transferDate != null ? transferDate.toDate() : null;
-		this.clientTransferDetailsRepositoryWrapper
-				.save(ClientTransferDetails.instance(client.getId(), client.getOffice().getId(),
-						destinationOffice.getId(), proposedTransferDate, transferEventType.getValue(),
-						DateUtils.getLocalDateTimeOfTenant().toDate(), this.context.authenticatedUser().getId()));
-	}
+        this.noteWritePlatformService.createAndPersistClientNote(client, jsonCommand);
+        Date proposedTransferDate = transferDate != null ? transferDate.toDate() : null;
+        this.clientTransferDetailsRepositoryWrapper
+                .save(ClientTransferDetails.instance(client.getId(), client.getOffice().getId(),
+                        destinationOffice.getId(), proposedTransferDate, transferEventType.getValue(),
+                        DateUtils.getLocalDateTimeOfTenant().toDate(), this.context.authenticatedUser().getId()));
+    }
 
     private List<Client> assembleListOfClients(final JsonCommand command) {
 

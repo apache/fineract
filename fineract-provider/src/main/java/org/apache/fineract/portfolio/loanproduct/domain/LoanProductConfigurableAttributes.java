@@ -58,12 +58,12 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
     @Column(name = "grace_on_arrears_ageing", nullable = true)
     private Boolean graceOnArrearsAgeing;
 
-	private static final String[] supportedloanConfigurableAttributes = {LoanProductConstants.amortizationTypeParamName,
-			LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyIdParamName,
-			LoanProductConstants.interestCalculationPeriodTypeParamName,
-			LoanProductConstants.inArrearsToleranceParamName, LoanProductConstants.repaymentEveryParamName,
-			LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName,
-			LoanProductConstants.graceOnArrearsAgeingParameterName};
+    private static final String[] supportedloanConfigurableAttributes = {LoanProductConstants.amortizationTypeParamName,
+            LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyIdParamName,
+            LoanProductConstants.interestCalculationPeriodTypeParamName,
+            LoanProductConstants.inArrearsToleranceParamName, LoanProductConstants.repaymentEveryParamName,
+            LoanProductConstants.graceOnPrincipalAndInterestPaymentParamName,
+            LoanProductConstants.graceOnArrearsAgeingParameterName};
 
     public static LoanProductConfigurableAttributes createFrom(JsonCommand command) {
 
@@ -216,14 +216,14 @@ public class LoanProductConfigurableAttributes extends AbstractPersistableCustom
         LoanProductConfigurableAttributes that = (LoanProductConfigurableAttributes) o;
 
         return Objects.equals(loanProduct, that.loanProduct) &&
-        	   Objects.equals(amortizationType, that.amortizationType) &&
-        	   Objects.equals(interestType, that.interestType) &&
-        		Objects.equals(transactionProcessingStrategyId, that.transactionProcessingStrategyId) &&
-        		Objects.equals(interestCalculationPeriodType, that.interestCalculationPeriodType) &&
-        		Objects.equals(inArrearsTolerance, that.inArrearsTolerance) &&
-        		Objects.equals(repaymentEvery, that.repaymentEvery) &&
-        		Objects.equals(graceOnPrincipalAndInterestPayment, that.graceOnPrincipalAndInterestPayment) &&
-        		Objects.equals(graceOnArrearsAgeing, that.graceOnArrearsAgeing);
+               Objects.equals(amortizationType, that.amortizationType) &&
+               Objects.equals(interestType, that.interestType) &&
+                Objects.equals(transactionProcessingStrategyId, that.transactionProcessingStrategyId) &&
+                Objects.equals(interestCalculationPeriodType, that.interestCalculationPeriodType) &&
+                Objects.equals(inArrearsTolerance, that.inArrearsTolerance) &&
+                Objects.equals(repaymentEvery, that.repaymentEvery) &&
+                Objects.equals(graceOnPrincipalAndInterestPayment, that.graceOnPrincipalAndInterestPayment) &&
+                Objects.equals(graceOnArrearsAgeing, that.graceOnArrearsAgeing);
     }
 
     @Override

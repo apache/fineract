@@ -82,7 +82,7 @@ public class EmailMessage extends AbstractPersistableCustom<Long> {
     
     public static EmailMessage instance(final Group group, final Client client, final Staff staff, final EmailCampaign emailCampaign, final EmailMessageStatusType statusType,
                                       final String emailSubject, final String message, final String sourceAddress, final String emailAddress, final String campaignName) {
-    	return new EmailMessage(group, client, staff,emailCampaign, statusType, emailSubject, message, emailAddress, campaignName);
+        return new EmailMessage(group, client, staff,emailCampaign, statusType, emailSubject, message, emailAddress, campaignName);
     }
 
     protected EmailMessage() {
@@ -91,7 +91,7 @@ public class EmailMessage extends AbstractPersistableCustom<Long> {
 
     private EmailMessage(final Group group, final Client client, final Staff staff, final EmailCampaign emailCampaign, final EmailMessageStatusType statusType,
             final String emailSubject, final String message, final String emailAddress, final String campaignName) {
-    	this.group = group;
+        this.group = group;
         this.client = client;
         this.staff = staff;
         this.emailCampaign = emailCampaign;
@@ -118,19 +118,19 @@ public class EmailMessage extends AbstractPersistableCustom<Long> {
     
 
     public Group getGroup() {
-    	return group;
+        return group;
     }
     
     public Client getClient() {
-    	return client;
+        return client;
     }
     
     public Staff getStaff() {
-    	return staff;
+        return staff;
     }
     
     public Integer getStatusType() {
-    	return statusType;
+        return statusType;
     }
 
 
@@ -139,12 +139,12 @@ public class EmailMessage extends AbstractPersistableCustom<Long> {
     public String getEmailSubject() {return emailSubject; }
     
     public String getMessage() {
-    	return message;
+        return message;
     }
     
 
     public void setStatusType(final Integer statusType) {
-    	this.statusType = statusType;
+        this.statusType = statusType;
     }
 
     public String getCampaignName() {

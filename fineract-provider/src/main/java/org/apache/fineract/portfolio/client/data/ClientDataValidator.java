@@ -54,11 +54,11 @@ public final class ClientDataValidator {
     private final ConfigurationReadPlatformService configurationReadPlatformService;
 
     @Autowired
-	public ClientDataValidator(final FromJsonHelper fromApiJsonHelper,
-			final ConfigurationReadPlatformService configurationReadPlatformService) {
+    public ClientDataValidator(final FromJsonHelper fromApiJsonHelper,
+            final ConfigurationReadPlatformService configurationReadPlatformService) {
         this.fromApiJsonHelper = fromApiJsonHelper;
-		this.configurationReadPlatformService = configurationReadPlatformService;
-	}
+        this.configurationReadPlatformService = configurationReadPlatformService;
+    }
 
     public void validateForCreate(final String json) {
 
@@ -69,9 +69,9 @@ public final class ClientDataValidator {
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.clientNonPersonDetailsParamName, element)) {
-	        final String clientNonPersonJson = this.fromApiJsonHelper.toJson(element.getAsJsonObject().get(ClientApiConstants.clientNonPersonDetailsParamName));
-	        if(clientNonPersonJson != null)
-	        	this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, clientNonPersonJson, ClientApiCollectionConstants.CLIENT_NON_PERSON_CREATE_REQUEST_DATA_PARAMETERS);
+            final String clientNonPersonJson = this.fromApiJsonHelper.toJson(element.getAsJsonObject().get(ClientApiConstants.clientNonPersonDetailsParamName));
+            if(clientNonPersonJson != null)
+                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, clientNonPersonJson, ClientApiCollectionConstants.CLIENT_NON_PERSON_CREATE_REQUEST_DATA_PARAMETERS);
         }
         
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -208,7 +208,7 @@ public final class ClientDataValidator {
         }
         
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.legalFormIdParamName, element)) {
-        	final Integer legalFormId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.legalFormIdParamName, element);
+            final Integer legalFormId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.legalFormIdParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.legalFormIdParamName).value(legalFormId).ignoreIfNull().inMinMaxRange(1, 2);
         }
 
@@ -217,18 +217,18 @@ public final class ClientDataValidator {
             baseDataValidator.reset().parameter(ClientApiConstants.datatables).value(datatables).notNull().jsonArrayNotEmpty();
         }
 
-		if (this.fromApiJsonHelper.parameterExists("isStaff", element)) {
+        if (this.fromApiJsonHelper.parameterExists("isStaff", element)) {
             final Boolean isStaffFlag = this.fromApiJsonHelper.extractBooleanNamed("isStaff", element);
             baseDataValidator.reset().parameter("isStaff").value(isStaffFlag).notNull();
         }
-		
-		  
-		if(this.configurationReadPlatformService
-				.retrieveGlobalConfiguration("Enable-Address").isEnabled()){
-		    final JsonArray address =this.fromApiJsonHelper.extractJsonArrayNamed(ClientApiConstants.address, element);
-		    baseDataValidator.reset().parameter(ClientApiConstants.address).value(address).notNull().jsonArrayNotEmpty();
-		}
-		
+        
+          
+        if(this.configurationReadPlatformService
+                .retrieveGlobalConfiguration("Enable-Address").isEnabled()){
+            final JsonArray address =this.fromApiJsonHelper.extractJsonArrayNamed(ClientApiConstants.address, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.address).value(address).notNull().jsonArrayNotEmpty();
+        }
+        
         List<ApiParameterError> dataValidationErrorsForClientNonPerson = getDataValidationErrorsForCreateOnClientNonPerson(element.getAsJsonObject().get(ClientApiConstants.clientNonPersonDetailsParamName));
         dataValidationErrors.addAll(dataValidationErrorsForClientNonPerson);
         
@@ -237,8 +237,8 @@ public final class ClientDataValidator {
     
     List<ApiParameterError> getDataValidationErrorsForCreateOnClientNonPerson(JsonElement element)
     {
-    	
-    	final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(ClientApiCollectionConstants.CLIENT_RESOURCE_NAME);
@@ -246,7 +246,7 @@ public final class ClientDataValidator {
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.incorpNumberParamName, element)) {
             final String incorpNumber = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.incorpNumberParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.incorpNumberParamName).value(incorpNumber).ignoreIfNull()
-            		.notExceedingLengthOf(50);
+                    .notExceedingLengthOf(50);
         }
         
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.remarksParamName, element)) {
@@ -272,7 +272,7 @@ public final class ClientDataValidator {
             baseDataValidator.reset().parameter(ClientApiConstants.mainBusinessLineIdParamName).value(mainBusinessLine).integerGreaterThanZero();
         }
 
-		return dataValidationErrors;
+        return dataValidationErrors;
     }
 
     private void validateIndividualNamePartsCannotBeUsedWithFullname(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
@@ -349,11 +349,11 @@ public final class ClientDataValidator {
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.clientNonPersonDetailsParamName, element)) {
-	        final String clientNonPersonJson = this.fromApiJsonHelper.toJson(element.getAsJsonObject().get(ClientApiConstants.clientNonPersonDetailsParamName));
-	        if(clientNonPersonJson != null)
-	        	this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, clientNonPersonJson, ClientApiCollectionConstants.CLIENT_NON_PERSON_UPDATE_REQUEST_DATA_PARAMETERS);
+            final String clientNonPersonJson = this.fromApiJsonHelper.toJson(element.getAsJsonObject().get(ClientApiConstants.clientNonPersonDetailsParamName));
+            if(clientNonPersonJson != null)
+                this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, clientNonPersonJson, ClientApiCollectionConstants.CLIENT_NON_PERSON_UPDATE_REQUEST_DATA_PARAMETERS);
         }
-	        
+            
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -491,12 +491,12 @@ public final class ClientDataValidator {
         }
         
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.legalFormIdParamName, element)) {
-        	atLeastOneParameterPassedForUpdate = true;
-        	final Integer legalFormId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.legalFormIdParamName, element);
+            atLeastOneParameterPassedForUpdate = true;
+            final Integer legalFormId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.legalFormIdParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.legalFormIdParamName).value(legalFormId).ignoreIfNull().inMinMaxRange(1, 2);
         }
 
-		if (this.fromApiJsonHelper.parameterExists("isStaff", element)) {
+        if (this.fromApiJsonHelper.parameterExists("isStaff", element)) {
             final Boolean isStaffFlag = this.fromApiJsonHelper.extractBooleanNamed("isStaff", element);
             baseDataValidator.reset().parameter("isStaff").value(isStaffFlag).notNull();
         }
@@ -510,7 +510,7 @@ public final class ClientDataValidator {
         }
         
         @SuppressWarnings("unchecked")
-		List<ApiParameterError> dataValidationErrorsForClientNonPerson = (List<ApiParameterError>) parameterUpdateStatusDetails.get("dataValidationErrors");        
+        List<ApiParameterError> dataValidationErrorsForClientNonPerson = (List<ApiParameterError>) parameterUpdateStatusDetails.get("dataValidationErrors");        
         dataValidationErrors.addAll(dataValidationErrorsForClientNonPerson);
         
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -518,48 +518,48 @@ public final class ClientDataValidator {
     
     Map<String, Object> getParameterUpdateStatusAndDataValidationErrorsForUpdateOnClientNonPerson(JsonElement element)
     {
-    	boolean atLeastOneParameterPassedForUpdate = false;
-    	final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        boolean atLeastOneParameterPassedForUpdate = false;
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(ClientApiCollectionConstants.CLIENT_RESOURCE_NAME);
-    	
-    	if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.incorpNumberParamName, element)) {
+        
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.incorpNumberParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final String incorpNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.incorpNumberParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.incorpNumberParamName).value(incorpNo).ignoreIfNull().notExceedingLengthOf(50);
         }
-    	
-    	if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.remarksParamName, element)) {
+        
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.remarksParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final String remarks = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.remarksParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.remarksParamName).value(remarks).notExceedingLengthOf(150);
         }
-    	
-    	if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.incorpValidityTillParamName, element)) {
+        
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.incorpValidityTillParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final LocalDate incorpValidityTill = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.incorpValidityTillParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.incorpValidityTillParamName).value(incorpValidityTill);
         }
-    	
-    	if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.constitutionIdParamName, element)) {
+        
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.constitutionIdParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final Integer constitutionId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.constitutionIdParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.constitutionIdParamName).value(constitutionId).ignoreIfNull().integerGreaterThanZero();
         }
-    	
-    	if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.mainBusinessLineIdParamName, element)) {
+        
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.mainBusinessLineIdParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final Integer mainBusinessLineId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.mainBusinessLineIdParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.mainBusinessLineIdParamName).value(mainBusinessLineId).integerGreaterThanZero();
         }
-    	
-    	Map<String, Object> parameterUpdateStatusDetails = new HashMap<>();
-    	parameterUpdateStatusDetails.put("parameterUpdateStatus", atLeastOneParameterPassedForUpdate);
-    	parameterUpdateStatusDetails.put("dataValidationErrors", dataValidationErrors);
-    	
-		return parameterUpdateStatusDetails;
-    	
+        
+        Map<String, Object> parameterUpdateStatusDetails = new HashMap<>();
+        parameterUpdateStatusDetails.put("parameterUpdateStatus", atLeastOneParameterPassedForUpdate);
+        parameterUpdateStatusDetails.put("dataValidationErrors", dataValidationErrors);
+        
+        return parameterUpdateStatusDetails;
+        
     }
 
     public void validateActivation(final JsonCommand command) {
@@ -779,8 +779,8 @@ public final class ClientDataValidator {
 
         final LocalDate undoRejectionDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.reopenedDateParamName,
                 element);
-		baseDataValidator.reset().parameter(ClientApiConstants.reopenedDateParamName).value(undoRejectionDate).notNull()
-				.validateDateBeforeOrEqual(DateUtils.getLocalDateOfTenant());
+        baseDataValidator.reset().parameter(ClientApiConstants.reopenedDateParamName).value(undoRejectionDate).notNull()
+                .validateDateBeforeOrEqual(DateUtils.getLocalDateOfTenant());
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
@@ -802,8 +802,8 @@ public final class ClientDataValidator {
 
         final LocalDate undoWithdrawnDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.reopenedDateParamName,
                 element);
-		baseDataValidator.reset().parameter(ClientApiConstants.reopenedDateParamName).value(undoWithdrawnDate).notNull()
-				.validateDateBeforeOrEqual(DateUtils.getLocalDateOfTenant());
+        baseDataValidator.reset().parameter(ClientApiConstants.reopenedDateParamName).value(undoWithdrawnDate).notNull()
+                .validateDateBeforeOrEqual(DateUtils.getLocalDateOfTenant());
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 

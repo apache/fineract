@@ -81,10 +81,10 @@ public class SearchData {
     }
 
     public String getEntityMobileNo() {
-		return this.entityMobileNo;
-	}
+        return this.entityMobileNo;
+    }
 
-	public EnumOptionData getEntityStatus() {
+    public EnumOptionData getEntityStatus() {
         return this.entityStatus;
     }
 

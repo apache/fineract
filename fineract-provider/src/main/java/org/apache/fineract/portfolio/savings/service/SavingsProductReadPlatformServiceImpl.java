@@ -270,9 +270,9 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
         }
         
         if(inClauseAdded) {
-        	sql += " and sp.deposit_type_enum = ?";
+            sql += " and sp.deposit_type_enum = ?";
         }else {
-        	 sql += " where sp.deposit_type_enum = ?";
+             sql += " where sp.deposit_type_enum = ?";
         }
         return this.jdbcTemplate.query(sql, this.savingsProductLookupsRowMapper, new Object[] { DepositAccountType.SAVINGS_DEPOSIT.getValue() });
 

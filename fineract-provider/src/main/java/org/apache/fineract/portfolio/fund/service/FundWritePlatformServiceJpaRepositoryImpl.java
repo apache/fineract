@@ -76,9 +76,9 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
             handleFundDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleFundDataIntegrityIssues(command, throwable, dve);
-         	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleFundDataIntegrityIssues(command, throwable, dve);
+             return CommandProcessingResult.empty();
         }
     }
 
@@ -105,9 +105,9 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
             handleFundDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleFundDataIntegrityIssues(command, throwable, dve);
-         	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleFundDataIntegrityIssues(command, throwable, dve);
+             return CommandProcessingResult.empty();
         }
     }
 

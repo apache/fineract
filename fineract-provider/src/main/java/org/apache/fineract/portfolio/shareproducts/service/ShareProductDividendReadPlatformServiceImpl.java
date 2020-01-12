@@ -51,7 +51,7 @@ public class ShareProductDividendReadPlatformServiceImpl implements ShareProduct
 
     @Autowired
     public ShareProductDividendReadPlatformServiceImpl(final RoutingDataSource dataSource,
-    		final ColumnValidator columnValidator) {
+            final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.columnValidator = columnValidator;
     }

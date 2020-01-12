@@ -35,12 +35,12 @@ import java.util.Map;
 @Table(name = "m_cashier_transactions")
 public class CashierTransaction extends AbstractPersistableCustom<Long> {
 
-	@Transient
+    @Transient
     private Office office;
-	
-	@Transient
+    
+    @Transient
     private Teller teller;
-	
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cashier_id", nullable = false)
     private Cashier cashier;
@@ -79,8 +79,8 @@ public class CashierTransaction extends AbstractPersistableCustom<Long> {
     }
     
     public static CashierTransaction fromJson(
-    		final Cashier cashier,
-    		final JsonCommand command) {
+            final Cashier cashier,
+            final JsonCommand command) {
         final Integer txnType = command.integerValueOfParameterNamed("txnType");
         final BigDecimal txnAmount = command.bigDecimalValueOfParameterNamed("txnAmount");
         final LocalDate txnDate = command.localDateValueOfParameterNamed("txnDate");
@@ -91,23 +91,23 @@ public class CashierTransaction extends AbstractPersistableCustom<Long> {
 
         // TODO: get client/loan/savings details
         return new CashierTransaction (cashier, txnType, txnAmount, txnDate, 
-        		entityType, entityId, txnNote, currencyCode);
+                entityType, entityId, txnNote, currencyCode);
         
     }
     
     public CashierTransaction (Cashier cashier, Integer txnType, BigDecimal txnAmount, 
-    		LocalDate txnDate, String entityType, Long entityId, String txnNote, String currencyCode) {
-    	this.cashier = cashier;
-    	this.txnType = txnType;
-    	if (txnDate != null) {
-    		this.txnDate = txnDate.toDate();
-    	}
-    	this.txnAmount = txnAmount;
-    	this.entityType = entityType;
-    	this.entityId = entityId;
-    	this.txnNote = txnNote;
-    	this.createdDate = new Date(); 
-    	this.currencyCode = currencyCode;
+            LocalDate txnDate, String entityType, Long entityId, String txnNote, String currencyCode) {
+        this.cashier = cashier;
+        this.txnType = txnType;
+        if (txnDate != null) {
+            this.txnDate = txnDate.toDate();
+        }
+        this.txnAmount = txnAmount;
+        this.entityType = entityType;
+        this.entityId = entityId;
+        this.txnNote = txnNote;
+        this.createdDate = new Date(); 
+        this.currencyCode = currencyCode;
     }
     
     public Map<String, Object> update(final JsonCommand command) {

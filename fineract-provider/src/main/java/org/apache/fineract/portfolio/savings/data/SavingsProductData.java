@@ -88,10 +88,10 @@ public class SavingsProductData implements Serializable {
     private final Collection<ChargeData> chargeOptions;
     private final Collection<ChargeData> penaltyOptions;
     private final Collection<TaxGroupData> taxGroupOptions;
-	private final Boolean isDormancyTrackingActive;
-	private final Long daysToInactive;
-	private final Long daysToDormancy;
-	private final Long daysToEscheat;
+    private final Boolean isDormancyTrackingActive;
+    private final Long daysToInactive;
+    private final Long daysToDormancy;
+    private final Long daysToEscheat;
 
     public static SavingsProductData template(final CurrencyData currency, final EnumOptionData interestCompoundingPeriodType,
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
@@ -439,13 +439,13 @@ public class SavingsProductData implements Serializable {
         return this.name;
     }
 
-	public String getDepositAccountType() {
-		return depositAccountType;
-	}
+    public String getDepositAccountType() {
+        return depositAccountType;
+    }
 
-	public void setDepositAccountType(String depositAccountType) {
-		this.depositAccountType = depositAccountType;
-	}
+    public void setDepositAccountType(String depositAccountType) {
+        this.depositAccountType = depositAccountType;
+    }
 
     public BigDecimal getNominalAnnualInterestRate() {
         return nominalAnnualInterestRate;

@@ -66,7 +66,7 @@ public enum ChargeCalculationType {
     }
     
     public static Object[] validValuesForTrancheDisbursement(){
-    	return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue()};
+        return new Integer[] { ChargeCalculationType.FLAT.getValue(), ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue()};
     }
 
     public static ChargeCalculationType fromInt(final Integer chargeCalculation) {
@@ -85,7 +85,7 @@ public enum ChargeCalculationType {
                 chargeCalculationType = PERCENT_OF_INTEREST;
             break;
             case 5:
-            	chargeCalculationType = PERCENT_OF_DISBURSEMENT_AMOUNT;
+                chargeCalculationType = PERCENT_OF_DISBURSEMENT_AMOUNT;
             break;
         }
         return chargeCalculationType;
@@ -120,6 +120,6 @@ public enum ChargeCalculationType {
     }
     
     public boolean isPercentageOfDisbursementAmount(){
-    	return this.value.equals(ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue());
+        return this.value.equals(ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue());
     }
 }

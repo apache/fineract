@@ -97,8 +97,8 @@ public class DailyCompoundingPeriod implements CompoundingPeriod {
         return interestEarned;
     }
 
-	@Override
-	public LocalDateInterval getPeriodInterval() {
-		return this.periodInterval;
-	}
+    @Override
+    public LocalDateInterval getPeriodInterval() {
+        return this.periodInterval;
+    }
 }

@@ -61,22 +61,22 @@ public class LoanProductFloatingRates extends AbstractPersistableCustom<Long> {
     private BigDecimal maxDifferentialLendingRate;
 
     @Column(name = "is_floating_interest_rate_calculation_allowed", nullable = false)
-	private boolean isFloatingInterestRateCalculationAllowed;
+    private boolean isFloatingInterestRateCalculationAllowed;
     
-	public LoanProductFloatingRates(){
-		
-	}
-	public LoanProductFloatingRates(FloatingRate floatingRate, LoanProduct loanProduct, BigDecimal interestRateDifferential, 
+    public LoanProductFloatingRates(){
+        
+    }
+    public LoanProductFloatingRates(FloatingRate floatingRate, LoanProduct loanProduct, BigDecimal interestRateDifferential, 
             BigDecimal minDifferentialLendingRate, BigDecimal maxDifferentialLendingRate, BigDecimal defaultDifferentialLendingRate, 
             boolean isFloatingInterestRateCalculationAllowed){
-		this.floatingRate = floatingRate;
-		this.loanProduct = loanProduct;
-		this.interestRateDifferential = interestRateDifferential;
-		this.minDifferentialLendingRate = minDifferentialLendingRate;
-		this.maxDifferentialLendingRate = maxDifferentialLendingRate;
-		this.defaultDifferentialLendingRate = defaultDifferentialLendingRate;
-		this.isFloatingInterestRateCalculationAllowed = isFloatingInterestRateCalculationAllowed;
-	}
+        this.floatingRate = floatingRate;
+        this.loanProduct = loanProduct;
+        this.interestRateDifferential = interestRateDifferential;
+        this.minDifferentialLendingRate = minDifferentialLendingRate;
+        this.maxDifferentialLendingRate = maxDifferentialLendingRate;
+        this.defaultDifferentialLendingRate = defaultDifferentialLendingRate;
+        this.isFloatingInterestRateCalculationAllowed = isFloatingInterestRateCalculationAllowed;
+    }
 
     public LoanProduct getLoanProduct() {
         return this.loanProduct;

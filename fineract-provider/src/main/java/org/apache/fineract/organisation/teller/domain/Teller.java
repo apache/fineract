@@ -84,22 +84,22 @@ public class Teller extends AbstractPersistableCustom<Long> {
     }
     
     private Teller (final Office staffOffice, final String name, final String description, final LocalDate startDate, 
-    		final LocalDate endDate, final TellerStatus status) {
-    	
-    	this.name = StringUtils.defaultIfEmpty(name, null);
-    	this.description = StringUtils.defaultIfEmpty(description, null);
-    	if (startDate != null) {
-    		this.startDate = startDate.toDateTimeAtStartOfDay().toDate();
-    	}
-    	if (endDate != null) {
-    		this.endDate = endDate.toDateTimeAtStartOfDay().toDate();
-    	}
-    	if (status != null) {
-    		this.status = status.getValue();
-    	}
-    	this.office = staffOffice;
-    	
-    	/*
+            final LocalDate endDate, final TellerStatus status) {
+        
+        this.name = StringUtils.defaultIfEmpty(name, null);
+        this.description = StringUtils.defaultIfEmpty(description, null);
+        if (startDate != null) {
+            this.startDate = startDate.toDateTimeAtStartOfDay().toDate();
+        }
+        if (endDate != null) {
+            this.endDate = endDate.toDateTimeAtStartOfDay().toDate();
+        }
+        if (status != null) {
+            this.status = status.getValue();
+        }
+        this.office = staffOffice;
+        
+        /*
         if (StringUtils.isNotBlank(name)) {
             this.name = name.trim();
         } else {
@@ -183,7 +183,7 @@ public class Teller extends AbstractPersistableCustom<Long> {
             final Integer newValue = command.integerValueOfParameterNamed(statusParamName);
             final TellerStatus status = TellerStatus.fromInt(newValue);
             if (status != TellerStatus.INVALID) {
-            	this.status = status.getValue(); 
+                this.status = status.getValue(); 
             }
         }
 
@@ -284,8 +284,8 @@ public class Teller extends AbstractPersistableCustom<Long> {
         this.cashiers = cashiers;
     }
 
-	public void initializeLazyCollections() {
-		this.office.getId();
-		this.cashiers.size();
-	}
+    public void initializeLazyCollections() {
+        this.office.getId();
+        this.cashiers.size();
+    }
 }

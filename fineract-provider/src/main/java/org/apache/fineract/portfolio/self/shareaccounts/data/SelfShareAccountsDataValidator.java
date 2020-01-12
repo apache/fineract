@@ -38,38 +38,38 @@ import com.google.gson.JsonElement;
 @Component
 public class SelfShareAccountsDataValidator {
 
-	private final FromJsonHelper fromApiJsonHelper;
+    private final FromJsonHelper fromApiJsonHelper;
 
-	@Autowired
-	public SelfShareAccountsDataValidator(final FromJsonHelper fromApiJsonHelper) {
-		this.fromApiJsonHelper = fromApiJsonHelper;
-	}
+    @Autowired
+    public SelfShareAccountsDataValidator(final FromJsonHelper fromApiJsonHelper) {
+        this.fromApiJsonHelper = fromApiJsonHelper;
+    }
 
-	public HashMap<String, Object> validateShareAccountApplication(final String json) {
-		if (StringUtils.isBlank(json)) {
-			throw new InvalidJsonException();
-		}
+    public HashMap<String, Object> validateShareAccountApplication(final String json) {
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
 
-		final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-				.resource(ShareAccountApiConstants.shareEntityType);
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(ShareAccountApiConstants.shareEntityType);
 
-		final JsonElement element = this.fromApiJsonHelper.parse(json);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-		final String clientId = this.fromApiJsonHelper.extractStringNamed(ShareAccountApiConstants.clientid_paramname,
-				element);
-		baseDataValidator.reset().parameter(ShareAccountApiConstants.clientid_paramname).value(clientId).notNull()
-				.longGreaterThanZero();
+        final String clientId = this.fromApiJsonHelper.extractStringNamed(ShareAccountApiConstants.clientid_paramname,
+                element);
+        baseDataValidator.reset().parameter(ShareAccountApiConstants.clientid_paramname).value(clientId).notNull()
+                .longGreaterThanZero();
 
-		if (!dataValidationErrors.isEmpty()) {
-			throw new PlatformApiDataValidationException(dataValidationErrors);
-		}
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
-		HashMap<String, Object> retAttr = new HashMap<>();
-		retAttr.put(ShareAccountApiConstants.clientid_paramname, Long.parseLong(clientId));
+        HashMap<String, Object> retAttr = new HashMap<>();
+        retAttr.put(ShareAccountApiConstants.clientid_paramname, Long.parseLong(clientId));
 
-		return retAttr;
+        return retAttr;
 
-	}
+    }
 
 }

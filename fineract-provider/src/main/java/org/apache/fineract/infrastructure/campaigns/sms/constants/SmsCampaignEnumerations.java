@@ -86,11 +86,11 @@ public class SmsCampaignEnumerations {
     public static List<EnumOptionData> calendarPeriodFrequencyTypes(final PeriodFrequencyType[] periodFrequencyTypes) {
         final List<EnumOptionData> optionDatas = new ArrayList<>();
         for (final PeriodFrequencyType periodFrequencyType : periodFrequencyTypes) {
-        	if(!periodFrequencyType.getValue().equals(PeriodFrequencyType.INVALID.getValue())) {
-        		final EnumOptionData optionData = new EnumOptionData(periodFrequencyType.getValue().longValue(), periodFrequencyType.getCode(),
+            if(!periodFrequencyType.getValue().equals(PeriodFrequencyType.INVALID.getValue())) {
+                final EnumOptionData optionData = new EnumOptionData(periodFrequencyType.getValue().longValue(), periodFrequencyType.getCode(),
                         periodFrequencyType.toString());
-                optionDatas.add(optionData);	
-        	}
+                optionDatas.add(optionData);    
+            }
         }
         return optionDatas;
     }

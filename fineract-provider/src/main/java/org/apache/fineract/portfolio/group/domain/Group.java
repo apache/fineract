@@ -334,9 +334,9 @@ public final class Group extends AbstractPersistableCustom<Long> {
             actualChanges.put(GroupingTypesApiConstants.localeParamName, localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
-			if (newValue != null) {
-				this.activationDate = newValue.toDate();
-			}
+            if (newValue != null) {
+                this.activationDate = newValue.toDate();
+            }
         }
         
         if (command.isChangeInStringParameterNamed(GroupingTypesApiConstants.accountNoParamName, this.accountNumber)) {
@@ -401,24 +401,24 @@ public final class Group extends AbstractPersistableCustom<Long> {
         return this.clientMembers.contains(client);
     }
 
-	public void generateHierarchy() {
-		if (this.parent != null) {
-			this.hierarchy = this.parent.hierarchyOf(getId());
-		} else {
-			this.hierarchy = "." + getId() + ".";
-			for (Group group : this.groupMembers) {
-				group.setParent(this);
-				group.generateHierarchy();
-			}
-		}
-	}
+    public void generateHierarchy() {
+        if (this.parent != null) {
+            this.hierarchy = this.parent.hierarchyOf(getId());
+        } else {
+            this.hierarchy = "." + getId() + ".";
+            for (Group group : this.groupMembers) {
+                group.setParent(this);
+                group.generateHierarchy();
+            }
+        }
+    }
     
-	public void resetHierarchy() {
-			this.hierarchy = "." + this.getId();
-	}
+    public void resetHierarchy() {
+            this.hierarchy = "." + this.getId();
+    }
     
     private String hierarchyOf(final Long id) {
-    	return this.hierarchy + id.toString() + ".";
+        return this.hierarchy + id.toString() + ".";
     }
 
     public boolean isOfficeIdentifiedBy(final Long officeId) {
@@ -584,7 +584,7 @@ public final class Group extends AbstractPersistableCustom<Long> {
             this.groupMembers.add(group);
             differences.add(group.getId().toString());
             group.setParent(this);
-    		group.generateHierarchy();
+            group.generateHierarchy();
         }
 
         return differences;
@@ -597,7 +597,7 @@ public final class Group extends AbstractPersistableCustom<Long> {
             if (hasGroupAsMember(group)) {
                 this.groupMembers.remove(group);
                 differences.add(group.getId().toString());
-    			group.resetHierarchy();
+                group.resetHierarchy();
             } else {
                 throw new GroupNotExistsInCenterException(group.getId(), getId());
             }
@@ -759,9 +759,9 @@ public final class Group extends AbstractPersistableCustom<Long> {
         this.accountNumberRequiresAutoGeneration = false;
     }
 
-	public void setGroupMembers(List<Group> groupMembers) {
-		this.groupMembers = groupMembers;
-	}
+    public void setGroupMembers(List<Group> groupMembers) {
+        this.groupMembers = groupMembers;
+    }
     
     
 }
