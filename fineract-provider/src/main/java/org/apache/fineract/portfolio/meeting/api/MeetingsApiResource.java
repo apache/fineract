@@ -81,10 +81,10 @@ public class MeetingsApiResource {
     private final DefaultToApiJsonSerializer<MeetingData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-	private static final Set<String> MEETING_RESPONSE_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(MeetingApiConstants.idParamName, MeetingApiConstants.meetingDateParamName,
-					MeetingApiConstants.clientsAttendance, MeetingApiConstants.clients,
-					MeetingApiConstants.calendarData, MeetingApiConstants.attendanceTypeOptions));
+    private static final Set<String> MEETING_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(MeetingApiConstants.idParamName, MeetingApiConstants.meetingDateParamName,
+                    MeetingApiConstants.clientsAttendance, MeetingApiConstants.clients,
+                    MeetingApiConstants.calendarData, MeetingApiConstants.attendanceTypeOptions));
 
     @Autowired
     public MeetingsApiResource(final PlatformSecurityContext context, final MeetingReadPlatformService readPlatformService,

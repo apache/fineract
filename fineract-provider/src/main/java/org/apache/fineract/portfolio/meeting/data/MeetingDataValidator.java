@@ -53,11 +53,11 @@ import com.google.gson.reflect.TypeToken;
 @Component
 public class MeetingDataValidator {
 
-	private final FromJsonHelper fromApiJsonHelper;
-	private static final Set<String> MEETING_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(MeetingApiConstants.meetingDateParamName, MeetingApiConstants.localeParamName,
-					MeetingApiConstants.dateFormatParamName, MeetingApiConstants.calendarIdParamName,
-					MeetingApiConstants.clientsAttendanceParamName));
+    private final FromJsonHelper fromApiJsonHelper;
+    private static final Set<String> MEETING_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(MeetingApiConstants.meetingDateParamName, MeetingApiConstants.localeParamName,
+                    MeetingApiConstants.dateFormatParamName, MeetingApiConstants.calendarIdParamName,
+                    MeetingApiConstants.clientsAttendanceParamName));
 
     @Autowired
     public MeetingDataValidator(final FromJsonHelper fromApiJsonHelper) {

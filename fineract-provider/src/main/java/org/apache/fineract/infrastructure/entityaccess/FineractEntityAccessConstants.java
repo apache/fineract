@@ -20,8 +20,8 @@ package org.apache.fineract.infrastructure.entityaccess;
 
 public class FineractEntityAccessConstants {
 
-	public static final String GLOBAL_CONFIG_FOR_OFFICE_SPECIFIC_PRODUCTS = "office-specific-products-enabled";
-	public static final String GLOBAL_CONFIG_FOR_RESTRICT_PRODUCTS_TO_USER_OFFICE = "restrict-products-to-user-office";
+    public static final String GLOBAL_CONFIG_FOR_OFFICE_SPECIFIC_PRODUCTS = "office-specific-products-enabled";
+    public static final String GLOBAL_CONFIG_FOR_RESTRICT_PRODUCTS_TO_USER_OFFICE = "restrict-products-to-user-office";
     public static final String ENTITY_ACCESS_CODENAME = "Entity to Entity Access Types";
 
     /***
@@ -29,10 +29,10 @@ public class FineractEntityAccessConstants {
      ***/
     public static enum ENTITY_ACCESS_JSON_INPUT_PARAMS {
         ENTITY_TYPE("entityType"),
-    	ENTITY_ID("entityId"),
+        ENTITY_ID("entityId"),
         ENTITY_ACCESS_TYPE_ID("entityAccessTypeId"),
         SECOND_ENTITY_TYPE("secondEntityType"),
-    	SECOND_ENTITY_ID("secondEntityId")
+        SECOND_ENTITY_ID("secondEntityId")
         ;
 
         private final String value;

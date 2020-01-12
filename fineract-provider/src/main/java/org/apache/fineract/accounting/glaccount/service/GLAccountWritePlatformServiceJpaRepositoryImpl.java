@@ -121,13 +121,13 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
         try {
             final GLAccountCommand accountCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
             accountCommand.validateForUpdate();
-			if (command.hasParameter(GLAccountJsonInputParams.DISABLED
-					.getValue())
-					&& command
-							.booleanPrimitiveValueOfParameterNamed(GLAccountJsonInputParams.DISABLED
-									.getValue())) {
-				validateForAttachedProduct(glAccountId);
-			}
+            if (command.hasParameter(GLAccountJsonInputParams.DISABLED
+                    .getValue())
+                    && command
+                            .booleanPrimitiveValueOfParameterNamed(GLAccountJsonInputParams.DISABLED
+                                    .getValue())) {
+                validateForAttachedProduct(glAccountId);
+            }
             final Long parentId = command.longValueOfParameterNamed(GLAccountJsonInputParams.PARENT_ID.getValue());
             if (glAccountId.equals(parentId)) { throw new InvalidParentGLAccountHeadException(glAccountId, parentId); }
             // is the glAccount valid
@@ -178,17 +178,17 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
     }
 
     private void validateForAttachedProduct(Long glAccountId) {
-		String sql = "select count(*) from acc_product_mapping acc where acc.gl_account_id = ?";
-		try {
-			int count = this.jdbcTemplate.queryForObject(sql, Integer.class, glAccountId);
-			if (count > 0) {
-				throw new GLAccountDisableException();
-			}
-		} catch (EmptyResultDataAccessException e) {
-		}
-	}
+        String sql = "select count(*) from acc_product_mapping acc where acc.gl_account_id = ?";
+        try {
+            int count = this.jdbcTemplate.queryForObject(sql, Integer.class, glAccountId);
+            if (count > 0) {
+                throw new GLAccountDisableException();
+            }
+        } catch (EmptyResultDataAccessException e) {
+        }
+    }
 
-	@Transactional
+    @Transactional
     @Override
     public CommandProcessingResult deleteGLAccount(final Long glAccountId) {
         final GLAccount glAccount = this.glAccountRepository.findById(glAccountId)

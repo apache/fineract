@@ -139,14 +139,14 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             
             Collection<Client> clients = null;
             if(command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)
-            		&& command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER)
-            		&& command.hasParameter(AppUserConstants.CLIENTS)){
-            	JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
-            	Collection<Long> clientIds = new HashSet<>();
-            	for(JsonElement clientElement : clientsArray){
-            		clientIds.add(clientElement.getAsLong());
-            	}
-            	clients = this.clientRepositoryWrapper.findAll(clientIds);
+                    && command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER)
+                    && command.hasParameter(AppUserConstants.CLIENTS)){
+                JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
+                Collection<Long> clientIds = new HashSet<>();
+                for(JsonElement clientElement : clientsArray){
+                    clientIds.add(clientElement.getAsLong());
+                }
+                clients = this.clientRepositoryWrapper.findAll(clientIds);
             }
 
             appUser = AppUser.fromJson(userOffice, linkedStaff, allRoles, clients, command);
@@ -165,7 +165,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final JpaSystemException | PersistenceException | AuthenticationServiceException dve) {
-        	  Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+              Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleDataIntegrityIssues(command, throwable, dve);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -202,17 +202,17 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             Collection<Client> clients = null;
             boolean isSelfServiceUser = userToUpdate.isSelfServiceUser();
             if(command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)){
-            	isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER); 
+                isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER); 
             }
             
             if(isSelfServiceUser
-            		&& command.hasParameter(AppUserConstants.CLIENTS)){
-            	JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
-            	Collection<Long> clientIds = new HashSet<>();
-            	for(JsonElement clientElement : clientsArray){
-            		clientIds.add(clientElement.getAsLong());
-            	}
-            	clients = this.clientRepositoryWrapper.findAll(clientIds);
+                    && command.hasParameter(AppUserConstants.CLIENTS)){
+                JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
+                Collection<Long> clientIds = new HashSet<>();
+                for(JsonElement clientElement : clientsArray){
+                    clientIds.add(clientElement.getAsLong());
+                }
+                clients = this.clientRepositoryWrapper.findAll(clientIds);
             }
 
             final Map<String, Object> changes = userToUpdate.update(command, this.platformPasswordEncoder, clients);
@@ -258,7 +258,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final JpaSystemException | PersistenceException | AuthenticationServiceException dve) {
-        	  Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+              Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleDataIntegrityIssues(command, throwable, dve);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //

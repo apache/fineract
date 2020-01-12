@@ -24,12 +24,12 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleP
 import org.joda.time.LocalDate;
 
 public interface LoanRescheduleModalPeriod {
-	
-	LoanSchedulePeriodData toData();
-	
-	Integer periodNumber();
-	
-	Integer oldPeriodNumber();
+    
+    LoanSchedulePeriodData toData();
+    
+    Integer periodNumber();
+    
+    Integer oldPeriodNumber();
 
     LocalDate periodFromDate();
 

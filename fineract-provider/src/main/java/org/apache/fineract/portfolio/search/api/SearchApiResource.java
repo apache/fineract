@@ -97,7 +97,7 @@ public class SearchApiResource {
     @ApiResponses({@ApiResponse(code = 200, message = "", response = SearchApiResourceSwagger.GetSearchResponse.class)})
     public String searchData(@Context final UriInfo uriInfo, @QueryParam("query")  @ApiParam(value = "query")final String query,
             @QueryParam("resource")  @ApiParam(value = "resource") final String resource ,@DefaultValue("false") @QueryParam("exactMatch")  @ApiParam(value = "exactMatch")  Boolean exactMatch) {
-    	
+     
         final SearchConditions searchConditions = new SearchConditions(query, resource,exactMatch);
 
         final Collection<SearchData> searchResults = this.searchReadPlatformService.retriveMatchingData(searchConditions);

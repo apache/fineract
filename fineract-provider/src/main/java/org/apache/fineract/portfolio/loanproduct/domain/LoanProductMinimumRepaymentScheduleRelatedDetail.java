@@ -30,30 +30,30 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
  */
 public interface LoanProductMinimumRepaymentScheduleRelatedDetail {
 
-	MonetaryCurrency getCurrency();
-	
-	Money getPrincipal();
-	
-	Integer graceOnInterestCharged();
-	
-	Integer graceOnInterestPayment();
-	
-	Integer graceOnPrincipalPayment();
-	
-	Integer recurringMoratoriumOnPrincipalPeriods();
-	
-	Money getInArrearsTolerance();
-	
-	BigDecimal getNominalInterestRatePerPeriod();
-	
-	PeriodFrequencyType getInterestPeriodFrequencyType();
-	
-	BigDecimal getAnnualNominalInterestRate();
-	
-	InterestMethod getInterestMethod();
-	
-	InterestCalculationPeriodMethod getInterestCalculationPeriodMethod();
-	
+    MonetaryCurrency getCurrency();
+    
+    Money getPrincipal();
+    
+    Integer graceOnInterestCharged();
+    
+    Integer graceOnInterestPayment();
+    
+    Integer graceOnPrincipalPayment();
+    
+    Integer recurringMoratoriumOnPrincipalPeriods();
+    
+    Money getInArrearsTolerance();
+    
+    BigDecimal getNominalInterestRatePerPeriod();
+    
+    PeriodFrequencyType getInterestPeriodFrequencyType();
+    
+    BigDecimal getAnnualNominalInterestRate();
+    
+    InterestMethod getInterestMethod();
+    
+    InterestCalculationPeriodMethod getInterestCalculationPeriodMethod();
+    
     Integer getRepayEvery();
 
     PeriodFrequencyType getRepaymentPeriodFrequencyType();

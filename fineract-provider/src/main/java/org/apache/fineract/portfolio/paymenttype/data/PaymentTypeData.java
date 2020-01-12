@@ -74,14 +74,14 @@ public class PaymentTypeData implements Serializable {
         PaymentTypeData that = (PaymentTypeData) o;
 
         return Objects.equals(id, that.id) &&
-        	   Objects.equals(name, that.name) &&
-        	   Objects.equals(description, that.description) &&
-        	   Objects.equals(isCashPayment, that.isCashPayment) &&
-        	   Objects.equals(position, that.position);
+               Objects.equals(name, that.name) &&
+               Objects.equals(description, that.description) &&
+               Objects.equals(isCashPayment, that.isCashPayment) &&
+               Objects.equals(position, that.position);
     }
 
     @Override
     public int hashCode() {
-    	return Objects.hash(id, name, description, isCashPayment, position);
+        return Objects.hash(id, name, description, isCashPayment, position);
     }
 }

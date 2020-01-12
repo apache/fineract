@@ -31,19 +31,19 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "HOOK", action = "DELETE")
 public class DeleteHookCommandHandler implements NewCommandSourceHandler {
 
-	private final HookWritePlatformService writePlatformService;
+    private final HookWritePlatformService writePlatformService;
 
-	@Autowired
-	public DeleteHookCommandHandler(
-			final HookWritePlatformService writePlatformService) {
-		this.writePlatformService = writePlatformService;
-	}
+    @Autowired
+    public DeleteHookCommandHandler(
+            final HookWritePlatformService writePlatformService) {
+        this.writePlatformService = writePlatformService;
+    }
 
-	@Transactional
-	@Override
-	public CommandProcessingResult processCommand(final JsonCommand command) {
+    @Transactional
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
 
-		return this.writePlatformService.deleteHook(command.entityId());
-	}
+        return this.writePlatformService.deleteHook(command.entityId());
+    }
 
 }

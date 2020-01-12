@@ -177,9 +177,9 @@ public class ClientEntityImportHandler implements ImportHandler {
             addressList = new ArrayList<AddressData>(Arrays.asList(addressDataObj));
         }
         return ClientData.importClientEntityInstance(legalFormId,row.getRowNum(),name,officeId,clientTypeId,clientClassicationId,
-				staffId, active, activationDate, submittedOn, externalId, incorportionDate, mobileNo,
-				clientNonPersonData, addressList, locale, dateFormat);
-	}
+                staffId, active, activationDate, submittedOn, externalId, incorportionDate, mobileNo,
+                clientNonPersonData, addressList, locale, dateFormat);
+    }
 
     public Count importEntity(String dateFormat) {
         Sheet clientSheet=workbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);

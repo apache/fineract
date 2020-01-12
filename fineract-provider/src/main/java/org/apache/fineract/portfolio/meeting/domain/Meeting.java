@@ -78,10 +78,10 @@ public class Meeting extends AbstractPersistableCustom<Long> {
     }
 
     public static Meeting createNew(final CalendarInstance calendarInstance, final Date meetingDate, Boolean isTransactionDateOnNonMeetingDate,
-    		final boolean isSkipRepaymentOnFirstMonth, final int numberOfDays) {
-    	
-    	if (!isTransactionDateOnNonMeetingDate && !isValidMeetingDate(calendarInstance, meetingDate,isSkipRepaymentOnFirstMonth, numberOfDays)) 
-    	{ throw new NotValidRecurringDateException("meeting", "The date '"
+            final boolean isSkipRepaymentOnFirstMonth, final int numberOfDays) {
+        
+        if (!isTransactionDateOnNonMeetingDate && !isValidMeetingDate(calendarInstance, meetingDate,isSkipRepaymentOnFirstMonth, numberOfDays)) 
+        { throw new NotValidRecurringDateException("meeting", "The date '"
                 + meetingDate + "' is not a valid meeting date.", meetingDate); }
         return new Meeting(calendarInstance, meetingDate);
     }
@@ -180,7 +180,7 @@ public class Meeting extends AbstractPersistableCustom<Long> {
     }
 
     private static boolean isValidMeetingDate(final CalendarInstance calendarInstance, final Date meetingDate,
-    		final boolean isSkipRepaymentOnFirstMonth, final int numberOfDays) {
+            final boolean isSkipRepaymentOnFirstMonth, final int numberOfDays) {
         final Calendar calendar = calendarInstance.getCalendar();
         LocalDate meetingDateLocalDate = null;
         if (meetingDate != null) {

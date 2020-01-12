@@ -163,10 +163,10 @@ public class ClientPersonImportHandler implements ImportHandler {
              addressList = new ArrayList<AddressData>(Arrays.asList(addressDataObj));
         }
         return ClientData.importClientPersonInstance(legalFormId,row.getRowNum(),firstName,lastName,middleName,submittedOn,activationDate,active,externalId,
-				officeId, staffId, mobileNo, dob, clientTypeId, genderId, clientClassicationId, isStaff,
-				addressList, locale, dateFormat);
+                officeId, staffId, mobileNo, dob, clientTypeId, genderId, clientClassicationId, isStaff,
+                addressList, locale, dateFormat);
 
-	}
+    }
 
     public Count importEntity(String dateFormat) {
         Sheet clientSheet=workbook.getSheet(TemplatePopulateImportConstants.CLIENT_PERSON_SHEET_NAME);

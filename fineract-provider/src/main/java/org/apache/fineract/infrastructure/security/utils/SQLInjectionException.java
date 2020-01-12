@@ -22,8 +22,8 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 
 public class SQLInjectionException extends PlatformApiDataValidationException {
 
-	public SQLInjectionException() {
-		super("error.msg.found.sql.injection", "Unexpected SQL Commands found", null);
-	}
+    public SQLInjectionException() {
+        super("error.msg.found.sql.injection", "Unexpected SQL Commands found", null);
+    }
 
 }

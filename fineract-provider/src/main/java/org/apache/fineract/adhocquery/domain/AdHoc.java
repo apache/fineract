@@ -38,19 +38,19 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Table(name = "m_adhoc")
 public class AdHoc extends AbstractAuditableCustom<AppUser, Long> {
 
-  	@Column(name = "name", length = 100)
+      @Column(name = "name", length = 100)
     private  String name;
     
     @Column(name = "query", length = 2000)
     private  String query;
-   	
+       
     @Column(name = "table_name", length = 100)
     private  String tableName;
     
     
     @Column(name = "table_fields", length = 2000)
     private  String tableFields;
-   	
+       
     @Column(name = "email", length = 500)
     private  String email;
 
@@ -60,9 +60,9 @@ public class AdHoc extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "report_run_every")
     private Long reportRunEvery;
 
-	@Column(name = "IsActive", nullable = false)
+    @Column(name = "IsActive", nullable = false)
     private boolean isActive = false;
-   	
+       
     private AdHoc(final String name, final String query,final String tableName,final String tableFields ,final String email, final Long reportRunFrequency, final Long reportRunEvery, final boolean isActive) {
         this.name = StringUtils.defaultIfEmpty(name, null);
         this.query=StringUtils.defaultIfEmpty(query,null);
@@ -139,7 +139,7 @@ public class AdHoc extends AbstractAuditableCustom<AppUser, Long> {
         }
         final String paramisActive = "isActive";
         if (command.isChangeInBooleanParameterNamed(paramisActive, this.isActive)) {
-        	final Boolean newValue = command.booleanObjectValueOfParameterNamed(paramisActive);
+            final Boolean newValue = command.booleanObjectValueOfParameterNamed(paramisActive);
             actualChanges.put(paramisActive, newValue);
             this.isActive = newValue;
         }
@@ -147,28 +147,28 @@ public class AdHoc extends AbstractAuditableCustom<AppUser, Long> {
     }
     
     public String getName() {
-		return name;
-	}
-	public String getQuery() {
-		return query;
-	}
-	public String getTableName() {
-		return tableName;
-	}
-	public String getTableFields() {
-		return tableFields;
-	}
+        return name;
+    }
+    public String getQuery() {
+        return query;
+    }
+    public String getTableName() {
+        return tableName;
+    }
+    public String getTableFields() {
+        return tableFields;
+    }
     public boolean isActive() {
         return this.isActive;
     }
-	public String getEmail() {
-		return email;
-	}
+    public String getEmail() {
+        return email;
+    }
     public void disableActive() {
         this.isActive = true;
     }
     public void enableActive() {
-    	this.isActive = false;
+        this.isActive = false;
     }
     public Long getReportRunFrequency() {
         return this.reportRunFrequency;

@@ -899,9 +899,9 @@ public final class LoanApplicationTerms {
         final int totalRepaymentsWithCapitalPayment = calculateNumberOfRepaymentsWithPrincipalPayment();
         Money principalPerPeriod = null;
         if (getFixedEmiAmount() == null) {
-        	principalPerPeriod = this.principal.minus(totalPrincipalAccounted).dividedBy(totalRepaymentsWithCapitalPayment, mc.getRoundingMode()).plus(
+            principalPerPeriod = this.principal.minus(totalPrincipalAccounted).dividedBy(totalRepaymentsWithCapitalPayment, mc.getRoundingMode()).plus(
                     this.adjustPrincipalForFlatLoans);
-        	if (isPrincipalGraceApplicableForThisPeriod(periodNumber)) {
+            if (isPrincipalGraceApplicableForThisPeriod(periodNumber)) {
                 principalPerPeriod = principalPerPeriod.zero();
             }
             if (!isPrincipalGraceApplicableForThisPeriod(periodNumber) && currentPeriodFixedPrincipalAmount != null) {
@@ -911,8 +911,8 @@ public final class LoanApplicationTerms {
 
             }
         }else{
-        	principalPerPeriod =  Money.of(this.getCurrency(), getFixedEmiAmount()).minus(interestForThisInstallment);
-        	return principalPerPeriod;
+            principalPerPeriod =  Money.of(this.getCurrency(), getFixedEmiAmount()).minus(interestForThisInstallment);
+            return principalPerPeriod;
         }
         
         return principalPerPeriod;
@@ -1133,7 +1133,7 @@ public final class LoanApplicationTerms {
          * if grace period available then need to be subtracted
          */
         if(this.interestChargingGrace != null){
-        	periodsRemaining = periodsRemaining - this.interestChargingGrace;
+            periodsRemaining = periodsRemaining - this.interestChargingGrace;
         }
         return periodsRemaining;
     }

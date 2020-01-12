@@ -26,9 +26,9 @@ import org.apache.fineract.infrastructure.hooks.domain.Hook;
 
 public interface HookReadPlatformService {
 
-	Collection<HookData> retrieveAllHooks();
+    Collection<HookData> retrieveAllHooks();
 
-	HookData retrieveHook(Long hookId);
+    HookData retrieveHook(Long hookId);
 
     List<Hook> retrieveHooksByEvent(final String actionName, final String entityName);
 

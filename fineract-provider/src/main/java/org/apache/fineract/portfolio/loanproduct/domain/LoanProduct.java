@@ -309,10 +309,10 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         final boolean syncExpectedWithDisbursementDate = command.booleanPrimitiveValueOfParameterNamed("syncExpectedWithDisbursementDate");
         
         
-		final boolean canUseForTopup = command.parameterExists(LoanProductConstants.canUseForTopup)
-				? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.canUseForTopup)
-				: false;
-				
+        final boolean canUseForTopup = command.parameterExists(LoanProductConstants.canUseForTopup)
+                ? command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.canUseForTopup)
+                : false;
+                
         final boolean isEqualAmortization = command.parameterExists(LoanProductConstants.isEqualAmortizationParam) ? command
                 .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.isEqualAmortizationParam) : false;
 
@@ -634,7 +634,7 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         this.canDefineInstallmentAmount = canDefineEmiAmount;
         this.installmentAmountInMultiplesOf = installmentAmountInMultiplesOf;
         this.syncExpectedWithDisbursementDate = 
-        		syncExpectedWithDisbursementDate;
+                syncExpectedWithDisbursementDate;
         this.canUseForTopup = canUseForTopup;
         this.isEqualAmortization = isEqualAmortization;
     }
@@ -861,10 +861,10 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
         }
         
         if(command.isChangeInBooleanParameterNamed("syncExpectedWithDisbursementDate"
-        		, this.syncExpectedWithDisbursementDate)){
-        	final boolean newValue = command.booleanPrimitiveValueOfParameterNamed("syncExpectedWithDisbursementDate");
-        	actualChanges.put("syncExpectedWithDisbursementDate", newValue);
-        	this.syncExpectedWithDisbursementDate = newValue;
+                , this.syncExpectedWithDisbursementDate)){
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed("syncExpectedWithDisbursementDate");
+            actualChanges.put("syncExpectedWithDisbursementDate", newValue);
+            this.syncExpectedWithDisbursementDate = newValue;
         }
 
         /**
@@ -1170,14 +1170,14 @@ public class LoanProduct extends AbstractPersistableCustom<Long> {
     }
     
     public boolean syncExpectedWithDisbursementDate() {
-		return syncExpectedWithDisbursementDate;
-	}
+        return syncExpectedWithDisbursementDate;
+    }
 
-	public void setSyncExpectedWithDisbursementDate(boolean syncExpectedWithDisbursementDate) {
-		this.syncExpectedWithDisbursementDate = syncExpectedWithDisbursementDate;
-	}
+    public void setSyncExpectedWithDisbursementDate(boolean syncExpectedWithDisbursementDate) {
+        this.syncExpectedWithDisbursementDate = syncExpectedWithDisbursementDate;
+    }
 
-	public Map<String, BigDecimal> fetchBorrowerCycleVariationsForCycleNumber(final Integer cycleNumber) {
+    public Map<String, BigDecimal> fetchBorrowerCycleVariationsForCycleNumber(final Integer cycleNumber) {
         Map<String, BigDecimal> borrowerCycleVariations = new HashMap<>();
         borrowerCycleVariations.put(LoanProductConstants.principal, this.loanProductRelatedDetail.getPrincipal().getAmount());
         borrowerCycleVariations.put(LoanProductConstants.interestRatePerPeriod,

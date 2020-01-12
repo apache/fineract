@@ -60,7 +60,7 @@ public class ThreadLocalContextUtil {
     }
     
     public static void setAuthToken(final String authToken) {
-    	authTokenContext.set(authToken);
+        authTokenContext.set(authToken);
     }
 
     public static String getAuthToken() {

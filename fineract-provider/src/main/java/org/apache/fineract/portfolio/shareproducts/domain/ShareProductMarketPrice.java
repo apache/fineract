@@ -47,7 +47,7 @@ public class ShareProductMarketPrice extends AbstractPersistableCustom<Long> {
     private BigDecimal shareValue ;
     
     public ShareProductMarketPrice() {
-	
+    
     }
     
     public ShareProductMarketPrice(final Date fromDate, final BigDecimal shareValue) {
@@ -68,10 +68,10 @@ public class ShareProductMarketPrice extends AbstractPersistableCustom<Long> {
     }
     
     public void setStartDate(Date date) {
-    	this.fromDate = date ;
+        this.fromDate = date ;
     }
     
     public void setShareValue(BigDecimal value) {
-    	this.shareValue = value ;
+        this.shareValue = value ;
     }
 }

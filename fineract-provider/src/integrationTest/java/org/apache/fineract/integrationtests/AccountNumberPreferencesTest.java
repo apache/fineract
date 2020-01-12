@@ -291,11 +291,11 @@ public class AccountNumberPreferencesTest {
         this.groupAccountNo = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "accountNo");
         
         if (isAccountPreferenceSetUp) {
-        	String groupsPrefixName = (String) this.accountNumberPreferencesHelper.getAccountNumberPreference(
+            String groupsPrefixName = (String) this.accountNumberPreferencesHelper.getAccountNumberPreference(
                     this.groupsAccountNumberPreferenceId, "prefixType.value");
-        	
+            
             if (groupsPrefixName.equals(this.officeName)) {
-            	
+                
                 final String groupOfficeName = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "officeName");
                 
                 this.validateAccountNumberLengthAndStartsWithPrefix(this.groupAccountNo, groupOfficeName);
@@ -316,15 +316,15 @@ public class AccountNumberPreferencesTest {
         Assert.assertTrue(center.getName().equals(name));
         
         if (isAccountPreferenceSetUp) {
-        	String centerPrefixName = (String) this.accountNumberPreferencesHelper.getAccountNumberPreference(
+            String centerPrefixName = (String) this.accountNumberPreferencesHelper.getAccountNumberPreference(
                     this.centerAccountNumberPreferenceId, "prefixType.value");
             final String CENTER_URL = "/fineract-provider/api/v1/centers/" + this.centerId + "?" + Utils.TENANT_IDENTIFIER;
-        	
+            
             if (centerPrefixName.equals(this.officeName)) {
                 final String centerOfficeName = Utils.performServerGet(requestSpec, responseSpec, CENTER_URL, "officeName");  
                 this.validateAccountNumberLengthAndStartsWithPrefix(center.getAccountNo(), centerOfficeName);
             }
-        } else {	
+        } else {    
             validateAccountNumberLengthAndStartsWithPrefix(center.getAccountNo(), null);
         }
     }
@@ -375,7 +375,7 @@ public class AccountNumberPreferencesTest {
 
     private void validateAccountNumberLengthAndStartsWithPrefix(final String accountNumber, String prefix) {
         if (prefix != null) {
-        		prefix = prefix.substring(0, Math.min(prefix.length(), 10));
+                prefix = prefix.substring(0, Math.min(prefix.length(), 10));
             Assert.assertEquals(accountNumber.length(), prefix.length() + 9);
             Assert.assertTrue(accountNumber.startsWith(prefix));
         } else {

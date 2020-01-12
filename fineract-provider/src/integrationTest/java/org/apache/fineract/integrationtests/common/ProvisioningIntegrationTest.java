@@ -158,10 +158,10 @@ public class ProvisioningIntegrationTest {
             Object requestedCategoryId = requestedMap.get("categoryId") ;
             boolean found = false ; 
             for(int j = 0 ; j < newdefintions.size(); j++) {
-            	Map newMap = (Map)newdefintions.get(j) ;
+                Map newMap = (Map)newdefintions.get(j) ;
                 Object newCategoryId = newMap.get("categoryId") ;
                 if(requestedCategoryId.equals(newCategoryId)) {
-                	found = true ;
+                    found = true ;
                     checkProperty("categoryId", requestedMap, newMap) ;
                     checkProperty("categoryName", requestedMap, newMap) ;
                     checkProperty("minAge", requestedMap, newMap) ;

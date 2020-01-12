@@ -26,6 +26,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface ReportParameterUsageRepository extends JpaRepository<ReportParameterUsage, Long>,
         JpaSpecificationExecutor<ReportParameterUsage> {
     // no added behaviour
-	
-	List<ReportParameterUsage> findByReport(Report report);
+    
+    List<ReportParameterUsage> findByReport(Report report);
 }

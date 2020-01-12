@@ -68,8 +68,8 @@ public class ProvisioningEntriesApiResource {
     private final DefaultToApiJsonSerializer<Object> entriesApiJsonSerializer;
     private final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-	private static final Set<String> PROVISIONING_ENTRY_PARAMETERS = new HashSet<>(Arrays.asList(
-			ProvisioningEntriesApiConstants.PROVISIONINGENTRY_PARAM, ProvisioningEntriesApiConstants.ENTRIES_PARAM));
+    private static final Set<String> PROVISIONING_ENTRY_PARAMETERS = new HashSet<>(Arrays.asList(
+            ProvisioningEntriesApiConstants.PROVISIONINGENTRY_PARAM, ProvisioningEntriesApiConstants.ENTRIES_PARAM));
     private static final Set<String> ALL_PROVISIONING_ENTRIES = new HashSet<>(Arrays.asList
             (ProvisioningEntriesApiConstants.PROVISIONINGENTRY_PARAM));
     @Autowired

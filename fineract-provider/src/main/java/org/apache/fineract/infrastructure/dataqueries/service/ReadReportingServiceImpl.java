@@ -93,10 +93,10 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-	public StreamingOutput retrieveReportCSV(final String name, final String type,
-			final Map<String, String> queryParams, final boolean isSelfServiceUserReport) {
+    public StreamingOutput retrieveReportCSV(final String name, final String type,
+            final Map<String, String> queryParams, final boolean isSelfServiceUserReport) {
 
-		return new StreamingOutput() {
+        return new StreamingOutput() {
 
             @Override
             public void write(final OutputStream out) {
@@ -175,8 +175,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-	public GenericResultsetData retrieveGenericResultset(final String name, final String type,
-			final Map<String, String> queryParams, final boolean isSelfServiceUserReport) {
+    public GenericResultsetData retrieveGenericResultset(final String name, final String type,
+            final Map<String, String> queryParams, final boolean isSelfServiceUserReport) {
 
         final long startTime = System.currentTimeMillis();
         logger.info("STARTING REPORT: " + name + "   Type: " + type);
@@ -190,8 +190,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         return result;
     }
 
-	private String getSQLtoRun(final String name, final String type, final Map<String, String> queryParams,
-			final boolean isSelfServiceUserReport) {
+    private String getSQLtoRun(final String name, final String type, final Map<String, String> queryParams,
+            final boolean isSelfServiceUserReport) {
 
         String sql = getSql(name, type);
 
@@ -210,14 +210,14 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         // permitted to be run by the user
         sql = this.genericDataService.replace(sql, "${currentUserId}", currentUser.getId().toString());
         
-		sql = this.genericDataService.replace(sql, "${isSelfServiceUser}",
-				Integer.toString(isSelfServiceUserReport ? 1 : 0));
+        sql = this.genericDataService.replace(sql, "${isSelfServiceUser}",
+                Integer.toString(isSelfServiceUserReport ? 1 : 0));
 
-		sql = this.genericDataService.wrapSQL(sql);
+        sql = this.genericDataService.wrapSQL(sql);
 
-		return sql;
+        return sql;
 
-	}
+    }
 
     private String getSql(final String name, final String type) {
 
@@ -249,8 +249,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-	public String retrieveReportPDF(final String reportName, final String type, final Map<String, String> queryParams,
-			final boolean isSelfServiceUserReport) {
+    public String retrieveReportPDF(final String reportName, final String type, final Map<String, String> queryParams,
+            final boolean isSelfServiceUserReport) {
 
         final String fileLocation = FileSystemContentRepository.FINERACT_BASE_DIR + File.separator + "";
         if (!new File(fileLocation).isDirectory()) {
@@ -617,10 +617,10 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         return null ;
     }
     
-	private void validateReportName(final String name) {
+    private void validateReportName(final String name) {
 
-		if (!StringUtils.isBlank(name) && !name.matches(REPORT_NAME_REGEX_PATTERN)) {
-			throw new SQLInjectionException();
-		}
-	}
+        if (!StringUtils.isBlank(name) && !name.matches(REPORT_NAME_REGEX_PATTERN)) {
+            throw new SQLInjectionException();
+        }
+    }
 }

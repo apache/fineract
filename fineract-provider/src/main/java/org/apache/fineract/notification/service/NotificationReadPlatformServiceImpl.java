@@ -52,8 +52,8 @@ public class NotificationReadPlatformServiceImpl implements NotificationReadPlat
 
     @Autowired
     public NotificationReadPlatformServiceImpl(final RoutingDataSource dataSource,
-    		final PlatformSecurityContext context,
-    		final ColumnValidator columnValidator) {
+            final PlatformSecurityContext context,
+            final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.context = context;
         this.columnValidator = columnValidator;

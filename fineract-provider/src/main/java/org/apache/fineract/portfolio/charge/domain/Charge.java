@@ -603,15 +603,15 @@ public class Charge extends AbstractPersistableCustom<Long> {
         if (!(o instanceof Charge)) return false;
         Charge other= (Charge) o;
         return Objects.equals(name, other.name) &&
-			Objects.equals(amount, other.amount) &&
-			Objects.equals(currencyCode, other.currencyCode) &&
-			Objects.equals(chargeAppliesTo, other.chargeAppliesTo) &&
-			Objects.equals(chargeTimeType, other.chargeTimeType) &&
-			Objects.equals(chargeCalculation, other.chargeCalculation) &&
-			Objects.equals(chargePaymentMode, other.chargePaymentMode) &&
-			Objects.equals(feeOnDay, other.feeOnDay) &&
-			Objects.equals(feeInterval, other.feeInterval) &&
-			Objects.equals(feeOnMonth, other.feeOnMonth) &&
+   Objects.equals(amount, other.amount) &&
+   Objects.equals(currencyCode, other.currencyCode) &&
+   Objects.equals(chargeAppliesTo, other.chargeAppliesTo) &&
+   Objects.equals(chargeTimeType, other.chargeTimeType) &&
+   Objects.equals(chargeCalculation, other.chargeCalculation) &&
+   Objects.equals(chargePaymentMode, other.chargePaymentMode) &&
+   Objects.equals(feeOnDay, other.feeOnDay) &&
+   Objects.equals(feeInterval, other.feeInterval) &&
+   Objects.equals(feeOnMonth, other.feeOnMonth) &&
                 penalty == other.penalty &&
                 active == other.active &&
                 deleted == other.deleted &&
@@ -625,6 +625,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
     @Override
     public int hashCode() {
         return Objects.hash(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculation, 
-        		chargePaymentMode, feeOnDay, feeInterval, feeOnMonth, penalty, active, deleted, minCap, maxCap, feeFrequency, account, taxGroup);
+          chargePaymentMode, feeOnDay, feeInterval, feeOnMonth, penalty, active, deleted, minCap, maxCap, feeFrequency, account, taxGroup);
     }
 }

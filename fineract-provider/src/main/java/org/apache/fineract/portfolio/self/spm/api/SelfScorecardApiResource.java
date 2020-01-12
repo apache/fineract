@@ -46,53 +46,53 @@ import org.springframework.transaction.annotation.Transactional;
 @Scope("singleton")
 @Api(tags = {"Self Score Card"})
 @SwaggerDefinition(tags = {
-		@Tag(name = "Self Score Card", description = "")
+  @Tag(name = "Self Score Card", description = "")
 })
 public class SelfScorecardApiResource {
 
-	private final PlatformSecurityContext context;
-	private final ScorecardApiResource scorecardApiResource;
-	private final AppuserClientMapperReadService appuserClientMapperReadService;
+    private final PlatformSecurityContext context;
+    private final ScorecardApiResource scorecardApiResource;
+    private final AppuserClientMapperReadService appuserClientMapperReadService;
 
-	@Autowired
-	public SelfScorecardApiResource(final PlatformSecurityContext securityContext,
-			final AppuserClientMapperReadService appuserClientMapperReadService,
-			final ScorecardApiResource scorecardApiResource) {
-		this.context = securityContext;
-		this.scorecardApiResource = scorecardApiResource;
-		this.appuserClientMapperReadService = appuserClientMapperReadService;
-	}
+    @Autowired
+    public SelfScorecardApiResource(final PlatformSecurityContext securityContext,
+            final AppuserClientMapperReadService appuserClientMapperReadService,
+            final ScorecardApiResource scorecardApiResource) {
+        this.context = securityContext;
+        this.scorecardApiResource = scorecardApiResource;
+        this.appuserClientMapperReadService = appuserClientMapperReadService;
+    }
 
-	@GET
-	@Path("clients/{clientId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	@Transactional
-	public List<ScorecardData> findByClient(@PathParam("clientId") final Long clientId) {
+    @GET
+    @Path("clients/{clientId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Transactional
+    public List<ScorecardData> findByClient(@PathParam("clientId") final Long clientId) {
 
-		validateAppuserClientsMapping(clientId);
-		return this.scorecardApiResource.findByClient(clientId);
-	}
+        validateAppuserClientsMapping(clientId);
+        return this.scorecardApiResource.findByClient(clientId);
+    }
 
-	@POST
-	@Path("{surveyId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	@Transactional
-	public void createScorecard(@PathParam("surveyId") final Long surveyId, final ScorecardData scorecardData) {
-		if (scorecardData.getClientId() != null) {
-			validateAppuserClientsMapping(scorecardData.getClientId());
-			this.scorecardApiResource.createScorecard(surveyId, scorecardData);
-		}
+    @POST
+    @Path("{surveyId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Transactional
+    public void createScorecard(@PathParam("surveyId") final Long surveyId, final ScorecardData scorecardData) {
+        if (scorecardData.getClientId() != null) {
+            validateAppuserClientsMapping(scorecardData.getClientId());
+            this.scorecardApiResource.createScorecard(surveyId, scorecardData);
+        }
 
-	}
+    }
 
-	private void validateAppuserClientsMapping(final Long clientId) {
-		AppUser user = this.context.authenticatedUser();
-		final boolean mappedClientId = this.appuserClientMapperReadService.isClientMappedToUser(clientId, user.getId());
-		if (!mappedClientId) {
-			throw new ClientNotFoundException(clientId);
-		}
-	}
+    private void validateAppuserClientsMapping(final Long clientId) {
+        AppUser user = this.context.authenticatedUser();
+        final boolean mappedClientId = this.appuserClientMapperReadService.isClientMappedToUser(clientId, user.getId());
+        if (!mappedClientId) {
+            throw new ClientNotFoundException(clientId);
+        }
+    }
 
 }

@@ -160,9 +160,9 @@ public class LoanProductMinMaxConstraints {
         return this.maxNumberOfRepayments;
     }
 
-	public void updateForFloatingInterestRates() {
-		this.minNominalInterestRatePerPeriod = null;
-		this.maxNominalInterestRatePerPeriod = null;
-	}
+    public void updateForFloatingInterestRates() {
+        this.minNominalInterestRatePerPeriod = null;
+        this.maxNominalInterestRatePerPeriod = null;
+    }
 
 }

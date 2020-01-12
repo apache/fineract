@@ -118,25 +118,25 @@ public final class UserDataValidator {
         
         Boolean isSelfServiceUser = null;
         if(this.fromApiJsonHelper.parameterExists(AppUserConstants.IS_SELF_SERVICE_USER, element)){
-        	isSelfServiceUser = this.fromApiJsonHelper.extractBooleanNamed(AppUserConstants.IS_SELF_SERVICE_USER, element);
-        	if(isSelfServiceUser == null){
-        		baseDataValidator.reset().parameter(AppUserConstants.IS_SELF_SERVICE_USER).trueOrFalseRequired(false);
-        	}
+            isSelfServiceUser = this.fromApiJsonHelper.extractBooleanNamed(AppUserConstants.IS_SELF_SERVICE_USER, element);
+            if(isSelfServiceUser == null){
+                baseDataValidator.reset().parameter(AppUserConstants.IS_SELF_SERVICE_USER).trueOrFalseRequired(false);
+            }
         }
         
         if(this.fromApiJsonHelper.parameterExists(AppUserConstants.CLIENTS, element)){
-        	if(isSelfServiceUser == null || !isSelfServiceUser){
-        		baseDataValidator.reset().parameter(AppUserConstants.CLIENTS).failWithCode("not.supported.when.isSelfServiceUser.is.false",
-        				"clients parameter is not supported when isSelfServiceUser parameter is false");
-        	}else{
-            	final JsonArray clientsArray = this.fromApiJsonHelper.extractJsonArrayNamed(AppUserConstants.CLIENTS, element);
-           		baseDataValidator.reset().parameter(AppUserConstants.CLIENTS).value(clientsArray).jsonArrayNotEmpty();
+            if(isSelfServiceUser == null || !isSelfServiceUser){
+                baseDataValidator.reset().parameter(AppUserConstants.CLIENTS).failWithCode("not.supported.when.isSelfServiceUser.is.false",
+                        "clients parameter is not supported when isSelfServiceUser parameter is false");
+            }else{
+                final JsonArray clientsArray = this.fromApiJsonHelper.extractJsonArrayNamed(AppUserConstants.CLIENTS, element);
+                   baseDataValidator.reset().parameter(AppUserConstants.CLIENTS).value(clientsArray).jsonArrayNotEmpty();
 
-            	for(JsonElement client : clientsArray){
-            		Long clientId = client.getAsLong();
-            		baseDataValidator.reset().parameter(AppUserConstants.CLIENTS).value(clientId).longGreaterThanZero();
-            	}
-        	}
+                for(JsonElement client : clientsArray){
+                    Long clientId = client.getAsLong();
+                    baseDataValidator.reset().parameter(AppUserConstants.CLIENTS).value(clientId).longGreaterThanZero();
+                }
+            }
         }
 
         final String[] roles = this.fromApiJsonHelper.extractArrayNamed("roles", element);
@@ -216,25 +216,25 @@ public final class UserDataValidator {
         
         Boolean isSelfServiceUser = null;
         if(this.fromApiJsonHelper.parameterExists(AppUserConstants.IS_SELF_SERVICE_USER, element)){
-        	isSelfServiceUser = this.fromApiJsonHelper.extractBooleanNamed(AppUserConstants.IS_SELF_SERVICE_USER, element);
-        	if(isSelfServiceUser == null){
-        		baseDataValidator.reset().parameter(AppUserConstants.IS_SELF_SERVICE_USER).trueOrFalseRequired(false);
-        	}
+            isSelfServiceUser = this.fromApiJsonHelper.extractBooleanNamed(AppUserConstants.IS_SELF_SERVICE_USER, element);
+            if(isSelfServiceUser == null){
+                baseDataValidator.reset().parameter(AppUserConstants.IS_SELF_SERVICE_USER).trueOrFalseRequired(false);
+            }
         }
         
         if(this.fromApiJsonHelper.parameterExists(AppUserConstants.CLIENTS, element)){
-        	if(isSelfServiceUser != null && !isSelfServiceUser){
-        		baseDataValidator.reset().parameter(AppUserConstants.CLIENTS).failWithCode("not.supported.when.isSelfServiceUser.is.false",
-        				"clients parameter is not supported when isSelfServiceUser parameter is false");
-        	}else{
-            	final JsonArray clientsArray = this.fromApiJsonHelper.extractJsonArrayNamed(AppUserConstants.CLIENTS, element);
-           		baseDataValidator.reset().parameter(AppUserConstants.CLIENTS).value(clientsArray).jsonArrayNotEmpty();
+            if(isSelfServiceUser != null && !isSelfServiceUser){
+                baseDataValidator.reset().parameter(AppUserConstants.CLIENTS).failWithCode("not.supported.when.isSelfServiceUser.is.false",
+                        "clients parameter is not supported when isSelfServiceUser parameter is false");
+            }else{
+                final JsonArray clientsArray = this.fromApiJsonHelper.extractJsonArrayNamed(AppUserConstants.CLIENTS, element);
+                   baseDataValidator.reset().parameter(AppUserConstants.CLIENTS).value(clientsArray).jsonArrayNotEmpty();
 
-            	for(JsonElement client : clientsArray){
-            		Long clientId = client.getAsLong();
-            		baseDataValidator.reset().parameter(AppUserConstants.CLIENTS).value(clientId).longGreaterThanZero();
-            	}
-        	}
+                for(JsonElement client : clientsArray){
+                    Long clientId = client.getAsLong();
+                    baseDataValidator.reset().parameter(AppUserConstants.CLIENTS).value(clientId).longGreaterThanZero();
+                }
+            }
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

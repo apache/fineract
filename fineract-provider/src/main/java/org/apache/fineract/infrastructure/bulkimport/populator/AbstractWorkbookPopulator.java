@@ -88,8 +88,8 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
   }
   
   protected void writeBigDecimal(int colIndex, Row row, BigDecimal value) {
-		row.createCell(colIndex).setCellValue(((value != null) ? value.doubleValue() : 0));
-	}
+        row.createCell(colIndex).setCellValue(((value != null) ? value.doubleValue() : 0));
+    }
  
   protected void setOfficeDateLookupTable(Sheet sheet, List<OfficeData> offices, int officeNameCol,
       int activationDateCol,String dateFormat) {
@@ -142,23 +142,23 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
 
                     }
             }
-			if (groups != null) {
-				for (GroupGeneralData group : groups) {
-					Row row = sheet.getRow(++rowIndex);
-					if (row == null)
-						row = sheet.createRow(rowIndex);
-					writeString(nameCol, row, group.getName().replaceAll("[ )(] ", "_"));
+            if (groups != null) {
+                for (GroupGeneralData group : groups) {
+                    Row row = sheet.getRow(++rowIndex);
+                    if (row == null)
+                        row = sheet.createRow(rowIndex);
+                    writeString(nameCol, row, group.getName().replaceAll("[ )(] ", "_"));
 
-					if (group.getActivationDate() != null) {
-						date = inputFormat.parse(group.getActivationDate().toString());
-						writeDate(activationDateCol, row, outputFormat.format(date), dateCellStyle, dateFormat);
-					} 
+                    if (group.getActivationDate() != null) {
+                        date = inputFormat.parse(group.getActivationDate().toString());
+                        writeDate(activationDateCol, row, outputFormat.format(date), dateCellStyle, dateFormat);
+                    } 
 
-				}
-			}
+                }
+            }
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-	}
+    }
 
 }

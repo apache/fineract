@@ -48,7 +48,7 @@ public class DepositAccountOnHoldTransactionReadPlatformServiceImpl implements D
 
     @Autowired
     public DepositAccountOnHoldTransactionReadPlatformServiceImpl(final RoutingDataSource dataSource,
-    		final ColumnValidator columnValidator) {
+            final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         mapper = new DepositAccountOnHoldTransactionsMapper();
         this.columnValidator = columnValidator;

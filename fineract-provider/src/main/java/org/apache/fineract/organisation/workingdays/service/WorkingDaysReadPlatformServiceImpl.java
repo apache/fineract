@@ -79,7 +79,7 @@ public class WorkingDaysReadPlatformServiceImpl implements WorkingDaysReadPlatfo
 
     @Override
     public WorkingDaysData retrieve() {
-    	//Check whether template is enabled or not?
+        //Check whether template is enabled or not?
         try {
             final WorkingDaysMapper rm = new WorkingDaysMapper();
             final String sql = " select " + rm.schema();
@@ -98,7 +98,7 @@ public class WorkingDaysReadPlatformServiceImpl implements WorkingDaysReadPlatfo
     }
     
     private Collection<EnumOptionData> repaymentRescheduleTypeOptions() {
-    	 return Arrays.asList(
+         return Arrays.asList(
                  WorkingDaysEnumerations.repaymentRescheduleType(RepaymentRescheduleType.SAME_DAY),
                  WorkingDaysEnumerations.repaymentRescheduleType(RepaymentRescheduleType.MOVE_TO_NEXT_WORKING_DAY),
                  WorkingDaysEnumerations.repaymentRescheduleType(RepaymentRescheduleType.MOVE_TO_NEXT_REPAYMENT_MEETING_DAY),

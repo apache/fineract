@@ -63,25 +63,25 @@ public class DepositAccountTransactionDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
 
-	private static final Set<String> DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-			DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName, transactionDateParamName,
-			transactionAmountParamName, paymentTypeIdParamName, transactionAccountNumberParamName, checkNumberParamName,
-			routingCodeParamName, receiptNumberParamName, bankNumberParamName));
+    private static final Set<String> DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName, transactionDateParamName,
+            transactionAmountParamName, paymentTypeIdParamName, transactionAccountNumberParamName, checkNumberParamName,
+            routingCodeParamName, receiptNumberParamName, bankNumberParamName));
 
-	private static final Set<String> DEPOSIT_ACCOUNT_RECOMMENDED_DEPOSIT_AMOUNT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName,
-					DepositsApiConstants.mandatoryRecommendedDepositAmountParamName,
-					DepositsApiConstants.effectiveDateParamName));
+    private static final Set<String> DEPOSIT_ACCOUNT_RECOMMENDED_DEPOSIT_AMOUNT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName,
+                    DepositsApiConstants.mandatoryRecommendedDepositAmountParamName,
+                    DepositsApiConstants.effectiveDateParamName));
 
-	private static final Set<String> DEPOSIT_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-			DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName, closedOnDateParamName,
-			DepositsApiConstants.noteParamName, onAccountClosureIdParamName, paymentTypeIdParamName,
-			transactionAccountNumberParamName, checkNumberParamName, routingCodeParamName, receiptNumberParamName,
-			bankNumberParamName, DepositsApiConstants.transferDescriptionParamName, toSavingsAccountIdParamName));
+    private static final Set<String> DEPOSIT_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName, closedOnDateParamName,
+            DepositsApiConstants.noteParamName, onAccountClosureIdParamName, paymentTypeIdParamName,
+            transactionAccountNumberParamName, checkNumberParamName, routingCodeParamName, receiptNumberParamName,
+            bankNumberParamName, DepositsApiConstants.transferDescriptionParamName, toSavingsAccountIdParamName));
 
-	private static final Set<String> DEPOSIT_ACCOUNT_PRE_MATURE_CALCULATION_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName,
-					closedOnDateParamName));
+    private static final Set<String> DEPOSIT_ACCOUNT_PRE_MATURE_CALCULATION_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(DepositsApiConstants.localeParamName, DepositsApiConstants.dateFormatParamName,
+                    closedOnDateParamName));
 
 
     @Autowired
@@ -96,8 +96,8 @@ public class DepositAccountTransactionDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-				DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                DEPOSIT_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(depositAccountType
@@ -131,8 +131,8 @@ public class DepositAccountTransactionDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-				DEPOSIT_ACCOUNT_RECOMMENDED_DEPOSIT_AMOUNT_UPDATE_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                DEPOSIT_ACCOUNT_RECOMMENDED_DEPOSIT_AMOUNT_UPDATE_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -177,8 +177,8 @@ public class DepositAccountTransactionDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-				DEPOSIT_ACCOUNT_PRE_MATURE_CALCULATION_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                DEPOSIT_ACCOUNT_PRE_MATURE_CALCULATION_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(depositAccountType
@@ -198,8 +198,8 @@ public class DepositAccountTransactionDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-				DEPOSIT_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                DEPOSIT_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(depositAccountType

@@ -76,10 +76,10 @@ public class AccountNumberGenerator {
     }
 
     public String generate(ShareAccount shareaccount, AccountNumberFormat accountNumberFormat) {
-    	Map<String, String> propertyMap = new HashMap<>();
-    	propertyMap.put(ID, shareaccount.getId().toString());
-    	propertyMap.put(SHARE_PRODUCT_SHORT_NAME, shareaccount.getShareProduct().getShortName());
-    	return generateAccountNumber(propertyMap, accountNumberFormat) ;
+        Map<String, String> propertyMap = new HashMap<>();
+        propertyMap.put(ID, shareaccount.getId().toString());
+        propertyMap.put(SHARE_PRODUCT_SHORT_NAME, shareaccount.getShareProduct().getShortName());
+        return generateAccountNumber(propertyMap, accountNumberFormat) ;
     }
     
     private String generateAccountNumber(Map<String, String> propertyMap, AccountNumberFormat accountNumberFormat) {
@@ -121,14 +121,14 @@ public class AccountNumberGenerator {
     }
     
     public String generateGroupAccountNumber(Group group, AccountNumberFormat accountNumberFormat) {
-    	Map<String, String> propertyMap = new HashMap<>();
+        Map<String, String> propertyMap = new HashMap<>();
         propertyMap.put(ID, group.getId().toString());
         propertyMap.put(OFFICE_NAME, group.getOffice().getName());        
         return generateAccountNumber(propertyMap, accountNumberFormat);
     }
     
     public String generateCenterAccountNumber(Group group, AccountNumberFormat accountNumberFormat) {
-    	Map<String, String> propertyMap = new HashMap<>();
+        Map<String, String> propertyMap = new HashMap<>();
         propertyMap.put(ID, group.getId().toString());
         propertyMap.put(OFFICE_NAME, group.getOffice().getName());        
         return generateAccountNumber(propertyMap, accountNumberFormat);

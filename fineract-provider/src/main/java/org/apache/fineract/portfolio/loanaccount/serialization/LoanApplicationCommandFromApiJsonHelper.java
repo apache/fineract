@@ -1100,7 +1100,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.disbursementDataParameterName, element) && expectedDisbursement != null
                 && totalPrincipal != null) {
-        	
+            
             BigDecimal tatalDisbursement = BigDecimal.ZERO;
             final JsonArray variationArray = this.fromApiJsonHelper.extractJsonArrayNamed(LoanApiConstants.disbursementDataParameterName,
                     element);
@@ -1121,10 +1121,10 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                         .parameterAtIndexArray(LoanApiConstants.disbursementDateParameterName, i).value(expectedDisbursementDate)
                         .notNull();
                         if(i == 0 && expectedDisbursementDate != null && !expectedDisbursement.equals(expectedDisbursementDate)) {
-                        	 baseDataValidator.reset().parameter(LoanApiConstants.disbursementDateParameterName)
+                             baseDataValidator.reset().parameter(LoanApiConstants.disbursementDateParameterName)
                              .failWithCode(LoanApiConstants.DISBURSEMENT_DATE_START_WITH_ERROR);
                         }else if(i > 0 && expectedDisbursementDate != null && expectedDisbursementDate.isBefore(expectedDisbursement)) {
-                        	baseDataValidator.reset().parameter(LoanApiConstants.disbursementDataParameterName)
+                            baseDataValidator.reset().parameter(LoanApiConstants.disbursementDataParameterName)
                             .failWithCode(LoanApiConstants.DISBURSEMENT_DATE_BEFORE_ERROR);
                         }
                         

@@ -942,7 +942,7 @@ public class LoanProductData implements Serializable {
     }
     
     public Integer getRecurringMoratoriumOnPrincipalPeriods() {
-    	return this.recurringMoratoriumOnPrincipalPeriods;
+        return this.recurringMoratoriumOnPrincipalPeriods;
     }
 
     public Integer getGraceOnInterestPayment() {
@@ -1196,9 +1196,9 @@ public class LoanProductData implements Serializable {
         return this.allowPartialPeriodInterestCalcualtion;
     }
 
-	public boolean syncExpectedWithDisbursementDate() {
-		return syncExpectedWithDisbursementDate;
-	}
+    public boolean syncExpectedWithDisbursementDate() {
+        return syncExpectedWithDisbursementDate;
+    }
     
         public boolean canUseForTopup() {
             return this.canUseForTopup;

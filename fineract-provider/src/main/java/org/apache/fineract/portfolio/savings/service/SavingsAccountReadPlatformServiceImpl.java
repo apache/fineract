@@ -95,7 +95,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     private final StaffReadPlatformService staffReadPlatformService;
     private final SavingsDropdownReadPlatformService dropdownReadPlatformService;
     private final ChargeReadPlatformService chargeReadPlatformService;
-	private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
+    private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     // mappers
     private final SavingsAccountTransactionTemplateMapper transactionTemplateMapper;
@@ -377,17 +377,17 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             Integer daysToDormancy = null;
             Integer daysToEscheat = null;
 
-        	LocalDate localTenantDate = DateUtils.getLocalDateOfTenant();
+            LocalDate localTenantDate = DateUtils.getLocalDateOfTenant();
             if(isDormancyTrackingActive && statusEnum.equals(SavingsAccountStatusType.ACTIVE.getValue())){
-            	if(subStatusEnum < SavingsAccountSubStatusEnum.ESCHEAT.getValue()){
+                if(subStatusEnum < SavingsAccountSubStatusEnum.ESCHEAT.getValue()){
                     daysToEscheat = Days.daysBetween(localTenantDate,lastActiveTransactionDate.plusDays(numDaysToEscheat)).getDays();
-            	}
-            	if(subStatusEnum < SavingsAccountSubStatusEnum.DORMANT.getValue()){
+                }
+                if(subStatusEnum < SavingsAccountSubStatusEnum.DORMANT.getValue()){
                     daysToDormancy = Days.daysBetween(localTenantDate,lastActiveTransactionDate.plusDays(numDaysToDormancy)).getDays();
-            	}
-            	if(subStatusEnum < SavingsAccountSubStatusEnum.INACTIVE.getValue()){
+                }
+                if(subStatusEnum < SavingsAccountSubStatusEnum.INACTIVE.getValue()){
                     daysToInactive = Days.daysBetween(localTenantDate,lastActiveTransactionDate.plusDays(numDaysToInactive)).getDays(); 
-            	}
+                }
             }
 
             final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
@@ -534,8 +534,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             BigDecimal interestNotPosted = BigDecimal.ZERO;
             LocalDate lastInterestCalculationDate = null;
             if(totalInterestEarned != null){
-            	interestNotPosted = totalInterestEarned.subtract(totalInterestPosted).add(totalOverdraftInterestDerived);
-            	lastInterestCalculationDate = JdbcSupport.getLocalDate(rs, "lastInterestCalculationDate");
+                interestNotPosted = totalInterestEarned.subtract(totalInterestPosted).add(totalOverdraftInterestDerived);
+                lastInterestCalculationDate = JdbcSupport.getLocalDate(rs, "lastInterestCalculationDate");
             }
             
             final SavingsAccountSummaryData summary = new SavingsAccountSummaryData(currency, totalDeposits, totalWithdrawals,
@@ -1130,83 +1130,83 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
     }
 
-	@Override
-	public List<Long> retrieveSavingsIdsPendingInactive(
-			LocalDate tenantLocalDate) {
-		List<Long> ret = null;
-		StringBuilder sql = new StringBuilder("select sa.id ");
-		sql.append(" from m_savings_account as sa ");
-		sql.append(" inner join m_savings_product as sp on (sa.product_id = sp.id and sp.is_dormancy_tracking_active = 1) ");
-		sql.append(" where sa.status_enum = 300 ");
-		sql.append(" and sa.sub_status_enum = 0 ");
-		sql.append(" and DATEDIFF(?,(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
-		sql.append(" from m_savings_account_transaction as sat ");
-		sql.append(" where sat.is_reversed = 0 ");
-		sql.append(" and sat.transaction_type_enum in (1,2) ");
-		sql.append(" and sat.savings_account_id = sa.id)) >= sp.days_to_inactive "); 
-		
-		try {
-			ret =  this.jdbcTemplate.queryForList(sql.toString(), Long.class, new Object[] {formatter.print(tenantLocalDate)});
-		} catch (EmptyResultDataAccessException e) {
-			// ignore empty result scenario
-		} catch (DataAccessException e) {
-			throw e;
-		}
-		
-		return ret;
-	}
+    @Override
+    public List<Long> retrieveSavingsIdsPendingInactive(
+            LocalDate tenantLocalDate) {
+        List<Long> ret = null;
+        StringBuilder sql = new StringBuilder("select sa.id ");
+        sql.append(" from m_savings_account as sa ");
+        sql.append(" inner join m_savings_product as sp on (sa.product_id = sp.id and sp.is_dormancy_tracking_active = 1) ");
+        sql.append(" where sa.status_enum = 300 ");
+        sql.append(" and sa.sub_status_enum = 0 ");
+        sql.append(" and DATEDIFF(?,(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
+        sql.append(" from m_savings_account_transaction as sat ");
+        sql.append(" where sat.is_reversed = 0 ");
+        sql.append(" and sat.transaction_type_enum in (1,2) ");
+        sql.append(" and sat.savings_account_id = sa.id)) >= sp.days_to_inactive "); 
+        
+        try {
+            ret =  this.jdbcTemplate.queryForList(sql.toString(), Long.class, new Object[] {formatter.print(tenantLocalDate)});
+        } catch (EmptyResultDataAccessException e) {
+            // ignore empty result scenario
+        } catch (DataAccessException e) {
+            throw e;
+        }
+        
+        return ret;
+    }
 
-	@Override
-	public List<Long> retrieveSavingsIdsPendingDormant(
-			LocalDate tenantLocalDate) {
-		List<Long> ret = null;
-		StringBuilder sql = new StringBuilder("select sa.id ");
-		sql.append(" from m_savings_account as sa ");
-		sql.append(" inner join m_savings_product as sp on (sa.product_id = sp.id and sp.is_dormancy_tracking_active = 1) ");
-		sql.append(" where sa.status_enum = 300 ");
-		sql.append(" and sa.sub_status_enum = 100 ");
-		sql.append(" and DATEDIFF(?,(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
-		sql.append(" from m_savings_account_transaction as sat ");
-		sql.append(" where sat.is_reversed = 0 ");
-		sql.append(" and sat.transaction_type_enum in (1,2) ");
-		sql.append(" and sat.savings_account_id = sa.id)) >= sp.days_to_dormancy "); 
-		
-		try {
-			ret =  this.jdbcTemplate.queryForList(sql.toString(), Long.class, new Object[] {formatter.print(tenantLocalDate)});
-		} catch (EmptyResultDataAccessException e) {
-			// ignore empty result scenario
-		} catch (DataAccessException e) {
-			throw e;
-		}
-		
-		return ret;
-	}
+    @Override
+    public List<Long> retrieveSavingsIdsPendingDormant(
+            LocalDate tenantLocalDate) {
+        List<Long> ret = null;
+        StringBuilder sql = new StringBuilder("select sa.id ");
+        sql.append(" from m_savings_account as sa ");
+        sql.append(" inner join m_savings_product as sp on (sa.product_id = sp.id and sp.is_dormancy_tracking_active = 1) ");
+        sql.append(" where sa.status_enum = 300 ");
+        sql.append(" and sa.sub_status_enum = 100 ");
+        sql.append(" and DATEDIFF(?,(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
+        sql.append(" from m_savings_account_transaction as sat ");
+        sql.append(" where sat.is_reversed = 0 ");
+        sql.append(" and sat.transaction_type_enum in (1,2) ");
+        sql.append(" and sat.savings_account_id = sa.id)) >= sp.days_to_dormancy "); 
+        
+        try {
+            ret =  this.jdbcTemplate.queryForList(sql.toString(), Long.class, new Object[] {formatter.print(tenantLocalDate)});
+        } catch (EmptyResultDataAccessException e) {
+            // ignore empty result scenario
+        } catch (DataAccessException e) {
+            throw e;
+        }
+        
+        return ret;
+    }
 
-	@Override
-	public List<Long> retrieveSavingsIdsPendingEscheat(
-			LocalDate tenantLocalDate) {
-		List<Long> ret = null;
-		StringBuilder sql = new StringBuilder("select sa.id ");
-		sql.append(" from m_savings_account as sa ");
-		sql.append(" inner join m_savings_product as sp on (sa.product_id = sp.id and sp.is_dormancy_tracking_active = 1) ");
-		sql.append(" where sa.status_enum = 300 ");
-		sql.append(" and sa.sub_status_enum = 200 ");
-		sql.append(" and DATEDIFF(?,(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
-		sql.append(" from m_savings_account_transaction as sat ");
-		sql.append(" where sat.is_reversed = 0 ");
-		sql.append(" and sat.transaction_type_enum in (1,2) ");
-		sql.append(" and sat.savings_account_id = sa.id)) >= sp.days_to_escheat "); 
-		
-		try {
-			ret =  this.jdbcTemplate.queryForList(sql.toString(), Long.class, new Object[] {formatter.print(tenantLocalDate)});
-		} catch (EmptyResultDataAccessException e) {
-			// ignore empty result scenario
-		} catch (DataAccessException e) {
-			throw e;
-		}
-		
-		return ret;
-	}
+    @Override
+    public List<Long> retrieveSavingsIdsPendingEscheat(
+            LocalDate tenantLocalDate) {
+        List<Long> ret = null;
+        StringBuilder sql = new StringBuilder("select sa.id ");
+        sql.append(" from m_savings_account as sa ");
+        sql.append(" inner join m_savings_product as sp on (sa.product_id = sp.id and sp.is_dormancy_tracking_active = 1) ");
+        sql.append(" where sa.status_enum = 300 ");
+        sql.append(" and sa.sub_status_enum = 200 ");
+        sql.append(" and DATEDIFF(?,(select IFNULL(max(sat.transaction_date),sa.activatedon_date) ");
+        sql.append(" from m_savings_account_transaction as sat ");
+        sql.append(" where sat.is_reversed = 0 ");
+        sql.append(" and sat.transaction_type_enum in (1,2) ");
+        sql.append(" and sat.savings_account_id = sa.id)) >= sp.days_to_escheat "); 
+        
+        try {
+            ret =  this.jdbcTemplate.queryForList(sql.toString(), Long.class, new Object[] {formatter.print(tenantLocalDate)});
+        } catch (EmptyResultDataAccessException e) {
+            // ignore empty result scenario
+        } catch (DataAccessException e) {
+            throw e;
+        }
+        
+        return ret;
+    }
 
     @Override
     public boolean isAccountBelongsToClient(final Long clientId, final Long accountId, final DepositAccountType depositAccountType,
@@ -1249,13 +1249,13 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
      * annualFeeNextDueDate); } }
      */
 
-	@Override
-	public String retrieveAccountNumberByAccountId(Long accountId) {
-		try {
-			final String sql = "select s.account_no from m_savings_account s where s.id = ?";
-			return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
-		} catch (final EmptyResultDataAccessException e) {
-			throw new SavingsAccountNotFoundException(accountId);
-		}
-	}
+    @Override
+    public String retrieveAccountNumberByAccountId(Long accountId) {
+        try {
+            final String sql = "select s.account_no from m_savings_account s where s.id = ?";
+            return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
+        } catch (final EmptyResultDataAccessException e) {
+            throw new SavingsAccountNotFoundException(accountId);
+        }
+    }
 }

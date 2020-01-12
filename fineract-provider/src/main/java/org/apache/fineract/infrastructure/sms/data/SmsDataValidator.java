@@ -43,13 +43,13 @@ import com.google.gson.reflect.TypeToken;
 public final class SmsDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
-	private static final Set<String> CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-			SmsApiConstants.localeParamName, SmsApiConstants.dateFormatParamName, SmsApiConstants.groupIdParamName,
-			SmsApiConstants.clientIdParamName, SmsApiConstants.staffIdParamName, SmsApiConstants.messageParamName,
-			SmsApiConstants.campaignIdParamName));
+    private static final Set<String> CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            SmsApiConstants.localeParamName, SmsApiConstants.dateFormatParamName, SmsApiConstants.groupIdParamName,
+            SmsApiConstants.clientIdParamName, SmsApiConstants.staffIdParamName, SmsApiConstants.messageParamName,
+            SmsApiConstants.campaignIdParamName));
 
-	public static final Set<String> UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(SmsApiConstants.messageParamName, SmsApiConstants.campaignIdParamName));
+    public static final Set<String> UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(SmsApiConstants.messageParamName, SmsApiConstants.campaignIdParamName));
 
     @Autowired
     public SmsDataValidator(final FromJsonHelper fromApiJsonHelper) {

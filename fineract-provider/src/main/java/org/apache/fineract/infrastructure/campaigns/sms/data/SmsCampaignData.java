@@ -207,8 +207,8 @@ public class SmsCampaignData {
         return this.providerId;
     }
 
-	public boolean isNotification() {
-		return this.isNotification;
-	}
+    public boolean isNotification() {
+        return this.isNotification;
+    }
 
 }

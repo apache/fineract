@@ -136,10 +136,10 @@ public class SavingsProductHelper {
             map.putAll(getAccountMappingForCashBased());
         }
         if(this.isDormancyTrackingActive){
-        	map.put("isDormancyTrackingActive", Boolean.toString(this.isDormancyTrackingActive));
-        	map.put("daysToInactive", this.daysToInactive);
-        	map.put("daysToDormancy", this.daysToDormancy);
-        	map.put("daysToEscheat", this.daysToEscheat);
+            map.put("isDormancyTrackingActive", Boolean.toString(this.isDormancyTrackingActive));
+            map.put("daysToInactive", this.daysToInactive);
+            map.put("daysToDormancy", this.daysToDormancy);
+            map.put("daysToEscheat", this.daysToEscheat);
 
         }
         String savingsProductCreateJson = new Gson().toJson(map);
@@ -285,13 +285,13 @@ public class SavingsProductHelper {
         assertEquals("ERROR IN CREATING THE Savings Product", generatedProductID, responseSavingsProductID);
     }
 
-	public SavingsProductHelper withDormancy() {
-	    this.isDormancyTrackingActive = true;
-	    this.daysToInactive = "30";
-	    this.daysToDormancy = "60";
-	    this.daysToEscheat = "90";
+    public SavingsProductHelper withDormancy() {
+        this.isDormancyTrackingActive = true;
+        this.daysToInactive = "30";
+        this.daysToDormancy = "60";
+        this.daysToEscheat = "90";
 
-		return this;
-	}
+        return this;
+    }
 
 }

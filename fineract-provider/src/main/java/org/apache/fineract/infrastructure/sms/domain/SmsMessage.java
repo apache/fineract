@@ -188,13 +188,13 @@ public class SmsMessage extends AbstractPersistableCustom<Long> {
         this.deliveredOnDate = deliveredOnDate;
     }
 
-	public boolean isNotification() {
-		return this.isNotification;
-	}
+    public boolean isNotification() {
+        return this.isNotification;
+    }
 
-	public void setNotification(boolean isNotification) {
-		this.isNotification = isNotification;
-	}
+    public void setNotification(boolean isNotification) {
+        this.isNotification = isNotification;
+    }
     
     
 }

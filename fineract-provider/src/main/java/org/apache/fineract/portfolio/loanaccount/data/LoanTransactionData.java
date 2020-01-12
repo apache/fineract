@@ -58,12 +58,12 @@ public class LoanTransactionData {
     private final BigDecimal outstandingLoanBalance;
     private final LocalDate submittedOnDate;
     private final boolean manuallyReversed;
-	private final LocalDate possibleNextRepaymentDate;
+    private final LocalDate possibleNextRepaymentDate;
 
     // templates
     final Collection<PaymentTypeData> paymentTypeOptions;
     
-	private  Collection<CodeValueData> writeOffReasonOptions = null;
+    private  Collection<CodeValueData> writeOffReasonOptions = null;
 
     //import fields
     private transient Integer rowIndex;
@@ -259,36 +259,36 @@ public class LoanTransactionData {
     }
     
     public static LoanTransactionData LoanTransactionDataForDisbursalTemplate(final LoanTransactionEnumData transactionType, final LocalDate expectedDisbursedOnLocalDateForTemplate, 
-			final BigDecimal disburseAmountForTemplate,	final Collection<PaymentTypeData> paymentOptions,
-			final BigDecimal retriveLastEmiAmount, final LocalDate possibleNextRepaymentDate) {
-		    final Long id = null;
-		    final Long officeId = null;
-		    final String officeName = null;
-		    final PaymentDetailData paymentDetailData = null;
-		    final CurrencyData currency = null;
-		    final BigDecimal unrecognizedIncomePortion = null;
-		    final BigDecimal principalPortion = null;;
-		    final BigDecimal interestPortion = null;
-		    final BigDecimal feeChargesPortion = null;
-		    final BigDecimal penaltyChargesPortion = null;
-		    final BigDecimal overpaymentPortion = null;
-		    final String externalId = null;
-		    final BigDecimal outstandingLoanBalance = null;
-		    final AccountTransferData transfer = null;
-		    final LocalDate submittedOnDate = null;
-		    final boolean manuallyReversed = false;
-			return new LoanTransactionData(id, officeId, officeName, transactionType, paymentDetailData, currency, expectedDisbursedOnLocalDateForTemplate,
-					disburseAmountForTemplate, principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion, overpaymentPortion,	unrecognizedIncomePortion, 
-					paymentOptions, transfer, externalId, retriveLastEmiAmount, outstandingLoanBalance, submittedOnDate, manuallyReversed, possibleNextRepaymentDate);
-		
-	}
+            final BigDecimal disburseAmountForTemplate,    final Collection<PaymentTypeData> paymentOptions,
+            final BigDecimal retriveLastEmiAmount, final LocalDate possibleNextRepaymentDate) {
+            final Long id = null;
+            final Long officeId = null;
+            final String officeName = null;
+            final PaymentDetailData paymentDetailData = null;
+            final CurrencyData currency = null;
+            final BigDecimal unrecognizedIncomePortion = null;
+            final BigDecimal principalPortion = null;;
+            final BigDecimal interestPortion = null;
+            final BigDecimal feeChargesPortion = null;
+            final BigDecimal penaltyChargesPortion = null;
+            final BigDecimal overpaymentPortion = null;
+            final String externalId = null;
+            final BigDecimal outstandingLoanBalance = null;
+            final AccountTransferData transfer = null;
+            final LocalDate submittedOnDate = null;
+            final boolean manuallyReversed = false;
+            return new LoanTransactionData(id, officeId, officeName, transactionType, paymentDetailData, currency, expectedDisbursedOnLocalDateForTemplate,
+                    disburseAmountForTemplate, principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion, overpaymentPortion,    unrecognizedIncomePortion, 
+                    paymentOptions, transfer, externalId, retriveLastEmiAmount, outstandingLoanBalance, submittedOnDate, manuallyReversed, possibleNextRepaymentDate);
+        
+    }
 
     private LoanTransactionData(Long id , final Long officeId, final String officeName, LoanTransactionEnumData transactionType, final PaymentDetailData paymentDetailData,
-    		final CurrencyData currency, final LocalDate date,	BigDecimal amount, final BigDecimal principalPortion, final BigDecimal interestPortion, 
-    		final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion, final BigDecimal overpaymentPortion, BigDecimal unrecognizedIncomePortion,	Collection<PaymentTypeData> paymentOptions,
-    		final AccountTransferData transfer, final String externalId, final BigDecimal fixedEmiAmount, BigDecimal outstandingLoanBalance, 
-    		final LocalDate submittedOnDate, final boolean manuallyReversed, final LocalDate possibleNextRepaymentDate) {
-    	 this.id = id;
+            final CurrencyData currency, final LocalDate date,    BigDecimal amount, final BigDecimal principalPortion, final BigDecimal interestPortion, 
+            final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion, final BigDecimal overpaymentPortion, BigDecimal unrecognizedIncomePortion,    Collection<PaymentTypeData> paymentOptions,
+            final AccountTransferData transfer, final String externalId, final BigDecimal fixedEmiAmount, BigDecimal outstandingLoanBalance, 
+            final LocalDate submittedOnDate, final boolean manuallyReversed, final LocalDate possibleNextRepaymentDate) {
+         this.id = id;
          this.officeId = officeId;
          this.officeName = officeName;
          this.type = transactionType;
@@ -310,16 +310,16 @@ public class LoanTransactionData {
          this.submittedOnDate = submittedOnDate;
          this.manuallyReversed = manuallyReversed;
          this.possibleNextRepaymentDate = possibleNextRepaymentDate;
-	}
+    }
 
-	
+    
 
-	public LocalDate dateOf() {
+    public LocalDate dateOf() {
         return this.date;
     }
 
     public boolean isNotDisbursement() {
-    	return type.id() == 1;
+        return type.id() == 1;
     }
 
     
@@ -338,6 +338,6 @@ public class LoanTransactionData {
     }
     
     public void setWriteOffReasonOptions(Collection<CodeValueData> writeOffReasonOptions){
-    	this.writeOffReasonOptions =writeOffReasonOptions;
+        this.writeOffReasonOptions =writeOffReasonOptions;
     }
 }

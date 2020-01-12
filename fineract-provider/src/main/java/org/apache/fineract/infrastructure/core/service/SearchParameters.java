@@ -239,7 +239,7 @@ public final class SearchParameters {
         return new SearchParameters(sqlSearch, null, externalId, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder,
                 staffId, accountNo, loanId, savingsId, orphansOnly, isSelfUser);
     }
-	
+    
     private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
             final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
             final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,

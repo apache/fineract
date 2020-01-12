@@ -25,7 +25,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 
 public interface SelfAccountTransferReadService {
 
-	Collection<SelfAccountTemplateData> retrieveSelfAccountTemplateData(
-			AppUser user);
+    Collection<SelfAccountTemplateData> retrieveSelfAccountTemplateData(
+            AppUser user);
 
 }

@@ -83,13 +83,13 @@ public class SavingsAccountRepositoryWrapper {
     }
     
     @Transactional(readOnly=true)
-	public Page<SavingsAccount> findByStatus(Integer status, Pageable pageable) {
-		Page<SavingsAccount> accounts = this.repository.findByStatus(status, pageable);
-		loadLazyCollections(accounts);
-		return accounts;
-	}
+    public Page<SavingsAccount> findByStatus(Integer status, Pageable pageable) {
+        Page<SavingsAccount> accounts = this.repository.findByStatus(status, pageable);
+        loadLazyCollections(accounts);
+        return accounts;
+    }
 
-	//Root Entities are enough
+    //Root Entities are enough
     public List<SavingsAccount> findByClientIdAndGroupId(@Param("clientId") Long clientId, @Param("groupId") Long groupId) {
         return this.repository.findByClientIdAndGroupId(clientId, groupId) ;
     }
@@ -129,8 +129,8 @@ public class SavingsAccountRepositoryWrapper {
     }
     
     private void loadLazyCollections(Page<SavingsAccount> accounts) {
-		for (SavingsAccount account : accounts) {
-			account.loadLazyCollections();
-		}
-	}
+        for (SavingsAccount account : accounts) {
+            account.loadLazyCollections();
+        }
+    }
 }

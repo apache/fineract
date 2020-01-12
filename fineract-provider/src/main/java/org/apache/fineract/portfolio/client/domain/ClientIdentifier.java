@@ -79,7 +79,7 @@ public class ClientIdentifier extends AbstractAuditableCustom<AppUser, Long> {
         ClientIdentifierStatus statusEnum = ClientIdentifierStatus.valueOf(statusName.toUpperCase());
         this.active = null;      
         if(statusEnum.isActive()){
-        	this.active = statusEnum.getValue();
+            this.active = statusEnum.getValue();
         }
         this.status = statusEnum.getValue();
     }

@@ -25,8 +25,8 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class TopicNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-	public TopicNotFoundException(final Long id) {
-		super("error.msg.topic.id.invalid", "Topic with identifier " + id + " does not exist", id);
-	}
+    public TopicNotFoundException(final Long id) {
+        super("error.msg.topic.id.invalid", "Topic with identifier " + id + " does not exist", id);
+    }
 
 }

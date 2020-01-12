@@ -24,33 +24,33 @@ import java.math.BigDecimal;
 @SuppressWarnings("unused")
 public class ObligeeData {
 
-	private final String firstName;
-	private final String lastName;
-	private final String displayName;
-	private final String accountNumber;
-	private final BigDecimal loanAmount;
-	private final BigDecimal guaranteeAmount;
-	private final BigDecimal amountReleased;
-	private final BigDecimal amountTransferred;
+    private final String firstName;
+    private final String lastName;
+    private final String displayName;
+    private final String accountNumber;
+    private final BigDecimal loanAmount;
+    private final BigDecimal guaranteeAmount;
+    private final BigDecimal amountReleased;
+    private final BigDecimal amountTransferred;
 
-	private ObligeeData(String firstname, String lastname, String displayName, String accountNumber,
-			BigDecimal loanAmount, BigDecimal guaranteeAmount, BigDecimal amountReleased,
-			BigDecimal amountTransferred) {
-		this.firstName = firstname;
-		this.lastName = lastname;
-		this.displayName = displayName;
-		this.accountNumber = accountNumber;
-		this.loanAmount = loanAmount;
-		this.guaranteeAmount = guaranteeAmount;
-		this.amountReleased = amountReleased;
-		this.amountTransferred = amountTransferred;
-	}
+    private ObligeeData(String firstname, String lastname, String displayName, String accountNumber,
+            BigDecimal loanAmount, BigDecimal guaranteeAmount, BigDecimal amountReleased,
+            BigDecimal amountTransferred) {
+        this.firstName = firstname;
+        this.lastName = lastname;
+        this.displayName = displayName;
+        this.accountNumber = accountNumber;
+        this.loanAmount = loanAmount;
+        this.guaranteeAmount = guaranteeAmount;
+        this.amountReleased = amountReleased;
+        this.amountTransferred = amountTransferred;
+    }
 
-	public static ObligeeData instance(final String firstname, final String lastname, final String displayName,
-			final String accountNumber, final BigDecimal loanAmount, final BigDecimal guaranteeAmount,
-			final BigDecimal amountReleased, final BigDecimal amountTransferred) {
-		return new ObligeeData(firstname, lastname, displayName, accountNumber, loanAmount, guaranteeAmount,
-				amountReleased, amountTransferred);
-	}
+    public static ObligeeData instance(final String firstname, final String lastname, final String displayName,
+            final String accountNumber, final BigDecimal loanAmount, final BigDecimal guaranteeAmount,
+            final BigDecimal amountReleased, final BigDecimal amountTransferred) {
+        return new ObligeeData(firstname, lastname, displayName, accountNumber, loanAmount, guaranteeAmount,
+                amountReleased, amountTransferred);
+    }
 
 }

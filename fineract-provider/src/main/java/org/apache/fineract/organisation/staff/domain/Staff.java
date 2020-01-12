@@ -61,7 +61,7 @@ public class Staff extends AbstractPersistableCustom<Long> {
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private String externalId;
 
-	@Column(name = "email_address", length = 50, unique = true)
+    @Column(name = "email_address", length = 50, unique = true)
     private String emailAddress;
 
     @ManyToOne
@@ -249,7 +249,7 @@ public class Staff extends AbstractPersistableCustom<Long> {
         return getId().equals(staff.getId());
     }
 
-	public String emailAddress() {
+    public String emailAddress() {
         return emailAddress;
     }
 

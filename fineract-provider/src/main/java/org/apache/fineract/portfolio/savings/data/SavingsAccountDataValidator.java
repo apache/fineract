@@ -92,8 +92,8 @@ public class SavingsAccountDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-				SavingsAccountConstant.SAVINGS_ACCOUNT_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                SavingsAccountConstant.SAVINGS_ACCOUNT_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -465,7 +465,7 @@ public class SavingsAccountDataValidator {
     }
 
     public void validateForUnAssignSavingsOfficer(final String json) {
-    	if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
         
         final Set<String> supportedParameters = new HashSet<>(Arrays.asList("unassignedDate","locale","dateFormat"));
 

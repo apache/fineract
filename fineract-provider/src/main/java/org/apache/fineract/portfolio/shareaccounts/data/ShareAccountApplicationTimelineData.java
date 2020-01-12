@@ -25,7 +25,7 @@ import java.io.Serializable;
 @SuppressWarnings("unused")
 public class ShareAccountApplicationTimelineData implements Serializable {
 
-	private final LocalDate submittedOnDate;
+    private final LocalDate submittedOnDate;
     private final String submittedByUsername;
     private final String submittedByFirstname;
     private final String submittedByLastname;

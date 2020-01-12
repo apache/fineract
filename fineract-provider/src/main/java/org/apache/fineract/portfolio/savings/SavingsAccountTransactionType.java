@@ -113,7 +113,7 @@ public enum SavingsAccountTransactionType {
                 savingsAccountTransactionType = SavingsAccountTransactionType.WITHHOLD_TAX;
             break;
             case 19:
-            	savingsAccountTransactionType = SavingsAccountTransactionType.ESCHEAT;
+                savingsAccountTransactionType = SavingsAccountTransactionType.ESCHEAT;
             break;
             case 20:
                 savingsAccountTransactionType = SavingsAccountTransactionType.AMOUNT_HOLD;
@@ -137,10 +137,10 @@ public enum SavingsAccountTransactionType {
         return this.value.equals(SavingsAccountTransactionType.INTEREST_POSTING.getValue());
     }
 
-	public boolean isOverDraftInterestPosting() {
-		return this.value.equals(SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue());
-	}
-	
+    public boolean isOverDraftInterestPosting() {
+        return this.value.equals(SavingsAccountTransactionType.OVERDRAFT_INTEREST.getValue());
+    }
+    
     public boolean isWithHoldTax() {
         return this.value.equals(SavingsAccountTransactionType.WITHHOLD_TAX.getValue());
     }

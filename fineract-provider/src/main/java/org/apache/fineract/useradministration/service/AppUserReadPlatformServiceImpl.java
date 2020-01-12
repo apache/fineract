@@ -143,13 +143,13 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
                 user.getPasswordNeverExpires(), user.isSelfServiceUser());
         
         if(retUser.isSelfServiceUser()){
-        	Set<ClientData> clients = new HashSet<>();
-        	for(AppUserClientMapping clientMap : user.getAppUserClientMappings()){
-        		Client client = clientMap.getClient();
-        		clients.add(ClientData.lookup(client.getId(), client.getDisplayName(), 
-        				client.getOffice().getId(), client.getOffice().getName()));
-        	}
-        	retUser.setClients(clients);
+            Set<ClientData> clients = new HashSet<>();
+            for(AppUserClientMapping clientMap : user.getAppUserClientMappings()){
+                Client client = clientMap.getClient();
+                clients.add(ClientData.lookup(client.getId(), client.getDisplayName(), 
+                        client.getOffice().getId(), client.getOffice().getName()));
+            }
+            retUser.setClients(clients);
         }
         
         return retUser; 

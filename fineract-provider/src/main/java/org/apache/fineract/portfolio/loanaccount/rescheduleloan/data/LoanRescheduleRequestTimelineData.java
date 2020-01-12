@@ -25,7 +25,7 @@ import org.joda.time.LocalDate;
  **/
 @SuppressWarnings("unused")
 public class LoanRescheduleRequestTimelineData {
-	private final LocalDate submittedOnDate;
+    private final LocalDate submittedOnDate;
     private final String submittedByUsername;
     private final String submittedByFirstname;
     private final String submittedByLastname;
@@ -44,8 +44,8 @@ public class LoanRescheduleRequestTimelineData {
             final String submittedByLastname, final LocalDate approvedOnDate, final String approvedByUsername, final String approvedByFirstname,
             final String approvedByLastname, final LocalDate rejectedOnDate, final String rejectedByUsername, final String rejectedByFirstname,
             final String rejectedByLastname) {
-    	
-    	this.submittedOnDate = submittedOnDate;
+        
+        this.submittedOnDate = submittedOnDate;
         this.submittedByUsername = submittedByUsername;
         this.submittedByFirstname = submittedByFirstname;
         this.submittedByLastname = submittedByLastname;
@@ -59,6 +59,6 @@ public class LoanRescheduleRequestTimelineData {
         this.rejectedByUsername = rejectedByUsername;
         this.rejectedByFirstname = rejectedByFirstname;
         this.rejectedByLastname = rejectedByLastname;
-    	
+        
     }
 }

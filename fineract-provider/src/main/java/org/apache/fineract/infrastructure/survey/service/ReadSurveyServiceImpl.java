@@ -97,7 +97,7 @@ public class ReadSurveyServiceImpl implements ReadSurveyService {
 
     @Override
     public SurveyDataTableData retrieveSurvey(String surveyName) {
-    	SQLInjectionValidator.validateSQLInput(surveyName);
+        SQLInjectionValidator.validateSQLInput(surveyName);
         final String sql = "select cf.enabled, application_table_name, registered_table_name" + " from x_registered_table "
                 + " left join c_configuration cf on x_registered_table.registered_table_name = cf.name " + " where exists" + " (select 'f'"
                 + " from m_appuser_role ur " + " join m_role r on r.id = ur.role_id"

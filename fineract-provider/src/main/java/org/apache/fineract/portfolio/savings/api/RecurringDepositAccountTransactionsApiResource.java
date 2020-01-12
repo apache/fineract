@@ -151,8 +151,8 @@ public class RecurringDepositAccountTransactionsApiResource {
             transactionData = SavingsAccountTransactionData.templateOnTop(transactionData, paymentTypeOptions);
         }
 
-		return this.toApiJsonSerializer.serialize(settings, transactionData,
-				FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, transactionData,
+                FIXED_DEPOSIT_TRANSACTION_RESPONSE_DATA_PARAMETERS);
     }
 
     @POST

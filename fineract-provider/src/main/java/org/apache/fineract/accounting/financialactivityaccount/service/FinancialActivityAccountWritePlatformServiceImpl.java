@@ -82,8 +82,8 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
             handleFinancialActivityAccountDataIntegrityIssues(command, dataIntegrityViolationException.getMostSpecificCause(), dataIntegrityViolationException);
             return CommandProcessingResult.empty();
         }catch(final PersistenceException ee) {
-        	Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
-        	handleFinancialActivityAccountDataIntegrityIssues(command, throwable, ee);
+            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
+            handleFinancialActivityAccountDataIntegrityIssues(command, throwable, ee);
             return CommandProcessingResult.empty();
         }
     }
@@ -132,9 +132,9 @@ public class FinancialActivityAccountWritePlatformServiceImpl implements Financi
             handleFinancialActivityAccountDataIntegrityIssues(command, dataIntegrityViolationException.getMostSpecificCause(), dataIntegrityViolationException);
             return CommandProcessingResult.empty();
         }catch(final PersistenceException ee) {
-        	Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
-        	handleFinancialActivityAccountDataIntegrityIssues(command, throwable, ee);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
+            handleFinancialActivityAccountDataIntegrityIssues(command, throwable, ee);
+            return CommandProcessingResult.empty();
         }
     }
 

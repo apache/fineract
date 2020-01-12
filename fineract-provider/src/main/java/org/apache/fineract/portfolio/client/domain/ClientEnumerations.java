@@ -72,7 +72,7 @@ public class ClientEnumerations {
     }
     
     public static EnumOptionData legalForm(final LegalForm legalForm) {
-    	final EnumOptionData optionData = new EnumOptionData(legalForm.getValue().longValue(), legalForm.getCode(),
+        final EnumOptionData optionData = new EnumOptionData(legalForm.getValue().longValue(), legalForm.getCode(),
                 legalForm.toString());
         return optionData;
     }

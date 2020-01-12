@@ -93,9 +93,9 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
             handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(jsonCommand, throwable, dve);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(jsonCommand, throwable, dve);
+            return CommandProcessingResult.empty();
         }
 
     }
@@ -124,9 +124,9 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
             handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(jsonCommand, throwable, dve);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(jsonCommand, throwable, dve);
+            return CommandProcessingResult.empty();
         }
     }
 

@@ -431,7 +431,7 @@ public class LoansApiResource {
                     Collection<ClientData> members = loanAccountGroupData.groupData().clientMembers();
                     accountLinkingOptions = new ArrayList<>();
                     if(members != null){
-                    	for (ClientData clientData : members) {
+                        for (ClientData clientData : members) {
                             Integer loanCounter = this.loanReadPlatformService.retriveLoanCounter(clientData.id(), productId);
                             memberLoanCycle.put(clientData.id(), loanCounter);
                             accountLinkingOptions.addAll(getaccountLinkingOptions(newLoanAccount, clientData.id(), groupId));
@@ -514,7 +514,7 @@ public class LoansApiResource {
                     compoundingCalendarData);
         }
         if (loanBasicDetails.isMonthlyRepaymentFrequencyType()) {
-        	Collection<CalendarData> loanCalendarDatas = this.calendarReadPlatformService
+            Collection<CalendarData> loanCalendarDatas = this.calendarReadPlatformService
                     .retrieveCalendarsByEntity(loanId,
                             CalendarEntityType.LOANS.getValue(), null);
             CalendarData calendarData = null;
@@ -522,7 +522,7 @@ public class LoansApiResource {
                 calendarData = loanCalendarDatas.iterator().next();
             }
             if(calendarData != null)
-            	loanBasicDetails = LoanAccountData.withLoanCalendarData(loanBasicDetails, calendarData);
+                loanBasicDetails = LoanAccountData.withLoanCalendarData(loanBasicDetails, calendarData);
         }
         Collection<InterestRatePeriodData> interestRatesPeriods = this.loanReadPlatformService.retrieveLoanInterestRatePeriodData(loanBasicDetails);
         Collection<LoanTransactionData> loanRepayments = null;

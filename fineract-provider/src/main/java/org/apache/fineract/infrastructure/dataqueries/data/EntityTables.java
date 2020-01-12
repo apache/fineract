@@ -25,7 +25,7 @@ import java.util.Map;
 
 public enum EntityTables {
 
-	CLIENT("m_client",
+    CLIENT("m_client",
         new Integer[]{StatusEnum.CREATE.getCode(),
                 StatusEnum.ACTIVATE.getCode(),
                 StatusEnum.CLOSE.getCode()},
@@ -52,57 +52,57 @@ public enum EntityTables {
                 StatusEnum.CLOSE.getCode()},
         "savings_account_id");
 
-	private static final Map<String, EntityTables> lookup = new HashMap<String, EntityTables>();
-	static {
-		for (EntityTables d : EntityTables.values())
-			lookup.put(d.getName(), d);
-	}
+    private static final Map<String, EntityTables> lookup = new HashMap<String, EntityTables>();
+    static {
+        for (EntityTables d : EntityTables.values())
+            lookup.put(d.getName(), d);
+    }
 
-	private String name;
+    private String name;
 
-	private Integer[] codes;
+    private Integer[] codes;
 
-	private String foreignKeyColumnNameOnDatatable;
+    private String foreignKeyColumnNameOnDatatable;
 
-	private EntityTables(String name, Integer[] codes, String foreignKeyColumnNameOnDatatable) {
-		this.name = name;
-		this.codes = codes;
-		this.foreignKeyColumnNameOnDatatable = foreignKeyColumnNameOnDatatable;
-	}
+    private EntityTables(String name, Integer[] codes, String foreignKeyColumnNameOnDatatable) {
+        this.name = name;
+        this.codes = codes;
+        this.foreignKeyColumnNameOnDatatable = foreignKeyColumnNameOnDatatable;
+    }
 
-	public static List<String> getEntitiesList() {
+    public static List<String> getEntitiesList() {
 
-		List<String> data = new ArrayList<String>();
+        List<String> data = new ArrayList<String>();
 
-		for (EntityTables entity : EntityTables.values()) {
-			data.add(entity.name);
-		}
+        for (EntityTables entity : EntityTables.values()) {
+            data.add(entity.name);
+        }
 
-		return data;
+        return data;
 
-	}
+    }
 
-	public static Integer[] getStatus(String name) {
-		if (lookup.get(name) != null) {
-			return lookup.get(name).getCodes();
-		}
-		return new Integer[]{};
-	}
+    public static Integer[] getStatus(String name) {
+        if (lookup.get(name) != null) {
+            return lookup.get(name).getCodes();
+        }
+        return new Integer[]{};
+    }
 
-	public Integer[] getCodes() {
-		return this.codes;
-	}
+    public Integer[] getCodes() {
+        return this.codes;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getForeignKeyColumnNameOnDatatable() {
-		return this.foreignKeyColumnNameOnDatatable;
-	}
+    public String getForeignKeyColumnNameOnDatatable() {
+        return this.foreignKeyColumnNameOnDatatable;
+    }
 
-	public static String getForeignKeyColumnNameOnDatatable(String name) {
-		return lookup.get(name).foreignKeyColumnNameOnDatatable;
-	}
+    public static String getForeignKeyColumnNameOnDatatable(String name) {
+        return lookup.get(name).foreignKeyColumnNameOnDatatable;
+    }
 
 }

@@ -43,9 +43,9 @@ import com.google.gson.reflect.TypeToken;
 public class JobDetailDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
-	private static final Set<String> JOB_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-			SchedulerJobApiConstants.displayNameParamName, SchedulerJobApiConstants.jobActiveStatusParamName,
-			SchedulerJobApiConstants.cronExpressionParamName));
+    private static final Set<String> JOB_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            SchedulerJobApiConstants.displayNameParamName, SchedulerJobApiConstants.jobActiveStatusParamName,
+            SchedulerJobApiConstants.cronExpressionParamName));
 
     @Autowired
     public JobDetailDataValidator(final FromJsonHelper fromApiJsonHelper) {

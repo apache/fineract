@@ -126,7 +126,7 @@ public class ImportHandlerUtils {
 
     public static String trimEmptyDecimalPortion(String result) {
         if(result != null && result.endsWith(".0"))
-            return	result.split("\\.")[0];
+            return    result.split("\\.")[0];
         else
             return result;
     }

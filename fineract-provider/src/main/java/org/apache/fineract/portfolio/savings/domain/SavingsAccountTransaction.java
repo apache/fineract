@@ -112,7 +112,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     @Column(name = "created_date", nullable = false)
     private Date createdDate;
 
-	@ManyToOne
+    @ManyToOne
     @JoinColumn(name = "appuser_id", nullable = true)
     private AppUser appUser;
     
@@ -357,10 +357,10 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
         return SavingsAccountTransactionType.fromInt(this.typeOf).isInterestPosting() && isNotReversed();
     }
 
-	public boolean isInterestPosting() {
-		return SavingsAccountTransactionType.fromInt(this.typeOf).isInterestPosting()
-				|| SavingsAccountTransactionType.fromInt(this.typeOf).isOverDraftInterestPosting();
-	}
+    public boolean isInterestPosting() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isInterestPosting()
+                || SavingsAccountTransactionType.fromInt(this.typeOf).isOverDraftInterestPosting();
+    }
     public boolean isWithdrawalFeeAndNotReversed() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isWithdrawalFee() && isNotReversed();
     }
@@ -782,7 +782,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     }
 
     public PaymentDetail getPaymentDetail() {
-    	return this.paymentDetail ;
+        return this.paymentDetail ;
     }
     
     public void updateReleaseId(Long releaseId) {
@@ -793,7 +793,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
         return this.releaseIdOfHoldAmountTransaction;
     }
     
-	public boolean isAmountOnHoldNotReleased() {
-		return (isAmountOnHold() && getReleaseIdOfHoldAmountTransaction() == null);
-	}
+    public boolean isAmountOnHoldNotReleased() {
+        return (isAmountOnHold() && getReleaseIdOfHoldAmountTransaction() == null);
+    }
 }

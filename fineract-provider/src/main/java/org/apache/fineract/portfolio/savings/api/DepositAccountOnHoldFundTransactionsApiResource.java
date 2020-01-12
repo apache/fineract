@@ -78,8 +78,8 @@ public class DepositAccountOnHoldFundTransactionsApiResource {
                 savingsId, guarantorFundingId, searchParameters);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		return this.toApiJsonSerializer.serialize(settings, transfers,
-				SavingsApiSetConstants.SAVINGS_ACCOUNT_ON_HOLD_RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, transfers,
+                SavingsApiSetConstants.SAVINGS_ACCOUNT_ON_HOLD_RESPONSE_DATA_PARAMETERS);
     }
 
 }

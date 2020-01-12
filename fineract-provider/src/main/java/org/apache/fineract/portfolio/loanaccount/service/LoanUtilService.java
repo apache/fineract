@@ -147,28 +147,28 @@ public class LoanUtilService {
                return scheduleGeneratorDTO;
     }
 
-	public Boolean isLoanRepaymentsSyncWithMeeting(final Group group, final Calendar calendar) {
-		Boolean isSkipRepaymentOnFirstMonth = false;
-		Long entityId = null;
-		Long entityTypeId = null;
+    public Boolean isLoanRepaymentsSyncWithMeeting(final Group group, final Calendar calendar) {
+        Boolean isSkipRepaymentOnFirstMonth = false;
+        Long entityId = null;
+        Long entityTypeId = null;
 
-		if (group != null) {
-			if (group.getParent() != null) {
-				entityId = group.getParent().getId();
-				entityTypeId = CalendarEntityType.CENTERS.getValue().longValue();
-			} else {
-				entityId = group.getId();
-				entityTypeId = CalendarEntityType.GROUPS.getValue().longValue();
-			}
-		}
+        if (group != null) {
+            if (group.getParent() != null) {
+                entityId = group.getParent().getId();
+                entityTypeId = CalendarEntityType.CENTERS.getValue().longValue();
+            } else {
+                entityId = group.getId();
+                entityTypeId = CalendarEntityType.GROUPS.getValue().longValue();
+            }
+        }
 
-		if (entityId == null || calendar == null) {
-			return isSkipRepaymentOnFirstMonth;
-		}
-		isSkipRepaymentOnFirstMonth = this.calendarReadPlatformService
-				.isCalendarAssociatedWithEntity(entityId, calendar.getId(), entityTypeId);
-		return isSkipRepaymentOnFirstMonth;
-	}
+        if (entityId == null || calendar == null) {
+            return isSkipRepaymentOnFirstMonth;
+        }
+        isSkipRepaymentOnFirstMonth = this.calendarReadPlatformService
+                .isCalendarAssociatedWithEntity(entityId, calendar.getId(), entityTypeId);
+        return isSkipRepaymentOnFirstMonth;
+    }
 
 
     public LocalDate getCalculatedRepaymentsStartingFromDate(final Loan loan) {

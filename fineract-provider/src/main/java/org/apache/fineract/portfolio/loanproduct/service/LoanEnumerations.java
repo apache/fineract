@@ -610,7 +610,7 @@ public class LoanEnumerations {
         return interestRecalculationCompoundingNthDayType(NthDayType.fromInt(id));
     }
     public static EnumOptionData interestRecalculationCompoundingNthDayType(final NthDayType type) {
-    	final String codePrefix = "interestRecalculationCompounding.";
+        final String codePrefix = "interestRecalculationCompounding.";
         long nthDayValue = type.getValue().longValue();
         EnumOptionData optionData = null;
         switch (type) {

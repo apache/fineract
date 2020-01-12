@@ -38,35 +38,35 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "m_hook_templates")
 public class HookTemplate extends AbstractPersistableCustom<Long> {
 
-	@Column(name = "name", nullable = false, length = 100)
-	private String name;
+    @Column(name = "name", nullable = false, length = 100)
+    private String name;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "template", orphanRemoval = true, fetch=FetchType.EAGER)
-	private Set<Schema> fields = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "template", orphanRemoval = true, fetch=FetchType.EAGER)
+    private Set<Schema> fields = new HashSet<>();
 
-	private HookTemplate(final String name) {
+    private HookTemplate(final String name) {
 
-		if (StringUtils.isNotBlank(name)) {
-			this.name = name.trim();
-		} else {
-			this.name = null;
-		}
-	}
+        if (StringUtils.isNotBlank(name)) {
+            this.name = name.trim();
+        } else {
+            this.name = null;
+        }
+    }
 
-	protected HookTemplate() {
+    protected HookTemplate() {
 
-	}
+    }
 
-	public static HookTemplate fromJson(final JsonCommand command) {
-		final String name = command.stringValueOfParameterNamed(nameParamName);
-		return new HookTemplate(name);
-	}
+    public static HookTemplate fromJson(final JsonCommand command) {
+        final String name = command.stringValueOfParameterNamed(nameParamName);
+        return new HookTemplate(name);
+    }
 
-	public String getName() {
-		return this.name;
-	}
+    public String getName() {
+        return this.name;
+    }
 
-	public Set<Schema> getSchema() {
-		return this.fields;
-	}
+    public Set<Schema> getSchema() {
+        return this.fields;
+    }
 }

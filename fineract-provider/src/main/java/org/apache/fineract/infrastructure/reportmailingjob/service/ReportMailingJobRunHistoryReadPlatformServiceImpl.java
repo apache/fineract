@@ -45,7 +45,7 @@ public class ReportMailingJobRunHistoryReadPlatformServiceImpl implements Report
     
     @Autowired
     public ReportMailingJobRunHistoryReadPlatformServiceImpl(final RoutingDataSource dataSource,
-    		final ColumnValidator columnValidator) {
+            final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.reportMailingJobRunHistoryMapper = new ReportMailingJobRunHistoryMapper();
         this.columnValidator = columnValidator;

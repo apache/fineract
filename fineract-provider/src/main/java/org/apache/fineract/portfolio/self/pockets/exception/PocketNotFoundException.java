@@ -25,8 +25,8 @@ import org.apache.fineract.portfolio.self.pockets.api.PocketApiConstants;
 @SuppressWarnings("serial")
 public class PocketNotFoundException extends AbstractPlatformDomainRuleException {
 
-	public PocketNotFoundException() {
-		super(PocketApiConstants.pocketNotFoundException, PocketApiConstants.pocketNotFoundErrorMessage);
-	}
+    public PocketNotFoundException() {
+        super(PocketApiConstants.pocketNotFoundException, PocketApiConstants.pocketNotFoundErrorMessage);
+    }
 
 }

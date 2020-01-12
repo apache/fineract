@@ -321,16 +321,16 @@ public class SmsCampaignValidator {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
     
-	public boolean isValidNotificationOrSms(Client client, SmsCampaign smsCampaign, Object mobileNo) {
-		if (smsCampaign.isNotification()) {
-			if (client != null) {
-				DeviceRegistration deviceRegistration = this.deviceRegistrationRepository
-						.findDeviceRegistrationByClientId(client.getId());
-				return (deviceRegistration != null);
-			}
-			return false;
-		}
-		return (mobileNo != null);
-	}
+    public boolean isValidNotificationOrSms(Client client, SmsCampaign smsCampaign, Object mobileNo) {
+        if (smsCampaign.isNotification()) {
+            if (client != null) {
+                DeviceRegistration deviceRegistration = this.deviceRegistrationRepository
+                        .findDeviceRegistrationByClientId(client.getId());
+                return (deviceRegistration != null);
+            }
+            return false;
+        }
+        return (mobileNo != null);
+    }
     
 }

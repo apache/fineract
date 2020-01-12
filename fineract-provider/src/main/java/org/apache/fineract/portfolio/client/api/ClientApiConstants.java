@@ -84,7 +84,7 @@ public class ClientApiConstants {
     public static final String accountNoParamName = "accountNo";
     public static final String externalIdParamName = "externalId";
     public static final String mobileNoParamName = "mobileNo";
-	public static final String emailAddressParamName = "emailAddress";
+    public static final String emailAddressParamName = "emailAddress";
     public static final String firstnameParamName = "firstname";
     public static final String middlenameParamName = "middlename";
     public static final String lastnameParamName = "lastname";
@@ -96,7 +96,7 @@ public class ClientApiConstants {
     public static final String activationDateParamName = "activationDate";
     public static final String reactivationDateParamName = "reactivationDate";
     public static final String staffIdParamName = "staffId";
-	public static final String isStaffParamName = "isStaff";
+    public static final String isStaffParamName = "isStaff";
     public static final String closureDateParamName = "closureDate";
     public static final String closureReasonIdParamName = "closureReasonId";
     public static final String reopenedDateParamName = "reopenedDate";

@@ -167,50 +167,50 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
     }
 
 
-	public void validateIsEditMeetingAllowed(Long groupId) {
+    public void validateIsEditMeetingAllowed(Long groupId) {
 
-		final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(
-				dataValidationErrors).resource("calendar");
-		Group centerOrGroup = null;
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(
+                dataValidationErrors).resource("calendar");
+        Group centerOrGroup = null;
 
-		if (groupId != null) {
-			centerOrGroup = this.groupRepository
-					.findOneWithNotFoundDetection(groupId);
-			final Group parent = centerOrGroup.getParent();
-			/* Check if it is a Group and belongs to a center */
-			if (centerOrGroup.isGroup() && parent != null) {
-				
-				Integer centerEntityTypeId = CalendarEntityType.CENTERS
-						.getValue();
-				/* Check if calendar is created at center */
-				final CalendarInstance collectionCalendarInstance = this.calendarInstanceRepository
-						.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
-								parent.getId(), centerEntityTypeId,
-								CalendarType.COLLECTION.getValue());
-				/* If calendar is created by parent group, then it cannot be edited by the child group */
-				if (collectionCalendarInstance != null) {
-					final String errorMessage = "meeting.created.at.center.cannot.be.edited.at.group.level";
-					baseDataValidator.reset()
-							.failWithCodeNoParameterAddedToErrorCode(
-									errorMessage);
-				}
-			}
+        if (groupId != null) {
+            centerOrGroup = this.groupRepository
+                    .findOneWithNotFoundDetection(groupId);
+            final Group parent = centerOrGroup.getParent();
+            /* Check if it is a Group and belongs to a center */
+            if (centerOrGroup.isGroup() && parent != null) {
+                
+                Integer centerEntityTypeId = CalendarEntityType.CENTERS
+                        .getValue();
+                /* Check if calendar is created at center */
+                final CalendarInstance collectionCalendarInstance = this.calendarInstanceRepository
+                        .findByEntityIdAndEntityTypeIdAndCalendarTypeId(
+                                parent.getId(), centerEntityTypeId,
+                                CalendarType.COLLECTION.getValue());
+                /* If calendar is created by parent group, then it cannot be edited by the child group */
+                if (collectionCalendarInstance != null) {
+                    final String errorMessage = "meeting.created.at.center.cannot.be.edited.at.group.level";
+                    baseDataValidator.reset()
+                            .failWithCodeNoParameterAddedToErrorCode(
+                                    errorMessage);
+                }
+            }
 
-		}
-		if (!dataValidationErrors.isEmpty()) {
-			throw new PlatformApiDataValidationException(
-					"validation.msg.validation.errors.exist",
-					"Validation errors exist.", dataValidationErrors);
-		}
+        }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(
+                    "validation.msg.validation.errors.exist",
+                    "Validation errors exist.", dataValidationErrors);
+        }
 
-	}
+    }
     
     @Override
     public CommandProcessingResult updateCalendar(final JsonCommand command) {
 
-    	/** Validate to check if Edit is Allowed **/
-    	this.validateIsEditMeetingAllowed(command.getGroupId());
+        /** Validate to check if Edit is Allowed **/
+        this.validateIsEditMeetingAllowed(command.getGroupId());
         /*
          * Validate all the data for updating the calendar
          */

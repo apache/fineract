@@ -48,9 +48,9 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
     
     @Autowired
     public AdHocScheduledJobRunnerServiceImpl(final RoutingDataSource dataSource,
-    		final AdHocReadPlatformService adHocReadPlatformService
+            final AdHocReadPlatformService adHocReadPlatformService
             ) {
-    	this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.adHocReadPlatformService = adHocReadPlatformService;
        
     }
@@ -59,12 +59,12 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
     @Override
     @CronTarget(jobName = JobName.GENERATE_ADHOCCLIENT_SCEHDULE)
     public void generateClientSchedule() {
-    	final Collection<AdHocData> adhocs = this.adHocReadPlatformService.retrieveAllActiveAdHocQuery();
+        final Collection<AdHocData> adhocs = this.adHocReadPlatformService.retrieveAllActiveAdHocQuery();
         if(adhocs.size()>0){
-        	adhocs.forEach(adhoc->{
-        	    boolean run = true;
+            adhocs.forEach(adhoc->{
+                boolean run = true;
                 LocalDate next = null;
-        	    if (adhoc.getReportRunFrequency() != null) {
+                if (adhoc.getReportRunFrequency() != null) {
                     if (adhoc.getLastRun() != null) {
                         LocalDate start = adhoc.getLastRun().toLocalDate();
                         LocalDate end = new DateTime().toLocalDate();
@@ -113,9 +113,9 @@ public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunn
                 } else {
                     logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Skipping execution of " + adhoc.getName() + ", scheduled for execution on " + next);
                 }
-            });	
+            });    
         }else{
-        	logger.info(ThreadLocalContextUtil.getTenant().getName() + "Nothing to update ");
+            logger.info(ThreadLocalContextUtil.getTenant().getName() + "Nothing to update ");
         }
         
         

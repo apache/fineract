@@ -121,9 +121,9 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(jsonCommand, throwable, dve);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(jsonCommand, throwable, dve);
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -219,9 +219,9 @@ public class ShareAccountWritePlatformServiceJpaRepositoryImpl implements ShareA
             handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(jsonCommand, throwable, dve);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(jsonCommand, throwable, dve);
+            return CommandProcessingResult.empty();
         }
     }
 

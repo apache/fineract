@@ -23,10 +23,10 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface HookWritePlatformService {
 
-	CommandProcessingResult createHook(JsonCommand command);
+    CommandProcessingResult createHook(JsonCommand command);
 
-	CommandProcessingResult updateHook(Long hookId, JsonCommand command);
+    CommandProcessingResult updateHook(Long hookId, JsonCommand command);
 
-	CommandProcessingResult deleteHook(Long hookId);
+    CommandProcessingResult deleteHook(Long hookId);
 
 }

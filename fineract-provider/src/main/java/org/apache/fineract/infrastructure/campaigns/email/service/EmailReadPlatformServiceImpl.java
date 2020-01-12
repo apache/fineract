@@ -83,7 +83,7 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
         }
         
         public String tableName() {
-        	return "scheduled_email_messages_outbound";
+            return "scheduled_email_messages_outbound";
         }
 
         @Override
@@ -130,31 +130,31 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
     }
     
     @Override
-	public Collection<EmailData> retrieveAllPending(final SearchParameters searchParameters) {
-    	final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " limit 0, " + searchParameters.getLimit() : "";
-    	final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = "
-    			+ EmailMessageStatusType.PENDING.getValue() + sqlPlusLimit;
+    public Collection<EmailData> retrieveAllPending(final SearchParameters searchParameters) {
+        final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " limit 0, " + searchParameters.getLimit() : "";
+        final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = "
+                + EmailMessageStatusType.PENDING.getValue() + sqlPlusLimit;
 
         return this.jdbcTemplate.query(sql, this.emailRowMapper, new Object[] {});
     }
 
-	@Override
-	public Collection<EmailData> retrieveAllSent(final SearchParameters searchParameters) {
-		final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " limit 0, " + searchParameters.getLimit() : "";
-    	final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = "
-    			+ EmailMessageStatusType.SENT.getValue() + sqlPlusLimit;
+    @Override
+    public Collection<EmailData> retrieveAllSent(final SearchParameters searchParameters) {
+        final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " limit 0, " + searchParameters.getLimit() : "";
+        final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = "
+                + EmailMessageStatusType.SENT.getValue() + sqlPlusLimit;
 
         return this.jdbcTemplate.query(sql, this.emailRowMapper, new Object[] {});
-	}
+    }
 
-	@Override
-	public List<Long> retrieveExternalIdsOfAllSent(final Integer limit) {
-		final String sqlPlusLimit = (limit > 0) ? " limit 0, " + limit : "";
-		final String sql = "select external_id from " + this.emailRowMapper.tableName() + " where status_enum = "
-    			+ EmailMessageStatusType.SENT.getValue() + sqlPlusLimit;
-		
-		return this.jdbcTemplate.queryForList(sql, Long.class);
-	}
+    @Override
+    public List<Long> retrieveExternalIdsOfAllSent(final Integer limit) {
+        final String sqlPlusLimit = (limit > 0) ? " limit 0, " + limit : "";
+        final String sql = "select external_id from " + this.emailRowMapper.tableName() + " where status_enum = "
+                + EmailMessageStatusType.SENT.getValue() + sqlPlusLimit;
+        
+        return this.jdbcTemplate.queryForList(sql, Long.class);
+    }
 
     @Override
     public Collection<EmailData> retrieveAllDelivered(final Integer limit) {
@@ -165,14 +165,14 @@ public class EmailReadPlatformServiceImpl implements EmailReadPlatformService {
         return this.jdbcTemplate.query(sql, this.emailRowMapper, new Object[] {});
     }
 
-	@Override
-	public Collection<EmailData> retrieveAllFailed(final SearchParameters searchParameters) {
-		final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " limit 0, " + searchParameters.getLimit() : "";
+    @Override
+    public Collection<EmailData> retrieveAllFailed(final SearchParameters searchParameters) {
+        final String sqlPlusLimit = (searchParameters.getLimit() > 0) ? " limit 0, " + searchParameters.getLimit() : "";
         final String sql = "select " + this.emailRowMapper.schema() + " where emo.status_enum = "
                 + EmailMessageStatusType.FAILED.getValue() + sqlPlusLimit;
 
         return this.jdbcTemplate.query(sql, this.emailRowMapper, new Object[] {});
-	}
+    }
 
     @Override
     public Page<EmailData> retrieveEmailByStatus(final Integer limit, final Integer status,final Date dateFrom, final Date dateTo) {

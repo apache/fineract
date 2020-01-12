@@ -26,9 +26,9 @@ import org.apache.fineract.portfolio.client.data.ClientFamilyMembersData;
 public interface ClientFamilyMembersReadPlatformService 
 {
 
-	Collection<ClientFamilyMembersData> getClientFamilyMembers(long clientId);
-	
-	ClientFamilyMembersData getClientFamilyMember(long id);
+    Collection<ClientFamilyMembersData> getClientFamilyMembers(long clientId);
+    
+    ClientFamilyMembersData getClientFamilyMember(long id);
 
-	ClientFamilyMembersData retrieveTemplate();
+    ClientFamilyMembersData retrieveTemplate();
 }

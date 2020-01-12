@@ -54,7 +54,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
     @Autowired
     public StaffReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-    		final ColumnValidator columnValidator) {
+            final ColumnValidator columnValidator) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.columnValidator = columnValidator;
@@ -65,7 +65,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         public String schema() {
             return " s.id as id,s.office_id as officeId, o.name as officeName, s.firstname as firstname, s.lastname as lastname,"
                     + " s.display_name as displayName, s.is_loan_officer as isLoanOfficer, s.external_id as externalId, s.mobile_no as mobileNo,"
-            		+ " s.is_active as isActive, s.joining_date as joiningDate from m_staff s "
+                    + " s.is_active as isActive, s.joining_date as joiningDate from m_staff s "
                     + " join m_office o on o.id = s.office_id";
         }
 
@@ -166,8 +166,8 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
     @Override
     public Collection<StaffData> retrieveAllStaffForDropdown(final Long officeId) {
-    	
-    	//adding the Authorization criteria so that a user cannot see an employee who does not belong to his office or 	a sub office for his office.
+        
+        //adding the Authorization criteria so that a user cannot see an employee who does not belong to his office or     a sub office for his office.
         final String hierarchy = this.context.authenticatedUser().getOffice().getHierarchy()+"%";
 
         final Long defaultOfficeId = defaultToUsersOfficeIfNull(officeId);
@@ -187,8 +187,8 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
     @Override
     public StaffData retrieveStaff(final Long staffId) {
-    	
-        //adding the Authorization criteria so that a user cannot see an employee who does not belong to his office or 	a sub office for his office.
+        
+        //adding the Authorization criteria so that a user cannot see an employee who does not belong to his office or     a sub office for his office.
         final String hierarchy = this.context.authenticatedUser().getOffice().getHierarchy()+ "%";
          
 
@@ -210,16 +210,16 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     }
 
     private Collection<StaffData> retrieveAllStaff(final String extraCriteria, Long officeId) {
-    	
+        
         final StaffMapper rm = new StaffMapper();
         String sql = "select " + rm.schema();
         final String hierarchy = this.context.authenticatedUser().getOffice().getHierarchy()+"%";
         if (StringUtils.isNotBlank(extraCriteria)){
-        	sql += " where " + extraCriteria;        	
+            sql += " where " + extraCriteria;            
         }
         sql = sql + " order by s.lastname";
         if(officeId==null){
-        	return this.jdbcTemplate.query(sql, rm, new Object[] {hierarchy });
+            return this.jdbcTemplate.query(sql, rm, new Object[] {hierarchy });
         }        
         return this.jdbcTemplate.query(sql, rm, new Object[] {officeId, hierarchy });
     }
@@ -251,7 +251,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
                 throw new UnrecognizedQueryParamException("status", status, new Object[]{"all", "active", "inactive"});
             }
         }
-        //adding the Authorization criteria so that a user cannot see an employee who does not belong to his office or 	a sub office for his office.
+        //adding the Authorization criteria so that a user cannot see an employee who does not belong to his office or     a sub office for his office.
         
         extraCriteria.append(" and o.hierarchy like ? ");
 
@@ -272,41 +272,41 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     }
     
     @Override
-	public Object[] hasAssociatedItems(final Long staffId){
+    public Object[] hasAssociatedItems(final Long staffId){
         ArrayList<String> params = new ArrayList<String>();        
                 
         String sql =  "select c.display_name as client, g.display_name as grp,l.loan_officer_id as loan, s.field_officer_id as sav"+
-        			  " from m_staff staff "+
-        			  " left outer join m_client c on staff.id = c.staff_id  AND c.status_enum < ? "+
-        			  " left outer join m_group g on staff.id = g.staff_id " +
+                      " from m_staff staff "+
+                      " left outer join m_client c on staff.id = c.staff_id  AND c.status_enum < ? "+
+                      " left outer join m_group g on staff.id = g.staff_id " +
                       " left outer join m_loan l on staff.id = l.loan_officer_id and l.loan_status_id < ? " +
                       " left outer join m_savings_account s on c.staff_id = s.field_officer_id and s.status_enum < ? "+ 
                       " where  staff.id  = ? "+
                       " group by staff.id, client, grp, loan, sav";
         
        
-		List<Map<String, Object>> result = this.jdbcTemplate.queryForList(
-				sql,
-				new Object[] {
-						ClientStatus.CLOSED.getValue(),
-						LoanStatus.WITHDRAWN_BY_CLIENT.getValue(),
-						SavingsAccountStatusType.WITHDRAWN_BY_APPLICANT
-								.getValue(), staffId });
+        List<Map<String, Object>> result = this.jdbcTemplate.queryForList(
+                sql,
+                new Object[] {
+                        ClientStatus.CLOSED.getValue(),
+                        LoanStatus.WITHDRAWN_BY_CLIENT.getValue(),
+                        SavingsAccountStatusType.WITHDRAWN_BY_APPLICANT
+                                .getValue(), staffId });
         if (result != null) {
-       		for (Map<String, Object> map : result) {
-       			if (map.get("client") != null) {
-       				params.add("client");
-       			}
-       			if (map.get("grp") != null) {
-       				params.add("group");
-       			}
-       			if (map.get("loan")  != null) {
-       				params.add("loan");
-       			}
-       			if (map.get("sav")  != null) {
-       				params.add("savings account");
-       			}
-       		}		
+               for (Map<String, Object> map : result) {
+                   if (map.get("client") != null) {
+                       params.add("client");
+                   }
+                   if (map.get("grp") != null) {
+                       params.add("group");
+                   }
+                   if (map.get("loan")  != null) {
+                       params.add("loan");
+                   }
+                   if (map.get("sav")  != null) {
+                       params.add("savings account");
+                   }
+               }        
         }
         return params.toArray();
         

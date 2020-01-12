@@ -47,7 +47,7 @@ public interface ClientReadPlatformService {
 
     ClientData retrieveAllNarrations(String clientNarrations);
     
-	Date retrieveClientTransferProposalDate(Long clientId);
+    Date retrieveClientTransferProposalDate(Long clientId);
 
-	void validateClient(Long clientId);
+    void validateClient(Long clientId);
 }

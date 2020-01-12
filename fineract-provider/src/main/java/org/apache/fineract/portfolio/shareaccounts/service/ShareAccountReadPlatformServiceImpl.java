@@ -505,13 +505,13 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         }
     }
 
-	@Override
-	public String retrieveAccountNumberByAccountId(Long accountId) {
-		try {
-			final String sql = "select s.account_no from m_share_account s where s.id = ?";
-			return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
-		} catch (final EmptyResultDataAccessException e) {
-			throw new ShareAccountNotFoundException(accountId);
-		}
-	}
+    @Override
+    public String retrieveAccountNumberByAccountId(Long accountId) {
+        try {
+            final String sql = "select s.account_no from m_share_account s where s.id = ?";
+            return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
+        } catch (final EmptyResultDataAccessException e) {
+            throw new ShareAccountNotFoundException(accountId);
+        }
+    }
 }

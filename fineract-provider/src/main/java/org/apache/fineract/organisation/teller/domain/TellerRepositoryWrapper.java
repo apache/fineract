@@ -42,14 +42,14 @@ public class TellerRepositoryWrapper {
     }
     
     public Teller save(final Teller teller) {
-    	return this.repository.save(teller) ;
+        return this.repository.save(teller) ;
     }
     
     public Teller saveAndFlush(final Teller teller) {
-    	return this.repository.saveAndFlush(teller) ;
+        return this.repository.saveAndFlush(teller) ;
     }
     
     public void delete(final Teller teller) {
-    	this.repository.delete(teller);
+        this.repository.delete(teller);
     }
 }

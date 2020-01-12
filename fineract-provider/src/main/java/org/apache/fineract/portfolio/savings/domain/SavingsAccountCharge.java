@@ -213,7 +213,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom<Long> {
         populateDerivedFields(transactionAmount, chargeAmount);
 
         if (this.isWithdrawalFee()
-        		|| this.isSavingsNoActivity()) {
+                || this.isSavingsNoActivity()) {
             this.amountOutstanding = BigDecimal.ZERO;
         }
 
@@ -646,7 +646,7 @@ public class SavingsAccountCharge extends AbstractPersistableCustom<Long> {
     }
     
     public boolean isSavingsNoActivity(){
-    	return ChargeTimeType.fromInt(this.chargeTime).isSavingsNoActivityFee();
+        return ChargeTimeType.fromInt(this.chargeTime).isSavingsNoActivityFee();
     }
 
     public boolean isSavingsClosure() {
@@ -684,25 +684,25 @@ public class SavingsAccountCharge extends AbstractPersistableCustom<Long> {
         if (!(o instanceof SavingsAccountCharge)) return false;
         SavingsAccountCharge that = (SavingsAccountCharge) o;
         return Objects.equals(penaltyCharge, that.penaltyCharge) &&
-        	   Objects.equals(paid, that.paid) &&
-        	   Objects.equals(waived, that.waived) &&
-        	   Objects.equals(status, that.status) &&
-        	   Objects.equals(savingsAccount, that.savingsAccount) &&
-        	   Objects.equals(charge, that.charge) &&
-        	   Objects.equals(chargeTime, that.chargeTime) &&
-        	   Objects.equals(dueDate, that.dueDate) &&
-        	   Objects.equals(feeOnMonth, that.feeOnMonth) &&
-        	   Objects.equals(feeOnDay, that.feeOnDay) &&
-        	   Objects.equals(feeInterval, that.feeInterval) &&
-        	   Objects.equals(chargeCalculation, that.chargeCalculation) &&
-        	   Objects.equals(percentage, that.percentage) &&
-        	   Objects.equals(amountPercentageAppliedTo, that.amountPercentageAppliedTo) &&
-        	   Objects.equals(amount, that.amount) &&
-        	   Objects.equals(amountPaid, that.amountPaid) &&
-        	   Objects.equals(amountWaived, that.amountWaived) &&
-        	   Objects.equals(amountWrittenOff, that.amountWrittenOff) &&
-        	   Objects.equals(amountOutstanding, that.amountOutstanding) &&
-        	   Objects.equals(inactivationDate, that.inactivationDate);
+               Objects.equals(paid, that.paid) &&
+               Objects.equals(waived, that.waived) &&
+               Objects.equals(status, that.status) &&
+               Objects.equals(savingsAccount, that.savingsAccount) &&
+               Objects.equals(charge, that.charge) &&
+               Objects.equals(chargeTime, that.chargeTime) &&
+               Objects.equals(dueDate, that.dueDate) &&
+               Objects.equals(feeOnMonth, that.feeOnMonth) &&
+               Objects.equals(feeOnDay, that.feeOnDay) &&
+               Objects.equals(feeInterval, that.feeInterval) &&
+               Objects.equals(chargeCalculation, that.chargeCalculation) &&
+               Objects.equals(percentage, that.percentage) &&
+               Objects.equals(amountPercentageAppliedTo, that.amountPercentageAppliedTo) &&
+               Objects.equals(amount, that.amount) &&
+               Objects.equals(amountPaid, that.amountPaid) &&
+               Objects.equals(amountWaived, that.amountWaived) &&
+               Objects.equals(amountWrittenOff, that.amountWrittenOff) &&
+               Objects.equals(amountOutstanding, that.amountOutstanding) &&
+               Objects.equals(inactivationDate, that.inactivationDate);
     }
 
     @Override

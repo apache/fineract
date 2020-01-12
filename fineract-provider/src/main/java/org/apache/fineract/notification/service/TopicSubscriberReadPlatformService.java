@@ -23,7 +23,7 @@ import java.util.Collection;
 import org.apache.fineract.notification.data.TopicSubscriberData;
 
 public interface TopicSubscriberReadPlatformService {
-	
-	Collection<TopicSubscriberData> getSubscribers(Long entityId, String entityType, String memberType);
-	
+    
+    Collection<TopicSubscriberData> getSubscribers(Long entityId, String entityType, String memberType);
+    
 }

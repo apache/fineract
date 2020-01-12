@@ -138,7 +138,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
 
         List<Map<String, Object>> list = jdbcTemplate.queryForList(organizationRunningBalanceSql, entityDate, entityDate);
         for (Map<String, Object> entries : list) {
-        	Long accountId = Long.parseLong(entries.get("accountId").toString()); //Drizzle is returning Big Integer where as MySQL returns Long.
+            Long accountId = Long.parseLong(entries.get("accountId").toString()); //Drizzle is returning Big Integer where as MySQL returns Long.
             if (!runningBalanceMap.containsKey(accountId)) {
                 runningBalanceMap.put(accountId, (BigDecimal) entries.get("runningBalance"));
             }
@@ -168,7 +168,7 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
             ArrayList<String> updateSql = new ArrayList<>();
             int batchIndex = 0;
             for (int index = 0 ; index < entryDatas.size() ; index++) {
-            	JournalEntryData entryData = entryDatas.get(index) ;
+                JournalEntryData entryData = entryDatas.get(index) ;
                 Map<Long, BigDecimal> officeRunningBalanceMap = null;
                 if (officesRunningBalance.containsKey(entryData.getOfficeId())) {
                     officeRunningBalanceMap = officesRunningBalance.get(entryData.getOfficeId());
@@ -184,8 +184,8 @@ public class JournalEntryRunningBalanceUpdateServiceImpl implements JournalEntry
                 batchIndex++ ;
                 if (batchIndex == batchUpdateSize || index == entryDatas.size()-1) {
                     // run a batch update of the 1000 update SQL statements
-                	String[] batch = new String[updateSql.size()] ;
-                	updateSql.toArray(batch) ;
+                    String[] batch = new String[updateSql.size()] ;
+                    updateSql.toArray(batch) ;
                     this.jdbcTemplate.batchUpdate(batch);
                     // reset counter and string array
                     batchIndex = 0;

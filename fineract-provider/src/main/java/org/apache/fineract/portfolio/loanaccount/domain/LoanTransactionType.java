@@ -128,8 +128,8 @@ public enum LoanTransactionType {
                 loanTransactionType = LoanTransactionType.REFUND_FOR_ACTIVE_LOAN;
             break;
             case 19:
-            	loanTransactionType = LoanTransactionType.INCOME_POSTING;
-            	break;
+                loanTransactionType = LoanTransactionType.INCOME_POSTING;
+                break;
             default:
                 loanTransactionType = LoanTransactionType.INVALID;
             break;

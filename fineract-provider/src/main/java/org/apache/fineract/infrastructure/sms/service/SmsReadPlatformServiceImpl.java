@@ -54,7 +54,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
     @Autowired
     public SmsReadPlatformServiceImpl(final RoutingDataSource dataSource,
-    		final ColumnValidator columnValidator) {
+            final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.smsRowMapper = new SmsMapper();
         this.columnValidator = columnValidator;

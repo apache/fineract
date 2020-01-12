@@ -329,7 +329,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         // validate ActualDisbursement Date Against Expected Disbursement Date
         LoanProduct loanProduct = loan.loanProduct();
         if(loanProduct.syncExpectedWithDisbursementDate()){
-        	syncExpectedDateWithActualDisbursementDate(loan, actualDisbursementDate);
+            syncExpectedDateWithActualDisbursementDate(loan, actualDisbursementDate);
         }
         checkClientOrGroupActive(loan);
 
@@ -342,7 +342,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         
         LocalDate recalculateFrom = null;
         if(!loan.isMultiDisburmentLoan()){
-        	loan.setActualDisbursementDate(actualDisbursementDate.toDate());
+            loan.setActualDisbursementDate(actualDisbursementDate.toDate());
         }        
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
 
@@ -363,13 +363,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Map<String, Object> changes = new LinkedHashMap<>();
 
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
-		if (paymentDetail != null && paymentDetail.getPaymentType() != null
-				&& paymentDetail.getPaymentType().isCashPayment()) {
-			BigDecimal transactionAmount = command
-					.bigDecimalValueOfParameterNamed("transactionAmount");
-			this.cashierTransactionDataValidator.validateOnLoanDisbursal(
-					currentUser, loan.getCurrencyCode(), transactionAmount);
-		}     
+        if (paymentDetail != null && paymentDetail.getPaymentType() != null
+                && paymentDetail.getPaymentType().isCashPayment()) {
+            BigDecimal transactionAmount = command
+                    .bigDecimalValueOfParameterNamed("transactionAmount");
+            this.cashierTransactionDataValidator.validateOnLoanDisbursal(
+                    currentUser, loan.getCurrencyCode(), transactionAmount);
+        }     
         final Boolean isPaymnetypeApplicableforDisbursementCharge = configurationDomainService
                 .isPaymnetypeApplicableforDisbursementCharge();
 
@@ -428,7 +428,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             regenerateScheduleOnDisbursement(command, loan, recalculateSchedule, scheduleGeneratorDTO, nextPossibleRepaymentDate, rescheduledRepaymentDate);
             if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
-            	createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
+                createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
             }
             if (isPaymnetypeApplicableforDisbursementCharge) {
                 changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO, paymentDetail);
@@ -498,13 +498,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .build();
     }
 
-	private void createAndSaveLoanScheduleArchive(final Loan loan, ScheduleGeneratorDTO scheduleGeneratorDTO) {
-		LoanRescheduleRequest loanRescheduleRequest = null;
-		LoanScheduleModel loanScheduleModel = loan.regenerateScheduleModel(scheduleGeneratorDTO);
-		List<LoanRepaymentScheduleInstallment> installments = retrieveRepaymentScheduleFromModel(loanScheduleModel);
-		this.loanScheduleHistoryWritePlatformService.createAndSaveLoanScheduleArchive(installments,
-		        loan, loanRescheduleRequest);
-	}
+    private void createAndSaveLoanScheduleArchive(final Loan loan, ScheduleGeneratorDTO scheduleGeneratorDTO) {
+        LoanRescheduleRequest loanRescheduleRequest = null;
+        LoanScheduleModel loanScheduleModel = loan.regenerateScheduleModel(scheduleGeneratorDTO);
+        List<LoanRepaymentScheduleInstallment> installments = retrieveRepaymentScheduleFromModel(loanScheduleModel);
+        this.loanScheduleHistoryWritePlatformService.createAndSaveLoanScheduleArchive(installments,
+                loan, loanRescheduleRequest);
+    }
 
     /**
      * create standing instruction for disbursed loan
@@ -634,7 +634,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             // validate ActualDisbursement Date Against Expected Disbursement Date
             LoanProduct loanProduct = loan.loanProduct();
             if(loanProduct.syncExpectedWithDisbursementDate()){
-            	syncExpectedDateWithActualDisbursementDate(loan, actualDisbursementDate);
+                syncExpectedDateWithActualDisbursementDate(loan, actualDisbursementDate);
             }
             checkClientOrGroupActive(loan);
             this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.LOAN_DISBURSAL,
@@ -678,7 +678,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 regenerateScheduleOnDisbursement(command, loan, recalculateSchedule, scheduleGeneratorDTO, nextPossibleRepaymentDate,
                         rescheduledRepaymentDate);
                 if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
-                	createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
+                    createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
                 }
                 if (configurationDomainService.isPaymnetypeApplicableforDisbursementCharge()) {
                     changedTransactionDetail = loan.disburse(currentUser, command, changes, scheduleGeneratorDTO, paymentDetail);
@@ -1123,10 +1123,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("dateFormat", command.dateFormat());
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         if(command.hasParameter("writeoffReasonId")){
-        	Long writeoffReasonId = command.longValueOfParameterNamed("writeoffReasonId");
-        	CodeValue writeoffReason = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(LoanApiConstants.WRITEOFFREASONS, writeoffReasonId);
-        	changes.put("writeoffReasonId", writeoffReasonId);
-        	loan.updateWriteOffReason(writeoffReason);
+            Long writeoffReasonId = command.longValueOfParameterNamed("writeoffReasonId");
+            CodeValue writeoffReason = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(LoanApiConstants.WRITEOFFREASONS, writeoffReasonId);
+            changes.put("writeoffReasonId", writeoffReasonId);
+            loan.updateWriteOffReason(writeoffReason);
         }    
         
         checkClientOrGroupActive(loan);
@@ -3009,25 +3009,25 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
     
     private void syncExpectedDateWithActualDisbursementDate(final Loan loan, LocalDate actualDisbursementDate){
-	   	if(!loan.getExpectedDisbursedOnLocalDate().equals(actualDisbursementDate)){
-	   		throw new DateMismatchException(actualDisbursementDate, 
-	   				loan.getExpectedDisbursedOnLocalDate());
-	   	}
-	   	
-	   }
+           if(!loan.getExpectedDisbursedOnLocalDate().equals(actualDisbursementDate)){
+               throw new DateMismatchException(actualDisbursementDate, 
+                       loan.getExpectedDisbursedOnLocalDate());
+           }
+           
+       }
     
-	private void validateTransactionsForTransfer(final Loan loan, final LocalDate transferDate) {
+    private void validateTransactionsForTransfer(final Loan loan, final LocalDate transferDate) {
 
-		for (LoanTransaction transaction : loan.getLoanTransactions()) {
-			if ((transaction.getTransactionDate().isEqual(transferDate)
-					&& transaction.getCreatedDateTime().isEqual(transferDate.toDateTimeAtStartOfDay().toLocalDateTime()))
-					|| transaction.getTransactionDate().isAfter(transferDate)) {
-				throw new GeneralPlatformDomainRuleException(TransferApiConstants.transferClientLoanException,
-						TransferApiConstants.transferClientLoanExceptionMessage, transaction.getCreatedDateTime().toLocalDate(),
-						transferDate);
-			}
+        for (LoanTransaction transaction : loan.getLoanTransactions()) {
+            if ((transaction.getTransactionDate().isEqual(transferDate)
+                    && transaction.getCreatedDateTime().isEqual(transferDate.toDateTimeAtStartOfDay().toLocalDateTime()))
+                    || transaction.getTransactionDate().isAfter(transferDate)) {
+                throw new GeneralPlatformDomainRuleException(TransferApiConstants.transferClientLoanException,
+                        TransferApiConstants.transferClientLoanExceptionMessage, transaction.getCreatedDateTime().toLocalDate(),
+                        transferDate);
+            }
 
-		}
+        }
 
-	}
+    }
 }

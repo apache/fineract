@@ -367,10 +367,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MM yyyy");
         fmt.withZone(DateUtils.getDateTimeZoneOfTenant());
 
-		while (todaysDate.isAfter(savingsAccountCharge.getDueLocalDate())) {
-			this.payCharge(savingsAccountCharge, savingsAccountCharge.getDueLocalDate(), savingsAccountCharge.amount(),
-					fmt, user);
-		}
+        while (todaysDate.isAfter(savingsAccountCharge.getDueLocalDate())) {
+            this.payCharge(savingsAccountCharge, savingsAccountCharge.getDueLocalDate(), savingsAccountCharge.amount(),
+                    fmt, user);
+        }
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(savingsAccountCharge.getId()) //
@@ -1543,18 +1543,18 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withClientId(account.clientId()).withGroupId(account.groupId()).withSavingsId(savingsId).with(changes).build();
     }
     
-	private void validateTransactionsForTransfer(final SavingsAccount savingsAccount, final LocalDate transferDate) {
+    private void validateTransactionsForTransfer(final SavingsAccount savingsAccount, final LocalDate transferDate) {
 
-		for (SavingsAccountTransaction transaction : savingsAccount.getTransactions()) {
-			if ((transaction.getTransactionLocalDate().isEqual(transferDate)
-					&& transaction.getTransactionLocalDate().isAfter(new LocalDate(transferDate)))
-					|| transaction.getTransactionLocalDate().isAfter(transferDate)) {
-				throw new GeneralPlatformDomainRuleException(TransferApiConstants.transferClientSavingsException,
-						TransferApiConstants.transferClientSavingsException, new LocalDate(transaction.createdDate()),
-						transferDate);
-			}
+        for (SavingsAccountTransaction transaction : savingsAccount.getTransactions()) {
+            if ((transaction.getTransactionLocalDate().isEqual(transferDate)
+                    && transaction.getTransactionLocalDate().isAfter(new LocalDate(transferDate)))
+                    || transaction.getTransactionLocalDate().isAfter(transferDate)) {
+                throw new GeneralPlatformDomainRuleException(TransferApiConstants.transferClientSavingsException,
+                        TransferApiConstants.transferClientSavingsException, new LocalDate(transaction.createdDate()),
+                        transferDate);
+            }
 
-		}
+        }
 
-	}
+    }
 }
