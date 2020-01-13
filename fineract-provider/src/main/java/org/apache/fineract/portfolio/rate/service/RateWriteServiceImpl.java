@@ -34,6 +34,7 @@ import org.apache.fineract.portfolio.rate.exception.RateNotFoundException;
 import org.apache.fineract.portfolio.rate.serialization.RateDefinitionCommandFromApiJsonDeserializer;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepository;
+import org.apache.fineract.useradministration.exception.UserNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +74,7 @@ public class RateWriteServiceImpl implements RateWriteService {
       final Long approveUserId = command.longValueOfParameterNamed(approveUserIdParamName);
       AppUser approveUser = null;
       if (approveUserId != null) {
-        approveUser = this.appUserRepository.findOne(approveUserId);
+        approveUser = this.appUserRepository.findById(approveUserId).orElseThrow(() -> new UserNotFoundException(approveUserId));
       }
       final Rate rate = Rate.fromJson(command, approveUser);
 
@@ -98,20 +99,17 @@ public class RateWriteServiceImpl implements RateWriteService {
     try {
       this.context.authenticatedUser();
 
-      final Rate rateToUpdate = this.rateRepository.findOne(rateId);
-      if (rateToUpdate == null) {
-        throw new RateNotFoundException(rateId);
-      }
+      final Rate rateToUpdate = this.rateRepository.findById(rateId).orElseThrow(() -> new RateNotFoundException(rateId));
 
       final Map<String, Object> changes = rateToUpdate.update(command);
 
       this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
       if (changes.containsKey(approveUserIdParamName)) {
-        final Long newValue = (Long) changes.get(approveUserIdParamName);
+        final Long newApproveUserId = (Long) changes.get(approveUserIdParamName);
         AppUser newApproveUser = null;
-        if (newValue != null) {
-          newApproveUser = this.appUserRepository.findOne(newValue);
+        if (newApproveUserId != null) {
+          newApproveUser = this.appUserRepository.findById(newApproveUserId).orElseThrow(() -> new UserNotFoundException(newApproveUserId));
         }
         rateToUpdate.setApproveUser(newApproveUser);
       }

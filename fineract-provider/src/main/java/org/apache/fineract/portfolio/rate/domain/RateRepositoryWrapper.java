@@ -36,19 +36,14 @@ public class RateRepositoryWrapper {
   }
 
   public Rate findOneWithNotFoundDetection(final Long rateId) {
-
-    final Rate rate = this.repository.findOne(rateId);
-    if (rate == null) {
-      throw new RateNotFoundException(rateId);
-    }
-
+    final Rate rate = this.repository.findById(rateId).orElseThrow(() -> new RateNotFoundException(rateId));
     return rate;
   }
 
   public List<Rate> findMultipleWithNotFoundDetection(final List<Long> rateIds) {
     List<Rate> rates = new ArrayList<>();
     if (rateIds != null && !rateIds.isEmpty()) {
-      final List<Rate> foundRates = this.repository.findAll(rateIds);
+      final List<Rate> foundRates = this.repository.findAllById(rateIds);
       for (Long rateId : rateIds) {
         Boolean found = false;
         for (Rate foundRate : foundRates) {
