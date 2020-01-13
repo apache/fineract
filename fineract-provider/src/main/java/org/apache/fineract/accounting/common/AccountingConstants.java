@@ -18,13 +18,15 @@
  */
 package org.apache.fineract.accounting.common;
 
+import org.apache.fineract.accounting.financialactivityaccount.data.FinancialActivityData;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
+
+import net.sf.ehcache.util.FindBugsSuppressWarnings;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.fineract.accounting.financialactivityaccount.data.FinancialActivityData;
-import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 
 public class AccountingConstants {
 
@@ -289,14 +291,16 @@ public class AccountingConstants {
             return convertToFinancialActivityData(type);
         }
 
+        // TODO Fix this..
+        @FindBugsSuppressWarnings("LI_LAZY_INIT_UPDATE_STATIC")
         public static List<FinancialActivityData> getAllFinancialActivities() {
-            if (financialActivities == null) {
-                financialActivities = new ArrayList<>();
+        	if (financialActivities == null) {
+        		financialActivities = new ArrayList<>();
                 for (final FINANCIAL_ACTIVITY type : FINANCIAL_ACTIVITY.values()) {
                     FinancialActivityData financialActivityData = convertToFinancialActivityData(type);
                     financialActivities.add(financialActivityData);
                 }
-            }
+        	}
             return financialActivities;
         }
 

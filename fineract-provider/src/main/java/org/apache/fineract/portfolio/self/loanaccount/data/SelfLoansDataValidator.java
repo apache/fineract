@@ -40,6 +40,8 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonElement;
 
+import net.sf.ehcache.util.FindBugsSuppressWarnings;
+
 @Component
 public class SelfLoansDataValidator {
 	private static final Set<String> allowedAssociationParameters = new HashSet<>(
@@ -83,6 +85,9 @@ public class SelfLoansDataValidator {
 
 	}
 	
+	// TODO fix this!
+	@FindBugsSuppressWarnings("EC_UNRELATED_TYPES")
+	// See review here: https://github.com/apache/fineract/pull/670
 	public HashMap<String, Object> validateLoanApplication(final String json){
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
@@ -108,6 +113,9 @@ public class SelfLoansDataValidator {
 
 	}
 
+	// TODO fix this!
+	@FindBugsSuppressWarnings("EC_UNRELATED_TYPES")
+	// See review here: https://github.com/apache/fineract/pull/670/files/0409af3903d350afe43ef4837e4d915ccbe14285#r357920937
 	public HashMap<String, Object> validateModifyLoanApplication(final String json) {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");

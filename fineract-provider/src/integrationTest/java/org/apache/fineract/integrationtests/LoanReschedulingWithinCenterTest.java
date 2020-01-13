@@ -151,8 +151,7 @@ public class LoanReschedulingWithinCenterTest {
 
         // VERIFY THE INTEREST
         Float interestDue = (Float) ((HashMap) loanRepaymnetSchedule.get(2)).get("interestDue");
-        assertEquals(String.valueOf(interestDue), "90.82");
-
+        assertEquals("90.82", String.valueOf(interestDue));
     }
     
     private void associateClientsToGroup(Integer groupId, Integer clientId) {
@@ -280,8 +279,7 @@ public class LoanReschedulingWithinCenterTest {
 
         // VERIFY THE INTEREST
         Float interestDue = (Float) ((HashMap) loanRepaymnetSchedule.get(2)).get("interestDue");
-        assertEquals(String.valueOf(interestDue), "41.05");
-
+        assertEquals("41.05", String.valueOf(interestDue));
     }
 
     private Integer createLoanProductWithInterestRecalculation(final String repaymentStrategy,

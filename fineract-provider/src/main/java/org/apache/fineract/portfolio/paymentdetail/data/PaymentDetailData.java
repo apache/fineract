@@ -20,10 +20,13 @@ package org.apache.fineract.portfolio.paymentdetail.data;
 
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 /**
  * Immutable data object representing a payment.
  */
-public class PaymentDetailData {
+public class PaymentDetailData implements Serializable {
 
     @SuppressWarnings("unused")
     private final Long id;
@@ -50,7 +53,23 @@ public class PaymentDetailData {
         this.receiptNumber = receiptNumber;
         this.bankNumber = bankNumber;
     }
-    
-    
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PaymentDetailData)) return false;
+        PaymentDetailData that = (PaymentDetailData) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(paymentType, that.paymentType) &&
+                Objects.equals(accountNumber, that.accountNumber) &&
+                Objects.equals(checkNumber, that.checkNumber) &&
+                Objects.equals(routingCode, that.routingCode) &&
+                Objects.equals(receiptNumber, that.receiptNumber) &&
+                Objects.equals(bankNumber, that.bankNumber);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, paymentType, accountNumber, checkNumber, routingCode, receiptNumber, bankNumber);
+    }
 }

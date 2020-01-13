@@ -18,11 +18,13 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob;
 
+import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ReportMailingJobConstants {
+public class ReportMailingJobConstants implements Serializable {
 
     // define the API resource entity name
     public static final String REPORT_MAILING_JOB_ENTITY_NAME = "REPORTMAILINGJOB";
@@ -62,23 +64,26 @@ public class ReportMailingJobConstants {
     public static final String STRETCHY_REPORT_PARAM_NAME = "stretchyReport";
     
     // list of permitted parameters for the create report mailing job request
-    public static final Set<String> CREATE_REQUEST_PARAMETERS = new HashSet<>(Arrays.asList(LOCALE_PARAM_NAME, DATE_FORMAT_PARAM_NAME, 
-            NAME_PARAM_NAME, DESCRIPTION_PARAM_NAME, RECURRENCE_PARAM_NAME, EMAIL_RECIPIENTS_PARAM_NAME, EMAIL_SUBJECT_PARAM_NAME, 
-            EMAIL_MESSAGE_PARAM_NAME, EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME, STRETCHY_REPORT_ID_PARAM_NAME, 
-            STRETCHY_REPORT_PARAM_MAP_PARAM_NAME, IS_ACTIVE_PARAM_NAME, START_DATE_TIME_PARAM_NAME));
-    
+    public static final Set<String> CREATE_REQUEST_PARAMETERS =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(LOCALE_PARAM_NAME, DATE_FORMAT_PARAM_NAME,
+            NAME_PARAM_NAME, DESCRIPTION_PARAM_NAME, RECURRENCE_PARAM_NAME, EMAIL_RECIPIENTS_PARAM_NAME, EMAIL_SUBJECT_PARAM_NAME,
+            EMAIL_MESSAGE_PARAM_NAME, EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME, STRETCHY_REPORT_ID_PARAM_NAME,
+            STRETCHY_REPORT_PARAM_MAP_PARAM_NAME, IS_ACTIVE_PARAM_NAME, START_DATE_TIME_PARAM_NAME)));
+
     // list of permitted parameters for the update report mailing job request
-    public static final Set<String> UPDATE_REQUEST_PARAMETERS = new HashSet<>(Arrays.asList(LOCALE_PARAM_NAME, DATE_FORMAT_PARAM_NAME, 
+    public static final Set<String> UPDATE_REQUEST_PARAMETERS =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(LOCALE_PARAM_NAME, DATE_FORMAT_PARAM_NAME,
             NAME_PARAM_NAME, DESCRIPTION_PARAM_NAME, RECURRENCE_PARAM_NAME, EMAIL_RECIPIENTS_PARAM_NAME, EMAIL_SUBJECT_PARAM_NAME, 
             EMAIL_MESSAGE_PARAM_NAME, EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME, STRETCHY_REPORT_ID_PARAM_NAME, 
-            STRETCHY_REPORT_PARAM_MAP_PARAM_NAME, IS_ACTIVE_PARAM_NAME, START_DATE_TIME_PARAM_NAME));
+            STRETCHY_REPORT_PARAM_MAP_PARAM_NAME, IS_ACTIVE_PARAM_NAME, START_DATE_TIME_PARAM_NAME)));
     
     // list of parameters that represent the properties of a report mailing job
-    public static final Set<String> REPORT_MAILING_JOB_DATA_PARAMETERS = new HashSet<>(Arrays.asList(ID_PARAM_NAME, NAME_PARAM_NAME, 
+    public static final Set<String> REPORT_MAILING_JOB_DATA_PARAMETERS =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ID_PARAM_NAME, NAME_PARAM_NAME,
             DESCRIPTION_PARAM_NAME, RECURRENCE_PARAM_NAME, EMAIL_RECIPIENTS_PARAM_NAME, EMAIL_SUBJECT_PARAM_NAME, EMAIL_MESSAGE_PARAM_NAME, 
             EMAIL_ATTACHMENT_FILE_FORMAT_PARAM_NAME, STRETCHY_REPORT_PARAM_NAME, STRETCHY_REPORT_PARAM_MAP_PARAM_NAME, IS_ACTIVE_PARAM_NAME, 
             START_DATE_TIME_PARAM_NAME, PREVIOUS_RUN_DATE_TIME_PARAM_NAME, NEXT_RUN_DATE_TIME_PARAM_NAME, PREVIOUS_RUN_STATUS, 
-            PREVIOUS_RUN_ERROR_LOG, PREVIOUS_RUN_ERROR_MESSAGE, NUMBER_OF_RUNS));
+            PREVIOUS_RUN_ERROR_LOG, PREVIOUS_RUN_ERROR_MESSAGE, NUMBER_OF_RUNS)));
     
     // report mailing job configuration names
     public static final String GMAIL_SMTP_SERVER = "GMAIL_SMTP_SERVER";

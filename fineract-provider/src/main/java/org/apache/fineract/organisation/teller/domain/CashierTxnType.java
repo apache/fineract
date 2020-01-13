@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.organisation.teller.domain;
 
-import java.util.HashMap;
+import java.io.Serializable;
 
-public class CashierTxnType {
+public class CashierTxnType implements Serializable {
 	
 	private Integer id;
 	private String value;

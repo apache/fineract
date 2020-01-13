@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.data;
 
-public class ShareAccountTransactionEnumData {
+import java.io.Serializable;
+
+public class ShareAccountTransactionEnumData implements Serializable {
 
     private final Long id;
     private final String code;

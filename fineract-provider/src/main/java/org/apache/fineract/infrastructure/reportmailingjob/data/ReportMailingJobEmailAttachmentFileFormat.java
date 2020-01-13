@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public enum ReportMailingJobEmailAttachmentFileFormat {
     INVALID(0, "ReportMailingJobEmailAttachmentFileFormat.INVALID", "Invalid"),
@@ -34,7 +34,7 @@ public enum ReportMailingJobEmailAttachmentFileFormat {
     private String value;
     private Integer id;
     
-    private ReportMailingJobEmailAttachmentFileFormat(final Integer id, final String code, final String value) {
+    ReportMailingJobEmailAttachmentFileFormat(final Integer id, final String code, final String value) {
         this.value = value;
         this.code = code;
         this.id = id;
@@ -69,11 +69,11 @@ public enum ReportMailingJobEmailAttachmentFileFormat {
     public static ReportMailingJobEmailAttachmentFileFormat newInstance(final Integer id) {
         ReportMailingJobEmailAttachmentFileFormat emailAttachmentFileFormat = INVALID;
         
-        if (id == XLS.id) {
+        if (id.equals(XLS.id)) {
             emailAttachmentFileFormat = XLS;
-        } else if (id == PDF.id) {
+        } else if (id.equals(PDF.id)) {
             emailAttachmentFileFormat = PDF;
-        } else if (id == CSV.id) {
+        } else if (id.equals(CSV.id)) {
             emailAttachmentFileFormat = CSV;
         }
         

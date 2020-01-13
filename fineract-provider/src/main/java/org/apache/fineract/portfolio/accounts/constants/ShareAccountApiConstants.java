@@ -19,17 +19,18 @@
 package org.apache.fineract.portfolio.accounts.constants;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 public interface ShareAccountApiConstants {
 
-	public static final String amountParamName = "amount";
-	public static final String dateFormatParamName = "dateFormat";
-	public static final String dueAsOfDateParamName = "dueDate";
-	public static final String feeIntervalParamName = "feeInterval";
-	public static final String feeOnMonthDayParamName = "feeOnMonthDay";
-	public static final String localeParamName = "locale";
+	String amountParamName = "amount";
+	String dateFormatParamName = "dateFormat";
+	String dueAsOfDateParamName = "dueDate";
+	String feeIntervalParamName = "feeInterval";
+	String feeOnMonthDayParamName = "feeOnMonthDay";
+	String localeParamName = "locale";
 
 	// Command Strings
 	String APPROVE_COMMAND = "approve";
@@ -91,19 +92,21 @@ public interface ShareAccountApiConstants {
 	
 	String note_paramname = "note" ;
 	
-	public String requesteddate_paramname = "requestedDate" ;
+	String requesteddate_paramname = "requestedDate" ;
 	
-	public String additionalshares_paramname = "additionalshares" ;
+	String additionalshares_paramname = "additionalshares" ;
 	
-	public String closeddate_paramname = "closedDate";
+	String closeddate_paramname = "closedDate";
 
-	public static final String shareEntityType = "share";
+	String shareEntityType = "share";
 	
-	Set<String> supportedParameters = new HashSet<>(Arrays.asList(locale_paramname, dateformat_paramname, id_paramname,clientid_paramname, productid_paramname,
-	        submitteddate_paramname,approveddate_paramname, externalid_paramname, currency_paramname, digitsafterdecimal_paramname,
-	        inmultiplesof_paramname, requestedshares_paramname,savingsaccountid_paramname,lockinperiod_paramname,
-	        lockperiodfrequencytype_paramname,minimumactiveperiod_paramname, minimumactiveperiodfrequencytype_paramname,
-	        allowdividendcalculationforinactiveclients_paramname, charges_paramname, applicationdate_param,
-	        purchaseddate_paramname,numberofshares_paramname,purchasedprice_paramname));
+	Set<String> supportedParameters = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(locale_paramname,
+					dateformat_paramname,  id_paramname,clientid_paramname, productid_paramname,
+					submitteddate_paramname,approveddate_paramname, externalid_paramname, currency_paramname,
+					digitsafterdecimal_paramname, inmultiplesof_paramname, requestedshares_paramname,
+					savingsaccountid_paramname,lockinperiod_paramname, lockperiodfrequencytype_paramname,
+					minimumactiveperiod_paramname, minimumactiveperiodfrequencytype_paramname,
+					allowdividendcalculationforinactiveclients_paramname, charges_paramname, applicationdate_param,
+					purchaseddate_paramname,numberofshares_paramname,purchasedprice_paramname)));
 
 }

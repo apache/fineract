@@ -320,7 +320,7 @@ public final class LoanProductDataValidator {
                 .value(isInterestRecalculationEnabled).notNull().isOneOfTheseValues(true, false);
 
         if (isInterestRecalculationEnabled != null) {
-            if (isInterestRecalculationEnabled.booleanValue()) {
+            if (isInterestRecalculationEnabled) {
                 if (isEqualAmortization) { throw new EqualAmortizationUnsupportedFeatureException("interest.recalculation",
                         "interest recalculation"); }
                 validateInterestRecalculationParams(element, baseDataValidator, null);
@@ -363,7 +363,7 @@ public final class LoanProductDataValidator {
                         .failWithCode("not.supported.when.isLinkedToFloatingInterestRates.is.true",
                                 "interestRateFrequencyType param is not supported when isLinkedToFloatingInterestRates is true");
             }
-            if ((interestType == null || interestType != InterestMethod.DECLINING_BALANCE.getValue())
+            if ((interestType == null || !interestType.equals(InterestMethod.DECLINING_BALANCE.getValue()))
                     || (isInterestRecalculationEnabled == null || isInterestRecalculationEnabled == false)) {
                 baseDataValidator
                         .reset()
@@ -1208,7 +1208,7 @@ public final class LoanProductDataValidator {
             Integer interestType = this.fromApiJsonHelper.parameterExists("interestType", element) ? this.fromApiJsonHelper
                     .extractIntegerNamed("interestType", element, Locale.getDefault()) : loanProduct.getLoanProductRelatedDetail()
                     .getInterestMethod().getValue();
-            if ((interestType == null || interestType != InterestMethod.DECLINING_BALANCE.getValue())
+            if ((interestType == null || !interestType.equals(InterestMethod.DECLINING_BALANCE.getValue()))
                     || (isInterestRecalculationEnabled == null || isInterestRecalculationEnabled == false)) {
                 baseDataValidator
                         .reset()

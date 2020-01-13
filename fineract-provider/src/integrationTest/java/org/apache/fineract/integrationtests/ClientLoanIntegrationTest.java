@@ -18,27 +18,17 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.Assert.assertEquals;
-
-import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.gson.JsonObject;
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.path.json.JsonPath;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.accounting.JournalEntry;
-import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
-import org.apache.fineract.integrationtests.common.accounting.PeriodicAccrualAccountingHelper;
+import org.apache.fineract.integrationtests.common.accounting.*;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
@@ -53,13 +43,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.gson.JsonObject;
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.path.json.JsonPath;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Client Loan Integration Test for checking Loan Application Repayments
@@ -5080,24 +5070,25 @@ public class ClientLoanIntegrationTest {
     }
 
     public Integer getDayOfWeek(Calendar date) {
-        Integer dayOfWeek = null;
+        int dayOfWeek = 0;
         if (null != date) {
             dayOfWeek = date.get(Calendar.DAY_OF_WEEK) - 1;
-            if (dayOfWeek.compareTo(0) == 0) {
+            if (dayOfWeek == 0) {
                 dayOfWeek = 7;
             }
         }
-        return dayOfWeek;
+        return Integer.valueOf(dayOfWeek);
     }
 
     public Integer getDayOfMonth(Calendar date) {
-        Integer dayOfMonth = null;
+        int dayOfMonth = 0;
         if (null != date) {
             dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
-            if (dayOfMonth.compareTo(28) > 0) {
+            if (dayOfMonth > 28) {
                 dayOfMonth = 28;
             }
         }
-        return dayOfMonth;
+
+        return Integer.valueOf(dayOfMonth);
     }
 }

@@ -43,6 +43,10 @@ buildscript {
      classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
      classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.2.2'
       classpath "gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.18.1"
+      classpath "com.github.spotbugs:spotbugs-gradle-plugin:2.0.1"
+      //Use Guava version 23+ as a workaround to spotbug intergration. 
+      // See: https://github.com/spotbugs/spotbugs-gradle-plugin/issues/128#issuecomment-535864882
+      classpath 'com.google.guava:guava:28.1-jre' 
   }
 }
 
@@ -60,6 +64,7 @@ apply plugin: 'java'
 apply plugin: "org.hidetake.swagger.generator"
 apply plugin: 'java-library'
 apply plugin: 'openjpa'
+apply plugin: "com.github.spotbugs"
 
 // apply plugin: 'pmd'
 // apply plugin: 'findbugs'
@@ -76,7 +81,7 @@ dependencyManagement {
      dependency 'com.squareup.okhttp:okhttp:2.0.0'
      dependency 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
      dependency 'com.google.code.gson:gson:+'
-     dependency 'com.google.guava:guava:15.0'
+     dependency 'com.google.guava:guava:28.1-jre'
      dependency 'joda-time:joda-time:+'
      dependency 'org.apache.commons:commons-email:1.3.3'
      dependency 'org.apache.commons:commons-lang3:+'
@@ -163,7 +168,7 @@ rat {
  excludes = [
 	'**/licenses/**',
 	'**/*.md',
-	'**/*.github/*',
+	'**/*.github/**',
 	'**/MANIFEST.MF',
     '**/*.json',
 	'**/*.txt',
@@ -461,6 +466,7 @@ task integrationTest(type:Test) {
 }
 
 
+import com.github.spotbugs.SpotBugsTask
 import groovy.sql.Sql
 
 repositories {
@@ -544,4 +550,9 @@ swaggerSources {
     }
 }
 
-
+// To generate an HTML report instead of XML
+tasks.withType(SpotBugsTask) {
+    reports.xml.enabled = false
+    reports.html.enabled = true
+    reportLevel = "high"
+}

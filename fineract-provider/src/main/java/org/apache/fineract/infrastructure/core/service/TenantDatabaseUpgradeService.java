@@ -28,6 +28,8 @@ import org.apache.fineract.infrastructure.core.boot.db.TenantDataSourcePortFixSe
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenantConnection;
 import org.apache.fineract.infrastructure.security.service.TenantDetailsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -45,12 +47,14 @@ import com.googlecode.flyway.core.util.jdbc.DriverDataSource;
 @Service
 public class TenantDatabaseUpgradeService {
 
+	private final static Logger LOG = LoggerFactory.getLogger(TenantDatabaseUpgradeService.class);
+
     private final TenantDetailsService tenantDetailsService;
     protected final DataSource tenantDataSource;
     protected final TenantDataSourcePortFixService tenantDataSourcePortFixService;
-    
-    @Autowired private JDBCDriverConfig driverConfig ;
-    
+
+    @Autowired private JDBCDriverConfig driverConfig;
+
     @Autowired
     public TenantDatabaseUpgradeService(final TenantDetailsService detailsService,
             @Qualifier("tenantDataSourceJndi") final DataSource dataSource, TenantDataSourcePortFixService tenantDataSourcePortFixService) {
@@ -88,15 +92,27 @@ public class TenantDatabaseUpgradeService {
      * itself.
      */
     private void upgradeTenantDB() {
+    	String dbHostname = getEnvVar("FINERACT_DEFAULT_TENANTDB_HOSTNAME", "localhost");
+    	String dbPort = getEnvVar("FINERACT_DEFAULT_TENANTDB_PORT", "3306");
+    	LOG.info("upgradeTenantDB: FINERACT_DEFAULT_TENANTDB_HOSTNAME = {}, FINERACT_DEFAULT_TENANTDB_PORT = {}", dbHostname, dbPort);
+
         final Flyway flyway = new Flyway();
         flyway.setDataSource(tenantDataSource);
         flyway.setLocations("sql/migrations/list_db");
         flyway.setOutOfOrder(true);
         flyway.setPlaceholders(ImmutableMap.of( // FINERACT-773
-            "fineract_default_tenantdb_hostname", System.getProperty("FINERACT_DEFAULT_TENANTDB_HOSTNAME", "localhost"),
-            "fineract_default_tenantdb_port",     System.getProperty("FINERACT_DEFAULT_TENANTDB_PORT", "3306")));
+            "fineract_default_tenantdb_hostname", dbHostname,
+            "fineract_default_tenantdb_port",     dbPort));
         flyway.migrate();
 
         tenantDataSourcePortFixService.fixUpTenantsSchemaServerPort();
     }
+
+	private String getEnvVar(String name, String defaultValue) {
+		String value = System.getenv(name);
+		if (value == null) {
+			return defaultValue;
+		}
+		return value;
+	}
 }

@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.infrastructure.security.api;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
@@ -132,12 +134,12 @@ public class AuthenticationApiResource {
                     principal.hasSpecificPermissionTo(TwoFactorConstants.BYPASS_TWO_FACTOR_PERMISSION);
             if (this.springSecurityPlatformSecurityContext.doesPasswordHasToBeRenewed(principal)) {
                 authenticatedUserData = new AuthenticatedUserData(request.username, principal.getId(),
-                        new String(base64EncodedAuthenticationKey), isTwoFactorRequired);
+                        new String(base64EncodedAuthenticationKey, StandardCharsets.UTF_8), isTwoFactorRequired);
             } else {
 
                 authenticatedUserData = new AuthenticatedUserData(request.username, officeId, officeName, staffId, staffDisplayName,
                         organisationalRole, roles, permissions, principal.getId(),
-                        new String(base64EncodedAuthenticationKey), isTwoFactorRequired);
+                        new String(base64EncodedAuthenticationKey, StandardCharsets.UTF_8), isTwoFactorRequired);
             }
 
         }

@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.integrationtests.common.savings;
 
+import com.google.gson.Gson;
+
 import java.util.HashMap;
 import java.util.List;
-
-import com.google.gson.Gson;
 
 public class SavingsApplicationTestBuilder {
 
@@ -40,7 +40,7 @@ public class SavingsApplicationTestBuilder {
 
         final HashMap<String, Object> map = new HashMap<>();
         map.put("dateFormat", "dd MMMM yyyy");
-        if (accountType == "GROUP") {
+        if (accountType.equals("GROUP")) {
             map.put("groupId", ID);
         } else {
             map.put("clientId", ID);

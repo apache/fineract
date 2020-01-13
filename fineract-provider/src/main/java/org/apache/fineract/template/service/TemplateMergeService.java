@@ -18,25 +18,9 @@
  */
 package org.apache.fineract.template.service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.net.Authenticator;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.PasswordAuthentication;
-import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
 import org.apache.fineract.template.domain.Template;
 import org.apache.fineract.template.domain.TemplateFunctions;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -45,9 +29,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheFactory;
+import java.io.*;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.PasswordAuthentication;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 @Service
 public class TemplateMergeService {
@@ -58,18 +51,13 @@ public class TemplateMergeService {
     private Map<String, Object> scopes;
     private String authToken;
 
-    // @Autowired
-    // public TemplateMergeService(final FromJsonHelper fromApiJsonHelper) {
-    // this.fromApiJsonHelper = fromApiJsonHelper;
-    //
 
     public void setAuthToken(final String authToken) {
-        //final String auth = ThreadLocalContextUtil.getAuthToken();
     	this.authToken =  authToken;
     }
     
 
-    public String compile(final Template template, final Map<String, Object> scopes) throws MalformedURLException, IOException {
+    public String compile(final Template template, final Map<String, Object> scopes) throws IOException {
         this.scopes = scopes;
         this.scopes.put("static", new TemplateFunctions());
         
@@ -111,7 +99,7 @@ public class TemplateMergeService {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, Object> getMapFromUrl(final String url) throws MalformedURLException, IOException {
+    private Map<String, Object> getMapFromUrl(final String url) throws IOException {
         final HttpURLConnection connection = getConnection(url);
 
         final String response = getStringFromInputStream(connection.getInputStream());
@@ -162,7 +150,7 @@ public class TemplateMergeService {
         String line;
         try {
 
-            br = new BufferedReader(new InputStreamReader(is));
+            br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             while ((line = br.readLine()) != null) {
                 sb.append(line);
             }
