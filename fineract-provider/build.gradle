@@ -165,7 +165,7 @@ rat {
  excludes = [
 	'**/licenses/**',
 	'**/*.md',
-	'**/*.github/*',
+	'**/*.github/**',
 	'**/MANIFEST.MF',
     '**/*.json',
 	'**/*.txt',
