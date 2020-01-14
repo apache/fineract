@@ -40,6 +40,7 @@ public class MoneyHelper {
     private ConfigurationDomainService configurationDomainService;
 
     @PostConstruct
+    // This is a hack, but fixing this is not trivial, because some @Entity domain classes use this helper
     @FindBugsSuppressWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
     public void someFunction () {
         staticConfigurationDomainService = configurationDomainService;

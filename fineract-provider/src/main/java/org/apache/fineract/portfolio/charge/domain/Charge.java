@@ -112,7 +112,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
     private TaxGroup taxGroup;
 
     public static Charge fromJson(final JsonCommand command, final GLAccount account, final TaxGroup taxGroup) {
-
         final String name = command.stringValueOfParameterNamed("name");
         final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
         final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
@@ -138,7 +137,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
     }
 
     protected Charge() {
-        //
     }
 
     private Charge(final String name, final BigDecimal amount, final String currencyCode, final ChargeAppliesTo chargeAppliesTo,
@@ -288,7 +286,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
     }
 
     public Map<String, Object> update(final JsonCommand command) {
-
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
         final String localeAsInput = command.locale();
@@ -507,7 +504,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
     }
 
     public ChargeData toData() {
-
         final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(this.chargeTimeType);
         final EnumOptionData chargeAppliesTo = ChargeEnumerations.chargeAppliesTo(this.chargeAppliesTo);
         final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(this.chargeCalculation);
@@ -605,26 +601,25 @@ public class Charge extends AbstractPersistableCustom<Long> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Charge)) return false;
-        Charge charge = (Charge) o;
-        return Objects.equals(name, charge.name) &&
-        		Objects.equals(amount, charge.amount) &&
-        		Objects.equals(currencyCode, charge.currencyCode) &&
-        		Objects.equals(chargeAppliesTo, charge.chargeAppliesTo) &&
-        		Objects.equals(chargeTimeType, charge.chargeTimeType) &&
-        		Objects.equals(chargeCalculation, charge.chargeCalculation) &&
-        		Objects.equals(chargePaymentMode, charge.chargePaymentMode) &&
-        		Objects.equals(feeOnDay, charge.feeOnDay) &&
-        		Objects.equals(feeInterval, charge.feeInterval) &&
-        		Objects.equals(feeOnMonth, charge.feeOnMonth) &&
-        		Objects.equals(penalty, charge.penalty) &&
-        		Objects.equals(active, charge.active) &&
-        		Objects.equals(deleted, charge.deleted) &&
-        		Objects.equals(minCap, charge.minCap) &&
-        		Objects.equals(maxCap, charge.maxCap) &&
-        		Objects.equals(feeFrequency, charge.feeFrequency) &&
-        		Objects.equals(account, charge.account) &&
-        		Objects.equals(taxGroup, charge.taxGroup);
-
+        Charge other= (Charge) o;
+        return Objects.equals(name, other.name) &&
+			Objects.equals(amount, other.amount) &&
+			Objects.equals(currencyCode, other.currencyCode) &&
+			Objects.equals(chargeAppliesTo, other.chargeAppliesTo) &&
+			Objects.equals(chargeTimeType, other.chargeTimeType) &&
+			Objects.equals(chargeCalculation, other.chargeCalculation) &&
+			Objects.equals(chargePaymentMode, other.chargePaymentMode) &&
+			Objects.equals(feeOnDay, other.feeOnDay) &&
+			Objects.equals(feeInterval, other.feeInterval) &&
+			Objects.equals(feeOnMonth, other.feeOnMonth) &&
+                penalty == other.penalty &&
+                active == other.active &&
+                deleted == other.deleted &&
+                Objects.equals(minCap, other.minCap) &&
+                Objects.equals(maxCap, other.maxCap) &&
+                Objects.equals(feeFrequency, other.feeFrequency) &&
+                Objects.equals(account, other.account) &&
+                Objects.equals(taxGroup, other.taxGroup);
     }
 
     @Override

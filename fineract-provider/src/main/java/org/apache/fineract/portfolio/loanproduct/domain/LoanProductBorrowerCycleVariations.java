@@ -56,7 +56,6 @@ public class LoanProductBorrowerCycleVariations extends AbstractPersistableCusto
     private BigDecimal defaultValue;
 
     protected LoanProductBorrowerCycleVariations() {
-
     }
 
     public LoanProductBorrowerCycleVariations(final Integer borrowerCycleNumber, final Integer paramType, final Integer valueConditionType,
@@ -83,30 +82,19 @@ public class LoanProductBorrowerCycleVariations extends AbstractPersistableCusto
 
     @Override
     public boolean equals(final Object obj) {
-        final LoanProductBorrowerCycleVariations borrowerCycleVariations = (LoanProductBorrowerCycleVariations) obj;
-        boolean minValequal = false;
-        if (borrowerCycleVariations.minValue == null && this.minValue == null) {
-            minValequal = true;
-        } else if (borrowerCycleVariations.minValue != null && this.minValue != null) {
-            minValequal = borrowerCycleVariations.minValue.equals(this.minValue);
-        }
-
-        boolean maxValequal = false;
-        if (borrowerCycleVariations.maxValue == null && this.maxValue == null) {
-            maxValequal = true;
-        } else if (borrowerCycleVariations.maxValue != null && this.maxValue != null) {
-            maxValequal = borrowerCycleVariations.maxValue.equals(this.maxValue);
-        }
-        if (borrowerCycleVariations.borrowerCycleNumber.equals(this.borrowerCycleNumber)
-                && borrowerCycleVariations.defaultValue.equals(this.defaultValue) && minValequal && maxValequal
-                && borrowerCycleVariations.valueConditionType.equals(this.valueConditionType)
-                && borrowerCycleVariations.paramType.equals(this.paramType)) { return true; }
-        return false;
+        final LoanProductBorrowerCycleVariations other = (LoanProductBorrowerCycleVariations) obj;
+        return Objects.equals(loanProduct, other.loanProduct)
+            && Objects.equals(borrowerCycleNumber, other.borrowerCycleNumber)
+            && Objects.equals(paramType, other.paramType)
+            && Objects.equals(valueConditionType, other.valueConditionType)
+            && Objects.equals(minValue, other.minValue)
+            && Objects.equals(maxValue, other.maxValue)
+            && Objects.equals(defaultValue, other.defaultValue);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(borrowerCycleNumber, minValue, maxValue);
+        return Objects.hash(loanProduct, borrowerCycleNumber, paramType, valueConditionType, minValue, maxValue, defaultValue);
     }
 
     public void copy(final LoanProductBorrowerCycleVariations borrowerCycleVariations) {
@@ -132,5 +120,4 @@ public class LoanProductBorrowerCycleVariations extends AbstractPersistableCusto
     public BigDecimal getDefaultValue() {
         return this.defaultValue;
     }
-
 }
