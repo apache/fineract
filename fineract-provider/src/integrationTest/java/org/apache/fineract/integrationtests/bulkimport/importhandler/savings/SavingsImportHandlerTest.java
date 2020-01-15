@@ -159,9 +159,8 @@ public class SavingsImportHandlerTest {
             Assert.assertEquals("Imported", row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
             
         } catch (AssertionError error) {
-            // Output expected AssertionErrors.
-            System.out.println("AssertionError: "+error);
             logger.error("AssertionError: "+error);
+            throw error;
         }
     }
 }
