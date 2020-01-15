@@ -35,6 +35,7 @@ import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.template.domain.Template;
+import org.apache.fineract.template.service.TemplateMergeService;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -43,6 +44,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -54,6 +57,7 @@ import java.util.Date;
 public class SavingsImportHandlerTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
+    private final static Logger logger = LoggerFactory.getLogger(SavingsImportHandlerTest.class);
 
     @Before
     public void setup() {
@@ -157,6 +161,7 @@ public class SavingsImportHandlerTest {
         } catch (AssertionError error) {
             // Output expected AssertionErrors.
             System.out.println("AssertionError: "+error);
+            logger.error("AssertionError: "+error);
         }
     }
 }
