@@ -100,7 +100,6 @@ public class SelfShareAccountsApiResource {
 		this.productReadPlatformService = productReadPlatformService;
 		this.chargeReadPlatformService = chargeReadPlatformService;
 		this.appUserShareAccountsMapperReadPlatformService = appUserShareAccountsMapperReadPlatformService;
-
 	}
 
 	@GET
@@ -114,7 +113,7 @@ public class SelfShareAccountsApiResource {
     @ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = SelfShareAccountsApiResourceSwagger.GetShareAccountsClientIdProductIdResponse.class)})
 	public String template(@QueryParam("clientId") @ApiParam("clientId") final Long clientId, @QueryParam("productId") @ApiParam("productId") final Long productId,
 			@Context final UriInfo uriInfo) {
-		
+
 		validateAppuserClientsMapping(clientId);
 
 		Collection<ProductData> productOptions = new ArrayList<ProductData>();
@@ -152,10 +151,10 @@ public class SelfShareAccountsApiResource {
 	@Path("{accountId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	/*
     @ApiOperation(value = "Retrieve a share application/account", httpMethod = "GET", notes = "\n" +
             "\n" + "\n" + "Example Requests:\n" + "\n" + "self/shareaccounts/12\n")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response  SelfShareAccountsApiResourceSwagger.GetShareAccountResponse.class)})*/
+	// TODO actually write SelfShareAccountsApiResourceSwagger.GetShareAccountResponse (it currently does not exist)
+    // @ApiResponses({@ApiResponse(code = 200, message = "OK", responseContainer = "List", response = SelfShareAccountsApiResourceSwagger.GetShareAccountResponse.class)})
 	public String retrieveShareAccount(@PathParam("accountId")  final Long accountId, @Context final UriInfo uriInfo) {
 		validateAppuserShareAccountMapping(accountId);
 		final boolean includeTemplate = false;
