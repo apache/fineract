@@ -10,6 +10,11 @@ to start contributing to this project in the online web-based IDE GitPod.io righ
 (You may initially have to press F1 to Find Command and run "Java: Start Language Server".)
 It's of course also possible to contribute with a "traditional" loca ldevelopment environment (see below).
 
+Community
+=========
+
+If you are interested in contributing to this project, but perhaps don't quite know how and where to get started, please [join our developer mailing list](http://fineract.apache.org/#contribute), listen into our conversations, chime into threads, and just send us a friendly "Hello!" introduction email; we're a friendly bunch, and look forward to hearing from you.
+
 
 Requirements
 ============
