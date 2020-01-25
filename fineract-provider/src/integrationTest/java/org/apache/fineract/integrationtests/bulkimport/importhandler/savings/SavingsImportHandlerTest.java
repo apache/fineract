@@ -140,6 +140,8 @@ public class SavingsImportHandlerTest {
             workbook.write(outputStream);
             outputStream.close();
 
+            Assert.assertNotNull(file);
+
             String importDocumentId = savingsAccountHelper.importSavingsTemplate(file);
             file.delete();
             Assert.assertNotNull(importDocumentId);
