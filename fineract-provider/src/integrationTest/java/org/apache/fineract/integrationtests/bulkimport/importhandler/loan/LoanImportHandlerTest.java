@@ -168,7 +168,6 @@ public class LoanImportHandlerTest {
         String location=loanTransactionHelper.getOutputTemplateLocation(importDocumentId);
 
         Utils.waitUntilFileCreation(location);
-        
         FileInputStream fileInputStream = new FileInputStream(location);
         Workbook Outputworkbook=new HSSFWorkbook(fileInputStream);
         Sheet outputLoanSheet = Outputworkbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME);

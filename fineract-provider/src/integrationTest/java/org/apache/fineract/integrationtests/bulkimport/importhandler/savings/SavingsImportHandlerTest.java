@@ -140,7 +140,9 @@ public class SavingsImportHandlerTest {
             workbook.write(outputStream);
             outputStream.close();
 
+            logger.info("savings xls file info :"+file);
             Assert.assertNotNull(file);
+            Assert.assertEquals(true,file.exists());
 
             String importDocumentId = savingsAccountHelper.importSavingsTemplate(file);
             file.delete();
@@ -159,7 +161,6 @@ public class SavingsImportHandlerTest {
             Sheet OutputSavingsSheet = Outputworkbook.getSheet(TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME);
             Row row = OutputSavingsSheet.getRow(1);
             Assert.assertEquals("Imported", row.getCell(SavingsConstants.STATUS_COL).getStringCellValue());
-            
         } catch (AssertionError error) {
             logger.error("AssertionError: "+error);
             throw error;
