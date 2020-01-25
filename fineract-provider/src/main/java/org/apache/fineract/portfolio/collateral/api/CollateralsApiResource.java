@@ -44,7 +44,10 @@ import java.util.*;
 @Path("/loans/{loanId}/collaterals")
 @Component
 @Scope("singleton")
-@Api(value = "Loan Collateral", description = "In lending agreements, collateral is a borrower's pledge of specific property to a lender, to secure repayment of a loan. The collateral serves as protection for a lender against a borrower's default - that is, any borrower failing to pay the principal and interest under the terms of a loan obligation. If a borrower does default on a loan (due to insolvency or other event), that borrower forfeits (gives up) the property pledged as collateral - and the lender then becomes the owner of the collateral")
+@Api(tags = {"Loan Collateral"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Loan Collateral", description = "In lending agreements, collateral is a borrower's pledge of specific property to a lender, to secure repayment of a loan. The collateral serves as protection for a lender against a borrower's default - that is, any borrower failing to pay the principal and interest under the terms of a loan obligation. If a borrower does default on a loan (due to insolvency or other event), that borrower forfeits (gives up) the property pledged as collateral - and the lender then becomes the owner of the collateral")
+})
 public class CollateralsApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "type", "value", "description",

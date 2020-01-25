@@ -45,7 +45,7 @@ public class SmsCampaignData {
     private final String recurrence;
     private final Long providerId;
     private final boolean isNotification;
-    
+
 
     private final Collection<SmsProviderData> smsProviderOptions;
 
@@ -62,16 +62,16 @@ public class SmsCampaignData {
     private final Collection<EnumOptionData> frequencyTypeOptions;
 
     private final Collection<EnumOptionData> periodFrequencyOptions;
-    
+
     private SmsCampaignData(final Long id, final String campaignName, final EnumOptionData campaignType, final EnumOptionData triggerType,
-            final Long runReportId, 
+            final Long runReportId,
             final String reportName, final String paramValue, final EnumOptionData campaignStatus,
             final String message, final DateTime nextTriggerDate, final LocalDate lastTriggerDate,
             final SmsCampaignTimeLine smsCampaignTimeLine, final DateTime recurrenceStartDate, final String recurrence,
             final Long providerId, final Collection<SmsBusinessRulesData> businessRulesOptions,
             final Collection<SmsProviderData> smsProviderOptions, final Collection<EnumOptionData> campaignTypeOptions,
-            final Collection<EnumOptionData> triggerTypeOptions, final Collection<EnumOptionData> months, 
-            final Collection<EnumOptionData> weekDays, final Collection<EnumOptionData> frequencyTypeOptions, 
+            final Collection<EnumOptionData> triggerTypeOptions, final Collection<EnumOptionData> months,
+            final Collection<EnumOptionData> weekDays, final Collection<EnumOptionData> frequencyTypeOptions,
             final Collection<EnumOptionData> periodFrequencyOptions, final boolean isNotification) {
         this.id = id;
         this.campaignName = campaignName;
@@ -108,7 +108,7 @@ public class SmsCampaignData {
     }
 
     public static SmsCampaignData instance(final Long id, final String campaignName, final EnumOptionData campaignType,
-            final EnumOptionData triggerType, 
+            final EnumOptionData triggerType,
             final Long runReportId, final String reportName, final String paramValue, final EnumOptionData campaignStatus,
             final String message, final DateTime nextTriggerDate, final LocalDate lastTriggerDate,
             final SmsCampaignTimeLine smsCampaignTimeLine, final DateTime recurrenceStartDate, final String recurrence,
@@ -207,8 +207,8 @@ public class SmsCampaignData {
         return this.providerId;
     }
 
-	public boolean isNotification() {
-		return this.isNotification;
-	}
+    public boolean isNotification() {
+        return this.isNotification;
+    }
 
 }

@@ -45,7 +45,7 @@ public class LoanRescheduleRequestData {
     private final Collection<CodeValueData> rescheduleReasons;
     @SuppressWarnings("unused")
     private final Collection<LoanTermVariationsData> loanTermVariationsData;
-    
+
     /**
      * LoanRescheduleRequestData constructor
      * @param loanTermVariationsData TODO
@@ -86,10 +86,10 @@ public class LoanRescheduleRequestData {
                 rescheduleReasonCodeValue, rescheduleReasonComment, timeline, clientName, loanAccountNumber, clientId, recalculateInterest,
                 rescheduleReasons, loanTermVariationsData);
     }
-    
+
     /**
      * LoanRescheduleRequestData constructor
-     * 
+     *
      * @param loanTermVariationsData
      *            TODO
      **/

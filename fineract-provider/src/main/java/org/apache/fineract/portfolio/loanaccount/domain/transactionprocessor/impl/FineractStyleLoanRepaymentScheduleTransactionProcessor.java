@@ -31,10 +31,10 @@ import org.joda.time.LocalDate;
 
 /**
  * Old style {@link LoanRepaymentScheduleTransactionProcessor}.
- * 
+ *
  * For ALL types of transactions, pays off components in order of interest, then
  * principal.
- * 
+ *
  * Other formulas exist on fineract where you can choose 'Declining-Balance
  * Interest Recalculation' which simply means, recalculate the interest
  * component based on the how much principal is outstanding at a point in time;

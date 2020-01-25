@@ -25,15 +25,15 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  **/
 public class LoanRescheduleRequestNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-	/** 
-	 * LoanRescheduleRequestNotFoundException constructor 
-	 * 
-	 * @param requestId the loan reschedule request identifier
-	 * 
-	 **/
-	public LoanRescheduleRequestNotFoundException(final Long requestId) {
-		super("error.msg.loan.reschedule.request.id.invalid", 
-				"Loan reschedule request with identifier " + requestId + " does not exist", requestId);
-	}
+    /**
+     * LoanRescheduleRequestNotFoundException constructor
+     *
+     * @param requestId the loan reschedule request identifier
+     *
+     **/
+    public LoanRescheduleRequestNotFoundException(final Long requestId) {
+        super("error.msg.loan.reschedule.request.id.invalid",
+                "Loan reschedule request with identifier " + requestId + " does not exist", requestId);
+    }
 
 }

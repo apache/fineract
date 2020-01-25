@@ -177,7 +177,7 @@ public class SavingsProductAssembler {
 
         boolean withHoldTax = command.booleanPrimitiveValueOfParameterNamed(withHoldTaxParamName);
         final TaxGroup taxGroup = assembleTaxGroup(command);
-        
+
         final Boolean isDormancyTrackingActive = command.booleanObjectValueOfParameterNamed(isDormancyTrackingActiveParamName);
         final Long daysToInactive = command.longValueOfParameterNamed(daysToInactiveParamName);
         final Long daysToDormancy = command.longValueOfParameterNamed(daysToDormancyParamName);

@@ -27,7 +27,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 public class ReportMailingJobConfigurationNotFoundException extends AbstractPlatformResourceNotFoundException {
 
     public ReportMailingJobConfigurationNotFoundException(final String name) {
-        super("error.msg.report.mailing.job.configuration.name.invalid", "Report mailing job configuration with name " + name + 
+        super("error.msg.report.mailing.job.configuration.name.invalid", "Report mailing job configuration with name " + name +
                 " does not exist", name);
     }
 }

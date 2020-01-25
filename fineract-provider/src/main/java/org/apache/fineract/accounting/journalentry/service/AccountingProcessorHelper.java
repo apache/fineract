@@ -340,10 +340,10 @@ public class AccountingProcessorHelper {
     /**
      * Convenience method that creates a pair of related Debits and Credits for
      * Accrual Based accounting.
-     * 
+     *
      * The target accounts for debits and credits are switched in case of a
      * reversal
-     * 
+     *
      * @param office
      * @param accountTypeToBeDebited
      *            Enum of the placeholder GLAccount to be debited
@@ -375,10 +375,10 @@ public class AccountingProcessorHelper {
     /**
      * Convenience method that creates a pair of related Debits and Credits for
      * Accrual Based accounting.
-     * 
+     *
      * The target accounts for debits and credits are switched in case of a
      * reversal
-     * 
+     *
      * @param office office
      * @param currencyCode currencyCode
      * @param accountTypeToBeDebited  Enum of the placeholder GLAccount to be debited
@@ -435,10 +435,10 @@ public class AccountingProcessorHelper {
     /**
      * Convenience method that creates a pair of related Debits and Credits for
      * Cash Based accounting.
-     * 
+     *
      * The target accounts for debits and credits are switched in case of a
      * reversal
-     * 
+     *
      * @param office
      * @param accountTypeToBeDebited
      *            Enum of the placeholder GLAccount to be debited
@@ -470,10 +470,10 @@ public class AccountingProcessorHelper {
     /**
      * Convenience method that creates a pair of related Debits and Credits for
      * Cash Based accounting.
-     * 
+     *
      * The target accounts for debits and credits are switched in case of a
      * reversal
-     * 
+     *
      * @param office
      * @param accountTypeToBeDebited
      *            Enum of the placeholder GLAccount to be debited
@@ -562,10 +562,10 @@ public class AccountingProcessorHelper {
     /**
      * Convenience method that creates a pair of related Debits and Credits for
      * Cash Based accounting.
-     * 
+     *
      * The target accounts for debits and credits are switched in case of a
      * reversal
-     * 
+     *
      * @param office
      * @param currencyCode
      * @param accountTypeToBeDebited Enum of the placeholder GLAccount to be debited
@@ -721,10 +721,10 @@ public class AccountingProcessorHelper {
     /**
      * Convenience method that creates a pair of related Debits and Credits for
      * Cash Based accounting.
-     * 
+     *
      * The target accounts for debits and credits are switched in case of a
      * reversal
-     * 
+     *
      * @param office office
      * @param currencyCode currencyCode
      * @param accountTypeToBeDebited Enum of the placeholder GLAccount to be debited
@@ -1041,7 +1041,7 @@ public class AccountingProcessorHelper {
                 "Recent Portfolio changes w.r.t Charges for shares have Broken the accounting code",
                 "Recent Portfolio changes w.r.t Charges for shares have Broken the accounting code"); }
     }
-    
+
     private void createDebitJournalEntryForShares(final Office office, final String currencyCode, final GLAccount account,
             final Long shareAccountId, final String transactionId, final Date transactionDate, final BigDecimal amount) {
         final boolean manualEntry = false;

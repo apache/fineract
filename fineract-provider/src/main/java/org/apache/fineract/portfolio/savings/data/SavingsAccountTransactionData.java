@@ -18,9 +18,6 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
-import java.math.BigDecimal;
-import java.util.Collection;
-
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -31,11 +28,15 @@ import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.joda.time.LocalDate;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Collection;
+
 /**
  * Immutable data object representing a savings account transaction.
  */
 @SuppressWarnings("unused")
-public class SavingsAccountTransactionData {
+public class SavingsAccountTransactionData implements Serializable {
 
     private final Long id;
     private final SavingsAccountTransactionEnumData transactionType;
@@ -53,7 +54,7 @@ public class SavingsAccountTransactionData {
     private final boolean interestedPostedAsOn;
     private final String submittedByUsername;
     private final String note ;
-    
+
     // templates
     final Collection<PaymentTypeData> paymentTypeOptions;
 
@@ -169,7 +170,7 @@ public class SavingsAccountTransactionData {
                 savingsAccountTransactionData.paymentDetailData, savingsAccountTransactionData.accountId,
                 savingsAccountTransactionData.accountNo, savingsAccountTransactionData.date, savingsAccountTransactionData.currency,
                 savingsAccountTransactionData.amount,savingsAccountTransactionData.outstandingChargeAmount, savingsAccountTransactionData.runningBalance, savingsAccountTransactionData.reversed,
-                savingsAccountTransactionData.transfer, paymentTypeOptions, savingsAccountTransactionData.interestedPostedAsOn, 
+                savingsAccountTransactionData.transfer, paymentTypeOptions, savingsAccountTransactionData.interestedPostedAsOn,
                 savingsAccountTransactionData.submittedByUsername, savingsAccountTransactionData.note);
     }
 

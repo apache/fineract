@@ -49,7 +49,7 @@ public class SmsCampaignDropdownReadPlatformServiceImpl implements SmsCampaignDr
     private final RestTemplate restTemplate;
 
     private final SmsConfigUtils smsConfigUtils ;
-    
+
     @Autowired
     public SmsCampaignDropdownReadPlatformServiceImpl(final SmsConfigUtils smsConfigUtils) {
         this.restTemplate = new RestTemplate();

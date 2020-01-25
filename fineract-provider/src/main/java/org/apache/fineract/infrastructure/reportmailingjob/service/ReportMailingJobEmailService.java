@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJob
 public interface ReportMailingJobEmailService {
     /**
      * Handles request to send an email with attachment
-     * 
+     *
      * @param reportMailingJobEmailData {@link ReportMailingJobEmailData} object
      */
     void sendEmailWithAttachment(final ReportMailingJobEmailData reportMailingJobEmailData);

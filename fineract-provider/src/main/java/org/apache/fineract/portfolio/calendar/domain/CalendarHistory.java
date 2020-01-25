@@ -143,8 +143,8 @@ public class CalendarHistory extends AbstractPersistableCustom<Long> {
         this.endDate = historyCalEndDate;
     }
 
-	public Calendar getCalendar() {
-		return this.calendar;
-	}
-        
+    public Calendar getCalendar() {
+        return this.calendar;
+    }
+
 }

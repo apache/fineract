@@ -33,7 +33,7 @@ import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyTy
 /**
  * Entity for holding interest recalculation setting, details will be copied
  * from product directly
- * 
+ *
  * @author conflux
  */
 

@@ -291,7 +291,7 @@ public class ChargeData implements Comparable<ChargeData>, Serializable {
         final Collection<ChargeData> chargeOptions = null;
         final Boolean isActive = null;
         final BigDecimal chargeAmountOrPercentage = BigDecimal.ZERO ;
-        
+
         return new ShareAccountChargeData(shareChargeId, this.id, shareAccountId, this.name, this.currency, this.amount, amountPaid,
                 amountWaived, amountWrittenOff, amountOutstanding, this.chargeTimeType, this.chargeCalculationType, percentage,
                 amountPercentageAppliedTo, chargeOptions, isActive, chargeAmountOrPercentage);

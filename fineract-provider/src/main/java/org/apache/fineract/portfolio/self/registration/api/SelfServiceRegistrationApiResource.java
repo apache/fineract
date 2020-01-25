@@ -33,10 +33,15 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import io.swagger.annotations.*;
 
 @Path("/self/registration")
 @Component
 @Scope("singleton")
+@Api(tags = {"Self Service Registration"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Self Service Registration", description = "")
+})
 public class SelfServiceRegistrationApiResource {
 
     private final SelfServiceRegistrationWritePlatformService selfServiceRegistrationWritePlatformService;

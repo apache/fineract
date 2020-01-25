@@ -45,7 +45,10 @@ import java.util.Set;
 @Path("/charges")
 @Component
 @Scope("singleton")
-@Api(value = "Charges", description = "Its typical for MFIs to add extra costs for their financial products. These are typically Fees or Penalties.\n" + "\n" + "A Charge on fineract platform is what we use to model both Fees and Penalties.\n" + "\n" + "At present we support defining charges for use with Client accounts and both loan and saving products.")
+@Api(tags = {"Charges"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Charges", description = "Its typical for MFIs to add extra costs for their financial products. These are typically Fees or Penalties.\n" + "\n" + "A Charge on fineract platform is what we use to model both Fees and Penalties.\n" + "\n" + "At present we support defining charges for use with Client accounts and both loan and saving products.")
+})
 public class ChargesApiResource {
 
     private final Set<String> CHARGES_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "amount", "currency", "penalty", "active",

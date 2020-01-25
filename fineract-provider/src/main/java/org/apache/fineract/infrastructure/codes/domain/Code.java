@@ -52,7 +52,7 @@ public class Code extends AbstractPersistableCustom<Long> {
         final String name = command.stringValueOfParameterNamed("name");
         return new Code(name);
     }
-    
+
     public static Code createNew(final String name) {
         return new Code(name);
     }

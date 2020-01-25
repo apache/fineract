@@ -24,10 +24,10 @@ import org.apache.fineract.spm.data.ScorecardData;
 
 
 public interface ScorecardReadPlatformService {
-    
+
     Collection<ScorecardData> retrieveScorecardByClient(final Long clientId);
-    
+
     Collection<ScorecardData> retrieveScorecardBySurveyAndClient(final Long surveyId,final Long clientId);
-    
+
     Collection<ScorecardData> retrieveScorecardBySurvey(final Long surveyId);
 }

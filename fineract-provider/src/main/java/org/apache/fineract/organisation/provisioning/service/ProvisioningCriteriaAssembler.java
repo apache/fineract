@@ -81,11 +81,11 @@ public class ProvisioningCriteriaAssembler {
         }
         return loanProducts ;
     }
-    
+
     private void validateRange(Set<ProvisioningCriteriaDefinition> criteriaDefinitions) {
         List<ProvisioningCriteriaDefinition> def = new ArrayList<>() ;
         def.addAll(criteriaDefinitions) ;
-        
+
         for (int i = 0; i < def.size(); i++) {
             for (int j = i + 1; j < def.size(); j++) {
                 if (def.get(i).isOverlapping(def.get(j))) {
@@ -94,12 +94,12 @@ public class ProvisioningCriteriaAssembler {
             }
         }
     }
-    
+
     public ProvisioningCriteria fromParsedJson(final JsonElement jsonElement) {
         ProvisioningCriteria provisioningCriteria = createCriteria(jsonElement);
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(jsonElement.getAsJsonObject());
         List<LoanProduct> loanProducts = parseLoanProducts(jsonElement) ;
-        
+
         Set<ProvisioningCriteriaDefinition> criteriaDefinitions = new HashSet<>();
         JsonArray jsonProvisioningCriteria = this.fromApiJsonHelper.extractJsonArrayNamed(
                 ProvisioningCriteriaConstants.JSON_PROVISIONING_DEFINITIONS_PARAM, jsonElement);
@@ -121,10 +121,9 @@ public class ProvisioningCriteriaAssembler {
 
     private ProvisioningCriteria createCriteria(final JsonElement jsonElement) {
         final String criteriaName = this.fromApiJsonHelper.extractStringNamed(ProvisioningCriteriaConstants.JSON_CRITERIANAME_PARAM, jsonElement);
-        AppUser modifiedBy = null;
-        DateTime modifiedOn = null;
+
         ProvisioningCriteria criteria = new ProvisioningCriteria(criteriaName, platformSecurityContext.authenticatedUser(), new DateTime(),
-                modifiedBy, modifiedOn);
+                platformSecurityContext.authenticatedUser(), new DateTime());
         return criteria;
     }
 

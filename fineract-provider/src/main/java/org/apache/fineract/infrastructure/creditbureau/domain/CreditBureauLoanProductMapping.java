@@ -32,119 +32,119 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Entity
 @Table(name = "m_creditbureau_loanproduct_mapping")
 public class CreditBureauLoanProductMapping extends AbstractPersistableCustom<Long> {
-	
-	@Column(name = "is_CreditCheck_Mandatory")
-	private boolean isCreditCheckMandatory;
-	
-	@Column(name = "skip_CreditCheck_in_Failure")
-	private boolean skipCreditCheckInFailure;
-	
-	@Column(name = "stale_Period")
-	private int stalePeriod;
 
-	private boolean is_active;
+    @Column(name = "is_CreditCheck_Mandatory")
+    private boolean isCreditCheckMandatory;
 
-	@ManyToOne
-	private OrganisationCreditBureau organisation_creditbureau;
+    @Column(name = "skip_CreditCheck_in_Failure")
+    private boolean skipCreditCheckInFailure;
 
-	@OneToOne
-	@JoinColumn(name="loan_product_id")
-	private LoanProduct loanProduct;
-	
-	public CreditBureauLoanProductMapping() {
+    @Column(name = "stale_Period")
+    private int stalePeriod;
 
-	}
+    private boolean is_active;
 
-	public CreditBureauLoanProductMapping(boolean isCreditCheckMandatory, boolean skipCreditCheckInFailure, int stalePeriod,
-			boolean is_active, OrganisationCreditBureau organisationCreditbureau, LoanProduct loanProduct) {
-		this.isCreditCheckMandatory = isCreditCheckMandatory;
-		this.skipCreditCheckInFailure = skipCreditCheckInFailure;
-		this.stalePeriod = stalePeriod;
-		this.is_active = is_active;
-		this.organisation_creditbureau = organisationCreditbureau;
-		this.loanProduct = loanProduct;
-	}
+    @ManyToOne
+    private OrganisationCreditBureau organisation_creditbureau;
 
-	public static CreditBureauLoanProductMapping fromJson(final JsonCommand command,
-			OrganisationCreditBureau organisation_creditbureau, LoanProduct loanProduct) {
-		 Boolean isCreditCheckMandatory=false;
-		 Boolean skipCreditCheckInFailure=false;
-		 Integer stalePeriod=-1;
-		 Boolean is_active=false;
-		 if((Boolean)command.booleanPrimitiveValueOfParameterNamed("isCreditcheckMandatory")!=null)
-		 {
-			 isCreditCheckMandatory = command.booleanPrimitiveValueOfParameterNamed("isCreditcheckMandatory");	 
-		 }
-		
-		 if((Boolean)command.booleanPrimitiveValueOfParameterNamed("skipCreditcheckInFailure")!=null)
-		 {
-			 skipCreditCheckInFailure = command.booleanPrimitiveValueOfParameterNamed("skipCreditcheckInFailure");	 
-		 }
-		 
-		 if((Integer)command.integerValueOfParameterNamed("stalePeriod")!=null)
-		 {
-			 stalePeriod = command.integerValueOfParameterNamed("stalePeriod");	 
-		 }
-		
-		 if((Boolean) command.booleanPrimitiveValueOfParameterNamed("is_active"))
-		 {
-			 is_active = command.booleanPrimitiveValueOfParameterNamed("is_active");	 
-		 }
-	
+    @OneToOne
+    @JoinColumn(name="loan_product_id")
+    private LoanProduct loanProduct;
 
-		return new CreditBureauLoanProductMapping(isCreditCheckMandatory, skipCreditCheckInFailure, stalePeriod, is_active,
-				organisation_creditbureau, loanProduct);
+    public CreditBureauLoanProductMapping() {
 
-	}
+    }
 
-	public boolean isCreditCheckMandatory() {
-		return this.isCreditCheckMandatory;
-	}
+    public CreditBureauLoanProductMapping(boolean isCreditCheckMandatory, boolean skipCreditCheckInFailure, int stalePeriod,
+            boolean is_active, OrganisationCreditBureau organisationCreditbureau, LoanProduct loanProduct) {
+        this.isCreditCheckMandatory = isCreditCheckMandatory;
+        this.skipCreditCheckInFailure = skipCreditCheckInFailure;
+        this.stalePeriod = stalePeriod;
+        this.is_active = is_active;
+        this.organisation_creditbureau = organisationCreditbureau;
+        this.loanProduct = loanProduct;
+    }
 
-	public void setCreditCheckMandatory(boolean isCreditCheckMandatory) {
-		this.isCreditCheckMandatory = isCreditCheckMandatory;
-	}
+    public static CreditBureauLoanProductMapping fromJson(final JsonCommand command,
+            OrganisationCreditBureau organisation_creditbureau, LoanProduct loanProduct) {
+         Boolean isCreditCheckMandatory=false;
+         Boolean skipCreditCheckInFailure=false;
+         Integer stalePeriod=-1;
+         Boolean is_active=false;
+         if((Boolean)command.booleanPrimitiveValueOfParameterNamed("isCreditcheckMandatory")!=null)
+         {
+             isCreditCheckMandatory = command.booleanPrimitiveValueOfParameterNamed("isCreditcheckMandatory");
+         }
 
-	public boolean isSkipCreditCheckInFailure() {
-		return this.skipCreditCheckInFailure;
-	}
+         if((Boolean)command.booleanPrimitiveValueOfParameterNamed("skipCreditcheckInFailure")!=null)
+         {
+             skipCreditCheckInFailure = command.booleanPrimitiveValueOfParameterNamed("skipCreditcheckInFailure");
+         }
 
-	public void setSkipCreditCheckInFailure(boolean skipCreditCheckInFailure) {
-		this.skipCreditCheckInFailure = skipCreditCheckInFailure;
-	}
+         if((Integer)command.integerValueOfParameterNamed("stalePeriod")!=null)
+         {
+             stalePeriod = command.integerValueOfParameterNamed("stalePeriod");
+         }
 
-	public int getStalePeriod() {
-		return this.stalePeriod;
-	}
+         if((Boolean) command.booleanPrimitiveValueOfParameterNamed("is_active"))
+         {
+             is_active = command.booleanPrimitiveValueOfParameterNamed("is_active");
+         }
 
-	public void setStalePeriod(int stalePeriod) {
-		this.stalePeriod = stalePeriod;
-	}
 
-	public boolean isIs_active() {
-		return this.is_active;
-	}
+        return new CreditBureauLoanProductMapping(isCreditCheckMandatory, skipCreditCheckInFailure, stalePeriod, is_active,
+                organisation_creditbureau, loanProduct);
 
-	public void setIs_active(boolean is_active) {
-		this.is_active = is_active;
-	}
+    }
 
-	public OrganisationCreditBureau getOrganisationCreditbureau() {
-		return this.organisation_creditbureau;
-	}
+    public boolean isCreditCheckMandatory() {
+        return this.isCreditCheckMandatory;
+    }
 
-	public void setOrganisationCreditbureau(OrganisationCreditBureau organisationCreditbureau) {
-		this.organisation_creditbureau = organisationCreditbureau;
-	}
+    public void setCreditCheckMandatory(boolean isCreditCheckMandatory) {
+        this.isCreditCheckMandatory = isCreditCheckMandatory;
+    }
 
-	public LoanProduct getLoanProduct() {
-		return this.loanProduct;
-	}
+    public boolean isSkipCreditCheckInFailure() {
+        return this.skipCreditCheckInFailure;
+    }
 
-	public void setLoanProduct(LoanProduct loanProduct) {
-		this.loanProduct = loanProduct;
-	}
+    public void setSkipCreditCheckInFailure(boolean skipCreditCheckInFailure) {
+        this.skipCreditCheckInFailure = skipCreditCheckInFailure;
+    }
 
-	
+    public int getStalePeriod() {
+        return this.stalePeriod;
+    }
+
+    public void setStalePeriod(int stalePeriod) {
+        this.stalePeriod = stalePeriod;
+    }
+
+    public boolean isIs_active() {
+        return this.is_active;
+    }
+
+    public void setIs_active(boolean is_active) {
+        this.is_active = is_active;
+    }
+
+    public OrganisationCreditBureau getOrganisationCreditbureau() {
+        return this.organisation_creditbureau;
+    }
+
+    public void setOrganisationCreditbureau(OrganisationCreditBureau organisationCreditbureau) {
+        this.organisation_creditbureau = organisationCreditbureau;
+    }
+
+    public LoanProduct getLoanProduct() {
+        return this.loanProduct;
+    }
+
+    public void setLoanProduct(LoanProduct loanProduct) {
+        this.loanProduct = loanProduct;
+    }
+
+
 
 }

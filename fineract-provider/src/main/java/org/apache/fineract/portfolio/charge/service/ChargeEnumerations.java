@@ -84,16 +84,16 @@ public class ChargeEnumerations {
             case SHAREACCOUNT_ACTIVATION:
                 optionData = new EnumOptionData(ChargeTimeType.SHAREACCOUNT_ACTIVATION.getValue().longValue(), ChargeTimeType.SHAREACCOUNT_ACTIVATION.getCode(), "Share Account Activate") ;
             break ;
-            
+
             case SHARE_PURCHASE:
-            	optionData = new EnumOptionData(ChargeTimeType.SHARE_PURCHASE.getValue().longValue(), ChargeTimeType.SHARE_PURCHASE.getCode(), "Share Purchase") ;
+                optionData = new EnumOptionData(ChargeTimeType.SHARE_PURCHASE.getValue().longValue(), ChargeTimeType.SHARE_PURCHASE.getCode(), "Share Purchase") ;
             break ;
             case SHARE_REDEEM:
-            	optionData = new EnumOptionData(ChargeTimeType.SHARE_REDEEM.getValue().longValue(), ChargeTimeType.SHARE_REDEEM.getCode(), "Share Redeem") ;
+                optionData = new EnumOptionData(ChargeTimeType.SHARE_REDEEM.getValue().longValue(), ChargeTimeType.SHARE_REDEEM.getCode(), "Share Redeem") ;
             break ;
             case SAVINGS_NOACTIVITY_FEE:
-            	optionData = new EnumOptionData(ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getValue().longValue(), ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getCode(), 
-            			"Saving No Activity Fee");
+                optionData = new EnumOptionData(ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getValue().longValue(), ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getCode(),
+                        "Saving No Activity Fee");
             break;
             default:
                 optionData = new EnumOptionData(ChargeTimeType.INVALID.getValue().longValue(), ChargeTimeType.INVALID.getCode(), "Invalid");
@@ -120,7 +120,7 @@ public class ChargeEnumerations {
                 optionData = new EnumOptionData(ChargeAppliesTo.CLIENT.getValue().longValue(), ChargeAppliesTo.CLIENT.getCode(), "Client");
             break;
             case SHARES:
-            	optionData = new EnumOptionData(ChargeAppliesTo.SHARES.getValue().longValue(), ChargeAppliesTo.SHARES.getCode(), "Shares") ;
+                optionData = new EnumOptionData(ChargeAppliesTo.SHARES.getValue().longValue(), ChargeAppliesTo.SHARES.getCode(), "Shares") ;
             break ;
             default:
                 optionData = new EnumOptionData(ChargeAppliesTo.INVALID.getValue().longValue(), ChargeAppliesTo.INVALID.getCode(),
@@ -154,8 +154,8 @@ public class ChargeEnumerations {
                         ChargeCalculationType.PERCENT_OF_INTEREST.getCode(), "% Interest");
             break;
             case PERCENT_OF_DISBURSEMENT_AMOUNT:
-            	optionData = new EnumOptionData(ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue().longValue(),
-            	        ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getCode(), "% Disbursement Amount");
+                optionData = new EnumOptionData(ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getValue().longValue(),
+                        ChargeCalculationType.PERCENT_OF_DISBURSEMENT_AMOUNT.getCode(), "% Disbursement Amount");
             break;
             default:
                 optionData = new EnumOptionData(ChargeCalculationType.INVALID.getValue().longValue(),
@@ -183,5 +183,5 @@ public class ChargeEnumerations {
         }
         return optionData;
     }
-    
+
 }

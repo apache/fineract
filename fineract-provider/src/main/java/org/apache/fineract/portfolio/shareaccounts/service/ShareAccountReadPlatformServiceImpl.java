@@ -83,7 +83,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     private final JdbcTemplate jdbcTemplate;
     private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
     private final PaginationHelper<AccountData> shareAccountDataPaginationHelper = new PaginationHelper<>();
-    
+
     @Autowired
     public ShareAccountReadPlatformServiceImpl(final RoutingDataSource dataSource, final ApplicationContext applicationContext,
             final ChargeReadPlatformService chargeReadPlatformService,
@@ -150,7 +150,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
     public ShareAccountData retrieveOne(final Long id, final boolean includeTemplate) {
         Collection<ShareAccountChargeData> charges = this.shareAccountChargeReadPlatformService.retrieveAccountCharges(id, "active");
         Collection<ShareAccountTransactionData> purchasedShares = this.purchasedSharesReadPlatformService.retrievePurchasedShares(id);
-        
+
         ShareAccountMapper mapper = new ShareAccountMapper(charges, purchasedShares);
         String query = "select " + mapper.schema() + "where sa.id=?";
         ShareAccountData data = (ShareAccountData)this.jdbcTemplate.queryForObject(query, mapper, new Object[] { id });
@@ -161,7 +161,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         data.setCurrentMarketPrice(currentMarketPrice);
         if(!includeTemplate) {
             Collection<ShareAccountDividendData> dividends = this.retrieveAssociatedDividends(id) ;
-            data.setDividends(dividends);    
+            data.setDividends(dividends);
         }
         if (includeTemplate) {
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = this.shareProductDropdownReadPlatformService
@@ -448,7 +448,7 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
                     .append("saps.id as purchasedId, saps.account_id as accountId, saps.transaction_date as transactionDate, saps.total_shares as purchasedShares, saps.unit_price as unitPrice, ")
                     .append("saps.status_enum as purchaseStatus, saps.type_enum as purchaseType, saps.amount as amount, saps.charge_amount as chargeamount, ")
                     .append("saps.amount_paid as amountPaid ");
-            
+
             schema = buff.toString();
         }
 
@@ -505,13 +505,13 @@ public class ShareAccountReadPlatformServiceImpl implements ShareAccountReadPlat
         }
     }
 
-	@Override
-	public String retrieveAccountNumberByAccountId(Long accountId) {
-		try {
-			final String sql = "select s.account_no from m_share_account s where s.id = ?";
-			return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
-		} catch (final EmptyResultDataAccessException e) {
-			throw new ShareAccountNotFoundException(accountId);
-		}
-	}
+    @Override
+    public String retrieveAccountNumberByAccountId(Long accountId) {
+        try {
+            final String sql = "select s.account_no from m_share_account s where s.id = ?";
+            return this.jdbcTemplate.queryForObject(sql, new Object[] { accountId }, String.class);
+        } catch (final EmptyResultDataAccessException e) {
+            throw new ShareAccountNotFoundException(accountId);
+        }
+    }
 }

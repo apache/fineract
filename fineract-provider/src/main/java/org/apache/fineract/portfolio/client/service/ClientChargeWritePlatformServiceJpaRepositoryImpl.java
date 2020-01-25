@@ -261,7 +261,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
      * <br>
      * charge is not already paid or waived <br>
      * amount is not more than total due
-     * 
+     *
      * @param client
      * @param clientCharge
      * @param fmt
@@ -368,7 +368,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
 
     /**
      * Ensures that the charge due date is not on a holiday or a non working day
-     * 
+     *
      * @param clientCharge
      * @param fmt
      */
@@ -380,7 +380,7 @@ public class ClientChargeWritePlatformServiceJpaRepositoryImpl implements Client
     /**
      * Ensures that the charge transaction date (for payments) is not on a
      * holiday or a non working day
-     * 
+     *
      * @param savingsAccountCharge
      * @param fmt
      */

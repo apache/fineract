@@ -110,7 +110,7 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
                 loanTermVariationsData.add(loanRescheduleRequestToTermVariationMapping.getLoanTermVariations().toData());
             }
         }
-        
+
         for (LoanTermVariationsData loanTermVariation : loanApplicationTerms.getLoanTermVariations().getDueDateVariation()) {
             if (rescheduleFromDate.isBefore(loanTermVariation.getTermApplicableFrom())) {
                 LocalDate applicableDate = this.scheduledDateGenerator.generateNextRepaymentDate(rescheduleFromDate, loanApplicationTerms,
@@ -123,7 +123,7 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
                 }
             }
         }
-        
+
         loanApplicationTerms.getLoanTermVariations().updateLoanTermVariationsData(loanTermVariationsData);
         final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
         final MathContext mathContext = new MathContext(8, roundingMode);
@@ -138,7 +138,7 @@ public class LoanReschedulePreviewPlatformServiceImpl implements LoanRescheduleP
         final LoanScheduleModel loanScheduleModel = loanSchedule.getLoanScheduleModel();
         LoanScheduleModel loanScheduleModels = LoanScheduleModel.withLoanScheduleModelPeriods(loanScheduleModel.getPeriods(),
                 loanScheduleModel);
-        
+
         return loanScheduleModels;
     }
 

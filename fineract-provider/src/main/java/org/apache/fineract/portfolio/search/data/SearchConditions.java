@@ -27,8 +27,8 @@ public class SearchConditions {
     private final Boolean clientSearch;
     private final Boolean groupSearch;
     private final Boolean loanSeach;
-	private final Boolean savingSeach;
-	private final Boolean shareSeach;
+    private final Boolean savingSeach;
+    private final Boolean shareSeach;
     private final Boolean clientIdentifierSearch;
     private  Boolean exactMatch;
 
@@ -44,9 +44,9 @@ public class SearchConditions {
                 SEARCH_SUPPORTED_RESOURCES.LOANS.name().toLowerCase())) ? true : false;
         this.savingSeach = (null == searchResource || searchResource.toLowerCase().contains(
                 SEARCH_SUPPORTED_RESOURCES.SAVINGS.name().toLowerCase())) ? true : false;
-		this.shareSeach = (null == searchResource || searchResource.toLowerCase().contains(
+        this.shareSeach = (null == searchResource || searchResource.toLowerCase().contains(
                 SEARCH_SUPPORTED_RESOURCES.SHARES.name().toLowerCase())) ? true : false;
-  		this.clientIdentifierSearch = (null == searchResource || searchResource.toLowerCase().contains(
+          this.clientIdentifierSearch = (null == searchResource || searchResource.toLowerCase().contains(
                 SEARCH_SUPPORTED_RESOURCES.CLIENTIDENTIFIERS.name().toLowerCase())) ? true : false;
     }
 
@@ -57,8 +57,8 @@ public class SearchConditions {
         this.clientSearch = clientSearch;
         this.groupSearch = groupSearch;
         this.loanSeach = loanSeach;
-		this.savingSeach = savingSeach;
-		this.shareSeach = shareSeach;
+        this.savingSeach = savingSeach;
+        this.shareSeach = shareSeach;
         this.clientIdentifierSearch = clientIdentifierSearch;
         this.exactMatch=exactMatch;
     }
@@ -71,7 +71,7 @@ public class SearchConditions {
         return this.searchResource;
     }
     public Boolean getExactMatch() {
-    	return this.exactMatch;
+        return this.exactMatch;
     }
     public Boolean isClientSearch() {
         return this.clientSearch;
@@ -88,12 +88,12 @@ public class SearchConditions {
     public Boolean isSavingSeach() {
         return this.savingSeach;
     }
-	
-	public Boolean isShareSeach() {
+
+    public Boolean isShareSeach() {
         return this.shareSeach;
     }
 
-	public Boolean isClientIdentifierSearch() {
+    public Boolean isClientIdentifierSearch() {
         return this.clientIdentifierSearch;
     }
 

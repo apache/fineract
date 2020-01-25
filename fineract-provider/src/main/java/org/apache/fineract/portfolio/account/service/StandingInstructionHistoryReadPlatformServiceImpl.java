@@ -61,7 +61,7 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
 
     @Autowired
     public StandingInstructionHistoryReadPlatformServiceImpl(final RoutingDataSource dataSource,
-    		final ColumnValidator columnValidator) {
+            final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.standingInstructionHistoryMapper = new StandingInstructionHistoryMapper();
         this.columnValidator = columnValidator;
@@ -129,7 +129,7 @@ public class StandingInstructionHistoryReadPlatformServiceImpl implements Standi
             paramObj.add(df.format(standingInstructionDTO.startDateRange()));
             addAndCaluse = true;
         }
-        
+
         if (standingInstructionDTO.endDateRange() != null) {
             if (addAndCaluse) {
                 sqlBuilder.append(" and ");

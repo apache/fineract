@@ -23,5 +23,5 @@ public interface ProductsApiConstants {
 
     public final String READPLATFORM_NAME = "ReadPlatformService" ;
     public final String PRODUCT_COMMANDSERVICE = "PRODUCT_COMMANDSERVICE" ;
-    
+
 }

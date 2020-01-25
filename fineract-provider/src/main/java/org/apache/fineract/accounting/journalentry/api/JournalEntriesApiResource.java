@@ -70,9 +70,8 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 @Api(tags = {"Journal Entries"})
 @SwaggerDefinition(tags = {
-        @Tag(name = "Journal Entries", description = "A journal entry refers to the logging of transactions against general ledger accounts. A journal entry may consist of several line items, each of which is either a \\\"debit\\\" or a \\\"credit\\\". The total amount of the debits must equal the total amount of the credits or the journal entry is said to be \\\"unbalanced\\\" \\n\" + \"\\n\" + \"A journal entry directly changes the account balances on the general ledger")
+        @Tag(name = "Journal Entries", description = "A journal entry refers to the logging of transactions against general ledger accounts. A journal entry may consist of several line items, each of which is either a \"debit\" or a \"credit\". The total amount of the debits must equal the total amount of the credits or the journal entry is said to be \"unbalanced\" \n" + "\n" + "A journal entry directly changes the account balances on the general ledger")
 })
-
 public class JournalEntriesApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "officeId", "officeName",
@@ -222,7 +221,7 @@ public class JournalEntriesApiResource {
         return this.apiJsonSerializerService.serialize(settings, entries, RESPONSE_DATA_PARAMETERS);
     }
 
-    
+
     @GET
     @Path("openingbalance")
     @Consumes({ MediaType.APPLICATION_JSON })

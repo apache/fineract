@@ -124,7 +124,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         }catch(final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleDataIntegrityIssues(command, throwable, dve);
-        	return CommandProcessingResult.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -192,9 +192,9 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch(final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleDataIntegrityIssues(command, throwable, dve);
-         	return CommandProcessingResult.empty();
+             return CommandProcessingResult.empty();
         }
     }
 

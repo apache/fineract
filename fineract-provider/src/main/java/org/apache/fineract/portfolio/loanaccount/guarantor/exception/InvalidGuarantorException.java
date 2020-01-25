@@ -30,7 +30,7 @@ public class InvalidGuarantorException extends AbstractPlatformDomainRuleExcepti
         super("error.msg.invalid.guarantor", "Tried to set Client with id " + clientId
                 + " as a guarantor to his/her own loan with loan identifier =" + loanId, clientId, loanId);
     }
-    
+
     public InvalidGuarantorException(final Long clientId, final Long loanId,final String errorcode) {
         super("error.msg."+errorcode, "Tried to set Client with id " + clientId
                 + " as a guarantor to his/her own loan with loan identifier =" + loanId, clientId, loanId);

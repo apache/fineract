@@ -80,9 +80,9 @@ public class AccountNumberFormatWritePlatformServiceJpaRepositoryImpl implements
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException ee) {
-        	Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
-        	handleDataIntegrityIssues(command, throwable, ee);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, ee);
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -120,9 +120,9 @@ public class AccountNumberFormatWritePlatformServiceJpaRepositoryImpl implements
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException ee) {
-        	Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
-        	handleDataIntegrityIssues(command, throwable, ee);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(ee.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, ee);
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -137,7 +137,7 @@ public class AccountNumberFormatWritePlatformServiceJpaRepositoryImpl implements
                 .build();
     }
 
-        
+
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.

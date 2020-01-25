@@ -118,7 +118,7 @@ public class DisbursementData implements Comparable<DisbursementData> {
         return target != null && target.isAfter(fromNotInclusive) && !target.isAfter(upToAndInclusive);
     }
 
-    
+
     public BigDecimal getWaivedChargeAmount() {
         if(this.waivedChargeAmount == null){
             return BigDecimal.ZERO;

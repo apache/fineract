@@ -225,14 +225,14 @@ public class LoanAssembler {
         Group group = null;
 
         final LoanProductRelatedDetail loanProductRelatedDetail = this.loanScheduleAssembler.assembleLoanProductRelatedDetail(element);
-        
+
         final BigDecimal interestRateDifferential = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.interestRateDifferentialParameterName, element);
         final Boolean isFloatingInterestRate = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isFloatingInterestRateParameterName, element);
 
         final String loanTypeParameterName = "loanType";
         final String loanTypeStr = this.fromApiJsonHelper.extractStringNamed(loanTypeParameterName, element);
         final EnumOptionData loanType = AccountEnumerations.loanType(loanTypeStr);
-       
+
 
         if (clientId != null) {
             client = this.clientRepository.findOneWithNotFoundDetection(clientId);

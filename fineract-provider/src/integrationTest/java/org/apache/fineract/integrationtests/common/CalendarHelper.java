@@ -88,18 +88,18 @@ public class CalendarHelper {
         final Integer responseCalendarId = from(responseCalendarDetailsinJSON).get("id");
         assertEquals("ERROR IN CREATING THE CALENDAR", generatedCalendarId, responseCalendarId);
     }
-    
+
     public static Integer createMeetingForGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
     final Integer groupId, final String startDate, final String frequency, final String interval, final String repeatsOnDay) {
 
-    	System.out.println("---------------------------------CREATING A MEETING CALENDAR FOR THE GROUP------------------------------");
+        System.out.println("---------------------------------CREATING A MEETING CALENDAR FOR THE GROUP------------------------------");
 
-    	final String CALENDAR_RESOURCE_URL = BASE_URL + Center_Entity + groupId + ENITY_NAME + "?" + Utils.TENANT_IDENTIFIER;
+        final String CALENDAR_RESOURCE_URL = BASE_URL + Center_Entity + groupId + ENITY_NAME + "?" + Utils.TENANT_IDENTIFIER;
 
-    	System.out.println(CALENDAR_RESOURCE_URL);
+        System.out.println(CALENDAR_RESOURCE_URL);
 
-    	return Utils.performServerPost(requestSpec, responseSpec, CALENDAR_RESOURCE_URL,
-    			getTestCalendarAsJSON(frequency, interval, repeatsOnDay, startDate), "resourceId");
+        return Utils.performServerPost(requestSpec, responseSpec, CALENDAR_RESOURCE_URL,
+                getTestCalendarAsJSON(frequency, interval, repeatsOnDay, startDate), "resourceId");
     }
 
     public static Integer updateMeetingCalendarForCenter(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

@@ -46,8 +46,8 @@ import com.google.gson.reflect.TypeToken;
 public class ProvisioningEntriesDefinitionJsonDeserializer implements ProvisioningEntriesApiConstants {
 
     private final FromJsonHelper fromApiJsonHelper;
-	private static final Set<String> supportedParameters = new HashSet<>(
-			Arrays.asList(JSON_DATE_PARAM, JSON_DATEFORMAT_PARAM, JSON_LOCALE_PARAM, JSON_CREATEJOURNALENTRIES_PARAM));
+    private static final Set<String> supportedParameters = new HashSet<>(
+            Arrays.asList(JSON_DATE_PARAM, JSON_DATEFORMAT_PARAM, JSON_LOCALE_PARAM, JSON_CREATEJOURNALENTRIES_PARAM));
 
 
     @Autowired

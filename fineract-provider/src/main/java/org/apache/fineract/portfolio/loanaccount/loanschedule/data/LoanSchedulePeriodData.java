@@ -25,7 +25,7 @@ import org.joda.time.LocalDate;
 
 /**
  * Immutable data object that represents a period of a loan schedule.
- * 
+ *
  */
 public class LoanSchedulePeriodData {
 

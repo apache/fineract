@@ -47,11 +47,11 @@ public interface LoanScheduleModelPeriod {
     BigDecimal penaltyChargesDue();
 
     void addLoanCharges(BigDecimal feeCharge, BigDecimal penaltyCharge);
-    
+
     boolean isRecalculatedInterestComponent();
 
     void addPrincipalAmount(Money principalDue);
-    
+
     void addInterestAmount(Money interestDue);
     Set<LoanInterestRecalcualtionAdditionalDetails> getLoanCompoundingDetails();
 }

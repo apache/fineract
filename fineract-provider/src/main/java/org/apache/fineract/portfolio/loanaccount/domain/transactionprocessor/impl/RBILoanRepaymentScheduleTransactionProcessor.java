@@ -31,15 +31,15 @@ import org.joda.time.LocalDate;
 
 /**
  * Adhikar/RBI style {@link LoanRepaymentScheduleTransactionProcessor}.
- * 
+ *
  * From https://mifosforge.jira.com/browse/MIFOS-5636:
- * 
+ *
  * Per RBI regulations, all interest must be paid (both current and overdue)
  * before principal is paid.
- * 
+ *
  * For example on a loan with two installments due (one current and one overdue)
  * of 220 each (200 principal + 20 interest):
- * 
+ *
  * Partial Payment of 40 20 Payment to interest on Installment #1 (200 principal
  * remaining) 20 Payment to interest on Installment #2 (200 principal remaining)
  */

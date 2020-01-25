@@ -97,7 +97,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
-	
+
     @Autowired
     public SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final SavingsAccountRepositoryWrapper savingAccountRepository, final SavingsAccountAssembler savingAccountAssembler,
@@ -196,9 +196,9 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(command, throwable, dve);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -298,9 +298,9 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return new CommandProcessingResult(Long.valueOf(-1));
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(command, throwable, dve);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -534,8 +534,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                 .setRollbackTransaction(rollbackTransaction)//
                 .build();
     }
-    
-    
+
+
     private Map<BUSINESS_ENTITY, Object> constructEntityMap(final BUSINESS_ENTITY entityEvent, Object entity) {
         Map<BUSINESS_ENTITY, Object> map = new HashMap<>(1);
         map.put(entityEvent, entity);

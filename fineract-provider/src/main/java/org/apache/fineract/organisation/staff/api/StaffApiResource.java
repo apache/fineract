@@ -63,7 +63,10 @@ import org.springframework.stereotype.Component;
 @Path("/staff")
 @Component
 @Scope("singleton")
-@Api(value = "Staff", description = "Allows you to model staff members. At present the key role of significance is whether this staff member is a loan officer or not.")
+@Api(tags = {"Staff"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Staff", description = "Allows you to model staff members. At present the key role of significance is whether this staff member is a loan officer or not.")
+})
 public class StaffApiResource {
 
     /**

@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  * Implemented class is responsible for notifying the business event to
  * registered listeners.
- * 
+ *
  */
 public interface BusinessEventNotifierService {
 

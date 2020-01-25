@@ -303,7 +303,7 @@ public class LoanApplicationTestBuilder {
      * disbursement with the group meetings (it seems that if we do use this
      * parameter we should also use calendarID to sync repayment with group
      * meetings)
-     * 
+     *
      * @return
      */
     public LoanApplicationTestBuilder withSyncDisbursementWithMeetin() {

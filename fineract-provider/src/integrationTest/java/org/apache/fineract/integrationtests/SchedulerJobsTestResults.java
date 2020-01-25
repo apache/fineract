@@ -18,26 +18,12 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.Assert.assertEquals;
-
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
-import org.apache.fineract.integrationtests.common.HolidayHelper;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
-import org.apache.fineract.integrationtests.common.StandingInstructionsHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
+import org.apache.fineract.integrationtests.common.*;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.accounting.JournalEntry;
@@ -61,11 +47,15 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings({ "unused", "unchecked", "rawtypes", "static-access", "cast" })
 public class SchedulerJobsTestResults {
@@ -152,14 +142,14 @@ public class SchedulerJobsTestResults {
 
         Float chargeAmount = (Float) chargeData.get("amount");
 
-		final HashMap savingsDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
-		final HashMap annualFeeDetails = (HashMap) savingsDetails.get("annualFee");
-		ArrayList<Integer> annualFeeDueDateAsArrayList = (ArrayList<Integer>) annualFeeDetails.get("dueDate");
-		LocalDate nextDueDateForAnnualFee = LocalDate.of(annualFeeDueDateAsArrayList.get(0), annualFeeDueDateAsArrayList.get(1), annualFeeDueDateAsArrayList.get(2));
-		LocalDate todaysDate = LocalDate.now(ZoneId.of("Asia/Kolkata"));
+        final HashMap savingsDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
+        final HashMap annualFeeDetails = (HashMap) savingsDetails.get("annualFee");
+        ArrayList<Integer> annualFeeDueDateAsArrayList = (ArrayList<Integer>) annualFeeDetails.get("dueDate");
+        LocalDate nextDueDateForAnnualFee = LocalDate.of(annualFeeDueDateAsArrayList.get(0), annualFeeDueDateAsArrayList.get(1), annualFeeDueDateAsArrayList.get(2));
+        LocalDate todaysDate = LocalDate.now(ZoneId.of("Asia/Kolkata"));
 
-		Assert.assertTrue("Verifying that all due Annual Fees have been paid ",
-				nextDueDateForAnnualFee.isAfter(todaysDate));
+        Assert.assertTrue("Verifying that all due Annual Fees have been paid ",
+                nextDueDateForAnnualFee.isAfter(todaysDate));
 
     }
 
@@ -831,12 +821,12 @@ public class SchedulerJobsTestResults {
     public void testInterestTransferForSavings() throws InterruptedException {
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec, this.responseSpec);
-        FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
-        AccountHelper accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        //FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec,this.responseSpec);
+        //AccountHelper accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         FixedDepositAccountHelper fixedDepositAccountHelper = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec);
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        DateFormat monthDayFormat = new SimpleDateFormat("dd MMM", Locale.US);
+        //DateFormat monthDayFormat = new SimpleDateFormat("dd MMM", Locale.US);
 
         Calendar todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -3);

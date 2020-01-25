@@ -31,19 +31,19 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "HOOK", action = "CREATE")
 public class CreateHookCommandHandler implements NewCommandSourceHandler {
 
-	private final HookWritePlatformService writePlatformService;
+    private final HookWritePlatformService writePlatformService;
 
-	@Autowired
-	public CreateHookCommandHandler(
-			final HookWritePlatformService writePlatformService) {
-		this.writePlatformService = writePlatformService;
-	}
+    @Autowired
+    public CreateHookCommandHandler(
+            final HookWritePlatformService writePlatformService) {
+        this.writePlatformService = writePlatformService;
+    }
 
-	@Transactional
-	@Override
-	public CommandProcessingResult processCommand(final JsonCommand command) {
+    @Transactional
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
 
-		return this.writePlatformService.createHook(command);
-	}
+        return this.writePlatformService.createHook(command);
+    }
 
 }

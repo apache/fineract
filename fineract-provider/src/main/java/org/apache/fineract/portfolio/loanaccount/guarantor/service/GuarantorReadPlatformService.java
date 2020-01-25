@@ -27,7 +27,7 @@ public interface GuarantorReadPlatformService {
 
     /**
      * Validates the passed in loanId before retrieving Guarantors for the same
-     * 
+     *
      * @param loanId
      * @return
      */
@@ -36,14 +36,14 @@ public interface GuarantorReadPlatformService {
     /**
      * Methods Returns all Guarantors for a Given loan Id (if the loan Id is
      * valid and Exists)
-     * 
+     *
      * @param loanId
      * @return
      */
     List<GuarantorData> retrieveGuarantorsForLoan(Long loanId);
 
-	GuarantorData retrieveGuarantor(Long loanId, Long guarantorId);
+    GuarantorData retrieveGuarantor(Long loanId, Long guarantorId);
 
-	List<ObligeeData> retrieveObligeeDetails(Long clientId);
+    List<ObligeeData> retrieveObligeeDetails(Long clientId);
 
 }

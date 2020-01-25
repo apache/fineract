@@ -30,38 +30,38 @@ import org.springframework.stereotype.Service;
 @Service
 public class AccountEntityServiceForLoanImpl implements AccountEntityService {
 
-	private final String KEY = EntityAccountType.LOAN.name();
+    private final String KEY = EntityAccountType.LOAN.name();
 
-	private final PlatformSecurityContext context;
-	private final AppuserLoansMapperReadService appuserLoansMapperReadService;
-	private final LoanReadPlatformService loanReadPlatformService;
+    private final PlatformSecurityContext context;
+    private final AppuserLoansMapperReadService appuserLoansMapperReadService;
+    private final LoanReadPlatformService loanReadPlatformService;
 
-	@Autowired
-	public AccountEntityServiceForLoanImpl(final PlatformSecurityContext context,
-			final AppuserLoansMapperReadService appuserLoansMapperReadService,
-			final LoanReadPlatformService loanReadPlatformService) {
+    @Autowired
+    public AccountEntityServiceForLoanImpl(final PlatformSecurityContext context,
+            final AppuserLoansMapperReadService appuserLoansMapperReadService,
+            final LoanReadPlatformService loanReadPlatformService) {
 
-		this.context = context;
-		this.appuserLoansMapperReadService = appuserLoansMapperReadService;
-		this.loanReadPlatformService = loanReadPlatformService;
+        this.context = context;
+        this.appuserLoansMapperReadService = appuserLoansMapperReadService;
+        this.loanReadPlatformService = loanReadPlatformService;
 
-	}
+    }
 
-	@Override
-	public String getKey() {
-		return KEY;
-	}
+    @Override
+    public String getKey() {
+        return KEY;
+    }
 
-	@Override
-	public void validateSelfUserAccountMapping(Long accountId) {
-		if (!this.appuserLoansMapperReadService.isLoanMappedToUser(accountId,
-				this.context.authenticatedUser().getId())) {
-			throw new LoanNotFoundException(accountId);
-		}
-	}
+    @Override
+    public void validateSelfUserAccountMapping(Long accountId) {
+        if (!this.appuserLoansMapperReadService.isLoanMappedToUser(accountId,
+                this.context.authenticatedUser().getId())) {
+            throw new LoanNotFoundException(accountId);
+        }
+    }
 
-	@Override
-	public String retrieveAccountNumberByAccountId(Long accountId) {
-		return this.loanReadPlatformService.retrieveAccountNumberByAccountId(accountId);
-	}
+    @Override
+    public String retrieveAccountNumberByAccountId(Long accountId) {
+        return this.loanReadPlatformService.retrieveAccountNumberByAccountId(accountId);
+    }
 }

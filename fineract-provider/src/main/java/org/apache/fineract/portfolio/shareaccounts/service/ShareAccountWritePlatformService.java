@@ -25,9 +25,9 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 public interface ShareAccountWritePlatformService {
 
     public CommandProcessingResult createShareAccount(JsonCommand jsonCommand) ;
-    
+
     public CommandProcessingResult updateShareAccount(Long accountId, JsonCommand jsonCommand) ;
-    
+
     public CommandProcessingResult approveShareAccount(Long accountId, JsonCommand jsonCommand) ;
 
     public CommandProcessingResult activateShareAccount(Long accountId, JsonCommand jsonCommand) ;
@@ -35,13 +35,13 @@ public interface ShareAccountWritePlatformService {
     public CommandProcessingResult rejectShareAccount(Long entityId, JsonCommand jsonCommand);
 
     public CommandProcessingResult undoApproveShareAccount(Long entityId, JsonCommand jsonCommand);
-    
+
     public CommandProcessingResult closeShareAccount(Long accountId, JsonCommand jsonCommand) ;
-    
+
     public CommandProcessingResult applyAddtionalShares(final Long accountId, JsonCommand jsonCommand) ;
-    
+
     public CommandProcessingResult approveAdditionalShares(Long accountId, JsonCommand jsonCommand) ;
-    
+
     public CommandProcessingResult rejectAdditionalShares(Long accountId, JsonCommand jsonCommand) ;
 
     public CommandProcessingResult redeemShares(Long accountId, JsonCommand jsonCommand);

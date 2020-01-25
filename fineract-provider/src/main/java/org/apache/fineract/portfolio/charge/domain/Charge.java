@@ -19,10 +19,7 @@
 package org.apache.fineract.portfolio.charge.domain;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -115,7 +112,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
     private TaxGroup taxGroup;
 
     public static Charge fromJson(final JsonCommand command, final GLAccount account, final TaxGroup taxGroup) {
-
         final String name = command.stringValueOfParameterNamed("name");
         final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
         final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
@@ -141,7 +137,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
     }
 
     protected Charge() {
-        //
     }
 
     private Charge(final String name, final BigDecimal amount, final String currencyCode, final ChargeAppliesTo chargeAppliesTo,
@@ -208,24 +203,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == null) { return false; }
-        if (obj == this) { return true; }
-        if (obj.getClass() != getClass()) { return false; }
-        final LoanCharge rhs = (LoanCharge) obj;
-        return new EqualsBuilder().appendSuper(super.equals(obj)) //
-                .append(getId(), rhs.getId()) //
-                .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(3, 5) //
-                .append(getId()) //
-                .toHashCode();
     }
 
     public String getName() {
@@ -309,7 +286,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
     }
 
     public Map<String, Object> update(final JsonCommand command) {
-
         final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
 
         final String localeAsInput = command.locale();
@@ -428,14 +404,14 @@ public class Charge extends AbstractPersistableCustom<Long> {
             final MonthDay monthDay = command.extractMonthDayNamed("feeOnMonthDay");
             final String actualValueEntered = command.stringValueOfParameterNamed("feeOnMonthDay");
             final Integer dayOfMonthValue = monthDay.getDayOfMonth();
-            if (this.feeOnDay != dayOfMonthValue) {
+            if (!this.feeOnDay.equals(dayOfMonthValue)) {
                 actualChanges.put("feeOnMonthDay", actualValueEntered);
                 actualChanges.put("locale", localeAsInput);
                 this.feeOnDay = dayOfMonthValue;
             }
 
             final Integer monthOfYear = monthDay.getMonthOfYear();
-            if (this.feeOnMonth != monthOfYear) {
+            if (!this.feeOnMonth.equals(monthOfYear)) {
                 actualChanges.put("feeOnMonthDay", actualValueEntered);
                 actualChanges.put("locale", localeAsInput);
                 this.feeOnMonth = monthOfYear;
@@ -519,7 +495,7 @@ public class Charge extends AbstractPersistableCustom<Long> {
     /**
      * Delete is a <i>soft delete</i>. Updates flag on charge so it wont appear
      * in query/report results.
-     * 
+     *
      * Any fields with unique constraints and prepended with id of record.
      */
     public void delete() {
@@ -528,7 +504,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
     }
 
     public ChargeData toData() {
-
         final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(this.chargeTimeType);
         final EnumOptionData chargeAppliesTo = ChargeEnumerations.chargeAppliesTo(this.chargeAppliesTo);
         final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(this.chargeCalculation);
@@ -620,5 +595,36 @@ public class Charge extends AbstractPersistableCustom<Long> {
 
     public void setTaxGroup(TaxGroup taxGroup) {
         this.taxGroup = taxGroup;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Charge)) return false;
+        Charge other= (Charge) o;
+        return Objects.equals(name, other.name) &&
+   Objects.equals(amount, other.amount) &&
+   Objects.equals(currencyCode, other.currencyCode) &&
+   Objects.equals(chargeAppliesTo, other.chargeAppliesTo) &&
+   Objects.equals(chargeTimeType, other.chargeTimeType) &&
+   Objects.equals(chargeCalculation, other.chargeCalculation) &&
+   Objects.equals(chargePaymentMode, other.chargePaymentMode) &&
+   Objects.equals(feeOnDay, other.feeOnDay) &&
+   Objects.equals(feeInterval, other.feeInterval) &&
+   Objects.equals(feeOnMonth, other.feeOnMonth) &&
+                penalty == other.penalty &&
+                active == other.active &&
+                deleted == other.deleted &&
+                Objects.equals(minCap, other.minCap) &&
+                Objects.equals(maxCap, other.maxCap) &&
+                Objects.equals(feeFrequency, other.feeFrequency) &&
+                Objects.equals(account, other.account) &&
+                Objects.equals(taxGroup, other.taxGroup);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculation,
+          chargePaymentMode, feeOnDay, feeInterval, feeOnMonth, penalty, active, deleted, minCap, maxCap, feeFrequency, account, taxGroup);
     }
 }

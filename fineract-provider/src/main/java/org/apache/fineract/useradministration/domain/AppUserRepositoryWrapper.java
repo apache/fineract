@@ -26,12 +26,12 @@ import org.springframework.stereotype.Service;
 public class AppUserRepositoryWrapper {
 
     private final AppUserRepository appUserRepository ;
-    
+
     @Autowired
     public AppUserRepositoryWrapper(final AppUserRepository appUserRepository) {
         this.appUserRepository = appUserRepository ;
     }
-    
+
     public AppUser fetchSystemUser() {
         String userName = "system" ;
         AppUser user = this.appUserRepository.findAppUserByName(userName);

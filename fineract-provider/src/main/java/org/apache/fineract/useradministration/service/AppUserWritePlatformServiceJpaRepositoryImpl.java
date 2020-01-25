@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.EntityExistsException;
 import javax.persistence.PersistenceException;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -65,6 +64,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -136,24 +136,24 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             if (staffId != null) {
                 linkedStaff = this.staffRepositoryWrapper.findByOfficeWithNotFoundDetection(staffId, userOffice.getId());
             }
-            
+
             Collection<Client> clients = null;
             if(command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)
-            		&& command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER)
-            		&& command.hasParameter(AppUserConstants.CLIENTS)){
-            	JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
-            	Collection<Long> clientIds = new HashSet<>();
-            	for(JsonElement clientElement : clientsArray){
-            		clientIds.add(clientElement.getAsLong());
-            	}
-            	clients = this.clientRepositoryWrapper.findAll(clientIds);
+                    && command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER)
+                    && command.hasParameter(AppUserConstants.CLIENTS)){
+                JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
+                Collection<Long> clientIds = new HashSet<>();
+                for(JsonElement clientElement : clientsArray){
+                    clientIds.add(clientElement.getAsLong());
+                }
+                clients = this.clientRepositoryWrapper.findAll(clientIds);
             }
 
             appUser = AppUser.fromJson(userOffice, linkedStaff, allRoles, clients, command);
 
             final Boolean sendPasswordToEmail = command.booleanObjectValueOfParameterNamed("sendPasswordToEmail");
             this.userDomainService.create(appUser, sendPasswordToEmail);
-            
+
             this.topicDomainService.subscribeUserToTopic(appUser);
 
             return new CommandProcessingResultBuilder() //
@@ -164,13 +164,13 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException | AuthenticationServiceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final JpaSystemException | PersistenceException | AuthenticationServiceException dve) {
+              Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleDataIntegrityIssues(command, throwable, dve);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .build();
-        }catch (final PlatformEmailSendException e) {
+        } catch (final PlatformEmailSendException e) {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
             final String email = command.stringValueOfParameterNamed("email");
@@ -198,21 +198,21 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                     .orElseThrow(() -> new UserNotFoundException(userId));
 
             final AppUserPreviousPassword currentPasswordToSaveAsPreview = getCurrentPasswordToSaveAsPreview(userToUpdate, command);
-            
+
             Collection<Client> clients = null;
             boolean isSelfServiceUser = userToUpdate.isSelfServiceUser();
             if(command.hasParameter(AppUserConstants.IS_SELF_SERVICE_USER)){
-            	isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER); 
+                isSelfServiceUser = command.booleanPrimitiveValueOfParameterNamed(AppUserConstants.IS_SELF_SERVICE_USER);
             }
-            
+
             if(isSelfServiceUser
-            		&& command.hasParameter(AppUserConstants.CLIENTS)){
-            	JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
-            	Collection<Long> clientIds = new HashSet<>();
-            	for(JsonElement clientElement : clientsArray){
-            		clientIds.add(clientElement.getAsLong());
-            	}
-            	clients = this.clientRepositoryWrapper.findAll(clientIds);
+                    && command.hasParameter(AppUserConstants.CLIENTS)){
+                JsonArray clientsArray = command.arrayOfParameterNamed(AppUserConstants.CLIENTS);
+                Collection<Long> clientIds = new HashSet<>();
+                for(JsonElement clientElement : clientsArray){
+                    clientIds.add(clientElement.getAsLong());
+                }
+                clients = this.clientRepositoryWrapper.findAll(clientIds);
             }
 
             final Map<String, Object> changes = userToUpdate.update(command, this.platformPasswordEncoder, clients);
@@ -257,8 +257,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
-        }catch (final PersistenceException | AuthenticationServiceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+        } catch (final JpaSystemException | PersistenceException | AuthenticationServiceException dve) {
+              Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleDataIntegrityIssues(command, throwable, dve);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -269,7 +269,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     /**
      * encode the new submitted password retrieve the last n used password check
      * if the current submitted password, match with one of them
-     * 
+     *
      * @param user
      * @param command
      * @return

@@ -394,8 +394,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
             this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy(),
-            		searchParameters.getSortOrder());
-            
+                    searchParameters.getSortOrder());
+
         }
 
         if (searchParameters.isLimited()) {
@@ -407,7 +407,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
-        		paramList.toArray(), this.centerMapper);
+                paramList.toArray(), this.centerMapper);
     }
 
     @Override
@@ -435,7 +435,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             if (searchParameters.isOrderByRequested()) {
                 sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy(),
-                		searchParameters.getSortOrder());
+                        searchParameters.getSortOrder());
             }
 
             if (searchParameters.isLimited()) {
@@ -601,8 +601,8 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
                         flag = false;
                         if (staffCenterData.getStaffId().equals(centerData.staffId())) {
                             staffCenterData.getMeetingFallCenters().add(centerData);
-                 
-                            
+
+
                             flag = true;
                             break;
                         }

@@ -239,7 +239,7 @@ public final class SearchParameters {
         return new SearchParameters(sqlSearch, null, externalId, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder,
                 staffId, accountNo, loanId, savingsId, orphansOnly, isSelfUser);
     }
-	
+
     private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
             final String hierarchy, final String firstname, final String lastname, final Integer offset, final Integer limit,
             final String orderBy, final String sortOrder, final Long staffId, final String accountNo, final Long loanId,
@@ -474,32 +474,32 @@ public final class SearchParameters {
         return this.isSelfUser;
     }
 
-    /** 
+    /**
      * creates an instance of the SearchParameters from a request for the report mailing job run history
-     * 
+     *
      * @return SearchParameters object
      **/
-    public static SearchParameters fromReportMailingJobRunHistory(final Integer offset, 
+    public static SearchParameters fromReportMailingJobRunHistory(final Integer offset,
             final Integer limit, final String orderBy, final String sortOrder) {
         final Integer maxLimitAllowed = getCheckedLimit(limit);
-        
+
         return new SearchParameters(null, null, null, null, null, null, null, offset, maxLimitAllowed, orderBy,
                 sortOrder, null, null, null, null, null, false);
     }
-    
+
     /**
      * creates an instance of the {@link SearchParameters} from a request for the report mailing job
-     * 
+     *
      * @param offset
      * @param limit
      * @param orderBy
      * @param sortOrder
      * @return {@link SearchParameters} object
      */
-    public static SearchParameters fromReportMailingJob(final Integer offset, 
+    public static SearchParameters fromReportMailingJob(final Integer offset,
             final Integer limit, final String orderBy, final String sortOrder) {
         final Integer maxLimitAllowed = getCheckedLimit(limit);
-        
+
         return new SearchParameters(null, null, null, null, null, null, null, offset, maxLimitAllowed, orderBy,
                 sortOrder, null, null, null, null, null, false);
     }

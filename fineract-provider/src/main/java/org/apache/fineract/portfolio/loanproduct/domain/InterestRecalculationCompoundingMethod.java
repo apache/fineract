@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /***
- * 
+ *
  * People typically use either of the following settings when defining interest
  * recalculation method:
  * <ul>

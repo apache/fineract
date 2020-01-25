@@ -218,13 +218,13 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
             final MonthDay monthDay = command.extractMonthDayNamed(recurrenceOnMonthDayParamName);
             final String actualValueEntered = command.stringValueOfParameterNamed(recurrenceOnMonthDayParamName);
             final Integer dayOfMonthValue = monthDay.getDayOfMonth();
-            if (this.recurrenceOnDay != dayOfMonthValue) {
+            if (!this.recurrenceOnDay.equals(dayOfMonthValue)) {
                 actualChanges.put(recurrenceOnMonthDayParamName, actualValueEntered);
                 this.recurrenceOnDay = dayOfMonthValue;
             }
 
             final Integer monthOfYear = monthDay.getMonthOfYear();
-            if (this.recurrenceOnMonth != monthOfYear) {
+            if (!this.recurrenceOnMonth.equals(monthOfYear)) {
                 actualChanges.put(recurrenceOnMonthDayParamName, actualValueEntered);
                 this.recurrenceOnMonth = monthOfYear;
             }
@@ -287,12 +287,12 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
     public void updateLatsRunDate(Date latsRunDate) {
         this.latsRunDate = latsRunDate;
     }
-    
+
     public void updateStatus(Integer status){
         this.status = status;
     }
-    
-    /** 
+
+    /**
      * delete the standing instruction by setting the status to 3 and appending "_deleted_" and the id to the name
      **/
      public void delete() {

@@ -51,7 +51,7 @@ public final class StaffCommandFromApiJsonDeserializer {
             "mobileNo", "isLoanOfficer", "isActive", "joiningDate", "dateFormat", "locale", "forceStatus"));
 
     private final FromJsonHelper fromApiJsonHelper;
-    
+
     private final StaffReadPlatformService staffReadPlatformService;
 
 
@@ -59,7 +59,7 @@ public final class StaffCommandFromApiJsonDeserializer {
     public StaffCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
             final StaffReadPlatformService staffReadPlatformService) {
         this.fromApiJsonHelper = fromApiJsonHelper;
-        this.staffReadPlatformService = staffReadPlatformService;        
+        this.staffReadPlatformService = staffReadPlatformService;
     }
 
     public void validateForCreate(final String json) {
@@ -97,27 +97,27 @@ public final class StaffCommandFromApiJsonDeserializer {
             final Boolean activeFlag = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
             baseDataValidator.reset().parameter("isActive").value(activeFlag).notNull();
         }
-        
+
         final LocalDate joiningDate = this.fromApiJsonHelper.extractLocalDateNamed("joiningDate", element);
         baseDataValidator.reset().parameter("joiningDate").value(joiningDate).notNull();
-       
+
         if (this.fromApiJsonHelper.parameterExists("dateFormat", element)) {
-        	final String dateFormat = this.fromApiJsonHelper.extractStringNamed("dateFormat", element);
-        	baseDataValidator.reset().parameter("dateFormat").value(dateFormat).notBlank();
+            final String dateFormat = this.fromApiJsonHelper.extractStringNamed("dateFormat", element);
+            baseDataValidator.reset().parameter("dateFormat").value(dateFormat).notBlank();
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists("locale", element)) {
-        	final String locale = this.fromApiJsonHelper.extractStringNamed("locale", element);
-        	baseDataValidator.reset().parameter("locale").value(locale).notBlank();
+            final String locale = this.fromApiJsonHelper.extractStringNamed("locale", element);
+            baseDataValidator.reset().parameter("locale").value(locale).notBlank();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     public void validateForUpdate(final String json) {
-        validateForUpdate(json, null); 
+        validateForUpdate(json, null);
     }
-    
+
     public void validateForUpdate(final String json,Long staffId) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
@@ -157,31 +157,31 @@ public final class StaffCommandFromApiJsonDeserializer {
             final Boolean activeFlag = this.fromApiJsonHelper.extractBooleanNamed("isActive", element);
             //Need to add here check to see if any clients, group, account and loans are assigned to this staff if staff is being set to inactive --LJB
             final Boolean forceStatus = this.fromApiJsonHelper.extractBooleanNamed("forceStatus", element);
-            if ((!activeFlag && forceStatus == null) || 
-                (!activeFlag && forceStatus)) {           
-            	 Object[] result = staffReadPlatformService.hasAssociatedItems(staffId);
-            	
-            	if (result != null && result.length > 0) {
-            		baseDataValidator.reset().parameter("isactive").failWithCode("staff.is.assigned",result);
-            	}
-            	
+            if ((!activeFlag && forceStatus == null) ||
+                (!activeFlag && forceStatus)) {
+                 Object[] result = staffReadPlatformService.hasAssociatedItems(staffId);
+
+                if (result != null && result.length > 0) {
+                    baseDataValidator.reset().parameter("isactive").failWithCode("staff.is.assigned",result);
+                }
+
             }
             baseDataValidator.reset().parameter("isActive").value(activeFlag).notNull();
         }
-                
+
         if (this.fromApiJsonHelper.parameterExists("joiningDate", element)) {
             final LocalDate joiningDate = this.fromApiJsonHelper.extractLocalDateNamed("joiningDate", element);
             baseDataValidator.reset().parameter("joiningDate").value(joiningDate).notNull();
         }
 
         if (this.fromApiJsonHelper.parameterExists("dateFormat", element)) {
-        	final String dateFormat = this.fromApiJsonHelper.extractStringNamed("dateFormat", element);
-        	baseDataValidator.reset().parameter("dateFormat").value(dateFormat).notBlank();
+            final String dateFormat = this.fromApiJsonHelper.extractStringNamed("dateFormat", element);
+            baseDataValidator.reset().parameter("dateFormat").value(dateFormat).notBlank();
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists("locale", element)) {
-        	final String locale = this.fromApiJsonHelper.extractStringNamed("locale", element);
-        	baseDataValidator.reset().parameter("locale").value(locale).notBlank();
+            final String locale = this.fromApiJsonHelper.extractStringNamed("locale", element);
+            baseDataValidator.reset().parameter("locale").value(locale).notBlank();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

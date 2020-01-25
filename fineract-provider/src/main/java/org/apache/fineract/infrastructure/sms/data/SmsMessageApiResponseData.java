@@ -20,48 +20,48 @@ package org.apache.fineract.infrastructure.sms.data;
 
 import java.util.List;
 
-/** 
- * Immutable data object representing an outbound SMS message API response data 
+/**
+ * Immutable data object representing an outbound SMS message API response data
  **/
 public class SmsMessageApiResponseData {
-	private Integer httpStatusCode;
-	private List<SmsMessageDeliveryReportData> data;
-	
-	/** 
-	 * SmsMessageApiResponseData constructor
-	 * 
-	 *  
-	 **/
-	private SmsMessageApiResponseData(Integer httpStatusCode, List<SmsMessageDeliveryReportData> data) {
-		this.httpStatusCode = httpStatusCode;
-		this.data = data;
-	}
-	
-	/** 
-	 * Default SmsMessageApiResponseData constructor 
-	 * 
-	 * 
-	 **/
-	protected SmsMessageApiResponseData() {}
-	
-	/** 
-	 * @return an instance of the SmsMessageApiResponseData class
-	 **/
-	public static SmsMessageApiResponseData getInstance(Integer httpStatusCode, List<SmsMessageDeliveryReportData> data) {
-		return new SmsMessageApiResponseData(httpStatusCode, data);
-	}
+    private Integer httpStatusCode;
+    private List<SmsMessageDeliveryReportData> data;
 
-	/**
-	 * @return the httpStatusCode
-	 */
-	public Integer getHttpStatusCode() {
-		return httpStatusCode;
-	}
+    /**
+     * SmsMessageApiResponseData constructor
+     *
+     *
+     **/
+    private SmsMessageApiResponseData(Integer httpStatusCode, List<SmsMessageDeliveryReportData> data) {
+        this.httpStatusCode = httpStatusCode;
+        this.data = data;
+    }
 
-	/**
-	 * @return the data
-	 */
-	public List<SmsMessageDeliveryReportData> getData() {
-		return data;
-	}
+    /**
+     * Default SmsMessageApiResponseData constructor
+     *
+     *
+     **/
+    protected SmsMessageApiResponseData() {}
+
+    /**
+     * @return an instance of the SmsMessageApiResponseData class
+     **/
+    public static SmsMessageApiResponseData getInstance(Integer httpStatusCode, List<SmsMessageDeliveryReportData> data) {
+        return new SmsMessageApiResponseData(httpStatusCode, data);
+    }
+
+    /**
+     * @return the httpStatusCode
+     */
+    public Integer getHttpStatusCode() {
+        return httpStatusCode;
+    }
+
+    /**
+     * @return the data
+     */
+    public List<SmsMessageDeliveryReportData> getData() {
+        return data;
+    }
 }

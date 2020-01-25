@@ -45,7 +45,7 @@ public class AllocateCashToCashierCommandHandler implements NewCommandSourceHand
 
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-    	
+
         return this.writePlatformService.allocateCashToCashier(command.subentityId(), command);
     }
 }

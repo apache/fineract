@@ -39,10 +39,10 @@ import org.springframework.data.jpa.domain.AbstractAuditable;
 /**
  * A custom copy of {@link AbstractAuditable} to override the column names used
  * on database.
- * 
+ *
  * Abstract base class for auditable entities. Stores the audition values in
  * persistent fields.
- * 
+ *
  * @param <U>
  *            the auditing type. Typically some kind of user.
  * @param <PK>
@@ -71,7 +71,7 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.springframework.data.domain.Auditable#getCreatedBy()
      */
     @Override
@@ -81,7 +81,7 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.springframework.data.domain.Auditable#setCreatedBy(java.lang.Object)
      */
@@ -93,7 +93,7 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.springframework.data.domain.Auditable#getCreatedDate()
      */
     @Override
@@ -103,7 +103,7 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.springframework.data.domain.Auditable#setCreatedDate(T)
      */
@@ -114,7 +114,7 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.springframework.data.domain.Auditable#getLastModifiedBy()
      */
     @Override
@@ -124,7 +124,7 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.springframework.data.domain.Auditable#setLastModifiedBy(java.lang
      * .Object)
@@ -137,7 +137,7 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.springframework.data.domain.Auditable#getLastModifiedDate()
      */
     @Override
@@ -147,7 +147,7 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.springframework.data.domain.Auditable#setLastModifiedDate(T)
      */

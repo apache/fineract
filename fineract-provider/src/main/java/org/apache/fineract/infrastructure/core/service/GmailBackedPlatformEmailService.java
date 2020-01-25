@@ -30,20 +30,20 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GmailBackedPlatformEmailService implements PlatformEmailService {
-	
-	private final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService;
-	
-	@Autowired
-	public GmailBackedPlatformEmailService(final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService){
-		this.externalServicesReadPlatformService = externalServicesReadPlatformService;
-	}
+
+    private final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService;
+
+    @Autowired
+    public GmailBackedPlatformEmailService(final ExternalServicesPropertiesReadPlatformService externalServicesReadPlatformService){
+        this.externalServicesReadPlatformService = externalServicesReadPlatformService;
+    }
 
     @Override
     public void sendToUserAccount(String organisationName, String contactName,
                                   String address, String username, String unencodedPassword) {
 
-	    final String subject = "Welcome " + contactName + " to " + organisationName;
-	    final String body = "You are receiving this email as your email account: " +
+        final String subject = "Welcome " + contactName + " to " + organisationName;
+        final String body = "You are receiving this email as your email account: " +
                 address + " has being used to create a user account for an organisation named [" +
                 organisationName + "] on Mifos.\n" +
                 "You can login using the following credentials:\nusername: " + username + "\n" +
@@ -51,8 +51,8 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
                 "You must change this password upon first log in using Uppercase, Lowercase, number and character.\n" +
                 "Thank you and welcome to the organisation.";
 
-	    final EmailDetail emailDetail = new EmailDetail(subject, body, address, contactName);
-	    sendDefinedEmail(emailDetail);
+        final EmailDetail emailDetail = new EmailDetail(subject, body, address, contactName);
+        sendDefinedEmail(emailDetail);
 
     }
 

@@ -36,11 +36,11 @@ import com.jayway.restassured.specification.ResponseSpecification;
 
 
 public class GlobalConfigInterestChargedFromDateSameAsDisbursalDateTest {
-    
+
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private GlobalConfigurationHelper globalConfigurationHelper;
-    
+
     @Before
     public void setup() {
         Utils.initializeRESTAssured();
@@ -54,20 +54,20 @@ public class GlobalConfigInterestChargedFromDateSameAsDisbursalDateTest {
         GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
         GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
     }
-    
+
     @SuppressWarnings( {"static-access", "rawtypes", "unchecked"})
     @Test
     public void testInterestChargedFromDateSameAsDisbursalDate(){
         this.globalConfigurationHelper = new GlobalConfigurationHelper(this.requestSpec, this.responseSpec);
-        
+
      // Retrieving All Global Configuration details
         final ArrayList<HashMap> globalConfig = this.globalConfigurationHelper
                         .getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
         Assert.assertNotNull(globalConfig);
-        
+
         String configName = "interest-charged-from-date-same-as-disbursal-date";
         boolean newBooleanValue = true;
-        
+
         for (Integer configIndex = 0; configIndex < (globalConfig.size()); configIndex++) {
                 if (globalConfig.get(configIndex).get("name")
                                 .equals(configName)) {
@@ -80,7 +80,7 @@ public class GlobalConfigInterestChargedFromDateSameAsDisbursalDateTest {
                         break;
                 }
         }
-        
+
     }
 
 }

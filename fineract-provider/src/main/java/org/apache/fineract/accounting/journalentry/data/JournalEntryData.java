@@ -29,7 +29,7 @@ import org.joda.time.LocalDate;
 
 /**
  * Immutable object representing a General Ledger Account
- * 
+ *
  * Note: no getter/setters required as google will produce json from fields of
  * object.
  */

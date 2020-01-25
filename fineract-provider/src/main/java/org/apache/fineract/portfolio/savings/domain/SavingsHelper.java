@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public final class SavingsHelper {
-    
+
     AccountTransfersReadPlatformService accountTransfersReadPlatformService = null;
 
     @Autowired
@@ -54,28 +54,28 @@ public final class SavingsHelper {
         LocalDate periodStartDate = startInterestCalculationLocalDate;
         LocalDate periodEndDate = periodStartDate;
         LocalDate actualPeriodStartDate = periodStartDate;
-             
+
         while (!periodStartDate.isAfter(interestPostingUpToDate) && !periodEndDate.isAfter(interestPostingUpToDate)) {
-           
+
           final  LocalDate  interestPostingLocalDate = determineInterestPostingPeriodEndDateFrom(periodStartDate, postingPeriodType,
                     interestPostingUpToDate, financialYearBeginningMonth);
-           
+
             periodEndDate = interestPostingLocalDate.minusDays(1);
-            
+
             if (!postInterestAsOn.isEmpty()) {
                 for (LocalDate transactiondate : postInterestAsOn) {
-					if (periodStartDate.isBefore(transactiondate)
-							&& (periodEndDate.isAfter(transactiondate) || periodEndDate
-									.isEqual(transactiondate))) {
+                    if (periodStartDate.isBefore(transactiondate)
+                            && (periodEndDate.isAfter(transactiondate) || periodEndDate
+                                    .isEqual(transactiondate))) {
                         periodEndDate = transactiondate.minusDays(1);
                         actualPeriodStartDate = periodEndDate;
                         break;
                     }
                 }
             }
-            
+
             postingPeriods.add(LocalDateInterval.create(periodStartDate, periodEndDate));
-                     
+
             if (actualPeriodStartDate.isEqual(periodEndDate))
             {
                 periodEndDate = actualPeriodStartDate.plusDays(1);
@@ -153,9 +153,9 @@ public final class SavingsHelper {
                 }
                 periodEndDate = periodEndDate.dayOfMonth().withMaximumValue();
             break;
-        }   
+        }
         // interest posting always occurs on next day after the period end date.
-        periodEndDate = periodEndDate.plusDays(1);       
+        periodEndDate = periodEndDate.plusDays(1);
         return periodEndDate;
     }
 

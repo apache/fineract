@@ -243,34 +243,34 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
          * till periodEndDate recurring dates will be generated.
          */
         final LocalDate periodEndDate = this.getPeriodEndDate(calendarData.getEndDate(), tillDate);
-         
-		Integer numberOfDays = 0;
-		boolean isSkipRepaymentOnFirstMonthEnabled = this.configurationDomainService
-				.isSkippingMeetingOnFirstDayOfMonthEnabled();
-		if (isSkipRepaymentOnFirstMonthEnabled) {
-			numberOfDays = this.configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
-		}
 
-		final Collection<LocalDate> recurringDates = CalendarUtils.getRecurringDates(rrule, seedDate, periodStartDate,
-				periodEndDate, maxCount, isSkipRepaymentOnFirstMonthEnabled, numberOfDays);
-		return recurringDates;
-	}
+        Integer numberOfDays = 0;
+        boolean isSkipRepaymentOnFirstMonthEnabled = this.configurationDomainService
+                .isSkippingMeetingOnFirstDayOfMonthEnabled();
+        if (isSkipRepaymentOnFirstMonthEnabled) {
+            numberOfDays = this.configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
+        }
 
-	@Override
-	public Boolean isCalendarAssociatedWithEntity(final Long entityId, final Long calendarId, final Long entityTypeId) {
-		String query = "Select COUNT(*) from m_calendar_instance ci where ci.entity_id = ? and ci.calendar_id = ? and "
-				+ " ci.entity_type_enum = ?";
-		try {
-			int calendarInstaneId = this.jdbcTemplate.queryForObject(query,
-					new Object[] { entityId, calendarId, entityTypeId }, Integer.class);
-			if (calendarInstaneId > 0) {
-				return true;
-			}
-			return false;
-		} catch (final EmptyResultDataAccessException e) {
-			return false;
-		}
-	}
+        final Collection<LocalDate> recurringDates = CalendarUtils.getRecurringDates(rrule, seedDate, periodStartDate,
+                periodEndDate, maxCount, isSkipRepaymentOnFirstMonthEnabled, numberOfDays);
+        return recurringDates;
+    }
+
+    @Override
+    public Boolean isCalendarAssociatedWithEntity(final Long entityId, final Long calendarId, final Long entityTypeId) {
+        String query = "Select COUNT(*) from m_calendar_instance ci where ci.entity_id = ? and ci.calendar_id = ? and "
+                + " ci.entity_type_enum = ?";
+        try {
+            int calendarInstaneId = this.jdbcTemplate.queryForObject(query,
+                    new Object[] { entityId, calendarId, entityTypeId }, Integer.class);
+            if (calendarInstaneId > 0) {
+                return true;
+            }
+            return false;
+        } catch (final EmptyResultDataAccessException e) {
+            return false;
+        }
+    }
 
     private LocalDate getSeedDate(LocalDate date) {
         return date;
@@ -323,44 +323,44 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
          * application calendar for that time period. e.g. If the previous
          * calendar details has weekly meeting starting from 1st of Oct 2013 on
          * every Tuesday, then meeting dates for collection are 1,8,15,22,29..
-         * 
+         *
          * If meeting schedule has changed from Tuesday to Friday with effective
          * from 15th of Oct (calendar update has made on 2nd of Oct) , then
          * application should allow to generate collection sheet on 8th of Oct
          * which is still on Tuesday and next collection sheet date should be on
          * 18th of Oct as per current calendar
          */
-        
-       
-		Integer numberOfDays = 0;
-		boolean isSkipRepaymentOnFirstMonthEnabled = configurationDomainService
-				.isSkippingMeetingOnFirstDayOfMonthEnabled();
-		if (isSkipRepaymentOnFirstMonthEnabled) {
-			numberOfDays = configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
-		}
 
-		if (lastMeetingDate != null && !calendarData.isBetweenStartAndEndDate(lastMeetingDate)
-				&& !calendarData.isBetweenStartAndEndDate(DateUtils.getLocalDateOfTenant())) {
-			applicableCalendarData = this.retrieveApplicableCalendarFromHistory(calendarData.getId(), lastMeetingDate);
-			nextEligibleMeetingDate = CalendarUtils.getRecentEligibleMeetingDate(applicableCalendarData.getRecurrence(),
-					lastMeetingDate, isSkipRepaymentOnFirstMonthEnabled, numberOfDays);
-		}
 
-		/**
-		 * If nextEligibleMeetingDate is on or after current calendar startdate
-		 * then regenerate the nextEligible meeting date based on
-		 */
-		if (nextEligibleMeetingDate == null) {
-			final LocalDate seedDate = (lastMeetingDate != null) ? lastMeetingDate : calendarData.getStartDate();
-			nextEligibleMeetingDate = CalendarUtils.getRecentEligibleMeetingDate(applicableCalendarData.getRecurrence(),
-					seedDate, isSkipRepaymentOnFirstMonthEnabled, numberOfDays);
-		} else if (calendarData.isBetweenStartAndEndDate(nextEligibleMeetingDate)) {
-			nextEligibleMeetingDate = CalendarUtils.getRecentEligibleMeetingDate(applicableCalendarData.getRecurrence(),
-					calendarData.getStartDate(), isSkipRepaymentOnFirstMonthEnabled, numberOfDays);
-		}
+        Integer numberOfDays = 0;
+        boolean isSkipRepaymentOnFirstMonthEnabled = configurationDomainService
+                .isSkippingMeetingOnFirstDayOfMonthEnabled();
+        if (isSkipRepaymentOnFirstMonthEnabled) {
+            numberOfDays = configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
+        }
 
-		return nextEligibleMeetingDate;
-	}
+        if (lastMeetingDate != null && !calendarData.isBetweenStartAndEndDate(lastMeetingDate)
+                && !calendarData.isBetweenStartAndEndDate(DateUtils.getLocalDateOfTenant())) {
+            applicableCalendarData = this.retrieveApplicableCalendarFromHistory(calendarData.getId(), lastMeetingDate);
+            nextEligibleMeetingDate = CalendarUtils.getRecentEligibleMeetingDate(applicableCalendarData.getRecurrence(),
+                    lastMeetingDate, isSkipRepaymentOnFirstMonthEnabled, numberOfDays);
+        }
+
+        /**
+         * If nextEligibleMeetingDate is on or after current calendar startdate
+         * then regenerate the nextEligible meeting date based on
+         */
+        if (nextEligibleMeetingDate == null) {
+            final LocalDate seedDate = (lastMeetingDate != null) ? lastMeetingDate : calendarData.getStartDate();
+            nextEligibleMeetingDate = CalendarUtils.getRecentEligibleMeetingDate(applicableCalendarData.getRecurrence(),
+                    seedDate, isSkipRepaymentOnFirstMonthEnabled, numberOfDays);
+        } else if (calendarData.isBetweenStartAndEndDate(nextEligibleMeetingDate)) {
+            nextEligibleMeetingDate = CalendarUtils.getRecentEligibleMeetingDate(applicableCalendarData.getRecurrence(),
+                    calendarData.getStartDate(), isSkipRepaymentOnFirstMonthEnabled, numberOfDays);
+        }
+
+        return nextEligibleMeetingDate;
+    }
 
     @Override
     public Collection<CalendarData> updateWithRecurringDates(final Collection<CalendarData> calendarsData) {
@@ -509,6 +509,6 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
                     lastUpdatedByUserId, lastUpdatedByUserName, meetingTime, monthOnDay);
         }
     }
-    
-    
+
+
 }

@@ -22,32 +22,32 @@ import java.math.BigDecimal;
 
 public class CompoundInterestValues {
 
-	private BigDecimal compoundedInterest;
-	private BigDecimal uncompoundedInterest;
+    private BigDecimal compoundedInterest;
+    private BigDecimal uncompoundedInterest;
 
-	public CompoundInterestValues(final BigDecimal compoundedInterest, final BigDecimal uncompoundedInterest) {
-		this.compoundedInterest = compoundedInterest;
-		this.uncompoundedInterest = uncompoundedInterest;
-	}
+    public CompoundInterestValues(final BigDecimal compoundedInterest, final BigDecimal uncompoundedInterest) {
+        this.compoundedInterest = compoundedInterest;
+        this.uncompoundedInterest = uncompoundedInterest;
+    }
 
-	public BigDecimal getcompoundedInterest() {
-		return this.compoundedInterest;
-	}
+    public BigDecimal getcompoundedInterest() {
+        return this.compoundedInterest;
+    }
 
-	public BigDecimal getuncompoundedInterest() {
-		return this.uncompoundedInterest;
-	}
+    public BigDecimal getuncompoundedInterest() {
+        return this.uncompoundedInterest;
+    }
 
-	public void setcompoundedInterest(BigDecimal interestToBeCompounded) {
-		this.compoundedInterest = interestToBeCompounded;
-	}
+    public void setcompoundedInterest(BigDecimal interestToBeCompounded) {
+        this.compoundedInterest = interestToBeCompounded;
+    }
 
-	public void setuncompoundedInterest(BigDecimal interestToBeUncompounded) {
-		this.uncompoundedInterest = interestToBeUncompounded;
-	}
+    public void setuncompoundedInterest(BigDecimal interestToBeUncompounded) {
+        this.uncompoundedInterest = interestToBeUncompounded;
+    }
 
-	public void setZeroForInterestToBeUncompounded() {
-		this.uncompoundedInterest = BigDecimal.ZERO;
-	}
+    public void setZeroForInterestToBeUncompounded() {
+        this.uncompoundedInterest = BigDecimal.ZERO;
+    }
 
 }

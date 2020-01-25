@@ -41,10 +41,10 @@ public interface AccountTransfersReadPlatformService {
     Page<AccountTransferData> retrieveByStandingInstruction(Long id, SearchParameters searchParameters);
 
     Collection<Long> fetchPostInterestTransactionIds(Long accountId);
-    
+
     AccountTransferData retrieveRefundByTransferTemplate(Long fromOfficeId, Long fromClientId, Long fromAccountId, Integer fromAccountType,
             Long toOfficeId, Long toClientId, Long toAccountId, Integer toAccountType);
 
-	BigDecimal getTotalTransactionAmount(Long accountId, Integer accountType,
-			LocalDate transactionDate);
+    BigDecimal getTotalTransactionAmount(Long accountId, Integer accountType,
+            LocalDate transactionDate);
 }

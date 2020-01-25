@@ -22,7 +22,7 @@ public enum SmsMessageStatusType {
 
     INVALID(0, "smsMessageStatusType.invalid"), //
     PENDING(100, "smsMessageStatusType.pending"), //
-    WAITING_FOR_DELIVERY_REPORT(150, "smsMessageStatusType.waitingForDeliveryReport"), 
+    WAITING_FOR_DELIVERY_REPORT(150, "smsMessageStatusType.waitingForDeliveryReport"),
     SENT(200, "smsMessageStatusType.sent"), //
     DELIVERED(300, "smsMessageStatusType.delivered"), //
     FAILED(400, "smsMessageStatusType.failed");

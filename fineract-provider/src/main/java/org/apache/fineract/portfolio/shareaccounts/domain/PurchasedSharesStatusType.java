@@ -69,7 +69,7 @@ public enum PurchasedSharesStatusType {
     public boolean isApproved() {
         return this.value.equals(PurchasedSharesStatusType.APPROVED.getValue());
     }
- 
+
     public boolean isRejected() {
         return this.value.equals(PurchasedSharesStatusType.REJECTED.getValue());
     }
@@ -77,7 +77,7 @@ public enum PurchasedSharesStatusType {
     public boolean isPurchased() {
         return this.value.equals(PurchasedSharesStatusType.PURCHASED.getValue());
     }
-    
+
     public boolean isChargePayment() {
         return this.value.equals(PurchasedSharesStatusType.CHARGE_PAYMENT.getValue());
     }

@@ -49,8 +49,8 @@ public class AccountNumberFormatDataValidator {
     private static final Set<String> ACCOUNT_NUMBER_FORMAT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
             AccountNumberFormatConstants.accountTypeParamName, AccountNumberFormatConstants.prefixTypeParamName));
 
-	private static final Set<String> ACCOUNT_NUMBER_FORMAT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(AccountNumberFormatConstants.prefixTypeParamName));
+    private static final Set<String> ACCOUNT_NUMBER_FORMAT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(AccountNumberFormatConstants.prefixTypeParamName));
 
     @Autowired
     public AccountNumberFormatDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -61,8 +61,8 @@ public class AccountNumberFormatDataValidator {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-				ACCOUNT_NUMBER_FORMAT_CREATE_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                ACCOUNT_NUMBER_FORMAT_CREATE_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
@@ -105,31 +105,31 @@ public class AccountNumberFormatDataValidator {
 
     }
 
-	public Set<Integer> determineValidAccountNumberPrefixes(
-			EntityAccountType entityAccountType) {
-		Set<AccountNumberPrefixType> validAccountNumberPrefixes = new HashSet<>();
+    public Set<Integer> determineValidAccountNumberPrefixes(
+            EntityAccountType entityAccountType) {
+        Set<AccountNumberPrefixType> validAccountNumberPrefixes = new HashSet<>();
 
-		switch (entityAccountType) {
-		case CLIENT:
-			validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForClientAccounts;
-			break;
+        switch (entityAccountType) {
+        case CLIENT:
+            validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForClientAccounts;
+            break;
 
-		case LOAN:
-			validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForLoanAccounts;
-			break;
+        case LOAN:
+            validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForLoanAccounts;
+            break;
 
-		case SAVINGS:
-			validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForSavingsAccounts;
-			break;
+        case SAVINGS:
+            validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForSavingsAccounts;
+            break;
 
-		case CENTER:
-			validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForCenters;
-			break;
-			
-		case GROUP:
-			validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForGroups;
-			break;
-		}
+        case CENTER:
+            validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForCenters;
+            break;
+
+        case GROUP:
+            validAccountNumberPrefixes = AccountNumberFormatEnumerations.accountNumberPrefixesForGroups;
+            break;
+        }
 
         Set<Integer> validAccountNumberPrefixValues = new HashSet<>();
         for (AccountNumberPrefixType validAccountNumberPrefix : validAccountNumberPrefixes) {
@@ -143,8 +143,8 @@ public class AccountNumberFormatDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-				ACCOUNT_NUMBER_FORMAT_UPDATE_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                ACCOUNT_NUMBER_FORMAT_UPDATE_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();

@@ -58,7 +58,10 @@ import org.springframework.stereotype.Component;
 @Path("/holidays")
 @Component
 @Scope("singleton")
-@Api(value = "Holidays", description = "Some MFI's span large regions where different branch offices might observe different holidays. They need the ability to define holidays for specific branch offices and be able to set the repayment rule to follow during those holidays.\n" + "\n" + "The reschedule of repayments to repaymentsRescheduledTo date during defined holidays is turned on/off by enabling/disabling reschedule-repayments-on-holidays in Global configurations.\n" + "\n" + "Allow Repayment transactions on a defined holidays is turned on/off by enabling/disabling allow-transactions-on-holiday in Global configurations.")
+@Api(tags = {"Holidays"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Holidays", description = "Some MFI's span large regions where different branch offices might observe different holidays. They need the ability to define holidays for specific branch offices and be able to set the repayment rule to follow during those holidays.\n" + "\n" + "The reschedule of repayments to repaymentsRescheduledTo date during defined holidays is turned on/off by enabling/disabling reschedule-repayments-on-holidays in Global configurations.\n" + "\n" + "Allow Repayment transactions on a defined holidays is turned on/off by enabling/disabling allow-transactions-on-holiday in Global configurations.")
+})
 public class HolidaysApiResource {
 
     private final DefaultToApiJsonSerializer<HolidayData> toApiJsonSerializer;
@@ -197,7 +200,7 @@ public class HolidaysApiResource {
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, holidays, HOLIDAY_RESPONSE_DATA_PARAMETERS);
     }
-    
+
     @GET
     @Path("/template")
     @Consumes({MediaType.APPLICATION_JSON})

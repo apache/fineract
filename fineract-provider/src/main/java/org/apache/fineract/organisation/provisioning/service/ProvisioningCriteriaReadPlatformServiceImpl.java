@@ -83,7 +83,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
         final Collection<GLAccountData> glAccounts = this.glAccountReadPlatformService.retrieveAllEnabledDetailGLAccounts();
         return ProvisioningCriteriaData.toTemplate(data, constructCriteriaTemplate(categories), allLoanProducts, glAccounts);
     }
-    
+
     private Collection<ProvisioningCriteriaDefinitionData> constructCriteriaTemplate(Collection<ProvisioningCategoryData> categories) {
         List<ProvisioningCriteriaDefinitionData> definitions = new ArrayList<>();
         for (ProvisioningCategoryData data : categories) {
@@ -97,7 +97,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
         final String sql = "select " + mapper.schema() ;
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
     }
-    
+
     private static final class ProvisioningCriteriaRowMapper implements RowMapper<ProvisioningCriteriaData> {
 
         @Override
@@ -124,7 +124,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
         }catch(EmptyResultDataAccessException e) {
             throw new ProvisioningCriteriaNotFoundException(criteriaId) ;
         }
-       
+
     }
 
     private List<ProvisioningCriteriaDefinitionData> retrieveProvisioningDefinitions(Long criteriaId) {
@@ -160,7 +160,7 @@ public class ProvisioningCriteriaReadPlatformServiceImpl implements Provisioning
             Long expenseAccount = rs.getLong("expense_account");
             String expenseAccountCode = rs.getString("expensecode");
             String expenseAccountName = rs.getString("expensename") ;
-            
+
             return new ProvisioningCriteriaDefinitionData(id, categoryId, categoryName, minAge, maxAge, provisioningPercentage,
                     liabilityAccount, liabilityAccountCode, liabilityAccountName, expenseAccount, expenseAccountCode, expenseAccountName);
         }

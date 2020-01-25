@@ -41,107 +41,107 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class FloatingRateWritePlatformServiceImpl implements
-		FloatingRateWritePlatformService {
+        FloatingRateWritePlatformService {
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(FloatingRateWritePlatformServiceImpl.class);
-	private final PlatformSecurityContext context;
-	private final FloatingRateDataValidator fromApiJsonDeserializer;
-	private final FloatingRateRepositoryWrapper floatingRateRepository;
+    private final static Logger logger = LoggerFactory
+            .getLogger(FloatingRateWritePlatformServiceImpl.class);
+    private final PlatformSecurityContext context;
+    private final FloatingRateDataValidator fromApiJsonDeserializer;
+    private final FloatingRateRepositoryWrapper floatingRateRepository;
 
-	@Autowired
-	public FloatingRateWritePlatformServiceImpl(
-			final PlatformSecurityContext context,
-			final FloatingRateDataValidator fromApiJsonDeserializer,
-			final FloatingRateRepositoryWrapper floatingRateRepository) {
-		this.context = context;
-		this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-		this.floatingRateRepository = floatingRateRepository;
-	}
+    @Autowired
+    public FloatingRateWritePlatformServiceImpl(
+            final PlatformSecurityContext context,
+            final FloatingRateDataValidator fromApiJsonDeserializer,
+            final FloatingRateRepositoryWrapper floatingRateRepository) {
+        this.context = context;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.floatingRateRepository = floatingRateRepository;
+    }
 
-	@Transactional
-	@Override
-	public CommandProcessingResult createFloatingRate(final JsonCommand command) {
-		try {
-			this.fromApiJsonDeserializer.validateForCreate(command.json());
-			final AppUser currentUser = this.context.authenticatedUser();
-			final FloatingRate newFloatingRate = FloatingRate.createNew(
-					currentUser, command);
-			this.floatingRateRepository.save(newFloatingRate);
-			return new CommandProcessingResultBuilder() //
-					.withCommandId(command.commandId()) //
-					.withEntityId(newFloatingRate.getId()) //
-					.build();
-		} catch (final DataIntegrityViolationException dve) {
-			handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
-			return CommandProcessingResult.empty();
-		}catch (final PersistenceException dve) {
-			Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+    @Transactional
+    @Override
+    public CommandProcessingResult createFloatingRate(final JsonCommand command) {
+        try {
+            this.fromApiJsonDeserializer.validateForCreate(command.json());
+            final AppUser currentUser = this.context.authenticatedUser();
+            final FloatingRate newFloatingRate = FloatingRate.createNew(
+                    currentUser, command);
+            this.floatingRateRepository.save(newFloatingRate);
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(newFloatingRate.getId()) //
+                    .build();
+        } catch (final DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
+            return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleDataIntegrityIssues(command, throwable, dve);
-         	return CommandProcessingResult.empty();
-		}
-	}
+             return CommandProcessingResult.empty();
+        }
+    }
 
-	@Transactional
-	@Override
-	public CommandProcessingResult updateFloatingRate(final JsonCommand command) {
-		try {
-			final FloatingRate floatingRateForUpdate = this.floatingRateRepository
-					.findOneWithNotFoundDetection(command.entityId());
-			this.fromApiJsonDeserializer.validateForUpdate(command.json(),
-					floatingRateForUpdate);
-			final AppUser currentUser = this.context.authenticatedUser();
-			final Map<String, Object> changes = floatingRateForUpdate.update(
-					command, currentUser);
+    @Transactional
+    @Override
+    public CommandProcessingResult updateFloatingRate(final JsonCommand command) {
+        try {
+            final FloatingRate floatingRateForUpdate = this.floatingRateRepository
+                    .findOneWithNotFoundDetection(command.entityId());
+            this.fromApiJsonDeserializer.validateForUpdate(command.json(),
+                    floatingRateForUpdate);
+            final AppUser currentUser = this.context.authenticatedUser();
+            final Map<String, Object> changes = floatingRateForUpdate.update(
+                    command, currentUser);
 
-			if (!changes.isEmpty()) {
-				this.floatingRateRepository.save(floatingRateForUpdate);
-			}
+            if (!changes.isEmpty()) {
+                this.floatingRateRepository.save(floatingRateForUpdate);
+            }
 
-			return new CommandProcessingResultBuilder() //
-					.withCommandId(command.commandId()) //
-					.withEntityId(command.entityId()) //
-					.with(changes) //
-					.build();
-		} catch (final DataIntegrityViolationException dve) {
-			handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
-			return CommandProcessingResult.empty();
-		}catch (final PersistenceException dve) {
-			Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(command.entityId()) //
+                    .with(changes) //
+                    .build();
+        } catch (final DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
+            return CommandProcessingResult.empty();
+        }catch (final PersistenceException dve) {
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleDataIntegrityIssues(command, throwable, dve);
-         	return CommandProcessingResult.empty();
-		}
-	}
+             return CommandProcessingResult.empty();
+        }
+    }
 
-	private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
-			final Exception dve) {
+    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause,
+            final Exception dve) {
 
-		if (realCause.getMessage().contains("unq_name")) {
+        if (realCause.getMessage().contains("unq_name")) {
 
-			final String name = command.stringValueOfParameterNamed("name");
-			throw new PlatformDataIntegrityException(
-					"error.msg.floatingrates.duplicate.name",
-					"Floating Rate with name `" + name + "` already exists",
-					"name", name);
-		}
+            final String name = command.stringValueOfParameterNamed("name");
+            throw new PlatformDataIntegrityException(
+                    "error.msg.floatingrates.duplicate.name",
+                    "Floating Rate with name `" + name + "` already exists",
+                    "name", name);
+        }
 
-		if (realCause.getMessage().contains("unq_rate_period")) {
-			throw new PlatformDataIntegrityException(
-					"error.msg.floatingrates.duplicate.active.fromdate",
-					"Attempt to add multiple floating rate periods with same fromdate",
-					"fromdate", "");
-		}
+        if (realCause.getMessage().contains("unq_rate_period")) {
+            throw new PlatformDataIntegrityException(
+                    "error.msg.floatingrates.duplicate.active.fromdate",
+                    "Attempt to add multiple floating rate periods with same fromdate",
+                    "fromdate", "");
+        }
 
-		logAsErrorUnexpectedDataIntegrityException(dve);
-		throw new PlatformDataIntegrityException(
-				"error.msg.floatingrates.unknown.data.integrity.issue",
-				"Unknown data integrity issue with resource.");
-	}
+        logAsErrorUnexpectedDataIntegrityException(dve);
+        throw new PlatformDataIntegrityException(
+                "error.msg.floatingrates.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource.");
+    }
 
-	private void logAsErrorUnexpectedDataIntegrityException(
-			Exception dve) {
-		logger.error(dve.getMessage(), dve);
+    private void logAsErrorUnexpectedDataIntegrityException(
+            Exception dve) {
+        logger.error(dve.getMessage(), dve);
 
-	}
+    }
 
 }

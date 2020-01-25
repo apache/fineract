@@ -53,14 +53,14 @@ public class AppUserData {
     private final Collection<RoleData> selectedRoles;
     private final StaffData staff;
     private final Boolean isSelfServiceUser;
-    
-	@SuppressWarnings("unused")
+
+    @SuppressWarnings("unused")
     private Set<ClientData> clients;
 
-	public static AppUserData importInstance(Long officeId,Long staffId,String userName, String firstName, String lastName,
+    public static AppUserData importInstance(Long officeId,Long staffId,String userName, String firstName, String lastName,
             String email,Boolean sendPasswordToEmail,Boolean passwordNeverExpires, List<Long> roleIds,
             Integer rowIndex){
-	    return new AppUserData(officeId,staffId,userName,firstName,lastName,email,
+        return new AppUserData(officeId,staffId,userName,firstName,lastName,email,
                 sendPasswordToEmail,passwordNeverExpires,roleIds,rowIndex);
     }
     private AppUserData(Long officeId,Long staffId,String username, String firstname, String lastname,
@@ -158,13 +158,13 @@ public class AppUserData {
     public int hashCode() {
         return id != null ? id.hashCode() : 0;
     }
-    
+
     public void setClients(Set<ClientData> clients){
-    	this.clients = clients;
+        this.clients = clients;
     }
-    
+
     public boolean isSelfServiceUser() {
-		return this.isSelfServiceUser==null?false:this.isSelfServiceUser;
-	}
+        return this.isSelfServiceUser==null?false:this.isSelfServiceUser;
+    }
 
 }

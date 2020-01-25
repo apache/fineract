@@ -82,9 +82,9 @@ public class GuarantorsApiResource {
             "city", "state", "zip", "country", "mobileNumber", "housePhoneNumber", "comment", "dob", "guarantorTypeOptions",
             "allowedClientRelationshipTypes"));
 
-	private static final Set<String> ACCOUNT_TRANSFER_API_RESPONSE_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(AccountDetailConstants.idParamName, AccountTransfersApiConstants.transferDescriptionParamName,
-					AccountTransfersApiConstants.currencyParamName));
+    private static final Set<String> ACCOUNT_TRANSFER_API_RESPONSE_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(AccountDetailConstants.idParamName, AccountTransfersApiConstants.transferDescriptionParamName,
+                    AccountTransfersApiConstants.currencyParamName));
 
     private final String resourceNameForPermission = "GUARANTOR";
 

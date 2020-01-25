@@ -54,7 +54,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
 
     @Autowired
     public SmsReadPlatformServiceImpl(final RoutingDataSource dataSource,
-    		final ColumnValidator columnValidator) {
+            final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.smsRowMapper = new SmsMapper();
         this.columnValidator = columnValidator;
@@ -84,7 +84,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
         public String schema() {
             return this.schema;
         }
-        
+
         public String tableName() {
             return "sms_messages_outbound";
     }
@@ -104,7 +104,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
             final EnumOptionData status = SmsMessageEnumerations.status(statusId);
 
             final Long providerId = JdbcSupport.getLong(rs, "providerId");
-            
+
             final String campaignName = rs.getString("campaignName");
 
             return SmsData.instance(id, groupId, clientId, staffId, status, mobileNo, message, providerId, campaignName);
@@ -167,7 +167,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
         final String sql = "select id from " + this.smsRowMapper.tableName() + " where status_enum = "
                 + SmsMessageStatusType.WAITING_FOR_DELIVERY_REPORT.getValue() + sqlPlusLimit;
         final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(jdbcTemplate, sql, sqlCountRows, Long.class); 
+        return this.paginationHelper.fetchPage(jdbcTemplate, sql, sqlCountRows, Long.class);
         //(this.jdbcTemplate, sqlCountRows, new Object [] {}, Long.class); this.jdbcTemplate.queryForList(sql, Long.class);
     }
 
@@ -221,7 +221,7 @@ public class SmsReadPlatformServiceImpl implements SmsReadPlatformService {
             sqlBuilder.append(" and smo.submittedon_date >= ? and smo.submittedon_date <= ? ");
             objectArray[arrayPos] = fromDateString;
             arrayPos = arrayPos + 1;
-            
+
             objectArray[arrayPos] = toDateString;
             arrayPos = arrayPos + 1;
         }

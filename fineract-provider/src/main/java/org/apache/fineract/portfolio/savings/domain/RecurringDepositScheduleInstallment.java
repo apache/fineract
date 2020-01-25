@@ -74,7 +74,7 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
     private Date obligationsMetOnDate;
 
     /**
-     * 
+     *
      */
     protected RecurringDepositScheduleInstallment() {
         this.installmentNumber = null;
@@ -241,7 +241,7 @@ public class RecurringDepositScheduleInstallment extends AbstractAuditableCustom
         this.depositAmount = newDepositAmount;
         this.resetDerivedFields();
     }
-    
+
     public Integer installmentNumber() {
         return this.installmentNumber ;
     }

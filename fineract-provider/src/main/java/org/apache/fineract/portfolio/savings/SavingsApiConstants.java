@@ -177,7 +177,7 @@ public class    SavingsApiConstants {
     public static final String onHoldTransactionTypeParamName = "transactionType";
     public static final String onHoldTransactionDateParamName = "transactionDate";
     public static final String onHoldReversedParamName = "reversed";
-    
+
     // Savings Dormancy
     public static final String isDormancyTrackingActiveParamName = "isDormancyTrackingActive";
     public static final String daysToInactiveParamName = "daysToInactive";
@@ -185,6 +185,6 @@ public class    SavingsApiConstants {
     public static final String daysToEscheatParamName = "daysToEscheat";
 
     public static final String datatables = "datatables";
-    
+
     public static final String ERROR_MSG_SAVINGS_ACCOUNT_NOT_ACTIVE = "not.in.active.state";
 }

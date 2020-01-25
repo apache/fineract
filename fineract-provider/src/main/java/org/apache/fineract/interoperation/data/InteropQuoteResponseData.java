@@ -34,7 +34,7 @@ public class InteropQuoteResponseData extends InteropResponseData {
 
     private MoneyData fspCommission;
 
-    
+
     private InteropQuoteResponseData(Long resourceId, Long officeId, Long commandId, Map<String, Object> changesOnly,
                                      @NotNull String transactionCode, @NotNull InteropActionState state, LocalDateTime expiration,
                                      List<ExtensionData> extensionList, @NotNull String quoteCode, MoneyData fspFee, MoneyData fspCommission) {

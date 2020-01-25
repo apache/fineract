@@ -145,10 +145,10 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     @Query(DOES_CLIENT_HAVE_NON_CLOSED_LOANS)
     boolean doNonClosedLoanAccountsExistForClient(@Param("clientId") Long clientId);
-    
+
     @Query(DOES_PRODUCT_HAVE_NON_CLOSED_LOANS)
     boolean doNonClosedLoanAccountsExistForProduct(@Param("productId") Long productId);
-    
+
     @Query(FIND_BY_ACCOUNT_NUMBER)
     Loan findNonClosedLoanByAccountNumber(@Param("accountNumber") String accountNumber);
 

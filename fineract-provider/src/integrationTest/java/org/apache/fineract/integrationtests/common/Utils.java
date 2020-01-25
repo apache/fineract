@@ -34,6 +34,7 @@ import java.util.Random;
 import java.util.TimeZone;
 
 import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -62,7 +63,7 @@ public class Utils {
     public static final String TENANT_TIME_ZONE = "Asia/Kolkata";
 
     private static final String HEALTH_URL = "/fineract-provider/actuator/health";
-    private static final String LOGIN_URL  = "/fineract-provider/api/v1/authentication?username=mifos&password=password&" + TENANT_IDENTIFIER;
+    private static final String LOGIN_URL  = "/fineract-provider/api/v1/authentication?" + TENANT_IDENTIFIER;
 
     public static void initializeRESTAssured() {
         RestAssured.baseURI = "https://localhost";
@@ -116,9 +117,13 @@ public class Utils {
         try {
             logger.info("Logging in, for integration test...");
             System.out.println("-----------------------------------LOGIN-----------------------------------------");
-            final String json = RestAssured.post(LOGIN_URL).asString();
+            String json = RestAssured.given().contentType(ContentType.JSON)
+                .body("{\"username\":\"mifos\", \"password\":\"password\"}")
+                .expect().log().ifError().when().post(LOGIN_URL).asString();
             assertThat("Failed to login into fineract platform", StringUtils.isBlank(json), is(false));
-            return JsonPath.with(json).get("base64EncodedAuthenticationKey");
+            String key = JsonPath.with(json).get("base64EncodedAuthenticationKey");
+            assertThat("Failed to obtain key: " + json, StringUtils.isBlank(key), is(false));
+            return key;
         } catch (final Exception e) {
             if (e instanceof HttpHostConnectException) {
                 final HttpHostConnectException hh = (HttpHostConnectException) e;
@@ -258,8 +263,8 @@ public class Utils {
         return templateLocation.substring(1,templateLocation.length()-1);
     }
 
-    public static void waitUntilFileCreation(String location){
-        Long start= System.currentTimeMillis();
+    public static void waitUntilFileCreation(String location) {
+        Long start = System.currentTimeMillis();
 
         while (!new File(location).exists()) {
             try {
@@ -271,5 +276,17 @@ public class Utils {
                 break;
         }
     }
-}
 
+        public static Integer getDayOfWeek (Calendar date){
+            int dayOfWeek = 0;
+            if (null != date) {
+                dayOfWeek = date.get(Calendar.DAY_OF_WEEK) - 1;
+                if (dayOfWeek == 0) {
+                    dayOfWeek = 7;
+                }
+            }
+            return Integer.valueOf(dayOfWeek);
+
+        }
+
+    }

@@ -35,7 +35,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.apache.fineract.portfolio.common.service.BusinessEventNotifierService
      * #notifyBusinessEventToBeExecuted
@@ -55,7 +55,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.apache.fineract.portfolio.common.service.BusinessEventNotifierService
      * #notifyBusinessEventWasExecuted
@@ -75,7 +75,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.apache.fineract.portfolio.common.service.BusinessEventNotifierService
      * #addBusinessEventPreListners
@@ -90,7 +90,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.apache.fineract.portfolio.common.service.BusinessEventNotifierService
      * #addBusinessEventPostListners

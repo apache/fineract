@@ -83,7 +83,10 @@ import org.springframework.util.CollectionUtils;
 @Path("/fixeddepositaccounts")
 @Component
 @Scope("singleton")
-@Api(value = "Fixed Deposit Account", description = "Fixed Deposit accounts are instances of a praticular fixed deposit product created. An application process around the creation of accounts is also supported.")
+@Api(tags = {"Fixed Deposit Account"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Fixed Deposit Account", description = "Fixed Deposit accounts are instances of a praticular fixed deposit product created. An application process around the creation of accounts is also supported.")
+})
 public class FixedDepositAccountsApiResource {
 
     private final DepositAccountReadPlatformService depositAccountReadPlatformService;
@@ -201,7 +204,7 @@ public class FixedDepositAccountsApiResource {
 
         final FixedDepositAccountData account = (FixedDepositAccountData) this.depositAccountReadPlatformService.retrieveOneWithChartSlabs(
                 DepositAccountType.FIXED_DEPOSIT, accountId);
-        
+
         final Set<String> mandatoryResponseParameters = new HashSet<>();
         final FixedDepositAccountData accountTemplate = populateTemplateAndAssociations(accountId, account, staffInSelectedOfficeOnly,
                 chargeStatus, uriInfo, mandatoryResponseParameters);
@@ -211,7 +214,7 @@ public class FixedDepositAccountsApiResource {
         return this.toApiJsonSerializer.serialize(settings, accountTemplate,
                 DepositsApiConstants.FIXED_DEPOSIT_ACCOUNT_RESPONSE_DATA_PARAMETERS);
     }
-    
+
     private BigDecimal getActivationCharge(Long accountId){
         BigDecimal activationCharge = BigDecimal.ZERO;
         Collection<SavingsAccountChargeData> savingCharges = this.savingsAccountChargeReadPlatformService.retrieveSavingsAccountCharges(accountId, "active");

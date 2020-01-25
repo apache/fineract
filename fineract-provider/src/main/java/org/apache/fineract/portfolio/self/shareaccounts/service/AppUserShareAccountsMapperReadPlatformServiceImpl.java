@@ -26,26 +26,26 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AppUserShareAccountsMapperReadPlatformServiceImpl
-		implements AppUserShareAccountsMapperReadPlatformService {
+        implements AppUserShareAccountsMapperReadPlatformService {
 
 
-	private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
-	@Autowired
-	public AppUserShareAccountsMapperReadPlatformServiceImpl(
-			final RoutingDataSource dataSource) {
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
-	}
-	
-	@Override
-	public Boolean isShareAccountsMappedToUser(Long accountId, Long appUserId) {
-		return this.jdbcTemplate
-				.queryForObject(
-						"select case when (count(*) > 0) then true else false end "
-								+ " from m_selfservice_user_client_mapping as m "
-								+ " left join m_share_account as shares on shares.client_id = m.client_id  "
-								+ " where shares.id = ? and m.appuser_id = ? ",
-						new Object[] { accountId, appUserId }, Boolean.class);
-	}
+    @Autowired
+    public AppUserShareAccountsMapperReadPlatformServiceImpl(
+            final RoutingDataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+    @Override
+    public Boolean isShareAccountsMappedToUser(Long accountId, Long appUserId) {
+        return this.jdbcTemplate
+                .queryForObject(
+                        "select case when (count(*) > 0) then true else false end "
+                                + " from m_selfservice_user_client_mapping as m "
+                                + " left join m_share_account as shares on shares.client_id = m.client_id  "
+                                + " where shares.id = ? and m.appuser_id = ? ",
+                        new Object[] { accountId, appUserId }, Boolean.class);
+    }
 
 }

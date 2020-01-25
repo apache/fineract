@@ -35,13 +35,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SpringEventListener implements ApplicationListener<SpringEvent> {
-	
-	private final BasicAuthTenantDetailsService basicAuthTenantDetailsService;
+
+    private final BasicAuthTenantDetailsService basicAuthTenantDetailsService;
 
     private final NotificationWritePlatformService notificationWritePlatformService;
 
     private final AppUserRepository appUserRepository;
-    
+
     @Autowired
     public SpringEventListener(BasicAuthTenantDetailsService basicAuthTenantDetailsService,
                                      NotificationWritePlatformService notificationWritePlatformService,
@@ -51,11 +51,11 @@ public class SpringEventListener implements ApplicationListener<SpringEvent> {
         this.appUserRepository = appUserRepository;
     }
 
-	@Override
-	public void onApplicationEvent(SpringEvent event) {
-		NotificationData notificationData = event.getNotificationData();
-		
-		final FineractPlatformTenant tenant = this.basicAuthTenantDetailsService
+    @Override
+    public void onApplicationEvent(SpringEvent event) {
+        NotificationData notificationData = event.getNotificationData();
+
+        final FineractPlatformTenant tenant = this.basicAuthTenantDetailsService
                 .loadTenantById(notificationData.getTenantIdentifier(), false);
         ThreadLocalContextUtil.setTenant(tenant);
 
@@ -86,7 +86,7 @@ public class SpringEventListener implements ApplicationListener<SpringEvent> {
                 notificationData.getContent(),
                 notificationData.isSystemGenerated()
         );
-		
-	}
+
+    }
 
 }

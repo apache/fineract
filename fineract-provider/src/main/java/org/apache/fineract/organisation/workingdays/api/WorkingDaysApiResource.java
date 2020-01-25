@@ -45,7 +45,10 @@ import org.springframework.stereotype.Component;
 @Path("/workingdays")
 @Component
 @Scope("singleton")
-@Api(value = "Working days", description = "The days of the week that are workdays.\n" + "\n" + "Rescheduling of repayments when it falls on a non-working is turned on /off by enable/disable reschedule-future-repayments parameter in Global configurations.\n" + "\n" + "Allow transactions on non-working days is configurable by enabling/disbaling the allow-transactions-on-non_workingday parameter in Global configurations.")
+@Api(tags = {"Working days"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Working days", description = "The days of the week that are workdays.\n" + "\n" + "Rescheduling of repayments when it falls on a non-working is turned on /off by enable/disable reschedule-future-repayments parameter in Global configurations\n" + "\n" + "Allow transactions on non-working days is configurable by enabling/disbaling the allow-transactions-on-non_workingday parameter in Global configurations.")
+})
 public class WorkingDaysApiResource {
 
     private final DefaultToApiJsonSerializer<WorkingDaysData> toApiJsonSerializer;

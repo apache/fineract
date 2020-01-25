@@ -207,9 +207,9 @@ public class Office extends AbstractPersistableCustom<Long> implements Serializa
     }
 
     public Office getParent() {
-    	return this.parent;
+        return this.parent;
     }
-    
+
     public boolean hasParentOf(final Office office) {
         boolean isParent = false;
         if (this.parent != null) {
@@ -243,7 +243,7 @@ public class Office extends AbstractPersistableCustom<Long> implements Serializa
 
         return match;
     }
-    
+
     public void loadLazyCollections() {
         this.children.size() ;
     }

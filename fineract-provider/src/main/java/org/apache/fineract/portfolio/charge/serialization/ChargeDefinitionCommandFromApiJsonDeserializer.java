@@ -183,12 +183,12 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
                 baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType)
                         .isOneOfTheseValues(ChargeTimeType.validShareValues());
             }
-            
+
             if (chargeCalculationType != null) {
                 baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
                         .isOneOfTheseValues(ChargeCalculationType.validValuesForShares());
             }
-            
+
             if(chargeTimeType != null && chargeTimeType.equals(ChargeTimeType.SHAREACCOUNT_ACTIVATION.getValue())) {
                 if(chargeCalculationType != null) {
                     baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
@@ -300,13 +300,13 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             final Integer feeInterval = this.fromApiJsonHelper.extractIntegerNamed("feeInterval", element, Locale.getDefault());
             baseDataValidator.reset().parameter("feeInterval").value(feeInterval).integerGreaterThanZero();
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists("chargeCalculationType", element)) {
             final Integer chargeCalculationType = this.fromApiJsonHelper.extractIntegerNamed("chargeCalculationType", element,
                     Locale.getDefault());
             baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).notNull().inMinMaxRange(1, 5);
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists("chargePaymentMode", element)) {
             final Integer chargePaymentMode = this.fromApiJsonHelper.extractIntegerNamed("chargePaymentMode", element, Locale.getDefault());
             baseDataValidator.reset().parameter("chargePaymentMode").value(chargePaymentMode).notNull().inMinMaxRange(0, 1);
@@ -361,7 +361,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
             .isOneOfTheseValues(ChargeCalculationType.validValuesForShareAccountActivation());
         }
-        
+
         if (chargeTimeType.equals(ChargeTimeType.TRANCHE_DISBURSEMENT.getValue())) {
             baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType)
                     .isOneOfTheseValues(ChargeCalculationType.validValuesForTrancheDisbursement());

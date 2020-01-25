@@ -32,9 +32,9 @@ import com.google.gson.reflect.TypeToken;
  * {@link org.apache.fineract.infrastructure.core.serialization.FromJsonHelper} to
  * de-serialize the incoming String into a JSON List of type
  * {@link org.apache.fineract.batch.domain.BatchRequest}
- * 
+ *
  * @author Rishabh Shukla
- * 
+ *
  * @see org.apache.fineract.batch.domain.BatchRequest
  * @see org.apache.fineract.infrastructure.core.serialization.FromJsonHelper
  */
@@ -44,7 +44,7 @@ public class BatchRequestJsonHelper extends FromJsonHelper {
     /**
      * Returns a list of batchRequests after de-serializing it from the input
      * JSON string.
-     * 
+     *
      * @param json
      * @return List&lt;BatchRequest&gt;
      */

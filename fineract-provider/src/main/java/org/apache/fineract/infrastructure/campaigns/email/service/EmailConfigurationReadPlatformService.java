@@ -23,8 +23,8 @@ import org.apache.fineract.infrastructure.campaigns.email.data.EmailConfiguratio
 import java.util.Collection;
 
 public interface EmailConfigurationReadPlatformService {
-	
-	Collection<EmailConfigurationData> retrieveAll();
 
-	EmailConfigurationData retrieveOne(String name);
+    Collection<EmailConfigurationData> retrieveAll();
+
+    EmailConfigurationData retrieveOne(String name);
 }

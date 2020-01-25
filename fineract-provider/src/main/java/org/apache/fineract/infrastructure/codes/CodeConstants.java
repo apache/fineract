@@ -28,7 +28,7 @@ public class CodeConstants {
      * value
      ***/
     public static enum CODEVALUE_JSON_INPUT_PARAMS {
-        CODEVALUE_ID("id"), NAME("name"), POSITION("position"), DESCRIPTION("description"), IS_ACTIVE("isActive"), 
+        CODEVALUE_ID("id"), NAME("name"), POSITION("position"), DESCRIPTION("description"), IS_ACTIVE("isActive"),
         IS_MANDATORY("isMandatory");
 
         private final String value;

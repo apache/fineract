@@ -104,7 +104,7 @@ public class ProvisioningIntegrationTest {
 
         Map newCriteria = transactionHelper.retrieveProvisioningCriteria(criteriaId) ;
         validateProvisioningCriteria(requestCriteria, newCriteria) ;
-        
+
         ArrayList definitions = (ArrayList)newCriteria.get("definitions") ;
         for(int i = 0 ; i < definitions.size(); i++) {
             Map criteriadefinition = (Map) definitions.get(i) ;
@@ -115,9 +115,9 @@ public class ProvisioningIntegrationTest {
         Integer criteriaId1 = transactionHelper.updateProvisioningCriteria(criteriaId, updateCriteriaString) ;
         Map updatedCriteria = transactionHelper.retrieveProvisioningCriteria(criteriaId1) ;
         validateProvisioningCriteria(newCriteria, updatedCriteria) ;
-        
+
         transactionHelper.deleteProvisioningCriteria(criteriaId1) ;
- 
+
         categories = transactionHelper.retrieveAllProvisioningCategories();
         liability = accountHelper.createLiabilityAccount() ;
         expense = accountHelper.createExpenseAccount() ;
@@ -129,7 +129,7 @@ public class ProvisioningIntegrationTest {
         String provisioningEntryJson = ProvisioningHelper.createProvisioningEntryJson();
         Integer provisioningEntryId = transactionHelper.createProvisioningEntries(provisioningEntryJson);
         Assert.assertNotNull(provisioningEntryId);
-        
+
         transactionHelper.updateProvisioningEntry("recreateprovisioningentry", provisioningEntryId, "") ;
         transactionHelper.updateProvisioningEntry("createjournalentry", provisioningEntryId, "") ;
         Map entry = transactionHelper.retrieveProvisioningEntry(provisioningEntryId) ;
@@ -139,29 +139,29 @@ public class ProvisioningIntegrationTest {
     }
 
     private void validateProvisioningCriteria(Map requestCriteria, Map newCriteria) {
-        
+
         //criteria name validation
         String requestCriteriaName = (String)requestCriteria.get("criteriaName") ;
         String criteriaName = (String)newCriteria.get("criteriaName") ;
         Assert.assertEquals(criteriaName, requestCriteriaName) ;
-        
+
         //loan products validation
         ArrayList requestProducts = (ArrayList)requestCriteria.get("loanProducts") ;
         ArrayList products = (ArrayList)newCriteria.get("loanProducts") ;
         Assert.assertEquals(products.size(), requestProducts.size()) ;
-        
+
         ArrayList requestedDefinitions = (ArrayList)requestCriteria.get("definitions") ;
         ArrayList newdefintions = (ArrayList) newCriteria.get("definitions") ;
         Assert.assertEquals(newdefintions.size(), requestedDefinitions.size()) ;
         for(int i = 0 ; i < newdefintions.size() ; i++) {
             Map requestedMap = (Map)requestedDefinitions.get(i) ;
             Object requestedCategoryId = requestedMap.get("categoryId") ;
-            boolean found = false ; 
+            boolean found = false ;
             for(int j = 0 ; j < newdefintions.size(); j++) {
-            	Map newMap = (Map)newdefintions.get(j) ;
+                Map newMap = (Map)newdefintions.get(j) ;
                 Object newCategoryId = newMap.get("categoryId") ;
                 if(requestedCategoryId.equals(newCategoryId)) {
-                	found = true ;
+                    found = true ;
                     checkProperty("categoryId", requestedMap, newMap) ;
                     checkProperty("categoryName", requestedMap, newMap) ;
                     checkProperty("minAge", requestedMap, newMap) ;
@@ -175,13 +175,13 @@ public class ProvisioningIntegrationTest {
             if(!found) Assert.fail("No Category found with Id:"+requestedCategoryId);
         }
     }
-    
+
     private void checkProperty(String propertyName, Map requestMap, Map newMap) {
         Object requested = requestMap.get(propertyName) ;
         Object modified = newMap.get(propertyName) ;
         Assert.assertEquals(requested, modified) ;
     }
-    
+
     private Integer createLoanProduct(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
         System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         LoanProductTestBuilder builder = new LoanProductTestBuilder() //
@@ -199,7 +199,7 @@ public class ProvisioningIntegrationTest {
             builder = builder.withInterestCalculationPeriodTypeAsRepaymentPeriod(true);
         }
         final String loanProductJSON = builder.build(null);
-        
+
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
@@ -222,7 +222,7 @@ public class ProvisioningIntegrationTest {
                 .withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
         return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
-    
+
     private boolean isAlreadyProvisioningEntriesCreated() {
         ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper(requestSpec, responseSpec);
         Map entries = transactionHelper.retrieveAllProvisioningEntries() ;

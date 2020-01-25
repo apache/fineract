@@ -42,7 +42,7 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
     private final PlatformSecurityContext context;
     private final AdHocRepository adHocRepository;
     private final AdHocDataValidator adHocCommandFromApiJsonDeserializer;
-   
+
 
     @Autowired
     public AdHocWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AdHocRepository adHocRepository,
@@ -50,7 +50,7 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
         this.context = context;
         this.adHocRepository = adHocRepository;
         this.adHocCommandFromApiJsonDeserializer = adHocCommandFromApiJsonDeserializer;
-       
+
     }
 
     @Transactional

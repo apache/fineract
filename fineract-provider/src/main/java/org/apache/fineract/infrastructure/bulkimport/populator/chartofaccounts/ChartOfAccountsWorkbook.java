@@ -215,7 +215,7 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
         chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.LOOKUP_ACCOUNT_ID_COL,TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
         chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.LOOKUP_TAG_COL,TemplatePopulateImportConstants.SMALL_COL_SIZE);
         chartOfAccountsSheet.setColumnWidth(ChartOfAcountsConstants.LOOKUP_TAG_ID_COL,TemplatePopulateImportConstants.SMALL_COL_SIZE);
-        
+
         writeString(ChartOfAcountsConstants.ACCOUNT_TYPE_COL,rowHeader,"Account Type*");
         writeString(ChartOfAcountsConstants.GL_CODE_COL,rowHeader,"GL Code *");
         writeString(ChartOfAcountsConstants.ACCOUNT_USAGE_COL,rowHeader,"Account Usage *");

@@ -99,7 +99,7 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom<AppUse
 
     /**
      * If endDate is null then return false.
-     * 
+     *
      * @param compareDate
      * @return
      */

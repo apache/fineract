@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.portfolio.loanproduct.data;
 
+import java.io.Serializable;
+
 /**
  * Immutable data object representing a transaction strategy option for a loan.
  */
-public final class TransactionProcessingStrategyData {
+public final class TransactionProcessingStrategyData implements Serializable {
 
     private final Long id;
     @SuppressWarnings("unused")

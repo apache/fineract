@@ -60,7 +60,7 @@ public class TaxComponentHistory extends AbstractAuditableCustom<AppUser, Long> 
             final LocalDate endDate) {
         return new TaxComponentHistory(percentage, startDate, endDate);
     }
-    
+
     public LocalDate startDate(){
         LocalDate startDate = null;
         if(this.startDate != null){
@@ -68,7 +68,7 @@ public class TaxComponentHistory extends AbstractAuditableCustom<AppUser, Long> 
         }
         return startDate;
     }
-    
+
     public LocalDate endDate(){
         LocalDate endDate = null;
         if(this.endDate != null){
@@ -76,7 +76,7 @@ public class TaxComponentHistory extends AbstractAuditableCustom<AppUser, Long> 
         }
         return endDate;
     }
-    
+
     public boolean occursOnDayFromAndUpToAndIncluding(final LocalDate target) {
         if(this.endDate == null){
             return target != null && target.isAfter(startDate());
@@ -84,7 +84,7 @@ public class TaxComponentHistory extends AbstractAuditableCustom<AppUser, Long> 
         return target != null && target.isAfter(startDate()) && !target.isAfter(endDate());
     }
 
-    
+
     public BigDecimal getPercentage() {
         return this.percentage;
     }

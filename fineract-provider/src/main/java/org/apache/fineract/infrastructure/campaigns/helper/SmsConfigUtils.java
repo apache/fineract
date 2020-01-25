@@ -38,10 +38,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class SmsConfigUtils {
 
-	@Autowired
-	  private ExternalServicesPropertiesReadPlatformService propertiesReadPlatformService;
-	
-	//This method will return uri and HttpEntry objects with keys as uri and entity
+    @Autowired
+      private ExternalServicesPropertiesReadPlatformService propertiesReadPlatformService;
+
+    //This method will return uri and HttpEntry objects with keys as uri and entity
     public Map<String, Object> getMessageGateWayRequestURI(final String apiEndPoint, String apiQueueResourceDatas) {
         Map<String, Object> httpRequestdetails = new HashMap<>();
         MessageGatewayConfigurationData messageGatewayConfigurationData = this.propertiesReadPlatformService.getSMSGateway();
@@ -72,5 +72,5 @@ public class SmsConfigUtils {
 
         return httpRequestdetails;
     }
-	
+
 }

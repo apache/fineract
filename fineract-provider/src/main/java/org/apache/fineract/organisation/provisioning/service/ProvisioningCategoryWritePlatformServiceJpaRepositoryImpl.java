@@ -50,7 +50,7 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
 
     private final ProvisioningCategoryDefinitionJsonDeserializer fromApiJsonDeserializer;
     private final JdbcTemplate jdbcTemplate;
-    
+
     @Autowired
     public ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl(final ProvisioningCategoryRepository provisioningCategoryRepository,
             final ProvisioningCategoryDefinitionJsonDeserializer fromApiJsonDeserializer, final RoutingDataSource dataSource) {
@@ -71,9 +71,9 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(command, throwable, dve);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -106,9 +106,9 @@ public class ProvisioningCategoryWritePlatformServiceJpaRepositoryImpl implement
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(command, throwable, dve);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
+            return CommandProcessingResult.empty();
         }
     }
 

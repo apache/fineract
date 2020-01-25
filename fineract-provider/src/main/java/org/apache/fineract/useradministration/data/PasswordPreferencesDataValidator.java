@@ -42,9 +42,9 @@ import com.google.gson.reflect.TypeToken;
 @Component
 public class PasswordPreferencesDataValidator {
 
-	private final FromJsonHelper fromApiJsonHelper;
-	private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(
-			Arrays.asList(PasswordPreferencesApiConstants.VALIDATION_POLICY_ID));
+    private final FromJsonHelper fromApiJsonHelper;
+    private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(PasswordPreferencesApiConstants.VALIDATION_POLICY_ID));
 
     @Autowired
     public PasswordPreferencesDataValidator(FromJsonHelper fromApiJsonHelper) {

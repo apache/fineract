@@ -38,7 +38,7 @@ public interface FineractEntityAccessWriteService {
     /*
      * CommandProcessingResult updateEntityAccess ( final Long entityAccessId,
      * final JsonCommand command);
-     * 
+     *
      * CommandProcessingResult removeEntityAccess ( final String entityType,
      * final Long entityId, final Long accessType, final String
      * secondEntityType, final Long secondEntityId);

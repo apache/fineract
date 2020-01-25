@@ -170,7 +170,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final LoanReadPlatformService loanReadPlatformService,
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
             final BusinessEventNotifierService businessEventNotifierService, final ConfigurationDomainService configurationDomainService,
-            final LoanScheduleAssembler loanScheduleAssembler, final LoanUtilService loanUtilService, 
+            final LoanScheduleAssembler loanScheduleAssembler, final LoanUtilService loanUtilService,
             final CalendarReadPlatformService calendarReadPlatformService, final GlobalConfigurationRepositoryWrapper globalConfigurationRepository,
             final FineractEntityToEntityMappingRepository repository, final FineractEntityRelationRepository fineractEntityRelationRepository,
             final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService, final LoanProductReadPlatformService loanProductReadPlatformService) {
@@ -235,10 +235,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                         }
                         final Long groupId = this.fromJsonHelper.extractLongNamed("groupId", command.parsedJson());
                         if(groupId != null){
-                        	Group group= this.groupRepository.findOneWithNotFoundDetection(groupId);
+                         Group group= this.groupRepository.findOneWithNotFoundDetection(groupId);
                             officeSpecificLoanProductValidation( productId,group.getOffice().getId());
                         }
-            
+
             this.fromApiJsonDeserializer.validateForCreate(command.json(), isMeetingMandatoryForJLGLoans, loanProduct);
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -262,7 +262,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             final Loan newLoanApplication = this.loanAssembler.assembleFrom(command, currentUser);
 
-	     checkForProductMixRestrictions(newLoanApplication);
+      checkForProductMixRestrictions(newLoanApplication);
 
             validateSubmittedOnDate(newLoanApplication);
 
@@ -417,9 +417,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch(final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+         Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleDataIntegrityIssues(command, throwable, dve);
-         	return CommandProcessingResult.empty();
+          return CommandProcessingResult.empty();
         }
     }
 
@@ -556,7 +556,7 @@ public void checkForProductMixRestrictions(final Loan loan) {
             default:
             break;
         }
-         
+
         final Calendar calendar = Calendar.createRepeatingCalendar(title, calendarStartDate, CalendarType.COLLECTION.getValue(),
                 calendarFrequencyType, frequency, updatedRepeatsOnDay, recalculationFrequencyNthDay);
         final CalendarInstance calendarInstance = CalendarInstance.from(calendar, loan.loanInterestRecalculationDetails().getId(),
@@ -986,18 +986,18 @@ public void checkForProductMixRestrictions(final Loan loan) {
                     }
                 }
             }
-            
+
             if ((command.longValueOfParameterNamed(productIdParamName) != null)
-            							|| (command.longValueOfParameterNamed(clientIdParamName) != null) || (command.longValueOfParameterNamed(groupIdParamName) != null)) { 
-            						Long OfficeId = null;
-            						if(existingLoanApplication.getClient() != null){
-            							OfficeId = existingLoanApplication.getClient().getOffice().getId();
-            						}
-            						else if(existingLoanApplication.getGroup() != null){
-            							OfficeId = existingLoanApplication.getGroup().getOffice().getId();
-            						}
-            						officeSpecificLoanProductValidation( existingLoanApplication.getLoanProduct().getId(),OfficeId);
-            							}
+                   || (command.longValueOfParameterNamed(clientIdParamName) != null) || (command.longValueOfParameterNamed(groupIdParamName) != null)) {
+                  Long OfficeId = null;
+                  if(existingLoanApplication.getClient() != null){
+                   OfficeId = existingLoanApplication.getClient().getOffice().getId();
+                  }
+                  else if(existingLoanApplication.getGroup() != null){
+                   OfficeId = existingLoanApplication.getGroup().getOffice().getId();
+                  }
+                  officeSpecificLoanProductValidation( existingLoanApplication.getLoanProduct().getId(),OfficeId);
+                   }
 
             // updating loan interest recalculation details throwing null
             // pointer exception after saveAndFlush
@@ -1026,7 +1026,7 @@ public void checkForProductMixRestrictions(final Loan loan) {
         }catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleDataIntegrityIssues(command, throwable, dve);
-         	return CommandProcessingResult.empty();
+          return CommandProcessingResult.empty();
         }
     }
 
@@ -1035,13 +1035,13 @@ public void checkForProductMixRestrictions(final Loan loan) {
      * is.
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
-    	
-        if (realCause.getMessage().contains("loan_account_no_UNIQUE") || realCause.getCause().getMessage().contains("loan_account_no_UNIQUE")) {
+
+        if (realCause.getMessage().contains("loan_account_no_UNIQUE") || (realCause.getCause() != null && realCause.getCause().getMessage().contains("loan_account_no_UNIQUE"))) {
 
             final String accountNo = command.stringValueOfParameterNamed("accountNo");
             throw new PlatformDataIntegrityException("error.msg.loan.duplicate.accountNo", "Loan with accountNo `" + accountNo
                     + "` already exists", "accountNo", accountNo);
-        } else if (realCause.getMessage().contains("loan_externalid_UNIQUE") || realCause.getCause().getMessage().contains("loan_externalid_UNIQUE")) {
+        } else if (realCause.getMessage().contains("loan_externalid_UNIQUE") || (realCause.getCause() != null && realCause.getCause().getMessage().contains("loan_externalid_UNIQUE"))) {
             final String externalId = command.stringValueOfParameterNamed("externalId");
             throw new PlatformDataIntegrityException("error.msg.loan.duplicate.externalId", "Loan with externalId `" + externalId
                     + "` already exists", "externalId", externalId);
@@ -1068,11 +1068,11 @@ public void checkForProductMixRestrictions(final Loan loan) {
         this.noteRepository.deleteInBatch(relatedNotes);
 
         final AccountAssociations accountAssociations = this.accountAssociationsRepository.findByLoanIdAndType(loanId,
-				AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
-		if (accountAssociations != null) {
-			this.accountAssociationsRepository.delete(accountAssociations);
-		}
-		
+    AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
+  if (accountAssociations != null) {
+   this.accountAssociationsRepository.delete(accountAssociations);
+  }
+
         this.loanRepositoryWrapper.delete(loanId);
 
         return new CommandProcessingResultBuilder() //
@@ -1402,19 +1402,19 @@ public void checkForProductMixRestrictions(final Loan loan) {
     }
 
     private void officeSpecificLoanProductValidation(final Long productId, final Long officeId) {
-    			final GlobalConfigurationProperty restrictToUserOfficeProperty = this.globalConfigurationRepository
-    					.findOneByNameWithNotFoundDetection(
-    							FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_OFFICE_SPECIFIC_PRODUCTS);
-    			if (restrictToUserOfficeProperty.isEnabled()) {
-    				FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
-    						                               .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.toStr());
-    				FineractEntityToEntityMapping officeToLoanProductMappingList = this.repository.findListByProductId(fineractEntityRelation, productId,
-    						officeId);
-    				if (officeToLoanProductMappingList == null) {
-    					throw new NotOfficeSpecificProductException(productId, officeId);
-    				}
-    
-    			}
-    		}
-    
+       final GlobalConfigurationProperty restrictToUserOfficeProperty = this.globalConfigurationRepository
+         .findOneByNameWithNotFoundDetection(
+           FineractEntityAccessConstants.GLOBAL_CONFIG_FOR_OFFICE_SPECIFIC_PRODUCTS);
+       if (restrictToUserOfficeProperty.isEnabled()) {
+        FineractEntityRelation fineractEntityRelation = fineractEntityRelationRepository
+                                         .findOneByCodeName(FineractEntityAccessType.OFFICE_ACCESS_TO_LOAN_PRODUCTS.toStr());
+        FineractEntityToEntityMapping officeToLoanProductMappingList = this.repository.findListByProductId(fineractEntityRelation, productId,
+          officeId);
+        if (officeToLoanProductMappingList == null) {
+         throw new NotOfficeSpecificProductException(productId, officeId);
+        }
+
+       }
+      }
+
 }

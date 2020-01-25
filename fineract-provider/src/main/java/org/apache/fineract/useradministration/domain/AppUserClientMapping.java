@@ -30,51 +30,51 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Entity
 @Table(name = "m_selfservice_user_client_mapping")
 public class AppUserClientMapping extends AbstractPersistableCustom<Long> {
-	
+
     @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
-	public AppUserClientMapping(){
-		
-	}
+    public AppUserClientMapping(){
 
-	public AppUserClientMapping(Client client){
-		this.client = client;
-	}
+    }
 
-	public Client getClient() {
-		return this.client;
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
+    public AppUserClientMapping(Client client){
+        this.client = client;
+    }
 
-		if (null == obj) {
-			return false;
-		}
+    public Client getClient() {
+        return this.client;
+    }
 
-		if (this == obj) {
-			return true;
-		}
+    @Override
+    public boolean equals(Object obj) {
 
-		if (!getClass().equals(obj.getClass())) {
-			return false;
-		}
+        if (null == obj) {
+            return false;
+        }
 
-		AppUserClientMapping that = (AppUserClientMapping) obj;
+        if (this == obj) {
+            return true;
+        }
 
-		return null == this.client.getId() ? false : this.client.getId().equals(that.client.getId());
-	}
-	
-	@Override
-	public int hashCode() {
+        if (!getClass().equals(obj.getClass())) {
+            return false;
+        }
 
-		int hashCode = 17;
+        AppUserClientMapping that = (AppUserClientMapping) obj;
 
-		hashCode += null == this.client ? 0 : this.client.getId().hashCode() * 31;
+        return null == this.client.getId() ? false : this.client.getId().equals(that.client.getId());
+    }
 
-		return hashCode;
-	}
+    @Override
+    public int hashCode() {
+
+        int hashCode = 17;
+
+        hashCode += null == this.client ? 0 : this.client.getId().hashCode() * 31;
+
+        return hashCode;
+    }
 
 }

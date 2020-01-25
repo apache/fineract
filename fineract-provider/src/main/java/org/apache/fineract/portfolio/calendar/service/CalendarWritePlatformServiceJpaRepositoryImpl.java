@@ -167,55 +167,55 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
     }
 
 
-	public void validateIsEditMeetingAllowed(Long groupId) {
+    public void validateIsEditMeetingAllowed(Long groupId) {
 
-		final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(
-				dataValidationErrors).resource("calendar");
-		Group centerOrGroup = null;
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(
+                dataValidationErrors).resource("calendar");
+        Group centerOrGroup = null;
 
-		if (groupId != null) {
-			centerOrGroup = this.groupRepository
-					.findOneWithNotFoundDetection(groupId);
-			final Group parent = centerOrGroup.getParent();
-			/* Check if it is a Group and belongs to a center */
-			if (centerOrGroup.isGroup() && parent != null) {
-				
-				Integer centerEntityTypeId = CalendarEntityType.CENTERS
-						.getValue();
-				/* Check if calendar is created at center */
-				final CalendarInstance collectionCalendarInstance = this.calendarInstanceRepository
-						.findByEntityIdAndEntityTypeIdAndCalendarTypeId(
-								parent.getId(), centerEntityTypeId,
-								CalendarType.COLLECTION.getValue());
-				/* If calendar is created by parent group, then it cannot be edited by the child group */
-				if (collectionCalendarInstance != null) {
-					final String errorMessage = "meeting.created.at.center.cannot.be.edited.at.group.level";
-					baseDataValidator.reset()
-							.failWithCodeNoParameterAddedToErrorCode(
-									errorMessage);
-				}
-			}
+        if (groupId != null) {
+            centerOrGroup = this.groupRepository
+                    .findOneWithNotFoundDetection(groupId);
+            final Group parent = centerOrGroup.getParent();
+            /* Check if it is a Group and belongs to a center */
+            if (centerOrGroup.isGroup() && parent != null) {
 
-		}
-		if (!dataValidationErrors.isEmpty()) {
-			throw new PlatformApiDataValidationException(
-					"validation.msg.validation.errors.exist",
-					"Validation errors exist.", dataValidationErrors);
-		}
+                Integer centerEntityTypeId = CalendarEntityType.CENTERS
+                        .getValue();
+                /* Check if calendar is created at center */
+                final CalendarInstance collectionCalendarInstance = this.calendarInstanceRepository
+                        .findByEntityIdAndEntityTypeIdAndCalendarTypeId(
+                                parent.getId(), centerEntityTypeId,
+                                CalendarType.COLLECTION.getValue());
+                /* If calendar is created by parent group, then it cannot be edited by the child group */
+                if (collectionCalendarInstance != null) {
+                    final String errorMessage = "meeting.created.at.center.cannot.be.edited.at.group.level";
+                    baseDataValidator.reset()
+                            .failWithCodeNoParameterAddedToErrorCode(
+                                    errorMessage);
+                }
+            }
 
-	}
-    
+        }
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(
+                    "validation.msg.validation.errors.exist",
+                    "Validation errors exist.", dataValidationErrors);
+        }
+
+    }
+
     @Override
     public CommandProcessingResult updateCalendar(final JsonCommand command) {
 
-    	/** Validate to check if Edit is Allowed **/
-    	this.validateIsEditMeetingAllowed(command.getGroupId());
+        /** Validate to check if Edit is Allowed **/
+        this.validateIsEditMeetingAllowed(command.getGroupId());
         /*
          * Validate all the data for updating the calendar
          */
         this.fromApiJsonDeserializer.validateForUpdate(command.json());
-        
+
         Boolean areActiveEntitiesSynced = false;
         final Long calendarId = command.entityId();
 
@@ -229,12 +229,12 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
          * areActiveEntitiesSynced is set to true, if there are any active loans
          * synced to this calendar.
          */
-        
+
         if(numberOfActiveLoansSyncedWithThisCalendar > 0){
             areActiveEntitiesSynced = true;
         }
 
-        
+
         final Calendar calendarForUpdate = this.calendarRepository.findById(calendarId)
                 .orElseThrow(() -> new CalendarNotFoundException(calendarId));
 
@@ -243,33 +243,33 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         final CalendarHistory calendarHistory = new CalendarHistory(calendarForUpdate, oldStartDate);
 
         Map<String, Object> changes = null;
-        
+
         final Boolean reschedulebasedOnMeetingDates = command
                 .booleanObjectValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.RESCHEDULE_BASED_ON_MEETING_DATES.getValue());
-        
+
         /*
          * System allows to change the meeting date by two means,
-         * 
-         * Option 1: reschedulebasedOnMeetingDates = false or reschedulebasedOnMeetingDates is not passed 
+         *
+         * Option 1: reschedulebasedOnMeetingDates = false or reschedulebasedOnMeetingDates is not passed
          * By directly editing the recurring day with effective from
          * date and system decides the next meeting date based on some sensible
          * logic (i.e., number of minimum days between two repayments)
-         * 
-         * 
-         * Option 2: reschedulebasedOnMeetingDates = true 
+         *
+         *
+         * Option 2: reschedulebasedOnMeetingDates = true
          * By providing alternative meeting date for one of future
          * meeting date and derive the day of recurrence from the new meeting
          * date. Ex: User proposes new meeting date say "14/Nov/2014" for
          * present meeting date "12/Nov/2014", based on this input other values
          * re derived and loans are rescheduled
-         * 
+         *
          */
-        
+
         LocalDate newMeetingDate = null;
         LocalDate presentMeetingDate = null;
-        
+
         if (reschedulebasedOnMeetingDates != null && reschedulebasedOnMeetingDates) {
-            
+
             newMeetingDate = command.localDateValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.NEW_MEETING_DATE.getValue());
             presentMeetingDate = command.localDateValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.PRESENT_MEETING_DATE.getValue());
 
@@ -283,7 +283,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         } else {
             changes = calendarForUpdate.update(command, areActiveEntitiesSynced);
         }
-        
+
         if (!changes.isEmpty()) {
             // update calendar history table only if there is a change in
             // calendar start date.

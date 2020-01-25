@@ -30,21 +30,21 @@ import org.springframework.stereotype.Service;
 
 @Service
 @CommandType(entity = "FAMILYMEMBERS", action = "CREATE")
-public class AddClientFamilyMemberCommandHandler implements NewCommandSourceHandler 
+public class AddClientFamilyMemberCommandHandler implements NewCommandSourceHandler
 {
 
-	private final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService;
-	
-	@Autowired
-	public AddClientFamilyMemberCommandHandler(final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService)
-	{
-		this.clientFamilyMembersWritePlatformService=clientFamilyMembersWritePlatformService;
-	}
-	
-	@Override
-	public CommandProcessingResult processCommand(JsonCommand command) {
-	
-		return this.clientFamilyMembersWritePlatformService.addFamilyMember(command.getClientId(), command);
-	}
+    private final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService;
+
+    @Autowired
+    public AddClientFamilyMemberCommandHandler(final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService)
+    {
+        this.clientFamilyMembersWritePlatformService=clientFamilyMembersWritePlatformService;
+    }
+
+    @Override
+    public CommandProcessingResult processCommand(JsonCommand command) {
+
+        return this.clientFamilyMembersWritePlatformService.addFamilyMember(command.getClientId(), command);
+    }
 
 }

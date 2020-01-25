@@ -136,10 +136,10 @@ public class HolidayReadPlatformServiceImpl implements HolidayReadPlatformServic
             throw new HolidayNotFoundException(holidayId);
         }
     }
-    
+
     @Override
     public List<EnumOptionData> retrieveRepaymentScheduleUpdationTyeOptions(){
-        
+
         final List<EnumOptionData> repSchUpdationTypeOptions = Arrays.asList(
                 HolidayEnumerations.rescheduleType(RescheduleType.RESCHEDULETOSPECIFICDATE),
                 HolidayEnumerations.rescheduleType(RescheduleType.RESCHEDULETONEXTREPAYMENTDATE));

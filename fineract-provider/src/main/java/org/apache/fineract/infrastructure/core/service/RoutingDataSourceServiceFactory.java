@@ -25,9 +25,9 @@ import org.springframework.stereotype.Component;
 /**
  * Factory class to get data source service based on the details stored in
  * {@link ThreadLocal} variable for this request
- * 
+ *
  * {@link ThreadLocalContextUtil} is used to retrieve the Context
- * 
+ *
  */
 @Component
 public class RoutingDataSourceServiceFactory {

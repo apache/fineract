@@ -65,7 +65,10 @@ import java.util.Map;
 @Path("/savingsproducts")
 @Component
 @Scope("singleton")
-@Api(value = "Savings Product", description = "An MFIs savings product offerings are modeled using this API.\n" + "\n" + "When creating savings accounts, the details from the savings product are used to auto fill details of the savings account application process.")
+@Api(tags = {"Savings Product"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Savings Product", description = "An MFIs savings product offerings are modeled using this API." + "\n" + "When creating savings accounts, the details from the savings product are used to auto fill details of the savings account application process.")
+})
 public class SavingsProductsApiResource {
 
     private final SavingsProductReadPlatformService savingProductReadPlatformService;
@@ -151,8 +154,8 @@ public class SavingsProductsApiResource {
         final Collection<SavingsProductData> products = this.savingProductReadPlatformService.retrieveAll();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		return this.toApiJsonSerializer.serialize(settings, products,
-				SavingsApiSetConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, products,
+                SavingsApiSetConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -190,8 +193,8 @@ public class SavingsProductsApiResource {
             savingProductData = handleTemplateRelatedData(savingProductData);
         }
 
-		return this.toApiJsonSerializer.serialize(settings, savingProductData,
-				SavingsApiSetConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, savingProductData,
+                SavingsApiSetConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -207,8 +210,8 @@ public class SavingsProductsApiResource {
         final SavingsProductData savingProduct = handleTemplateRelatedData(null);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		return this.toApiJsonSerializer.serialize(settings, savingProduct,
-				SavingsApiSetConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, savingProduct,
+                SavingsApiSetConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
     }
 
     private SavingsProductData handleTemplateRelatedData(final SavingsProductData savingsProduct) {

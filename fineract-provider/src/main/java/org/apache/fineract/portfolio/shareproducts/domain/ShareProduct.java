@@ -87,7 +87,7 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
 
     @Column(name = "totalsubscribed_shares", nullable = true)
     private Long totalSubscribedShares;
-    
+
     @Column(name = "unit_price", nullable = false)
     private BigDecimal unitPrice;
 
@@ -286,26 +286,26 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public boolean setMarketPrice(Set<ShareProductMarketPriceData> marketPrice) {
-		boolean update = true;
-		Set<ShareProductMarketPrice> marketPriceTemp = new HashSet<ShareProductMarketPrice>();
-		if (marketPrice != null && marketPrice.size() > 0) {
-        	 for (ShareProductMarketPriceData data : marketPrice) {
+        boolean update = true;
+        Set<ShareProductMarketPrice> marketPriceTemp = new HashSet<ShareProductMarketPrice>();
+        if (marketPrice != null && marketPrice.size() > 0) {
+             for (ShareProductMarketPriceData data : marketPrice) {
                  if (data.getId() == null) {
                      ShareProductMarketPrice entity = new ShareProductMarketPrice(data.getStartDate(), data.getShareValue());
                      entity.setShareProduct(this);
                      marketPriceTemp.add(entity);
-				} else {
-					for (ShareProductMarketPrice priceData : this.marketPrice) {
-						if (priceData.getId().equals(data.getId())) {
-							priceData.setStartDate(data.getStartDate());
-							priceData.setShareValue(data.getShareValue());
-							marketPriceTemp.add(priceData);
-						}
-					}
-				}
-			}
-		}
-		this.marketPrice = marketPriceTemp;
+                } else {
+                    for (ShareProductMarketPrice priceData : this.marketPrice) {
+                        if (priceData.getId().equals(data.getId())) {
+                            priceData.setStartDate(data.getStartDate());
+                            priceData.setShareValue(data.getShareValue());
+                            marketPriceTemp.add(priceData);
+                        }
+                    }
+                }
+            }
+        }
+        this.marketPrice = marketPriceTemp;
         return update;
     }
 
@@ -416,30 +416,30 @@ public class ShareProduct extends AbstractAuditableCustom<AppUser, Long> {
         }
         return marketValue;
     }
-    
+
     public void addSubscribedShares(final Long subscribedShares) {
         if(this.totalSubscribedShares == null) {
             this.totalSubscribedShares = new Long(0) ;
         }
         this.totalSubscribedShares += subscribedShares ;
     }
-    
+
     public void removeSubscribedShares(final Long subscribedShares) {
         this.totalSubscribedShares -= subscribedShares ;
     }
-    
+
     public Long getSubscribedShares() {
         return this.totalSubscribedShares ;
     }
- 
+
     public Long getMinimumClientShares() {
         return this.minimumShares ;
     }
-    
+
     public Long getMaximumClientShares() {
         return this.maximumShares ;
     }
-    
+
     public Long getDefaultClientShares() {
         return this.nominalShares ;
     }

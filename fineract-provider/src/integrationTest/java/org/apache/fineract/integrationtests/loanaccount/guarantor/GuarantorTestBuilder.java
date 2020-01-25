@@ -79,7 +79,7 @@ public class GuarantorTestBuilder {
         this.guarantorTypeId = GUARANTOR_TYPE_CUSTOMER;
         return this;
     }
-    
+
     public GuarantorTestBuilder externalCustomer() {
         this.guarantorTypeId = GUARANTOR_TYPE_EXTERNAL;
         return this;

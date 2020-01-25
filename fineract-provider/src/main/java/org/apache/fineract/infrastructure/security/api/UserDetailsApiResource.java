@@ -48,13 +48,16 @@ import org.springframework.security.oauth2.provider.token.ResourceServerTokenSer
 import org.springframework.stereotype.Component;
 
 /*
- * Implementation of Oauth2 authentication APIs, loaded only when "oauth" profile is enabled. 
+ * Implementation of Oauth2 authentication APIs, loaded only when "oauth" profile is enabled.
  */
 @Path("/userdetails")
 @Component
 @Profile("oauth")
 @Scope("singleton")
-@Api(value = "Fetch authenticated user details", description = "")
+@Api(tags = {"Fetch authenticated user details"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Fetch authenticated user details", description = "")
+})
 public class UserDetailsApiResource {
 
     private final ResourceServerTokenServices tokenServices;

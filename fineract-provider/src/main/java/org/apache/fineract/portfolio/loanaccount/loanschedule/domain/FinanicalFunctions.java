@@ -23,16 +23,16 @@ public class FinanicalFunctions {
     /**
      * PMT calculates a fixed monthly payment to be paid by borrower every
      * 'period' to ensure loan is paid off in full (with interest).
-     * 
+     *
      * This monthly payment c depends upon the monthly interest rate r
      * (expressed as a fraction, not a percentage, i.e., divide the quoted
      * yearly percentage rate by 100 and by 12 to obtain the monthly interest
      * rate), the number of monthly payments N called the loan's term, and the
      * amount borrowed P known as the loan's principal; c is given by the
      * formula:
-     * 
+     *
      * c = (r / (1 - (1 + r)^-N))P
-     * 
+     *
      * @param interestRateFraction
      * @param numberOfPayments
      * @param principal

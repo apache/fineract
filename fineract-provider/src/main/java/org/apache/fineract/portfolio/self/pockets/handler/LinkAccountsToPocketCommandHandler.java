@@ -33,18 +33,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = PocketApiConstants.pocketEntityName, action = PocketApiConstants.linkAccountsActionName)
 public class LinkAccountsToPocketCommandHandler implements NewCommandSourceHandler {
 
-	private final PocketWritePlatformService pocketWritePlatformService;
+    private final PocketWritePlatformService pocketWritePlatformService;
 
-	@Autowired
-	public LinkAccountsToPocketCommandHandler(final PocketWritePlatformService pocketWritePlatformService) {
-		this.pocketWritePlatformService = pocketWritePlatformService;
-	}
+    @Autowired
+    public LinkAccountsToPocketCommandHandler(final PocketWritePlatformService pocketWritePlatformService) {
+        this.pocketWritePlatformService = pocketWritePlatformService;
+    }
 
-	@Transactional
-	@Override
-	public CommandProcessingResult processCommand(final JsonCommand command) {
+    @Transactional
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
 
-		return this.pocketWritePlatformService.linkAccounts(command);
-	}
+        return this.pocketWritePlatformService.linkAccounts(command);
+    }
 
 }

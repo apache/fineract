@@ -75,16 +75,16 @@ public class SearchData {
     public String getParentName() {
         return this.parentName;
     }
-    
+
     public String getParentType() {
         return this.parentType;
     }
 
     public String getEntityMobileNo() {
-		return this.entityMobileNo;
-	}
+        return this.entityMobileNo;
+    }
 
-	public EnumOptionData getEntityStatus() {
+    public EnumOptionData getEntityStatus() {
         return this.entityStatus;
     }
 

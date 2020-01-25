@@ -36,9 +36,9 @@ import org.springframework.stereotype.Component;
  * gets back the response. This class will also catch any errors raised by
  * {@link org.apache.fineract.portfolio.loanaccount.api.LoanChargesApiResource} and map
  * those errors to appropriate status codes in BatchResponse.
- * 
+ *
  * @author Rishabh Shukla
- * 
+ *
  * @see org.apache.fineract.batch.command.CommandStrategy
  * @see org.apache.fineract.batch.domain.BatchRequest
  * @see org.apache.fineract.batch.domain.BatchResponse

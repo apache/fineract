@@ -83,7 +83,7 @@ public class LoanChargePaidBy extends AbstractPersistableCustom<Long> {
         this.amount = amount;
     }
 
-    
+
     public Integer getInstallmentNumber() {
         return this.installmentNumber;
     }

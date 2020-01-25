@@ -33,53 +33,53 @@ public enum ScheduledEmailAttachmentFileFormat {
         this.code = code;
         this.id = id;
     }
-    
+
     public static ScheduledEmailAttachmentFileFormat instance(final String value) {
         ScheduledEmailAttachmentFileFormat emailAttachmentFileFormat = INVALID;
-        
+
         switch (value) {
             case "xls":
                 emailAttachmentFileFormat = XLS;
                 break;
-                
+
             case "pdf":
                 emailAttachmentFileFormat = PDF;
                 break;
-                
+
             case "csv":
                 emailAttachmentFileFormat = CSV;
                 break;
-                
+
             default:
                 break;
         }
-        
+
         return emailAttachmentFileFormat;
     }
-    
+
     public static ScheduledEmailAttachmentFileFormat instance(final Integer id) {
         ScheduledEmailAttachmentFileFormat emailAttachmentFileFormat = INVALID;
-        
+
         switch (id) {
             case 1:
                 emailAttachmentFileFormat = XLS;
                 break;
-                
+
             case 2:
                 emailAttachmentFileFormat = PDF;
                 break;
-                
+
             case 3:
                 emailAttachmentFileFormat = CSV;
                 break;
-                
+
             default:
                 break;
         }
-        
+
         return emailAttachmentFileFormat;
     }
-    
+
     /**
      * @return the code
      */
@@ -100,8 +100,8 @@ public enum ScheduledEmailAttachmentFileFormat {
     public Integer getId() {
         return id;
     }
-    
-    /** 
+
+    /**
      * @return list of valid ScheduledEmailAttachmentFileFormat ids
      **/
     public static Object[] validValues() {

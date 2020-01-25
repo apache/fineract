@@ -119,7 +119,7 @@ public class LoanSummaryData {
     public BigDecimal getTotalOutstanding() {
         return this.totalOutstanding;
     }
-    
+
     public BigDecimal getTotalPaidFeeCharges() {
         return feeChargesPaid ;
     }

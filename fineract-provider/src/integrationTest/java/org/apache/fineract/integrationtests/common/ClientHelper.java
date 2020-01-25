@@ -85,9 +85,9 @@ public class ClientHelper {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestClientAsJSON(activationDate, officeId),
                 "clientId");
     }
-    
-    
-    
+
+
+
     public static Integer createClientPending(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return createClientPending(requestSpec, responseSpec, "04 March 2014");
     }
@@ -128,12 +128,12 @@ public class ClientHelper {
 
     public static Integer createClientAsPerson(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String activationDate, final String officeId) {
-    	
+
         System.out.println("---------------------------------CREATING A CLIENT NON PERSON(ORGANISATION)---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestPersonClientAsJSON(activationDate, officeId),
                 "clientId");
     }
-    
+
     public static Integer createClientAsEntity(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         return createClientAsEntity(requestSpec, responseSpec, "04 March 2011");
     }
@@ -145,10 +145,10 @@ public class ClientHelper {
 
     public static Integer createClientAsEntity(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String activationDate, final String officeId) {
-    	
-    	Integer constitutionCodeId = (Integer) CodeHelper.getCodeByName(requestSpec, responseSpec, "Constitution").get("id");
-    	Integer soleProprietorCodeValueId = (Integer) CodeHelper.retrieveOrCreateCodeValue(constitutionCodeId, requestSpec, responseSpec).get("id");
-    	
+
+        Integer constitutionCodeId = (Integer) CodeHelper.getCodeByName(requestSpec, responseSpec, "Constitution").get("id");
+        Integer soleProprietorCodeValueId = (Integer) CodeHelper.retrieveOrCreateCodeValue(constitutionCodeId, requestSpec, responseSpec).get("id");
+
         System.out.println("---------------------------------CREATING A CLIENT NON PERSON(ORGANISATION)---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestEntityClientAsJSON(activationDate, officeId, soleProprietorCodeValueId),
                 "clientId");
@@ -185,13 +185,13 @@ public class ClientHelper {
         map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));
         map.put("externalId", randomIDGenerator("ID_", 7));
         map.put("dateFormat", DATE_FORMAT);
-		map.put("locale", "en");
-		map.put("active", "true");
-		map.put("activationDate", dateOfJoining);
-		System.out.println("map : " + map);
-		return new Gson().toJson(map);
+        map.put("locale", "en");
+        map.put("active", "true");
+        map.put("activationDate", dateOfJoining);
+        System.out.println("map : " + map);
+        return new Gson().toJson(map);
     }
-    
+
     public static String getTestClientAsJSONPending(final String submittedOnDate, final String officeId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("officeId", officeId);
@@ -199,11 +199,11 @@ public class ClientHelper {
         map.put("lastname", Utils.randomNameGenerator("Client_LastName_", 4));
         map.put("externalId", randomIDGenerator("ID_", 7));
         map.put("dateFormat", DATE_FORMAT);
-		map.put("locale", "en");
-		map.put("active", "false");
-		map.put("submittedOnDate", submittedOnDate);
-		System.out.println("map : " + map);
-		return new Gson().toJson(map);
+        map.put("locale", "en");
+        map.put("active", "false");
+        map.put("submittedOnDate", submittedOnDate);
+        System.out.println("map : " + map);
+        return new Gson().toJson(map);
     }
 
     public static String getTestPendingClientWithDatatableAsJson(final String registeredTableName) {
@@ -248,11 +248,11 @@ public class ClientHelper {
         map.put("active", "true");
         map.put("activationDate", dateOfJoining);
         map.put("legalFormId", 1);
-        
+
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }
-    
+
     public static String getTestEntityClientAsJSON(final String dateOfJoining, final String officeId, final Integer soleProprietorCodeValueId) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("officeId", officeId);
@@ -263,11 +263,11 @@ public class ClientHelper {
         map.put("active", "true");
         map.put("activationDate", dateOfJoining);
         map.put("legalFormId", 2);
-        
+
         final HashMap<String, Object> clientNonPersonMap = new HashMap<>();
         clientNonPersonMap.put("constitutionId", soleProprietorCodeValueId);
         map.put("clientNonPersonDetails", clientNonPersonMap);
-        
+
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }
@@ -344,60 +344,60 @@ public class ClientHelper {
 
     }
 
-	private String getReactivateClientAsJSON() {
-		final HashMap<String, String> map = new HashMap<>();
-		map.put("locale", CommonConstants.locale);
-		map.put("dateFormat", CommonConstants.dateFormat);
-		map.put("reactivationDate", CREATED_DATE_PLUS_ONE);
-		String clientJson = new Gson().toJson(map);
-		System.out.println(clientJson);
-		return clientJson;
+    private String getReactivateClientAsJSON() {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("locale", CommonConstants.locale);
+        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("reactivationDate", CREATED_DATE_PLUS_ONE);
+        String clientJson = new Gson().toJson(map);
+        System.out.println(clientJson);
+        return clientJson;
 
-	}
+    }
 
-	private String getUndoRejectClientAsJSON(final String date) {
-		final HashMap<String, String> map = new HashMap<>();
-		map.put("locale", CommonConstants.locale);
-		map.put("dateFormat", CommonConstants.dateFormat);
-		map.put("reopenedDate", date);
-		String clientJson = new Gson().toJson(map);
-		System.out.println(clientJson);
-		return clientJson;
+    private String getUndoRejectClientAsJSON(final String date) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("locale", CommonConstants.locale);
+        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("reopenedDate", date);
+        String clientJson = new Gson().toJson(map);
+        System.out.println(clientJson);
+        return clientJson;
 
-	}
+    }
 
-	private String getUndoWithdrawnClientAsJSON(final String date) {
-		final HashMap<String, String> map = new HashMap<>();
-		map.put("locale", CommonConstants.locale);
-		map.put("dateFormat", CommonConstants.dateFormat);
-		map.put("reopenedDate", date);
-		String clientJson = new Gson().toJson(map);
-		System.out.println(clientJson);
-		return clientJson;
+    private String getUndoWithdrawnClientAsJSON(final String date) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("locale", CommonConstants.locale);
+        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("reopenedDate", date);
+        String clientJson = new Gson().toJson(map);
+        System.out.println(clientJson);
+        return clientJson;
 
-	}
+    }
 
-	private String getRejectClientAsJSON() {
-		final HashMap<String, String> map = new HashMap<>();
-		/* Retrieve Code id for the Code "ClientRejectReason" */
-		String codeName = "ClientRejectReason";
-		HashMap<String, Object> code = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, codeName);
-		Integer clientRejectionReasonCodeId = (Integer) code.get("id");
+    private String getRejectClientAsJSON() {
+        final HashMap<String, String> map = new HashMap<>();
+        /* Retrieve Code id for the Code "ClientRejectReason" */
+        String codeName = "ClientRejectReason";
+        HashMap<String, Object> code = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, codeName);
+        Integer clientRejectionReasonCodeId = (Integer) code.get("id");
 
-		/* Retrieve/Create Code Values for the Code "ClientRejectReason" */
-		HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(clientRejectionReasonCodeId,
-				this.requestSpec, this.responseSpec);
-		Integer rejectionReasonId = (Integer) codeValue.get("id");
+        /* Retrieve/Create Code Values for the Code "ClientRejectReason" */
+        HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(clientRejectionReasonCodeId,
+                this.requestSpec, this.responseSpec);
+        Integer rejectionReasonId = (Integer) codeValue.get("id");
 
-		map.put("locale", CommonConstants.locale);
-		map.put("dateFormat", CommonConstants.dateFormat);
-		map.put("rejectionDate", CREATED_DATE_PLUS_ONE);
-		map.put("rejectionReasonId", rejectionReasonId.toString());
-		String clientJson = new Gson().toJson(map);
-		System.out.println(clientJson);
-		return clientJson;
+        map.put("locale", CommonConstants.locale);
+        map.put("dateFormat", CommonConstants.dateFormat);
+        map.put("rejectionDate", CREATED_DATE_PLUS_ONE);
+        map.put("rejectionReasonId", rejectionReasonId.toString());
+        String clientJson = new Gson().toJson(map);
+        System.out.println(clientJson);
+        return clientJson;
 
-	}
+    }
 
     private String getActivateClientAsJSON(String date) {
         final HashMap<String, String> map = new HashMap<>();
@@ -408,8 +408,8 @@ public class ClientHelper {
         System.out.println(clientJson);
         return clientJson;
     }
-    
-    
+
+
 
     private String getWithdrawClientAsJSON() {
         final HashMap<String, String> map = new HashMap<>();
@@ -490,56 +490,56 @@ public class ClientHelper {
         return performClientActions(createClientOperationURL(WITHDRAW_CLIENT_COMMAND, clientId), getWithdrawClientAsJSON(), clientId);
     }
 
-	private String createClientOperationURL(final String command, final Integer clientId) {
-		return CLIENT_URL + "/" + clientId + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
-	}
+    private String createClientOperationURL(final String command, final Integer clientId) {
+        return CLIENT_URL + "/" + clientId + "?command=" + command + "&" + Utils.TENANT_IDENTIFIER;
+    }
 
-	public HashMap<String, Object> undoReject(final Integer clientId) {
-		System.out.println("--------------------------------- UNDO REJECT CLIENT -------------------------------");
-		return performClientActions(createClientOperationURL(UNDOREJECT_CLIENT_COMMAND, clientId),
-				getUndoRejectClientAsJSON(CREATED_DATE_PLUS_TWO), clientId);
-	}
+    public HashMap<String, Object> undoReject(final Integer clientId) {
+        System.out.println("--------------------------------- UNDO REJECT CLIENT -------------------------------");
+        return performClientActions(createClientOperationURL(UNDOREJECT_CLIENT_COMMAND, clientId),
+                getUndoRejectClientAsJSON(CREATED_DATE_PLUS_TWO), clientId);
+    }
 
-	public HashMap<String, Object> undoWithdrawn(final Integer clientId) {
-		System.out.println("--------------------------------- UNDO WITHDRAWN CLIENT -------------------------------");
-		return performClientActions(createClientOperationURL(UNDOWITHDRAWN_CLIENT_COMMAND, clientId),
-				getUndoWithdrawnClientAsJSON(CREATED_DATE_PLUS_TWO), clientId);
-	}
+    public HashMap<String, Object> undoWithdrawn(final Integer clientId) {
+        System.out.println("--------------------------------- UNDO WITHDRAWN CLIENT -------------------------------");
+        return performClientActions(createClientOperationURL(UNDOWITHDRAWN_CLIENT_COMMAND, clientId),
+                getUndoWithdrawnClientAsJSON(CREATED_DATE_PLUS_TWO), clientId);
+    }
 
-	public Object undoRejectedclient(final Integer clientId, final String jsonAttributeToGetBack,
-			final String rejectedDate) {
-		System.out.println("----------------------------------UNDO REJECT CLIENT ----------------------------------");
-		return performClientActionsWithValidationErrors(createClientOperationURL(UNDOREJECT_CLIENT_COMMAND, clientId),
-				getUndoRejectClientAsJSON(rejectedDate), jsonAttributeToGetBack);
-	}
+    public Object undoRejectedclient(final Integer clientId, final String jsonAttributeToGetBack,
+            final String rejectedDate) {
+        System.out.println("----------------------------------UNDO REJECT CLIENT ----------------------------------");
+        return performClientActionsWithValidationErrors(createClientOperationURL(UNDOREJECT_CLIENT_COMMAND, clientId),
+                getUndoRejectClientAsJSON(rejectedDate), jsonAttributeToGetBack);
+    }
 
-	public Object undoWithdrawclient(final Integer clientId, final String jsonAttributeToGetBack,
-			final String rejectedDate) {
-		System.out.println("----------------------------------UNDO WITHDRAW CLIENT ----------------------------------");
-		return performClientActionsWithValidationErrors(
-				createClientOperationURL(UNDOWITHDRAWN_CLIENT_COMMAND, clientId),
-				getUndoWithdrawnClientAsJSON(rejectedDate), jsonAttributeToGetBack);
-	}
+    public Object undoWithdrawclient(final Integer clientId, final String jsonAttributeToGetBack,
+            final String rejectedDate) {
+        System.out.println("----------------------------------UNDO WITHDRAW CLIENT ----------------------------------");
+        return performClientActionsWithValidationErrors(
+                createClientOperationURL(UNDOWITHDRAWN_CLIENT_COMMAND, clientId),
+                getUndoWithdrawnClientAsJSON(rejectedDate), jsonAttributeToGetBack);
+    }
 
-	public Object activateClient(final Integer clientId, final String jsonAttributeToGetBack) {
-		System.out.println("--------------------------------- ACTIVATE CLIENT -------------------------------");
-		return performClientActionsWithValidationErrors(createClientOperationURL(ACTIVATE_CLIENT_COMMAND, clientId),
-				getActivateClientAsJSON(CREATED_DATE_PLUS_ONE), jsonAttributeToGetBack);
-	}
+    public Object activateClient(final Integer clientId, final String jsonAttributeToGetBack) {
+        System.out.println("--------------------------------- ACTIVATE CLIENT -------------------------------");
+        return performClientActionsWithValidationErrors(createClientOperationURL(ACTIVATE_CLIENT_COMMAND, clientId),
+                getActivateClientAsJSON(CREATED_DATE_PLUS_ONE), jsonAttributeToGetBack);
+    }
 
-	public HashMap<String, Object> activateClientWithDiffDateOption(final Integer clientId,
-			final String activationDate) {
-		System.out.println("--------------------------------- ACTIVATE CLIENT -------------------------------");
-		return performClientActions(createClientOperationURL(ACTIVATE_CLIENT_COMMAND, clientId),
-				getActivateClientAsJSON(activationDate), clientId);
-	}
+    public HashMap<String, Object> activateClientWithDiffDateOption(final Integer clientId,
+            final String activationDate) {
+        System.out.println("--------------------------------- ACTIVATE CLIENT -------------------------------");
+        return performClientActions(createClientOperationURL(ACTIVATE_CLIENT_COMMAND, clientId),
+                getActivateClientAsJSON(activationDate), clientId);
+    }
 
-	private ArrayList<HashMap> performClientActionsWithValidationErrors(final String postURLForClient,
-			final String jsonToBeSent, final String jsonAttributeToGetBack) {
-		return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForClient, jsonToBeSent,
-				jsonAttributeToGetBack);
-	}
-    
+    private ArrayList<HashMap> performClientActionsWithValidationErrors(final String postURLForClient,
+            final String jsonToBeSent, final String jsonAttributeToGetBack) {
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForClient, jsonToBeSent,
+                jsonAttributeToGetBack);
+    }
+
     private HashMap<String, Object> performClientActions(final String postURLForClient, final String jsonToBeSent, final Integer clientId) {
         Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForClient, jsonToBeSent, CommonConstants.RESPONSE_STATUS);
         HashMap<String, Object> response = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));

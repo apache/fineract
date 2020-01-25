@@ -699,7 +699,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
     /**
      * This generates the the report and converts it to a file by passing the
      * parameters below
-     * 
+     *
      * @param emailCampaign
      * @param emailAttachmentFileFormat
      * @param reportParams
@@ -744,7 +744,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
     /**
      * This matches the the actual values to the key in the report stretchy
      * parameters map
-     * 
+     *
      * @param stretchyParams
      * @param client
      * @return

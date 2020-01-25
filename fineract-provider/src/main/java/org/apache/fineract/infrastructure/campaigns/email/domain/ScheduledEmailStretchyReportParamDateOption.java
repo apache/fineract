@@ -38,55 +38,55 @@ public enum ScheduledEmailStretchyReportParamDateOption {
         this.code = code;
         this.id = id;
     }
-    
+
     /**
      * @param value
      * @return
      */
     public static ScheduledEmailStretchyReportParamDateOption instance(final String value) {
         ScheduledEmailStretchyReportParamDateOption scheduledEmailStretchyReportParamDateOption = INVALID;
-        
+
         switch (value) {
             case "today":
                 scheduledEmailStretchyReportParamDateOption = TODAY;
                 break;
-                
+
             // case "yesterday":
                 // scheduledEmailStretchyReportParamDateOption = YESTERDAY;
                 // break;
-                
+
             case "tomorrow":
                 scheduledEmailStretchyReportParamDateOption = TOMORROW;
                 break;
         }
-        
+
         return scheduledEmailStretchyReportParamDateOption;
     }
-    
+
     /**
      * @param id
      * @return
      */
     public static ScheduledEmailStretchyReportParamDateOption instance(final Integer id) {
         ScheduledEmailStretchyReportParamDateOption scheduledEmailStretchyReportParamDateOption = INVALID;
-        
+
         switch (id) {
             case 1:
                 scheduledEmailStretchyReportParamDateOption = TODAY;
                 break;
-                
+
             // case 2:
                 // scheduledEmailStretchyReportParamDateOption = YESTERDAY;
                 // break;
-                
+
             case 3:
                 scheduledEmailStretchyReportParamDateOption = TOMORROW;
                 break;
         }
-        
+
         return scheduledEmailStretchyReportParamDateOption;
     }
-    
+
     /**
      * @return the code
      */
@@ -107,8 +107,8 @@ public enum ScheduledEmailStretchyReportParamDateOption {
     public Integer getId() {
         return id;
     }
-    
-    /** 
+
+    /**
      * @return list of valid ScheduledEmailAttachmentFileFormat values
      **/
     public static Object[] validValues() {

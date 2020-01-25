@@ -31,18 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "ENTITY_DATATABLE_CHECK", action = "CREATE")
 public class CreateEntityDatatableChecksCommandHandler implements NewCommandSourceHandler {
 
-	private final EntityDatatableChecksWritePlatformService writePlatformService;
+    private final EntityDatatableChecksWritePlatformService writePlatformService;
 
-	@Autowired
-	public CreateEntityDatatableChecksCommandHandler(
-			final EntityDatatableChecksWritePlatformService writePlatformService) {
-		this.writePlatformService = writePlatformService;
-	}
+    @Autowired
+    public CreateEntityDatatableChecksCommandHandler(
+            final EntityDatatableChecksWritePlatformService writePlatformService) {
+        this.writePlatformService = writePlatformService;
+    }
 
-	@Transactional
-	@Override
-	public CommandProcessingResult processCommand(final JsonCommand command) {
+    @Transactional
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
 
-		return this.writePlatformService.createCheck(command);
-	}
+        return this.writePlatformService.createCheck(command);
+    }
 }

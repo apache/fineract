@@ -58,7 +58,10 @@ import org.springframework.stereotype.Component;
 @Path("/roles")
 @Component
 @Scope("singleton")
-@Api(value = "Roles", description = "An API capability to support management of application roles for user administration.")
+@Api(tags = {"Roles"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Roles", description = "An API capability to support management of application roles for user administration.")
+})
 public class RolesApiResource {
 
     /**
@@ -151,7 +154,7 @@ public class RolesApiResource {
 
     /**
      * Roles enable or disable
-     * 
+     *
      * @param roleId
      * @param commandParam
      * @param apiRequestBodyAsJson
@@ -239,7 +242,7 @@ public class RolesApiResource {
 
     /**
      * Delete Role
-     * 
+     *
      * @param roleId
      * @return
      */

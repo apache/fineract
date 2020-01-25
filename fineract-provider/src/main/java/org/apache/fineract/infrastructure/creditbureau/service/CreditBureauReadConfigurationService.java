@@ -26,8 +26,8 @@ import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauConfigur
 
 public interface CreditBureauReadConfigurationService {
 
-	Collection<CreditBureauConfigurationData> readConfigurationByOrganisationCreditBureauId(long id);
+    Collection<CreditBureauConfigurationData> readConfigurationByOrganisationCreditBureauId(long id);
 
-	Map<String, String> retrieveConfigMap(long id);
+    Map<String, String> retrieveConfigMap(long id);
 
 }

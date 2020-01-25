@@ -50,7 +50,7 @@ public class ShareAccountDividendReadPlatformServiceImpl implements ShareAccount
 
     @Autowired
     public ShareAccountDividendReadPlatformServiceImpl(final RoutingDataSource dataSource,
-    		final ColumnValidator columnValidator) {
+            final ColumnValidator columnValidator) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.columnValidator = columnValidator;
     }
@@ -89,7 +89,7 @@ public class ShareAccountDividendReadPlatformServiceImpl implements ShareAccount
             if (searchParameters.isSortOrderProvided()) {
                 sqlBuilder.append(' ').append(searchParameters.getSortOrder());
                 this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
-                
+
             }
         }
 

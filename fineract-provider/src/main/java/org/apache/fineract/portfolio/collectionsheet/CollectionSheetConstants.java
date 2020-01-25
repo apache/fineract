@@ -40,7 +40,7 @@ public class CollectionSheetConstants {
     public static final String calendarIdParamName = "calendarId";
     public static final String officeIdParamName = "officeId";
     public static final String staffIdParamName = "staffId";
-    public static final String isTransactionDateOnNonMeetingDateParamName = "isTransactionDateOnNonMeetingDate"; 
+    public static final String isTransactionDateOnNonMeetingDateParamName = "isTransactionDateOnNonMeetingDate";
 
     // attendance parameters
     public static final String clientsAttendanceParamName = "clientsAttendance";

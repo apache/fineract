@@ -56,7 +56,7 @@ public class ProvisioningHelper {
         String provisioningEntryCreateJson = new Gson().toJson(map);
         return provisioningEntryCreateJson;
     }
-    
+
     public final static String createProvisioningEntryJsonWithJournalsEnabled() {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("createjournalentries", Boolean.TRUE);

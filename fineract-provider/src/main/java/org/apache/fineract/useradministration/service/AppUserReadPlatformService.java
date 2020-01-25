@@ -31,6 +31,6 @@ public interface AppUserReadPlatformService {
     AppUserData retrieveNewUserDetails();
 
     AppUserData retrieveUser(Long userId);
-    
+
     boolean isUsernameExist(String username);
 }

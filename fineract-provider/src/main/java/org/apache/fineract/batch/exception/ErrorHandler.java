@@ -44,9 +44,9 @@ import com.google.gson.GsonBuilder;
  * class uses various subclasses of RuntimeException to check the kind of
  * exception raised and provide appropriate status and error codes for each one
  * of the raised exception.
- * 
+ *
  * @author Rishabh Shukla
- * 
+ *
  * @see org.apache.fineract.batch.command.CommandStrategy
  * @see org.apache.fineract.batch.command.internal.CreateClientCommandStrategy
  */
@@ -64,18 +64,18 @@ public class ErrorHandler extends RuntimeException {
     /**
      * Returns an object of ErrorInfo type containing the information regarding
      * the raised error.
-     * 
+     *
      * @param exception
      * @return ErrorInfo
      */
     public static ErrorInfo handler(final RuntimeException exception) {
 
-    	if(exception instanceof AbstractPlatformDomainRuleException) {
-    		PlatformDomainRuleExceptionMapper mapper = new PlatformDomainRuleExceptionMapper() ;
-    		final String errorBody = jsonHelper
+        if(exception instanceof AbstractPlatformDomainRuleException) {
+            PlatformDomainRuleExceptionMapper mapper = new PlatformDomainRuleExceptionMapper() ;
+            final String errorBody = jsonHelper
                     .toJson(mapper.toResponse((AbstractPlatformDomainRuleException) exception).getEntity());
-    		return new ErrorInfo(500, 9999, errorBody);
-    	}else if (exception instanceof AbstractPlatformResourceNotFoundException) {
+            return new ErrorInfo(500, 9999, errorBody);
+        }else if (exception instanceof AbstractPlatformResourceNotFoundException) {
 
             final PlatformResourceNotFoundExceptionMapper mapper = new PlatformResourceNotFoundExceptionMapper();
             final String errorBody = jsonHelper
@@ -110,14 +110,14 @@ public class ErrorHandler extends RuntimeException {
             final String errorBody = jsonHelper.toJson(mapper.toResponse((LinkedAccountRequiredException) exception).getEntity());
 
             return new ErrorInfo(403, 3002, errorBody);
-            
+
         } else if (exception instanceof MultiDisbursementDataRequiredException) {
 
             final PlatformDomainRuleExceptionMapper mapper = new PlatformDomainRuleExceptionMapper();
             final String errorBody = jsonHelper.toJson(mapper.toResponse((MultiDisbursementDataRequiredException) exception).getEntity());
 
             return new ErrorInfo(403, 3003, errorBody);
-            
+
         } else if (exception instanceof TransactionException) {
             return new ErrorInfo(400, 4001, "{\"Exception\": " + exception.getMessage()+"}");
 
@@ -128,7 +128,7 @@ public class ErrorHandler extends RuntimeException {
 
             return new ErrorInfo(500, 5001, errorBody);
         }else if(exception instanceof NonTransientDataAccessException) {
-        	return new ErrorInfo(400, 4001, "{\"Exception\": " + exception.getMessage()+"}");
+            return new ErrorInfo(400, 4001, "{\"Exception\": " + exception.getMessage()+"}");
         }
 
         return new ErrorInfo(500, 9999, "{\"Exception\": " + exception.toString() + "}");

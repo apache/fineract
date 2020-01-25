@@ -34,7 +34,7 @@ public class MySQLDictionaryCustom extends MySQLDictionary {
             this.allowsAliasInBulkClause = true ;
             this.useWildCardForCount = true ;
         }
-        
+
         @Override
         public void connectedConfiguration(Connection conn) throws SQLException {
                 super.connectedConfiguration(conn);

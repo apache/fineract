@@ -21,9 +21,9 @@ package org.apache.fineract.batch.exception;
 /**
  * Provides members to hold the basic information about the exceptions raised in
  * commandStrategy classes.
- * 
+ *
  * @author Rishabh Shukla
- * 
+ *
  * @see ErrorHandler
  */
 public final class ErrorInfo {
@@ -34,7 +34,7 @@ public final class ErrorInfo {
 
     /**
      * Constructor to initialize the members of this class.
-     * 
+     *
      * @param statusCode
      * @param errorCode
      * @param message
@@ -55,7 +55,7 @@ public final class ErrorInfo {
 
     /**
      * Getter method to provide the statusCode for an object of this type.
-     * 
+     *
      * @return Integer
      */
     public Integer getStatusCode() {
@@ -64,7 +64,7 @@ public final class ErrorInfo {
 
     /**
      * Setter method to set the statusCode for an object of this type.
-     * 
+     *
      * @param statusCode
      */
     public void setStatusCode(final Integer statusCode) {
@@ -73,7 +73,7 @@ public final class ErrorInfo {
 
     /**
      * Getter method to provide the errorCode for an object of this type.
-     * 
+     *
      * @return Integer
      */
     public Integer getErrorCode() {
@@ -82,7 +82,7 @@ public final class ErrorInfo {
 
     /**
      * Setter method to set the errorCode for an object of this type.
-     * 
+     *
      * @param errorCode
      */
     public void setErrorCode(final Integer errorCode) {
@@ -92,7 +92,7 @@ public final class ErrorInfo {
     /**
      * Getter method to provide the message of the error for an object of this
      * type.
-     * 
+     *
      * @return String
      */
     public String getMessage() {
@@ -101,7 +101,7 @@ public final class ErrorInfo {
 
     /**
      * Setter method to set the message of the error for an object of this type.
-     * 
+     *
      * @param message
      */
     public void setMessage(final String message) {

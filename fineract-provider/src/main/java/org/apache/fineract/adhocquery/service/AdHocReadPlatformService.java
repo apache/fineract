@@ -30,5 +30,5 @@ public interface AdHocReadPlatformService {
 
     AdHocData retrieveOne(Long adHocId);
     AdHocData retrieveNewAdHocDetails();
-    
+
 }

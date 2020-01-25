@@ -30,7 +30,7 @@ public enum PortfolioAccountType {
     private final Integer value;
     private final String code;
 
-    private PortfolioAccountType(final Integer value, final String code) {
+    PortfolioAccountType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }
@@ -71,10 +71,10 @@ public enum PortfolioAccountType {
     }
 
     public boolean isSavingsAccount() {
-        return this.value == Integer.valueOf(2);
+        return this.value.equals(2);
     }
 
     public boolean isLoanAccount() {
-        return this.value == Integer.valueOf(1);
+        return this.value.equals(1);
     }
 }

@@ -37,7 +37,7 @@ import java.util.*;
 @Component
 public class EmailCampaignValidator {
 
-   
+
 
     public static final String RESOURCE_NAME = "email";
     public static final String campaignName  = "campaignName";
@@ -89,18 +89,18 @@ public class EmailCampaignValidator {
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, EmailCampaignValidator.supportedParams);
-        
+
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(EmailCampaignValidator.RESOURCE_NAME);
-        
+
         final String campaignName =  this.fromApiJsonHelper.extractStringNamed(EmailCampaignValidator.campaignName,element);
         baseDataValidator.reset().parameter(EmailCampaignValidator.campaignName).value(campaignName).notBlank().notExceedingLengthOf(100);
-        
-        
+
+
         final Long campaignType = this.fromApiJsonHelper.extractLongNamed(EmailCampaignValidator.campaignType,element);
         baseDataValidator.reset().parameter(EmailCampaignValidator.campaignType).value(campaignType).notNull().integerGreaterThanZero();
 
@@ -115,9 +115,9 @@ public class EmailCampaignValidator {
         final Long businessRuleId = this.fromApiJsonHelper.extractLongNamed(EmailCampaignValidator.businessRuleId,element);
         baseDataValidator.reset().parameter(EmailCampaignValidator.businessRuleId).value(businessRuleId).notNull().integerGreaterThanZero();
 
-		final String emailSubject = this.fromApiJsonHelper.extractStringNamed(EmailCampaignValidator.emailSubject, element);
+        final String emailSubject = this.fromApiJsonHelper.extractStringNamed(EmailCampaignValidator.emailSubject, element);
         baseDataValidator.reset().parameter(EmailCampaignValidator.emailSubject).value(emailSubject).notBlank().notExceedingLengthOf(50);
-		
+
         final String emailMessage = this.fromApiJsonHelper.extractStringNamed(EmailCampaignValidator.emailMessage, element);
         baseDataValidator.reset().parameter(EmailCampaignValidator.emailMessage).value(emailMessage).notBlank().notExceedingLengthOf(480);
 

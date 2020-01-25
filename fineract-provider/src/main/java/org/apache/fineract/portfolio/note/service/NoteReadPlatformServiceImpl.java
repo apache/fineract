@@ -121,12 +121,12 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
         String conditionSql = "";
         switch (noteType) {
             case CLIENT:
-            	paramList.add(NoteType.CLIENT.getValue());
+                paramList.add(NoteType.CLIENT.getValue());
                 conditionSql = " n.client_id = ? and note_type_enum = ?";
             break;
             case LOAN:
-            	paramList.add(NoteType.LOAN.getValue());
-            	paramList.add(NoteType.LOAN_TRANSACTION.getValue());
+                paramList.add(NoteType.LOAN.getValue());
+                paramList.add(NoteType.LOAN_TRANSACTION.getValue());
                 conditionSql = " n.loan_id = ? and ( n.note_type_enum = ? or n.note_type_enum = ? )";
             break;
             case LOAN_TRANSACTION:

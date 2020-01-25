@@ -23,16 +23,16 @@ public class SmsProviderData {
     private Long id;
 
     private String tenantId;
-    
+
     private String phoneNo;
-    
+
     private String providerAppKey;
 
     private String providerName;
 
     private String providerDescription;
 
-    public SmsProviderData(final Long id, final String providerAppKey, final String providerName, final String providerDescription, final String tenantId, 
+    public SmsProviderData(final Long id, final String providerAppKey, final String providerName, final String providerDescription, final String tenantId,
             final String phoneNo) {
         this.id = id;
         this.providerAppKey = providerAppKey;
@@ -41,9 +41,9 @@ public class SmsProviderData {
         this.tenantId = tenantId;
         this.phoneNo = phoneNo;
     }
-    
+
     public SmsProviderData() {
-        
+
     }
 
     public Long getId() {

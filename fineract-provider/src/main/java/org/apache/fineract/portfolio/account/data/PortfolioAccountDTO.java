@@ -46,7 +46,7 @@ public class PortfolioAccountDTO {
         this.depositType = null;
         this.excludeOverDraftAccounts = false;
     }
-    
+
     public PortfolioAccountDTO(final Integer accountTypeId, final Long clientId, final String currencyCode, final long[] accountStatus,
             final Integer depositType) {
         this.accountTypeId = accountTypeId;
@@ -80,11 +80,11 @@ public class PortfolioAccountDTO {
     public boolean isExcludeOverDraftAccounts() {
         return this.excludeOverDraftAccounts;
     }
-    
+
     public Long getGroupId() {
         return this.groupId;
     }
-    
+
     public void setGroupId(final Long groupId) {
         this.groupId = groupId;
     }

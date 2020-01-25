@@ -31,10 +31,10 @@ import com.google.gson.GsonBuilder;
 
 /**
  * <p>
- * A google gson implementation of 
+ * A google gson implementation of
  * contract.
  * </p>
- * 
+ *
  * <p>
  * It serializes all fields of any Java {@link Object} passed to it.
  * </p>

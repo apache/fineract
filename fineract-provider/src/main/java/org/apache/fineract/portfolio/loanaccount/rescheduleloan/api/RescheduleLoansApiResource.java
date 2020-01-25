@@ -97,7 +97,7 @@ public class RescheduleLoansApiResource {
 
         return this.loanRescheduleRequestToApiJsonSerializer.serialize(settings, loanRescheduleReasons);
     }
-    
+
     @GET
     @Path("{scheduleId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -116,7 +116,7 @@ public class RescheduleLoansApiResource {
 
         final LoanRescheduleRequestData loanRescheduleRequestData = this.loanRescheduleRequestReadPlatformService
                 .readLoanRescheduleRequest(scheduleId);
-        
+
         return this.loanRescheduleRequestToApiJsonSerializer.serialize(settings, loanRescheduleRequestData);
     }
 
@@ -161,7 +161,7 @@ public class RescheduleLoansApiResource {
 
     /**
      * Compares two strings, ignoring differences in case
-     * 
+     *
      * @param firstString
      *            the first string
      * @param secondString
@@ -189,7 +189,7 @@ public class RescheduleLoansApiResource {
 
         return this.loanRescheduleRequestToApiJsonSerializer.serialize(settings, loanRescheduleRequestsData);
     }
-    
+
     /*@GET
     @Path("{scheduleId}")
     @Consumes({ MediaType.APPLICATION_JSON })

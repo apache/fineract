@@ -212,7 +212,7 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
     /**
      * Examines and updates each account mapping for given loan product with
      * changes passed in from the Json element
-     * 
+     *
      * @param loanProductId
      * @param changes
      * @param element

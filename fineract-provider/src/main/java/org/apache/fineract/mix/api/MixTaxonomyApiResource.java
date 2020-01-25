@@ -41,11 +41,15 @@ import org.apache.fineract.mix.service.MixTaxonomyReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import io.swagger.annotations.*;
 
 @Path("/mixtaxonomy")
 @Component
 @Scope("singleton")
-@Api(value = "Mix Taxonomy", description = "")
+@Api(tags = {"Mix Taxonomy"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Mix Taxonomy", description = "")
+})
 public class MixTaxonomyApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("taxonomyId", "name", "namespace", "dimension",

@@ -93,9 +93,9 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
             handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(jsonCommand, throwable, dve);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(jsonCommand, throwable, dve);
+            return CommandProcessingResult.empty();
         }
 
     }
@@ -124,9 +124,9 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
             handleDataIntegrityIssues(jsonCommand, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(jsonCommand, throwable, dve);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(jsonCommand, throwable, dve);
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -203,14 +203,14 @@ public class ShareProductWritePlatformServiceJpaRepositoryImpl implements ShareP
                 "Unknown data integrity issue with resource.");
     }
 
-    
+
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
 
         if (realCause.getMessage().contains("'name'")) {
             final String name = command.stringValueOfParameterNamed(ShareProductApiConstants.name_paramname);
             throw new PlatformDataIntegrityException("error.msg.shareproduct.duplicate.name", "Share Product with name `" + name
                     + "` already exists", "name", name);
-        } 
+        }
 
         throw new PlatformDataIntegrityException("error.msg.shareproduct.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");

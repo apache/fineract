@@ -31,18 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "ENTITY_DATATABLE_CHECK", action = "DELETE")
 public class DeleteEntityDatatableChecksCommandHandler implements NewCommandSourceHandler {
 
-	private final EntityDatatableChecksWritePlatformService writePlatformService;
+    private final EntityDatatableChecksWritePlatformService writePlatformService;
 
-	@Autowired
-	public DeleteEntityDatatableChecksCommandHandler(
-			final EntityDatatableChecksWritePlatformService writePlatformService) {
-		this.writePlatformService = writePlatformService;
-	}
+    @Autowired
+    public DeleteEntityDatatableChecksCommandHandler(
+            final EntityDatatableChecksWritePlatformService writePlatformService) {
+        this.writePlatformService = writePlatformService;
+    }
 
-	@Transactional
-	@Override
-	public CommandProcessingResult processCommand(JsonCommand command) {
+    @Transactional
+    @Override
+    public CommandProcessingResult processCommand(JsonCommand command) {
 
-		return this.writePlatformService.deleteCheck(command.entityId());
-	}
+        return this.writePlatformService.deleteCheck(command.entityId());
+    }
 }

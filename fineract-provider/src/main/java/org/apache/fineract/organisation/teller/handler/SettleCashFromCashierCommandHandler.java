@@ -45,7 +45,7 @@ public class SettleCashFromCashierCommandHandler implements NewCommandSourceHand
 
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-    	
+
         return this.writePlatformService.settleCashFromCashier(command.subentityId(), command);
     }
 }

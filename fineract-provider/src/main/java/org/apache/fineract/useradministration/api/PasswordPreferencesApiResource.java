@@ -47,7 +47,10 @@ import org.springframework.stereotype.Component;
 @Path("/" + PasswordPreferencesApiConstants.RESOURCE_NAME)
 @Component
 @Scope("singleton")
-@Api(value = "Password preferences", description = "This API enables management of password policy for user administration.\n" + "\n" + "There is no Apache Fineract functionality for creating a validation policy. The validation policies come pre-installed.\n" + "\n" + "Validation policies may be updated")
+@Api(tags = {"Password preferences"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Password preferences", description = "This API enables management of password policy for user administration.\n" + "\n" + "There is no Apache Fineract functionality for creating a validation policy. The validation policies come pre-installed.\n" + "\n" + "Validation policies may be updated")
+})
 public class PasswordPreferencesApiResource {
 
     private final PlatformSecurityContext context;

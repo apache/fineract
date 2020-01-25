@@ -383,10 +383,10 @@ public class LoanTransaction extends AbstractPersistableCustom<Long> {
     /**
      * This updates the derived fields of a loan transaction for the principal,
      * interest and interest waived portions.
-     * 
+     *
      * This accumulates the values passed to the already existent values for
      * each of the portions.
-     * 
+     *
      * @param principal principal
      * @param interest interest
      * @param feeCharges feeCharges
@@ -782,18 +782,20 @@ public class LoanTransaction extends AbstractPersistableCustom<Long> {
     public boolean isAccrualTransaction() {
         return isAccrual();
     }
-    
+
     public BigDecimal getOutstandingLoanBalance() {
         return outstandingLoanBalance;
     }
-    
+
     public PaymentDetail getPaymentDetail() {
         return this.paymentDetail;
     }
-    
+
     public boolean isPaymentTransaction() {
         return this.isNotReversed()
                 && !(this.isDisbursement() || this.isAccrual() || this.isRepaymentAtDisbursement() || this.isNonMonetaryTransaction() || this
                         .isIncomePosting());
     }
+
+    // TODO missing hashCode(), equals(Object obj), but probably OK as long as this is never stored in a Collection.
 }

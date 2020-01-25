@@ -36,7 +36,7 @@ import com.google.gson.reflect.TypeToken;
 
 /**
  * Immutable representation of a query.
- * 
+ *
  * Wraps the provided JSON with convenience functions for extracting parameter
  * values.
  */

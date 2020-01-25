@@ -22,55 +22,55 @@ import java.io.Serializable;
 
 public class TopicData implements Serializable {
 
-	private final Long id;
-	private final String title;
-	private final boolean enabled;
-	private final Long entityId;
-	private final String entityType;
-	private final String memberType;
+    private final Long id;
+    private final String title;
+    private final boolean enabled;
+    private final Long entityId;
+    private final String entityType;
+    private final String memberType;
 
-	public TopicData(Long id, String title, boolean enabled, Long entityId, String entityType,
-			String memberType) {
-		this.id = id;
-		this.title = title;
-		this.enabled = enabled;
-		this.entityId = entityId;
-		this.entityType = entityType;
-		this.memberType = memberType;
-	}
+    public TopicData(Long id, String title, boolean enabled, Long entityId, String entityType,
+            String memberType) {
+        this.id = id;
+        this.title = title;
+        this.enabled = enabled;
+        this.entityId = entityId;
+        this.entityType = entityType;
+        this.memberType = memberType;
+    }
 
-	public TopicData(Long id, String title, Long entityId, String entityType,
-			String memberType) {
-		this.id = id;
-		this.title = title;
-		this.enabled = true;
-		this.entityId = entityId;
-		this.entityType = entityType;
-		this.memberType = memberType;
-	}
+    public TopicData(Long id, String title, Long entityId, String entityType,
+            String memberType) {
+        this.id = id;
+        this.title = title;
+        this.enabled = true;
+        this.entityId = entityId;
+        this.entityType = entityType;
+        this.memberType = memberType;
+    }
 
-	public Long getId() {
-		return this.id;
-	}
+    public Long getId() {
+        return this.id;
+    }
 
-	public String getTitle() {
-		return this.title;
-	}
+    public String getTitle() {
+        return this.title;
+    }
 
-	public boolean isEnabled() {
-		return this.enabled;
-	}
+    public boolean isEnabled() {
+        return this.enabled;
+    }
 
-	public Long getEntityId() {
-		return this.entityId;
-	}
+    public Long getEntityId() {
+        return this.entityId;
+    }
 
-	public String getEntityType() {
-		return this.entityType;
-	}
+    public String getEntityType() {
+        return this.entityType;
+    }
 
-	public String getMemberType() {
-		return this.memberType;
-	}
+    public String getMemberType() {
+        return this.memberType;
+    }
 
 }

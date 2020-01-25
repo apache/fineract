@@ -54,7 +54,10 @@ import org.springframework.stereotype.Component;
 @Path("/makercheckers")
 @Component
 @Scope("singleton")
-@Api(value = "Maker Checker (or 4-eye) functionality")
+@Api(tags = {"Maker Checker (or 4-eye) functionality"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Maker Checker (or 4-eye) functionality")
+})
 public class MakercheckersApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "actionName", "entityName", "resourceId",

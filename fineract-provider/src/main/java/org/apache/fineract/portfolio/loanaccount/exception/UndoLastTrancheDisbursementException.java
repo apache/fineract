@@ -22,10 +22,10 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 
 public class UndoLastTrancheDisbursementException extends AbstractPlatformDomainRuleException{
 
-	public UndoLastTrancheDisbursementException(final Object... defaultUserMessageArgs) {
-		super("error.msg.cannot.undo.last.disbursal.after.repayments or waivers"," Cannot undo last disbursement after repayments or waivers.",
-				defaultUserMessageArgs);
-		
-	}
+    public UndoLastTrancheDisbursementException(final Object... defaultUserMessageArgs) {
+        super("error.msg.cannot.undo.last.disbursal.after.repayments or waivers"," Cannot undo last disbursement after repayments or waivers.",
+                defaultUserMessageArgs);
+
+    }
 
 }

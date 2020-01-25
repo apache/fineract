@@ -99,11 +99,11 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
 
     @Column(name = "second_reminder", nullable = true)
     private Integer secondReminder;
-    
+
     @Column(name="meeting_time",nullable=true)
     @Temporal(TemporalType.TIME)
     private Date meetingtime;
-    
+
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "calendar_id")
     private Set<CalendarHistory> calendarHistory = new HashSet<>();
@@ -406,7 +406,7 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
             actualChanges.put(secondRemindarParamName, newValue);
             this.secondReminder = newValue;
         }
-        
+
         final String timeFormat = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.Time_Format.getValue());
         final String time = CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue();
         if (command.isChangeInTimeParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.MEETING_TIME.getValue(), this.meetingtime,timeFormat)) {
@@ -416,9 +416,9 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
             if(timeInLocalDateTimeFormat!=null){
             this.meetingtime= timeInLocalDateTimeFormat.toDate();
             }
-           
+
         }
-        
+
         return actualChanges;
     }
 
@@ -427,7 +427,7 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
             final Integer interval, final Integer repeatsOnDay, final Integer repeatsOnNthDay) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
-        if (calendarStartDate != null & this.startDate != null) {
+        if (calendarStartDate != null && this.startDate != null) {
             if (!calendarStartDate.equals(this.getStartDateLocalDate())) {
                 actualChanges.put("startDate", calendarStartDate);
                 this.startDate = calendarStartDate.toDate();
@@ -489,7 +489,7 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
     public Integer getSecondReminder() {
         return this.secondReminder;
     }
-    
+
     public Date getMeetingTime(){
         return this.meetingtime;
     }
@@ -609,12 +609,12 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
             }
         }
         if (frequencyType.isMonthly()) {
-            if (repeatsOnNthDayOfMonth != null && (repeatsOnDay == null || repeatsOnDay == CalendarWeekDaysType.INVALID.getValue())) {
+            if (repeatsOnNthDayOfMonth != null && (repeatsOnDay == null || repeatsOnDay.equals(CalendarWeekDaysType.INVALID.getValue()))) {
                 if (repeatsOnNthDayOfMonth >= -1 && repeatsOnNthDayOfMonth <= 28) {
                     recurrenceBuilder.append(";BYMONTHDAY=");
                     recurrenceBuilder.append(repeatsOnNthDayOfMonth);
                 }
-            } else if (repeatsOnNthDayOfMonth != null && repeatsOnDay != null && repeatsOnDay != CalendarWeekDaysType.INVALID.getValue()) {
+            } else if (repeatsOnNthDayOfMonth != null && repeatsOnDay != null && !repeatsOnDay.equals(CalendarWeekDaysType.INVALID.getValue())) {
                 final NthDayType nthDay = NthDayType.fromInt(repeatsOnNthDayOfMonth);
                 if (!nthDay.isInvalid()) {
                     recurrenceBuilder.append(";BYSETPOS=");

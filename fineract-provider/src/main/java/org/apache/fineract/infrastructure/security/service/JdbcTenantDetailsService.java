@@ -112,7 +112,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
                     schemaPassword, autoUpdateEnabled, initialSize, validationInterval, removeAbandoned, removeAbandonedTimeout,
                     logAbandoned, abandonWhenPercentageFull, maxActive, minIdle, maxIdle, suspectTimeout, timeBetweenEvictionRunsMillis,
                     minEvictableIdleTimeMillis, maxRetriesOnDeadlock, maxIntervalBetweenRetries, testOnBorrow);
-            
+
         }
 
         private int bindValueInMinMaxRange(final int value, int min, int max) {

@@ -40,14 +40,14 @@ public class JLGClientData {
         final Collection<SavingsDueData> savings = null;
         return new JLGClientData(clientId, clientName, loans, savings, attendanceType);
     }
-    
+
     public static JLGClientData withSavings(final JLGClientData client, final Collection<SavingsDueData> savings){
         final Collection<LoanDueData> loans = null;
         final EnumOptionData attendanceType = null;
-        
+
         return new JLGClientData(client.clientId, client.clientName, loans, savings, attendanceType);
     }
-    
+
     /*public JLGClientData(final Long clientId, final String clientName, final Collection<LoanDueData> loans,
             final EnumOptionData attendanceType) {
         this.clientId = clientId;
@@ -61,7 +61,7 @@ public class JLGClientData {
         final Collection<SavingsDueData> savings = null;
         return new JLGClientData(clientId, clientName, loans, savings, attendanceType);
     }
-    
+
     /**
      * @param clientId
      * @param clientName
@@ -93,12 +93,12 @@ public class JLGClientData {
     public void setLoans(final Collection<LoanDueData> loans) {
         this.loans = loans;
     }
-        
+
     public Collection<SavingsDueData> getSavings() {
         return this.savings;
     }
 
-    
+
     public void setSavings(Collection<SavingsDueData> savings) {
         this.savings = savings;
     }

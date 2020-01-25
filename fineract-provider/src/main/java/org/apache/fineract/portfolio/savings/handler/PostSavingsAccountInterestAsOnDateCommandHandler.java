@@ -30,14 +30,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @CommandType(entity = "SAVINGSACCOUNT", action = "POSTINTERESTASONDATE")
 public class PostSavingsAccountInterestAsOnDateCommandHandler implements NewCommandSourceHandler {
-    
+
     private final SavingsAccountWritePlatformService writePlatformService;
-    
+
     @Autowired
     public PostSavingsAccountInterestAsOnDateCommandHandler(final SavingsAccountWritePlatformService writePlatformService) {
         this.writePlatformService = writePlatformService;
     }
-    
+
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {

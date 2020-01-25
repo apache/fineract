@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
  * An {@link ExceptionMapper} to map
  * {@link AbstractPlatformResourceNotFoundException} thrown by platform into a
  * HTTP API friendly format.
- * 
+ *
  * The {@link AbstractPlatformResourceNotFoundException} is thrown when an api
  * call for a resource that is expected to exist does not.
  */

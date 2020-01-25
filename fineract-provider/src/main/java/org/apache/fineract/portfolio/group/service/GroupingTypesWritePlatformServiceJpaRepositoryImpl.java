@@ -109,7 +109,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final SavingsAccountRepositoryWrapper savingsAccountRepositoryWrapper,
             final CodeValueRepositoryWrapper codeValueRepository, final CommandProcessingService commandProcessingService,
             final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
-            final LoanRepositoryWrapper loanRepositoryWrapper, 
+            final LoanRepositoryWrapper loanRepositoryWrapper,
             final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final AccountNumberGenerator accountNumberGenerator,
             final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
             final BusinessEventNotifierService businessEventNotifierService) {
@@ -239,28 +239,28 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             handleGroupDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, groupingType);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleGroupDataIntegrityIssues(command, throwable, dve, groupingType);
-         	return CommandProcessingResult.empty();
+             return CommandProcessingResult.empty();
         }
     }
 
     private void generateAccountNumberIfRequired(Group newGroup){
-    	if (newGroup.isAccountNumberRequiresAutoGeneration()) {
-        	EntityAccountType entityAccountType = null;
-        	AccountNumberFormat accountNumberFormat = null;
-        	if(newGroup.isCenter()){
-            	entityAccountType = EntityAccountType.CENTER;
-            	accountNumberFormat = this.accountNumberFormatRepository
+        if (newGroup.isAccountNumberRequiresAutoGeneration()) {
+            EntityAccountType entityAccountType = null;
+            AccountNumberFormat accountNumberFormat = null;
+            if(newGroup.isCenter()){
+                entityAccountType = EntityAccountType.CENTER;
+                accountNumberFormat = this.accountNumberFormatRepository
                         .findByAccountType(entityAccountType);
                 newGroup.updateAccountNo(this.accountNumberGenerator.generateCenterAccountNumber(newGroup, accountNumberFormat));
-        	}else {
-            	entityAccountType = EntityAccountType.GROUP;
-            	accountNumberFormat = this.accountNumberFormatRepository
+            }else {
+                entityAccountType = EntityAccountType.GROUP;
+                accountNumberFormat = this.accountNumberFormatRepository
                         .findByAccountType(entityAccountType);
                 newGroup.updateAccountNo(this.accountNumberGenerator.generateGroupAccountNumber(newGroup, accountNumberFormat));
-        	}
-            
+            }
+
         }
     }
     @Transactional
@@ -332,7 +332,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         }catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleGroupDataIntegrityIssues(command, throwable, dve, GroupTypes.GROUP);
-         	return CommandProcessingResult.empty();
+             return CommandProcessingResult.empty();
         }
     }
 
@@ -470,9 +470,9 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             handleGroupDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, groupingType);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
             handleGroupDataIntegrityIssues(command, throwable, dve, groupingType);
-         	return CommandProcessingResult.empty();
+             return CommandProcessingResult.empty();
         }
     }
 

@@ -48,14 +48,14 @@ public class AccountTransfersDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final AccountTransfersDetailDataValidator accountTransfersDetailDataValidator;
-	private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
-			AccountDetailConstants.localeParamName, AccountDetailConstants.dateFormatParamName,
-			AccountDetailConstants.fromOfficeIdParamName, AccountDetailConstants.fromClientIdParamName,
-			AccountDetailConstants.fromAccountTypeParamName, AccountDetailConstants.fromAccountIdParamName,
-			AccountDetailConstants.toOfficeIdParamName, AccountDetailConstants.toClientIdParamName,
-			AccountDetailConstants.toAccountTypeParamName, AccountDetailConstants.toAccountIdParamName,
-			AccountTransfersApiConstants.transferDateParamName, AccountTransfersApiConstants.transferAmountParamName,
-			AccountTransfersApiConstants.transferDescriptionParamName));
+    private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(
+            AccountDetailConstants.localeParamName, AccountDetailConstants.dateFormatParamName,
+            AccountDetailConstants.fromOfficeIdParamName, AccountDetailConstants.fromClientIdParamName,
+            AccountDetailConstants.fromAccountTypeParamName, AccountDetailConstants.fromAccountIdParamName,
+            AccountDetailConstants.toOfficeIdParamName, AccountDetailConstants.toClientIdParamName,
+            AccountDetailConstants.toAccountTypeParamName, AccountDetailConstants.toAccountIdParamName,
+            AccountTransfersApiConstants.transferDateParamName, AccountTransfersApiConstants.transferAmountParamName,
+            AccountTransfersApiConstants.transferDescriptionParamName));
 
 
     @Autowired
@@ -82,8 +82,8 @@ public class AccountTransfersDataValidator {
 
         this.accountTransfersDetailDataValidator.validate(command, baseDataValidator);
 
-		final LocalDate transactionDate = this.fromApiJsonHelper
-				.extractLocalDateNamed(AccountTransfersApiConstants.transferDateParamName, element);
+        final LocalDate transactionDate = this.fromApiJsonHelper
+                .extractLocalDateNamed(AccountTransfersApiConstants.transferDateParamName, element);
         baseDataValidator.reset().parameter(AccountTransfersApiConstants.transferDateParamName).value
                 (transactionDate).notNull();
 

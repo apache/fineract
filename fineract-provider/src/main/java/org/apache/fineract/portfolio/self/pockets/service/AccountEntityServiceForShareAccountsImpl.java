@@ -31,39 +31,39 @@ import org.springframework.stereotype.Service;
 @Service
 public class AccountEntityServiceForShareAccountsImpl implements AccountEntityService {
 
-	private final String KEY = EntityAccountType.SHARES.name();
+    private final String KEY = EntityAccountType.SHARES.name();
 
-	private final PlatformSecurityContext context;
-	private final AppUserShareAccountsMapperReadPlatformService appUserShareAccountsMapperReadPlatformService;
-	private final ShareAccountReadPlatformService shareAccountReadPlatformService;
+    private final PlatformSecurityContext context;
+    private final AppUserShareAccountsMapperReadPlatformService appUserShareAccountsMapperReadPlatformService;
+    private final ShareAccountReadPlatformService shareAccountReadPlatformService;
 
 
-	@Autowired
-	public AccountEntityServiceForShareAccountsImpl(final PlatformSecurityContext context,
-			final AppUserShareAccountsMapperReadPlatformService appUserShareAccountsMapperReadPlatformService,
-			final ShareAccountReadPlatformService shareAccountReadPlatformService) {
-		this.context = context;
-		this.appUserShareAccountsMapperReadPlatformService = appUserShareAccountsMapperReadPlatformService;
-		this.shareAccountReadPlatformService = shareAccountReadPlatformService;
-	}
+    @Autowired
+    public AccountEntityServiceForShareAccountsImpl(final PlatformSecurityContext context,
+            final AppUserShareAccountsMapperReadPlatformService appUserShareAccountsMapperReadPlatformService,
+            final ShareAccountReadPlatformService shareAccountReadPlatformService) {
+        this.context = context;
+        this.appUserShareAccountsMapperReadPlatformService = appUserShareAccountsMapperReadPlatformService;
+        this.shareAccountReadPlatformService = shareAccountReadPlatformService;
+    }
 
-	@Override
-	public String getKey() {
-		return KEY;
-	}
+    @Override
+    public String getKey() {
+        return KEY;
+    }
 
-	@Override
-	public void validateSelfUserAccountMapping(Long accountId) {
-		if (!this.appUserShareAccountsMapperReadPlatformService.isShareAccountsMappedToUser(accountId,
-				this.context.getAuthenticatedUserIfPresent().getId())) {
-			throw new ShareAccountNotFoundException(accountId);
+    @Override
+    public void validateSelfUserAccountMapping(Long accountId) {
+        if (!this.appUserShareAccountsMapperReadPlatformService.isShareAccountsMappedToUser(accountId,
+                this.context.getAuthenticatedUserIfPresent().getId())) {
+            throw new ShareAccountNotFoundException(accountId);
 
-		}
-	}
+        }
+    }
 
-	@Override
-	public String retrieveAccountNumberByAccountId(Long accountId) {
-		return this.shareAccountReadPlatformService.retrieveAccountNumberByAccountId(accountId);
-	}
+    @Override
+    public String retrieveAccountNumberByAccountId(Long accountId) {
+        return this.shareAccountReadPlatformService.retrieveAccountNumberByAccountId(accountId);
+    }
 
 }

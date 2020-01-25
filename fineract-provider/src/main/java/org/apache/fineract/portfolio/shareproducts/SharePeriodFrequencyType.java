@@ -48,7 +48,7 @@ public enum SharePeriodFrequencyType {
     }
 
     public static SharePeriodFrequencyType fromInt(final Integer type) {
-    	SharePeriodFrequencyType repaymentFrequencyType = SharePeriodFrequencyType.INVALID;
+        SharePeriodFrequencyType repaymentFrequencyType = SharePeriodFrequencyType.INVALID;
         if (type != null) {
             switch (type) {
                 case 0:

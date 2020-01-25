@@ -95,8 +95,8 @@ public class PaymentType extends AbstractPersistableCustom<Long> {
         return PaymentTypeData.instance(getId(), this.name, this.description, this.isCashPayment, this.position);
     }
 
-	public Boolean isCashPayment() {
-		return isCashPayment;
-	}
-	
+    public Boolean isCashPayment() {
+        return isCashPayment;
+    }
+
 }

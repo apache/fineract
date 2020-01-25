@@ -22,11 +22,11 @@ import java.util.Collection;
 import org.apache.fineract.notification.data.TopicData;
 
 public interface TopicReadPlatformService {
-	
-	Collection<TopicData> getAllTopics();
-	
-	Collection<TopicData> getAllEnabledTopics();
 
-	TopicData findById(Long id);
-	
+    Collection<TopicData> getAllTopics();
+
+    Collection<TopicData> getAllEnabledTopics();
+
+    TopicData findById(Long id);
+
 }

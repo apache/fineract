@@ -500,10 +500,10 @@ public class GroupSavingsIntegrationTest {
         BigDecimal totalWaiveAmount = BigDecimal.valueOf(Double.valueOf((Float) savingsChargeForWaive.get("amount")));
         totalWaiveAmount = totalWaiveAmount.add(totalWaiveAmount);
         assertEquals(totalWaiveAmount.floatValue(), waiveCharge.get("amountWaived"));
-        
+
         final Integer weeklyFeeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec, ChargesHelper.getSavingsWeeklyFeeJSON());
         Assert.assertNotNull(weeklyFeeId);
-        
+
         this.savingsAccountHelper.addChargesForSavings(savingsId, weeklyFeeId, true);
         charges = this.savingsAccountHelper.getSavingsCharges(savingsId);
         Assert.assertEquals(3, charges.size());
@@ -530,9 +530,9 @@ public class GroupSavingsIntegrationTest {
                 .plusWeeks((Integer) paidCharge.get("feeInterval"));
         assertEquals(expectedNextDueDate, nextDueDate);
         cal = Calendar.getInstance();
-        
+
         this.savingsAccountHelper.closeSavingsAccountAndGetBackRequiredField(savingsId, "true", null, sdf.format(cal.getTime()));
-        
+
     }
 
     public static Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

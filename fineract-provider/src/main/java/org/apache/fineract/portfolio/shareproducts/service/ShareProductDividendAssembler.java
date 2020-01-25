@@ -63,10 +63,10 @@ public class ShareProductDividendAssembler {
         if(shareAccountDatas == null || shareAccountDatas.isEmpty()) {
             throw new ShareAccountsNotFoundException(product.getId()) ;
         }
-        
+
         ShareProductDividendPayOutDetails productDividendPayOutDetails = null;
         int minimumActivePeriod = 0 ;
-        if(product.getMinimumActivePeriod() != null) { //minimum active period may be null 
+        if(product.getMinimumActivePeriod() != null) { //minimum active period may be null
             minimumActivePeriod = product.getMinimumActivePeriod();
         }
         final Map<Long, Long> numberOfSharesdaysPerAccount = new HashMap<>();
@@ -105,7 +105,7 @@ public class ShareProductDividendAssembler {
                 final PurchasedSharesStatusType type = PurchasedSharesStatusType.fromInt(purchasedSharesData.getType().getId()
                         .intValue());
                 if (status.isApproved() && !type.isChargePayment()) {
-                    
+
                     LocalDate shareStartDate = purchasedSharesData.getPurchasedDate();
                     if (shareStartDate.isBefore(lastDividendPostDate)) {
                         shareStartDate = lastDividendPostDate;

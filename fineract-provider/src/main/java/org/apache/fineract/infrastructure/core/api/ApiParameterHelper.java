@@ -171,7 +171,7 @@ public class ApiParameterHelper {
         SQLInjectionValidator.validateSQLInput(str);
         return singleQuote + StringUtils.replace(str, singleQuote, twoSingleQuotes, -1) + singleQuote;
     }
-    
+
 
     public static Map<String, String> asMap(final MultivaluedMap<String, String> queryParameters) {
 

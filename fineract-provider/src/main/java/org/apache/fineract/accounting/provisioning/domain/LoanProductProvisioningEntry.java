@@ -19,6 +19,7 @@
 package org.apache.fineract.accounting.provisioning.domain;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -73,8 +74,8 @@ public class LoanProductProvisioningEntry extends AbstractPersistableCustom<Long
     private GLAccount expenseAccount;
 
     protected LoanProductProvisioningEntry() {
-        
     }
+
     public LoanProductProvisioningEntry(final LoanProduct loanProduct, final Office office, final String currencyCode,
             final ProvisioningCategory provisioningCategory, final Long overdueInDays, final BigDecimal reservedAmount,
             final GLAccount liabilityAccount, final GLAccount expenseAccount, Long criteriaId) {
@@ -94,35 +95,50 @@ public class LoanProductProvisioningEntry extends AbstractPersistableCustom<Long
     }
 
     public BigDecimal getReservedAmount() {
-        return this.reservedAmount ;
+  return this.reservedAmount;
     }
     public void addReservedAmount(BigDecimal value) {
-        this.reservedAmount = this.reservedAmount.add(value) ;
-    }
-    
-    public Office getOffice() {
-        return this.office ;
+  this.reservedAmount = this.reservedAmount.add(value);
     }
 
-    public GLAccount getLiabilityAccount() {
-        return this.liabilityAccount ;
-    }
-    
-    public String getCurrencyCode() {
-        return this.currencyCode ;
-    }
-    
-    public GLAccount getExpenseAccount() {
-        return this.expenseAccount ;
-    }
-    
+    public Office getOffice() {
+  return this.office;
+ }
+
+ public GLAccount getLiabilityAccount() {
+  return this.liabilityAccount;
+ }
+
+ public String getCurrencyCode() {
+  return this.currencyCode;
+ }
+
+ public GLAccount getExpenseAccount() {
+  return this.expenseAccount;
+ }
+
+ // TODO Note that this domain class does equals() & hashCode() on getId() for @JoinColumn attributes, which not all other classes do...
+
     @Override
     public boolean equals(Object obj) {
         if (!obj.getClass().equals(getClass())) return false;
-        LoanProductProvisioningEntry entry = (LoanProductProvisioningEntry) obj;
-        return entry.loanProduct.getId().equals(this.loanProduct.getId())
-                && entry.provisioningCategory.getId().equals(this.provisioningCategory.getId())
-                && entry.office.getId().equals(this.office.getId())
-                && entry.getCurrencyCode().equals(this.getCurrencyCode());
+        LoanProductProvisioningEntry other = (LoanProductProvisioningEntry) obj;
+        return Objects.equals(other.entry.getId(), this.entry.getId())
+  && Objects.equals(other.criteriaId, this.criteriaId)
+         && Objects.equals(other.office.getId(), this.office.getId())
+  && Objects.equals(other.currencyCode, this.currencyCode)
+  && Objects.equals(other.loanProduct.getId(), this.loanProduct.getId())
+            && Objects.equals(other.provisioningCategory.getId(), this.provisioningCategory.getId())
+            && Objects.equals(other.overdueInDays, this.overdueInDays)
+            && Objects.equals(other.reservedAmount, this.reservedAmount)
+  && Objects.equals(other.liabilityAccount.getId(), this.liabilityAccount.getId())
+  && Objects.equals(other.expenseAccount.getId(), this.expenseAccount.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        // NOT return Objects.hash(entry, criteriaId, office, currencyCode, loanProduct, provisioningCategory, overdueInDays, reservedAmount, liabilityAccount, expenseAccount);
+ // to remain consistent with the implementation in equals(), also use getId() here.
+ return Objects.hash(entry.getId(), criteriaId, office.getId(), currencyCode, loanProduct.getId(), provisioningCategory.getId(), overdueInDays, reservedAmount, liabilityAccount.getId(), expenseAccount.getId());
     }
 }

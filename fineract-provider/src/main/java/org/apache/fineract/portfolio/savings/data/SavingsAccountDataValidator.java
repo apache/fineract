@@ -92,8 +92,8 @@ public class SavingsAccountDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-				SavingsAccountConstant.SAVINGS_ACCOUNT_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                SavingsAccountConstant.SAVINGS_ACCOUNT_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -208,7 +208,7 @@ public class SavingsAccountDataValidator {
             baseDataValidator.reset().parameter(withdrawalFeeForTransfersParamName).value(isWithdrawalFeeApplicableForTransfers)
                     .ignoreIfNull().validateForBooleanValue();
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists(withHoldTaxParamName, element)) {
             final String withHoldTax = this.fromApiJsonHelper.extractStringNamed(withHoldTaxParamName, element);
             baseDataValidator.reset().parameter(withHoldTaxParamName).value(withHoldTax).ignoreIfNull().validateForBooleanValue();
@@ -398,7 +398,7 @@ public class SavingsAccountDataValidator {
             baseDataValidator.reset().parameter(withdrawalFeeForTransfersParamName).value(isWithdrawalFeeApplicableForTransfers)
                     .ignoreIfNull().validateForBooleanValue();
         }
-        
+
         if (this.fromApiJsonHelper.parameterExists(withHoldTaxParamName, element)) {
             final String withHoldTax = this.fromApiJsonHelper.extractStringNamed(withHoldTaxParamName, element);
             baseDataValidator.reset().parameter(withHoldTaxParamName).value(withHoldTax).ignoreIfNull().validateForBooleanValue();
@@ -438,7 +438,7 @@ public class SavingsAccountDataValidator {
     public void validateForAssignSavingsOfficer(final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-        
+
         final Set<String> supportedParameters = new HashSet<>(Arrays.asList("fromSavingsOfficerId","toSavingsOfficerId","assignmentDate","locale","dateFormat"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -460,13 +460,13 @@ public class SavingsAccountDataValidator {
             baseDataValidator.reset().parameter("assignmentDate").value(assignmentDate).notNull();
         }
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }      
+                "Validation errors exist.", dataValidationErrors); }
 
     }
 
     public void validateForUnAssignSavingsOfficer(final String json) {
-    	if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-        
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
         final Set<String> supportedParameters = new HashSet<>(Arrays.asList("unassignedDate","locale","dateFormat"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -485,6 +485,6 @@ public class SavingsAccountDataValidator {
             baseDataValidator.reset().parameter("unassignedDate").value(unassignedDate).notNull();
         }
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }     
+                "Validation errors exist.", dataValidationErrors); }
 }
 }

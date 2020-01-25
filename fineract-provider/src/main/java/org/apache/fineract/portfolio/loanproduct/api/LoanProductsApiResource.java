@@ -65,7 +65,10 @@ import java.util.*;
 @Path("/loanproducts")
 @Component
 @Scope("singleton")
-@Api(value = "Loan Products", description = "A Loan product is a template that is used when creating a loan. Much of the template definition can be overridden during loan creation.")
+@Api(tags = {"Loan Products"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Loan Products", description = "A Loan product is a template that is used when creating a loan. Much of the template definition can be overridden during loan creation.")
+})
 public class LoanProductsApiResource {
 
     private final Set<String> LOAN_PRODUCT_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "name", "shortName", "description",
@@ -312,7 +315,7 @@ public class LoanProductsApiResource {
                 interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions, accountOptions,
                 accountingRuleTypeOptions, loanCycleValueConditionTypeOptions, daysInMonthTypeOptions, daysInYearTypeOptions,
                 interestRecalculationCompoundingTypeOptions, rescheduleStrategyTypeOptions, interestRecalculationFrequencyTypeOptions,
-                preCloseInterestCalculationStrategyOptions, floatingRateOptions, interestRecalculationNthDayTypeOptions, 
+                preCloseInterestCalculationStrategyOptions, floatingRateOptions, interestRecalculationNthDayTypeOptions,
                 interestRecalculationDayOfWeekTypeOptions);
     }
 

@@ -92,13 +92,13 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
 
     @Column(name = "product_id")
     private Long productId;
-    
+
     @Column(name = "transaction_id", length = 100)
     private String transactionId;
-    
+
     @Column(name="creditbureau_id")
     private Long creditBureauId;
-    
+
     @Column(name="organisation_creditbureau_id")
     private Long organisationCreditBureauId;
 
@@ -126,21 +126,21 @@ public class CommandSource extends AbstractPersistableCustom<Long> {
         return this.creditBureauId;
     }
 
-    
+
     public void setCreditBureauId(Long creditBureauId) {
         this.creditBureauId = creditBureauId;
     }
 
-    
+
     public Long getOrganisationCreditBureauId() {
         return this.organisationCreditBureauId;
     }
 
-    
+
     public void setOrganisationCreditBureauId(Long OrganisationCreditBureauId) {
         this.organisationCreditBureauId = OrganisationCreditBureauId;
     }
-    
+
     public void markAsChecked(final AppUser checker, final DateTime checkedOnDate) {
         this.checker = checker;
         this.checkedOnDate = checkedOnDate.toDate();

@@ -514,12 +514,12 @@ public class FixedDepositAccountData extends DepositAccountData {
         return new HashCodeBuilder(17, 37).append(this.id).append(this.accountNo).toHashCode();
     }
 
-    
+
     public BigDecimal getActivationCharge() {
         return this.activationCharge;
     }
 
-    
+
     public void setActivationCharge(BigDecimal activationCharge) {
         this.activationCharge = activationCharge;
     }

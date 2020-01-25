@@ -79,7 +79,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final ProvisioningEntriesDefinitionJsonDeserializer fromApiJsonDeserializer;
     private final FromJsonHelper fromApiJsonHelper;
-    
+
     @Autowired
     public ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl(
             final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService,
@@ -120,11 +120,11 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
                     existingEntryData.getId(), PortfolioProductType.PROVISIONING.getValue());
         }
         if(requestedEntry.getLoanProductProvisioningEntries() == null || requestedEntry.getLoanProductProvisioningEntries().size() == 0) {
-            requestedEntry.setJournalEntryCreated(Boolean.FALSE);    
+            requestedEntry.setJournalEntryCreated(Boolean.FALSE);
         }else {
             requestedEntry.setJournalEntryCreated(Boolean.TRUE);
         }
-        
+
         this.provisioningEntryRepository.save(requestedEntry);
         this.journalEntryWritePlatformService.createProvisioningJournalEntries(requestedEntry);
     }
@@ -156,7 +156,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
         Date currentDate  = DateUtils.getLocalDateOfTenant().toDate() ;
         boolean addJournalEntries = true;
         try {
-            Collection<ProvisioningCriteriaData> criteriaCollection = this.provisioningCriteriaReadPlatformService.retrieveAllProvisioningCriterias() ; 
+            Collection<ProvisioningCriteriaData> criteriaCollection = this.provisioningCriteriaReadPlatformService.retrieveAllProvisioningCriterias() ;
             if(criteriaCollection == null || criteriaCollection.size() == 0){
                 return ;
                 //FIXME: Do we need to throw NoProvisioningCriteriaDefinitionFound()?
@@ -171,7 +171,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
         Date createdDate = parseDate(command);
         boolean addJournalEntries = isJournalEntriesRequired(command);
         try {
-            Collection<ProvisioningCriteriaData> criteriaCollection = this.provisioningCriteriaReadPlatformService.retrieveAllProvisioningCriterias() ; 
+            Collection<ProvisioningCriteriaData> criteriaCollection = this.provisioningCriteriaReadPlatformService.retrieveAllProvisioningCriterias() ;
             if(criteriaCollection == null || criteriaCollection.size() == 0){
                 throw new NoProvisioningCriteriaDefinitionFound() ;
             }

@@ -23,7 +23,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 /**
  * {@link AbstractPlatformDomainRuleException} thrown when a value is not within
  * minimum and maximum values.
- * 
+ *
  */
 public class NotInMinMaxRangeException extends AbstractPlatformDomainRuleException {
 

@@ -29,7 +29,7 @@ public interface CommandProcessingService {
     CommandProcessingResult processAndLogCommand(CommandWrapper wrapper, JsonCommand command, boolean isApprovedByChecker);
 
     CommandProcessingResult logCommand(CommandSource commandSourceResult);
-    
+
     boolean validateCommand(final CommandWrapper commandWrapper,final AppUser user);
 
 }

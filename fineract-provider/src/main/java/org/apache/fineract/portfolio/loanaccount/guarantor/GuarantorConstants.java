@@ -28,7 +28,7 @@ public class GuarantorConstants {
     /***
      * Enum of all parameters passed in while creating/updating a loan product
      ***/
-    public static enum GUARANTOR_JSON_INPUT_PARAMS {
+    public enum GUARANTOR_JSON_INPUT_PARAMS {
         LOAN_ID("loanId"), CLIENT_RELATIONSHIP_TYPE_ID("clientRelationshipTypeId"), GUARANTOR_TYPE_ID("guarantorTypeId"), ENTITY_ID(
                 "entityId"), FIRSTNAME("firstname"), LASTNAME("lastname"), ADDRESS_LINE_1("addressLine1"), ADDRESS_LINE_2("addressLine2"), CITY(
                 "city"), STATE("state"), ZIP("zip"), COUNTRY("country"), MOBILE_NUMBER("mobileNumber"), PHONE_NUMBER("housePhoneNumber"), COMMENT(
@@ -36,7 +36,7 @@ public class GuarantorConstants {
 
         private final String value;
 
-        private GUARANTOR_JSON_INPUT_PARAMS(final String value) {
+        GUARANTOR_JSON_INPUT_PARAMS(final String value) {
             this.value = value;
         }
 
@@ -60,11 +60,11 @@ public class GuarantorConstants {
             return this.value;
         }
     }
-    
+
     public static final String GUARANTOR_SELF_GUARANTEE_ERROR = "min.self.guarantee.required";
     public static final String GUARANTOR_EXTERNAL_GUARANTEE_ERROR = "min.external.guarantee.required";
     public static final String GUARANTOR_MANDATORY_GUARANTEE_ERROR = "mandated.guarantee.required";
     public static final String GUARANTOR_INSUFFICIENT_BALANCE_ERROR = "insufficient.balance";
     public static final String GUARANTOR_NOT_ACTIVE_ERROR = "not.active";
-    
+
 }

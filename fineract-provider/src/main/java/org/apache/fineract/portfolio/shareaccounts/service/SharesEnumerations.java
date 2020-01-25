@@ -124,7 +124,7 @@ public class SharesEnumerations {
     public static EnumOptionData minimumActivePeriodFrequencyType(final int id) {
         return minimumActivePeriodFrequencyType(SharePeriodFrequencyType.fromInt(id));
     }
-    
+
     public static EnumOptionData minimumActivePeriodFrequencyType(final SharePeriodFrequencyType type) {
         final String codePrefix = "shares.minimumactive." ;
         EnumOptionData optionData = new EnumOptionData(SharePeriodFrequencyType.INVALID.getValue().longValue(),
@@ -151,7 +151,7 @@ public class SharesEnumerations {
         }
         return optionData;
     }
-    
+
     public static EnumOptionData lockinPeriodFrequencyType(final SharePeriodFrequencyType type) {
         final String codePrefix = "shares.lockin." ;
         EnumOptionData optionData = new EnumOptionData(SharePeriodFrequencyType.INVALID.getValue().longValue(),

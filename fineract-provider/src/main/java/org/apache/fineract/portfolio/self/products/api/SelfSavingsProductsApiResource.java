@@ -41,38 +41,38 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class SelfSavingsProductsApiResource {
 
-	private final SavingsProductsApiResource savingsProductsApiResource;
-	private final AppuserClientMapperReadService appUserClientMapperReadService;
+    private final SavingsProductsApiResource savingsProductsApiResource;
+    private final AppuserClientMapperReadService appUserClientMapperReadService;
 
-	@Autowired
-	public SelfSavingsProductsApiResource(final SavingsProductsApiResource savingsProductsApiResource,
-			final AppuserClientMapperReadService appUserClientMapperReadService) {
-		this.savingsProductsApiResource = savingsProductsApiResource;
-		this.appUserClientMapperReadService = appUserClientMapperReadService;
+    @Autowired
+    public SelfSavingsProductsApiResource(final SavingsProductsApiResource savingsProductsApiResource,
+            final AppuserClientMapperReadService appUserClientMapperReadService) {
+        this.savingsProductsApiResource = savingsProductsApiResource;
+        this.appUserClientMapperReadService = appUserClientMapperReadService;
 
-	}
+    }
 
-	@GET
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveAll(@QueryParam(SavingsApiConstants.clientIdParamName) final Long clientId,
-			@Context final UriInfo uriInfo) {
+    @GET
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveAll(@QueryParam(SavingsApiConstants.clientIdParamName) final Long clientId,
+            @Context final UriInfo uriInfo) {
 
-		this.appUserClientMapperReadService.validateAppuserClientsMapping(clientId);
-		return this.savingsProductsApiResource.retrieveAll(uriInfo);
+        this.appUserClientMapperReadService.validateAppuserClientsMapping(clientId);
+        return this.savingsProductsApiResource.retrieveAll(uriInfo);
 
-	}
+    }
 
-	@GET
-	@Path("{productId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveOne(@PathParam(SavingsApiConstants.productIdParamName) final Long productId,
-			@QueryParam(SavingsApiConstants.clientIdParamName) final Long clientId, @Context final UriInfo uriInfo) {
+    @GET
+    @Path("{productId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveOne(@PathParam(SavingsApiConstants.productIdParamName) final Long productId,
+            @QueryParam(SavingsApiConstants.clientIdParamName) final Long clientId, @Context final UriInfo uriInfo) {
 
-		this.appUserClientMapperReadService.validateAppuserClientsMapping(clientId);
-		return this.savingsProductsApiResource.retrieveOne(productId, uriInfo);
+        this.appUserClientMapperReadService.validateAppuserClientsMapping(clientId);
+        return this.savingsProductsApiResource.retrieveOne(productId, uriInfo);
 
-	}
+    }
 
 }

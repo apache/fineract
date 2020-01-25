@@ -51,7 +51,10 @@ import com.google.gson.Gson;
 @Path("/surveys")
 @Component
 @Scope("singleton")
-@Api(value = "SPM - Serveys", description = "")
+@Api(tags = {"Spm-Surveys"})
+@SwaggerDefinition(tags = {
+        @Tag(name = "Spm-Surveys", description = "")
+})
 public class SpmApiResource {
 
     private final PlatformSecurityContext securityContext;
@@ -142,9 +145,9 @@ public class SpmApiResource {
         }else{
             throw new UnrecognizedQueryParamException("command", command);
         }
-        
+
     }
-    
+
     private String getResponse(Long id) {
         Gson gson = new Gson();
         HashMap<String, Object> response = new HashMap<>();

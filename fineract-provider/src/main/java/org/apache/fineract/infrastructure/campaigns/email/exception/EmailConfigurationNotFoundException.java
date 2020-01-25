@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
  */
 public class EmailConfigurationNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-	public EmailConfigurationNotFoundException(final String name) {
-		super("error.msg.email.configuration.name.not.found", "Email configuration with name " + name + " does not exist", name);
-	}
+    public EmailConfigurationNotFoundException(final String name) {
+        super("error.msg.email.configuration.name.not.found", "Email configuration with name " + name + " does not exist", name);
+    }
 }

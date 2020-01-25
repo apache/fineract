@@ -112,17 +112,17 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     @Column(name = "created_date", nullable = false)
     private Date createdDate;
 
-	@ManyToOne
+    @ManyToOne
     @JoinColumn(name = "appuser_id", nullable = true)
     private AppUser appUser;
-    
+
     @Column(name = "is_manual", length = 1, nullable = true)
     private boolean isManualTransaction;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch=FetchType.EAGER)
     @JoinColumn(name = "savings_transaction_id", referencedColumnName = "id", nullable = false)
     private List<SavingsAccountTransactionTaxDetails> taxDetails = new ArrayList<>();
-    
+
     @Column(name = "release_id_of_hold_amount", length = 20)
     private Long releaseIdOfHoldAmountTransaction;
 
@@ -297,7 +297,7 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
         this.appUser = appUser;
         this.isManualTransaction = isManualTransaction;
     }
-    
+
     public static SavingsAccountTransaction holdAmount(final SavingsAccount savingsAccount, final Office office,
             final PaymentDetail paymentDetail, final LocalDate date, final Money amount, Date createdDate, final AppUser appUser) {
         final boolean isReversed = false;
@@ -357,10 +357,10 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
         return SavingsAccountTransactionType.fromInt(this.typeOf).isInterestPosting() && isNotReversed();
     }
 
-	public boolean isInterestPosting() {
-		return SavingsAccountTransactionType.fromInt(this.typeOf).isInterestPosting()
-				|| SavingsAccountTransactionType.fromInt(this.typeOf).isOverDraftInterestPosting();
-	}
+    public boolean isInterestPosting() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isInterestPosting()
+                || SavingsAccountTransactionType.fromInt(this.typeOf).isOverDraftInterestPosting();
+    }
     public boolean isWithdrawalFeeAndNotReversed() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isWithdrawalFee() && isNotReversed();
     }
@@ -510,11 +510,11 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     public boolean isAfter(final LocalDate transactionDate) {
         return getTransactionLocalDate().isAfter(transactionDate);
     }
-    
+
     public boolean isManualTransaction() {
         return this.isManualTransaction;
     }
-    
+
     public void setPostInterestAsOn(boolean isManualTransaction) {
         this.isManualTransaction = isManualTransaction;
     }
@@ -659,11 +659,11 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     public boolean isWaiveCharge() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isWaiveCharge();
     }
-    
+
     public boolean isAmountOnHold() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isAmountOnHold();
     }
-    
+
     public boolean isAmountRelease() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isAmountRelease();
     }
@@ -782,18 +782,18 @@ public final class SavingsAccountTransaction extends AbstractPersistableCustom<L
     }
 
     public PaymentDetail getPaymentDetail() {
-    	return this.paymentDetail ;
+        return this.paymentDetail ;
     }
-    
+
     public void updateReleaseId(Long releaseId) {
         this.releaseIdOfHoldAmountTransaction = releaseId;
     }
-    
+
     public Long getReleaseIdOfHoldAmountTransaction() {
         return this.releaseIdOfHoldAmountTransaction;
     }
-    
-	public boolean isAmountOnHoldNotReleased() {
-		return (isAmountOnHold() && getReleaseIdOfHoldAmountTransaction() == null);
-	}
+
+    public boolean isAmountOnHoldNotReleased() {
+        return (isAmountOnHold() && getReleaseIdOfHoldAmountTransaction() == null);
+    }
 }

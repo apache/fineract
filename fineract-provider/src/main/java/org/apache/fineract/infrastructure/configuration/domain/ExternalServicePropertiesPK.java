@@ -51,26 +51,26 @@ public class ExternalServicePropertiesPK implements Serializable {
     public Long getExternalService() {
         return externalServiceId;
     }
-    
-    @Override 
-	public boolean equals(Object obj) {
-		if (obj == null) {
-			return false;
-		}
-		if (obj == this) {
-			return true;
-		}
-		if (obj.getClass() != getClass()) {
-			return false;
-		}
-		final ExternalServicePropertiesPK rhs = (ExternalServicePropertiesPK) obj;
-		return new EqualsBuilder() //
-				.append(this.externalServiceId, rhs.externalServiceId) //
-				.append(this.name, rhs.name) //
-				.isEquals();
-	}
 
-    @Override 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        final ExternalServicePropertiesPK rhs = (ExternalServicePropertiesPK) obj;
+        return new EqualsBuilder() //
+                .append(this.externalServiceId, rhs.externalServiceId) //
+                .append(this.name, rhs.name) //
+                .isEquals();
+    }
+
+    @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37) //
                 .append(this.externalServiceId) //

@@ -119,7 +119,7 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
     /**
      * The interest period is the span of time at the end of which savings in a
      * client's account earn interest.
-     * 
+     *
      * A value from the {@link SavingsCompoundingInterestPeriodType}
      * enumeration.
      */
@@ -195,17 +195,17 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
     @JoinColumn(name = "tax_group_id")
     private TaxGroup taxGroup;
 
-	@Column(name = "is_dormancy_tracking_active")
-	private Boolean isDormancyTrackingActive;
+    @Column(name = "is_dormancy_tracking_active")
+    private Boolean isDormancyTrackingActive;
 
     @Column(name = "days_to_inactive")
-	private Long daysToInactive;
+    private Long daysToInactive;
 
     @Column(name = "days_to_dormancy")
-	private Long daysToDormancy;
+    private Long daysToDormancy;
 
     @Column(name = "days_to_escheat")
-	private Long daysToEscheat;
+    private Long daysToEscheat;
 
     public static SavingsProduct createNew(final String name, final String shortName, final String description,
             final MonetaryCurrency currency, final BigDecimal interestRate,
@@ -217,7 +217,7 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
             final boolean allowOverdraft, final BigDecimal overdraftLimit, final boolean enforceMinRequiredBalance,
             final BigDecimal minRequiredBalance, final BigDecimal minBalanceForInterestCalculation,
             final BigDecimal nominalAnnualInterestRateOverdraft, final BigDecimal minOverdraftForInterestCalculation,
-            boolean withHoldTax, TaxGroup taxGroup, 
+            boolean withHoldTax, TaxGroup taxGroup,
             final Boolean isDormancyTrackingActive, final Long daysToInactive, final Long daysToDormancy, final Long daysToEscheat) {
 
         return new SavingsProduct(name, shortName, description, currency, interestRate, interestCompoundingPeriodType,
@@ -302,13 +302,13 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
         this.minBalanceForInterestCalculation = minBalanceForInterestCalculation;
         this.withHoldTax = withHoldTax;
         this.taxGroup = taxGroup;
-        
+
         if(isDormancyTrackingActive == null) {
             this.isDormancyTrackingActive = Boolean.FALSE ;
         }else {
-            this.isDormancyTrackingActive = isDormancyTrackingActive;    
+            this.isDormancyTrackingActive = isDormancyTrackingActive;
         }
-        
+
         this.daysToInactive = daysToInactive;
         this.daysToDormancy = daysToDormancy;
         this.daysToEscheat = daysToEscheat;
@@ -570,7 +570,7 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
         } else {
             this.taxGroup = null;
         }
-        
+
         if(command.isChangeInBooleanParameterNamed(isDormancyTrackingActiveParamName, this.isDormancyTrackingActive)){
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isDormancyTrackingActiveParamName);
             actualChanges.put(isDormancyTrackingActiveParamName, newValue);
@@ -594,11 +594,11 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
             actualChanges.put(daysToEscheatParamName, newValue);
             this.daysToEscheat = newValue;
         }
-        
+
         if(this.isDormancyTrackingActive == null || !this.isDormancyTrackingActive){
-        	this.daysToInactive = null;
-        	this.daysToDormancy = null;
-        	this.daysToEscheat = null;
+            this.daysToInactive = null;
+            this.daysToDormancy = null;
+            this.daysToEscheat = null;
         }
 
         validateLockinDetails();
@@ -724,35 +724,35 @@ public class SavingsProduct extends AbstractPersistableCustom<Long> {
         return this.minOverdraftForInterestCalculation;
     }
 
-    
+
     public TaxGroup getTaxGroup() {
         return this.taxGroup;
     }
 
-    
+
     public void setTaxGroup(TaxGroup taxGroup) {
         this.taxGroup = taxGroup;
     }
 
-    
+
     public boolean withHoldTax() {
         return this.withHoldTax;
     }
 
     public boolean isDormancyTrackingActive() {
-		return null == this.isDormancyTrackingActive? false: this.isDormancyTrackingActive;
-	}
+        return null == this.isDormancyTrackingActive? false: this.isDormancyTrackingActive;
+    }
 
-	public Long getDaysToInactive() {
-		return this.daysToInactive;
-	}
+    public Long getDaysToInactive() {
+        return this.daysToInactive;
+    }
 
-	public Long getDaysToDormancy() {
-		return this.daysToDormancy;
-	}
+    public Long getDaysToDormancy() {
+        return this.daysToDormancy;
+    }
 
-	public Long getDaysToEscheat() {
-		return this.daysToEscheat;
-	}
+    public Long getDaysToEscheat() {
+        return this.daysToEscheat;
+    }
 
 }

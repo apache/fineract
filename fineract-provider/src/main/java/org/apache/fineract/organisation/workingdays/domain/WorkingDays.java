@@ -44,7 +44,7 @@ public class WorkingDays extends AbstractPersistableCustom<Long> {
 
     @Column(name = "extend_term_holiday_repayment", nullable = false)
     private Boolean extendTermForRepaymentsOnHolidays;
-    
+
     protected WorkingDays() {
 
     }
@@ -73,7 +73,7 @@ public class WorkingDays extends AbstractPersistableCustom<Long> {
     public void setRepaymentReschedulingType(Integer repaymentReschedulingType) {
         this.repaymentReschedulingType = repaymentReschedulingType;
     }
-    
+
     public Boolean getExtendTermForDailyRepayments(){
         return this.extendTermForDailyRepayments;
     }
@@ -96,7 +96,7 @@ public class WorkingDays extends AbstractPersistableCustom<Long> {
             actualChanges.put(repaymentRescheduleTypeParamName,  WorkingDaysEnumerations.workingDaysStatusType(newValue));
             this.repaymentReschedulingType = RepaymentRescheduleType.fromInt(newValue).getValue();
         }
-        
+
         if(command.isChangeInBooleanParameterNamed(WorkingDaysApiConstants.extendTermForDailyRepayments, this.extendTermForDailyRepayments)){
             final Boolean newValue = command.booleanPrimitiveValueOfParameterNamed(WorkingDaysApiConstants.extendTermForDailyRepayments);
             actualChanges.put(WorkingDaysApiConstants.extendTermForDailyRepayments, newValue);

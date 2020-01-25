@@ -132,7 +132,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         Long prevGroupId = null;
         Long prevClientId = null;
         final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
-                
+
 
         final List<JLGGroupData> jlgGroupsData = new ArrayList<>();
         List<JLGClientData> clientsData = new ArrayList<>();
@@ -260,7 +260,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                 sql.append("WHERE gp.id = :groupId ");
             }
             sql.append("and (ln.loan_status_id != 200 AND ln.loan_status_id != 100) ");
-            
+
             sql.append("and (gp.status_enum = 300 or (gp.status_enum = 600 and gp.closedon_date >= :dueDate)) ")
                     .append("and (cl.status_enum = 300 or (cl.status_enum = 600 and cl.closedon_date >= :dueDate)) ")
                     .append("GROUP BY gp.id, cl.id, ln.id, ca.attendance_type_enum ORDER BY gp.id , cl.id , ln.id ")
@@ -335,17 +335,17 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         final Calendar calendar = this.calendarRepositoryWrapper.findOneWithNotFoundDetection(calendarId);
         // check if transaction against calendar effective from date
-        
+
         final GroupGeneralData group = this.groupReadPlatformService.retrieveOne(groupId);
-        
+
         // entityType should be center if it's within a center
         final CalendarEntityType entityType = (group.isChildGroup()) ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
-        
+
         Long entityId = null;
         if(group.isChildGroup()){
-        	entityId = group.getParentId();
+            entityId = group.getParentId();
         }else{
-        	entityId = group.getId();
+            entityId = group.getId();
         }
 
         Boolean isSkipMeetingOnFirstDay = false;
@@ -353,8 +353,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         boolean isSkipRepaymentOnFirstMonthEnabled = this.configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
         if(isSkipRepaymentOnFirstMonthEnabled){
             numberOfDays = this.configurationDomainService.retreivePeroidInNumberOfDaysForSkipMeetingDate().intValue();
-            isSkipMeetingOnFirstDay = this.calendarReadPlatformService.isCalendarAssociatedWithEntity(entityId, calendar.getId(), 
-            		entityType.getValue().longValue());
+            isSkipMeetingOnFirstDay = this.calendarReadPlatformService.isCalendarAssociatedWithEntity(entityId, calendar.getId(),
+                    entityType.getValue().longValue());
         }
 
         if (!calendar.isValidRecurringDate(transactionDate, isSkipMeetingOnFirstDay, numberOfDays)) { throw new NotValidRecurringDateException("collectionsheet", "The date '"
@@ -364,7 +364,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String officeHierarchy = hierarchy + "%";
 
-        
+
 
         final JLGCollectionSheetFaltDataMapper mapper = new JLGCollectionSheetFaltDataMapper();
 
@@ -723,7 +723,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         // merge savings data into loan data
         mergeLoanData(collectionSheetFlatDatas, (List<IndividualClientData>) clientData);
-        
+
         final Collection<PaymentTypeData> paymentOptions = this.paymentTypeReadPlatformService.retrieveAllPaymentTypes();
 
         return IndividualCollectionSheetData.instance(transactionDate, clientData, paymentOptions);

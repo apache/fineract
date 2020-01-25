@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = ReportMailingJobConstants.REPORT_MAILING_JOB_ENTITY_NAME, action = "CREATE")
 public class CreateReportMailingJobCommandHandler implements NewCommandSourceHandler {
     private final ReportMailingJobWritePlatformService reportMailingJobWritePlatformService;
-    
+
     @Autowired
     public CreateReportMailingJobCommandHandler(final ReportMailingJobWritePlatformService reportMailingJobWritePlatformService) {
         this.reportMailingJobWritePlatformService = reportMailingJobWritePlatformService;

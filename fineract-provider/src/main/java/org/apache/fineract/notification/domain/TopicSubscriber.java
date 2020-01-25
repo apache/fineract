@@ -33,48 +33,48 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Table(name = "topic_subscriber")
 public class TopicSubscriber extends AbstractPersistableCustom<Long> {
 
-	@ManyToOne
-	@JoinColumn(name = "topic_id")
-	private Topic topic;
-	
-	@ManyToOne
-	@JoinColumn(name = "user_id")
-	private AppUser subscriber;
-	
-	@Column(name = "subscription_date")
-	private Date subscriptionDate;
+    @ManyToOne
+    @JoinColumn(name = "topic_id")
+    private Topic topic;
 
-	public TopicSubscriber() {
-	}
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private AppUser subscriber;
 
-	public TopicSubscriber(Topic topic, AppUser subscriber, Date subscriptionDate) {
-		this.topic = topic;
-		this.subscriber = subscriber;
-		this.subscriptionDate = subscriptionDate;
-	}
+    @Column(name = "subscription_date")
+    private Date subscriptionDate;
 
-	public Topic getTopic() {
-		return this.topic;
-	}
+    public TopicSubscriber() {
+    }
 
-	public void setTopic(Topic topic) {
-		this.topic = topic;
-	}
+    public TopicSubscriber(Topic topic, AppUser subscriber, Date subscriptionDate) {
+        this.topic = topic;
+        this.subscriber = subscriber;
+        this.subscriptionDate = subscriptionDate;
+    }
 
-	public AppUser getSubscriber() {
-		return this.subscriber;
-	}
+    public Topic getTopic() {
+        return this.topic;
+    }
 
-	public void setSubscriber(AppUser subscriber) {
-		this.subscriber = subscriber;
-	}
+    public void setTopic(Topic topic) {
+        this.topic = topic;
+    }
 
-	public Date getSubscriptionDate() {
-		return this.subscriptionDate;
-	}
+    public AppUser getSubscriber() {
+        return this.subscriber;
+    }
 
-	public void setSubscriptionDate(Date subscriptionDate) {
-		this.subscriptionDate = subscriptionDate;
-	}
-	
+    public void setSubscriber(AppUser subscriber) {
+        this.subscriber = subscriber;
+    }
+
+    public Date getSubscriptionDate() {
+        return this.subscriptionDate;
+    }
+
+    public void setSubscriptionDate(Date subscriptionDate) {
+        this.subscriptionDate = subscriptionDate;
+    }
+
 }

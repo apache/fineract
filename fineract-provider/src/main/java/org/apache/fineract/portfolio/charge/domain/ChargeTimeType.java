@@ -34,9 +34,9 @@ public enum ChargeTimeType {
     TRANCHE_DISBURSEMENT(12, "chargeTimeType.tranchedisbursement"), // only for
                                                                     // loan
     SHAREACCOUNT_ACTIVATION(13, "chargeTimeType.activation"), // only for loan
-    SHARE_PURCHASE(14, "chargeTimeType.sharespurchase"), 
+    SHARE_PURCHASE(14, "chargeTimeType.sharespurchase"),
     SHARE_REDEEM(15, "chargeTimeType.sharesredeem"),
-    
+
     SAVINGS_NOACTIVITY_FEE(16,"chargeTimeType.savingsNoActivityFee");
 
     private final Integer value;
@@ -131,7 +131,7 @@ public enum ChargeTimeType {
                     chargeTimeType = SHARE_REDEEM;
                 break;
                 case 16:
-                	chargeTimeType = SAVINGS_NOACTIVITY_FEE;
+                    chargeTimeType = SAVINGS_NOACTIVITY_FEE;
                 break;
                 default:
                     chargeTimeType = INVALID;
@@ -160,9 +160,9 @@ public enum ChargeTimeType {
     public boolean isWithdrawalFee() {
         return this.value.equals(ChargeTimeType.WITHDRAWAL_FEE.getValue());
     }
-    
+
     public boolean isSavingsNoActivityFee() {
-    	return this.value.equals(ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getValue());
+        return this.value.equals(ChargeTimeType.SAVINGS_NOACTIVITY_FEE.getValue());
     }
 
     public boolean isAnnualFee() {

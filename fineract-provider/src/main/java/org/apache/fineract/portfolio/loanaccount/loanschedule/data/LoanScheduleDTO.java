@@ -35,11 +35,11 @@ public class LoanScheduleDTO {
         this.installments = installments;
         this.loanScheduleModel = loanScheduleModel;
     }
-    
+
     public static LoanScheduleDTO from(final List<LoanRepaymentScheduleInstallment> installments, final LoanScheduleModel loanScheduleModel){
         return new LoanScheduleDTO(installments, loanScheduleModel);
     }
-    
+
     public List<LoanRepaymentScheduleInstallment> getInstallments() {
         return this.installments;
     }

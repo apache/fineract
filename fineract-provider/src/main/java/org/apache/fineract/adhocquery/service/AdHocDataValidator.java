@@ -72,10 +72,10 @@ public final class AdHocDataValidator {
 
         final String description = this.fromApiJsonHelper.extractStringNamed("query", element);
         baseDataValidator.reset().parameter("query").value(description).notBlank().notExceedingLengthOf(2000);
-        
+
         final String tableName = this.fromApiJsonHelper.extractStringNamed("tableName", element);
         baseDataValidator.reset().parameter("tableName").value(tableName).notBlank().notExceedingLengthOf(100);
-        
+
         final String tableFields = this.fromApiJsonHelper.extractStringNamed("tableFields", element);
         baseDataValidator.reset().parameter("tableFields").value(tableFields).notBlank().notExceedingLengthOf(1000);
 
@@ -141,7 +141,7 @@ public final class AdHocDataValidator {
             final Integer isActive = this.fromApiJsonHelper.extractIntegerNamed("isActive", element, Locale.getDefault());
             baseDataValidator.reset().parameter("isActive").value(isActive).notNull().inMinMaxRange(1, 2);
         }*/
-        
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 

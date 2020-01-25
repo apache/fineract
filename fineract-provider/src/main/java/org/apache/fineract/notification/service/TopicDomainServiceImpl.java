@@ -41,196 +41,196 @@ import org.springframework.util.ObjectUtils;
 @Service
 public class TopicDomainServiceImpl implements TopicDomainService {
 
-	private final RoleRepository roleRepository;
-	private final TopicRepository topicRepository;
+    private final RoleRepository roleRepository;
+    private final TopicRepository topicRepository;
     private final OfficeRepository officeRepository;
     private final TopicSubscriberRepository topicSubscriberRepository;
-	
-	@Autowired
-	public TopicDomainServiceImpl(RoleRepository roleRepository, TopicRepository topicRepository,
-			OfficeRepository officeRepository, TopicSubscriberRepository topicSubscriberRepository) {
-		
-		this.roleRepository = roleRepository;
-		this.topicRepository = topicRepository;
-		this.officeRepository = officeRepository;
-		this.topicSubscriberRepository = topicSubscriberRepository;
-	}
-	
-	@Override
-	public void createTopic( Office newOffice ) {
-		
-		Long entityId = newOffice.getId();
+
+    @Autowired
+    public TopicDomainServiceImpl(RoleRepository roleRepository, TopicRepository topicRepository,
+            OfficeRepository officeRepository, TopicSubscriberRepository topicSubscriberRepository) {
+
+        this.roleRepository = roleRepository;
+        this.topicRepository = topicRepository;
+        this.officeRepository = officeRepository;
+        this.topicSubscriberRepository = topicSubscriberRepository;
+    }
+
+    @Override
+    public void createTopic( Office newOffice ) {
+
+        Long entityId = newOffice.getId();
         String entityType = this.getEntityType(newOffice);
-        
+
         List<Role> allRoles = roleRepository.findAll();
         for(Role role : allRoles) {
-        	String memberType = role.getName().toUpperCase();
-        	String title = role.getName() + " of " + newOffice.getName();
-        	Topic newTopic = new Topic(title, true, entityId, entityType, memberType);
-        	topicRepository.save(newTopic);
+            String memberType = role.getName().toUpperCase();
+            String title = role.getName() + " of " + newOffice.getName();
+            Topic newTopic = new Topic(title, true, entityId, entityType, memberType);
+            topicRepository.save(newTopic);
         }
-	}
-	
-	@Override
-	public void createTopic( Role newRole ) {
-		
-		List<Office> offices = officeRepository.findAll();
-		
+    }
+
+    @Override
+    public void createTopic( Role newRole ) {
+
+        List<Office> offices = officeRepository.findAll();
+
         for (Office office : offices){
-        	String entityType = this.getEntityType(office);
-        	String title = newRole.getName() + " of " + office.getName();
-        	Topic newTopic = new Topic(title, true, office.getId(), entityType, newRole.getName().toUpperCase());
-        	topicRepository.save(newTopic);
+            String entityType = this.getEntityType(office);
+            String title = newRole.getName() + " of " + office.getName();
+            Topic newTopic = new Topic(title, true, office.getId(), entityType, newRole.getName().toUpperCase());
+            topicRepository.save(newTopic);
         }
-	}
-	
-	@Override
-	public void updateTopic( Office updatedOffice, Map<String, Object> changes ) {
-		
-		List<Topic> entityTopics = topicRepository.findByEntityId(updatedOffice.getId());
-		
-		if (changes.containsKey("parentId")) {
-			
+    }
+
+    @Override
+    public void updateTopic( Office updatedOffice, Map<String, Object> changes ) {
+
+        List<Topic> entityTopics = topicRepository.findByEntityId(updatedOffice.getId());
+
+        if (changes.containsKey("parentId")) {
+
             String entityType = this.getEntityType(updatedOffice);
             for (Topic topic : entityTopics) {
-            	topic.setEntityType(entityType);
-            	topicRepository.save(topic);
+                topic.setEntityType(entityType);
+                topicRepository.save(topic);
             }
-		}
-		if (changes.containsKey("name")) {
-			
-        	for (Topic topic: entityTopics) {
-        		Role role = roleRepository.getRoleByName(topic.getMemberType());
+        }
+        if (changes.containsKey("name")) {
+
+            for (Topic topic: entityTopics) {
+                Role role = roleRepository.getRoleByName(topic.getMemberType());
                 String title = role.getName() + " of " + updatedOffice.getName();
                 topic.setTitle(title);
                 topicRepository.save(topic);
-        	}
+            }
         }
-	}
-	
-	@Override
-	public void updateTopic( String previousRolename, Role updatedRole, Map<String, Object> changes ) {
+    }
+
+    @Override
+    public void updateTopic( String previousRolename, Role updatedRole, Map<String, Object> changes ) {
 
         if (changes.containsKey("name")) {
-        	List<Topic> entityTopics = topicRepository.findByMemberType(previousRolename);
-        	for (Topic topic : entityTopics) {
-        		Office office = officeRepository.findById(topic.getEntityId()).get();
-        		String title = updatedRole.getName() + " of " + office.getName();
-        		topic.setTitle(title);
-            	topic.setMemberType(updatedRole.getName().toUpperCase());
-            	topicRepository.save(topic);
-        	}
-        }
-	}
-	
-	@Override
-	public void deleteTopic( Role role ) {
-		
-		List<Topic> topics = topicRepository.findByMemberType(role.getName().toUpperCase());
-        for (Topic topic : topics) {
-        	topicRepository.delete(topic);
-        }
-	}
-	
-	@Override
-	public void subscribeUserToTopic( AppUser newUser ) {
-		
-		List<Topic> possibleTopics = topicRepository.findByEntityId(newUser.getOffice().getId());
-        
-        if (!possibleTopics.isEmpty()) {
-        	Set<Role> userRoles = newUser.getRoles();
-        	for (Role role : userRoles) {
-        		for (Topic topic : possibleTopics) {
-        			if(role.getName().compareToIgnoreCase(topic.getMemberType()) == 0) {
-        				TopicSubscriber topicSubscriber = new TopicSubscriber(topic, newUser, new Date());
-        				topicSubscriberRepository.save(topicSubscriber);
-        			}
-        		}
-        	}
-        }
-	}
-	
-	@Override
-	public void updateUserSubscription( AppUser userToUpdate, Map<String, Object> changes ) {
-		
-		List<TopicSubscriber> oldSubscriptions = topicSubscriberRepository.findBySubscriber(userToUpdate);
-		if (changes.containsKey("officeId")) {
-			final Long oldOfficeId = userToUpdate.getOffice().getId();
-	        final Long newOfficeId = (Long) changes.get("officeId");
-	        List<Topic> oldTopics = topicRepository.findByEntityId(oldOfficeId);
-            List<Topic> newTopics = topicRepository.findByEntityId(newOfficeId);
-            
-            for (TopicSubscriber subscriber : oldSubscriptions) {
-            	for (Topic topic : oldTopics) {
-            		if (subscriber.getTopic().getId() == topic.getId()) {
-            			topicSubscriberRepository.delete(subscriber);
-            		}
-            	}
+            List<Topic> entityTopics = topicRepository.findByMemberType(previousRolename);
+            for (Topic topic : entityTopics) {
+                Office office = officeRepository.findById(topic.getEntityId()).get();
+                String title = updatedRole.getName() + " of " + office.getName();
+                topic.setTitle(title);
+                topic.setMemberType(updatedRole.getName().toUpperCase());
+                topicRepository.save(topic);
             }
-            
+        }
+    }
+
+    @Override
+    public void deleteTopic( Role role ) {
+
+        List<Topic> topics = topicRepository.findByMemberType(role.getName().toUpperCase());
+        for (Topic topic : topics) {
+            topicRepository.delete(topic);
+        }
+    }
+
+    @Override
+    public void subscribeUserToTopic( AppUser newUser ) {
+
+        List<Topic> possibleTopics = topicRepository.findByEntityId(newUser.getOffice().getId());
+
+        if (!possibleTopics.isEmpty()) {
+            Set<Role> userRoles = newUser.getRoles();
+            for (Role role : userRoles) {
+                for (Topic topic : possibleTopics) {
+                    if(role.getName().compareToIgnoreCase(topic.getMemberType()) == 0) {
+                        TopicSubscriber topicSubscriber = new TopicSubscriber(topic, newUser, new Date());
+                        topicSubscriberRepository.save(topicSubscriber);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void updateUserSubscription( AppUser userToUpdate, Map<String, Object> changes ) {
+
+        List<TopicSubscriber> oldSubscriptions = topicSubscriberRepository.findBySubscriber(userToUpdate);
+        if (changes.containsKey("officeId")) {
+            final Long oldOfficeId = userToUpdate.getOffice().getId();
+            final Long newOfficeId = (Long) changes.get("officeId");
+            List<Topic> oldTopics = topicRepository.findByEntityId(oldOfficeId);
+            List<Topic> newTopics = topicRepository.findByEntityId(newOfficeId);
+
+            for (TopicSubscriber subscriber : oldSubscriptions) {
+                for (Topic topic : oldTopics) {
+                    if (subscriber.getTopic().getId().equals(topic.getId())) {
+                        topicSubscriberRepository.delete(subscriber);
+                    }
+                }
+            }
+
             Set<Role> userRoles = userToUpdate.getRoles();
-        	for (Role role : userRoles) {
-        		for (Topic topic : newTopics) {
-        			if (role.getName().compareToIgnoreCase(topic.getMemberType()) == 0) {
-        				TopicSubscriber newSubscription = new TopicSubscriber(topic, userToUpdate, new Date());
-        				topicSubscriberRepository.save(newSubscription);
-        			}
-        		}
-        	}
-		}
-		
-		if (changes.containsKey("roles")) {
-			
-			final Set<Role> oldRoles = userToUpdate.getRoles() ;
+            for (Role role : userRoles) {
+                for (Topic topic : newTopics) {
+                    if (role.getName().compareToIgnoreCase(topic.getMemberType()) == 0) {
+                        TopicSubscriber newSubscription = new TopicSubscriber(topic, userToUpdate, new Date());
+                        topicSubscriberRepository.save(newSubscription);
+                    }
+                }
+            }
+        }
+
+        if (changes.containsKey("roles")) {
+
+            final Set<Role> oldRoles = userToUpdate.getRoles() ;
             final Set<Role> tempOldRoles = new HashSet<>(oldRoles);
-            
+
             final String[] roleIds = (String[]) changes.get("roles");
             final Set<Role> updatedRoles = assembleSetOfRoles(roleIds);
             final Set<Role> tempUpdatedRoles = new HashSet<>(updatedRoles);
-            
+
             tempOldRoles.removeAll(updatedRoles);
             for (TopicSubscriber subscriber : oldSubscriptions) {
-            	Topic topic = subscriber.getTopic();
-            	for (Role role : tempOldRoles) {
-            		if (role.getName().compareToIgnoreCase(topic.getMemberType()) == 0) {
-            			topicSubscriberRepository.delete(subscriber);
-            		}
-            	}
+                Topic topic = subscriber.getTopic();
+                for (Role role : tempOldRoles) {
+                    if (role.getName().compareToIgnoreCase(topic.getMemberType()) == 0) {
+                        topicSubscriberRepository.delete(subscriber);
+                    }
+                }
             }
-            
+
             tempUpdatedRoles.removeAll(oldRoles);
             List<Topic> newTopics = topicRepository.findByEntityId(userToUpdate.getOffice().getId());
             for (Topic topic : newTopics) {
-            	for (Role role : tempUpdatedRoles) {
-            		if (role.getName().compareToIgnoreCase(topic.getMemberType()) == 0) {
-            			TopicSubscriber topicSubscriber = new TopicSubscriber(topic, userToUpdate, new Date());
-        				topicSubscriberRepository.save(topicSubscriber);
-            		}
-            	}
+                for (Role role : tempUpdatedRoles) {
+                    if (role.getName().compareToIgnoreCase(topic.getMemberType()) == 0) {
+                        TopicSubscriber topicSubscriber = new TopicSubscriber(topic, userToUpdate, new Date());
+                        topicSubscriberRepository.save(topicSubscriber);
+                    }
+                }
             }
-		}
-	}
-	
-	@Override
-	public void unsubcribeUserFromTopic( AppUser user ) {
-		
-		List<TopicSubscriber> subscriptions = topicSubscriberRepository.findBySubscriber(user);
-        for (TopicSubscriber subscription : subscriptions) {
-        	topicSubscriberRepository.delete(subscription);
         }
-	}
-	
+    }
 
-	private String getEntityType( Office office ) {
-		
-        if (office.getParent() == null) {
-        	return "OFFICE";
-        } else {
-        	return "BRANCH";
+    @Override
+    public void unsubcribeUserFromTopic( AppUser user ) {
+
+        List<TopicSubscriber> subscriptions = topicSubscriberRepository.findBySubscriber(user);
+        for (TopicSubscriber subscription : subscriptions) {
+            topicSubscriberRepository.delete(subscription);
         }
-	}
-	
-	private Set<Role> assembleSetOfRoles(final String[] rolesArray) {
+    }
+
+
+    private String getEntityType( Office office ) {
+
+        if (office.getParent() == null) {
+            return "OFFICE";
+        } else {
+            return "BRANCH";
+        }
+    }
+
+    private Set<Role> assembleSetOfRoles(final String[] rolesArray) {
 
         final Set<Role> allRoles = new HashSet<>();
 
@@ -238,12 +238,12 @@ public class TopicDomainServiceImpl implements TopicDomainService {
             for (final String roleId : rolesArray) {
                 final Long id = Long.valueOf(roleId);
                 final Role role = this.roleRepository.findById(id)
-						.orElseThrow(() -> new RoleNotFoundException(id));
+                        .orElseThrow(() -> new RoleNotFoundException(id));
                 allRoles.add(role);
             }
         }
 
         return allRoles;
     }
-	
+
 }

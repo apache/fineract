@@ -64,7 +64,7 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
     private final FromJsonHelper fromApiJsonHelper;
     private final GLAccountRepository glAccountRepository;
     private final ProvisioningEntriesReadPlatformService provisioningEntriesReadPlatformService ;
-    
+
     @Autowired
     public ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl(final ProvisioningCriteriaDefinitionJsonDeserializer fromApiJsonDeserializer,
             final ProvisioningCriteriaAssembler provisioningCriteriaAssembler, final ProvisioningCriteriaRepository provisioningCriteriaRepository,
@@ -75,7 +75,7 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
         this.provisioningCriteriaAssembler = provisioningCriteriaAssembler;
         this.provisioningCriteriaRepository = provisioningCriteriaRepository;
         this.fromApiJsonHelper = fromApiJsonHelper ;
-        this.glAccountRepository = glAccountRepository ; 
+        this.glAccountRepository = glAccountRepository ;
         this.provisioningEntriesReadPlatformService = provisioningEntriesReadPlatformService ;
     }
 
@@ -90,9 +90,9 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(command, throwable, dve);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -109,8 +109,8 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
 
     @Override
     public CommandProcessingResult updateProvisioningCriteria(final Long criteriaId, JsonCommand command) {
-    	try {
-    		this.fromApiJsonDeserializer.validateForUpdate(command.json());
+        try {
+            this.fromApiJsonDeserializer.validateForUpdate(command.json());
             ProvisioningCriteria provisioningCriteria = provisioningCriteriaRepository.findById(criteriaId).orElse(null);
             if(provisioningCriteria == null) {
                 throw new ProvisioningCategoryNotFoundException(criteriaId) ;
@@ -119,16 +119,16 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             final Map<String, Object> changes = provisioningCriteria.update(command, products) ;
             if(!changes.isEmpty()) {
                 updateProvisioningCriteriaDefinitions(provisioningCriteria, command) ;
-                provisioningCriteriaRepository.saveAndFlush(provisioningCriteria) ;    
+                provisioningCriteriaRepository.saveAndFlush(provisioningCriteria) ;
             }
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCriteria.getId()).build();	
-    	} catch (final DataIntegrityViolationException dve) {
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(provisioningCriteria.getId()).build();
+        } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         }catch (final PersistenceException dve) {
-        	Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
-        	handleDataIntegrityIssues(command, throwable, dve);
-        	return CommandProcessingResult.empty();
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause()) ;
+            handleDataIntegrityIssues(command, throwable, dve);
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -151,13 +151,13 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             String categoryName = null ;
             String liabilityAccountName = null ;
             String expenseAccountName = null ;
-            ProvisioningCriteriaDefinitionData data = new ProvisioningCriteriaDefinitionData(id, categoryId, 
-                    categoryName, minimumAge, maximumAge, provisioningpercentage, 
+            ProvisioningCriteriaDefinitionData data = new ProvisioningCriteriaDefinitionData(id, categoryId,
+                    categoryName, minimumAge, maximumAge, provisioningpercentage,
                     liabilityAccount.getId(), liabilityAccount.getGlCode(), liabilityAccountName, expenseAccount.getId(), expenseAccount.getGlCode(), expenseAccountName) ;
             provisioningCriteria.update(data, liabilityAccount, expenseAccount) ;
         }
     }
-    
+
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
@@ -168,10 +168,10 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             throw new PlatformDataIntegrityException("error.msg.provisioning.duplicate.criterianame", "Provisioning Criteria with name `"
                     + name + "` already exists", "category name", name);
         }else if (realCause.getMessage().contains("product_id")) {
-			throw new PlatformDataIntegrityException(
-					"error.msg.provisioning.product.id(s).already.associated.existing.criteria",
-					"The selected products already associated with another Provisioning Criteria");
-		}
+            throw new PlatformDataIntegrityException(
+                    "error.msg.provisioning.product.id(s).already.associated.existing.criteria",
+                    "The selected products already associated with another Provisioning Criteria");
+        }
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.provisioning.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());

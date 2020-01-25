@@ -30,17 +30,17 @@ import org.springframework.stereotype.Service;
 @CommandType(entity = "CREDITBUREAU_LOANPRODUCT_MAPPING", action = "CREATE")
 public class CreateCreditBureauLoanProductMappingCommandHandler implements NewCommandSourceHandler {
 
-	private final CreditBureauLoanProductMappingWritePlatformService writePlatformService;
+    private final CreditBureauLoanProductMappingWritePlatformService writePlatformService;
 
-	@Autowired
-	public CreateCreditBureauLoanProductMappingCommandHandler(final CreditBureauLoanProductMappingWritePlatformService writePlatformService) {
-		this.writePlatformService = writePlatformService;
-	}
+    @Autowired
+    public CreateCreditBureauLoanProductMappingCommandHandler(final CreditBureauLoanProductMappingWritePlatformService writePlatformService) {
+        this.writePlatformService = writePlatformService;
+    }
 
-	@Override
-	public CommandProcessingResult processCommand(JsonCommand command) {
+    @Override
+    public CommandProcessingResult processCommand(JsonCommand command) {
 
-		return this.writePlatformService.addCreditBureauLoanProductMapping(command.getCreditBureauId(), command);
-	}
+        return this.writePlatformService.addCreditBureauLoanProductMapping(command.getCreditBureauId(), command);
+    }
 
 }
