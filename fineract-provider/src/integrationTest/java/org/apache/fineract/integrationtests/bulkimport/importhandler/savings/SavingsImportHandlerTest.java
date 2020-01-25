@@ -123,12 +123,12 @@ public class SavingsImportHandlerTest {
             firstSavingsRow.createCell(SavingsConstants.INTEREST_POSTING_PERIOD_COL).setCellValue(savingsProductSheet.getRow(1).getCell(4).getStringCellValue());
             firstSavingsRow.createCell(SavingsConstants.INTEREST_CALCULATION_COL).setCellValue(savingsProductSheet.getRow(1).getCell(5).getStringCellValue());
             firstSavingsRow.createCell(SavingsConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL).setCellValue(savingsProductSheet.getRow(1).getCell(6).getStringCellValue());
-            firstSavingsRow.createCell(SavingsConstants.MIN_OPENING_BALANCE_COL).setCellValue(savingsProductSheet.getRow(1).getCell(7).getStringCellValue());
-            firstSavingsRow.createCell(SavingsConstants.LOCKIN_PERIOD_COL).setCellValue(savingsProductSheet.getRow(1).getCell(8).getStringCellValue());
-            firstSavingsRow.createCell(SavingsConstants.LOCKIN_PERIOD_FREQUENCY_COL).setCellValue(savingsProductSheet.getRow(1).getCell(9).getStringCellValue());
-            firstSavingsRow.createCell(SavingsConstants.APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS).setCellValue(savingsProductSheet.getRow(1).getCell(13).getStringCellValue());
-            firstSavingsRow.createCell(SavingsConstants.ALLOW_OVER_DRAFT_COL).setCellValue(savingsProductSheet.getRow(1).getCell(14).getStringCellValue());
-            firstSavingsRow.createCell(SavingsConstants.OVER_DRAFT_LIMIT_COL).setCellValue(savingsProductSheet.getRow(1).getCell(15).getNumericCellValue());
+            //firstSavingsRow.createCell(SavingsConstants.MIN_OPENING_BALANCE_COL).setCellValue(savingsProductSheet.getRow(1).getCell(7).getStringCellValue());
+            //firstSavingsRow.createCell(SavingsConstants.LOCKIN_PERIOD_COL).setCellValue(savingsProductSheet.getRow(1).getCell(8).getStringCellValue());
+            //firstSavingsRow.createCell(SavingsConstants.LOCKIN_PERIOD_FREQUENCY_COL).setCellValue(savingsProductSheet.getRow(1).getCell(9).getStringCellValue());
+            //firstSavingsRow.createCell(SavingsConstants.APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS).setCellValue(savingsProductSheet.getRow(1).getCell(13).getStringCellValue());
+            //firstSavingsRow.createCell(SavingsConstants.ALLOW_OVER_DRAFT_COL).setCellValue(savingsProductSheet.getRow(1).getCell(14).getStringCellValue());
+            //firstSavingsRow.createCell(SavingsConstants.OVER_DRAFT_LIMIT_COL).setCellValue(savingsProductSheet.getRow(1).getCell(15).getNumericCellValue());
 
             String currentdirectory = new File("").getAbsolutePath();
             File directory = new File(currentdirectory + File.separator + "src" + File.separator + "integrationTest" + File.separator +
