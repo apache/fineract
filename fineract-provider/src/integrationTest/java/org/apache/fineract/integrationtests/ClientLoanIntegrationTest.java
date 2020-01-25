@@ -5070,14 +5070,7 @@ public class ClientLoanIntegrationTest {
     }
 
     public Integer getDayOfWeek(Calendar date) {
-        int dayOfWeek = 0;
-        if (null != date) {
-            dayOfWeek = date.get(Calendar.DAY_OF_WEEK) - 1;
-            if (dayOfWeek == 0) {
-                dayOfWeek = 7;
-            }
-        }
-        return Integer.valueOf(dayOfWeek);
+        return Utils.getDayOfWeek(date) ;
     }
 
     public Integer getDayOfMonth(Calendar date) {
