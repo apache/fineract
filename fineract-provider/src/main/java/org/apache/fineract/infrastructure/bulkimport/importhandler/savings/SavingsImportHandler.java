@@ -168,8 +168,15 @@ public class SavingsImportHandler implements ImportHandler {
         if (ImportHandlerUtils.readAsDouble(SavingsConstants.MIN_OPENING_BALANCE_COL, row)!=null) {
              minRequiredOpeningBalance = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(SavingsConstants.MIN_OPENING_BALANCE_COL, row));
         }
-        Integer lockinPeriodFrequency = ImportHandlerUtils.readAsInt(SavingsConstants.LOCKIN_PERIOD_COL, row);
-        String lockinPeriodFrequencyType = ImportHandlerUtils.readAsString(SavingsConstants.LOCKIN_PERIOD_FREQUENCY_COL, row);
+        Integer lockinPeriodFrequency = null;
+        if(ImportHandlerUtils.readAsInt(SavingsConstants.LOCKIN_PERIOD_COL, row)!=null){
+            lockinPeriodFrequency = ImportHandlerUtils.readAsInt(SavingsConstants.LOCKIN_PERIOD_COL, row);
+        }
+
+        String lockinPeriodFrequencyType =null;
+        if(ImportHandlerUtils.readAsString(SavingsConstants.LOCKIN_PERIOD_FREQUENCY_COL, row)!=null) {
+            lockinPeriodFrequencyType = ImportHandlerUtils.readAsString(SavingsConstants.LOCKIN_PERIOD_FREQUENCY_COL, row);
+        }
         Long lockinPeriodFrequencyTypeId = null;
         EnumOptionData lockinPeriodFrequencyTypeEnum=null;
         if (lockinPeriodFrequencyType!=null) {
@@ -183,20 +190,34 @@ public class SavingsImportHandler implements ImportHandler {
                 lockinPeriodFrequencyTypeId = 3L;
             lockinPeriodFrequencyTypeEnum = new EnumOptionData(lockinPeriodFrequencyTypeId, null, null);
         }
-        Boolean applyWithdrawalFeeForTransfers = ImportHandlerUtils.readAsBoolean(SavingsConstants.APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS, row);
+
+        Boolean applyWithdrawalFeeForTransfers = null;
+        if(ImportHandlerUtils.readAsBoolean(SavingsConstants.APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS, row) != null){
+            applyWithdrawalFeeForTransfers = ImportHandlerUtils.readAsBoolean(SavingsConstants.APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS, row);
+        }
 
         String savingsType=null;
         if (ImportHandlerUtils.readAsString(SavingsConstants.SAVINGS_TYPE_COL, row)!=null)
         savingsType = ImportHandlerUtils.readAsString(SavingsConstants.SAVINGS_TYPE_COL, row).toLowerCase(Locale.ENGLISH);
 
-        String clientOrGroupName = ImportHandlerUtils.readAsString(SavingsConstants.CLIENT_NAME_COL, row);
+        String clientOrGroupName = null;
+        if(ImportHandlerUtils.readAsString(SavingsConstants.CLIENT_NAME_COL, row) != null)
+            clientOrGroupName = ImportHandlerUtils.readAsString(SavingsConstants.CLIENT_NAME_COL, row);
 
-        String externalId = ImportHandlerUtils.readAsString(SavingsConstants.EXTERNAL_ID_COL, row);
+
+        String externalId = null;
+        if(ImportHandlerUtils.readAsString(SavingsConstants.EXTERNAL_ID_COL, row)!=null)
+              externalId = ImportHandlerUtils.readAsString(SavingsConstants.EXTERNAL_ID_COL, row);
+
         List<SavingsAccountChargeData> charges = new ArrayList<>();
 
+        Boolean allowOverdraft = null;
+        if(ImportHandlerUtils.readAsBoolean(SavingsConstants.ALLOW_OVER_DRAFT_COL, row) != null)
+            allowOverdraft = ImportHandlerUtils.readAsBoolean(SavingsConstants.ALLOW_OVER_DRAFT_COL, row);
 
-        Boolean allowOverdraft = ImportHandlerUtils.readAsBoolean(SavingsConstants.ALLOW_OVER_DRAFT_COL, row);
-        BigDecimal overdraftLimit = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(SavingsConstants.OVER_DRAFT_LIMIT_COL, row));
+        BigDecimal overdraftLimit = null;
+        if(ImportHandlerUtils.readAsDouble(SavingsConstants.OVER_DRAFT_LIMIT_COL, row) != null)
+            overdraftLimit = BigDecimal.valueOf(ImportHandlerUtils.readAsDouble(SavingsConstants.OVER_DRAFT_LIMIT_COL, row));
 
         String charge1 = ImportHandlerUtils.readAsString(SavingsConstants.CHARGE_ID_1, row);
         String charge2 = ImportHandlerUtils.readAsString(SavingsConstants.CHARGE_ID_2, row);
