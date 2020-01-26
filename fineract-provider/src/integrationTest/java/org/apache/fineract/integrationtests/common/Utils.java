@@ -263,6 +263,7 @@ public class Utils {
         return templateLocation.substring(1,templateLocation.length()-1);
     }
 
+
     public static void waitUntilFileCreation(String location) {
         Long start = System.currentTimeMillis();
 
@@ -276,6 +277,9 @@ public class Utils {
                 break;
         }
     }
+
+
+
 
         public static Integer getDayOfWeek (Calendar date){
             int dayOfWeek = 0;
