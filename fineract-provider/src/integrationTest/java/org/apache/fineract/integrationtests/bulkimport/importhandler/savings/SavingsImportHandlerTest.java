@@ -103,28 +103,95 @@ public class SavingsImportHandlerTest {
             Sheet savingsSheet = workbook.getSheet(TemplatePopulateImportConstants.SAVINGS_ACCOUNTS_SHEET_NAME);
             Row firstSavingsRow = savingsSheet.getRow(1);
             Sheet officeSheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
-            firstSavingsRow.createCell(SavingsConstants.OFFICE_NAME_COL).setCellValue(officeSheet.getRow(1).getCell(1).getStringCellValue());
+
+            String officeName = readAsString(1,officeSheet.getRow(1));
+            if(officeName==null)
+                firstSavingsRow.createCell(SavingsConstants.OFFICE_NAME_COL).setCellType(Cell.CELL_TYPE_BLANK);
+            else
+                firstSavingsRow.createCell(SavingsConstants.OFFICE_NAME_COL).setCellValue(officeName);
+
             firstSavingsRow.createCell(SavingsConstants.SAVINGS_TYPE_COL).setCellValue("Individual");
-            firstSavingsRow.createCell(SavingsConstants.CLIENT_NAME_COL).setCellValue(savingsSheet.getRow(1).getCell(SavingsConstants.LOOKUP_CLIENT_NAME_COL).getStringCellValue());
+
+            String clientName = readAsString(SavingsConstants.LOOKUP_CLIENT_NAME_COL,savingsSheet.getRow(1));
+            if(clientName ==null)
+                firstSavingsRow.createCell(SavingsConstants.CLIENT_NAME_COL).setCellType(Cell.CELL_TYPE_BLANK);
+            else
+                firstSavingsRow.createCell(SavingsConstants.CLIENT_NAME_COL).setCellValue(clientName);
+
             Sheet savingsProductSheet = workbook.getSheet(TemplatePopulateImportConstants.PRODUCT_SHEET_NAME);
-            firstSavingsRow.createCell(SavingsConstants.PRODUCT_COL).setCellValue(savingsProductSheet.getRow(1).getCell(1).getStringCellValue());
+            String product = readAsString(1,savingsProductSheet.getRow(1));
+            if(product == null)
+                firstSavingsRow.createCell(SavingsConstants.PRODUCT_COL).setCellType(Cell.CELL_TYPE_BLANK);
+            else
+                firstSavingsRow.createCell(SavingsConstants.PRODUCT_COL).setCellValue(product);
+
             Sheet staffSheet = workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME);
-            firstSavingsRow.createCell(SavingsConstants.FIELD_OFFICER_NAME_COL).setCellValue(staffSheet.getRow(1).getCell(1).getStringCellValue());
+            String fieldOfficerName = readAsString(1,staffSheet.getRow(1));
+            if(fieldOfficerName == null)
+                firstSavingsRow.createCell(SavingsConstants.FIELD_OFFICER_NAME_COL).setCellType(Cell.CELL_TYPE_BLANK);
+            else
+                firstSavingsRow.createCell(SavingsConstants.FIELD_OFFICER_NAME_COL).setCellValue(fieldOfficerName);
+
+
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMMM yyyy");
             Date date = simpleDateFormat.parse("13 May 2017");
             firstSavingsRow.createCell(SavingsConstants.SUBMITTED_ON_DATE_COL).setCellValue(date);
             firstSavingsRow.createCell(SavingsConstants.APPROVED_DATE_COL).setCellValue(date);
             firstSavingsRow.createCell(SavingsConstants.ACTIVATION_DATE_COL).setCellValue(date);
-            firstSavingsRow.createCell(SavingsConstants.CURRENCY_COL).setCellValue(savingsProductSheet.getRow(1).getCell(10).getStringCellValue());
-            firstSavingsRow.createCell(SavingsConstants.DECIMAL_PLACES_COL).setCellValue(savingsProductSheet.getRow(1).getCell(11).getNumericCellValue());
-            firstSavingsRow.createCell(SavingsConstants.IN_MULTIPLES_OF_COL).setCellValue(savingsProductSheet.getRow(1).getCell(12).getNumericCellValue());
-            firstSavingsRow.createCell(SavingsConstants.NOMINAL_ANNUAL_INTEREST_RATE_COL).setCellValue(savingsProductSheet.getRow(1).getCell(2).getNumericCellValue());
-            firstSavingsRow.createCell(SavingsConstants.INTEREST_COMPOUNDING_PERIOD_COL).setCellValue(savingsProductSheet.getRow(1).getCell(3).getStringCellValue());
-            firstSavingsRow.createCell(SavingsConstants.INTEREST_POSTING_PERIOD_COL).setCellValue(savingsProductSheet.getRow(1).getCell(4).getStringCellValue());
-            firstSavingsRow.createCell(SavingsConstants.INTEREST_CALCULATION_COL).setCellValue(savingsProductSheet.getRow(1).getCell(5).getStringCellValue());
-            firstSavingsRow.createCell(SavingsConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL).setCellValue(savingsProductSheet.getRow(1).getCell(6).getStringCellValue());
 
-            firstSavingsRow.createCell(SavingsConstants.MIN_OPENING_BALANCE_COL).setCellValue(readAsDouble(7,savingsProductSheet.getRow(1)));
+            String currency = readAsString(10,savingsProductSheet.getRow(1));
+            if(currency == null)
+                firstSavingsRow.createCell(SavingsConstants.CURRENCY_COL).setCellType(Cell.CELL_TYPE_BLANK);
+            else
+                firstSavingsRow.createCell(SavingsConstants.CURRENCY_COL).setCellValue(currency);
+
+            Integer decimalPlaces = readAsInt(11,savingsProductSheet.getRow(1));
+            if(decimalPlaces==null)
+                firstSavingsRow.createCell(SavingsConstants.DECIMAL_PLACES_COL).setCellType(Cell.CELL_TYPE_BLANK);
+            else
+                firstSavingsRow.createCell(SavingsConstants.DECIMAL_PLACES_COL).setCellValue(decimalPlaces);
+
+            Integer inMultiplesOf = readAsInt(12,savingsProductSheet.getRow(1));
+            if(inMultiplesOf == null)
+                firstSavingsRow.createCell(SavingsConstants.IN_MULTIPLES_OF_COL).setCellType(Cell.CELL_TYPE_BLANK);
+            else
+                firstSavingsRow.createCell(SavingsConstants.IN_MULTIPLES_OF_COL).setCellValue(inMultiplesOf);
+
+            Double nominalInterest = readAsDouble(2,savingsProductSheet.getRow(1));
+            if(nominalInterest == 0.0)
+                firstSavingsRow.createCell(SavingsConstants.NOMINAL_ANNUAL_INTEREST_RATE_COL).setCellType(Cell.CELL_TYPE_BLANK);
+            else
+                firstSavingsRow.createCell(SavingsConstants.NOMINAL_ANNUAL_INTEREST_RATE_COL).setCellValue(nominalInterest);
+
+            String interestCompoundingPeriod = readAsString(3,savingsProductSheet.getRow(1));
+            if(interestCompoundingPeriod == null)
+                firstSavingsRow.createCell(SavingsConstants.INTEREST_COMPOUNDING_PERIOD_COL).setCellType(Cell.CELL_TYPE_BLANK);
+            else
+                firstSavingsRow.createCell(SavingsConstants.INTEREST_COMPOUNDING_PERIOD_COL).setCellValue(interestCompoundingPeriod);
+
+            String interestPostingPeriod =readAsString(4,savingsProductSheet.getRow(1));
+            if(interestPostingPeriod ==null)
+                firstSavingsRow.createCell(SavingsConstants.INTEREST_POSTING_PERIOD_COL).setCellType(Cell.CELL_TYPE_BLANK);
+            else
+                firstSavingsRow.createCell(SavingsConstants.INTEREST_POSTING_PERIOD_COL).setCellValue(interestPostingPeriod);
+
+            String interestCalculation=readAsString(5,savingsProductSheet.getRow(1));
+            if(interestCalculation==null)
+                firstSavingsRow.createCell(SavingsConstants.INTEREST_CALCULATION_COL).setCellType(Cell.CELL_TYPE_BLANK);
+            else
+                firstSavingsRow.createCell(SavingsConstants.INTEREST_CALCULATION_COL).setCellValue(interestCalculation);
+
+            String interestCalculationDaysInYear = readAsString(6,savingsProductSheet.getRow(1));
+            if(interestCalculationDaysInYear==null)
+                firstSavingsRow.createCell(SavingsConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL).setCellType(Cell.CELL_TYPE_BLANK);
+            else
+                firstSavingsRow.createCell(SavingsConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL).setCellValue(interestCalculationDaysInYear);
+
+            Double minimumOpeningBal = readAsDouble(7,savingsProductSheet.getRow(1));
+            if(minimumOpeningBal==0.0)
+                firstSavingsRow.createCell(SavingsConstants.MIN_OPENING_BALANCE_COL).setCellType(Cell.CELL_TYPE_BLANK);
+            else
+                firstSavingsRow.createCell(SavingsConstants.MIN_OPENING_BALANCE_COL).setCellValue(minimumOpeningBal);
 
             Integer lockinPeriod = readAsInt(8,savingsProductSheet.getRow(1));
             if(lockinPeriod == null)
@@ -172,7 +239,7 @@ public class SavingsImportHandlerTest {
             Assert.assertEquals(true, file.exists());
 
             String importDocumentId = savingsAccountHelper.importSavingsTemplate(file);
-            //file.delete();
+            file.delete();
             Assert.assertNotNull(importDocumentId);
 
             //Wait for the creation of output excel
