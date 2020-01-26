@@ -23,20 +23,17 @@ import com.jayway.restassured.builder.ResponseSpecBuilder;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
-import org.apache.fineract.infrastructure.bulkimport.constants.LoanConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.SavingsConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.apache.fineract.template.domain.Template;
-import org.apache.fineract.template.service.TemplateMergeService;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -50,9 +47,12 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import java.io.*;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import static org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils.*;
 
 public class SavingsImportHandlerTest {
     private ResponseSpecification responseSpec;
@@ -123,12 +123,39 @@ public class SavingsImportHandlerTest {
             firstSavingsRow.createCell(SavingsConstants.INTEREST_POSTING_PERIOD_COL).setCellValue(savingsProductSheet.getRow(1).getCell(4).getStringCellValue());
             firstSavingsRow.createCell(SavingsConstants.INTEREST_CALCULATION_COL).setCellValue(savingsProductSheet.getRow(1).getCell(5).getStringCellValue());
             firstSavingsRow.createCell(SavingsConstants.INTEREST_CALCULATION_DAYS_IN_YEAR_COL).setCellValue(savingsProductSheet.getRow(1).getCell(6).getStringCellValue());
-            firstSavingsRow.createCell(SavingsConstants.MIN_OPENING_BALANCE_COL).setCellValue(savingsProductSheet.getRow(1).getCell(7).getNumericCellValue());
-            firstSavingsRow.createCell(SavingsConstants.LOCKIN_PERIOD_COL).setCellValue(savingsProductSheet.getRow(1).getCell(8).getNumericCellValue());
-            firstSavingsRow.createCell(SavingsConstants.LOCKIN_PERIOD_FREQUENCY_COL).setCellValue(savingsProductSheet.getRow(1).getCell(9).getStringCellValue());
-            firstSavingsRow.createCell(SavingsConstants.APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS).setCellValue(savingsProductSheet.getRow(1).getCell(13).getBooleanCellValue());
-            firstSavingsRow.createCell(SavingsConstants.ALLOW_OVER_DRAFT_COL).setCellValue(savingsProductSheet.getRow(1).getCell(14).getBooleanCellValue());
-            firstSavingsRow.createCell(SavingsConstants.OVER_DRAFT_LIMIT_COL).setCellValue(savingsProductSheet.getRow(1).getCell(15).getNumericCellValue());
+
+            firstSavingsRow.createCell(SavingsConstants.MIN_OPENING_BALANCE_COL).setCellValue(readAsDouble(7,savingsProductSheet.getRow(1)));
+
+            Integer lockinPeriod = readAsInt(8,savingsProductSheet.getRow(1));
+            if(lockinPeriod == null)
+                firstSavingsRow.createCell(SavingsConstants.LOCKIN_PERIOD_COL).setCellType(Cell.CELL_TYPE_BLANK);
+
+            else
+                firstSavingsRow.createCell(SavingsConstants.LOCKIN_PERIOD_COL).setCellValue(lockinPeriod);
+
+            String lockinPeriodFrequency = readAsString(9,savingsProductSheet.getRow(1));
+            if(lockinPeriodFrequency == null)
+                firstSavingsRow.createCell(SavingsConstants.LOCKIN_PERIOD_FREQUENCY_COL).setCellType(Cell.CELL_TYPE_BLANK);
+            else
+                firstSavingsRow.createCell(SavingsConstants.LOCKIN_PERIOD_FREQUENCY_COL).setCellValue(lockinPeriodFrequency);
+
+            Boolean applyWithrawalTransfers=readAsBoolean(13,savingsProductSheet.getRow(1));
+            if(applyWithrawalTransfers==null)
+                firstSavingsRow.createCell(SavingsConstants.APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS).setCellType(Cell.CELL_TYPE_BLANK);
+            else
+                firstSavingsRow.createCell(SavingsConstants.APPLY_WITHDRAWAL_FEE_FOR_TRANSFERS).setCellValue(applyWithrawalTransfers);
+
+            Boolean allowOverDraft = readAsBoolean(14,savingsProductSheet.getRow(1));
+            if(allowOverDraft == null)
+                firstSavingsRow.createCell(SavingsConstants.ALLOW_OVER_DRAFT_COL).setCellType(Cell.CELL_TYPE_BLANK);
+            else
+                firstSavingsRow.createCell(SavingsConstants.ALLOW_OVER_DRAFT_COL).setCellValue(allowOverDraft);
+
+            Double overDraftLimit = readAsDouble(15,savingsProductSheet.getRow(1));
+            if(overDraftLimit==null)
+                firstSavingsRow.createCell(SavingsConstants.OVER_DRAFT_LIMIT_COL).setCellType(Cell.CELL_TYPE_BLANK);
+            else
+                firstSavingsRow.createCell(SavingsConstants.OVER_DRAFT_LIMIT_COL).setCellValue(overDraftLimit);
 
             String currentdirectory = new File("").getAbsolutePath();
             File directory = new File(currentdirectory + File.separator + "src" + File.separator + "integrationTest" + File.separator +
@@ -142,10 +169,10 @@ public class SavingsImportHandlerTest {
 
             logger.info("savings xls file info :"+file);
             Assert.assertNotNull(file);
-            Assert.assertEquals(true,file.exists());
+            Assert.assertEquals(true, file.exists());
 
             String importDocumentId = savingsAccountHelper.importSavingsTemplate(file);
-            file.delete();
+            //file.delete();
             Assert.assertNotNull(importDocumentId);
 
             //Wait for the creation of output excel
