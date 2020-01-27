@@ -107,6 +107,14 @@ _(Note that in previous versions, the `mysqlserver` environment variable used at
 and the `mysqlserver` environment variable is now no longer supported.)_
 
 
+Checkstyle
+============
+
+This project enforces [its code conventions](fineract-provider/config/checkstyle/checkstyle.xml) using Checkstyle.
+We recommend that you configure your favourite Java IDE to match those conventions.  For Eclipse, you can
+File > Import > General > Preferences our [config/fineractdev-eclipse-preferences.epf](config/fineractdev-eclipse-preferences.epf).
+
+
 Version
 ============
 
