@@ -48,8 +48,8 @@
     </module>
   -->
     <module name="TreeWalker">
-<!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
         <module name="EqualsHashCode"/>
+<!-- TODO Enable many more checks (go about this one by one, step by step, raise separate PRs fixing and then enforcing):
 
         <module name="RedundantImport"/>
         <module name="UnusedImports"/>
