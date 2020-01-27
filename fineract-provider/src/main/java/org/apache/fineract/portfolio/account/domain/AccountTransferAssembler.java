@@ -23,7 +23,6 @@ import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConst
 import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.transferDescriptionParamName;
 
 import java.math.BigDecimal;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;

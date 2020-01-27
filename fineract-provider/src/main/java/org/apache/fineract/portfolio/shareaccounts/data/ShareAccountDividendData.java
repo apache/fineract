@@ -18,11 +18,10 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.data;
 
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 @SuppressWarnings("unused")
 public class ShareAccountDividendData implements Serializable {

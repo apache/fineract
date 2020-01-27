@@ -19,9 +19,7 @@
 package org.apache.fineract.portfolio.client.data;
 
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**
  * Immutable data object represent client identity data.

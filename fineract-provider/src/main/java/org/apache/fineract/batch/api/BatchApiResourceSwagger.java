@@ -20,9 +20,8 @@ package org.apache.fineract.batch.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.apache.fineract.batch.domain.Header;
-
 import java.util.Set;
+import org.apache.fineract.batch.domain.Header;
 
 /**
  * Created by sanyam on 26/7/17.

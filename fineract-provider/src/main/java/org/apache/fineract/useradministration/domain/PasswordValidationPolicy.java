@@ -20,11 +20,9 @@ package org.apache.fineract.useradministration.domain;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity

@@ -20,9 +20,8 @@ package org.apache.fineract.organisation.monetary.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
-
 import java.util.Collection;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
  * Created by sanyam on 14/8/17.

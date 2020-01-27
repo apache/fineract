@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.core.domain;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import org.apache.openjpa.jdbc.sql.BooleanRepresentationFactory;
 import org.apache.openjpa.jdbc.sql.MySQLDictionary;
 

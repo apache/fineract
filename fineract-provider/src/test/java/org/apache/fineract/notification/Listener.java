@@ -18,9 +18,11 @@
  */
 package org.apache.fineract.notification;
 
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 import org.springframework.jms.listener.SessionAwareMessageListener;
-
-import javax.jms.*;
 
 public class Listener implements SessionAwareMessageListener {
 

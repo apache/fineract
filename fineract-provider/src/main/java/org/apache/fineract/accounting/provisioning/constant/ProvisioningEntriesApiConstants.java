@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.accounting.provisioning.constant;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public interface ProvisioningEntriesApiConstants {
 
     public final static String JSON_DATE_PARAM = "date" ;

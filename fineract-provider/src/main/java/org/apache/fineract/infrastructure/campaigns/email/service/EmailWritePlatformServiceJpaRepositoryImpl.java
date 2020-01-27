@@ -18,22 +18,21 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import java.util.Map;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailDataValidator;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessage;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageAssembler;
 import org.apache.fineract.infrastructure.campaigns.email.domain.EmailMessageRepository;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Map;
 
 @Service
 public class EmailWritePlatformServiceJpaRepositoryImpl implements EmailWritePlatformService {

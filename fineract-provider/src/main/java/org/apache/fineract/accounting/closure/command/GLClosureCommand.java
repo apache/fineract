@@ -20,7 +20,6 @@ package org.apache.fineract.accounting.closure.command;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.fineract.accounting.closure.api.GLClosureJsonInputParams;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;

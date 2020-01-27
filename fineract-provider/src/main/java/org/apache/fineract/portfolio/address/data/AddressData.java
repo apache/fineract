@@ -18,12 +18,11 @@
  */
 package org.apache.fineract.portfolio.address.data;
 
-import org.apache.fineract.infrastructure.codes.data.CodeValueData;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
+import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 
 @SuppressWarnings("unused")
 public class AddressData implements Serializable {

@@ -18,11 +18,10 @@
  */
 package org.apache.fineract.portfolio.accountdetails.data;
 
+import java.io.Serializable;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountApplicationTimelineData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountStatusEnumData;
-
-import java.io.Serializable;
 
 @SuppressWarnings("unused")
 public class ShareAccountSummaryData implements Serializable {

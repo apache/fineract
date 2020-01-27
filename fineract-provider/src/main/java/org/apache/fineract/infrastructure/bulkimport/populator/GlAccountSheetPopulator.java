@@ -18,13 +18,12 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.populator;
 
+import java.util.List;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-
-import java.util.List;
 
 public class GlAccountSheetPopulator extends AbstractWorkbookPopulator {
     private List<GLAccountData> allGlAccounts;

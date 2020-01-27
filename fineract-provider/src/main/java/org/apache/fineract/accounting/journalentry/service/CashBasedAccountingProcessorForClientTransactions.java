@@ -20,7 +20,6 @@ package org.apache.fineract.accounting.journalentry.service;
 
 import java.math.BigDecimal;
 import java.util.Date;
-
 import org.apache.fineract.accounting.closure.domain.GLClosure;
 import org.apache.fineract.accounting.journalentry.data.ClientTransactionDTO;
 import org.apache.fineract.organisation.office.domain.Office;

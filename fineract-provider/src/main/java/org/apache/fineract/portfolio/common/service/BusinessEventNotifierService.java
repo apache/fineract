@@ -18,10 +18,9 @@
  */
 package org.apache.fineract.portfolio.common.service;
 
+import java.util.Map;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
-
-import java.util.Map;
 
 /**
  * Implemented class is responsible for notifying the business event to

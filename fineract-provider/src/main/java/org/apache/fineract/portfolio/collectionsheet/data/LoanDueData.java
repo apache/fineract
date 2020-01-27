@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.collectionsheet.data;
 
 import java.math.BigDecimal;
-
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**

@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.api;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * Created by Cieyou on 2/26/14.
  */

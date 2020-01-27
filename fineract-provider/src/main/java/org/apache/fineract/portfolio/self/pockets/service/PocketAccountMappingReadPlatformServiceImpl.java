@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.self.pockets.service;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;

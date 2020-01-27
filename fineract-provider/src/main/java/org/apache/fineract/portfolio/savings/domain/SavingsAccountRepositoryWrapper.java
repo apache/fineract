@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.savings.domain;
 
 import java.util.List;
-
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;

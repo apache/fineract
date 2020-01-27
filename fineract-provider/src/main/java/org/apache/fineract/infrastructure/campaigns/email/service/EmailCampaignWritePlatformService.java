@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
+import org.apache.fineract.infrastructure.campaigns.email.data.PreviewCampaignMessage;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
-import org.apache.fineract.infrastructure.campaigns.email.data.PreviewCampaignMessage;
 
 public interface EmailCampaignWritePlatformService {
 

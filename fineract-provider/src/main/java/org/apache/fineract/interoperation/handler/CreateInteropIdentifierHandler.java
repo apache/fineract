@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.interoperation.handler;
 
+import static org.apache.fineract.interoperation.util.InteropUtil.ENTITY_NAME_IDENTIFIER;
+
 import com.google.common.base.Strings;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
@@ -29,9 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
-import static org.apache.fineract.interoperation.util.InteropUtil.ENTITY_NAME_IDENTIFIER;
-import static org.apache.fineract.interoperation.util.InteropUtil.ENTITY_NAME_REQUEST;
 
 @Service
 @CommandType(entity = ENTITY_NAME_IDENTIFIER, action = "CREATE")

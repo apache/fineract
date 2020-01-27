@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor;
 
 import java.util.List;
 import java.util.Set;
-
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;

@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.infrastructure.configuration.serialization;
 
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.configuration.command.UpdateGlobalConfigurationCommand;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
@@ -32,8 +32,6 @@ import org.apache.fineract.infrastructure.core.serialization.FromApiJsonDeserial
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.reflect.TypeToken;
 
 /**
  * Implementation of {@link FromApiJsonDeserializer} for

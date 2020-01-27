@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.common.service;
 
 import java.util.Map;
-
 import org.apache.fineract.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
 
 /**

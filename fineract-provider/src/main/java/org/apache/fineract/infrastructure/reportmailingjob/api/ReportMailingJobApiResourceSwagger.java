@@ -20,12 +20,11 @@ package org.apache.fineract.infrastructure.reportmailingjob.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.dataqueries.data.ReportData;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobTimelineData;
 import org.joda.time.DateTime;
-
-import java.util.List;
 
 /**
  * Created by sanyam on 13/8/17.

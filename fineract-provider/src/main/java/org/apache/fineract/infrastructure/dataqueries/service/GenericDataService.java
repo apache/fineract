@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.dataqueries.service;
 
 import java.util.List;
-
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 

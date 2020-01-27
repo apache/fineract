@@ -18,23 +18,44 @@
  */
 package org.apache.fineract.portfolio.loanproduct.service;
 
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.amortizationType;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestCalculationPeriodType;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestRateFrequencyType;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestRecalculationCompoundingDayOfWeekType;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestRecalculationCompoundingNthDayType;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestRecalculationCompoundingType;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestRecalculationFrequencyType;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.interestType;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.loanCycleValueConditionType;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.loanTermFrequencyType;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.preCloseInterestCalculationStrategy;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.repaymentFrequencyDayOfWeekType;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.repaymentFrequencyNthDayType;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.repaymentFrequencyType;
+import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.rescheduleStrategyType;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.common.domain.DayOfWeekType;
 import org.apache.fineract.portfolio.common.domain.NthDayType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionProcessingStrategyRepository;
 import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrategyData;
-import org.apache.fineract.portfolio.loanproduct.domain.*;
+import org.apache.fineract.portfolio.loanproduct.domain.AmortizationMethod;
+import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
+import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
+import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanPreClosureInterestCalculationStrategy;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditionType;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanRescheduleStrategyMethod;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
+import org.apache.fineract.portfolio.loanproduct.domain.RecalculationFrequencyType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
-import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations.*;
 
 @Service
 public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlatformService {

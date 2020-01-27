@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.configuration.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import org.apache.fineract.infrastructure.configuration.data.ExternalServicesData;
 import org.apache.fineract.infrastructure.configuration.exception.ExternalServiceConfigurationNotFoundException;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;

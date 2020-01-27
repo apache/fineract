@@ -18,27 +18,29 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.api;
 
+import java.util.Collection;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.campaigns.email.data.EmailConfigurationData;
+import org.apache.fineract.infrastructure.campaigns.email.service.EmailConfigurationReadPlatformService;
+import org.apache.fineract.infrastructure.campaigns.email.service.EmailReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.infrastructure.campaigns.email.data.EmailConfigurationData;
-import org.apache.fineract.infrastructure.campaigns.email.data.EmailData;
-import org.apache.fineract.infrastructure.campaigns.email.service.EmailConfigurationReadPlatformService;
-import org.apache.fineract.infrastructure.campaigns.email.service.EmailReadPlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
-import java.util.Collection;
 
 
 @Path("/email/configuration")

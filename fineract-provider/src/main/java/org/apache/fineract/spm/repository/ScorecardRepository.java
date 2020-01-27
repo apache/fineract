@@ -18,12 +18,11 @@
  */
 package org.apache.fineract.spm.repository;
 
+import java.util.List;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.spm.domain.Scorecard;
 import org.apache.fineract.spm.domain.Survey;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.List;
 
 public interface ScorecardRepository extends JpaRepository<Scorecard, Long> {
 

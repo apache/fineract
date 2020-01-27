@@ -20,7 +20,6 @@ package org.apache.fineract.integrationtests.useradministration.users;
 
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
-
 import org.apache.fineract.integrationtests.common.Utils;
 
 

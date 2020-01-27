@@ -18,6 +18,13 @@
  */
 package org.apache.fineract.notification.service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.annotation.PostConstruct;
+import javax.jms.Queue;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -45,16 +52,6 @@ import org.apache.fineract.useradministration.domain.Role;
 import org.apache.fineract.useradministration.domain.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
-import javax.jms.Queue;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Map;
 
 @Service
 public class NotificationDomainServiceImpl implements NotificationDomainService {

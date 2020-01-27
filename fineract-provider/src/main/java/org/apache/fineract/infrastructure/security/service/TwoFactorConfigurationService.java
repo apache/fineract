@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.security.service;
 
 import java.util.Map;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.security.data.OTPRequest;
 import org.apache.fineract.useradministration.domain.AppUser;

@@ -18,15 +18,13 @@
  */
 package org.apache.fineract.infrastructure.core.api;
 
-import java.lang.reflect.Type;
-
-import org.joda.time.MonthDay;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import java.lang.reflect.Type;
+import org.joda.time.MonthDay;
 
 /**
  * Serializer for joda time {@link MonthDay} that returns date in array format

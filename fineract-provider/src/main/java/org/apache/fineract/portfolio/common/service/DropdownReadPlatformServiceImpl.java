@@ -25,7 +25,6 @@ import static org.apache.fineract.portfolio.common.service.CommonEnumerations.te
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.common.domain.ConditionType;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;

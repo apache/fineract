@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.charge.service;
 
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public interface ChargeDropdownReadPlatformService {

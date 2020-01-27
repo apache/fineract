@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.adhocquery.service;
 
+import java.util.Collection;
+import java.util.Date;
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.domain.ReportRunFrequency;
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
@@ -35,9 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collection;
-import java.util.Date;
 
 @Service(value = "adHocScheduledJobRunnerService")
 public class AdHocScheduledJobRunnerServiceImpl implements AdHocScheduledJobRunnerService {

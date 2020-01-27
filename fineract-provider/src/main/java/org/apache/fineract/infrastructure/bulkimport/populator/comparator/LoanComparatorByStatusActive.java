@@ -18,9 +18,8 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.populator.comparator;
 
-import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
-
 import java.util.Comparator;
+import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 
 /**
  * Sorting the loan values based on loan status giving priority to active loans

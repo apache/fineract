@@ -19,7 +19,6 @@
 package org.apache.fineract.accounting.journalentry.service;
 
 import java.util.Date;
-
 import org.apache.fineract.accounting.journalentry.data.JournalEntryAssociationParametersData;
 import org.apache.fineract.accounting.journalentry.data.JournalEntryData;
 import org.apache.fineract.accounting.journalentry.data.OfficeOpeningBalancesData;

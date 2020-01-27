@@ -22,9 +22,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
-
 import java.lang.reflect.Type;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 public class CurrencyDateCodeSerializer implements JsonSerializer<CurrencyData>{
     @Override

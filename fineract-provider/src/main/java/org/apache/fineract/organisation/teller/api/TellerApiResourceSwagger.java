@@ -20,6 +20,9 @@ package org.apache.fineract.organisation.teller.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Date;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -28,10 +31,6 @@ import org.apache.fineract.organisation.teller.data.CashierTransactionData;
 import org.apache.fineract.organisation.teller.domain.CashierTxnType;
 import org.apache.fineract.organisation.teller.domain.TellerStatus;
 import org.joda.time.LocalDate;
-
-import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Date;
 
 /**
  * Created by sanyam on 20/8/17.

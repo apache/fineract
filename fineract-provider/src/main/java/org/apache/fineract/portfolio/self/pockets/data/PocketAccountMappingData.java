@@ -20,7 +20,6 @@
 package org.apache.fineract.portfolio.self.pockets.data;
 
 import java.util.Collection;
-
 import org.apache.fineract.portfolio.self.pockets.domain.PocketAccountMapping;
 
 @SuppressWarnings("unused")

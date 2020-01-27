@@ -24,18 +24,16 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-import java.util.Random;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.conn.HttpHostConnectException;
-
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.Random;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.conn.HttpHostConnectException;
 
 /**
  * Util for RestAssured tests. This class here in src/test is copy/pasted :(

@@ -18,10 +18,11 @@
  */
 package org.apache.fineract.accounting.closure.serialization;
 
+import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.closure.api.GLClosureJsonInputParams;
 import org.apache.fineract.accounting.closure.command.GLClosureCommand;
@@ -33,9 +34,6 @@ import org.apache.fineract.portfolio.loanaccount.guarantor.command.GuarantorComm
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.JsonElement;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * Implementation of {@link FromApiJsonDeserializer} for

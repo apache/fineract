@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.populator;
 
+import java.util.List;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.savings.data.FixedDepositProductData;
@@ -25,8 +26,6 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-
-import java.util.List;
 
 public class FixedDepositProductSheetPopulator extends AbstractWorkbookPopulator {
     List<FixedDepositProductData> products;

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.service;
 
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,10 +27,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -70,8 +69,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 @Service
 public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJobWritePlatformService {

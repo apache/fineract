@@ -18,6 +18,13 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailBusinessRulesData;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignData;
 import org.apache.fineract.infrastructure.campaigns.email.data.EmailCampaignTimeLine;
@@ -39,10 +46,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
 
 @Service
 public class EmailCampaignReadPlatformServiceImpl implements EmailCampaignReadPlatformService {

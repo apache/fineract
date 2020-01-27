@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.tax.service;
 
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;

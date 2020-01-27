@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.jobs.service;
 
 import java.util.Date;
-
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobRunHistory;

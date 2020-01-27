@@ -21,9 +21,6 @@ package org.apache.fineract.portfolio.self.shareaccounts.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
-import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 
 

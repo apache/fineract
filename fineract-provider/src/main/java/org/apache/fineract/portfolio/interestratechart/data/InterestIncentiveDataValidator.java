@@ -27,6 +27,9 @@ import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveA
 import static org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants.incentiveTypeparamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.descriptionParamName;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -36,7 +39,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -50,10 +52,6 @@ import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncenti
 import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncentiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 
 @Component
 public class InterestIncentiveDataValidator {

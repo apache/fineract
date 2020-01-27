@@ -18,16 +18,14 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.populator;
 
+import java.util.List;
+import java.util.Map;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
-import org.apache.fineract.template.domain.Template;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-
-import java.util.List;
-import java.util.Map;
 
 public class SavingsAccountSheetPopulator extends AbstractWorkbookPopulator {
 

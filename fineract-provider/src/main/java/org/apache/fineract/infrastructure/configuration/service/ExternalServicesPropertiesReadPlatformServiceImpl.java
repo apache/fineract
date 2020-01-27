@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.configuration.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.campaigns.sms.data.MessageGatewayConfigurationData;
 import org.apache.fineract.infrastructure.configuration.data.ExternalServicesPropertiesData;
 import org.apache.fineract.infrastructure.configuration.data.S3CredentialsData;

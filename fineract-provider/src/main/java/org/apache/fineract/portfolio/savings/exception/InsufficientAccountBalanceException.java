@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.savings.exception;
 
 import java.math.BigDecimal;
-
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**

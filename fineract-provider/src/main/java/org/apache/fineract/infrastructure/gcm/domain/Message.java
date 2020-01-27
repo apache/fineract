@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import org.apache.fineract.infrastructure.gcm.GcmConstants;
 
 /**

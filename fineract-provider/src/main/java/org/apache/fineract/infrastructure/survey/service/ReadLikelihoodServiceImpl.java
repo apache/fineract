@@ -20,9 +20,7 @@ package org.apache.fineract.infrastructure.survey.service;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.sql.DataSource;
-
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.survey.data.LikelihoodData;
 import org.springframework.beans.factory.annotation.Autowired;

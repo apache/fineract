@@ -20,20 +20,22 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.Assert.assertEquals;
 
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-
 import org.apache.fineract.accounting.common.AccountingConstants.FINANCIAL_ACTIVITY;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -42,31 +44,23 @@ import org.apache.fineract.integrationtests.common.TaxComponentHelper;
 import org.apache.fineract.integrationtests.common.TaxGroupHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.integrationtests.common.accounting.Account.AccountType;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
 import org.apache.fineract.integrationtests.common.accounting.JournalEntry;
 import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
-import org.apache.fineract.integrationtests.common.accounting.Account.AccountType;
 import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositAccountHelper;
 import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositAccountStatusChecker;
 import org.apache.fineract.integrationtests.common.fixeddeposit.FixedDepositProductHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.joda.time.DateTime;
-import org.joda.time.Days;
 import org.joda.time.Months;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
 
 @SuppressWarnings({ "unused", "unchecked", "rawtypes", "static-access" })
 public class FixedDepositTest {

@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.accounting.provisioning.serialization;
 
+import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +28,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.accounting.provisioning.constant.ProvisioningEntriesApiConstants;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -38,9 +39,6 @@ import org.apache.fineract.organisation.provisioning.exception.ProvisioningCrite
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.JsonElement;
-import com.google.gson.reflect.TypeToken;
 
 @Component
 public class ProvisioningEntriesDefinitionJsonDeserializer implements ProvisioningEntriesApiConstants {

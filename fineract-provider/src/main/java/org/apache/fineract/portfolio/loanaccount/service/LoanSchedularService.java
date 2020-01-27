@@ -18,11 +18,9 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import java.util.Map;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.organisation.office.data.OfficeData;
-import org.apache.fineract.organisation.office.domain.Office;
-
-import java.util.Map;
 
 
 public interface LoanSchedularService {

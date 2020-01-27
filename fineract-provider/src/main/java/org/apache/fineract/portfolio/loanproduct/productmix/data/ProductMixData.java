@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.loanproduct.productmix.data;
 
 import java.util.Collection;
-
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 
 public class ProductMixData {

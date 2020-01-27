@@ -18,9 +18,8 @@
  */
 package org.apache.fineract.portfolio.client.data;
 
-import org.joda.time.LocalDate;
-
 import java.io.Serializable;
+import org.joda.time.LocalDate;
 
 /**
  * Immutable data object represent the important time-line events of a loan

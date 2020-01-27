@@ -18,10 +18,9 @@
  */
 package org.apache.fineract.portfolio.paymentdetail.data;
 
-import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-
 import java.io.Serializable;
 import java.util.Objects;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 
 /**
  * Immutable data object representing a payment.

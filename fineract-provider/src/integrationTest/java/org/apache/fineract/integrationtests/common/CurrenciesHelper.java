@@ -22,7 +22,6 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 

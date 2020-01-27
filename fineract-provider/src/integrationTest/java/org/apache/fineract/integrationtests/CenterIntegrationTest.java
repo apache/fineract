@@ -18,12 +18,18 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.Assert.assertEquals;
+
 import com.google.gson.Gson;
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import org.apache.fineract.integrationtests.common.CenterDomain;
 import org.apache.fineract.integrationtests.common.CenterHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
@@ -32,13 +38,6 @@ import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-
-import static org.junit.Assert.assertEquals;
 
 public class CenterIntegrationTest {
 

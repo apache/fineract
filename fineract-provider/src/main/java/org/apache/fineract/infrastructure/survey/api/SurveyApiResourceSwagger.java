@@ -20,11 +20,9 @@ package org.apache.fineract.infrastructure.survey.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
+import java.util.List;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.joda.time.DateTime;
-
-import java.util.List;
 
 /**
  * Created by sanyam on 13/8/17.

@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.interestratechart.service;
 
 import java.util.Collection;
-
 import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartSlabData;
 
 public interface InterestRateChartSlabReadPlatformService {

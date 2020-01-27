@@ -21,7 +21,6 @@ package org.apache.fineract.adhocquery.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-
 import org.apache.fineract.adhocquery.data.AdHocData;
 import org.apache.fineract.adhocquery.exception.AdHocNotFoundException;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;

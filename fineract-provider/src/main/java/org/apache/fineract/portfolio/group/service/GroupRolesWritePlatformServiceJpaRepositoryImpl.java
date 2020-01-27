@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.group.service;
 
 import java.util.Map;
-
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;

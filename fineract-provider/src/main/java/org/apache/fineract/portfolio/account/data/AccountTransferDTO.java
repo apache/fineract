@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.account.data;
 
 import java.math.BigDecimal;
 import java.util.Locale;
-
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.domain.AccountTransferDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;

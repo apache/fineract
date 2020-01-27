@@ -21,7 +21,6 @@ package org.apache.fineract.organisation.monetary.domain;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Iterator;
-
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 

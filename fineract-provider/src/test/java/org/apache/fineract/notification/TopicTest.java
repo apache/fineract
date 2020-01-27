@@ -19,13 +19,12 @@
 package org.apache.fineract.notification;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.refEq;
+import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
-
 import org.apache.fineract.notification.domain.Topic;
 import org.apache.fineract.notification.domain.TopicRepository;
 import org.apache.fineract.notification.domain.TopicSubscriber;

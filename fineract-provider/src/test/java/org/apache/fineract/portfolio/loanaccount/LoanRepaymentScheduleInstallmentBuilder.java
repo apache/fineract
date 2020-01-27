@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount;
 
 import java.util.Set;
-
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;

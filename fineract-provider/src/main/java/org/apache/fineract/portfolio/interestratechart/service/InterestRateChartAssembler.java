@@ -26,10 +26,10 @@ import static org.apache.fineract.portfolio.interestratechart.InterestRateChartA
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants.nameParamName;
 import static org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants.currencyCodeParamName;
 
+import com.google.gson.JsonElement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -42,8 +42,6 @@ import org.apache.fineract.portfolio.interestratechart.domain.InterestRateChartS
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.JsonElement;
 
 @Service
 public class InterestRateChartAssembler {

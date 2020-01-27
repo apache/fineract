@@ -18,13 +18,11 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import java.util.HashMap;
-
-import org.apache.fineract.integrationtests.common.accounting.Account;
-
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.HashMap;
+import org.apache.fineract.integrationtests.common.accounting.Account;
 
 public class TaxComponentHelper {
 

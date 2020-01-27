@@ -18,10 +18,9 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import org.apache.http.HttpHeaders;
-
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import org.apache.http.HttpHeaders;
 
 public class ImageHelper {
 

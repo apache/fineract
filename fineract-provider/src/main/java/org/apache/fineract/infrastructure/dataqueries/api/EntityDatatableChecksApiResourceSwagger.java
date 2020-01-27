@@ -20,14 +20,13 @@ package org.apache.fineract.infrastructure.dataqueries.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableCheckStatusData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableChecksData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
-
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by sanyam on 31/7/17.

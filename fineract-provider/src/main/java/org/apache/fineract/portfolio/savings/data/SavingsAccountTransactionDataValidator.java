@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.activatedOnDateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.bankNumberParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.checkNumberParamName;
@@ -29,18 +30,18 @@ import static org.apache.fineract.portfolio.savings.SavingsApiConstants.transact
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.transactionAmountParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.transactionDateParamName;
 import static org.apache.fineract.portfolio.savings.SavingsApiConstants.withdrawBalanceParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
 
+import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Date;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -49,6 +50,7 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
@@ -57,10 +59,6 @@ import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.apache.fineract.organisation.monetary.domain.Money;
-
-import com.google.gson.JsonElement;
-import com.google.gson.reflect.TypeToken;
 
 @Component
 public class SavingsAccountTransactionDataValidator {

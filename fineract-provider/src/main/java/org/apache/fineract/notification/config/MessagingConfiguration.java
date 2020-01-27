@@ -20,7 +20,6 @@ package org.apache.fineract.notification.config;
 
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
-
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.fineract.infrastructure.core.boot.db.TenantDataSourcePortFixService;
 import org.apache.fineract.notification.eventandlistener.NotificationEventListener;

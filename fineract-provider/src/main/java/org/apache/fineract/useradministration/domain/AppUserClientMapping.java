@@ -23,9 +23,8 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.portfolio.client.domain.Client;
 
 @Entity
 @Table(name = "m_selfservice_user_client_mapping")

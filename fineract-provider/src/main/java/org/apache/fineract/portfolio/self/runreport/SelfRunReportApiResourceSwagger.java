@@ -20,10 +20,7 @@ package org.apache.fineract.portfolio.self.runreport;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.util.Set;
-import java.util.List;
-import java.time.LocalDate;
 
 
 /**

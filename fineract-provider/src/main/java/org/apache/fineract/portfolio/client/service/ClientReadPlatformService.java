@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.client.service;
 
 import java.util.Collection;
 import java.util.Date;
-
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.portfolio.client.data.ClientData;

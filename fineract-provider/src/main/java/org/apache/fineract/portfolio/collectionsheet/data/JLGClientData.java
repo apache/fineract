@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.collectionsheet.data;
 
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**

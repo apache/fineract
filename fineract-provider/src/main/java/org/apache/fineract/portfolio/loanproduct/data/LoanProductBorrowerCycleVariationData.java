@@ -18,12 +18,11 @@
  */
 package org.apache.fineract.portfolio.loanproduct.data;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductParamType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditionType;
-
-import java.io.Serializable;
-import java.math.BigDecimal;
 
 public class LoanProductBorrowerCycleVariationData implements Serializable {
 

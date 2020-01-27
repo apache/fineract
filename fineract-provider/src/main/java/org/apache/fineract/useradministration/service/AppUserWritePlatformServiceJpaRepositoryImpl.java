@@ -20,6 +20,13 @@ package org.apache.fineract.useradministration.service;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.persistence.PersistenceException;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -39,7 +46,13 @@ import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.useradministration.api.AppUserApiConstant;
-import org.apache.fineract.useradministration.domain.*;
+import org.apache.fineract.useradministration.domain.AppUser;
+import org.apache.fineract.useradministration.domain.AppUserPreviousPassword;
+import org.apache.fineract.useradministration.domain.AppUserPreviousPasswordRepository;
+import org.apache.fineract.useradministration.domain.AppUserRepository;
+import org.apache.fineract.useradministration.domain.Role;
+import org.apache.fineract.useradministration.domain.RoleRepository;
+import org.apache.fineract.useradministration.domain.UserDomainService;
 import org.apache.fineract.useradministration.exception.PasswordPreviouslyUsedException;
 import org.apache.fineract.useradministration.exception.RoleNotFoundException;
 import org.apache.fineract.useradministration.exception.UserNotFoundException;
@@ -56,9 +69,6 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
-
-import javax.persistence.PersistenceException;
-import java.util.*;
 
 @Service
 public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWritePlatformService {

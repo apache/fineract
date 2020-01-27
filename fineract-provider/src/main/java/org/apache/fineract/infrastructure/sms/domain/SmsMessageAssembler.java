@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.sms.domain;
 
+import com.google.gson.JsonElement;
 import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaign;
 import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaignRepository;
 import org.apache.fineract.infrastructure.campaigns.sms.exception.SmsCampaignNotFound;
@@ -33,8 +34,6 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.JsonElement;
 
 @Component
 public class SmsMessageAssembler {

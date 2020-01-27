@@ -18,6 +18,27 @@
  */
 package org.apache.fineract.portfolio.savings.domain;
 
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.amountParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dateFormatParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.dueAsOfDateParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeIntervalParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.feeOnMonthDayParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.localeParamName;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -29,17 +50,6 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.SavingsAccountChargeWithoutMandatoryFieldException;
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.*;
 
 /**
  * @author dv6

@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.campaigns.email.data;
 
 import java.io.File;
 import java.util.List;
-import java.util.Set;
 
 public class EmailMessageWithAttachmentData {
 

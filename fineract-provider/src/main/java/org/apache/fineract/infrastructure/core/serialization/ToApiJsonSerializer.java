@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.core.serialization;
 
 import java.util.Collection;
 import java.util.Set;
-
 import org.apache.fineract.infrastructure.core.service.Page;
 
 public interface ToApiJsonSerializer<T> {

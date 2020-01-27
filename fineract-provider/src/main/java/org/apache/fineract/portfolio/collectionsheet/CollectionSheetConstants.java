@@ -18,12 +18,6 @@
  */
 package org.apache.fineract.portfolio.collectionsheet;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
-
 public class CollectionSheetConstants {
 
     public static final String COLLECTIONSHEET_RESOURCE_NAME = "collectionsheet";

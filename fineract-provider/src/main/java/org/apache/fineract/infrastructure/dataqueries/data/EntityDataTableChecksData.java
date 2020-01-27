@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.dataqueries.data;
 
 import java.io.Serializable;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 /**

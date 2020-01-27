@@ -20,6 +20,12 @@ package org.apache.fineract.template;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -30,14 +36,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.loanaccount.LoanScheduleTestDataHelper;

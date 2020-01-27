@@ -18,20 +18,18 @@
  */
 package org.apache.fineract.batch.service;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.jayway.jsonpath.JsonModel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.jayway.jsonpath.JsonModel;
 
 /**
  * Provides methods to create dependency map among the various batchRequests. It

@@ -20,7 +20,6 @@ package org.apache.fineract.organisation.staff.data;
 
 import java.util.Collection;
 import java.util.List;
-
 import org.apache.fineract.portfolio.accountdetails.data.LoanAccountSummaryData;
 
 /**

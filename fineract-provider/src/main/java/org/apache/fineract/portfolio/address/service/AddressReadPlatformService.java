@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.address.service;
 
 import java.util.Collection;
-
 import org.apache.fineract.portfolio.address.data.AddressData;
 
 public interface AddressReadPlatformService {

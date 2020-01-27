@@ -18,11 +18,10 @@
  */
 package org.apache.fineract.accounting.glaccount.domain;
 
+import java.util.List;
 import org.apache.fineract.accounting.trialbalance.exception.TrialBalanceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class TrialBalanceRepositoryWrapper {

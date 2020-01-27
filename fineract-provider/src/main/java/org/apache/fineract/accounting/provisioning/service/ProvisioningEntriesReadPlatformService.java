@@ -20,7 +20,6 @@ package org.apache.fineract.accounting.provisioning.service;
 
 import java.util.Collection;
 import java.util.Date;
-
 import org.apache.fineract.accounting.provisioning.data.LoanProductProvisioningEntryData;
 import org.apache.fineract.accounting.provisioning.data.ProvisioningEntryData;
 import org.apache.fineract.infrastructure.core.service.Page;

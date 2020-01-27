@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.campaigns.sms.constants;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.campaigns.constants.CampaignType;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;

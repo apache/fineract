@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanproduct.domain;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
 public enum RecalculationFrequencyType {

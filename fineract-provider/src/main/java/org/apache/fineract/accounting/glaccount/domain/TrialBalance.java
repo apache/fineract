@@ -20,13 +20,15 @@
 package org.apache.fineract.accounting.glaccount.domain;
 
 
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-
-
-import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "m_trial_balance")
