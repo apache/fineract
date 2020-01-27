@@ -19,7 +19,6 @@
 package org.apache.fineract.notification.service;
 
 import java.util.Map;
-
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.Role;

@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.jobs.service;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;

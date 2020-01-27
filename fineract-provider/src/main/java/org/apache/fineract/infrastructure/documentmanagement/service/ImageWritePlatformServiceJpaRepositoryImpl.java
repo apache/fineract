@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.documentmanagement.service;
 
 import java.io.InputStream;
-
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.Base64EncodedImage;
 import org.apache.fineract.infrastructure.documentmanagement.api.ImagesApiResource.ENTITY_TYPE_FOR_IMAGES;

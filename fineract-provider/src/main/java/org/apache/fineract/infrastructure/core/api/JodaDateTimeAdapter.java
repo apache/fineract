@@ -18,14 +18,12 @@
  */
 package org.apache.fineract.infrastructure.core.api;
 
-import java.lang.reflect.Type;
-
-import org.joda.time.DateTime;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import java.lang.reflect.Type;
+import org.joda.time.DateTime;
 
 /**
  * Serializer for joda time {@link DateTime} that returns date as long to match

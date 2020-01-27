@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.note.service;
 
 import java.util.Collection;
-
 import org.apache.fineract.portfolio.note.data.NoteData;
 
 public interface NoteReadPlatformService {

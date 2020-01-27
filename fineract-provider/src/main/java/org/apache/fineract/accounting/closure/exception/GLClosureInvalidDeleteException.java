@@ -19,7 +19,6 @@
 package org.apache.fineract.accounting.closure.exception;
 
 import java.util.Date;
-
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**

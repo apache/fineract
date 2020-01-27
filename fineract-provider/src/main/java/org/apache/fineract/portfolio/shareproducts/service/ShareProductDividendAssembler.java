@@ -22,12 +22,11 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.products.service.ProductReadPlatformService;
-import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountData;
+import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionData;
 import org.apache.fineract.portfolio.shareaccounts.domain.PurchasedSharesStatusType;
 import org.apache.fineract.portfolio.shareaccounts.domain.ShareAccountDividendDetails;
 import org.apache.fineract.portfolio.shareaccounts.service.ShareAccountReadPlatformService;

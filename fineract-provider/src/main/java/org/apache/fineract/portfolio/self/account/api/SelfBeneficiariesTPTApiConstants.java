@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.portfolio.self.account.api;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public interface SelfBeneficiariesTPTApiConstants {
 
     public static final String BENEFICIARY_ENTITY_NAME = "SSBENEFICIARYTPT";

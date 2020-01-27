@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.reportmailingjob.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.annotations.ApiParam;
 import org.joda.time.DateTime;
 
 /**

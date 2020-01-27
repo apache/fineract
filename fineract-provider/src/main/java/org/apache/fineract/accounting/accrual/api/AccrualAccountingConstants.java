@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.accounting.accrual.api;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 public class AccrualAccountingConstants {
 
     public static final String accrueTillParamName = "tillDate";

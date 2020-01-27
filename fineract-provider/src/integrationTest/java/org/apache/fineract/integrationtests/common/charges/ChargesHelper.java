@@ -18,15 +18,13 @@
  */
 package org.apache.fineract.integrationtests.common.charges;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.Utils;
-
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })

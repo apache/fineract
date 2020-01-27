@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.campaigns.sms.service;
 
 import java.util.Map;
-
 import org.apache.fineract.infrastructure.campaigns.sms.data.CampaignPreviewData;
 import org.apache.fineract.infrastructure.campaigns.sms.domain.SmsCampaign;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;

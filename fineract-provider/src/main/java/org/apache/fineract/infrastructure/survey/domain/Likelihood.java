@@ -20,15 +20,13 @@ package org.apache.fineract.infrastructure.survey.domain;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.survey.api.LikelihoodApiConstants;
 import org.apache.fineract.infrastructure.survey.data.LikelihoodStatus;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Entity
 @Table(name = "ppi_likelihoods_ppi")

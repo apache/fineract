@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
 import java.util.Collection;
-
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**

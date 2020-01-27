@@ -20,7 +20,6 @@ package org.apache.fineract.organisation.teller.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-
 import org.apache.fineract.infrastructure.core.service.Page;
 
 public final class CashierTransactionsWithSummaryData implements Serializable {

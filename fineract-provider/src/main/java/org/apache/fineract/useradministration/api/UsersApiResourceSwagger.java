@@ -20,11 +20,10 @@ package org.apache.fineract.useradministration.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Collection;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.useradministration.data.RoleData;
-
-import java.util.Collection;
 
 /**
  * Created by sanyam on 23/8/17.

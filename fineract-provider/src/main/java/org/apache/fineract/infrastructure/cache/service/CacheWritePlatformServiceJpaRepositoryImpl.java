@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.cache.service;
 
 import java.util.Map;
-
 import org.apache.fineract.infrastructure.cache.domain.CacheType;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.springframework.beans.factory.annotation.Autowired;

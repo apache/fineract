@@ -18,18 +18,13 @@
  */
 package org.apache.fineract.interoperation.data;
 
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.interoperation.domain.InteropIdentifier;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountSubStatusEnum;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
-import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
-
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import javax.validation.constraints.NotNull;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 
 public class InteropTransactionsData extends CommandProcessingResult {
 

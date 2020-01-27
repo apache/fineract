@@ -18,13 +18,11 @@
  */
 package org.apache.fineract.integrationtests.common.xbrl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.apache.fineract.integrationtests.common.Utils;
-
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.apache.fineract.integrationtests.common.Utils;
 
 @SuppressWarnings("rawtypes")
 public class XBRLIntegrationTestHelper {

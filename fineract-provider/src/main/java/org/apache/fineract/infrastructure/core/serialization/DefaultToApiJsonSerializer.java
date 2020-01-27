@@ -18,14 +18,12 @@
  */
 package org.apache.fineract.infrastructure.core.serialization;
 
+import com.google.gson.Gson;
 import java.util.Collection;
 import java.util.Set;
-
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.Gson;
 
 /**
  * An abstract helper implementation of {@link ToApiJsonSerializer} for

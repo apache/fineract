@@ -20,9 +20,8 @@ package org.apache.fineract.infrastructure.configuration.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
-
 import java.util.List;
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 
 /**
  * Created by sanyam on 30/7/17.

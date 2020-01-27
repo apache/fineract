@@ -19,7 +19,6 @@
 package org.apache.fineract.adhocquery.service;
 
 import java.util.Map;
-
 import org.apache.fineract.adhocquery.domain.AdHoc;
 import org.apache.fineract.adhocquery.domain.AdHocRepository;
 import org.apache.fineract.adhocquery.exception.AdHocNotFoundException;

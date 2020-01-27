@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.interestratechart.domain;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
-
 import org.apache.fineract.portfolio.savings.domain.DepositAccountInterestRateChartSlabs;
 
 /**

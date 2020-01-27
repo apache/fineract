@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.self.pockets.domain;
 
 import java.util.Collection;
 import java.util.List;
-
 import org.apache.fineract.portfolio.self.pockets.exception.MappingIdNotLinkedToPocketException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

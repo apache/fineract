@@ -18,9 +18,8 @@
  */
 package org.apache.fineract.infrastructure.sms.data;
 
-import java.util.List;
-
 import com.google.gson.Gson;
+import java.util.List;
 
 /**
  * Immutable data object representing the API request body sent in the POST request to

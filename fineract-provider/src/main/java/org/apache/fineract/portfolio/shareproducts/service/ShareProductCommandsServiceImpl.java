@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.shareproducts.service;
 
+import com.google.gson.JsonElement;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -25,8 +26,6 @@ import org.apache.fineract.portfolio.products.service.ProductCommandsService;
 import org.apache.fineract.portfolio.shareproducts.constants.ShareProductApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.JsonElement;
 
 @Service(value = "SHAREPRODUCT_COMMANDSERVICE")
 public class ShareProductCommandsServiceImpl implements ProductCommandsService {

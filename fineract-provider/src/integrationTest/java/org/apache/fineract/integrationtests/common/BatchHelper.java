@@ -18,18 +18,16 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.fineract.batch.domain.BatchRequest;
-import org.apache.fineract.batch.domain.BatchResponse;
-import org.junit.Assert;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import org.apache.fineract.batch.domain.BatchRequest;
+import org.apache.fineract.batch.domain.BatchResponse;
+import org.junit.Assert;
 
 /**
  * Helper class for {@link org.apache.fineract.integrationtests.BatchApiTest}. It

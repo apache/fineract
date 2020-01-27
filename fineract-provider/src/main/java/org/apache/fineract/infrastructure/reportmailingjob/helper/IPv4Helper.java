@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.reportmailingjob.helper;
 
 import java.net.InetAddress;
-
 import org.apache.commons.lang.StringUtils;
 
 /**

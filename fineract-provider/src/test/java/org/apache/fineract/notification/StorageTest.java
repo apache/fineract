@@ -19,7 +19,16 @@
 
 package org.apache.fineract.notification;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.refEq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
+import java.util.Optional;
 import org.apache.fineract.notification.domain.Notification;
 import org.apache.fineract.notification.domain.NotificationMapper;
 import org.apache.fineract.notification.service.NotificationGeneratorReadRepositoryWrapper;
@@ -34,13 +43,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.security.core.userdetails.User;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Optional;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StorageTest {

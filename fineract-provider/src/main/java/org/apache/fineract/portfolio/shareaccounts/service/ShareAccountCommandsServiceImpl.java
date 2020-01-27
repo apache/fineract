@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.shareaccounts.service;
 
+import com.google.gson.JsonElement;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -26,8 +27,6 @@ import org.apache.fineract.portfolio.accounts.service.AccountsCommandsService;
 import org.apache.fineract.portfolio.shareaccounts.serialization.ShareAccountDataSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.JsonElement;
 
 @Service(value = "SHAREACCOUNT_COMMANDSERVICE")
 public class ShareAccountCommandsServiceImpl implements AccountsCommandsService {

@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
-
 import javax.persistence.Column;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -30,9 +29,7 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.DateTime;
 import org.springframework.data.domain.Auditable;
 import org.springframework.data.jpa.domain.AbstractAuditable;
 

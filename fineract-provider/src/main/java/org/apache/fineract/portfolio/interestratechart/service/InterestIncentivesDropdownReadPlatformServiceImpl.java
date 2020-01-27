@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.interestratechart.service;
 
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.common.domain.ConditionType;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;

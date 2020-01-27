@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.account.data;
 
 import java.math.BigDecimal;
-
 import org.joda.time.LocalDate;
 
 public class StandingInstructionDuesData {

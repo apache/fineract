@@ -18,22 +18,21 @@
  */
 package org.apache.fineract.mix.api;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import java.sql.Date;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
-import io.swagger.annotations.Api;
 import org.apache.fineract.mix.data.XBRLData;
 import org.apache.fineract.mix.service.XBRLBuilder;
 import org.apache.fineract.mix.service.XBRLResultService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import io.swagger.annotations.*;
 
 @Path("/mixreport")
 @Component

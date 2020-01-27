@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.core.boot.db;
 
 import javax.sql.DataSource;
-
 import org.apache.fineract.infrastructure.core.boot.JDBCDriverConfig;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.slf4j.Logger;

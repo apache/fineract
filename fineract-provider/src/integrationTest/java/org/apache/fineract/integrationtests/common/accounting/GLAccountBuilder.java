@@ -19,10 +19,9 @@
 package org.apache.fineract.integrationtests.common.accounting;
 
 import com.google.gson.Gson;
-import org.apache.fineract.integrationtests.common.Utils;
-
 import java.util.Calendar;
 import java.util.HashMap;
+import org.apache.fineract.integrationtests.common.Utils;
 
 public class GLAccountBuilder {
 

@@ -18,13 +18,11 @@
  */
 package org.apache.fineract.integrationtests.variableinstallments;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.fineract.integrationtests.common.Utils;
-
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.fineract.integrationtests.common.Utils;
 
 
 @SuppressWarnings("rawtypes")

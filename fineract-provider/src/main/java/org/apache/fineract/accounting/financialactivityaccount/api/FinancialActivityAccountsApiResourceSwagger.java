@@ -23,9 +23,6 @@ import io.swagger.annotations.ApiModelProperty;
 import org.apache.fineract.accounting.financialactivityaccount.data.FinancialActivityData;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 
-import java.util.List;
-import java.util.Map;
-
 /**
  * Created by sanyam on 24/7/17.
  */

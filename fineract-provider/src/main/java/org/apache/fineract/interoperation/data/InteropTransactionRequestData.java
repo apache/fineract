@@ -18,17 +18,27 @@
  */
 package org.apache.fineract.interoperation.data;
 
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_ACCOUNT_ID;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_AMOUNT;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_DATE_FORMAT;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_EXPIRATION;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_EXTENSION_LIST;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_GEO_CODE;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_LOCALE;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_NOTE;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_REQUEST_CODE;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_TRANSACTION_CODE;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_TRANSACTION_ROLE;
+import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_TRANSACTION_TYPE;
+
 import com.google.gson.JsonObject;
+import java.util.Arrays;
+import java.util.List;
+import javax.validation.constraints.NotNull;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.interoperation.domain.InteropTransactionRole;
 import org.joda.time.LocalDateTime;
-
-import javax.validation.constraints.NotNull;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.apache.fineract.interoperation.util.InteropUtil.*;
 
 public class InteropTransactionRequestData extends InteropRequestData {
 

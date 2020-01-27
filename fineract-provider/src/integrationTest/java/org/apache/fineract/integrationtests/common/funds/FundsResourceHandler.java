@@ -22,11 +22,9 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
-
-import org.apache.fineract.integrationtests.common.Utils;
-
 import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.integrationtests.common.Utils;
 
 public class FundsResourceHandler {
 

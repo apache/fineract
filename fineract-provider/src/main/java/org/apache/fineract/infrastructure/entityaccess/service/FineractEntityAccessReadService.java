@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.entityaccess.service;
 
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelationData;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityToEntityMappingData;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;

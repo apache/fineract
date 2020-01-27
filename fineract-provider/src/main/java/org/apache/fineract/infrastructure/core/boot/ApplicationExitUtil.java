@@ -21,9 +21,7 @@ package org.apache.fineract.infrastructure.core.boot;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-
 import org.springframework.context.ConfigurableApplicationContext;
 
 public abstract class ApplicationExitUtil {

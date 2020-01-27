@@ -18,13 +18,12 @@
  */
 package org.apache.fineract.interoperation.util;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import javax.validation.constraints.NotNull;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
-
-import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
-import java.math.MathContext;
 
 public class MathUtil {
 

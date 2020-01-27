@@ -18,18 +18,17 @@
  */
 package org.apache.fineract.infrastructure.core.domain;
 
+import static org.apache.fineract.infrastructure.core.service.DateUtils.getDateTimeZoneOfTenant;
+
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
-
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.springframework.jdbc.support.JdbcUtils;
-
-import static org.apache.fineract.infrastructure.core.service.DateUtils.getDateTimeZoneOfTenant;
 
 /**
  * Support for retrieving possibly null values from jdbc recordset delegating to

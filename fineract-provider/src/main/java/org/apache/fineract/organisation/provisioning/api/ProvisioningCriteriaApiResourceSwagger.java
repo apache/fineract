@@ -20,10 +20,9 @@ package org.apache.fineract.organisation.provisioning.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Collection;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaDefinitionData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
-
-import java.util.Collection;
 
 /**
  * Created by sanyam on 18/8/17.

@@ -18,11 +18,10 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.data;
 
-import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 
 /**
  * Immutable data object representing a resultset column.

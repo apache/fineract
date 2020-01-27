@@ -19,8 +19,6 @@
 package org.apache.fineract.portfolio.account.data;
 
 import java.math.BigDecimal;
-import java.util.Date;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.portfolio.client.data.ClientData;

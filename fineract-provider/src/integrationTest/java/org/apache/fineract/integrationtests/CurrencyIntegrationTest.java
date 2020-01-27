@@ -18,15 +18,14 @@
  */
 package org.apache.fineract.integrationtests;
 
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.junit.Before;
-
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
+import org.junit.Before;
 
 public class CurrencyIntegrationTest {
 

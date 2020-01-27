@@ -18,12 +18,16 @@
  */
 package org.apache.fineract.integrationtests;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -35,14 +39,6 @@ import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
 
 /**
  * Test class for

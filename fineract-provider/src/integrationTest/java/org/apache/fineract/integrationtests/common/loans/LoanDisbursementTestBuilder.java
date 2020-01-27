@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.integrationtests.common.loans;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.HashMap;
-
 public class LoanDisbursementTestBuilder {
 
     String dueDate = null;

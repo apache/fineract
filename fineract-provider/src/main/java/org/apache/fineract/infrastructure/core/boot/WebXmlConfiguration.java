@@ -18,21 +18,16 @@
  */
 package org.apache.fineract.infrastructure.core.boot;
 
-import javax.servlet.Filter;
+import com.sun.jersey.spi.spring.container.servlet.SpringServlet;
 import javax.servlet.Servlet;
-
 import org.apache.fineract.infrastructure.core.filters.ResponseCorsFilter;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletRegistrationBean;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.web.filter.DelegatingFilterProxy;
-
-import com.sun.jersey.spi.spring.container.servlet.SpringServlet;
 
 /**
  * This Configuration replaces what formerly was in web.xml.

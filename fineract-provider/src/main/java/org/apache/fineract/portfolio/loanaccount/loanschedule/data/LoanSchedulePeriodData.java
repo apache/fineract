@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 
 import java.math.BigDecimal;
-
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 

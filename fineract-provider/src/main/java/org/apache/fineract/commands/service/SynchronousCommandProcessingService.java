@@ -19,7 +19,6 @@
 package org.apache.fineract.commands.service;
 
 import java.util.Map;
-
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;

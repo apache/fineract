@@ -24,6 +24,12 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.path.json.JsonPath;
+import com.jayway.restassured.response.Response;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -32,14 +38,6 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
-
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.path.json.JsonPath;
-import com.jayway.restassured.response.Response;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
 import org.joda.time.DateTimeZone;

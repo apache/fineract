@@ -20,9 +20,8 @@ package org.apache.fineract.integrationtests.common.shares;
 
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
-import org.apache.fineract.integrationtests.common.Utils;
-
 import java.util.Map;
+import org.apache.fineract.integrationtests.common.Utils;
 
 public class ShareAccountTransactionHelper {
 

@@ -20,8 +20,6 @@ package org.apache.fineract.portfolio.collectionsheet.data;
 
 import java.util.Collection;
 import java.util.List;
-
-import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;

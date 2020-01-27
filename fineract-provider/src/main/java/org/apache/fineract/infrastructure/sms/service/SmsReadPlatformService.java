@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.sms.service;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.sms.data.SmsData;

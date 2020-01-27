@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Collection;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -27,10 +30,6 @@ import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.joda.time.LocalDate;
-
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.Collection;
 
 /**
  * Immutable data object representing a savings account transaction.

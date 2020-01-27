@@ -18,15 +18,14 @@
  */
 package org.apache.fineract.portfolio.self.loanaccount.data;
 
+import com.google.gson.JsonElement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.ws.rs.core.UriInfo;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -37,8 +36,6 @@ import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterExc
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.JsonElement;
 
 @Component
 public class SelfLoansDataValidator {

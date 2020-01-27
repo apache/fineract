@@ -18,11 +18,10 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
-import org.apache.fineract.portfolio.savings.SavingsApiConstants;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 
 public class SavingsAccountConstant extends SavingsApiConstants {
 

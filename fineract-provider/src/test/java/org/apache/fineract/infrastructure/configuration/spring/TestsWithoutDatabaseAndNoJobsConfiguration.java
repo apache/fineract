@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.configuration.spring;
 
 import javax.sql.DataSource;
-
 import org.apache.fineract.infrastructure.core.boot.AbstractApplicationConfiguration;
 import org.apache.fineract.infrastructure.core.service.TenantDatabaseUpgradeService;
 import org.apache.fineract.infrastructure.jobs.service.JobRegisterService;

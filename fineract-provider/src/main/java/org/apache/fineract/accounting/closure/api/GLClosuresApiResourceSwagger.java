@@ -22,9 +22,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.joda.time.LocalDate;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-
 final class GLClosuresApiResourceSwagger {
     private GLClosuresApiResourceSwagger() {
         // don't allow to instantiate; use only for live API documentation

@@ -18,14 +18,11 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
-
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.ArrayList;
+import java.util.HashMap;
 import org.junit.Assert;
 
 @SuppressWarnings({ "unused", "rawtypes" })

@@ -18,11 +18,10 @@
  */
 package org.apache.fineract.organisation.teller.data;
 
-import org.apache.fineract.organisation.staff.data.StaffData;
-
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import org.apache.fineract.organisation.staff.data.StaffData;
 
 /**
  * Represents a cashier, providing access to the cashier's office, staff

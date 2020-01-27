@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.account.data;
 
 import java.util.Date;
-
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 
 public class StandingInstructionDTO {

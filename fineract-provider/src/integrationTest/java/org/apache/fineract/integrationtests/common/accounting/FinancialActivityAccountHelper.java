@@ -18,13 +18,11 @@
  */
 package org.apache.fineract.integrationtests.common.accounting;
 
-import java.util.HashMap;
-import java.util.List;
-
-import org.apache.fineract.integrationtests.common.Utils;
-
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.HashMap;
+import java.util.List;
+import org.apache.fineract.integrationtests.common.Utils;
 
 @SuppressWarnings("rawtypes")
 public class FinancialActivityAccountHelper {

@@ -18,29 +18,20 @@
  */
 package org.apache.fineract.interoperation.data;
 
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.interoperation.domain.InteropIdentifier;
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
-import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
-import org.apache.fineract.portfolio.savings.DepositAccountType;
-import org.apache.fineract.portfolio.savings.data.SavingsAccountApplicationTimelineData;
-import org.apache.fineract.portfolio.savings.data.SavingsAccountStatusEnumData;
-import org.apache.fineract.portfolio.savings.data.SavingsAccountSubStatusEnumData;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountSubStatusEnum;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
-import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
-import org.joda.time.LocalDate;
-
-import javax.validation.constraints.NotNull;
-import java.beans.Transient;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.validation.constraints.NotNull;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.interoperation.domain.InteropIdentifier;
+import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
+import org.apache.fineract.portfolio.savings.DepositAccountType;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountStatusType;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountSubStatusEnum;
+import org.apache.fineract.portfolio.savings.domain.SavingsProduct;
+import org.joda.time.LocalDate;
 
 public class InteropAccountData extends CommandProcessingResult {
 

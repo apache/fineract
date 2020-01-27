@@ -18,11 +18,13 @@
  */
 package org.apache.fineract.infrastructure.core.service;
 
+import com.google.common.collect.ImmutableMap;
+import com.googlecode.flyway.core.Flyway;
+import com.googlecode.flyway.core.api.FlywayException;
+import com.googlecode.flyway.core.util.jdbc.DriverDataSource;
 import java.util.List;
-
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
-
 import org.apache.fineract.infrastructure.core.boot.JDBCDriverConfig;
 import org.apache.fineract.infrastructure.core.boot.db.TenantDataSourcePortFixService;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -33,12 +35,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-import com.google.common.collect.ImmutableMap;
-
-import com.googlecode.flyway.core.Flyway;
-import com.googlecode.flyway.core.api.FlywayException;
-import com.googlecode.flyway.core.util.jdbc.DriverDataSource;
 
 /**
  * A service that picks up on tenants that are configured to auto-update their

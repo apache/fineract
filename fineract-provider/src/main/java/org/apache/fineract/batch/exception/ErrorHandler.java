@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.batch.exception;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -34,9 +36,6 @@ import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementData
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.transaction.TransactionException;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * Provides an Error Handler method that returns an object of type

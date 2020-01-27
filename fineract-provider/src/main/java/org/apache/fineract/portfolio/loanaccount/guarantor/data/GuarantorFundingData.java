@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanaccount.guarantor.data;
 
 import java.math.BigDecimal;
 import java.util.Collection;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 

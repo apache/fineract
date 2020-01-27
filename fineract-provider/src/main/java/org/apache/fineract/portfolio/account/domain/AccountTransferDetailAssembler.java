@@ -26,8 +26,8 @@ import static org.apache.fineract.portfolio.account.AccountDetailConstants.toCli
 import static org.apache.fineract.portfolio.account.AccountDetailConstants.toOfficeIdParamName;
 import static org.apache.fineract.portfolio.account.AccountDetailConstants.transferTypeParamName;
 
+import com.google.gson.JsonElement;
 import java.util.Locale;
-
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -40,8 +40,6 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.JsonElement;
 
 @Service
 public class AccountTransferDetailAssembler {

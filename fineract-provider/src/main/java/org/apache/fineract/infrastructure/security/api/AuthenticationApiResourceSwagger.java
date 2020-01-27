@@ -20,10 +20,9 @@ package org.apache.fineract.infrastructure.security.api;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.useradministration.data.RoleData;
-
-import java.util.Collection;
 
 /**
  * Created by sanyam on 13/8/17.

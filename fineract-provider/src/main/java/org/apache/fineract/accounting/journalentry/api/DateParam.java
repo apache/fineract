@@ -20,9 +20,7 @@ package org.apache.fineract.accounting.journalentry.api;
 
 import java.util.Date;
 import java.util.Locale;
-
 import javax.ws.rs.WebApplicationException;
-
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.joda.time.LocalDate;
 

@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.reportmailingjob.util;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobStretchyReportParamDateOption;
 
 public class ReportMailingJobDateUtil {

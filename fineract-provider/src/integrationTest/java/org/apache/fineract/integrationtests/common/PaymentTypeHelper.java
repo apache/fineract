@@ -20,12 +20,11 @@ package org.apache.fineract.integrationtests.common;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.HashMap;
-
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.HashMap;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class PaymentTypeHelper {

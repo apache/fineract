@@ -18,13 +18,12 @@
  */
 package org.apache.fineract.accounting.common;
 
-import org.apache.fineract.accounting.financialactivityaccount.data.FinancialActivityData;
-import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.accounting.financialactivityaccount.data.FinancialActivityData;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 
 public class AccountingConstants {
 

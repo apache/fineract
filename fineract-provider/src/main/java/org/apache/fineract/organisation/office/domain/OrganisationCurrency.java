@@ -21,9 +21,8 @@ package org.apache.fineract.organisation.office.domain;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
-import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 
 /**
  * Represents currencies allowed for this MFI/organisation.

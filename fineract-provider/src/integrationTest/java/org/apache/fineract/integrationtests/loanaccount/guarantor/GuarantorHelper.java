@@ -18,14 +18,12 @@
  */
 package org.apache.fineract.integrationtests.loanaccount.guarantor;
 
-import java.util.HashMap;
-import java.util.List;
-
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.Utils;
-
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.HashMap;
+import java.util.List;
+import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.common.Utils;
 
 public class GuarantorHelper {
 

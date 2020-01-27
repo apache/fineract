@@ -21,7 +21,6 @@ package org.apache.fineract.mix.report.service;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
-
 import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.mix.service.XBRLResultServiceImpl;
 import org.junit.Before;

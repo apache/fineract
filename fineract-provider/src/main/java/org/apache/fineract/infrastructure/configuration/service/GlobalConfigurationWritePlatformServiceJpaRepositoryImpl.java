@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.configuration.service;
 
 import java.util.Map;
-
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationDataValidator;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationProperty;

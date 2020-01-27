@@ -18,8 +18,9 @@
  */
 package org.apache.fineract.portfolio.address.service;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
-
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -36,9 +37,6 @@ import org.apache.fineract.portfolio.client.domain.ClientAddressRepositoryWrappe
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 @Service
 public class AddressWritePlatformServiceImpl implements AddressWritePlatformService {

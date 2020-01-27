@@ -20,7 +20,6 @@ package org.apache.fineract.spm.util;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.spm.data.ScorecardData;
