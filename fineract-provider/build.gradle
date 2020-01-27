@@ -34,11 +34,12 @@ buildscript {
   }
 
   dependencies {
-     classpath 'io.spring.gradle:dependency-management-plugin:1.0.8.RELEASE'
+     classpath 'io.spring.gradle:dependency-management-plugin:1.0.9.RELEASE'
      classpath 'com.bmuschko:gradle-tomcat-plugin:2.5',
                'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0',
                'org.zeroturnaround:gradle-jrebel-plugin:1.1.2',
-               'org.springframework.boot:spring-boot-gradle-plugin:2.1.9.RELEASE' // also change springDataJpaVersion below
+               'org.springframework.boot:spring-boot-gradle-plugin:2.2.4.RELEASE' // also change springDataJpaVersion
+      // below
      classpath "org.apache.openjpa:openjpa:$openJPAVersion"
      classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
      classpath 'gradle.plugin.org.nosphere.apache:creadur-rat-gradle:0.2.2'
@@ -67,7 +68,7 @@ apply plugin: 'checkstyle'
 
 dependencyManagement {
   imports {
-    mavenBom 'org.springframework:spring-framework-bom:5.1.10.RELEASE'
+    mavenBom 'org.springframework:spring-framework-bom:5.2.3.RELEASE'
   }
 
   dependencies {
