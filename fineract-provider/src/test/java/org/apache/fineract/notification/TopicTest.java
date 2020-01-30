@@ -20,6 +20,7 @@ package org.apache.fineract.notification;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.refEq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,9 +38,11 @@ import org.apache.fineract.useradministration.domain.AppUserRepository;
 import org.apache.fineract.useradministration.domain.Role;
 import org.apache.fineract.useradministration.domain.RoleRepository;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-@org.junit.Ignore // see FINERACT-776
+@RunWith(MockitoJUnitRunner.class)
 public class TopicTest {
 
     @Mock
@@ -64,18 +67,10 @@ public class TopicTest {
     public void testTopicStorage() {
         Office office = officeRepository.getOne(1L);
         Role role = new Role("New Member_Type", "Testing topic creation");
+        Topic topic = topicRepository.getOne(1L);
 
-        String title = role.getName() + " of " + office.getName();
-        Long entityId = office.getId();
-        String entityType = "";
-        if (office.getParent() == null) {
-            entityType = "OFFICE";
-        } else {
-            entityType = "BRANCH";
-        }
-        Topic topic = new Topic(title, true, entityId, entityType, role.getName().toUpperCase());
-
-        when(this.officeRepository.getOne(1L)).thenReturn(office);
+        lenient().when(this.officeRepository.getOne(1L)).thenReturn(office);
+        lenient().when(this.topicRepository.getOne(1L)).thenReturn(topic);
         when(this.roleRepository.save(role)).thenReturn(role);
         when(this.topicWritePltfService.create(refEq(topic))).thenReturn(1L);
 
@@ -90,13 +85,13 @@ public class TopicTest {
 
     @Test
     public void testTopicSubscriberStorage() {
-        AppUser user = appUserRepository.findById(1L).get();
-        Topic topic = topicRepository.findById(1L).get();
+        AppUser user = appUserRepository.getOne(1L);
+        Topic topic = topicRepository.getOne(1L);
 
         TopicSubscriber topicSubscriber = new TopicSubscriber(topic, user, new Date());
 
-        when(this.appUserRepository.getOne(1L)).thenReturn(user);
-        when(this.topicRepository.getOne(1L)).thenReturn(topic);
+        lenient().when(this.appUserRepository.getOne(1L)).thenReturn(user);
+        lenient().when(this.topicRepository.getOne(1L)).thenReturn(topic);
         when(this.topicSubscriberWritePltfService.create(refEq(topicSubscriber))).thenReturn(1L);
 
         Long subscriberId = this.topicSubscriberWritePltfService.create(topicSubscriber);
